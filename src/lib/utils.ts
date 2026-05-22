@@ -30,3 +30,23 @@ export function formatDate(date: string | Date): string {
     day: 'numeric',
   }).format(new Date(date))
 }
+
+export function getTimeSince(date: string): { minutes: number; color: string } {
+  const now = new Date()
+  const created = new Date(date)
+  const diffMs = now.getTime() - created.getTime()
+  const minutes = Math.floor(diffMs / 60000)
+
+  let color = 'green'
+  if (minutes > 15) color = 'red'
+  else if (minutes > 10) color = 'yellow'
+
+  return { minutes, color }
+}
+
+export function formatOrderTime(date: string): string {
+  return new Date(date).toLocaleTimeString('es-AR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}

@@ -6,18 +6,20 @@ export function useAuth() {
   const { user, role, loading, initialized, checkAuth, signOut } = useAuthStore()
 
   useEffect(() => {
-    checkAuth()
+    if (!initialized) {
+      checkAuth()
+    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         await checkAuth()
       } else if (event === 'SIGNED_OUT') {
-        useAuthStore.setState({ user: null, role: null, initialized: true, loading: false })
+        useAuthStore.setState({ user: null, role: null })
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [checkAuth])
+  }, [initialized, checkAuth])
 
   return {
     user,
