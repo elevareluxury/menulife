@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #10b981;
+  --color-secondary: #3b82f6;
+  --color-accent: #f59e0b;
+  --color-danger: #ef4444;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+}
+
+* {
+  @apply antialiased;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+.btn-primary {
+  @apply bg-emerald-500 hover:bg-emerald-500/90 text-white px-4 py-2 rounded-lg font-medium transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors;
+}
