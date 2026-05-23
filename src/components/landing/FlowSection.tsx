@@ -5,7 +5,7 @@ const steps = [
   { icon: '⚡', num: 2, title: 'Abre al instante', desc: 'El menú carga en menos de un segundo, de forma impecable.' },
   { icon: '🍽️', num: 3, title: 'Navega el menú', desc: 'Fotos, categorías, precios y descripciones claras.' },
   { icon: '💳', num: 4, title: 'Paga', desc: 'Un toque. Apple Pay, Stripe o MercadoPago.' },
-  { icon: '📈', num: 5, title: 'Analytics en vivo', desc: 'El restaurante recibe datos en tiempo real al instante.' },
+  { icon: '📈', num: 5, title: 'Analytics en vivo', desc: 'El negocio recibe datos en tiempo real al instante.' },
 ]
 
 export function FlowSection() {

@@ -19,7 +19,7 @@ const benefits = [
 ]
 
 const messages = [
-  { type: 'received', text: '👋 ¡Bienvenido a MenuLife! Te configuro el restaurante en minutos.', time: '14:03' },
+  { type: 'received', text: '👋 ¡Bienvenido a MenuLife! Te configuro el negocio en minutos.', time: '14:03' },
   { type: 'bot', text: '✅ Paso 1: ¡Tu menú está en vivo!\nAcá está tu link de onboarding:', link: '🔗 menulife.app/setup/onboard', time: '14:03' },
   { type: 'sent', text: 'Genial. ¿Cómo acceden mis mozos?', time: '14:04' },
   { type: 'bot', text: '🎬 Mandales este video de 2 min:', link: '▶ Ver: Inicio rápido para mozos', extra: '¡Estarán tomando pedidos en minutos!', time: '14:04' },

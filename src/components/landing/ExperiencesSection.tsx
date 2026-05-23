@@ -31,7 +31,7 @@ const experiences = [
   {
     role: 'Experiencia del dueño',
     headline: 'Control\ntotal.',
-    trigger: 'Gestioná tu restaurante desde cualquier lugar.',
+    trigger: 'Gestioná tu negocio desde cualquier lugar.',
     features: [
       'Dashboard en tiempo real',
       'Analytics y mejores platos',

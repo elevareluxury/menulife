@@ -13,7 +13,7 @@ export function CTASection() {
             Empieza hoy
           </p>
           <h2 className="font-display text-5xl lg:text-6xl xl:text-7xl text-cream leading-[1.08] mb-6 max-w-3xl mx-auto">
-            Tu restaurante merece una experiencia de{' '}
+            Tu negocio merece una experiencia de{' '}
             <span className="italic text-orange">primer nivel.</span>
           </h2>
           <p className="text-cream/50 text-lg mb-12 max-w-lg mx-auto">

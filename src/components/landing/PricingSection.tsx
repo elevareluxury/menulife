@@ -5,7 +5,7 @@ const plans = [
   {
     tier: 'Inicial',
     name: 'Esencial',
-    desc: 'Para restaurantes pequeños que quieren digitalizarse.',
+    desc: 'Para negocios pequeños que quieren digitalizarse.',
     price: '$49',
     period: '/ mes',
     features: [
@@ -21,7 +21,7 @@ const plans = [
   {
     tier: 'Crecimiento',
     name: 'Profesional',
-    desc: 'Para restaurantes serios que quieren la experiencia completa.',
+    desc: 'Para negocios serios que quieren la experiencia completa.',
     price: '$129',
     period: '/ mes',
     features: [
@@ -139,7 +139,7 @@ export function PricingSection() {
           <a href="#" className="text-orange font-semibold hover:underline">
             Reservá una llamada de estrategia
           </a>{' '}
-          — encontramos la mejor opción para tu restaurante.
+          — encontramos la mejor opción para tu negocio.
         </p>
       </RevealOnScroll>
     </section>

@@ -12,12 +12,12 @@ export function FinalCTA() {
 
         <h2 className="font-display text-5xl lg:text-7xl font-semibold mb-4 tracking-tight leading-tight text-cream">
           Transformá la experiencia<br />
-          de tu <em className="italic text-orange-light">restaurante.</em>
+          de tu <em className="italic text-orange-light">negocio.</em>
         </h2>
 
         <p className="text-base text-cream/55 mb-10 leading-relaxed">
           Menús modernos. Servicio más rápido. Hospitalidad premium.<br />
-          Más de 1.200 restaurantes ya usan MenuLife.
+          Más de 1.200 negocios ya usan MenuLife.
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center">

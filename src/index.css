@@ -1,7 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* App colors */
+  /* App colors (dashboard) */
   --color-primary: #10b981;
   --color-secondary: #3b82f6;
   --color-accent: #f59e0b;
@@ -9,24 +10,24 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
 
-  /* Landing palette */
-  --color-cream: #F5EFE0;
-  --color-cream-50: #F9F4EC;
-  --color-cream-100: #F5EFE0;
-  --color-cream-200: #EDE5D0;
-  --color-cream-300: #E0D5BE;
-  --color-orange: #C8622A;
-  --color-orange-light: #E07840;
-  --color-brown: #3D2314;
-  --color-brown-50: #6B4226;
-  --color-brown-100: #3D2314;
-  --color-brown-900: #1A0F0A;
-  --color-muted: #8B6B52;
-  --color-orange-dim: rgba(200, 98, 42, 0.08);
+  /* Landing palette — remapped to new design system */
+  --color-cream: #F7F7F7;
+  --color-cream-50: #F7F7F7;
+  --color-cream-100: #F7F7F7;
+  --color-cream-200: #EFEFEF;
+  --color-cream-300: #E0E0E0;
+  --color-orange: #FF6B6B;
+  --color-orange-light: #FF5252;
+  --color-brown: #2C3E50;
+  --color-brown-50: #3A4E60;
+  --color-brown-100: #1a1a1a;
+  --color-brown-900: #1a1a1a;
+  --color-muted: #7F8C8D;
+  --color-orange-dim: rgba(255, 107, 107, 0.08);
 
-  /* Fonts */
-  --font-display: "Cormorant Garamond", serif;
-  --font-sans: "DM Sans", sans-serif;
+  /* Updated fonts */
+  --font-display: "Poppins", sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 
   /* Animations */
   --animate-float-slow: float-anim 6s ease-in-out infinite;
@@ -45,14 +46,96 @@
   50% { opacity: 0.5; transform: scale(0.8); }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+:root {
+  /* === FONDOS BASE === */
+  --bg-dark: #1a1a1a;
+  --bg-light: #F7F7F7;
+  --bg-card: rgba(26, 26, 26, 0.6);
+  --bg-card-light: rgba(247, 247, 247, 0.95);
+  --bg-overlay: rgba(26, 26, 26, 0.85);
+
+  /* === COLORES PRIMARIOS === */
+  --primary-coral: #FF6B6B;
+  --primary-coral-hover: #FF5252;
+  --primary-coral-active: #FF3838;
+  --primary-coral-light: rgba(255, 107, 107, 0.15);
+  --primary-coral-glow: rgba(255, 107, 107, 0.4);
+
+  /* === COLORES SECUNDARIOS === */
+  --secondary-orange: #F77F00;
+  --secondary-orange-hover: #E67300;
+  --secondary-orange-light: rgba(247, 127, 0, 0.15);
+
+  /* === COLORES FUNCIONALES === */
+  --success-green: #2D6A4F;
+  --success-green-hover: #255A42;
+  --success-green-light: rgba(45, 106, 79, 0.15);
+
+  --accent-yellow: #FFE66D;
+  --accent-yellow-hover: #FFD93D;
+  --accent-yellow-light: rgba(255, 230, 109, 0.2);
+
+  --info-teal: #4ECDC4;
+  --info-teal-hover: #3DBDB4;
+  --info-teal-light: rgba(78, 205, 196, 0.15);
+
+  /* === TEXTOS === */
+  --text-primary: #2C3E50;
+  --text-secondary: #7F8C8D;
+  --text-light: #BDC3C7;
+  --text-white: #FFFFFF;
+  --text-dark-primary: #F7F7F7;
+  --text-dark-secondary: #BDC3C7;
+
+  /* === BORDES === */
+  --border-light: rgba(255, 255, 255, 0.1);
+  --border-dark: rgba(0, 0, 0, 0.1);
+  --border-coral: rgba(255, 107, 107, 0.3);
+
+  /* === SOMBRAS === */
+  --shadow-sm: 0 2px 8px rgba(44, 62, 80, 0.08);
+  --shadow-md: 0 4px 16px rgba(44, 62, 80, 0.12);
+  --shadow-lg: 0 8px 32px rgba(44, 62, 80, 0.16);
+  --shadow-coral: 0 8px 32px rgba(255, 107, 107, 0.25);
+  --shadow-orange: 0 6px 24px rgba(247, 127, 0, 0.2);
+  --shadow-glow: 0 0 40px rgba(255, 107, 107, 0.3);
+
+  /* === GLASSMORPHISM === */
+  --glass-bg: rgba(26, 26, 26, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(20px);
+}
+
 * {
-  @apply antialiased;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
   @apply bg-gray-50 text-gray-900;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Pricing amounts use Space Mono */
+.price-amount {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  color: var(--primary-coral);
+  letter-spacing: -0.02em;
+}
+
+/* === DASHBOARD BUTTONS (unchanged) === */
 .btn-primary {
   @apply bg-emerald-500 hover:bg-emerald-500/90 text-white px-4 py-2 rounded-lg font-medium transition-colors;
 }
@@ -61,6 +144,92 @@ body {
   @apply bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors;
 }
 
+/* === LANDING UTILITIES === */
 .bg-gradient-radial {
   background-image: radial-gradient(ellipse at center, var(--tw-gradient-stops));
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--text-dark-primary) 0%, var(--primary-coral) 50%, var(--secondary-orange) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* === LANDING CTA BUTTONS === */
+.btn-cta-primary {
+  background: linear-gradient(135deg, var(--primary-coral) 0%, var(--secondary-orange) 100%);
+  box-shadow: var(--shadow-coral);
+  color: var(--text-white);
+  padding: 16px 48px;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-cta-primary:hover {
+  background: linear-gradient(135deg, var(--primary-coral-hover) 0%, var(--secondary-orange-hover) 100%);
+  box-shadow: 0 0 20px var(--primary-coral-glow), 0 0 40px var(--primary-coral-glow), var(--shadow-coral);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* === BADGE PROMO WITH SHIMMER === */
+.badge-promo {
+  background: linear-gradient(
+    90deg,
+    var(--accent-yellow) 0%,
+    var(--secondary-orange) 25%,
+    var(--accent-yellow) 50%,
+    var(--secondary-orange) 75%,
+    var(--accent-yellow) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px var(--accent-yellow-light);
+}
+
+/* === PRICING CARDS (glassmorphism overlay) === */
+.pricing-card-glass {
+  background: var(--glass-bg) !important;
+  backdrop-filter: saturate(180%) var(--glass-blur);
+  -webkit-backdrop-filter: saturate(180%) var(--glass-blur);
+  border-color: var(--glass-border) !important;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pricing-card-glass:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: var(--shadow-coral), var(--shadow-glow);
+  border-color: var(--border-coral) !important;
+}
+
+/* === FOCUS ACCESSIBILITY (WCAG AAA) === */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--primary-coral);
+  outline-offset: 4px;
+}
+
+/* === RESPONSIVE ADJUSTMENTS === */
+@media (max-width: 768px) {
+  :root {
+    --shadow-md: 0 2px 12px rgba(44, 62, 80, 0.1);
+    --shadow-lg: 0 4px 20px rgba(44, 62, 80, 0.12);
+  }
+}
+
+@media (min-width: 1025px) {
+  .pricing-card-glass:hover {
+    transform: translateY(-15px) scale(1.03) rotateX(2deg);
+  }
 }

@@ -56,7 +56,7 @@ export function FeaturesSection() {
               <span className="italic text-orange">Una plataforma.</span>
             </h2>
             <p className="text-muted text-lg max-w-xl mx-auto">
-              Diseñado para cada actor del restaurante — cliente, mozo y dueño.
+              Diseñado para cada actor del negocio — cliente, mozo y dueño.
             </p>
           </div>
         </RevealOnScroll>
@@ -93,7 +93,7 @@ export function FeaturesSection() {
         <div className="container mx-auto px-6 lg:px-12 mt-20">
           <div className="bg-brown-900 rounded-2xl px-8 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { value: '500+', label: 'Restaurantes activos' },
+              { value: '500+', label: 'Negocios activos' },
               { value: '99.9%', label: 'Uptime garantizado' },
               { value: '<2s', label: 'Tiempo de carga' },
               { value: '4.9★', label: 'Satisfacción promedio' },

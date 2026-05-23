@@ -25,7 +25,7 @@ export function HeroSection() {
             {/* Headline */}
             <h1 className="font-display text-[52px] lg:text-[64px] xl:text-[72px] text-brown-900 leading-[1.05] mb-6">
               El sistema operativo{' '}
-              <span className="italic text-orange">del restaurante moderno.</span>
+              <span className="italic text-orange">del negocio moderno.</span>
             </h1>
 
             {/* Subheadline */}
