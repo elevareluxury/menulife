@@ -1,12 +1,48 @@
 @import "tailwindcss";
 
 @theme {
+  /* App colors */
   --color-primary: #10b981;
   --color-secondary: #3b82f6;
   --color-accent: #f59e0b;
   --color-danger: #ef4444;
   --color-success: #10b981;
   --color-warning: #f59e0b;
+
+  /* Landing palette */
+  --color-cream: #F5EFE0;
+  --color-cream-50: #F9F4EC;
+  --color-cream-100: #F5EFE0;
+  --color-cream-200: #EDE5D0;
+  --color-cream-300: #E0D5BE;
+  --color-orange: #C8622A;
+  --color-orange-light: #E07840;
+  --color-brown: #3D2314;
+  --color-brown-50: #6B4226;
+  --color-brown-100: #3D2314;
+  --color-brown-900: #1A0F0A;
+  --color-muted: #8B6B52;
+  --color-orange-dim: rgba(200, 98, 42, 0.08);
+
+  /* Fonts */
+  --font-display: "Cormorant Garamond", serif;
+  --font-sans: "DM Sans", sans-serif;
+
+  /* Animations */
+  --animate-float-slow: float-anim 6s ease-in-out infinite;
+  --animate-float-medium: float-anim 7s ease-in-out infinite 1s;
+  --animate-float-fast: float-anim 8s ease-in-out infinite 2s;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes float-anim {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
 }
 
 * {
@@ -23,4 +59,8 @@ body {
 
 .btn-secondary {
   @apply bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors;
+}
+
+.bg-gradient-radial {
+  background-image: radial-gradient(ellipse at center, var(--tw-gradient-stops));
 }
