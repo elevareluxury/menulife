@@ -1,125 +1,201 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+/* === TIPOGRAFÍA (debe preceder a @import "tailwindcss") === */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+
 @import "tailwindcss";
 
+/* =====================================================
+   SISTEMA DE DISEÑO OSCURO — MENULIFE FASE 2
+   ===================================================== */
+
 @theme {
-  /* App colors (dashboard) */
-  --color-primary: #10b981;
+  /* === FONDOS DASHBOARD === */
+  --color-surface-1: #0F1115;
+  --color-surface-2: #13161C;
+  --color-surface-3: #171A21;
+  --color-surface-4: #1C2029;
+
+  /* === MARCA (CORAL) === */
+  --color-brand:      #FF6B7A;
+  --color-brand-hover: #FF5566;
+  --color-brand-dim:  rgba(255, 107, 122, 0.12);
+
+  /* === TINTA (TEXTOS) === */
+  --color-ink-1: #F5F7FA;
+  --color-ink-2: #98A2B3;
+  --color-ink-3: #6B7280;
+  --color-ink-4: #4B5563;
+
+  /* === ESTADOS FUNCIONALES === */
+  --color-ok:          #10B981;
+  --color-ok-dim:      rgba(16, 185, 129, 0.12);
+  --color-caution:     #F59E0B;
+  --color-caution-dim: rgba(245, 158, 11, 0.12);
+  --color-danger:      #EF4444;
+  --color-danger-dim:  rgba(239, 68, 68, 0.12);
+  --color-info:        #3B82F6;
+  --color-info-dim:    rgba(59, 130, 246, 0.12);
+  --color-purple:      #A855F7;
+  --color-purple-dim:  rgba(168, 85, 247, 0.12);
+
+  /* === DASHBOARD PALETTE (mantener compat) === */
+  --color-primary:  #10b981;
   --color-secondary: #3b82f6;
-  --color-accent: #f59e0b;
-  --color-danger: #ef4444;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
+  --color-accent:   #f59e0b;
+  --color-success:  #10b981;
+  --color-warning:  #f59e0b;
 
-  /* Landing palette — remapped to new design system */
-  --color-cream: #F7F7F7;
-  --color-cream-50: #F7F7F7;
-  --color-cream-100: #F7F7F7;
-  --color-cream-200: #EFEFEF;
-  --color-cream-300: #E0E0E0;
-  --color-orange: #FF6B6B;
+  /* === LANDING PALETTE === */
+  --color-cream:       #F7F7F7;
+  --color-cream-50:    #F7F7F7;
+  --color-cream-100:   #F7F7F7;
+  --color-cream-200:   #EFEFEF;
+  --color-cream-300:   #E0E0E0;
+  --color-orange:      #FF6B6B;
   --color-orange-light: #FF5252;
-  --color-brown: #2C3E50;
-  --color-brown-50: #3A4E60;
-  --color-brown-100: #1a1a1a;
-  --color-brown-900: #1a1a1a;
-  --color-muted: #7F8C8D;
-  --color-orange-dim: rgba(255, 107, 107, 0.08);
+  --color-brown:       #2C3E50;
+  --color-brown-50:    #3A4E60;
+  --color-brown-100:   #1a1a1a;
+  --color-brown-900:   #1a1a1a;
+  --color-muted:       #7F8C8D;
+  --color-orange-dim:  rgba(255, 107, 107, 0.08);
 
-  /* Updated fonts */
+  /* === FUENTES === */
   --font-display: "Poppins", sans-serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-sans:    "Geist", "Inter", -apple-system, BlinkMacSystemFont,
+                  "SF Pro Text", "Segoe UI", system-ui, sans-serif;
 
-  /* Animations */
-  --animate-float-slow: float-anim 6s ease-in-out infinite;
+  /* === ANIMACIONES TEMA === */
+  --animate-float-slow:   float-anim 6s ease-in-out infinite;
   --animate-float-medium: float-anim 7s ease-in-out infinite 1s;
-  --animate-float-fast: float-anim 8s ease-in-out infinite 2s;
-  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-float-fast:   float-anim 8s ease-in-out infinite 2s;
+  --animate-pulse-dot:    pulse-dot 2s ease-in-out infinite;
 }
 
-@keyframes float-anim {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
+/* =====================================================
+   VARIABLES GLOBALES
+   ===================================================== */
 :root {
-  /* === FONDOS BASE === */
-  --bg-dark: #1a1a1a;
-  --bg-light: #F7F7F7;
-  --bg-card: rgba(26, 26, 26, 0.6);
+  /* Fondos (también como vars para uso fuera de Tailwind) */
+  --bg-primary:   #0F1115;
+  --bg-secondary: #13161C;
+  --bg-tertiary:  #171A21;
+  --bg-elevated:  #1C2029;
+  --bg-overlay:   rgba(15, 17, 21, 0.88);
+
+  /* Bordes */
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-strong:  rgba(255, 255, 255, 0.12);
+  --border-brand:   rgba(255, 107, 122, 0.3);
+
+  /* Sombras */
+  --shadow-sm:    0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md:    0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-lg:    0 8px 28px rgba(0, 0, 0, 0.55);
+  --shadow-brand: 0 4px 20px rgba(255, 107, 122, 0.18);
+  --shadow-glow:  0 0 32px rgba(255, 107, 122, 0.22);
+
+  /* Glass */
+  --glass-bg:   rgba(15, 17, 21, 0.88);
+  --glass-blur: blur(20px) saturate(180%);
+
+  /* === LANDING VARS (sin cambios) === */
+  --bg-dark:   #1a1a1a;
+  --bg-light:  #F7F7F7;
+  --bg-card:   rgba(26, 26, 26, 0.6);
   --bg-card-light: rgba(247, 247, 247, 0.95);
-  --bg-overlay: rgba(26, 26, 26, 0.85);
 
-  /* === COLORES PRIMARIOS === */
-  --primary-coral: #FF6B6B;
-  --primary-coral-hover: #FF5252;
-  --primary-coral-active: #FF3838;
-  --primary-coral-light: rgba(255, 107, 107, 0.15);
-  --primary-coral-glow: rgba(255, 107, 107, 0.4);
+  --primary-coral:         #FF6B6B;
+  --primary-coral-hover:   #FF5252;
+  --primary-coral-active:  #FF3838;
+  --primary-coral-light:   rgba(255, 107, 107, 0.15);
+  --primary-coral-glow:    rgba(255, 107, 107, 0.4);
 
-  /* === COLORES SECUNDARIOS === */
-  --secondary-orange: #F77F00;
+  --secondary-orange:       #F77F00;
   --secondary-orange-hover: #E67300;
   --secondary-orange-light: rgba(247, 127, 0, 0.15);
 
-  /* === COLORES FUNCIONALES === */
-  --success-green: #2D6A4F;
+  --success-green:       #2D6A4F;
   --success-green-hover: #255A42;
   --success-green-light: rgba(45, 106, 79, 0.15);
 
-  --accent-yellow: #FFE66D;
+  --accent-yellow:       #FFE66D;
   --accent-yellow-hover: #FFD93D;
   --accent-yellow-light: rgba(255, 230, 109, 0.2);
 
-  --info-teal: #4ECDC4;
+  --info-teal:       #4ECDC4;
   --info-teal-hover: #3DBDB4;
   --info-teal-light: rgba(78, 205, 196, 0.15);
 
-  /* === TEXTOS === */
-  --text-primary: #2C3E50;
-  --text-secondary: #7F8C8D;
-  --text-light: #BDC3C7;
-  --text-white: #FFFFFF;
-  --text-dark-primary: #F7F7F7;
+  --text-primary:        #2C3E50;
+  --text-secondary:      #7F8C8D;
+  --text-light:          #BDC3C7;
+  --text-white:          #FFFFFF;
+  --text-dark-primary:   #F7F7F7;
   --text-dark-secondary: #BDC3C7;
 
-  /* === BORDES === */
   --border-light: rgba(255, 255, 255, 0.1);
-  --border-dark: rgba(0, 0, 0, 0.1);
+  --border-dark:  rgba(0, 0, 0, 0.1);
   --border-coral: rgba(255, 107, 107, 0.3);
 
-  /* === SOMBRAS === */
-  --shadow-sm: 0 2px 8px rgba(44, 62, 80, 0.08);
-  --shadow-md: 0 4px 16px rgba(44, 62, 80, 0.12);
-  --shadow-lg: 0 8px 32px rgba(44, 62, 80, 0.16);
+  --shadow-sm-light: 0 2px 8px rgba(44, 62, 80, 0.08);
+  --shadow-md-light: 0 4px 16px rgba(44, 62, 80, 0.12);
+  --shadow-lg-light: 0 8px 32px rgba(44, 62, 80, 0.16);
   --shadow-coral: 0 8px 32px rgba(255, 107, 107, 0.25);
   --shadow-orange: 0 6px 24px rgba(247, 127, 0, 0.2);
-  --shadow-glow: 0 0 40px rgba(255, 107, 107, 0.3);
+  --shadow-glow-landing: 0 0 40px rgba(255, 107, 107, 0.3);
 
-  /* === GLASSMORPHISM === */
-  --glass-bg: rgba(26, 26, 26, 0.4);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-blur: blur(20px);
+  --glass-bg-landing:    rgba(26, 26, 26, 0.4);
+  --glass-border:        rgba(255, 255, 255, 0.1);
 }
 
+/* =====================================================
+   KEYFRAMES
+   ===================================================== */
+@keyframes float-anim {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50%       { opacity: 0.6; box-shadow: 0 0 0 4px transparent; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* =====================================================
+   BASE
+   ===================================================== */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
   font-weight: 400;
   line-height: 1.6;
+  text-rendering: optimizeLegibility;
   @apply bg-gray-50 text-gray-900;
 }
 
@@ -127,7 +203,65 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Poppins', sans-serif;
 }
 
-/* Pricing amounts use Space Mono */
+/* =====================================================
+   UTILIDADES PERSONALIZADAS (DARK DASHBOARD)
+   ===================================================== */
+@layer utilities {
+  /* Fondos */
+  .bg-surface-1 { background-color: #0F1115; }
+  .bg-surface-2 { background-color: #13161C; }
+  .bg-surface-3 { background-color: #171A21; }
+  .bg-surface-4 { background-color: #1C2029; }
+  .bg-brand     { background-color: #FF6B7A; }
+  .bg-brand-dim { background-color: rgba(255, 107, 122, 0.12); }
+  .bg-ok-dim       { background-color: rgba(16, 185, 129, 0.12); }
+  .bg-caution-dim  { background-color: rgba(245, 158, 11, 0.12); }
+  .bg-danger-dim   { background-color: rgba(239, 68, 68, 0.12); }
+  .bg-info-dim     { background-color: rgba(59, 130, 246, 0.12); }
+  .bg-purple-dim   { background-color: rgba(168, 85, 247, 0.12); }
+
+  /* Textos */
+  .text-ink-1  { color: #F5F7FA; }
+  .text-ink-2  { color: #98A2B3; }
+  .text-ink-3  { color: #6B7280; }
+  .text-ink-4  { color: #4B5563; }
+  .text-brand  { color: #FF6B7A; }
+  .text-ok     { color: #10B981; }
+  .text-caution { color: #F59E0B; }
+  .text-danger { color: #EF4444; }
+  .text-info   { color: #3B82F6; }
+  .text-purple { color: #A855F7; }
+
+  /* Número con fuente premium */
+  .text-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Animaciones de entrada */
+  .animate-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) backwards; }
+  .animate-in:nth-child(1) { animation-delay: 0ms; }
+  .animate-in:nth-child(2) { animation-delay: 60ms; }
+  .animate-in:nth-child(3) { animation-delay: 120ms; }
+  .animate-in:nth-child(4) { animation-delay: 180ms; }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(90deg, #171A21 0%, #1C2029 50%, #171A21 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* Touch feedback en mobile */
+  @media (hover: none) {
+    .tap-scale:active { transform: scale(0.97); transition: transform 100ms; }
+  }
+}
+
+/* =====================================================
+   TIPOGRAFÍA PREMIUM
+   ===================================================== */
 .price-amount {
   font-family: 'Space Mono', monospace;
   font-weight: 700;
@@ -135,16 +269,74 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
-/* === DASHBOARD BUTTONS (unchanged) === */
+.text-display {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.text-h1 {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* =====================================================
+   SCROLLBAR PERSONALIZADO
+   ===================================================== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* =====================================================
+   ACCESIBILIDAD
+   ===================================================== */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid #FF6B7A;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =====================================================
+   DASHBOARD — ESTILOS DE COMPONENTES
+   ===================================================== */
+
+/* Fuente del dashboard */
+.dashboard-body {
+  font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+}
+
+/* =====================================================
+   DASHBOARD BUTTONS (sin cambios del plan original)
+   ===================================================== */
 .btn-primary {
   @apply bg-emerald-500 hover:bg-emerald-500/90 text-white px-4 py-2 rounded-lg font-medium transition-colors;
 }
-
 .btn-secondary {
   @apply bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors;
 }
 
-/* === LANDING UTILITIES === */
+/* =====================================================
+   LANDING — UTILITIES (sin cambios)
+   ===================================================== */
 .bg-gradient-radial {
   background-image: radial-gradient(ellipse at center, var(--tw-gradient-stops));
 }
@@ -156,7 +348,6 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: text;
 }
 
-/* === LANDING CTA BUTTONS === */
 .btn-cta-primary {
   background: linear-gradient(135deg, var(--primary-coral) 0%, var(--secondary-orange) 100%);
   box-shadow: var(--shadow-coral);
@@ -167,22 +358,16 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .btn-cta-primary:hover {
   background: linear-gradient(135deg, var(--primary-coral-hover) 0%, var(--secondary-orange-hover) 100%);
   box-shadow: 0 0 20px var(--primary-coral-glow), 0 0 40px var(--primary-coral-glow), var(--shadow-coral);
   transform: translateY(-2px) scale(1.02);
 }
 
-/* === BADGE PROMO WITH SHIMMER === */
 .badge-promo {
   background: linear-gradient(
-    90deg,
-    var(--accent-yellow) 0%,
-    var(--secondary-orange) 25%,
-    var(--accent-yellow) 50%,
-    var(--secondary-orange) 75%,
-    var(--accent-yellow) 100%
+    90deg, var(--accent-yellow) 0%, var(--secondary-orange) 25%,
+    var(--accent-yellow) 50%, var(--secondary-orange) 75%, var(--accent-yellow) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 3s linear infinite;
@@ -197,34 +382,27 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 20px var(--accent-yellow-light);
 }
 
-/* === PRICING CARDS (glassmorphism overlay) === */
 .pricing-card-glass {
-  background: var(--glass-bg) !important;
-  backdrop-filter: saturate(180%) var(--glass-blur);
-  -webkit-backdrop-filter: saturate(180%) var(--glass-blur);
+  background: var(--glass-bg-landing) !important;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-color: var(--glass-border) !important;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg-light);
   transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .pricing-card-glass:hover {
   transform: translateY(-10px) scale(1.02);
-  box-shadow: var(--shadow-coral), var(--shadow-glow);
+  box-shadow: var(--shadow-coral), var(--shadow-glow-landing);
   border-color: var(--border-coral) !important;
 }
 
-/* === FOCUS ACCESSIBILITY (WCAG AAA) === */
-button:focus-visible,
-a:focus-visible {
-  outline: 3px solid var(--primary-coral);
-  outline-offset: 4px;
-}
-
-/* === RESPONSIVE ADJUSTMENTS === */
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
 @media (max-width: 768px) {
   :root {
-    --shadow-md: 0 2px 12px rgba(44, 62, 80, 0.1);
-    --shadow-lg: 0 4px 20px rgba(44, 62, 80, 0.12);
+    --shadow-md: 0 2px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
   }
 }
 
