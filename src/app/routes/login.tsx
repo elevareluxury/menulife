@@ -14,9 +14,9 @@ export function LoginPage() {
         <LoginForm />
 
         <p className="mt-6 text-center text-sm text-gray-600">
-          ¿No tenés cuenta?{' '}
-          <Link to="/register" className="text-emerald-600 hover:underline font-medium">
-            Registrarse gratis
+          ¿Querés unirte?{' '}
+          <Link to="/solicitar-acceso" className="text-emerald-600 hover:underline font-medium">
+            Solicitar acceso
           </Link>
         </p>
       </Card>

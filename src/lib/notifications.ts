@@ -31,6 +31,49 @@ function playAlertBeep() {
   }
 }
 
+function playDing(ctx: AudioContext, startTime: number) {
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+  osc.connect(gain)
+  gain.connect(ctx.destination)
+  osc.frequency.setValueAtTime(880, startTime)
+  osc.frequency.exponentialRampToValueAtTime(440, startTime + 0.3)
+  gain.gain.setValueAtTime(0.5, startTime)
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.5)
+  osc.start(startTime)
+  osc.stop(startTime + 0.5)
+}
+
+export function playNotificationSound() {
+  try {
+    const ctx = new AudioContext()
+    playDing(ctx, ctx.currentTime)
+  } catch {
+    // AudioContext may be blocked by browser policy
+  }
+}
+
+export function playUrgentSound() {
+  try {
+    const ctx = new AudioContext()
+    playDing(ctx, ctx.currentTime)
+    playDing(ctx, ctx.currentTime + 0.35)
+    playDing(ctx, ctx.currentTime + 0.70)
+  } catch {
+    // AudioContext may be blocked by browser policy
+  }
+}
+
+export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (!('serviceWorker' in navigator)) return null
+  try {
+    const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    return registration
+  } catch {
+    return null
+  }
+}
+
 export function notifyNewOrder(orderType: string, tableOrName: string) {
   showNotification('🔔 Nuevo Pedido', {
     body: orderType === 'dine_in'

@@ -1,4 +1,5 @@
 import { Bell, Settings } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useGreeting } from '@/hooks/useGreeting'
 
@@ -18,6 +19,7 @@ const statusConfig: Record<OperationalStatus, { text: string; cls: string }> = {
 
 export function Header({ businessName, notificationCount = 0, operationalStatus = 'ok' }: HeaderProps) {
   const { text: greetingText, emoji } = useGreeting()
+  const navigate = useNavigate()
   const status = statusConfig[operationalStatus]
 
   return (
@@ -66,6 +68,7 @@ export function Header({ businessName, notificationCount = 0, operationalStatus 
           <button
             className="p-2 rounded-xl transition-colors hover:bg-surface-4 active:bg-surface-4"
             aria-label="Configuración"
+            onClick={() => navigate('/dashboard/settings')}
           >
             <Settings className="w-5 h-5 text-ink-3" strokeWidth={2} />
           </button>

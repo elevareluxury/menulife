@@ -32,23 +32,18 @@ export function useKitchenOrders(restaurantId: string) {
     try {
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
-        .select('id, restaurant_id, session_id, order_type, table_number, customer_name, status, total, currency, created_at')
+        .select('id, restaurant_id, session_id, order_type, table_number, customer_name, status, total, currency, created_at, order_items(id, menu_item_name, quantity, notes)')
         .eq('restaurant_id', restaurantId)
         .in('status', ['pending', 'cooking', 'ready', 'delivered'])
         .order('created_at', { ascending: true })
 
       if (ordersError) throw ordersError
 
-      const ordersWithItems = await Promise.all(
-        (ordersData || []).map(async (order) => {
-          const { data: itemsData } = await supabase
-            .from('order_items')
-            .select('id, menu_item_name, quantity, notes')
-            .eq('order_id', order.id)
-
-          return { ...order, items: itemsData || [] }
-        })
-      )
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ordersWithItems: KitchenOrder[] = ((ordersData as any[]) || []).map(order => ({
+        ...order,
+        items: order.order_items ?? [],
+      }))
 
       setOrders(ordersWithItems)
     } catch (error) {

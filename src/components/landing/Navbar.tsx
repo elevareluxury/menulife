@@ -42,9 +42,9 @@ export function Navbar() {
               Iniciar sesión
             </button>
           </Link>
-          <Link to="/register">
+          <Link to="/solicitar-acceso">
             <button className="px-6 py-2.5 bg-orange text-white rounded-full text-[13px] font-semibold shadow-md shadow-orange/30 hover:bg-orange-light hover:shadow-lg hover:shadow-orange/40 transition-all">
-              Empezar gratis
+              Solicitar acceso
             </button>
           </Link>
         </div>
@@ -85,9 +85,9 @@ export function Navbar() {
               Iniciar sesión
             </button>
           </Link>
-          <Link to="/register" className="block" onClick={() => setIsMenuOpen(false)}>
+          <Link to="/solicitar-acceso" className="block" onClick={() => setIsMenuOpen(false)}>
             <button className="w-full px-6 py-2.5 bg-orange text-white rounded-full text-[13px] font-semibold">
-              Empezar gratis
+              Solicitar acceso
             </button>
           </Link>
         </div>

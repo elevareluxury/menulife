@@ -58,7 +58,7 @@ export function WaitersManagement() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-1">Mozos</h1>
-          <p className="text-gray-600 text-sm">Gestiona tu equipo de mozos</p>
+          <p className="text-gray-400 text-sm">Gestiona tu equipo de mozos</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
@@ -82,7 +82,7 @@ export function WaitersManagement() {
             <Card key={waiter.id} className="p-4">
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h3 className="font-semibold text-lg">
+                  <h3 className="font-semibold text-lg text-gray-900">
                     {waiter.first_name} {waiter.last_name}
                   </h3>
                   <p className="text-sm text-gray-500">PIN: {waiter.pin}</p>

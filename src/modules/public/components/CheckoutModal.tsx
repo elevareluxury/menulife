@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Modal } from '@/components/ui/Modal'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
+import { useNavigate } from 'react-router-dom'
+import { DarkSheet } from './DarkSheet'
 import { supabase } from '@/lib/supabase'
 import { useCartStore } from '@/store/cartStore'
 import { useMenuStore } from '@/store/menuStore'
@@ -13,9 +11,12 @@ interface CheckoutModalProps {
   onClose: () => void
   restaurantId: string
   onSuccess: () => void
+  slug?: string
+  restaurantName?: string
 }
 
-export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess }: CheckoutModalProps) {
+export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, restaurantName }: CheckoutModalProps) {
+  const navigate = useNavigate()
   const { items, sessionId, clearCart, getTotal } = useCartStore()
   const { currency, language } = useMenuStore()
   const [loading, setLoading] = useState(false)
@@ -25,16 +26,12 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess }: Chec
   const [tables, setTables] = useState<{ value: string; label: string }[]>([])
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const mesaParam = params.get('mesa')
-    if (mesaParam) {
-      setTableNumber(mesaParam)
-    }
+    const mesaParam = new URLSearchParams(window.location.search).get('mesa')
+    if (mesaParam) setTableNumber(mesaParam)
   }, [])
 
   useEffect(() => {
     if (!restaurantId || orderType !== 'dine_in') return
-
     async function fetchTables() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data } = await (supabase as any)
@@ -43,7 +40,6 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess }: Chec
         .eq('restaurant_id', restaurantId)
         .eq('is_active', true)
         .order('table_number')
-
       if (data) {
         setTables((data as { table_number: string }[]).map(t => ({
           value: t.table_number,
@@ -51,14 +47,12 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess }: Chec
         })))
       }
     }
-
     fetchTables()
   }, [restaurantId, orderType])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
     try {
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -78,6 +72,9 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess }: Chec
 
       if (orderError) throw orderError
 
+      // Snapshot cart items before clearCart()
+      const cartSnapshot = items.map(i => ({ name: i.name, quantity: i.quantity }))
+
       const orderItems = items.map(item => ({
         order_id: order.id,
         menu_item_id: item.id,
@@ -89,16 +86,33 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess }: Chec
         notes: item.notes || null,
       }))
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems)
-
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
       if (itemsError) throw itemsError
+
+      // Persist order for tracking + banner
+      if (slug) {
+        sessionStorage.setItem(
+          `order_${slug}`,
+          JSON.stringify({
+            orderId: order.id,
+            tableNumber: order.table_number,
+            createdAt: order.created_at,
+            total: order.total,
+            status: 'pending',
+            restaurantName: restaurantName ?? '',
+            items: cartSnapshot,
+          })
+        )
+      }
 
       toast.success(language === 'ES' ? '¡Pedido enviado!' : 'Order sent!')
       clearCart()
       onSuccess()
       onClose()
+
+      if (slug) {
+        navigate(`/r/${slug}/pedido/${order.id}`)
+      }
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'Error al enviar el pedido')
     } finally {
@@ -106,85 +120,127 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess }: Chec
     }
   }
 
-  const title = language === 'ES' ? 'Confirmar Pedido' : 'Confirm Order'
+  const inputClass = "w-full px-4 py-3 rounded-2xl text-sm outline-none transition-colors"
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: 'var(--menu-card-elevated, #1A1A1A)',
+    border: '1px solid var(--menu-border, rgba(255,255,255,0.06))',
+    color: 'var(--menu-text-primary, #F5F5F5)',
+  }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <DarkSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title={language === 'ES' ? 'Confirmar pedido' : 'Confirm order'}
+    >
+      <form onSubmit={handleSubmit} className="px-4 py-4 space-y-5 pb-8">
+        {/* Order type */}
         <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => setOrderType('dine_in')}
-            className={`p-4 border-2 rounded-lg text-center transition-colors ${
-              orderType === 'dine_in'
-                ? 'border-emerald-500 bg-emerald-50'
-                : 'border-gray-200 hover:border-emerald-500'
-            }`}
-          >
-            <div className="text-2xl mb-1">🍽️</div>
-            <div className="font-medium">
-              {language === 'ES' ? 'Comer aquí' : 'Dine in'}
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setOrderType('takeaway')}
-            className={`p-4 border-2 rounded-lg text-center transition-colors ${
-              orderType === 'takeaway'
-                ? 'border-emerald-500 bg-emerald-50'
-                : 'border-gray-200 hover:border-emerald-500'
-            }`}
-          >
-            <div className="text-2xl mb-1">📦</div>
-            <div className="font-medium">
-              {language === 'ES' ? 'Para llevar' : 'Takeaway'}
-            </div>
-          </button>
+          {[
+            { type: 'dine_in'  as const, emoji: '🍽️', label: language === 'ES' ? 'Comer aquí' : 'Dine in'  },
+            { type: 'takeaway' as const, emoji: '📦', label: language === 'ES' ? 'Para llevar' : 'Takeaway' },
+          ].map(opt => {
+            const active = orderType === opt.type
+            return (
+              <button
+                key={opt.type}
+                type="button"
+                onClick={() => setOrderType(opt.type)}
+                className="p-4 rounded-2xl text-center transition-all"
+                style={{
+                  backgroundColor: active ? 'rgba(255,107,107,0.12)' : 'var(--menu-card-elevated, #1A1A1A)',
+                  border: `1.5px solid ${active ? 'var(--menu-accent, #FF6B6B)' : 'var(--menu-border, rgba(255,255,255,0.06))'}`,
+                }}
+              >
+                <div className="text-2xl mb-1">{opt.emoji}</div>
+                <div
+                  className="text-sm font-semibold"
+                  style={{ color: active ? 'var(--menu-accent, #FF6B6B)' : 'var(--menu-text-secondary, #888888)' }}
+                >
+                  {opt.label}
+                </div>
+              </button>
+            )
+          })}
         </div>
 
+        {/* Dine-in: table number */}
         {orderType === 'dine_in' && (
           tables.length > 0 ? (
-            <Select
-              label={language === 'ES' ? 'Mesa' : 'Table'}
-              value={tableNumber}
-              onChange={(e) => setTableNumber(e.target.value)}
-              options={[
-                { value: '', label: language === 'ES' ? 'Seleccionar mesa' : 'Select table' },
-                ...tables,
-              ]}
-              required
-            />
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: 'var(--menu-text-secondary, #888888)' }}>
+                {language === 'ES' ? 'Mesa' : 'Table'}
+              </label>
+              <select
+                value={tableNumber}
+                onChange={e => setTableNumber(e.target.value)}
+                required
+                className={inputClass}
+                style={inputStyle}
+              >
+                <option value="">{language === 'ES' ? 'Seleccionar mesa' : 'Select table'}</option>
+                {tables.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
           ) : (
-            <Input
-              label={language === 'ES' ? 'Número de Mesa' : 'Table Number'}
-              placeholder="7"
-              value={tableNumber}
-              onChange={(e) => setTableNumber(e.target.value)}
-              required
-            />
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: 'var(--menu-text-secondary, #888888)' }}>
+                {language === 'ES' ? 'Número de mesa' : 'Table number'}
+              </label>
+              <input
+                type="text"
+                placeholder="7"
+                value={tableNumber}
+                onChange={e => setTableNumber(e.target.value)}
+                required
+                className={inputClass}
+                style={inputStyle}
+              />
+            </div>
           )
         )}
 
+        {/* Takeaway: customer name */}
         {orderType === 'takeaway' && (
-          <Input
-            label={language === 'ES' ? 'Tu Nombre' : 'Your Name'}
-            placeholder={language === 'ES' ? 'Juan Pérez' : 'John Doe'}
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            required
-          />
+          <div>
+            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--menu-text-secondary, #888888)' }}>
+              {language === 'ES' ? 'Tu nombre' : 'Your name'}
+            </label>
+            <input
+              type="text"
+              placeholder={language === 'ES' ? 'Juan Pérez' : 'John Doe'}
+              value={customerName}
+              onChange={e => setCustomerName(e.target.value)}
+              required
+              className={inputClass}
+              style={inputStyle}
+            />
+          </div>
         )}
 
-        <div className="flex gap-3 justify-end pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            {language === 'ES' ? 'Cancelar' : 'Cancel'}
-          </Button>
-          <Button type="submit" isLoading={loading}>
-            {language === 'ES' ? 'Enviar Pedido' : 'Send Order'}
-          </Button>
-        </div>
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-4 rounded-2xl font-semibold text-white text-base transition-opacity disabled:opacity-60"
+          style={{
+            background: 'var(--menu-accent-gradient, linear-gradient(135deg,#FF6B6B,#FF8E53))',
+            boxShadow: '0 8px 24px rgba(255,107,107,0.35)',
+            marginBottom: 'env(safe-area-inset-bottom)',
+          }}
+        >
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              {language === 'ES' ? 'Enviando...' : 'Sending...'}
+            </span>
+          ) : (
+            language === 'ES' ? 'Enviar pedido' : 'Send order'
+          )}
+        </button>
       </form>
-    </Modal>
+    </DarkSheet>
   )
 }

@@ -1,8 +1,11 @@
-import { Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { Spinner } from '@/components/ui/Spinner'
 import { SuperAdminLayout } from '@/modules/super-admin/components/SuperAdminLayout'
 import { SuperDashboard } from '@/modules/super-admin/pages/SuperDashboard'
+import { AccessRequestsTab } from '@/modules/super-admin/pages/AccessRequestsTab'
+import { RestaurantsTab } from '@/modules/super-admin/pages/RestaurantsTab'
+import { MetricasTab } from '@/modules/super-admin/pages/MetricasTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
@@ -10,7 +13,7 @@ export function SuperAdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0F1115' }}>
         <Spinner size="lg" />
       </div>
     )
@@ -21,7 +24,15 @@ export function SuperAdminPage() {
 
   return (
     <SuperAdminLayout>
-      <SuperDashboard />
+      <Routes>
+        <Route index element={<SuperDashboard />} />
+        <Route path="solicitudes" element={<AccessRequestsTab />} />
+        <Route path="negocios"    element={<RestaurantsTab />} />
+        <Route path="metricas"   element={<MetricasTab />} />
+        {/* Legacy aliases → redirect to new paths */}
+        <Route path="requests"     element={<Navigate to="/super-admin/solicitudes" replace />} />
+        <Route path="restaurants"  element={<Navigate to="/super-admin/negocios" replace />} />
+      </Routes>
     </SuperAdminLayout>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, FileUp } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
@@ -7,11 +7,13 @@ import { useRestaurant } from '../hooks/useRestaurant'
 import { useMenuSections } from '../hooks/useMenuSections'
 import { SectionList } from '../components/SectionList'
 import { SectionModal } from '../components/SectionModal'
+import { PDFImportModal } from '../components/PDFImportModal'
 
 export function MenuManagement() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
-  const { sections, loading: sectionsLoading } = useMenuSections(restaurant?.id)
+  const { sections, loading: sectionsLoading, refetch } = useMenuSections(restaurant?.id)
   const [isSectionModalOpen, setIsSectionModalOpen] = useState(false)
+  const [isPDFModalOpen, setIsPDFModalOpen] = useState(false)
 
   if (restaurantLoading || sectionsLoading) {
     return (
@@ -39,10 +41,16 @@ export function MenuManagement() {
             {restaurant.name} · {sections.length} {sections.length === 1 ? 'sección' : 'secciones'}
           </p>
         </div>
-        <Button onClick={() => setIsSectionModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva sección
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setIsPDFModalOpen(true)}>
+            <FileUp className="h-4 w-4 mr-2" />
+            Importar carta PDF
+          </Button>
+          <Button onClick={() => setIsSectionModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva sección
+          </Button>
+        </div>
       </div>
 
       {/* Empty state */}
@@ -66,6 +74,13 @@ export function MenuManagement() {
         isOpen={isSectionModalOpen}
         onClose={() => setIsSectionModalOpen(false)}
         restaurantId={restaurant.id}
+      />
+
+      <PDFImportModal
+        isOpen={isPDFModalOpen}
+        onClose={() => setIsPDFModalOpen(false)}
+        restaurantId={restaurant.id}
+        onSuccess={() => { setIsPDFModalOpen(false); refetch() }}
       />
     </div>
   )

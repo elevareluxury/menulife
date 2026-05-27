@@ -111,7 +111,7 @@ export function TablesConfiguration() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-1">Configuración de Mesas</h1>
-          <p className="text-gray-600 text-sm">Arrastra las mesas para organizarlas</p>
+          <p className="text-gray-400 text-sm">Arrastra las mesas para organizarlas</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
@@ -124,7 +124,7 @@ export function TablesConfiguration() {
         {Object.entries({ free: 'Libre', occupied: 'Ocupada', reserved: 'Reservada' }).map(([k, label]) => (
           <div key={k} className="flex items-center gap-1.5">
             <div className={`w-3 h-3 rounded-full ${STATUS_COLORS[k]}`} />
-            <span className="text-gray-600">{label}</span>
+            <span className="text-gray-400">{label}</span>
           </div>
         ))}
       </div>
@@ -160,7 +160,7 @@ export function TablesConfiguration() {
                 >
                   <div className="p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-sm">Mesa {table.table_number}</span>
+                      <span className="font-bold text-sm text-gray-900">Mesa {table.table_number}</span>
                       <div className={`w-2.5 h-2.5 rounded-full ${STATUS_COLORS[table.status]}`} />
                     </div>
                     <div className="text-xs text-gray-500 mb-2">{table.capacity} pers.</div>

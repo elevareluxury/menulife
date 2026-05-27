@@ -61,6 +61,19 @@ export type Database = {
           mercadopago_access_token: string | null
           created_at: string
           updated_at: string
+          website: string | null
+          country: string | null
+          province: string | null
+          address_extra: string | null
+          postal_code: string | null
+          directions: string | null
+          social_links: Json | null
+          menu_accent_color: string | null
+          menu_card_style: string | null
+          show_prices: boolean
+          show_descriptions: boolean
+          show_calories: boolean
+          onboarding_completed: boolean
         }
         Insert: {
           id?: string
@@ -89,6 +102,19 @@ export type Database = {
           mercadopago_access_token?: string | null
           created_at?: string
           updated_at?: string
+          website?: string | null
+          country?: string | null
+          province?: string | null
+          address_extra?: string | null
+          postal_code?: string | null
+          directions?: string | null
+          social_links?: Json | null
+          menu_accent_color?: string | null
+          menu_card_style?: string | null
+          show_prices?: boolean
+          show_descriptions?: boolean
+          show_calories?: boolean
+          onboarding_completed?: boolean
         }
         Update: {
           id?: string
@@ -117,6 +143,19 @@ export type Database = {
           mercadopago_access_token?: string | null
           created_at?: string
           updated_at?: string
+          website?: string | null
+          country?: string | null
+          province?: string | null
+          address_extra?: string | null
+          postal_code?: string | null
+          directions?: string | null
+          social_links?: Json | null
+          menu_accent_color?: string | null
+          menu_card_style?: string | null
+          show_prices?: boolean
+          show_descriptions?: boolean
+          show_calories?: boolean
+          onboarding_completed?: boolean
         }
         Relationships: []
       }
@@ -228,7 +267,7 @@ export type Database = {
           table_number: string | null
           customer_name: string | null
           customer_phone: string | null
-          status: 'pending' | 'confirmed' | 'cooking' | 'ready' | 'delivered' | 'cancelled'
+          status: 'pending' | 'confirmed' | 'cooking' | 'ready' | 'delivered' | 'cancelled' | 'bill_requested' | 'paid'
           subtotal: number
           total: number
           currency: 'ARS' | 'USD'
@@ -243,7 +282,7 @@ export type Database = {
           table_number?: string | null
           customer_name?: string | null
           customer_phone?: string | null
-          status?: 'pending' | 'confirmed' | 'cooking' | 'ready' | 'delivered' | 'cancelled'
+          status?: 'pending' | 'confirmed' | 'cooking' | 'ready' | 'delivered' | 'cancelled' | 'bill_requested' | 'paid'
           subtotal: number
           total: number
           currency?: 'ARS' | 'USD'
@@ -258,7 +297,7 @@ export type Database = {
           table_number?: string | null
           customer_name?: string | null
           customer_phone?: string | null
-          status?: 'pending' | 'confirmed' | 'cooking' | 'ready' | 'delivered' | 'cancelled'
+          status?: 'pending' | 'confirmed' | 'cooking' | 'ready' | 'delivered' | 'cancelled' | 'bill_requested' | 'paid'
           subtotal?: number
           total?: number
           currency?: 'ARS' | 'USD'
@@ -303,6 +342,273 @@ export type Database = {
           currency?: string
           notes?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      waiters: {
+        Row: {
+          id: string
+          restaurant_id: string
+          first_name: string
+          last_name: string
+          pin: string
+          is_active: boolean
+          is_on_shift: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          first_name: string
+          last_name: string
+          pin: string
+          is_active?: boolean
+          is_on_shift?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          first_name?: string
+          last_name?: string
+          pin?: string
+          is_active?: boolean
+          is_on_shift?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tables: {
+        Row: {
+          id: string
+          restaurant_id: string
+          table_number: string
+          capacity: number
+          position_x: number
+          position_y: number
+          sort_order: number
+          status: 'free' | 'occupied' | 'reserved'
+          waiter_id: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          table_number: string
+          capacity?: number
+          position_x?: number
+          position_y?: number
+          sort_order?: number
+          status?: 'free' | 'occupied' | 'reserved'
+          waiter_id?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          table_number?: string
+          capacity?: number
+          position_x?: number
+          position_y?: number
+          sort_order?: number
+          status?: 'free' | 'occupied' | 'reserved'
+          waiter_id?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      waiter_calls: {
+        Row: {
+          id: string
+          restaurant_id: string
+          table_id: string
+          waiter_id: string | null
+          type: 'call' | 'bill_request'
+          status: 'pending' | 'attended' | 'cancelled'
+          created_at: string
+          attended_at: string | null
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          table_id: string
+          waiter_id?: string | null
+          type?: 'call' | 'bill_request'
+          status?: 'pending' | 'attended' | 'cancelled'
+          created_at?: string
+          attended_at?: string | null
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          table_id?: string
+          waiter_id?: string | null
+          type?: 'call' | 'bill_request'
+          status?: 'pending' | 'attended' | 'cancelled'
+          created_at?: string
+          attended_at?: string | null
+        }
+        Relationships: []
+      }
+      bills: {
+        Row: {
+          id: string
+          restaurant_id: string
+          table_id: string
+          waiter_id: string
+          order_id: string | null
+          subtotal: number
+          tip: number
+          total: number
+          currency: string
+          status: 'open' | 'paid' | 'cancelled'
+          created_at: string
+          closed_at: string | null
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          table_id: string
+          waiter_id: string
+          order_id?: string | null
+          subtotal: number
+          tip?: number
+          total: number
+          currency?: string
+          status?: 'open' | 'paid' | 'cancelled'
+          created_at?: string
+          closed_at?: string | null
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          table_id?: string
+          waiter_id?: string
+          order_id?: string | null
+          subtotal?: number
+          tip?: number
+          total?: number
+          currency?: string
+          status?: 'open' | 'paid' | 'cancelled'
+          created_at?: string
+          closed_at?: string | null
+        }
+        Relationships: []
+      }
+      bill_items: {
+        Row: {
+          id: string
+          bill_id: string
+          order_item_id: string | null
+          menu_item_name: string
+          quantity: number
+          unit_price: number
+          subtotal: number
+          assigned_to: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          bill_id: string
+          order_item_id?: string | null
+          menu_item_name: string
+          quantity: number
+          unit_price: number
+          subtotal: number
+          assigned_to?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          bill_id?: string
+          order_item_id?: string | null
+          menu_item_name?: string
+          quantity?: number
+          unit_price?: number
+          subtotal?: number
+          assigned_to?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      access_requests: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          business_name: string
+          phone: string | null
+          city: string | null
+          message: string | null
+          status: 'pending' | 'approved' | 'rejected'
+          created_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          business_name: string
+          phone?: string | null
+          city?: string | null
+          message?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          business_name?: string
+          phone?: string | null
+          city?: string | null
+          message?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          id: string
+          bill_id: string
+          amount: number
+          payment_method: 'cash' | 'debit_card' | 'credit_card' | 'transfer' | 'mercadopago' | 'other'
+          payment_details: Json | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          bill_id: string
+          amount: number
+          payment_method: 'cash' | 'debit_card' | 'credit_card' | 'transfer' | 'mercadopago' | 'other'
+          payment_details?: Json | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          bill_id?: string
+          amount?: number
+          payment_method?: 'cash' | 'debit_card' | 'credit_card' | 'transfer' | 'mercadopago' | 'other'
+          payment_details?: Json | null
+          created_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }

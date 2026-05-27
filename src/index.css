@@ -411,3 +411,26 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(-15px) scale(1.03) rotateX(2deg);
   }
 }
+
+/* =====================================================
+   PUBLIC MENU — dark premium design system
+   ===================================================== */
+.public-menu {
+  --menu-bg:              #0D0D0D;
+  --menu-card:            #111111;
+  --menu-card-elevated:   #1A1A1A;
+  --menu-surface:         #222222;
+  --menu-text-primary:    #F5F5F5;
+  --menu-text-secondary:  #888888;
+  --menu-text-muted:      #555555;
+  --menu-accent:          #FF6B6B;
+  --menu-accent-2:        #FF8E53;
+  --menu-accent-gradient: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  --menu-success:         #10B981;
+  --menu-rating:          #F59E0B;
+  --menu-border:          rgba(255, 255, 255, 0.06);
+  --menu-border-hover:    rgba(255, 255, 255, 0.12);
+  background-color: var(--menu-bg);
+  color: var(--menu-text-primary);
+  -webkit-font-smoothing: antialiased;
+}

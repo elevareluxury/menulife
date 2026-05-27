@@ -4,12 +4,13 @@ import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { Spinner } from '@/components/ui/Spinner'
 import { Sidebar } from '@/modules/dashboard/components/Sidebar'
 import { BottomNav } from '@/components/dashboard/BottomNav'
+import { ImpersonationBanner } from '@/modules/super-admin/components/ImpersonationBanner'
 
 export { DashboardHome } from '@/modules/dashboard/pages/DashboardHome'
 
 export function DashboardPage() {
   const { loading, initialized, isAuthenticated } = useAuth()
-  const { restaurant } = useRestaurant()
+  const { restaurant, loading: restaurantLoading } = useRestaurant()
 
   if (!initialized || loading) {
     return (
@@ -21,8 +22,14 @@ export function DashboardPage() {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
+  // Redirect new users to onboarding until they complete it
+  if (!restaurantLoading && restaurant && restaurant.onboarding_completed === false) {
+    return <Navigate to="/onboarding" replace />
+  }
+
   return (
     <div className="min-h-screen bg-surface-1 text-ink-1 dashboard-body">
+      <ImpersonationBanner />
       {/* Sidebar — visible sólo en desktop */}
       <Sidebar restaurantSlug={restaurant?.slug} />
 

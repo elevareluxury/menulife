@@ -35,9 +35,9 @@ export function HeroSection() {
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-4 mb-10">
-              <Link to="/register">
+              <Link to="/solicitar-acceso">
                 <button className="px-8 py-4 bg-orange text-cream font-semibold rounded-xl hover:bg-orange-light transition-colors shadow-lg shadow-orange/25 text-base">
-                  Empezar gratis →
+                  Solicitar acceso →
                 </button>
               </Link>
               <button className="px-8 py-4 border border-brown/25 text-brown font-medium rounded-xl hover:bg-brown/5 transition-colors text-base">

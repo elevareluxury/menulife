@@ -1,19 +1,36 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Users, Receipt } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { Modal } from '@/components/ui/Modal'
-import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
+import { ArrowLeft, Minus, Plus, Check } from 'lucide-react'
 import { Spinner } from '@/components/ui/Spinner'
 import { supabase } from '@/lib/supabase'
 import { useWaiterAuthStore } from '@/store/waiterAuthStore'
 import { formatPrice } from '@/lib/utils'
 import toast from 'react-hot-toast'
+import type { ReactNode } from 'react'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any
+// ── Theme ────────────────────────────────────────────────────────────────────
+const BG     = '#0A0D12'
+const CARD   = '#171A21'
+const CARD2  = '#1E2330'
+const BORDER = 'rgba(255,255,255,0.06)'
+const TEXT   = '#F5F7FA'
+const MUTED  = '#98A2B3'
+const ACCENT = '#FF6B7A'
+const GREEN  = '#10B981'
+const GOLD   = '#F59E0B'
+
+// ── Types ────────────────────────────────────────────────────────────────────
+type PaymentMethod = 'cash' | 'debit_card' | 'credit_card' | 'mercadopago' | 'transfer' | 'other'
+type TipMode = 0 | 10 | 15 | 20 | 'custom'
+
+const PAYMENT_OPTIONS: { value: PaymentMethod; label: string; icon: string }[] = [
+  { value: 'cash',        label: 'Efectivo',     icon: '💵' },
+  { value: 'debit_card',  label: 'Débito',        icon: '💳' },
+  { value: 'credit_card', label: 'Crédito',       icon: '💳' },
+  { value: 'mercadopago', label: 'MercadoPago',   icon: '📱' },
+  { value: 'transfer',    label: 'Transferencia', icon: '🔄' },
+  { value: 'other',       label: 'Otro',          icon: '💱' },
+]
 
 interface OrderItem {
   id: string
@@ -34,7 +51,7 @@ interface OrderData {
 
 interface BillData {
   id: string
-  order_id: string
+  order_id: string | null
   table_id: string
   subtotal: number
   tip: number
@@ -43,29 +60,48 @@ interface BillData {
   status: string
 }
 
+interface PaidInfo {
+  total: number
+  method: PaymentMethod
+  change: number
+  currency: string
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
 export function TableBill() {
   const { slug, tableNumber } = useParams()
   const navigate = useNavigate()
   const { waiter } = useWaiterAuthStore()
-  const [order, setOrder] = useState<OrderData | null>(null)
-  const [bill, setBill] = useState<BillData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [showTipModal, setShowTipModal] = useState(false)
-  const [showSplitModal, setShowSplitModal] = useState(false)
-  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
+  const [order, setOrder]   = useState<OrderData | null>(null)
+  const [bill, setBill]     = useState<BillData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const [tipMode, setTipMode]       = useState<TipMode>(0)
+  const [customTip, setCustomTip]   = useState('')
+  const [splitPersons, setSplitPersons] = useState(1)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
+  const [receivedAmount, setReceivedAmount] = useState('')
+  const [confirming, setConfirming] = useState(false)
+  const [paidInfo, setPaidInfo]     = useState<PaidInfo | null>(null)
+
+  // ── Auth guard ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!waiter) navigate(`/waiter/${slug}/login`, { replace: true })
+  }, [waiter, navigate, slug])
+
+  // ── Fetch order + bill ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!waiter || !tableNumber) return
 
     async function fetchData() {
       try {
-        // Buscar pedido activo de la mesa
         const { data: orderData, error: orderError } = await supabase
           .from('orders')
           .select('id, table_number, status, total, currency, items:order_items(id, menu_item_name, quantity, price_snapshot, notes)')
           .eq('restaurant_id', waiter!.restaurant_id)
           .eq('table_number', tableNumber as string)
-          .in('status', ['pending', 'cooking', 'ready', 'delivered'])
+          .in('status', ['pending', 'confirmed', 'cooking', 'ready', 'delivered', 'bill_requested'])
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
@@ -76,26 +112,25 @@ export function TableBill() {
         const typedOrder = orderData as unknown as OrderData
         setOrder(typedOrder)
 
-        // Buscar o crear cuenta
-        const { data: existingBill } = await db
+        // Fetch or auto-create bill
+        const { data: existingBill } = await supabase
           .from('bills')
           .select('*')
           .eq('order_id', typedOrder.id)
           .maybeSingle()
 
         if (existingBill) {
-          setBill(existingBill)
+          setBill(existingBill as BillData)
         } else {
-          // Buscar table_id
-          const { data: tableData } = await db
+          const { data: tableData } = await supabase
             .from('tables')
             .select('id')
             .eq('restaurant_id', waiter!.restaurant_id)
-            .eq('table_number', tableNumber)
+            .eq('table_number', tableNumber as string)
             .maybeSingle()
 
           if (tableData) {
-            const { data: newBill, error: billError } = await db
+            const { data: newBill, error: billError } = await supabase
               .from('bills')
               .insert({
                 restaurant_id: waiter!.restaurant_id,
@@ -110,10 +145,14 @@ export function TableBill() {
               .select()
               .single()
 
-            if (billError) throw billError
-            setBill(newBill)
+            if (billError) {
+              if (billError.code === '23505') {
+                const { data: raceBill } = await supabase.from('bills').select('*').eq('order_id', typedOrder.id).maybeSingle()
+                if (raceBill) setBill(raceBill as BillData)
+              } else throw billError
+              return
+            }
 
-            // Crear bill_items
             const billItems = typedOrder.items.map(item => ({
               bill_id: newBill.id,
               order_item_id: item.id,
@@ -122,11 +161,17 @@ export function TableBill() {
               unit_price: item.price_snapshot,
               subtotal: item.price_snapshot * item.quantity,
             }))
-            await db.from('bill_items').insert(billItems)
+            const { error: itemsError } = await supabase.from('bill_items').insert(billItems)
+            if (itemsError) {
+              await supabase.from('bills').delete().eq('id', newBill.id)
+              throw itemsError
+            }
+            setBill(newBill as BillData)
           }
         }
-      } catch (error) {
-        console.error('Error fetching bill data:', error)
+      } catch (err) {
+        console.error('Error fetching bill data:', err)
+        toast.error('Error cargando la cuenta')
       } finally {
         setLoading(false)
       }
@@ -135,314 +180,335 @@ export function TableBill() {
     fetchData()
   }, [waiter, tableNumber])
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>
+  // ── Derived values ──────────────────────────────────────────────────────────
+  const subtotal    = bill?.subtotal ?? order?.total ?? 0
+  const currency    = (bill?.currency ?? order?.currency ?? 'ARS') as 'ARS' | 'USD'
+  const tipAmount   = tipMode === 'custom'
+    ? Math.max(0, parseFloat(customTip) || 0)
+    : Math.round(subtotal * (tipMode as number) / 100)
+  const totalWithTip = subtotal + tipAmount
+  const perPerson   = splitPersons > 1 ? totalWithTip / splitPersons : 0
+  const parsed      = parseFloat(receivedAmount) || 0
+  const change      = paymentMethod === 'cash' && parsed > totalWithTip ? parsed - totalWithTip : 0
+
+  // ── Confirm payment ─────────────────────────────────────────────────────────
+  const handleConfirmPayment = async () => {
+    if (!bill || !order) return
+    if (paymentMethod === 'cash' && receivedAmount && parsed < totalWithTip) {
+      toast.error('El monto recibido es menor al total')
+      return
+    }
+    setConfirming(true)
+    try {
+      const { error: billErr } = await supabase
+        .from('bills')
+        .update({ tip: tipAmount, total: totalWithTip, status: 'paid', closed_at: new Date().toISOString() })
+        .eq('id', bill.id)
+      if (billErr) throw billErr
+
+      const { error: payErr } = await supabase
+        .from('payments')
+        .insert({
+          bill_id: bill.id,
+          amount: paymentMethod === 'cash' ? (parsed || totalWithTip) : totalWithTip,
+          payment_method: paymentMethod,
+          created_by: waiter?.id ?? null,
+        })
+      if (payErr) throw payErr
+
+      if (bill.order_id) {
+        await supabase.from('orders').update({ status: 'paid' }).eq('id', bill.order_id)
+      }
+
+      await supabase.from('tables').update({ status: 'free' }).eq('id', bill.table_id)
+
+      // Dismiss pending bill_request calls for this table
+      await supabase
+        .from('waiter_calls')
+        .update({ status: 'attended', attended_at: new Date().toISOString() })
+        .eq('table_id', bill.table_id)
+        .eq('type', 'bill_request')
+        .eq('status', 'pending')
+
+      setPaidInfo({ total: totalWithTip, method: paymentMethod, change, currency })
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error al registrar pago')
+    } finally {
+      setConfirming(false)
+    }
   }
 
-  if (!order) {
+  // ── Loading ─────────────────────────────────────────────────────────────────
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="max-w-sm w-full p-8 text-center">
-          <p className="text-gray-600 mb-4">No hay pedidos activos en esta mesa</p>
-          <Button onClick={() => navigate(-1)}>Volver</Button>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: BG }}>
+        <Spinner size="lg" />
       </div>
     )
   }
 
+  // ── No active order ─────────────────────────────────────────────────────────
+  if (!order) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-4" style={{ backgroundColor: BG }}>
+        <p className="text-4xl">🍽️</p>
+        <p className="text-base font-semibold" style={{ color: TEXT }}>No hay pedidos activos en Mesa {tableNumber}</p>
+        <button
+          onClick={() => navigate(`/waiter/${slug}/dashboard`)}
+          className="mt-2 px-6 py-2.5 rounded-xl text-sm font-bold"
+          style={{ backgroundColor: ACCENT, color: '#fff' }}
+        >
+          Volver al dashboard
+        </button>
+      </div>
+    )
+  }
+
+  // ── Post-payment confirmation ───────────────────────────────────────────────
+  if (paidInfo) {
+    const methodLabel = PAYMENT_OPTIONS.find(p => p.value === paidInfo.method)?.label ?? paidInfo.method
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-6" style={{ backgroundColor: BG }}>
+        <div
+          className="w-20 h-20 rounded-full flex items-center justify-center"
+          style={{ backgroundColor: `${GREEN}20`, border: `2px solid ${GREEN}` }}
+        >
+          <Check className="w-10 h-10" style={{ color: GREEN }} />
+        </div>
+
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-1" style={{ color: TEXT }}>Pago registrado</h1>
+          <p className="text-base font-semibold" style={{ color: GREEN }}>Mesa {tableNumber} · LIBRE</p>
+        </div>
+
+        <div className="w-full max-w-sm rounded-2xl p-5 space-y-3" style={{ backgroundColor: CARD, border: `1px solid ${BORDER}` }}>
+          <SummaryRow label="Total cobrado" value={formatPrice(paidInfo.total, paidInfo.currency as 'ARS' | 'USD')} highlight />
+          <SummaryRow label="Método de pago" value={methodLabel} />
+          {paidInfo.change > 0 && (
+            <SummaryRow label="Vuelto" value={formatPrice(paidInfo.change, paidInfo.currency as 'ARS' | 'USD')} gold />
+          )}
+        </div>
+
+        <button
+          onClick={() => navigate(`/waiter/${slug}/dashboard`)}
+          className="w-full max-w-sm py-4 rounded-2xl font-bold text-base"
+          style={{ background: `linear-gradient(135deg, ${ACCENT}, #FF8E53)`, color: '#fff' }}
+        >
+          Volver al dashboard
+        </button>
+      </div>
+    )
+  }
+
+  // ── Main bill view ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-1 hover:bg-gray-100 rounded-lg">
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold">Mesa {tableNumber}</h1>
-            <p className="text-sm text-gray-500">{order.items.length} items</p>
-          </div>
+    <div className="min-h-screen" style={{ backgroundColor: BG }}>
+
+      {/* Header */}
+      <div
+        className="sticky top-0 z-10 flex items-center gap-3 px-4 py-4"
+        style={{ backgroundColor: BG, borderBottom: `1px solid ${BORDER}` }}
+      >
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl"
+          style={{ backgroundColor: CARD }}
+        >
+          <ArrowLeft className="w-5 h-5" style={{ color: TEXT }} />
+        </button>
+        <div className="flex-1">
+          <h1 className="text-lg font-bold" style={{ color: TEXT }}>Mesa {tableNumber}</h1>
+          <p className="text-xs" style={{ color: MUTED }}>
+            {order.items.length} items
+            {order.status === 'bill_requested' && (
+              <span style={{ color: GOLD }}> · 💰 Pidió la cuenta</span>
+            )}
+          </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 space-y-4 max-w-md">
-        {/* Items */}
-        <Card className="p-4">
-          <h2 className="font-semibold mb-3">Items del Pedido</h2>
+      <div className="px-4 pt-4 pb-10 space-y-4 max-w-md mx-auto">
+
+        {/* ── Items del pedido ──────────────────────────────────────────────── */}
+        <BillSection title="Pedido">
           <div className="space-y-2">
             {order.items.map(item => (
-              <div key={item.id} className="flex justify-between text-sm">
-                <span className="text-gray-700">{item.quantity}x {item.menu_item_name}</span>
-                <span className="font-semibold">
-                  {formatPrice(item.price_snapshot * item.quantity, order.currency as 'ARS' | 'USD')}
+              <div key={item.id} className="flex justify-between items-start gap-2">
+                <span className="text-sm flex-1" style={{ color: MUTED }}>
+                  {item.quantity}× {item.menu_item_name}
+                  {item.notes && <span className="text-xs italic block">{item.notes}</span>}
+                </span>
+                <span className="text-sm font-semibold whitespace-nowrap" style={{ color: TEXT }}>
+                  {formatPrice(item.price_snapshot * item.quantity, currency)}
                 </span>
               </div>
             ))}
           </div>
-        </Card>
+          <div className="mt-3 pt-3 flex justify-between" style={{ borderTop: `1px solid ${BORDER}` }}>
+            <span className="text-sm" style={{ color: MUTED }}>Subtotal</span>
+            <span className="font-bold" style={{ color: TEXT }}>{formatPrice(subtotal, currency)}</span>
+          </div>
+        </BillSection>
 
-        {/* Totales */}
-        <Card className="p-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">{formatPrice(bill?.subtotal ?? order.total, order.currency as 'ARS' | 'USD')}</span>
-            </div>
-            <div className="flex justify-between text-sm items-center">
-              <span className="text-gray-600">Propina</span>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{formatPrice(bill?.tip ?? 0, order.currency as 'ARS' | 'USD')}</span>
-                <Button size="sm" variant="ghost" onClick={() => setShowTipModal(true)}>
-                  {(bill?.tip ?? 0) > 0 ? 'Cambiar' : 'Agregar'}
-                </Button>
-              </div>
-            </div>
-            <div className="border-t pt-2 flex justify-between font-bold text-lg">
-              <span>Total</span>
-              <span className="text-emerald-600">
-                {formatPrice(bill?.total ?? order.total, order.currency as 'ARS' | 'USD')}
+        {/* ── Propina ───────────────────────────────────────────────────────── */}
+        <BillSection title="Propina">
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            {([0, 10, 15, 20] as const).map(pct => (
+              <button
+                key={pct}
+                onClick={() => { setTipMode(pct); setCustomTip('') }}
+                className="py-2.5 rounded-xl text-sm font-semibold transition-all"
+                style={{
+                  backgroundColor: tipMode === pct ? `${ACCENT}20` : CARD2,
+                  color: tipMode === pct ? ACCENT : MUTED,
+                  border: `1px solid ${tipMode === pct ? `${ACCENT}40` : BORDER}`,
+                }}
+              >
+                {pct === 0 ? 'Sin' : `${pct}%`}
+              </button>
+            ))}
+          </div>
+          <input
+            type="number"
+            placeholder="Monto personalizado"
+            value={customTip}
+            onChange={e => { setCustomTip(e.target.value); setTipMode('custom') }}
+            className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+            style={{ backgroundColor: CARD2, color: TEXT, border: `1px solid ${BORDER}` }}
+          />
+          {tipAmount > 0 && (
+            <p className="mt-2 text-xs text-right" style={{ color: MUTED }}>
+              Propina: <span style={{ color: GREEN }}>{formatPrice(tipAmount, currency)}</span>
+            </p>
+          )}
+        </BillSection>
+
+        {/* ── Dividir cuenta ────────────────────────────────────────────────── */}
+        <BillSection title="Dividir cuenta">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSplitPersons(p => Math.max(1, p - 1))}
+                className="w-9 h-9 flex items-center justify-center rounded-xl"
+                style={{ backgroundColor: CARD2, border: `1px solid ${BORDER}` }}
+              >
+                <Minus className="w-4 h-4" style={{ color: MUTED }} />
+              </button>
+              <span className="text-xl font-bold w-8 text-center" style={{ color: TEXT }}>{splitPersons}</span>
+              <button
+                onClick={() => setSplitPersons(p => p + 1)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl"
+                style={{ backgroundColor: CARD2, border: `1px solid ${BORDER}` }}
+              >
+                <Plus className="w-4 h-4" style={{ color: MUTED }} />
+              </button>
+              <span className="text-sm" style={{ color: MUTED }}>
+                {splitPersons === 1 ? 'persona' : 'personas'}
               </span>
             </div>
+            {splitPersons > 1 && (
+              <div className="text-right">
+                <p className="text-xs" style={{ color: MUTED }}>por persona</p>
+                <p className="text-lg font-bold" style={{ color: ACCENT }}>{formatPrice(perPerson, currency)}</p>
+              </div>
+            )}
           </div>
-        </Card>
+        </BillSection>
 
-        {/* Acciones */}
-        <Button onClick={() => setShowSplitModal(true)} className="w-full" variant="secondary">
-          <Users className="w-4 h-4 mr-2" />
-          Dividir Cuenta
-        </Button>
-        <Button onClick={() => setShowPaymentModal(true)} className="w-full">
-          <Receipt className="w-4 h-4 mr-2" />
-          Cobrar
-        </Button>
+        {/* ── Total ─────────────────────────────────────────────────────────── */}
+        <div
+          className="rounded-2xl px-5 py-4 flex items-center justify-between"
+          style={{ backgroundColor: CARD, border: `1px solid ${BORDER}` }}
+        >
+          <span className="font-semibold" style={{ color: MUTED }}>Total a cobrar</span>
+          <span className="text-2xl font-bold" style={{ color: TEXT }}>{formatPrice(totalWithTip, currency)}</span>
+        </div>
+
+        {/* ── Método de pago ────────────────────────────────────────────────── */}
+        <BillSection title="Método de pago">
+          <div className="grid grid-cols-3 gap-2">
+            {PAYMENT_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setPaymentMethod(opt.value)}
+                className="flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all"
+                style={{
+                  backgroundColor: paymentMethod === opt.value ? `${ACCENT}18` : CARD2,
+                  border: `1px solid ${paymentMethod === opt.value ? `${ACCENT}50` : BORDER}`,
+                }}
+              >
+                <span className="text-xl">{opt.icon}</span>
+                <span
+                  className="text-[11px] font-semibold"
+                  style={{ color: paymentMethod === opt.value ? ACCENT : MUTED }}
+                >
+                  {opt.label}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {paymentMethod === 'cash' && (
+            <div className="mt-3">
+              <label className="block text-xs font-medium mb-1.5" style={{ color: MUTED }}>
+                Monto recibido
+              </label>
+              <input
+                type="number"
+                placeholder={String(totalWithTip)}
+                value={receivedAmount}
+                onChange={e => setReceivedAmount(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ backgroundColor: CARD2, color: TEXT, border: `1px solid ${BORDER}` }}
+              />
+              {change > 0 && (
+                <p className="mt-2 text-sm font-semibold" style={{ color: GOLD }}>
+                  Vuelto: {formatPrice(change, currency)}
+                </p>
+              )}
+            </div>
+          )}
+        </BillSection>
+
+        {/* ── CTA ───────────────────────────────────────────────────────────── */}
+        <button
+          onClick={handleConfirmPayment}
+          disabled={confirming}
+          className="w-full py-4 rounded-2xl font-bold text-base transition-opacity disabled:opacity-60"
+          style={{
+            background: `linear-gradient(135deg, ${ACCENT}, #FF8E53)`,
+            color: '#fff',
+            boxShadow: `0 8px 24px ${ACCENT}40`,
+          }}
+        >
+          {confirming ? 'Procesando...' : `Confirmar pago · ${formatPrice(totalWithTip, currency)}`}
+        </button>
+
       </div>
-
-      {bill && (
-        <>
-          <TipModal
-            isOpen={showTipModal}
-            onClose={() => setShowTipModal(false)}
-            bill={bill}
-            onUpdate={(tip: number) => setBill(b => b ? { ...b, tip, total: b.subtotal + tip } : b)}
-          />
-          <SplitModal
-            isOpen={showSplitModal}
-            onClose={() => setShowSplitModal(false)}
-            bill={bill}
-            items={order.items}
-          />
-          <PaymentModal
-            isOpen={showPaymentModal}
-            onClose={() => setShowPaymentModal(false)}
-            bill={bill}
-            onSuccess={() => navigate(`/waiter/${slug}/dashboard`)}
-          />
-        </>
-      )}
     </div>
   )
 }
 
-// --- Tip Modal ---
-function TipModal({ isOpen, onClose, bill, onUpdate }: {
-  isOpen: boolean; onClose: () => void; bill: BillData
-  onUpdate: (tip: number) => void
-}) {
-  const [customTip, setCustomTip] = useState('')
-  const [loading, setLoading] = useState(false)
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
-  const applyTip = async (amount: number) => {
-    setLoading(true)
-    try {
-      const { error } = await db
-        .from('bills')
-        .update({ tip: amount, total: bill.subtotal + amount })
-        .eq('id', bill.id)
-      if (error) throw error
-      onUpdate(amount)
-      onClose()
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'Error')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const suggested = [
-    { label: '10%', amount: Math.round(bill.subtotal * 0.1) },
-    { label: '15%', amount: Math.round(bill.subtotal * 0.15) },
-    { label: '20%', amount: Math.round(bill.subtotal * 0.2) },
-  ]
-
+function BillSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Agregar Propina">
-      <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-3">
-          {suggested.map(tip => (
-            <Button key={tip.label} variant="secondary" onClick={() => applyTip(tip.amount)} disabled={loading}
-              className="flex flex-col h-auto py-4 gap-1">
-              <span className="text-lg font-bold">{tip.label}</span>
-              <span className="text-xs">{formatPrice(tip.amount, bill.currency as 'ARS' | 'USD')}</span>
-            </Button>
-          ))}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Monto personalizado</label>
-          <div className="flex gap-2">
-            <Input type="number" placeholder="0" value={customTip}
-              onChange={e => setCustomTip(e.target.value)} />
-            <Button onClick={() => applyTip(parseFloat(customTip) || 0)} disabled={loading}>Aplicar</Button>
-          </div>
-        </div>
-        <Button variant="ghost" onClick={() => applyTip(0)} disabled={loading} className="w-full">
-          Sin propina
-        </Button>
-      </div>
-    </Modal>
+    <div className="rounded-2xl p-4" style={{ backgroundColor: CARD, border: `1px solid ${BORDER}` }}>
+      <h2 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: MUTED }}>
+        {title}
+      </h2>
+      {children}
+    </div>
   )
 }
 
-// --- Split Modal ---
-function SplitModal({ isOpen, onClose, bill, items }: {
-  isOpen: boolean; onClose: () => void; bill: BillData; items: OrderItem[]
-}) {
-  const [splitType, setSplitType] = useState<'equal' | 'by_item'>('equal')
-  const [people, setPeople] = useState(2)
-  const [assignments, setAssignments] = useState<Record<string, string>>({})
-
-  const perPerson = people > 0 ? bill.total / people : bill.total
-
+function SummaryRow({ label, value, highlight, gold }: { label: string; value: string; highlight?: boolean; gold?: boolean }) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Dividir Cuenta" size="lg">
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <Button variant={splitType === 'equal' ? 'primary' : 'secondary'} onClick={() => setSplitType('equal')}>
-            Por Personas
-          </Button>
-          <Button variant={splitType === 'by_item' ? 'primary' : 'secondary'} onClick={() => setSplitType('by_item')}>
-            Por Items
-          </Button>
-        </div>
-
-        {splitType === 'equal' ? (
-          <div>
-            <Input label="¿Cuántas personas?" type="number" min={2} value={people}
-              onChange={e => setPeople(parseInt(e.target.value) || 2)} />
-            <div className="mt-4 p-4 bg-emerald-50 rounded-xl text-center">
-              <p className="text-sm text-gray-600 mb-1">Total por persona:</p>
-              <p className="text-2xl font-bold text-emerald-600">
-                {formatPrice(perPerson, bill.currency as 'ARS' | 'USD')}
-              </p>
-            </div>
-            <Button className="w-full mt-4" onClick={() => {
-              toast.success(`${formatPrice(perPerson, bill.currency as 'ARS' | 'USD')} por persona`)
-              onClose()
-            }}>
-              Confirmar División
-            </Button>
-          </div>
-        ) : (
-          <div>
-            <p className="text-sm text-gray-600 mb-3">Asigna cada item a una persona</p>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {items.map(item => (
-                <div key={item.id} className="flex items-center gap-2">
-                  <span className="flex-1 text-sm">{item.quantity}x {item.menu_item_name}</span>
-                  <Input placeholder="Nombre" className="w-28 text-sm"
-                    value={assignments[item.id] ?? ''}
-                    onChange={e => setAssignments(prev => ({ ...prev, [item.id]: e.target.value }))}
-                  />
-                </div>
-              ))}
-            </div>
-            <Button className="w-full mt-4" onClick={() => { toast.success('División guardada'); onClose() }}>
-              Confirmar
-            </Button>
-          </div>
-        )}
-      </div>
-    </Modal>
-  )
-}
-
-// --- Payment Modal ---
-function PaymentModal({ isOpen, onClose, bill, onSuccess }: {
-  isOpen: boolean; onClose: () => void; bill: BillData; onSuccess: () => void
-}) {
-  const [paymentMethod, setPaymentMethod] = useState('cash')
-  const [amount, setAmount] = useState(bill.total.toString())
-  const [loading, setLoading] = useState(false)
-  const { waiter } = useWaiterAuthStore()
-
-  const parsedAmount = parseFloat(amount) || 0
-  const change = paymentMethod === 'cash' && parsedAmount > bill.total ? parsedAmount - bill.total : 0
-
-  const handlePayment = async () => {
-    if (parsedAmount <= 0) { toast.error('Monto inválido'); return }
-    setLoading(true)
-    try {
-      const { error: payErr } = await db
-        .from('payments')
-        .insert({ bill_id: bill.id, amount: parsedAmount, payment_method: paymentMethod, created_by: waiter?.id })
-      if (payErr) throw payErr
-
-      const { error: billErr } = await db
-        .from('bills')
-        .update({ status: 'paid', closed_at: new Date().toISOString() })
-        .eq('id', bill.id)
-      if (billErr) throw billErr
-
-      await supabase.from('orders').update({ status: 'delivered' }).eq('id', bill.order_id)
-
-      await db.from('tables').update({ status: 'free' }).eq('id', bill.table_id)
-
-      toast.success('Pago registrado')
-      onSuccess()
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : 'Error al registrar pago')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Registrar Pago">
-      <div className="space-y-4">
-        <div className="p-4 bg-gray-50 rounded-xl text-center">
-          <p className="text-sm text-gray-600 mb-1">Total a cobrar:</p>
-          <p className="text-3xl font-bold text-emerald-600">
-            {formatPrice(bill.total, bill.currency as 'ARS' | 'USD')}
-          </p>
-        </div>
-
-        <Input label="Monto Recibido" type="number" step="1" value={amount}
-          onChange={e => setAmount(e.target.value)} />
-
-        <Select
-          label="Método de Pago"
-          value={paymentMethod}
-          onChange={e => setPaymentMethod(e.target.value)}
-          options={[
-            { value: 'cash', label: 'Efectivo' },
-            { value: 'debit_card', label: 'Tarjeta de Débito' },
-            { value: 'credit_card', label: 'Tarjeta de Crédito' },
-            { value: 'transfer', label: 'Transferencia' },
-          ]}
-        />
-
-        {change > 0 && (
-          <div className="p-3 bg-green-50 rounded-xl">
-            <p className="text-sm text-gray-600">Vuelto:</p>
-            <p className="text-xl font-bold text-green-600">
-              {formatPrice(change, bill.currency as 'ARS' | 'USD')}
-            </p>
-          </div>
-        )}
-
-        <div className="flex gap-3">
-          <Button variant="secondary" onClick={onClose} className="flex-1">Cancelar</Button>
-          <Button onClick={handlePayment} isLoading={loading} className="flex-1">Confirmar Pago</Button>
-        </div>
-      </div>
-    </Modal>
+    <div className="flex justify-between items-center text-sm">
+      <span style={{ color: MUTED }}>{label}</span>
+      <span className="font-semibold" style={{ color: highlight ? TEXT : gold ? GOLD : MUTED }}>
+        {value}
+      </span>
+    </div>
   )
 }

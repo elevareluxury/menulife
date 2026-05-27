@@ -11,20 +11,39 @@ export interface Restaurant {
   owner_id: string
   slug: string
   name: string
-  name_en?: string
-  email?: string
-  phone?: string
-  address?: string
-  city?: string
-  logo_url?: string
+  name_en?: string | null
+  email?: string | null
+  phone?: string | null
+  address?: string | null
+  city?: string | null
+  logo_url?: string | null
+  cover_image_url?: string | null
+  description?: string | null
+  description_en?: string | null
   default_currency: 'ARS' | 'USD'
   default_language: 'ES' | 'EN'
+  timezone?: string
+  schedule?: unknown
   is_open: boolean
   is_active: boolean
   plan: 'menu' | 'pro' | 'total'
   subscription_status: 'trial' | 'active' | 'past_due' | 'cancelled'
   mercadopago_enabled: boolean
   created_at: string
+  // Settings fields
+  website?: string | null
+  country?: string | null
+  province?: string | null
+  address_extra?: string | null
+  postal_code?: string | null
+  directions?: string | null
+  social_links?: unknown
+  menu_accent_color?: string | null
+  menu_card_style?: string | null
+  show_prices?: boolean
+  show_descriptions?: boolean
+  show_calories?: boolean
+  onboarding_completed?: boolean
 }
 
 export interface MenuSection {

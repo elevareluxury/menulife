@@ -21,7 +21,11 @@
       "Bash(npx tsc *)",
       "Bash(node *)",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)}, indent=2\\)\\)\")",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(grep -E '\\\\.\\(ts|tsx\\)$')",
+      "Bash(xargs grep *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('DEPS:', list\\(d.get\\('dependencies',{}\\).keys\\(\\)\\)\\); print\\('DEV:', list\\(d.get\\('devDependencies',{}\\).keys\\(\\)\\)\\)\")",
+      "Bash(dir \"E:/menulife/public\")"
     ]
   }
 }

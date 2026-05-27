@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { pin, restaurant_id } = await req.json()
+    const { pin, restaurant_id, waiter_id } = await req.json()
 
     if (!pin || !restaurant_id) {
       throw new Error('PIN y restaurant_id son requeridos')
@@ -24,13 +24,18 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { data: mozo, error } = await supabase
+    let query = supabase
       .from('waiters')
       .select('*')
       .eq('restaurant_id', restaurant_id)
       .eq('pin', pin)
       .eq('is_active', true)
-      .single()
+
+    if (waiter_id) {
+      query = query.eq('id', waiter_id)
+    }
+
+    const { data: mozo, error } = await query.single()
 
     if (error || !mozo) {
       return new Response(

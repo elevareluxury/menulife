@@ -21,9 +21,9 @@ export function FinalCTA() {
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center">
-          <Link to="/register">
+          <Link to="/solicitar-acceso">
             <button className="px-9 py-4 bg-orange text-white rounded-full font-semibold text-base shadow-lg shadow-orange/30 hover:bg-orange-light hover:shadow-xl hover:shadow-orange/40 hover:-translate-y-0.5 transition-all">
-              Empezar gratis →
+              Solicitar acceso →
             </button>
           </Link>
           <button className="px-8 py-4 border border-cream/25 text-cream/80 rounded-full font-semibold text-base hover:border-orange hover:text-orange-light transition-all">

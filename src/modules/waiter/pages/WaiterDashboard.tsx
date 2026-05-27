@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LogOut, Bell, Clock } from 'lucide-react'
+import { LogOut, Bell, Clock, Receipt } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
+import { InstallBanner } from '@/components/ui/InstallBanner'
 import { supabase } from '@/lib/supabase'
 import { useWaiterAuthStore } from '@/store/waiterAuthStore'
 import { getTimeSince } from '@/lib/utils'
+import { useWaiterNotifications } from '../hooks/useWaiterNotifications'
+import { NotificationBanner } from '../components/NotificationBanner'
 import type { Table } from '@/types'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any
 
 interface OrderWithItems {
   id: string
@@ -24,6 +24,7 @@ interface CallWithTable {
   id: string
   created_at: string
   table: { table_number: string }
+  type: 'call' | 'bill_request'
 }
 
 const TABLE_STATUS_STYLES: Record<string, string> = {
@@ -41,6 +42,8 @@ export function WaiterDashboard() {
   const [calls, setCalls] = useState<CallWithTable[]>([])
   const [loading, setLoading] = useState(true)
 
+  const { banners, dismissBanner } = useWaiterNotifications(orders, calls)
+
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate(`/waiter/${slug}/login`, { replace: true })
@@ -52,7 +55,7 @@ export function WaiterDashboard() {
 
     async function fetchData() {
       try {
-        const { data: tablesData } = await db
+        const { data: tablesData } = await supabase
           .from('tables')
           .select('*')
           .eq('waiter_id', waiter!.id)
@@ -68,7 +71,7 @@ export function WaiterDashboard() {
             .select('id, table_number, status, created_at')
             .eq('restaurant_id', waiter!.restaurant_id)
             .in('table_number', tableNumbers)
-            .in('status', ['pending', 'cooking', 'ready'])
+            .in('status', ['pending', 'cooking', 'ready', 'bill_requested'])
 
           const orders: OrderWithItems[] = await Promise.all(
             (ordersData ?? []).map(async (order) => {
@@ -84,14 +87,20 @@ export function WaiterDashboard() {
           setOrders([])
         }
 
-        const { data: callsData } = await db
+        const { data: callsData } = await supabase
           .from('waiter_calls')
-          .select('id, created_at, table:tables(table_number)')
+          .select('id, created_at, table_id, type')
           .eq('waiter_id', waiter!.id)
           .eq('status', 'pending')
           .order('created_at', { ascending: false })
 
-        setCalls(callsData ?? [])
+        const resolvedCalls: CallWithTable[] = (callsData ?? []).map(c => ({
+          id: c.id,
+          created_at: c.created_at,
+          type: (c.type ?? 'call') as 'call' | 'bill_request',
+          table: { table_number: fetchedTables.find(t => t.id === c.table_id)?.table_number ?? '' },
+        }))
+        setCalls(resolvedCalls)
       } catch (error) {
         console.error('Error fetching waiter data:', error)
       } finally {
@@ -124,7 +133,7 @@ export function WaiterDashboard() {
   }, [waiter])
 
   const attendCall = async (callId: string) => {
-    await db
+    await supabase
       .from('waiter_calls')
       .update({ status: 'attended', attended_at: new Date().toISOString() })
       .eq('id', callId)
@@ -137,10 +146,14 @@ export function WaiterDashboard() {
     return <div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>
   }
 
-  const readyOrders = orders.filter(o => o.status === 'ready')
+  const regularCalls  = calls.filter(c => c.type !== 'bill_request')
+  const billRequests  = calls.filter(c => c.type === 'bill_request')
+  const readyOrders   = orders.filter(o => o.status === 'ready')
+  const billOrders    = orders.filter(o => o.status === 'bill_requested')
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <NotificationBanner banners={banners} onDismiss={dismissBanner} />
       <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div>
@@ -155,17 +168,73 @@ export function WaiterDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-6 space-y-6 max-w-lg">
-        {/* Llamadas pendientes */}
-        {calls.length > 0 && (
+
+        {/* ── Install PWA prompt ─────────────────────────────────────────────── */}
+        <InstallBanner />
+
+        {/* ── Solicitudes de cuenta (dorado) ─────────────────────────────────── */}
+        {(billRequests.length > 0 || billOrders.length > 0) && (
+          <Card className="p-4 border-2" style={{ backgroundColor: '#FFFBEB', borderColor: '#F59E0B' }}>
+            <div className="flex items-start gap-3">
+              <Receipt className="w-6 h-6 shrink-0 mt-0.5" style={{ color: '#D97706' }} />
+              <div className="flex-1">
+                <h3 className="font-semibold mb-3" style={{ color: '#92400E' }}>
+                  {billRequests.length + billOrders.length}{' '}
+                  {billRequests.length + billOrders.length === 1 ? 'solicitud de cuenta' : 'solicitudes de cuenta'}
+                </h3>
+                <div className="space-y-2">
+                  {/* bill_request calls */}
+                  {billRequests.map(call => (
+                    <div key={call.id} className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
+                      <div>
+                        <p className="font-semibold text-gray-900">Mesa {call.table?.table_number}</p>
+                        <p className="text-xs text-gray-500">{getTimeSince(call.created_at).minutes}m atrás</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          attendCall(call.id)
+                          navigate(`/waiter/${slug}/table/${call.table.table_number}`)
+                        }}
+                        style={{ backgroundColor: '#F59E0B', color: '#fff', border: 'none' }}
+                      >
+                        Cobrar
+                      </Button>
+                    </div>
+                  ))}
+                  {/* bill_requested orders (customer requested via status change) */}
+                  {billOrders.map(order => (
+                    <div key={order.id} className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
+                      <div>
+                        <p className="font-semibold text-gray-900">Mesa {order.table_number}</p>
+                        <p className="text-xs text-gray-500">{order.items.length} items · {getTimeSince(order.created_at).minutes}m</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/waiter/${slug}/table/${order.table_number}`)}
+                        style={{ backgroundColor: '#F59E0B', color: '#fff', border: 'none' }}
+                      >
+                        Cobrar
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* ── Llamadas regulares (rojo) ───────────────────────────────────────── */}
+        {regularCalls.length > 0 && (
           <Card className="p-4 bg-red-50 border-red-200">
             <div className="flex items-start gap-3">
               <Bell className="w-6 h-6 text-red-600 animate-pulse shrink-0 mt-0.5" />
               <div className="flex-1">
                 <h3 className="font-semibold text-red-900 mb-3">
-                  {calls.length} {calls.length === 1 ? 'llamada pendiente' : 'llamadas pendientes'}
+                  {regularCalls.length} {regularCalls.length === 1 ? 'llamada pendiente' : 'llamadas pendientes'}
                 </h3>
                 <div className="space-y-2">
-                  {calls.map(call => (
+                  {regularCalls.map(call => (
                     <div key={call.id} className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
                       <div>
                         <p className="font-semibold">Mesa {call.table?.table_number}</p>
@@ -180,7 +249,7 @@ export function WaiterDashboard() {
           </Card>
         )}
 
-        {/* Pedidos listos */}
+        {/* ── Pedidos listos ─────────────────────────────────────────────────── */}
         {readyOrders.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-3 text-green-700">🟢 Pedidos Listos para entregar</h2>
@@ -203,7 +272,7 @@ export function WaiterDashboard() {
           </div>
         )}
 
-        {/* Mis mesas */}
+        {/* ── Mis mesas ──────────────────────────────────────────────────────── */}
         <div>
           <h2 className="text-lg font-semibold mb-3">Mis Mesas</h2>
           {tables.length === 0 ? (
@@ -213,10 +282,11 @@ export function WaiterDashboard() {
               {tables.map(table => {
                 const order = getTableOrder(table.table_number)
                 const styleClass = TABLE_STATUS_STYLES[table.status] ?? 'bg-gray-50 border-gray-300'
+                const isBillReq = order?.status === 'bill_requested'
                 return (
                   <Card
                     key={table.id}
-                    className={`p-4 border-2 cursor-pointer transition-all hover:shadow-md ${styleClass}`}
+                    className={`p-4 border-2 cursor-pointer transition-all hover:shadow-md ${isBillReq ? 'border-amber-400 bg-amber-50' : styleClass}`}
                     onClick={() => order && navigate(`/waiter/${slug}/table/${table.table_number}`)}
                   >
                     <div className="text-center">
@@ -224,8 +294,17 @@ export function WaiterDashboard() {
                       <p className="text-xs text-gray-500">{table.capacity} personas</p>
                       {order ? (
                         <div className="mt-3">
-                          <span className="inline-block px-2 py-1 bg-white rounded-lg text-xs font-medium text-emerald-700 shadow-sm">
-                            {order.items?.length ?? 0} items · {order.status === 'ready' ? '✓ Listo' : order.status === 'cooking' ? '🔥 Cocina' : '⏳ Nuevo'}
+                          <span
+                            className="inline-block px-2 py-1 rounded-lg text-xs font-medium shadow-sm"
+                            style={isBillReq ? { backgroundColor: '#FEF3C7', color: '#92400E' } : { backgroundColor: '#fff', color: '#065F46' }}
+                          >
+                            {isBillReq
+                              ? '💰 Pide cuenta'
+                              : order.status === 'ready'
+                              ? '✓ Listo'
+                              : order.status === 'cooking'
+                              ? '🔥 Cocina'
+                              : `⏳ ${order.items?.length ?? 0} items`}
                           </span>
                           <Button size="sm" className="w-full mt-2">Ver Cuenta</Button>
                         </div>
