@@ -257,7 +257,7 @@ function TableModal({ isOpen, onClose, restaurantId, table, waiters }: TableModa
       } else {
         const { error } = await db
           .from('tables')
-          .insert({ ...data, restaurant_id: restaurantId, position_x: 50, position_y: 50 })
+          .insert({ ...data, restaurant_id: restaurantId, position_x: 50, position_y: 50, is_active: true })
         if (error) throw error
         toast.success('Mesa creada')
       }

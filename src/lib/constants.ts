@@ -1,5 +1,5 @@
 export const APP_NAME = 'menulife'
-export const APP_URL = import.meta.env.VITE_APP_URL ?? 'http://localhost:5173'
+export const APP_URL = import.meta.env.VITE_APP_URL ?? window.location.origin
 
 export const ROUTES = {
   HOME: '/',

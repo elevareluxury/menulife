@@ -15,7 +15,7 @@ interface AuthState {
   signOut: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   role: null,
   loading: true,
@@ -25,12 +25,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   setRole: (role) => set({ role }),
 
   checkAuth: async () => {
-    try {
+    // Don't flash a full-screen spinner on token refreshes — only block on first load
+    if (!get().initialized) {
       set({ loading: true })
+    }
 
+    let timedOut = false
+    const timer = setTimeout(() => {
+      timedOut = true
+      set({ user: null, role: null, loading: false, initialized: true })
+    }, 10_000)
+
+    try {
       const { data: { user } } = await supabase.auth.getUser()
+      if (timedOut) return
 
       if (!user) {
+        clearTimeout(timer)
         set({ user: null, role: null, loading: false, initialized: true })
         return
       }
@@ -41,11 +52,14 @@ export const useAuthStore = create<AuthState>((set) => ({
         .eq('user_id', user.id)
         .maybeSingle()
 
-      const role: UserRole = superAdmin ? 'super_admin' : 'restaurant_owner'
+      if (timedOut) return
+      clearTimeout(timer)
 
+      const role: UserRole = superAdmin ? 'super_admin' : 'restaurant_owner'
       set({ user, role, loading: false, initialized: true })
     } catch {
-      set({ user: null, role: null, loading: false, initialized: true })
+      clearTimeout(timer)
+      if (!timedOut) set({ user: null, role: null, loading: false, initialized: true })
     }
   },
 

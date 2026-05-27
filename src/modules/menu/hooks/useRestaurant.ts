@@ -14,6 +14,11 @@ export function useRestaurant() {
       return
     }
 
+    let active = true
+    const timer = setTimeout(() => {
+      if (active) setLoading(false)
+    }, 10_000)
+
     async function fetchRestaurant() {
       try {
         const { data, error } = await supabase
@@ -22,16 +27,23 @@ export function useRestaurant() {
           .eq('owner_id', user!.id)
           .single()
 
+        if (!active) return
+        clearTimeout(timer)
         if (error) throw error
         setRestaurant(data as Restaurant)
       } catch (error) {
         console.error('Error fetching restaurant:', error)
       } finally {
-        setLoading(false)
+        if (active) setLoading(false)
       }
     }
 
     fetchRestaurant()
+
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
   }, [user])
 
   return { restaurant, loading }

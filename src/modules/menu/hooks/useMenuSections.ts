@@ -2,8 +2,29 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { MenuSection } from '@/types'
 
+const cacheKey = (restaurantId: string) => `ml_menu_sections_${restaurantId}`
+
+function readCache(restaurantId: string): MenuSection[] | null {
+  try {
+    const raw = localStorage.getItem(cacheKey(restaurantId))
+    return raw ? (JSON.parse(raw) as MenuSection[]) : null
+  } catch {
+    return null
+  }
+}
+
+function writeCache(restaurantId: string, data: MenuSection[]) {
+  try {
+    localStorage.setItem(cacheKey(restaurantId), JSON.stringify(data))
+  } catch {
+    // storage quota exceeded — ignore
+  }
+}
+
 export function useMenuSections(restaurantId: string | undefined) {
-  const [sections, setSections] = useState<MenuSection[]>([])
+  const [sections, setSections] = useState<MenuSection[]>(() =>
+    restaurantId ? (readCache(restaurantId) ?? []) : []
+  )
   const [loading, setLoading] = useState(true)
 
   const fetchSections = useCallback(async () => {
@@ -16,9 +37,13 @@ export function useMenuSections(restaurantId: string | undefined) {
         .order('sort_order', { ascending: true })
 
       if (error) throw error
-      setSections((data as MenuSection[]) ?? [])
+      const result = (data as MenuSection[]) ?? []
+      setSections(result)
+      writeCache(restaurantId, result)
     } catch (error) {
       console.error('Error fetching sections:', error)
+      const cached = readCache(restaurantId)
+      if (cached) setSections(cached)
     } finally {
       setLoading(false)
     }
@@ -28,6 +53,12 @@ export function useMenuSections(restaurantId: string | undefined) {
     if (!restaurantId) {
       setLoading(false)
       return
+    }
+
+    const cached = readCache(restaurantId)
+    if (cached) {
+      setSections(cached)
+      setLoading(false)
     }
 
     fetchSections()

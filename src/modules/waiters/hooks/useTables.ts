@@ -10,7 +10,15 @@ export function useTables(restaurantId: string | undefined) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!restaurantId) return
+    if (!restaurantId) {
+      setLoading(false)
+      return
+    }
+
+    let active = true
+    const timer = setTimeout(() => {
+      if (active) setLoading(false)
+    }, 10_000)
 
     async function fetchTables() {
       try {
@@ -20,12 +28,14 @@ export function useTables(restaurantId: string | undefined) {
           .eq('restaurant_id', restaurantId)
           .order('table_number')
 
+        if (!active) return
+        clearTimeout(timer)
         if (error) throw error
         setTables(data ?? [])
       } catch (error) {
         console.error('Error fetching tables:', error)
       } finally {
-        setLoading(false)
+        if (active) setLoading(false)
       }
     }
 
@@ -40,7 +50,11 @@ export function useTables(restaurantId: string | undefined) {
       )
       .subscribe()
 
-    return () => { channel.unsubscribe() }
+    return () => {
+      active = false
+      clearTimeout(timer)
+      channel.unsubscribe()
+    }
   }, [restaurantId])
 
   return { tables, loading }

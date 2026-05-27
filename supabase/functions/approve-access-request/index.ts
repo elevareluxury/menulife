@@ -129,7 +129,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Send magic link email
-    const siteUrl = Deno.env.get('SITE_URL') ?? 'http://localhost:5173'
+    const siteUrl = Deno.env.get('SITE_URL') ?? 'https://menulife.app'
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: request.email,

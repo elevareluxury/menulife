@@ -21,6 +21,7 @@ import { BusinessSettings } from '@/modules/settings/pages/BusinessSettings'
 import { AccessRequestPage } from '@/modules/access-request/pages/AccessRequestPage'
 import { OnboardingFlow } from '@/modules/onboarding/pages/OnboardingFlow'
 import { OrderTracking } from '@/modules/public/pages/OrderTracking'
+import { AuthCallback } from '@/pages/AuthCallback'
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/solicitar-acceso" element={<AccessRequestPage />} />
         <Route path="/onboarding" element={<OnboardingFlow />} />
         <Route path="/dashboard" element={<DashboardPage />}>
@@ -51,6 +53,8 @@ function App() {
         <Route path="/waiter/:slug/dashboard" element={<WaiterDashboard />} />
         <Route path="/waiter/:slug/table/:tableNumber" element={<TableBill />} />
         <Route path="/super-admin/*" element={<SuperAdminPage />} />
+        {/* Alias sin guión — por si alguien tipea /superadmin */}
+        <Route path="/superadmin/*" element={<Navigate to="/super-admin" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

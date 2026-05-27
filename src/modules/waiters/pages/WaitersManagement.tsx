@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, UserCheck, UserX } from 'lucide-react'
+import { Plus, Edit, Trash2, UserCheck, UserX, Copy, MessageCircle, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
@@ -14,6 +14,53 @@ import type { Waiter } from '@/types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
+
+function WaiterLinkBanner({ slug }: { slug: string }) {
+  const url = `${window.location.origin}/waiter/${slug}/login`
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(url)
+    toast.success('Link copiado')
+  }
+
+  const shareWhatsApp = () => {
+    const text = encodeURIComponent(`Ingresá a MenuLife: ${url}`)
+    window.open(`https://wa.me/?text=${text}`, '_blank')
+  }
+
+  return (
+    <Card className="mb-6 border-2" style={{ borderColor: '#6366f1', backgroundColor: '#eef2ff' }}>
+      <div className="flex items-start gap-3 p-1">
+        <Smartphone className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#4f46e5' }} />
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm mb-1" style={{ color: '#3730a3' }}>
+            Link para tus mozos
+          </p>
+          <p className="text-xs mb-3" style={{ color: '#4338ca' }}>
+            Pasales este link para que ingresen. Cada uno selecciona su nombre e ingresa su PIN.
+          </p>
+          <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-indigo-200">
+            <span className="text-xs text-gray-700 truncate flex-1 font-mono">{url}</span>
+            <button
+              onClick={copy}
+              className="shrink-0 flex items-center gap-1 text-xs font-medium px-2 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+            >
+              <Copy className="w-3 h-3" />
+              Copiar
+            </button>
+          </div>
+          <button
+            onClick={shareWhatsApp}
+            className="mt-2 flex items-center gap-1.5 text-xs font-medium text-green-700 hover:text-green-800 transition-colors"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            Compartir por WhatsApp
+          </button>
+        </div>
+      </div>
+    </Card>
+  )
+}
 
 export function WaitersManagement() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
@@ -65,6 +112,9 @@ export function WaitersManagement() {
           Nuevo Mozo
         </Button>
       </div>
+
+      {/* Banner con link para mozos */}
+      {restaurant?.slug && <WaiterLinkBanner slug={restaurant.slug} />}
 
       {waiters.length === 0 ? (
         <Card>

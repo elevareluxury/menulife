@@ -19,6 +19,16 @@ export function LoginPage() {
             Solicitar acceso
           </Link>
         </p>
+
+        {/* Acceso superadmin — discreto al pie */}
+        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+          <p className="text-xs text-gray-400">
+            ¿Sos del equipo MenuLife?{' '}
+            <Link to="/super-admin" className="text-gray-400 hover:text-gray-600 underline underline-offset-2">
+              Acceder como admin →
+            </Link>
+          </p>
+        </div>
       </Card>
     </div>
   )
