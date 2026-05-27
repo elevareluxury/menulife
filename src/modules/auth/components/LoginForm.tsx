@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -58,15 +58,26 @@ export function LoginForm() {
         required
         autoComplete="email"
       />
-      <Input
-        type="password"
-        label="Contraseña"
-        placeholder="••••••••"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        autoComplete="current-password"
-      />
+      <div>
+        <Input
+          type="password"
+          label="Contraseña"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="current-password"
+        />
+        <div className="flex justify-end mt-1">
+          <Link
+            to="/forgot-password"
+            className="text-sm hover:underline"
+            style={{ color: '#FF6B7A' }}
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
+      </div>
       <Button type="submit" className="w-full" isLoading={loading}>
         Iniciar sesión
       </Button>

@@ -22,6 +22,8 @@ import { AccessRequestPage } from '@/modules/access-request/pages/AccessRequestP
 import { OnboardingFlow } from '@/modules/onboarding/pages/OnboardingFlow'
 import { OrderTracking } from '@/modules/public/pages/OrderTracking'
 import { AuthCallback } from '@/pages/AuthCallback'
+import { ForgotPassword } from '@/pages/ForgotPassword'
+import { ResetPassword } from '@/pages/ResetPassword'
 
 function App() {
   return (
@@ -34,7 +36,9 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/auth/callback"    element={<AuthCallback />} />
+        <Route path="/forgot-password"  element={<ForgotPassword />} />
+        <Route path="/reset-password"   element={<ResetPassword />} />
         <Route path="/solicitar-acceso" element={<AccessRequestPage />} />
         <Route path="/onboarding" element={<OnboardingFlow />} />
         <Route path="/dashboard" element={<DashboardPage />}>
