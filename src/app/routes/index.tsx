@@ -1,11 +1,18 @@
+import { useState, useEffect } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { Spinner } from '@/components/ui/Spinner'
 
 export function ProtectedRoute({ superAdminOnly = false }: { superAdminOnly?: boolean }) {
   const { user, role, initialized } = useAuthStore()
+  const [timedOut, setTimedOut] = useState(false)
 
-  if (!initialized) {
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 5_000)
+    return () => clearTimeout(t)
+  }, [])
+
+  if (!initialized && !timedOut) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner size="lg" />
@@ -21,8 +28,14 @@ export function ProtectedRoute({ superAdminOnly = false }: { superAdminOnly?: bo
 
 export function PublicRoute() {
   const { user, role, initialized } = useAuthStore()
+  const [timedOut, setTimedOut] = useState(false)
 
-  if (!initialized) {
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 5_000)
+    return () => clearTimeout(t)
+  }, [])
+
+  if (!initialized && !timedOut) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner size="lg" />

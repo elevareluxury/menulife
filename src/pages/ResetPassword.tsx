@@ -149,10 +149,11 @@ export function ResetPassword() {
       const { error: authError } = await supabase.auth.updateUser({ password })
       if (authError) throw authError
       toast.success('Contraseña actualizada')
-      navigate('/dashboard', { replace: true })
+      // Sign out then redirect — avoids session-state race when landing on dashboard
+      await supabase.auth.signOut()
+      navigate('/login?message=Contraseña+actualizada+correctamente', { replace: true })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al actualizar. Intentá de nuevo.')
-    } finally {
       setLoading(false)
     }
   }

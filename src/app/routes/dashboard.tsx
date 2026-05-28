@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
@@ -11,8 +12,14 @@ export { DashboardHome } from '@/modules/dashboard/pages/DashboardHome'
 export function DashboardPage() {
   const { loading, initialized, isAuthenticated } = useAuth()
   const { restaurant, loading: restaurantLoading } = useRestaurant()
+  const [timedOut, setTimedOut] = useState(false)
 
-  if (!initialized || loading) {
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 5_000)
+    return () => clearTimeout(t)
+  }, [])
+
+  if ((!initialized || loading) && !timedOut) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-1">
         <Spinner size="lg" />

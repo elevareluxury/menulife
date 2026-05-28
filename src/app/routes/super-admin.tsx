@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { Spinner } from '@/components/ui/Spinner'
@@ -9,9 +10,15 @@ import { MetricasTab } from '@/modules/super-admin/pages/MetricasTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
-  const { loading, isAuthenticated, isSuperAdmin } = useAuth()
+  const { loading, initialized, isAuthenticated, isSuperAdmin } = useAuth()
+  const [timedOut, setTimedOut] = useState(false)
 
-  if (loading) {
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 5_000)
+    return () => clearTimeout(t)
+  }, [])
+
+  if ((!initialized || loading) && !timedOut) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0F1115' }}>
         <Spinner size="lg" />

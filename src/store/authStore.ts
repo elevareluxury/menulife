@@ -15,7 +15,7 @@ interface AuthState {
   signOut: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   role: null,
   loading: true,
@@ -25,46 +25,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setRole: (role) => set({ role }),
 
   checkAuth: async () => {
-    // Only show the full-screen spinner on the very first load
-    if (!get().initialized) {
-      set({ loading: true })
-    }
-
-    let timedOut = false
-    const timer = setTimeout(() => {
-      timedOut = true
-      set({ user: null, role: null, loading: false, initialized: true })
-    }, 10_000)
-
+    // Pure role resolver — never touches loading state.
+    // useAuth hook owns loading; this only fills in the role after session is confirmed.
     try {
-      // getSession() reads from localStorage — fast, no network round-trip.
-      // This unblocks route guards immediately instead of waiting for getUser().
       const { data: { session } } = await supabase.auth.getSession()
-      if (timedOut) return
+      if (!session?.user) return
 
-      if (!session?.user) {
-        clearTimeout(timer)
-        set({ user: null, role: null, loading: false, initialized: true })
-        return
-      }
-
-      // Unblock UI right away — user is authenticated
-      set({ user: session.user, loading: false, initialized: true })
-
-      // Role check in background — doesn't delay rendering
       const { data: superAdmin } = await supabase
         .from('super_admins')
         .select('id')
         .eq('user_id', session.user.id)
         .maybeSingle()
 
-      if (timedOut) return
-      clearTimeout(timer)
-
       set({ role: superAdmin ? 'super_admin' : 'restaurant_owner' })
     } catch {
-      clearTimeout(timer)
-      if (!timedOut) set({ user: null, role: null, loading: false, initialized: true })
+      // Silently fail — role defaults stay, not worth blocking anything
     }
   },
 

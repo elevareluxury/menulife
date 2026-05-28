@@ -3,54 +3,68 @@ import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 
 export function useAuth() {
-  const { user, role, loading, initialized, checkAuth, signOut } = useAuthStore()
+  const store = useAuthStore()
 
   useEffect(() => {
-    // Safety timeout — loading can never stay true beyond 10 s
-    const timeout = setTimeout(() => {
-      useAuthStore.setState({ loading: false, initialized: true })
-    }, 10_000)
+    let mounted = true
 
-    // Kick off the initial auth check (reads from localStorage via getSession)
-    checkAuth().then(() => clearTimeout(timeout))
+    // Absolute safety net — loading can never stay true beyond 8 seconds
+    const safetyTimeout = setTimeout(() => {
+      if (mounted) useAuthStore.setState({ loading: false, initialized: true })
+    }, 8_000)
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      clearTimeout(timeout)
-
-      if (
-        event === 'SIGNED_IN'      ||
-        event === 'TOKEN_REFRESHED' ||
-        event === 'INITIAL_SESSION'
-      ) {
-        // Set user IMMEDIATELY from the session that comes with the event.
-        // This prevents route guards from seeing user=null after a login
-        // while the async role-check is still in flight.
+    // getSession() reads from localStorage — fast, no network round-trip.
+    // Set loading:false IMMEDIATELY once we know the session state.
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        if (!mounted) return
+        clearTimeout(safetyTimeout)
         useAuthStore.setState({
           user: session?.user ?? null,
           loading: false,
           initialized: true,
         })
-        // Role check runs in the background — doesn't block navigation
-        if (session?.user) await checkAuth()
-      } else if (event === 'SIGNED_OUT') {
-        useAuthStore.setState({ user: null, role: null, loading: false, initialized: true })
+        // Role check runs in background — doesn't block navigation
+        if (session?.user) store.checkAuth()
+      })
+      .catch(() => {
+        if (!mounted) return
+        clearTimeout(safetyTimeout)
+        useAuthStore.setState({ loading: false, initialized: true })
+      })
+
+    // Listen for auth changes — only update user/loading, never set loading:true
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return
+      clearTimeout(safetyTimeout)
+      useAuthStore.setState({
+        user: session?.user ?? null,
+        loading: false,
+        initialized: true,
+      })
+      if (event === 'SIGNED_OUT') {
+        useAuthStore.setState({ role: null })
+      } else if (event === 'SIGNED_IN' && session?.user) {
+        // Role check in background — only on actual sign-in, not INITIAL_SESSION
+        store.checkAuth()
       }
     })
 
     return () => {
-      clearTimeout(timeout)
+      mounted = false
+      clearTimeout(safetyTimeout)
       subscription.unsubscribe()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
-    user,
-    role,
-    loading,
-    initialized,
-    isAuthenticated: !!user,
-    isSuperAdmin: role === 'super_admin',
-    isRestaurantOwner: role === 'restaurant_owner',
-    signOut,
+    user: store.user,
+    role: store.role,
+    loading: store.loading,
+    initialized: store.initialized,
+    isAuthenticated: !!store.user,
+    isSuperAdmin: store.role === 'super_admin',
+    isRestaurantOwner: store.role === 'restaurant_owner',
+    signOut: store.signOut,
   }
 }
