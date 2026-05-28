@@ -1,5 +1,5 @@
 /* === TIPOGRAFÍA (debe preceder a @import "tailwindcss") === */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Geist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700;800;900&family=Geist:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
 
@@ -349,8 +349,18 @@ h1, h2, h3, h4, h5, h6 {
   --ml-gray-200:      #e0ddd8;
   --ml-gray-500:      #8a8780;
   --ml-gray-700:      #3d3c39;
-  --font-syne:        'Syne', sans-serif;
-  --font-jakarta:     'Plus Jakarta Sans', sans-serif;
+  --font-syne:        'Bricolage Grotesque', -apple-system, sans-serif;
+  --font-jakarta:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Landing title letter-spacing (Bricolage Grotesque is wider than Syne) */
+.landing-page h1,
+.landing-page h2,
+[style*="font-syne"] {
+  letter-spacing: -0.025em;
+}
+.hero-title-lg {
+  letter-spacing: -0.04em;
 }
 
 @keyframes ml-shimmer {
@@ -478,21 +488,31 @@ h1, h2, h3, h4, h5, h6 {
 /* =====================================================
    PUBLIC MENU — dark premium design system
    ===================================================== */
+/* Responsive hero height for public menu */
+.menu-hero-header {
+  height: 180px;
+}
+@media (min-width: 768px) {
+  .menu-hero-header {
+    height: 280px;
+  }
+}
+
 .public-menu {
-  --menu-bg:              #0D0D0D;
-  --menu-card:            #111111;
-  --menu-card-elevated:   #1A1A1A;
-  --menu-surface:         #222222;
-  --menu-text-primary:    #F5F5F5;
-  --menu-text-secondary:  #888888;
-  --menu-text-muted:      #555555;
-  --menu-accent:          #FF6B6B;
-  --menu-accent-2:        #FF8E53;
-  --menu-accent-gradient: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  --menu-bg:              #0F1115;
+  --menu-card:            #161B22;
+  --menu-card-elevated:   #1C2330;
+  --menu-surface:         #232C3B;
+  --menu-text-primary:    #F2F4F7;
+  --menu-text-secondary:  #8B9BB4;
+  --menu-text-muted:      #4D5A6E;
+  --menu-accent:          #F4705A;
+  --menu-accent-2:        #F09040;
+  --menu-accent-gradient: linear-gradient(135deg, #F4705A, #F09040);
   --menu-success:         #10B981;
   --menu-rating:          #F59E0B;
-  --menu-border:          rgba(255, 255, 255, 0.06);
-  --menu-border-hover:    rgba(255, 255, 255, 0.12);
+  --menu-border:          rgba(255, 255, 255, 0.07);
+  --menu-border-hover:    rgba(255, 255, 255, 0.14);
   background-color: var(--menu-bg);
   color: var(--menu-text-primary);
   -webkit-font-smoothing: antialiased;

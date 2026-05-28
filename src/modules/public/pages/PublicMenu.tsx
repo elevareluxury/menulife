@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { Search, Globe, DollarSign, ShoppingCart, Bell, X, Receipt } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMenuStore } from '@/store/menuStore'
 import { useCartStore } from '@/store/cartStore'
-import { formatPrice } from '@/lib/utils'
 import { CartSheet } from '../components/CartSheet'
 import { CheckoutModal } from '../components/CheckoutModal'
 import { ItemDetailSheet } from '../components/ItemDetailSheet'
@@ -13,18 +12,31 @@ import { ActiveOrderBanner } from '@/components/tracking/ActiveOrderBanner'
 import toast from 'react-hot-toast'
 import type { Restaurant, MenuSection, MenuItem } from '@/types'
 
-// ─── Tag labels ────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const TAG_ICONS: Record<string, string> = {
-  vegano: '🌱',
-  vegetariano: '🥗',
-  sin_tacc: '🌾',
-  picante: '🌶️',
-  recomendado: '⭐',
-  nuevo: '✨',
+function fmtPrice(amount: number): string {
+  if (Number.isInteger(amount)) return amount.toLocaleString('es-AR')
+  return amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-// ─── Item card ─────────────────────────────────────────────────────────────────
+const BADGE_PRIORITY = ['nuevo', 'recomendado', 'picante', 'sin_tacc', 'vegano', 'vegetariano']
+const BADGE_META: Record<string, { label: string; bg: string; color: string }> = {
+  nuevo:        { label: '✨ Nuevo',       bg: 'rgba(139,92,246,0.16)', color: '#A78BFA' },
+  recomendado:  { label: '⭐ Popular',     bg: 'rgba(245,158,11,0.16)', color: '#FCD34D' },
+  picante:      { label: '🌶️ Picante',    bg: 'rgba(244,112,90,0.16)', color: '#F4705A' },
+  sin_tacc:     { label: '🌾 Sin TACC',   bg: 'rgba(16,185,129,0.14)', color: '#34D399' },
+  vegano:       { label: '🌱 Vegano',     bg: 'rgba(16,185,129,0.14)', color: '#34D399' },
+  vegetariano:  { label: '🥗 Vegetariano', bg: 'rgba(16,185,129,0.14)', color: '#34D399' },
+}
+
+function topBadge(tags: string[]): string | null {
+  for (const b of BADGE_PRIORITY) {
+    if (tags.includes(b)) return b
+  }
+  return null
+}
+
+// ─── ItemCard ─────────────────────────────────────────────────────────────────
 
 function ItemCard({
   item,
@@ -44,53 +56,33 @@ function ItemCard({
   const name  = language === 'EN' && item.name_en        ? item.name_en        : item.name
   const desc  = language === 'EN' && item.description_en ? item.description_en : item.description
   const price = currency === 'ARS' ? item.price_ars : item.price_usd
+  const badge = topBadge(item.tags)
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation()
-    addItem({
-      id:        item.id,
-      name:      item.name,
-      name_en:   item.name_en,
-      price_ars: item.price_ars,
-      price_usd: item.price_usd,
-      image_url: item.image_url,
-    })
+    addItem({ id: item.id, name: item.name, name_en: item.name_en, price_ars: item.price_ars, price_usd: item.price_usd, image_url: item.image_url })
   }
 
   return (
-    <button
+    <motion.button
       onClick={() => onTap(item)}
-      className="w-full text-left flex gap-3 p-3 rounded-2xl transition-colors active:opacity-80"
-      style={{
-        backgroundColor: 'var(--menu-card, #111111)',
-        border: '1px solid var(--menu-border, rgba(255,255,255,0.06))',
-      }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+      className="w-full text-left flex gap-3 p-3 rounded-2xl relative overflow-hidden"
+      style={{ backgroundColor: 'var(--menu-card)', border: '1px solid var(--menu-border)' }}
     >
       {/* Thumbnail */}
-      <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 relative">
+      <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
         {item.image_url ? (
-          <>
-            <img
-              src={item.image_url}
-              alt={name}
-              loading="lazy"
-              className="w-full h-full object-cover"
-            />
-            {cartQty > 0 && (
-              <div
-                className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
-                style={{ background: 'var(--menu-accent-gradient, linear-gradient(135deg,#FF6B6B,#FF8E53))' }}
-              >
-                {cartQty}
-              </div>
-            )}
-          </>
+          <img src={item.image_url} alt={name} loading="lazy" className="w-full h-full object-cover" />
         ) : (
-          <div
-            className="w-full h-full flex items-center justify-center"
-            style={{ backgroundColor: 'var(--menu-card-elevated, #1A1A1A)' }}
-          >
-            <span className="text-3xl" style={{ filter: 'grayscale(1)', opacity: 0.18 }}>🍽️</span>
+          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--menu-card-elevated)' }}>
+            <span className="text-3xl opacity-20">🍽️</span>
+          </div>
+        )}
+        {cartQty > 0 && (
+          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <span className="text-white text-xl font-bold">{cartQty}</span>
           </div>
         )}
       </div>
@@ -98,70 +90,48 @@ function ItemCard({
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
         <div>
-          <p
-            className="text-[1rem] font-bold leading-tight line-clamp-1"
-            style={{ color: 'var(--menu-text-primary, #F5F5F5)' }}
-          >
+          {badge && (
+            <div
+              className="inline-flex items-center text-[0.625rem] font-bold px-1.5 py-0.5 rounded-full mb-1"
+              style={{ backgroundColor: BADGE_META[badge].bg, color: BADGE_META[badge].color }}
+            >
+              {BADGE_META[badge].label}
+            </div>
+          )}
+          <p className="text-[0.9375rem] font-bold leading-tight line-clamp-1" style={{ color: 'var(--menu-text-primary)' }}>
             {name}
           </p>
           {desc && (
-            <p
-              className="text-[0.8125rem] line-clamp-2 mt-0.5 leading-snug"
-              style={{ color: 'var(--menu-text-muted, #555555)' }}
-            >
+            <p className="text-[0.75rem] line-clamp-2 mt-0.5 leading-snug" style={{ color: 'var(--menu-text-muted)' }}>
               {desc}
             </p>
           )}
         </div>
 
-        {/* Price + tags + add button */}
         <div className="flex items-end justify-between mt-2">
-          <div>
-            <p
-              className="text-[1.0625rem] font-bold"
-              style={{ color: 'var(--menu-accent, #FF6B6B)' }}
-            >
-              {formatPrice(price, currency)}
-            </p>
-            {item.tags.length > 0 && (
-              <div className="flex gap-1 mt-1">
-                {item.tags.slice(0, 3).map(tag => (
-                  <span key={tag} className="text-xs" style={{ color: 'var(--menu-text-muted, #555555)' }}>
-                    {TAG_ICONS[tag] ?? tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+          <p className="text-[1rem] font-bold" style={{ color: 'var(--menu-accent)' }}>
+            ${fmtPrice(price)}
+          </p>
 
           {cartQty > 0 ? (
             <div
               className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl"
-              style={{ backgroundColor: 'rgba(255,107,107,0.12)' }}
+              style={{ backgroundColor: 'rgba(244,112,90,0.12)' }}
               onClick={e => e.stopPropagation()}
             >
               <button
                 onClick={e => { e.stopPropagation(); updateQuantity(item.id, cartQty - 1) }}
-                className="w-5 h-5 flex items-center justify-center rounded-md text-xs font-bold"
-                style={{ color: 'var(--menu-accent, #FF6B6B)' }}
-              >
-                −
-              </button>
-              <span
-                className="text-sm font-bold w-4 text-center"
-                style={{ color: 'var(--menu-accent, #FF6B6B)' }}
-              >
-                {cartQty}
-              </span>
+                className="w-6 h-6 flex items-center justify-center rounded-lg text-sm font-bold"
+                style={{ color: 'var(--menu-accent)' }}
+              >−</button>
+              <span className="text-sm font-bold w-4 text-center" style={{ color: 'var(--menu-accent)' }}>{cartQty}</span>
               <motion.button
                 whileTap={{ scale: 0.82 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 12 }}
                 onClick={e => { e.stopPropagation(); updateQuantity(item.id, cartQty + 1) }}
-                className="w-5 h-5 flex items-center justify-center rounded-md text-xs font-bold"
-                style={{ color: 'var(--menu-accent, #FF6B6B)' }}
-              >
-                +
-              </motion.button>
+                className="w-6 h-6 flex items-center justify-center rounded-lg text-sm font-bold"
+                style={{ color: 'var(--menu-accent)' }}
+              >+</motion.button>
             </div>
           ) : (
             <motion.button
@@ -169,18 +139,99 @@ function ItemCard({
               transition={{ type: 'spring', stiffness: 500, damping: 12 }}
               onClick={handleAdd}
               className="w-8 h-8 flex items-center justify-center rounded-xl text-white font-bold text-lg leading-none"
-              style={{ background: 'var(--menu-accent-gradient, linear-gradient(135deg,#FF6B6B,#FF8E53))' }}
-            >
-              +
-            </motion.button>
+              style={{ background: 'var(--menu-accent-gradient)' }}
+            >+</motion.button>
           )}
         </div>
       </div>
-    </button>
+    </motion.button>
   )
 }
 
-// ─── Main component ────────────────────────────────────────────────────────────
+// ─── FeaturedRow ──────────────────────────────────────────────────────────────
+
+function FeaturedRow({
+  items,
+  language,
+  currency,
+  onTap,
+}: {
+  items: MenuItem[]
+  language: 'ES' | 'EN'
+  currency: 'ARS' | 'USD'
+  onTap: (item: MenuItem) => void
+}) {
+  const { addItem, items: cartItems } = useCartStore()
+  if (items.length === 0) return null
+
+  return (
+    <div className="mb-6">
+      <p
+        className="text-xs font-bold uppercase tracking-widest px-4 mb-3"
+        style={{ color: 'var(--menu-text-muted)', letterSpacing: '0.1em' }}
+      >
+        ⭐ {language === 'ES' ? 'Destacados' : 'Featured'}
+      </p>
+      <div className="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
+        {items.map(item => {
+          const inCart = cartItems.find(i => i.id === item.id)?.quantity ?? 0
+          const name  = language === 'EN' && item.name_en ? item.name_en : item.name
+          const price = currency === 'ARS' ? item.price_ars : item.price_usd
+
+          return (
+            <motion.button
+              key={item.id}
+              onClick={() => onTap(item)}
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              className="flex-shrink-0 rounded-2xl overflow-hidden text-left relative"
+              style={{
+                width: 144,
+                scrollSnapAlign: 'start',
+                backgroundColor: 'var(--menu-card)',
+                border: '1px solid var(--menu-border)',
+              }}
+            >
+              <div className="relative" style={{ height: 112 }}>
+                {item.image_url ? (
+                  <img src={item.image_url} alt={name} loading="lazy" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: 'var(--menu-card-elevated)' }}>
+                    <span className="text-4xl opacity-20">🍽️</span>
+                  </div>
+                )}
+                {inCart > 0 && (
+                  <div
+                    className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
+                    style={{ background: 'var(--menu-accent-gradient)' }}
+                  >{inCart}</div>
+                )}
+              </div>
+              <div className="p-2.5 pb-2">
+                <p className="text-[0.8125rem] font-semibold line-clamp-1 mb-0.5" style={{ color: 'var(--menu-text-primary)' }}>
+                  {name}
+                </p>
+                <p className="text-[0.8125rem] font-bold" style={{ color: 'var(--menu-accent)' }}>
+                  ${fmtPrice(price)}
+                </p>
+              </div>
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  addItem({ id: item.id, name: item.name, name_en: item.name_en, price_ars: item.price_ars, price_usd: item.price_usd, image_url: item.image_url })
+                }}
+                className="absolute bottom-2.5 right-2.5 w-7 h-7 rounded-xl flex items-center justify-center text-white font-bold text-base"
+                style={{ background: 'var(--menu-accent-gradient)' }}
+              >+</button>
+            </motion.button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export function PublicMenu() {
   const { slug } = useParams()
@@ -188,27 +239,31 @@ export function PublicMenu() {
   const { getItemCount, getTotal } = useCartStore()
   const itemCount = getItemCount()
 
-  const [restaurant, setRestaurant]       = useState<Restaurant | null>(null)
-  const [sections, setSections]           = useState<MenuSection[]>([])
-  const [items, setItems]                 = useState<MenuItem[]>([])
-  const [loading, setLoading]             = useState(true)
-  const [searchQuery, setSearchQuery]     = useState('')
-  const [activeFilters, setActiveFilters] = useState<string[]>([])
+  const [restaurant, setRestaurant]           = useState<Restaurant | null>(null)
+  const [sections, setSections]               = useState<MenuSection[]>([])
+  const [items, setItems]                     = useState<MenuItem[]>([])
+  const [loading, setLoading]                 = useState(true)
+  const [searchQuery, setSearchQuery]         = useState('')
+  const [activeFilters, setActiveFilters]     = useState<string[]>([])
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null)
+  const [scrolled, setScrolled]               = useState(false)
 
-  const [isCartOpen,      setIsCartOpen]      = useState(false)
-  const [isCheckoutOpen,  setIsCheckoutOpen]  = useState(false)
-  const [detailItem,      setDetailItem]      = useState<MenuItem | null>(null)
-  const [isDetailOpen,    setIsDetailOpen]    = useState(false)
+  const [isCartOpen,     setIsCartOpen]     = useState(false)
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const [detailItem,     setDetailItem]     = useState<MenuItem | null>(null)
+  const [isDetailOpen,   setIsDetailOpen]   = useState(false)
 
-  const [callingWaiter, setCallingWaiter]     = useState(false)
-  const [requestingBill, setRequestingBill]   = useState(false)
-  const [billRequested, setBillRequested]     = useState(false)
+  const [callingWaiter,  setCallingWaiter]  = useState(false)
+  const [requestingBill, setRequestingBill] = useState(false)
+  const [billRequested,  setBillRequested]  = useState(false)
   const mesaParam = new URLSearchParams(window.location.search).get('mesa')
-  const prevItemCount = useRef(itemCount)
 
-  // Cart icon wiggle when item added
+  const prevItemCount = useRef(itemCount)
   const [cartWiggle, setCartWiggle] = useState(false)
+
+  const { scrollY } = useScroll()
+  useMotionValueEvent(scrollY, 'change', v => setScrolled(v > 130))
+
   useEffect(() => {
     if (itemCount > prevItemCount.current) {
       setCartWiggle(true)
@@ -217,7 +272,7 @@ export function PublicMenu() {
     prevItemCount.current = itemCount
   }, [itemCount])
 
-  // ── Fetch data ──────────────────────────────────────────────────────────────
+  // ── Fetch data ───────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!slug) { setLoading(false); return }
 
@@ -264,8 +319,7 @@ export function PublicMenu() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any
       const { data: tableData } = await db
-        .from('tables')
-        .select('id, waiter_id')
+        .from('tables').select('id, waiter_id')
         .eq('restaurant_id', restaurant.id)
         .eq('table_number', mesaParam)
         .maybeSingle()
@@ -286,7 +340,7 @@ export function PublicMenu() {
     }
   }
 
-  // ── Waiter call ─────────────────────────────────────────────────────────────
+  // ── Waiter call ──────────────────────────────────────────────────────────────
   const handleCallWaiter = async () => {
     if (!restaurant || !mesaParam || callingWaiter) return
     setCallingWaiter(true)
@@ -294,8 +348,7 @@ export function PublicMenu() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any
       const { data: tableData } = await db
-        .from('tables')
-        .select('id, waiter_id')
+        .from('tables').select('id, waiter_id')
         .eq('restaurant_id', restaurant.id)
         .eq('table_number', mesaParam)
         .maybeSingle()
@@ -314,7 +367,7 @@ export function PublicMenu() {
     }
   }
 
-  // ── Filtering ───────────────────────────────────────────────────────────────
+  // ── Filtering ─────────────────────────────────────────────────────────────────
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f])
 
@@ -327,29 +380,25 @@ export function PublicMenu() {
       item.name.toLowerCase().includes(q) ||
       (item.name_en?.toLowerCase().includes(q) ?? false) ||
       (item.description?.toLowerCase().includes(q) ?? false)
-    const matchFilters =
-      activeFilters.length === 0 || activeFilters.every(f => item.tags.includes(f))
+    const matchFilters = activeFilters.length === 0 || activeFilters.every(f => item.tags.includes(f))
     return matchSearch && matchFilters
   })
 
-  // ── Open detail sheet ───────────────────────────────────────────────────────
   const openDetail = (item: MenuItem) => {
     setDetailItem(item)
     setIsDetailOpen(true)
   }
 
-  // ── Loading ─────────────────────────────────────────────────────────────────
+  // ── Loading ───────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="public-menu min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div
-            className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin"
-            style={{ borderColor: 'var(--menu-accent, #FF6B6B)', borderTopColor: 'transparent' }}
+            className="w-10 h-10 rounded-full border-2 animate-spin"
+            style={{ borderColor: 'var(--menu-accent)', borderTopColor: 'transparent' }}
           />
-          <p className="text-sm" style={{ color: 'var(--menu-text-muted, #555555)' }}>
-            Cargando menú...
-          </p>
+          <p className="text-sm" style={{ color: 'var(--menu-text-muted)' }}>Cargando menú...</p>
         </div>
       </div>
     )
@@ -360,117 +409,165 @@ export function PublicMenu() {
       <div className="public-menu min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-5xl mb-3">🍽️</p>
-          <p style={{ color: 'var(--menu-text-secondary, #888888)' }}>
-            Restaurante no encontrado
-          </p>
+          <p style={{ color: 'var(--menu-text-secondary)' }}>Restaurante no encontrado</p>
         </div>
       </div>
     )
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────────
-
-  const filters = [
+  // ── Computed ──────────────────────────────────────────────────────────────────
+  const FILTERS = [
     { key: 'vegano',      label: '🌱 Vegano'      },
     { key: 'vegetariano', label: '🥗 Vegetariano' },
     { key: 'sin_tacc',    label: '🌾 Sin TACC'    },
+    { key: 'picante',     label: '🌶️ Picante'     },
   ]
 
-  // Groups for "Todos" view
+  const accentColor = restaurant.menu_accent_color ?? '#F4705A'
+  const featuredItems = items.filter(i => i.is_available && i.tags.includes('recomendado'))
   const sectionGroups = sections
-    .map(sec => ({
-      section: sec,
-      items: filteredItems.filter(i => i.section_id === sec.id),
-    }))
+    .map(sec => ({ section: sec, items: filteredItems.filter(i => i.section_id === sec.id) }))
     .filter(g => g.items.length > 0)
 
-  const restName = restaurant.name
+  const menuVars = {
+    '--menu-accent': accentColor,
+    '--menu-accent-gradient': `linear-gradient(135deg, ${accentColor}, #F09040)`,
+  } as React.CSSProperties
 
   return (
-    <div className="public-menu min-h-screen" style={{ backgroundColor: 'var(--menu-bg, #0D0D0D)' }}>
+    <div className="public-menu min-h-screen" style={menuVars}>
 
-      {/* ── Sticky header ─────────────────────────────────────────────────── */}
-      <header
-        className="sticky top-0 z-30"
-        style={{
-          backgroundColor: 'rgba(13,13,13,0.92)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid var(--menu-border, rgba(255,255,255,0.06))',
-        }}
-      >
-        {/* Row 1: Logo + name + toggles */}
-        <div className="flex items-center justify-between px-4 pt-3 pb-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {restaurant.logo_url && (
-              <img
-                src={restaurant.logo_url}
-                alt={restName}
-                className="w-8 h-8 rounded-xl object-cover flex-shrink-0"
-              />
+      {/* ── Hero (180px mobile / 280px desktop, document flow, scrolls away) ── */}
+      <div className="relative menu-hero-header">
+        {restaurant.cover_image_url ? (
+          <img
+            src={restaurant.cover_image_url}
+            alt={restaurant.name}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(135deg, #0F1115 0%, #1a2035 100%)' }}
+          />
+        )}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to bottom, rgba(15,17,21,0.25) 0%, rgba(15,17,21,0.88) 100%)' }}
+        />
+        {/* Restaurant info overlay */}
+        <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 flex items-end gap-3">
+          {restaurant.logo_url && (
+            <img
+              src={restaurant.logo_url}
+              alt={restaurant.name}
+              className="w-14 h-14 rounded-2xl object-cover flex-shrink-0"
+              style={{ border: '2px solid rgba(255,255,255,0.15)' }}
+            />
+          )}
+          <div className="flex-1 min-w-0 pb-0.5">
+            <h1 className="font-bold text-white text-xl leading-tight truncate">{restaurant.name}</h1>
+            {mesaParam && (
+              <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Mesa {mesaParam}</p>
             )}
-            <h1
-              className="font-bold truncate"
-              style={{ fontSize: '1.125rem', color: 'var(--menu-text-primary, #F5F5F5)' }}
-            >
-              {restName}
-            </h1>
           </div>
-
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => setLanguage(language === 'ES' ? 'EN' : 'ES')}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-opacity active:opacity-60"
-              style={{
-                backgroundColor: 'var(--menu-card-elevated, #1A1A1A)',
-                color: 'var(--menu-text-secondary, #888888)',
-              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
+              style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)' }}
             >
-              <Globe className="w-3 h-3" />
-              {language}
+              <Globe className="w-3 h-3" />{language}
             </button>
             <button
               onClick={() => setCurrency(currency === 'ARS' ? 'USD' : 'ARS')}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-opacity active:opacity-60"
-              style={{
-                backgroundColor: 'var(--menu-card-elevated, #1A1A1A)',
-                color: 'var(--menu-text-secondary, #888888)',
-              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
+              style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)' }}
             >
-              <DollarSign className="w-3 h-3" />
-              {currency}
+              <DollarSign className="w-3 h-3" />{currency}
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Row 2: Search */}
-        <div className="px-4 pb-2">
-          <div
-            className="flex items-center gap-2 px-3 py-2.5 rounded-2xl"
+      {/* ── Collapsing header (fixed, appears when hero scrolled away) ───── */}
+      <AnimatePresence>
+        {scrolled && (
+          <motion.div
+            key="collapsed-header"
+            initial={{ y: -64 }}
+            animate={{ y: 0 }}
+            exit={{ y: -64 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+            className="fixed top-0 left-0 right-0 z-50 flex items-center gap-2.5 px-4"
             style={{
-              backgroundColor: 'var(--menu-card-elevated, #1A1A1A)',
-              border: '1px solid var(--menu-border, rgba(255,255,255,0.06))',
+              height: 52,
+              backgroundColor: 'rgba(15,17,21,0.95)',
+              backdropFilter: 'blur(20px)',
+              borderBottom: '1px solid var(--menu-border)',
             }}
           >
-            <Search className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--menu-text-muted, #555555)' }} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder={language === 'ES' ? 'Buscar platos...' : 'Search dishes...'}
-              className="flex-1 bg-transparent outline-none text-sm"
-              style={{ color: 'var(--menu-text-primary, #F5F5F5)', fontSize: '16px' }}
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')}>
-                <X className="w-4 h-4" style={{ color: 'var(--menu-text-muted, #555555)' }} />
-              </button>
+            {restaurant.logo_url && (
+              <img src={restaurant.logo_url} alt={restaurant.name} className="w-7 h-7 rounded-xl object-cover flex-shrink-0" />
             )}
-          </div>
-        </div>
+            <span className="font-bold text-sm flex-1 truncate" style={{ color: 'var(--menu-text-primary)' }}>
+              {restaurant.name}
+            </span>
+            {mesaParam && (
+              <span
+                className="text-xs px-2 py-1 rounded-lg"
+                style={{ backgroundColor: 'var(--menu-card-elevated)', color: 'var(--menu-text-secondary)' }}
+              >
+                Mesa {mesaParam}
+              </span>
+            )}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setLanguage(language === 'ES' ? 'EN' : 'ES')}
+                className="px-2 py-1 rounded-lg text-xs font-semibold"
+                style={{ backgroundColor: 'var(--menu-card-elevated)', color: 'var(--menu-text-secondary)' }}
+              >{language}</button>
+              <button
+                onClick={() => setCurrency(currency === 'ARS' ? 'USD' : 'ARS')}
+                className="px-2 py-1 rounded-lg text-xs font-semibold"
+                style={{ backgroundColor: 'var(--menu-card-elevated)', color: 'var(--menu-text-secondary)' }}
+              >{currency}</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Row 3: Filter pills */}
-        <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide">
-          {filters.map(({ key, label }) => {
+      {/* ── Sticky search + filter bar ───────────────────────────────────── */}
+      <div
+        className="sticky z-30 px-4 pt-3 pb-2.5"
+        style={{
+          top: 0,
+          backgroundColor: 'rgba(15,17,21,0.95)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid var(--menu-border)',
+        }}
+      >
+        <div
+          className="flex items-center gap-2 px-3 py-2.5 rounded-2xl mb-2.5"
+          style={{ backgroundColor: 'var(--menu-card-elevated)', border: '1px solid var(--menu-border)' }}
+        >
+          <Search className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--menu-text-muted)' }} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder={language === 'ES' ? 'Buscar platos...' : 'Search dishes...'}
+            className="flex-1 bg-transparent outline-none text-sm"
+            style={{ color: 'var(--menu-text-primary)', fontSize: '16px' }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')}>
+              <X className="w-4 h-4" style={{ color: 'var(--menu-text-muted)' }} />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+          {FILTERS.map(({ key, label }) => {
             const active = activeFilters.includes(key)
             return (
               <button
@@ -478,49 +575,41 @@ export function PublicMenu() {
                 onClick={() => toggleFilter(key)}
                 className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 transition-all active:scale-95"
                 style={{
-                  backgroundColor: active ? 'rgba(255,107,107,0.15)' : 'var(--menu-card-elevated, #1A1A1A)',
-                  color: active ? 'var(--menu-accent, #FF6B6B)' : 'var(--menu-text-secondary, #888888)',
-                  border: `1px solid ${active ? 'rgba(255,107,107,0.3)' : 'var(--menu-border, rgba(255,255,255,0.06))'}`,
+                  backgroundColor: active ? 'rgba(244,112,90,0.14)' : 'var(--menu-card-elevated)',
+                  color: active ? 'var(--menu-accent)' : 'var(--menu-text-secondary)',
+                  border: `1px solid ${active ? 'rgba(244,112,90,0.3)' : 'var(--menu-border)'}`,
                 }}
-              >
-                {label}
-              </button>
+              >{label}</button>
             )
           })}
         </div>
-      </header>
+      </div>
 
-      {/* ── Category tabs ──────────────────────────────────────────────────── */}
+      {/* ── Category tabs ────────────────────────────────────────────────── */}
       {sections.length > 1 && (
         <div
           className="sticky z-20 flex gap-1 overflow-x-auto px-4 py-2 scrollbar-hide"
           style={{
-            top: 'auto',
-            backgroundColor: 'rgba(13,13,13,0.92)',
+            top: 0,
+            backgroundColor: 'rgba(15,17,21,0.95)',
             backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid var(--menu-border, rgba(255,255,255,0.06))',
+            borderBottom: '1px solid var(--menu-border)',
           }}
         >
-          {/* "Todos" tab */}
           <button
             onClick={() => setActiveSectionId(null)}
-            className="px-4 py-2 rounded-xl text-[0.9375rem] font-semibold whitespace-nowrap flex-shrink-0 transition-all relative"
-            style={{
-              color: activeSectionId === null
-                ? 'var(--menu-accent, #FF6B6B)'
-                : 'var(--menu-text-secondary, #888888)',
-            }}
+            className="px-4 py-2 text-[0.875rem] font-semibold whitespace-nowrap flex-shrink-0 relative transition-colors"
+            style={{ color: activeSectionId === null ? 'var(--menu-accent)' : 'var(--menu-text-secondary)' }}
           >
             {language === 'ES' ? 'Todos' : 'All'}
             {activeSectionId === null && (
               <motion.div
                 layoutId="tab-indicator"
                 className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
-                style={{ backgroundColor: 'var(--menu-accent, #FF6B6B)' }}
+                style={{ backgroundColor: 'var(--menu-accent)' }}
               />
             )}
           </button>
-
           {sections.map(sec => {
             const label = language === 'EN' && sec.name_en ? sec.name_en : sec.name
             const isActive = activeSectionId === sec.id
@@ -528,19 +617,15 @@ export function PublicMenu() {
               <button
                 key={sec.id}
                 onClick={() => setActiveSectionId(isActive ? null : sec.id)}
-                className="px-4 py-2 rounded-xl text-[0.9375rem] font-semibold whitespace-nowrap flex-shrink-0 transition-all relative"
-                style={{
-                  color: isActive
-                    ? 'var(--menu-accent, #FF6B6B)'
-                    : 'var(--menu-text-secondary, #888888)',
-                }}
+                className="px-4 py-2 text-[0.875rem] font-semibold whitespace-nowrap flex-shrink-0 relative transition-colors"
+                style={{ color: isActive ? 'var(--menu-accent)' : 'var(--menu-text-secondary)' }}
               >
                 {label}
                 {isActive && (
                   <motion.div
                     layoutId="tab-indicator"
                     className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
-                    style={{ backgroundColor: 'var(--menu-accent, #FF6B6B)' }}
+                    style={{ backgroundColor: 'var(--menu-accent)' }}
                   />
                 )}
               </button>
@@ -549,130 +634,127 @@ export function PublicMenu() {
         </div>
       )}
 
-      {/* ── Items ──────────────────────────────────────────────────────────── */}
-      <main
-        className="px-4 py-4 space-y-6"
-        style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}
-      >
-        {filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <p className="text-4xl">🔍</p>
-            <p className="text-sm" style={{ color: 'var(--menu-text-secondary, #888888)' }}>
-              {language === 'ES' ? 'No se encontraron platos' : 'No dishes found'}
-            </p>
-          </div>
-        ) : activeSectionId !== null ? (
-          /* Single section */
-          <motion.div
-            key={activeSectionId}
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.05 } }, hidden: {} }}
-            className="space-y-3"
-          >
-            {filteredItems.map(item => (
-              <motion.div
-                key={item.id}
-                variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
-              >
-                <ItemCard
-                  item={item}
-                  language={language}
-                  currency={currency}
-                  onTap={openDetail}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          /* All sections grouped */
-          sectionGroups.map(({ section, items: sItems }) => (
-            <div key={section.id}>
-              <h2
-                className="text-base font-bold mb-3"
-                style={{ color: 'var(--menu-text-secondary, #888888)', letterSpacing: '0.04em' }}
-              >
-                {(language === 'EN' && section.name_en ? section.name_en : section.name).toUpperCase()}
-              </h2>
-              <motion.div
-                initial="hidden"
-                animate="show"
-                variants={{ show: { transition: { staggerChildren: 0.05 } }, hidden: {} }}
-                className="space-y-3"
-              >
-                {sItems.map(item => (
-                  <motion.div
-                    key={item.id}
-                    variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
-                  >
-                    <ItemCard
-                      item={item}
-                      language={language}
-                      currency={currency}
-                      onTap={openDetail}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          ))
+      {/* ── Main content ─────────────────────────────────────────────────── */}
+      <main className="pt-4" style={{ paddingBottom: 'calc(110px + env(safe-area-inset-bottom))' }}>
+
+        {/* Featured row — hidden while searching or filtering */}
+        {!activeSectionId && !searchQuery && activeFilters.length === 0 && featuredItems.length > 0 && (
+          <FeaturedRow items={featuredItems} language={language} currency={currency} onTap={openDetail} />
         )}
+
+        {/* Items */}
+        <div className="px-4">
+          {filteredItems.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <p className="text-4xl">😕</p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--menu-text-secondary)' }}>
+                {searchQuery
+                  ? (language === 'ES' ? `No encontramos "${searchQuery}"` : `No results for "${searchQuery}"`)
+                  : (language === 'ES' ? 'No se encontraron platos' : 'No dishes found')
+                }
+              </p>
+              {(searchQuery || activeFilters.length > 0) && (
+                <button
+                  onClick={() => { setSearchQuery(''); setActiveFilters([]) }}
+                  className="text-sm font-semibold px-4 py-2 rounded-xl mt-1"
+                  style={{ backgroundColor: 'rgba(244,112,90,0.12)', color: 'var(--menu-accent)' }}
+                >
+                  {language === 'ES' ? 'Ver todo el menú' : 'Show full menu'}
+                </button>
+              )}
+            </div>
+          ) : activeSectionId !== null ? (
+            <motion.div
+              key={activeSectionId}
+              initial="hidden"
+              animate="show"
+              variants={{ show: { transition: { staggerChildren: 0.04 } }, hidden: {} }}
+              className="space-y-3"
+            >
+              {filteredItems.map(item => (
+                <motion.div key={item.id} variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}>
+                  <ItemCard item={item} language={language} currency={currency} onTap={openDetail} />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            sectionGroups.map(({ section, items: sItems }) => (
+              <div key={section.id} className="mb-7">
+                <p
+                  className="text-xs font-bold uppercase mb-3"
+                  style={{ color: 'var(--menu-text-muted)', letterSpacing: '0.1em' }}
+                >
+                  {language === 'EN' && section.name_en ? section.name_en : section.name}
+                </p>
+                <motion.div
+                  initial="hidden"
+                  animate="show"
+                  variants={{ show: { transition: { staggerChildren: 0.04 } }, hidden: {} }}
+                  className="space-y-3"
+                >
+                  {sItems.map(item => (
+                    <motion.div key={item.id} variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}>
+                      <ItemCard item={item} language={language} currency={currency} onTap={openDetail} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+            ))
+          )}
+        </div>
       </main>
 
-      {/* ── Pedir la cuenta (only when mesa param exists) ─────────────────── */}
+      {/* ── Bill request button ──────────────────────────────────────────── */}
       {mesaParam && (
         <button
           onClick={handleRequestBill}
           disabled={requestingBill || billRequested}
           className="fixed bottom-44 right-4 z-20 w-12 h-12 flex items-center justify-center rounded-2xl transition-all active:opacity-60 disabled:opacity-50"
           style={{
-            backgroundColor: billRequested ? 'rgba(245,158,11,0.15)' : 'var(--menu-card-elevated, #1A1A1A)',
-            border: `1px solid ${billRequested ? '#F59E0B' : 'var(--menu-border, rgba(255,255,255,0.06))'}`,
+            backgroundColor: billRequested ? 'rgba(245,158,11,0.15)' : 'var(--menu-card-elevated)',
+            border: `1px solid ${billRequested ? '#F59E0B' : 'var(--menu-border)'}`,
           }}
           title={language === 'ES' ? 'Pedir la cuenta' : 'Request bill'}
         >
           <Receipt
             className={`w-5 h-5 ${requestingBill ? 'animate-pulse' : ''}`}
-            style={{ color: billRequested ? '#F59E0B' : 'var(--menu-text-secondary, #888888)' }}
+            style={{ color: billRequested ? '#F59E0B' : 'var(--menu-text-secondary)' }}
           />
         </button>
       )}
 
-      {/* ── Bell button (only when mesa param exists) ──────────────────────── */}
+      {/* ── Bell button ──────────────────────────────────────────────────── */}
       {mesaParam && (
         <button
           onClick={handleCallWaiter}
           disabled={callingWaiter}
           className="fixed bottom-28 right-4 z-20 w-12 h-12 flex items-center justify-center rounded-2xl transition-opacity active:opacity-60 disabled:opacity-50"
-          style={{
-            backgroundColor: 'var(--menu-card-elevated, #1A1A1A)',
-            border: '1px solid var(--menu-border, rgba(255,255,255,0.06))',
-          }}
+          style={{ backgroundColor: 'var(--menu-card-elevated)', border: '1px solid var(--menu-border)' }}
           title="Llamar al mozo"
         >
           <Bell
             className={`w-5 h-5 ${callingWaiter ? 'animate-pulse' : ''}`}
-            style={{ color: 'var(--menu-text-secondary, #888888)' }}
+            style={{ color: 'var(--menu-text-secondary)' }}
           />
         </button>
       )}
 
-      {/* ── Floating cart button ───────────────────────────────────────────── */}
+      {/* ── Floating cart pill ───────────────────────────────────────────── */}
       <AnimatePresence>
         {itemCount > 0 && (
           <motion.button
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
+            initial={{ y: 80, opacity: 0, scale: 0.9 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 80, opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', damping: 22, stiffness: 300 }}
             onClick={() => setIsCartOpen(true)}
-            className="fixed left-1/2 z-30 flex items-center gap-3 rounded-2xl font-semibold text-white text-sm"
+            className="fixed left-1/2 z-40 flex items-center gap-3 rounded-2xl font-semibold text-white text-sm"
             style={{
               bottom: 'calc(20px + env(safe-area-inset-bottom))',
               transform: 'translateX(-50%)',
-              padding: '16px 24px',
-              background: 'linear-gradient(135deg, #FF6B6B, #FF8E53)',
-              boxShadow: '0 8px 32px rgba(255,107,107,0.4)',
+              padding: '14px 22px',
+              background: `linear-gradient(135deg, ${accentColor}, #F09040)`,
+              boxShadow: `0 8px 32px rgba(244,112,90,0.38)`,
               whiteSpace: 'nowrap',
             }}
           >
@@ -682,28 +764,24 @@ export function PublicMenu() {
             >
               <ShoppingCart className="w-5 h-5" />
             </motion.span>
-            <span>
-              {language === 'ES' ? 'Ver pedido' : 'View order'} ({itemCount})
-            </span>
-            <span className="opacity-80">·</span>
-            <span>{formatPrice(getTotal(currency), currency)}</span>
+            <span>{language === 'ES' ? 'Ver pedido' : 'View order'} ({itemCount})</span>
+            <span className="opacity-50">·</span>
+            <span>${fmtPrice(getTotal(currency))}</span>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* ── Sheets & modals ────────────────────────────────────────────────── */}
+      {/* ── Sheets & modals ─────────────────────────────────────────────── */}
       <ItemDetailSheet
         item={detailItem}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
       />
-
       <CartSheet
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         onCheckout={() => { setIsCartOpen(false); setIsCheckoutOpen(true) }}
       />
-
       <CheckoutModal
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
@@ -712,7 +790,6 @@ export function PublicMenu() {
         slug={slug}
         restaurantName={restaurant.name}
       />
-
       {slug && <ActiveOrderBanner slug={slug} />}
     </div>
   )

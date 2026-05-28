@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import {
   ChevronLeft, Store, MapPin, Clock, Share2, Palette,
-  Globe, MessageCircle, X, Upload,
+  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -43,6 +43,7 @@ interface SocialLinks {
 
 interface SettingsForm {
   logo_url: string
+  cover_image_url: string
   name: string
   description: string
   phone: string
@@ -81,7 +82,7 @@ const DEFAULT_SOCIAL: SocialLinks = {
 }
 
 const DEFAULT_FORM: SettingsForm = {
-  logo_url: '', name: '', description: '', phone: '', email: '', website: '',
+  logo_url: '', cover_image_url: '', name: '', description: '', phone: '', email: '', website: '',
   country: 'Argentina', province: '', city: '', address: '',
   address_extra: '', postal_code: '', directions: '',
   schedule: DEFAULT_SCHEDULE,
@@ -155,8 +156,9 @@ function parseSocialLinks(raw: unknown): SocialLinks {
 
 function restaurantToForm(r: Restaurant): SettingsForm {
   return {
-    logo_url:       r.logo_url       ?? '',
-    name:           r.name           ?? '',
+    logo_url:         r.logo_url         ?? '',
+    cover_image_url:  r.cover_image_url  ?? '',
+    name:             r.name             ?? '',
     description:    r.description    ?? '',
     phone:          r.phone          ?? '',
     email:          r.email          ?? '',
@@ -241,6 +243,10 @@ export function BusinessSettings() {
   const [formData, setFormData] = useState<SettingsForm>(DEFAULT_FORM)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string>('')
+  const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [coverPreview, setCoverPreview] = useState<string>('')
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [isDraggingCover, setIsDraggingCover] = useState(false)
 
   // Fetch restaurant
   useEffect(() => {
@@ -255,17 +261,24 @@ export function BusinessSettings() {
           setRestaurant(data as Restaurant)
           setFormData(restaurantToForm(data as Restaurant))
           if (data.logo_url) setLogoPreview(data.logo_url)
+          if (data.cover_image_url) setCoverPreview(data.cover_image_url)
         }
         setLoading(false)
       })
   }, [user])
 
-  // Revoke blob URL on unmount / change
+  // Revoke blob URLs on unmount / change
   useEffect(() => {
     return () => {
       if (logoPreview.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
     }
   }, [logoPreview])
+
+  useEffect(() => {
+    return () => {
+      if (coverPreview.startsWith('blob:')) URL.revokeObjectURL(coverPreview)
+    }
+  }, [coverPreview])
 
   // Helpers to update form fields
   const setField = <K extends keyof SettingsForm>(key: K, value: SettingsForm[K]) =>
@@ -316,11 +329,42 @@ export function BusinessSettings() {
     multiple: false,
   })
 
+  // Cover dropzone
+  const onDropCover = useCallback((accepted: File[], rejected: unknown[]) => {
+    if ((rejected as unknown[]).length > 0) {
+      toast.error('Imagen inválida. Usá JPG, PNG o WebP de máx. 5MB')
+      return
+    }
+    if (accepted[0]) {
+      if (coverPreview.startsWith('blob:')) URL.revokeObjectURL(coverPreview)
+      setCoverFile(accepted[0])
+      setCoverPreview(URL.createObjectURL(accepted[0]))
+    }
+  }, [coverPreview])
+
+  const {
+    getRootProps: getCoverRootProps,
+    getInputProps: getCoverInputProps,
+    isDragActive: isCoverDragActive,
+  } = useDropzone({
+    onDrop: onDropCover,
+    accept: ACCEPTED_IMAGE_TYPES,
+    maxSize: 5 * 1024 * 1024,
+    multiple: false,
+  })
+
   const removeLogo = () => {
     if (logoPreview.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
     setLogoFile(null)
     setLogoPreview('')
     setField('logo_url', '')
+  }
+
+  const removeCover = () => {
+    if (coverPreview.startsWith('blob:')) URL.revokeObjectURL(coverPreview)
+    setCoverFile(null)
+    setCoverPreview('')
+    setField('cover_image_url', '')
   }
 
   // Save handler
@@ -342,11 +386,33 @@ export function BusinessSettings() {
         setLogoFile(null)
       }
 
+      let finalCoverUrl: string | null = formData.cover_image_url || null
+      if (coverFile) {
+        setUploadingCover(true)
+        const ext = coverFile.name.split('.').pop() ?? 'jpg'
+        const fileName = `covers/${restaurant.id}-${Date.now()}.${ext}`
+        const { error: coverErr } = await supabase.storage
+          .from('restaurant-assets')
+          .upload(fileName, coverFile, { cacheControl: '3600', upsert: true })
+        if (!coverErr) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('restaurant-assets')
+            .getPublicUrl(fileName)
+          finalCoverUrl = publicUrl
+          setField('cover_image_url', publicUrl)
+          setCoverFile(null)
+        } else {
+          toast.error('Error al subir la portada')
+        }
+        setUploadingCover(false)
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any)
         .from('restaurants')
         .update({
           logo_url:          finalLogoUrl,
+          cover_image_url:   finalCoverUrl,
           name:              formData.name.trim(),
           description:       formData.description.trim() || null,
           phone:             formData.phone.trim() || null,
@@ -384,6 +450,9 @@ export function BusinessSettings() {
       setLogoFile(null)
       if (!restaurant.logo_url && logoPreview.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
       setLogoPreview(restaurant.logo_url ?? '')
+      setCoverFile(null)
+      if (!restaurant.cover_image_url && coverPreview.startsWith('blob:')) URL.revokeObjectURL(coverPreview)
+      setCoverPreview(restaurant.cover_image_url ?? '')
     }
     toast('Cambios descartados', { icon: '↩️' })
   }
@@ -449,6 +518,83 @@ export function BusinessSettings() {
             )}
           </div>
         </div>
+      </SectionCard>
+
+      {/* Cover image */}
+      <SectionCard title="Imagen de portada" description="Aparece como banner en el menú digital que ven tus clientes.">
+        {/* 16:9 preview area */}
+        <div
+          className="relative w-full rounded-xl overflow-hidden mb-4"
+          style={{ paddingBottom: '56.25%' }}
+        >
+          <div className="absolute inset-0">
+            {uploadingCover ? (
+              <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center gap-2">
+                <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-gray-500">Subiendo portada...</span>
+              </div>
+            ) : coverPreview ? (
+              <img
+                src={coverPreview}
+                alt="Portada"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div
+                {...getCoverRootProps()}
+                className={cn(
+                  'w-full h-full flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors',
+                  isCoverDragActive || isDraggingCover
+                    ? 'bg-orange-50 border-2 border-dashed border-[#F4705A]'
+                    : 'bg-gray-100 border-2 border-dashed border-gray-300 hover:border-gray-400',
+                )}
+                onDragEnter={() => setIsDraggingCover(true)}
+                onDragLeave={() => setIsDraggingCover(false)}
+                onDrop={() => setIsDraggingCover(false)}
+              >
+                <input {...getCoverInputProps()} />
+                <ImageIcon className={cn('w-10 h-10', isCoverDragActive ? 'text-[#F4705A]' : 'text-gray-300')} />
+                <p className={cn('text-sm font-medium', isCoverDragActive ? 'text-[#F4705A]' : 'text-gray-500')}>
+                  {isCoverDragActive ? 'Soltá la imagen aquí' : 'Arrastrá tu portada aquí'}
+                </p>
+                <p className="text-xs text-gray-400">o usá el botón de abajo para subir</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div {...getCoverRootProps()} className="contents">
+            <input {...getCoverInputProps()} />
+            <button
+              type="button"
+              onClick={e => e.stopPropagation()}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Upload className="w-4 h-4" />
+              {coverPreview ? 'Cambiar portada' : 'Subir portada'}
+            </button>
+          </div>
+          {coverPreview && (
+            <button
+              type="button"
+              onClick={removeCover}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 bg-white text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Eliminar
+            </button>
+          )}
+        </div>
+
+        <p className="text-xs text-gray-400 mt-3">
+          JPG, PNG o WEBP · Recomendado: 1200×630 px · Máximo 5 MB
+        </p>
+        <p className="text-xs text-gray-500 mt-1.5 flex items-start gap-1.5">
+          <span className="text-base leading-none">💡</span>
+          Esta imagen aparece como banner en el header del menú que ven tus clientes.
+        </p>
       </SectionCard>
 
       {/* Info fields */}
@@ -885,7 +1031,7 @@ export function BusinessSettings() {
           <div className="flex gap-3 mt-5">
             <Button
               onClick={handleSave}
-              isLoading={saving || uploadingLogo}
+              isLoading={saving || uploadingLogo || uploadingCover}
               className="bg-[#FF6B7A] hover:bg-[#e85e6b] text-white focus:ring-[#FF6B7A]"
             >
               Guardar cambios
@@ -907,7 +1053,7 @@ export function BusinessSettings() {
         </Button>
         <Button
           onClick={handleSave}
-          isLoading={saving || uploadingLogo}
+          isLoading={saving || uploadingLogo || uploadingCover}
           className="flex-1 bg-[#FF6B7A] hover:bg-[#e85e6b] text-white focus:ring-[#FF6B7A]"
         >
           Guardar cambios

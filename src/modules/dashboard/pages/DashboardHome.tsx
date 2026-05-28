@@ -46,6 +46,7 @@ export function DashboardHome() {
           businessName={restaurant?.name ?? 'Mi Local'}
           notificationCount={summaryData.activeOrders.new}
           operationalStatus={operationalStatus}
+          coverImageUrl={restaurant?.cover_image_url ?? undefined}
         />
       </motion.div>
 
