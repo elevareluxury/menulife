@@ -1,34 +1,111 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { ShimmerButton } from './Navbar'
+
+declare const gsap: any
+declare const Splitting: any
 
 export function FinalCTA() {
+  const titleRef = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    if (typeof gsap === 'undefined') return
+    const ST = (window as any).ScrollTrigger
+    if (!ST) return
+
+    if (typeof Splitting !== 'undefined' && titleRef.current) {
+      const res = Splitting({ target: titleRef.current, by: 'words' })
+      if (res?.[0]?.words?.length) {
+        gsap.fromTo(res[0].words,
+          { opacity: 0, y: -30, filter: 'blur(6px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.7, stagger: 0.07, ease: 'power3.out',
+            scrollTrigger: { trigger: titleRef.current, start: 'top 80%' } })
+      }
+    }
+
+    gsap.fromTo('[data-cta-sub]',
+      { opacity: 0, y: 24 },
+      { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out',
+        scrollTrigger: { trigger: '[data-cta-sub]', start: 'top 82%' } })
+
+    gsap.fromTo('[data-cta-btns]',
+      { opacity: 0, scale: 0.9 },
+      { opacity: 1, scale: 1, duration: 0.65, ease: 'back.out(1.4)',
+        scrollTrigger: { trigger: '[data-cta-btns]', start: 'top 84%' } })
+  }, [])
+
   return (
-    <section className="relative py-28 px-4 lg:px-16 bg-brown-100 text-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-radial from-orange/18 via-transparent to-transparent" />
+    <section style={{
+      background: `
+        linear-gradient(to top, rgba(244,112,90,0.2) 0%, transparent 55%),
+        #0F1115
+      `,
+      padding:   '112px 24px',
+      textAlign: 'center',
+      position:  'relative',
+      overflow:  'hidden',
+    }}>
+      {/* Ambient glow decorations */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+        width: '600px', height: '300px',
+        background: 'radial-gradient(ellipse, rgba(244,112,90,0.15) 0%, transparent 70%)',
+        filter: 'blur(40px)', pointerEvents: 'none',
+      }} />
 
-      <div className="relative z-10 max-w-4xl mx-auto">
-        <div className="text-xs font-semibold tracking-[0.14em] uppercase text-orange mb-5">
-          Empezá hoy
-        </div>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: '900px', margin: '0 auto' }}>
+        <p style={{
+          fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
+          textTransform: 'uppercase', color: 'var(--ml-salmon)',
+          fontFamily: 'var(--font-jakarta)', marginBottom: '20px',
+        }}>Empezá hoy</p>
 
-        <h2 className="font-display text-5xl lg:text-7xl font-semibold mb-4 tracking-tight leading-tight text-cream">
-          Transformá la experiencia<br />
-          de tu <em className="italic text-orange-light">negocio.</em>
+        <h2 ref={titleRef} style={{
+          fontFamily:    'var(--font-syne)',
+          fontWeight:    800,
+          fontSize:      'clamp(44px, 7vw, 80px)',
+          lineHeight:    1.06,
+          color:         '#fff',
+          marginBottom:  '20px',
+          letterSpacing: '-0.03em',
+        }}>
+          Transformá la experiencia{' '}
+          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>de tu negocio.</em>
         </h2>
 
-        <p className="text-base text-cream/55 mb-10 leading-relaxed">
-          Menús modernos. Servicio más rápido. Hospitalidad premium.<br />
-          Más de 1.200 negocios ya usan MenuLife.
+        <p data-cta-sub style={{
+          fontFamily:    'var(--font-jakarta)',
+          fontWeight:    300,
+          fontSize:      '18px',
+          color:         'rgba(255,255,255,0.55)',
+          lineHeight:    1.65,
+          marginBottom:  '48px',
+          maxWidth:      '560px',
+          margin:        '0 auto 48px',
+        }}>
+          Más de 1.200 negocios ya usan MenuLife.<br />
+          Tu competencia también. ¿Vas a esperar?
         </p>
 
-        <div className="flex flex-wrap gap-4 justify-center">
-          <Link to="/solicitar-acceso">
-            <button className="px-9 py-4 bg-orange text-white rounded-full font-semibold text-base shadow-lg shadow-orange/30 hover:bg-orange-light hover:shadow-xl hover:shadow-orange/40 hover:-translate-y-0.5 transition-all">
+        <div data-cta-btns style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
+          <Link to="/solicitar-acceso" style={{ textDecoration: 'none' }}>
+            <ShimmerButton style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '50px' }}>
               Solicitar acceso →
-            </button>
+            </ShimmerButton>
           </Link>
-          <button className="px-8 py-4 border border-cream/25 text-cream/80 rounded-full font-semibold text-base hover:border-orange hover:text-orange-light transition-all">
-            Reservar demo
-          </button>
+          <button style={{
+            padding:      '16px 36px', borderRadius: '50px',
+            border:       '1px solid rgba(255,255,255,0.25)',
+            background:   'rgba(255,255,255,0.05)',
+            backdropFilter: 'blur(10px)',
+            color:        'rgba(255,255,255,0.7)',
+            fontSize:     '16px', fontWeight: 500,
+            cursor:       'pointer', fontFamily: 'var(--font-jakarta)',
+            transition:   'all 0.2s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; e.currentTarget.style.color = '#fff' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
+          >Reservar demo</button>
         </div>
       </div>
     </section>

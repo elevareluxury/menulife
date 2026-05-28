@@ -1,5 +1,5 @@
 /* === TIPOGRAFÍA (debe preceder a @import "tailwindcss") === */
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Geist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
 
@@ -332,6 +332,62 @@ h1, h2, h3, h4, h5, h6 {
 }
 .btn-secondary {
   @apply bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors;
+}
+
+/* =====================================================
+   LANDING v2 — PALETA REBRAND (salmón + dark)
+   ===================================================== */
+:root {
+  --ml-dark:          #0F1115;
+  --ml-dark-2:        #161a22;
+  --ml-dark-3:        #1e2433;
+  --ml-salmon:        #F4705A;
+  --ml-salmon-light:  #f8957f;
+  --ml-salmon-dark:   #c4503d;
+  --ml-off-white:     #f8f6f3;
+  --ml-gray-100:      #f2f0ed;
+  --ml-gray-200:      #e0ddd8;
+  --ml-gray-500:      #8a8780;
+  --ml-gray-700:      #3d3c39;
+  --font-syne:        'Syne', sans-serif;
+  --font-jakarta:     'Plus Jakarta Sans', sans-serif;
+}
+
+@keyframes ml-shimmer {
+  0%   { left: -100%; }
+  100% { left: 200%; }
+}
+@keyframes ml-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+@keyframes ml-pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(244,112,90,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(244,112,90,0.55), 0 0 80px rgba(244,112,90,0.2); }
+}
+@keyframes ml-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes ml-chat-dot {
+  0%, 80%, 100% { transform: scale(0); opacity: 0; }
+  40%           { transform: scale(1); opacity: 1; }
+}
+@keyframes ml-scroll-arrow {
+  0%, 100% { transform: translateY(0) translateX(-50%); opacity: 0.4; }
+  50%       { transform: translateY(8px) translateX(-50%); opacity: 0.8; }
+}
+@keyframes ml-bar-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes ml-slide-right {
+  from { transform: translateX(60px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes ml-fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* =====================================================

@@ -1,97 +1,150 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-const navLinks = [
-  { label: 'Producto', href: '#experiences' },
-  { label: 'Cómo funciona', href: '#flow' },
-  { label: 'Onboarding', href: '#whatsapp' },
-  { label: 'Precios', href: '#pricing' },
+const NAV_LINKS = [
+  { label: 'Producto',        href: '#experiences' },
+  { label: 'Cómo funciona',   href: '#flow' },
+  { label: 'Onboarding',      href: '#whatsapp' },
+  { label: 'Precios',         href: '#pricing' },
 ]
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [scrolled,   setScrolled]   = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-cream/90 backdrop-blur-lg border-b border-brown/10">
-      <div className="px-4 lg:px-16 h-[68px] flex items-center justify-between">
+    <nav style={{
+      position:           'fixed',
+      top: 0, left: 0, right: 0,
+      zIndex:             1000,
+      background:         'rgba(15,17,21,0.78)',
+      backdropFilter:     'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderBottom:       scrolled ? '1px solid rgba(244,112,90,0.25)' : '1px solid rgba(244,112,90,0)',
+      transition:         'border-color 0.4s ease',
+      fontFamily:         'var(--font-jakarta)',
+      animation:          'ml-fade-up 0.4s ease both',
+    }}>
+      <div style={{
+        maxWidth: '1280px', margin: '0 auto',
+        padding: '0 24px', height: '68px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 font-display font-bold text-2xl tracking-tight">
-          <div className="w-8 h-8 bg-gradient-to-br from-orange to-orange-light rounded-lg flex items-center justify-center text-white text-base">
-            M
-          </div>
-          MenuLife
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <div style={{
+            width: '32px', height: '32px',
+            background: 'var(--ml-salmon)', borderRadius: '8px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '17px',
+          }}>M</div>
+          <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '20px', letterSpacing: '-0.02em' }}>
+            MenuLife
+          </span>
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden lg:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-[13px] font-medium text-muted hover:text-brown transition-colors"
-            >
-              {link.label}
-            </a>
+        <div className="hidden lg:flex" style={{ gap: '32px', alignItems: 'center' }}>
+          {NAV_LINKS.map(link => (
+            <NavLink key={link.label} href={link.href}>{link.label}</NavLink>
           ))}
         </div>
 
-        {/* Desktop actions */}
-        <div className="hidden lg:flex items-center gap-3">
-          <Link to="/login">
-            <button className="px-5 py-2 border border-brown/20 rounded-full text-[13px] font-medium text-brown-100 hover:border-orange hover:text-orange transition-all">
-              Iniciar sesión
-            </button>
+        {/* Desktop CTAs */}
+        <div className="hidden lg:flex" style={{ gap: '12px', alignItems: 'center' }}>
+          <Link to="/login" style={{ textDecoration: 'none' }}>
+            <button style={{
+              padding: '8px 20px', border: '1px solid rgba(255,255,255,0.25)',
+              borderRadius: '50px', background: 'transparent',
+              color: 'rgba(255,255,255,0.8)', fontSize: '13px', fontWeight: 500,
+              cursor: 'pointer', fontFamily: 'var(--font-jakarta)', transition: 'all 0.2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; e.currentTarget.style.color = '#fff' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)' }}
+            >Iniciar sesión</button>
           </Link>
-          <Link to="/solicitar-acceso">
-            <button className="px-6 py-2.5 bg-orange text-white rounded-full text-[13px] font-semibold shadow-md shadow-orange/30 hover:bg-orange-light hover:shadow-lg hover:shadow-orange/40 transition-all">
-              Solicitar acceso
-            </button>
+          <Link to="/solicitar-acceso" style={{ textDecoration: 'none' }}>
+            <ShimmerButton>Solicitar acceso</ShimmerButton>
           </Link>
         </div>
 
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="lg:hidden p-2"
-          aria-label="Menú"
-        >
-          {isMenuOpen ? (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
+        {/* Mobile burger */}
+        <button className="lg:hidden" onClick={() => setMobileOpen(v => !v)} aria-label="Menú"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', padding: '4px' }}>
+          {mobileOpen
+            ? <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" /></svg>
+            : <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+          }
         </button>
       </div>
 
       {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-brown/10 px-4 py-4 space-y-3">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="block text-muted hover:text-brown py-1"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {link.label}
-            </a>
+      {mobileOpen && (
+        <div style={{
+          background: 'rgba(15,17,21,0.97)', borderTop: '1px solid rgba(255,255,255,0.06)',
+          padding: '20px 24px', fontFamily: 'var(--font-jakarta)',
+        }}>
+          {NAV_LINKS.map(link => (
+            <a key={link.label} href={link.href} onClick={() => setMobileOpen(false)} style={{
+              display: 'block', color: 'rgba(255,255,255,0.7)', textDecoration: 'none',
+              padding: '10px 0', fontSize: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)',
+            }}>{link.label}</a>
           ))}
-          <Link to="/login" className="block" onClick={() => setIsMenuOpen(false)}>
-            <button className="w-full px-5 py-2 border border-brown/20 rounded-full text-[13px] font-medium">
-              Iniciar sesión
-            </button>
-          </Link>
-          <Link to="/solicitar-acceso" className="block" onClick={() => setIsMenuOpen(false)}>
-            <button className="w-full px-6 py-2.5 bg-orange text-white rounded-full text-[13px] font-semibold">
-              Solicitar acceso
-            </button>
-          </Link>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
+            <Link to="/login" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
+              <button style={{ width: '100%', padding: '12px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50px', background: 'transparent', color: '#fff', fontSize: '14px', cursor: 'pointer', fontFamily: 'var(--font-jakarta)' }}>Iniciar sesión</button>
+            </Link>
+            <Link to="/solicitar-acceso" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
+              <ShimmerButton style={{ width: '100%' }}>Solicitar acceso</ShimmerButton>
+            </Link>
+          </div>
         </div>
       )}
     </nav>
+  )
+}
+
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} style={{
+      color: 'rgba(255,255,255,0.7)', textDecoration: 'none',
+      fontSize: '14px', fontWeight: 500, transition: 'color 0.2s',
+    }}
+      onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
+      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
+    >{children}</a>
+  )
+}
+
+export function ShimmerButton({ children, style, onClick }: {
+  children: React.ReactNode
+  style?: React.CSSProperties
+  onClick?: () => void
+}) {
+  return (
+    <button onClick={onClick} style={{
+      position: 'relative', overflow: 'hidden',
+      padding: '9px 22px', borderRadius: '50px', border: 'none',
+      background: 'var(--ml-salmon)', color: '#fff',
+      fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+      fontFamily: 'var(--font-jakarta)', transition: 'transform 0.2s, box-shadow 0.2s',
+      ...style,
+    }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(244,112,90,0.5)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
+    >
+      <span style={{ position: 'relative', zIndex: 1 }}>{children}</span>
+      <span style={{
+        position: 'absolute', top: 0, left: '-100%', width: '100%', height: '100%',
+        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+        animation: 'ml-shimmer 3s infinite',
+      }} />
+    </button>
   )
 }

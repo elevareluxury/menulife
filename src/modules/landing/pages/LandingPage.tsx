@@ -1,43 +1,56 @@
 import { useEffect } from 'react'
-import { CustomCursor } from '@/components/landing/CustomCursor'
-import { GrainOverlay } from '@/components/landing/GrainOverlay'
-import { Navbar } from '@/components/landing/Navbar'
-import { HeroSection } from '@/components/landing/HeroSection'
-import { ExperiencesSection } from '@/components/landing/ExperiencesSection'
-import { FlowSection } from '@/components/landing/FlowSection'
-import { WhatsAppSection } from '@/components/landing/WhatsAppSection'
-import { PricingSection } from '@/components/landing/PricingSection'
-import { FinalCTA } from '@/components/landing/FinalCTA'
-import { Footer } from '@/components/landing/Footer'
+import { Navbar }              from '@/components/landing/Navbar'
+import { HeroSection }         from '@/components/landing/HeroSection'
+import { TrustBand }           from '@/components/landing/TrustBand'
+import { ExperiencesSection }  from '@/components/landing/ExperiencesSection'
+import { FlowSection }         from '@/components/landing/FlowSection'
+import { WhatsAppSection }     from '@/components/landing/WhatsAppSection'
+import { TestimonialsSection } from '@/components/landing/TestimonialsSection'
+import { PricingSection }      from '@/components/landing/PricingSection'
+import { FAQSection }          from '@/components/landing/FAQSection'
+import { FinalCTA }            from '@/components/landing/FinalCTA'
+import { Footer }              from '@/components/landing/Footer'
 
 export function LandingPage() {
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth'
-    return () => {
-      document.documentElement.style.scrollBehavior = 'auto'
-    }
+    // Register ScrollTrigger once at app level
+    const g = (window as any).gsap
+    const ST = (window as any).ScrollTrigger
+    if (g && ST) g.registerPlugin(ST)
+    return () => { document.documentElement.style.scrollBehavior = 'auto' }
   }, [])
 
   return (
-    <div className="min-h-screen bg-cream overflow-x-hidden">
-      <CustomCursor />
-      <GrainOverlay />
+    <div style={{ background: 'var(--ml-dark)', overflowX: 'hidden', minHeight: '100vh' }}>
       <Navbar />
 
-      <HeroSection />
-      <div id="experiences">
-        <ExperiencesSection />
-      </div>
-      <div id="flow">
-        <FlowSection />
-      </div>
-      <div id="whatsapp">
-        <WhatsAppSection />
-      </div>
-      <div id="pricing">
-        <PricingSection />
-      </div>
-      <FinalCTA />
+      <main>
+        <HeroSection />
+        <TrustBand />
+
+        <div id="experiences">
+          <ExperiencesSection />
+        </div>
+
+        <div id="flow">
+          <FlowSection />
+        </div>
+
+        <div id="whatsapp">
+          <WhatsAppSection />
+        </div>
+
+        <TestimonialsSection />
+
+        <div id="pricing">
+          <PricingSection />
+        </div>
+
+        <FAQSection />
+        <FinalCTA />
+      </main>
+
       <Footer />
     </div>
   )
