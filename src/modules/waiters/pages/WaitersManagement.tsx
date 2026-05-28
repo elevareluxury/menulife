@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit, Trash2, UserCheck, UserX, Copy, MessageCircle, Smartphone } from 'lucide-react'
+import bcrypt from 'bcryptjs'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
@@ -135,7 +136,7 @@ export function WaitersManagement() {
                   <h3 className="font-semibold text-lg text-gray-900">
                     {waiter.first_name} {waiter.last_name}
                   </h3>
-                  <p className="text-sm text-gray-500">PIN: {waiter.pin}</p>
+                  <p className="text-sm text-gray-500">PIN: ••••••</p>
                 </div>
                 <div className="flex gap-1">
                   <Button
@@ -200,7 +201,7 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
 
   useEffect(() => {
     if (waiter) {
-      setFormData({ first_name: waiter.first_name, last_name: waiter.last_name, pin: waiter.pin })
+      setFormData({ first_name: waiter.first_name, last_name: waiter.last_name, pin: '' })
     } else {
       setFormData({ first_name: '', last_name: '', pin: '' })
     }
@@ -212,20 +213,42 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.pin.length !== 6) {
+
+    const isEditing = !!waiter
+    const pinChanged = formData.pin.length > 0
+
+    if (!isEditing && formData.pin.length !== 6) {
       toast.error('El PIN debe tener 6 dígitos')
       return
     }
+    if (isEditing && pinChanged && formData.pin.length !== 6) {
+      toast.error('El PIN debe tener 6 dígitos')
+      return
+    }
+
     setLoading(true)
     try {
-      if (waiter) {
-        const { error } = await db.from('waiters').update(formData).eq('id', waiter.id)
+      if (isEditing) {
+        const updates: Record<string, string> = {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+        }
+        if (pinChanged) {
+          updates.pin = await bcrypt.hash(formData.pin, 10)
+        }
+        const { error } = await db.from('waiters').update(updates).eq('id', waiter.id)
         if (error) throw error
         toast.success('Mozo actualizado')
       } else {
-        const { error } = await db.from('waiters').insert({ ...formData, restaurant_id: restaurantId })
+        const hashedPin = await bcrypt.hash(formData.pin, 10)
+        const { error } = await db.from('waiters').insert({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          pin: hashedPin,
+          restaurant_id: restaurantId,
+        })
         if (error) throw error
-        toast.success('Mozo creado')
+        toast.success(`Mozo creado. PIN: ${formData.pin} — guardalo en un lugar seguro.`, { duration: 8000 })
       }
       onClose()
     } catch (error: unknown) {
@@ -253,17 +276,19 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
           required
         />
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">PIN (6 dígitos)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            PIN (6 dígitos){waiter ? <span className="text-gray-400 font-normal ml-1">— dejar vacío para no cambiar</span> : null}
+          </label>
           <div className="flex gap-2">
             <Input
-              placeholder="123456"
+              placeholder={waiter ? '••••••' : '123456'}
               value={formData.pin}
               onChange={(e) => {
                 const v = e.target.value.replace(/\D/g, '').slice(0, 6)
                 setFormData(prev => ({ ...prev, pin: v }))
               }}
               maxLength={6}
-              required
+              required={!waiter}
             />
             <Button type="button" variant="secondary" onClick={generatePIN}>
               Generar

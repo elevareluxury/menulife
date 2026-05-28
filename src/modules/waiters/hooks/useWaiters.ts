@@ -35,7 +35,7 @@ export function useWaiters(restaurantId: string | undefined) {
     try {
       const { data, error } = await db
         .from('waiters')
-        .select('*')
+        .select('id, first_name, last_name, avatar_url, is_active, is_on_shift, restaurant_id, created_at, updated_at')
         .eq('restaurant_id', restaurantId)
         .order('first_name')
 

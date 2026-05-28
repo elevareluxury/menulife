@@ -92,9 +92,10 @@ export interface Waiter {
   restaurant_id: string
   first_name: string
   last_name: string
-  pin: string
+  pin?: string
   is_active: boolean
   is_on_shift: boolean
+  avatar_url?: string | null
   created_at: string
   updated_at: string
 }

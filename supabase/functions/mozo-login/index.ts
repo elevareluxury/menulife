@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { create } from 'https://deno.land/x/djwt@v2.8/mod.ts'
+import bcrypt from 'npm:bcryptjs'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,8 +16,8 @@ serve(async (req) => {
   try {
     const { pin, restaurant_id, waiter_id } = await req.json()
 
-    if (!pin || !restaurant_id) {
-      throw new Error('PIN y restaurant_id son requeridos')
+    if (!pin || !restaurant_id || !waiter_id) {
+      throw new Error('pin, restaurant_id y waiter_id son requeridos')
     }
 
     const supabase = createClient(
@@ -24,20 +25,40 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    let query = supabase
+    // Fetch waiter by id — do NOT filter by pin (it may be hashed)
+    const { data: mozo, error } = await supabase
       .from('waiters')
-      .select('*')
+      .select('id, first_name, last_name, avatar_url, is_active, is_on_shift, restaurant_id, pin')
+      .eq('id', waiter_id)
       .eq('restaurant_id', restaurant_id)
-      .eq('pin', pin)
       .eq('is_active', true)
-
-    if (waiter_id) {
-      query = query.eq('id', waiter_id)
-    }
-
-    const { data: mozo, error } = await query.single()
+      .single()
 
     if (error || !mozo) {
+      return new Response(
+        JSON.stringify({ error: 'PIN incorrecto' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Verify PIN — supports both bcrypt hashes and legacy plain text (progressive migration)
+    const storedPin: string = mozo.pin ?? ''
+    const isHashed = storedPin.startsWith('$2')
+    let isValid = false
+
+    if (isHashed) {
+      isValid = await bcrypt.compare(pin, storedPin)
+    } else {
+      // Legacy plain-text comparison
+      isValid = storedPin === pin
+      if (isValid) {
+        // Migrate to hashed on first successful plain-text login
+        const newHash = await bcrypt.hash(pin, 10)
+        await supabase.from('waiters').update({ pin: newHash }).eq('id', mozo.id)
+      }
+    }
+
+    if (!isValid) {
       return new Response(
         JSON.stringify({ error: 'PIN incorrecto' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -62,8 +83,11 @@ serve(async (req) => {
       key
     )
 
+    // Never return the pin field to the client
+    const { pin: _pin, ...mozoSafe } = mozo
+
     return new Response(
-      JSON.stringify({ token, mozo }),
+      JSON.stringify({ token, mozo: mozoSafe }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error: unknown) {
