@@ -77,6 +77,25 @@ export function TablesConfiguration() {
     dragging.current = null
   }
 
+  const onCanvasTouchMove = (e: React.TouchEvent) => {
+    if (!dragging.current) return
+    e.preventDefault()
+    const { id, dx, dy } = dragging.current
+    const touch = e.touches[0]
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+    const x = Math.max(0, Math.min(touch.clientX - rect.left - dx, rect.width - 110))
+    const y = Math.max(0, Math.min(touch.clientY - rect.top - dy, rect.height - 110))
+    setPositions(prev => ({ ...prev, [id]: { x, y } }))
+  }
+
+  const onCanvasTouchEnd = () => {
+    if (!dragging.current) return
+    const { id } = dragging.current
+    const pos = positions[id]
+    if (pos) updateTablePosition(id, Math.round(pos.x), Math.round(pos.y))
+    dragging.current = null
+  }
+
   const onTableMouseDown = (e: React.MouseEvent, tableId: string) => {
     e.preventDefault()
     const canvasRect = (e.currentTarget.closest('.table-canvas') as HTMLDivElement).getBoundingClientRect()
@@ -84,6 +103,17 @@ export function TablesConfiguration() {
       id: tableId,
       dx: e.clientX - canvasRect.left - (positions[tableId]?.x ?? 0),
       dy: e.clientY - canvasRect.top - (positions[tableId]?.y ?? 0),
+    }
+  }
+
+  const onTableTouchStart = (e: React.TouchEvent, tableId: string) => {
+    e.stopPropagation()
+    const touch = e.touches[0]
+    const canvasRect = (e.currentTarget.closest('.table-canvas') as HTMLDivElement).getBoundingClientRect()
+    dragging.current = {
+      id: tableId,
+      dx: touch.clientX - canvasRect.left - (positions[tableId]?.x ?? 0),
+      dy: touch.clientY - canvasRect.top - (positions[tableId]?.y ?? 0),
     }
   }
 
@@ -143,10 +173,12 @@ export function TablesConfiguration() {
         <Card className="p-0 overflow-hidden">
           <div
             className="table-canvas relative bg-gray-50 select-none"
-            style={{ height: '600px' }}
+            style={{ height: '600px', touchAction: 'none' }}
             onMouseMove={onCanvasMouseMove}
             onMouseUp={onCanvasMouseUp}
             onMouseLeave={onCanvasMouseUp}
+            onTouchMove={onCanvasTouchMove}
+            onTouchEnd={onCanvasTouchEnd}
           >
             {tables.map((table) => {
               const pos = positions[table.id] ?? { x: table.position_x, y: table.position_y }
@@ -155,8 +187,9 @@ export function TablesConfiguration() {
                 <div
                   key={table.id}
                   className={`absolute cursor-grab active:cursor-grabbing bg-white rounded-xl shadow-md border-2 ${STATUS_BORDERS[table.status] ?? 'border-gray-300'} hover:shadow-lg transition-shadow`}
-                  style={{ left: pos.x, top: pos.y, width: 110, userSelect: 'none' }}
+                  style={{ left: pos.x, top: pos.y, width: 110, userSelect: 'none', touchAction: 'none' }}
                   onMouseDown={(e) => onTableMouseDown(e, table.id)}
+                  onTouchStart={(e) => onTableTouchStart(e, table.id)}
                 >
                   <div className="p-3">
                     <div className="flex items-center justify-between mb-2">
@@ -173,6 +206,7 @@ export function TablesConfiguration() {
                       <button
                         className="p-1 hover:bg-gray-100 rounded"
                         onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
                         onClick={(e) => {
                           e.stopPropagation()
                           setEditingTable(table)
@@ -184,6 +218,7 @@ export function TablesConfiguration() {
                       <button
                         className="p-1 hover:bg-red-50 rounded"
                         onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
                         onClick={(e) => {
                           e.stopPropagation()
                           handleDelete(table.id)

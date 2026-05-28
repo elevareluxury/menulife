@@ -242,10 +242,12 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
       } else {
         const hashedPin = await bcrypt.hash(formData.pin, 10)
         const { error } = await db.from('waiters').insert({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          pin: hashedPin,
+          first_name:    formData.first_name,
+          last_name:     formData.last_name,
+          pin:           hashedPin,
           restaurant_id: restaurantId,
+          is_active:     true,
+          is_on_shift:   false,
         })
         if (error) throw error
         toast.success(`Mozo creado. PIN: ${formData.pin} — guardalo en un lugar seguro.`, { duration: 8000 })

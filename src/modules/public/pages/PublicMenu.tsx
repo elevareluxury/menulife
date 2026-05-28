@@ -756,6 +756,8 @@ export function PublicMenu() {
               background: `linear-gradient(135deg, ${accentColor}, #F09040)`,
               boxShadow: `0 8px 32px rgba(244,112,90,0.38)`,
               whiteSpace: 'nowrap',
+              width: 'calc(100% - 32px)',
+              maxWidth: '420px',
             }}
           >
             <motion.span

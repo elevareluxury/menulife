@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import bcrypt from 'bcryptjs'
 import { supabase } from '@/lib/supabase'
 import { useWaiterAuthStore } from '@/store/waiterAuthStore'
 import { useWaiters } from '@/modules/waiters/hooks/useWaiters'
@@ -65,6 +66,45 @@ export function WaiterLogin() {
 
   const handleDelete = () => setPin(p => p.slice(0, -1))
 
+  // Fallback: client-side bcrypt comparison when edge function isn't deployed
+  const loginDirect = async (currentPin: string) => {
+    if (!restaurantId || !selectedWaiter) throw new Error('Datos incompletos')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: waiterRow, error } = await (supabase as any)
+      .from('waiters')
+      .select('id, first_name, last_name, avatar_url, is_on_shift, pin')
+      .eq('id', selectedWaiter.id)
+      .eq('restaurant_id', restaurantId)
+      .eq('is_active', true)
+      .single()
+
+    if (error || !waiterRow) throw new Error('PIN incorrecto')
+
+    const storedPin: string = waiterRow.pin ?? ''
+    const isHashed = storedPin.startsWith('$2')
+    const isValid = isHashed
+      ? await bcrypt.compare(currentPin, storedPin)
+      : storedPin === currentPin
+
+    if (!isValid) throw new Error('PIN incorrecto')
+
+    // Migrate plain-text PIN to bcrypt hash on successful login
+    if (!isHashed) {
+      const hashed = await bcrypt.hash(currentPin, 10)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('waiters').update({ pin: hashed }).eq('id', waiterRow.id)
+    }
+
+    const { pin: _pin, ...mozo } = waiterRow
+    localStorage.setItem(lastWaiterKey, selectedWaiter.id)
+    setAuth(`direct-${Date.now()}`, mozo)
+    toast.success(`Bienvenido ${mozo.first_name}!`)
+    requestNotificationPermission()
+    registerServiceWorker()
+    navigate(`/waiter/${slug}/dashboard`)
+  }
+
   const handleSubmit = async () => {
     if (pin.length !== 6 || !restaurantId || !selectedWaiter) {
       toast.error('Ingresa un PIN de 6 dígitos')
@@ -72,30 +112,52 @@ export function WaiterLogin() {
     }
     setLoading(true)
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL as string}/functions/v1/mozo-login`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY as string,
-          },
-          body: JSON.stringify({ pin, restaurant_id: restaurantId, waiter_id: selectedWaiter.id }),
+      // Primary path: Supabase Edge Function (server-side bcrypt)
+      let usedFallback = false
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL as string}/functions/v1/mozo-login`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY as string,
+            },
+            body: JSON.stringify({ pin, restaurant_id: restaurantId, waiter_id: selectedWaiter.id }),
+          }
+        )
+
+        // Edge function not deployed (404) → use fallback
+        if (response.status === 404) {
+          usedFallback = true
+        } else {
+          const data = await response.json()
+          if (!response.ok) throw new Error(data.error || 'PIN incorrecto')
+
+          localStorage.setItem(lastWaiterKey, selectedWaiter.id)
+          setAuth(data.token, data.mozo)
+          toast.success(`Bienvenido ${data.mozo.first_name}!`)
+          requestNotificationPermission()
+          registerServiceWorker()
+          navigate(`/waiter/${slug}/dashboard`)
+          return
         }
-      )
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Error al iniciar sesión')
+      } catch (fetchErr) {
+        // Network error (function not reachable) → use fallback
+        const msg = fetchErr instanceof Error ? fetchErr.message : ''
+        if (msg === 'Failed to fetch' || msg.includes('NetworkError') || msg.includes('network')) {
+          usedFallback = true
+        } else {
+          throw fetchErr
+        }
+      }
 
-      localStorage.setItem(lastWaiterKey, selectedWaiter.id)
-      setAuth(data.token, data.mozo)
-      toast.success(`Bienvenido ${data.mozo.first_name}!`)
-
-      requestNotificationPermission()
-      registerServiceWorker()
-
-      navigate(`/waiter/${slug}/dashboard`)
+      if (usedFallback) {
+        await loginDirect(pin)
+      }
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'PIN incorrecto')
+      const msg = error instanceof Error ? error.message : 'PIN incorrecto'
+      toast.error(msg)
       setPinError(true)
       setPin('')
       setTimeout(() => setPinError(false), 600)
@@ -109,6 +171,7 @@ export function WaiterLogin() {
     if (pin.length === 6 && step === 'pin' && !loading) {
       handleSubmit()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pin])
 
   const avatarColor = selectedWaiter ? getColor(selectedWaiter.id) : 'var(--ml-salmon)'
