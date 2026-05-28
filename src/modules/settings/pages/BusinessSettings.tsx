@@ -221,7 +221,7 @@ function SocialInput({ icon, prefix, value, placeholder, onChange }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 px-3 py-2 text-sm outline-none bg-white"
+        className="flex-1 px-3 py-2 text-sm text-gray-900 outline-none bg-white placeholder:text-gray-400"
       />
     </div>
   )
@@ -622,14 +622,14 @@ export function BusinessSettings() {
                     type="time"
                     value={d.from ?? '09:00'}
                     onChange={e => updateDay(day.key, 'from', e.target.value)}
-                    className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                   <span className="text-gray-400 flex-shrink-0">→</span>
                   <input
                     type="time"
                     value={d.to ?? '23:00'}
                     onChange={e => updateDay(day.key, 'to', e.target.value)}
-                    className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               ) : (
@@ -694,7 +694,7 @@ export function BusinessSettings() {
               value={formData.social_links.whatsapp}
               onChange={e => updateSocial('whatsapp', e.target.value)}
               placeholder="+54 9 11 1234-5678"
-              className="flex-1 px-3 py-2 text-sm outline-none bg-white"
+              className="flex-1 px-3 py-2 text-sm text-gray-900 outline-none bg-white placeholder:text-gray-400"
             />
           </div>
         </div>
@@ -712,7 +712,7 @@ export function BusinessSettings() {
               value={formData.social_links.google_maps}
               onChange={e => updateSocial('google_maps', e.target.value)}
               placeholder="https://maps.google.com/..."
-              className="flex-1 px-3 py-2 text-sm outline-none bg-white"
+              className="flex-1 px-3 py-2 text-sm text-gray-900 outline-none bg-white placeholder:text-gray-400"
             />
           </div>
         </div>
