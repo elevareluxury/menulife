@@ -389,6 +389,13 @@ h1, h2, h3, h4, h5, h6 {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes ml-shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-8px); }
+  40%     { transform: translateX(8px); }
+  60%     { transform: translateX(-6px); }
+  80%     { transform: translateX(6px); }
+}
 
 /* =====================================================
    LANDING — UTILITIES (sin cambios)

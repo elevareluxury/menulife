@@ -1,14 +1,14 @@
 import type { Waiter } from '@/types'
 
 const AVATAR_COLORS = [
-  'bg-emerald-500',
-  'bg-teal-500',
-  'bg-cyan-500',
-  'bg-green-500',
-  'bg-sky-500',
-  'bg-violet-500',
-  'bg-rose-500',
-  'bg-amber-500',
+  '#F4705A', // salmon
+  '#6C63FF', // purple
+  '#22C55E', // green
+  '#3B82F6', // blue
+  '#F59E0B', // amber
+  '#EC4899', // pink
+  '#14B8A6', // teal
+  '#8B5CF6', // violet
 ]
 
 function avatarColor(id: string) {
@@ -19,9 +19,15 @@ function avatarColor(id: string) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-gray-50 rounded-xl p-4 flex flex-col items-center gap-3 animate-pulse border-2 border-transparent">
-      <div className="w-14 h-14 rounded-full bg-gray-200" />
-      <div className="h-3.5 w-20 bg-gray-200 rounded" />
+    <div style={{
+      background: 'rgba(255,255,255,0.04)', borderRadius: '16px',
+      padding: '20px 16px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+      border: '1px solid rgba(255,255,255,0.06)',
+      animation: 'pulse 1.5s ease-in-out infinite',
+    }}>
+      <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+      <div style={{ height: '12px', width: '72px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)' }} />
     </div>
   )
 }
@@ -36,7 +42,7 @@ interface Props {
 export function WaiterSelector({ waiters, loading, lastWaiterId, onSelect }: Props) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-3 w-full">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%' }}>
         {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
       </div>
     )
@@ -44,7 +50,7 @@ export function WaiterSelector({ waiters, loading, lastWaiterId, onSelect }: Pro
 
   if (waiters.length === 0) {
     return (
-      <p className="text-center text-gray-400 py-8 text-sm">
+      <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: '32px 0', fontFamily: 'var(--font-jakarta)', fontSize: '14px' }}>
         No hay mozos activos registrados
       </p>
     )
@@ -57,28 +63,53 @@ export function WaiterSelector({ waiters, loading, lastWaiterId, onSelect }: Pro
   })
 
   return (
-    <div className="grid grid-cols-2 gap-3 w-full max-h-64 overflow-y-auto">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', width: '100%', maxHeight: '280px', overflowY: 'auto' }}>
       {sorted.map((waiter) => {
         const initials = `${waiter.first_name[0]}${waiter.last_name[0]}`.toUpperCase()
         const isLast = waiter.id === lastWaiterId
+        const color = avatarColor(waiter.id)
         return (
           <button
             key={waiter.id}
             onClick={() => onSelect(waiter)}
-            className={`bg-gray-50 hover:bg-gray-100 active:bg-gray-200 rounded-xl p-4 flex flex-col items-center gap-2 transition-colors border-2 ${
-              isLast ? 'border-emerald-500' : 'border-transparent'
-            }`}
+            style={{
+              background: isLast ? `${color}18` : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${isLast ? `${color}60` : 'rgba(255,255,255,0.07)'}`,
+              borderRadius: '14px',
+              padding: '18px 12px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = `${color}20`
+              e.currentTarget.style.borderColor = `${color}80`
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = isLast ? `${color}18` : 'rgba(255,255,255,0.04)'
+              e.currentTarget.style.borderColor = isLast ? `${color}60` : 'rgba(255,255,255,0.07)'
+              e.currentTarget.style.transform = ''
+            }}
           >
-            <div
-              className={`w-14 h-14 rounded-full ${avatarColor(waiter.id)} flex items-center justify-center text-white text-xl font-bold select-none`}
-            >
+            <div style={{
+              width: '52px', height: '52px', borderRadius: '50%',
+              background: color,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontSize: '18px', fontWeight: 800,
+              fontFamily: 'var(--font-syne)',
+              flexShrink: 0,
+              boxShadow: `0 4px 16px ${color}40`,
+            }}>
               {initials}
             </div>
-            <span className="text-gray-800 text-sm font-medium text-center leading-tight">
+            <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.8)', textAlign: 'center', lineHeight: 1.3 }}>
               {waiter.first_name} {waiter.last_name}
             </span>
             {isLast && (
-              <span className="text-emerald-600 text-xs font-medium">Último usado</span>
+              <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '10px', fontWeight: 600, color, letterSpacing: '0.04em' }}>
+                Último
+              </span>
             )}
           </button>
         )

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -15,32 +14,65 @@ interface FormData {
 
 const EMPTY: FormData = { name: '', email: '', business_name: '', phone: '', city: '', message: '' }
 
-function Field({
-  label, name, type = 'text', placeholder, required, value, onChange, maxLength,
-}: {
+const BASE_INPUT: React.CSSProperties = {
+  width: '100%',
+  padding: '11px 14px',
+  borderRadius: '10px',
+  background: 'rgba(255,255,255,0.06)',
+  color: '#fff',
+  fontSize: '14px',
+  fontFamily: 'var(--font-jakarta)',
+  outline: 'none',
+  transition: 'border-color 0.2s, box-shadow 0.2s',
+  boxSizing: 'border-box',
+}
+
+function DarkInput({ label, required, ...props }: {
   label: string
-  name: string
-  type?: string
-  placeholder?: string
   required?: boolean
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  maxLength?: number
-}) {
+} & React.InputHTMLAttributes<HTMLInputElement>) {
+  const [focused, setFocused] = useState(false)
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-        {label} {required && <span className="text-orange-500">*</span>}
+      <label style={{ display: 'block', fontFamily: 'var(--font-jakarta)', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: '6px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        {label} {required && <span style={{ color: 'var(--ml-salmon)' }}>*</span>}
       </label>
       <input
-        type={type}
-        name={name}
-        placeholder={placeholder}
+        {...props}
         required={required}
-        value={value}
-        onChange={onChange}
-        maxLength={maxLength}
-        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm bg-white"
+        onFocus={e => { setFocused(true); props.onFocus?.(e) }}
+        onBlur={e => { setFocused(false); props.onBlur?.(e) }}
+        style={{
+          ...BASE_INPUT,
+          border: `1px solid ${focused ? 'var(--ml-salmon)' : 'rgba(255,255,255,0.1)'}`,
+          boxShadow: focused ? '0 0 0 3px rgba(244,112,90,0.12)' : 'none',
+        }}
+      />
+    </div>
+  )
+}
+
+function DarkTextarea({ label, charCount, ...props }: {
+  label: string
+  charCount?: number
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const [focused, setFocused] = useState(false)
+  return (
+    <div>
+      <label style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-jakarta)', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: '6px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        <span>{label}</span>
+        {charCount !== undefined && <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>{charCount}/500</span>}
+      </label>
+      <textarea
+        {...props}
+        onFocus={e => { setFocused(true); props.onFocus?.(e) }}
+        onBlur={e => { setFocused(false); props.onBlur?.(e) }}
+        style={{
+          ...BASE_INPUT as React.CSSProperties,
+          resize: 'none',
+          border: `1px solid ${focused ? 'var(--ml-salmon)' : 'rgba(255,255,255,0.1)'}`,
+          boxShadow: focused ? '0 0 0 3px rgba(244,112,90,0.12)' : 'none',
+        } as React.CSSProperties}
       />
     </div>
   )
@@ -57,29 +89,16 @@ export function AccessRequestPage() {
       setForm(prev => ({ ...prev, [field]: e.target.value }))
 
   const validate = (): boolean => {
-    if (form.name.trim().length < 2) {
-      toast.error('El nombre debe tener al menos 2 caracteres')
-      return false
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      toast.error('Ingresá un email válido')
-      return false
-    }
-    if (!form.business_name.trim()) {
-      toast.error('El nombre del negocio es requerido')
-      return false
-    }
-    if (form.message.length > 500) {
-      toast.error('El mensaje no puede superar los 500 caracteres')
-      return false
-    }
+    if (form.name.trim().length < 2) { toast.error('El nombre debe tener al menos 2 caracteres'); return false }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) { toast.error('Ingresá un email válido'); return false }
+    if (!form.business_name.trim()) { toast.error('El nombre del negocio es requerido'); return false }
+    if (form.message.length > 500) { toast.error('El mensaje no puede superar los 500 caracteres'); return false }
     return true
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
-
     setLoading(true)
     try {
       const { error } = await supabase.from('access_requests').insert({
@@ -90,15 +109,10 @@ export function AccessRequestPage() {
         city: form.city.trim() || null,
         message: form.message.trim() || null,
       })
-
       if (error) {
-        if (error.code === '23505') {
-          toast.error('Ya existe una solicitud con ese email. Te avisamos pronto.')
-          return
-        }
+        if (error.code === '23505') { toast.error('Ya existe una solicitud con ese email. Te avisamos pronto.'); return }
         throw error
       }
-
       setSubmittedEmail(form.email.trim().toLowerCase())
       setSubmitted(true)
     } catch (err) {
@@ -110,32 +124,40 @@ export function AccessRequestPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10 text-green-600" />
+      <div style={{ minHeight: '100vh', background: '#0F1115', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ textAlign: 'center', maxWidth: '440px' }}>
+          <div style={{
+            width: '80px', height: '80px', borderRadius: '50%',
+            background: 'rgba(244,112,90,0.12)', border: '2px solid var(--ml-salmon)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 24px',
+            animation: 'ml-float 3s ease-in-out infinite',
+          }}>
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--ml-salmon)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20,6 9,17 4,12" />
+            </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">¡Solicitud enviada!</h2>
-          <p className="text-gray-500 mb-2">
-            Revisamos tu solicitud en menos de 24 horas.
+          <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '28px', color: '#fff', marginBottom: '12px' }}>
+            ¡Solicitud enviada!
+          </h2>
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '15px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: '24px' }}>
+            Revisamos tu solicitud en menos de 24 horas.<br />
+            Te avisamos a: <span style={{ color: '#fff', fontWeight: 600 }}>{submittedEmail}</span>
           </p>
-          <p className="text-gray-500 mb-6">
-            Te avisamos a: <span className="font-semibold text-gray-800">{submittedEmail}</span>
-          </p>
-          <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 mb-8">
-            <p className="text-sm text-orange-700">
+          <div style={{
+            padding: '14px 18px',
+            background: 'rgba(244,112,90,0.08)', border: '1px solid rgba(244,112,90,0.2)',
+            borderRadius: '14px', marginBottom: '32px',
+          }}>
+            <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)' }}>
               Mientras tanto, seguinos en{' '}
-              <a
-                href="https://instagram.com/menulife.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold underline"
-              >
+              <a href="https://instagram.com/menulife.app" target="_blank" rel="noopener noreferrer"
+                style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}>
                 @menulife.app
               </a>
             </p>
           </div>
-          <Link to="/" className="text-sm text-gray-400 hover:text-gray-600 transition">
+          <Link to="/" style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>
             ← Volver al inicio
           </Link>
         </div>
@@ -144,106 +166,203 @@ export function AccessRequestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header band */}
-      <div className="bg-gray-900 py-10 px-4 text-center">
-        <Link to="/" className="inline-flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-400 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-            M
-          </div>
-          <span className="text-white font-bold text-xl">MenuLife</span>
+    <div style={{ minHeight: '100vh', background: '#0F1115' }} className="flex flex-col lg:flex-row">
+      {/* Left panel — value prop (desktop only) */}
+      <div
+        className="hidden lg:flex lg:flex-col lg:justify-center"
+        style={{
+          width: '42%',
+          flexShrink: 0,
+          borderRight: '1px solid rgba(255,255,255,0.05)',
+          padding: '64px 52px',
+          position: 'relative', overflow: 'hidden',
+        }}
+      >
+        {/* Salmon ambient glow */}
+        <div style={{
+          position: 'absolute', bottom: '-100px', left: '-100px',
+          width: '500px', height: '500px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(244,112,90,0.1) 0%, transparent 65%)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Logo */}
+        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '52px' }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '10px',
+            background: 'var(--ml-salmon)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '18px',
+          }}>M</div>
+          <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '20px' }}>MenuLife</span>
         </Link>
-        <h1 className="text-3xl font-bold text-white mb-2">
-          Transformá tu negocio con
+
+        {/* Badge */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: '8px',
+          background: 'rgba(244,112,90,0.1)', border: '1px solid rgba(244,112,90,0.25)',
+          borderRadius: '50px', padding: '5px 14px',
+          marginBottom: '20px', alignSelf: 'flex-start',
+        }}>
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--ml-salmon)', flexShrink: 0, animation: 'ml-chat-dot 1.2s ease-in-out infinite' }} />
+          <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '12px', fontWeight: 600, color: 'var(--ml-salmon)' }}>
+            14 días gratis — sin tarjeta
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h1 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(30px,2.8vw,42px)', color: '#fff', lineHeight: 1.15, marginBottom: '16px' }}>
+          Tu negocio,<br />
+          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>digital desde hoy.</em>
         </h1>
-        <p className="text-orange-400 font-semibold text-xl">
-          software digital inteligente
+        <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, marginBottom: '36px', maxWidth: '300px' }}>
+          Menú digital, pedidos, gestión de mozos y analytics — todo en una sola plataforma.
         </p>
-        <p className="text-gray-400 text-sm mt-3 max-w-sm mx-auto">
-          Menú digital, pedidos, mozos y más — todo en una sola plataforma.
-          Completá el formulario y te contactamos en 24hs.
-        </p>
+
+        {/* Trust list */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '36px' }}>
+          {[
+            { icon: '⚡', text: 'Funcionando en menos de 10 minutos' },
+            { icon: '📱', text: 'Sin app para tus clientes — solo QR' },
+            { icon: '📊', text: 'Analytics en tiempo real con IA' },
+          ].map(({ icon, text }) => (
+            <div key={text} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{
+                width: '32px', height: '32px', borderRadius: '8px', flexShrink: 0,
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px',
+              }}>{icon}</span>
+              <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>{text}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Testimonial */}
+        <div style={{
+          padding: '16px 18px',
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
+          borderLeft: '3px solid var(--ml-salmon)',
+          borderRadius: '0 12px 12px 0',
+        }}>
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, fontStyle: 'italic', margin: '0 0 8px' }}>
+            "Empezamos el viernes, el lunes ya estábamos cobrando con QR en todas las mesas."
+          </p>
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, margin: 0 }}>
+            — Valeria M., Forest Café
+          </p>
+        </div>
       </div>
 
-      {/* Form */}
-      <div className="max-w-lg mx-auto px-4 py-10">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Solicitar acceso gratuito</h2>
+      {/* Right panel — form */}
+      <div style={{
+        flex: 1,
+        background: '#13161e',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+        padding: '48px 24px',
+        overflowY: 'auto',
+      }}>
+        {/* Mobile logo */}
+        <Link to="/" className="flex lg:hidden" style={{ alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '28px' }}>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '8px',
+            background: 'var(--ml-salmon)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '16px',
+          }}>M</div>
+          <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '18px' }}>MenuLife</span>
+        </Link>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <Field
-              label="Tu nombre"
-              name="name"
+        <div style={{
+          width: '100%', maxWidth: '480px',
+          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: '20px', padding: '32px 28px',
+        }}>
+          <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '20px', color: '#fff', margin: '0 0 4px' }}>
+            Solicitar acceso gratuito
+          </h2>
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', margin: '0 0 24px' }}>
+            Completá el formulario y te contactamos en 24hs.
+          </p>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <DarkInput
+              label="Tu nombre" required
               placeholder="Juan Pérez"
-              required
               value={form.name}
-              onChange={e => update('name')(e as React.ChangeEvent<HTMLInputElement>)}
+              onChange={update('name')}
             />
-            <Field
-              label="Email"
-              name="email"
-              type="email"
+            <DarkInput
+              label="Email" required type="email"
               placeholder="juan@tucafe.com"
-              required
               value={form.email}
-              onChange={e => update('email')(e as React.ChangeEvent<HTMLInputElement>)}
+              onChange={update('email')}
             />
-            <Field
-              label="Nombre del negocio"
-              name="business_name"
+            <DarkInput
+              label="Nombre del negocio" required
               placeholder="Forest Café"
-              required
               value={form.business_name}
-              onChange={e => update('business_name')(e as React.ChangeEvent<HTMLInputElement>)}
+              onChange={update('business_name')}
             />
-            <Field
-              label="Teléfono / WhatsApp"
-              name="phone"
-              type="tel"
-              placeholder="+54 9 11 1234-5678"
-              value={form.phone}
-              onChange={e => update('phone')(e as React.ChangeEvent<HTMLInputElement>)}
-            />
-            <Field
-              label="Ciudad"
-              name="city"
-              placeholder="Buenos Aires"
-              value={form.city}
-              onChange={e => update('city')(e as React.ChangeEvent<HTMLInputElement>)}
-            />
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                ¿Algo más que quieras contarnos?
-                <span className="text-gray-400 font-normal ml-1">({form.message.length}/500)</span>
-              </label>
-              <textarea
-                value={form.message}
-                onChange={update('message')}
-                placeholder="Tenemos un café con 20 mesas y queremos digitalizar el servicio..."
-                rows={4}
-                maxLength={500}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm bg-white resize-none"
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <DarkInput
+                label="Teléfono / WhatsApp" type="tel"
+                placeholder="+54 9 11 1234-5678"
+                value={form.phone}
+                onChange={update('phone')}
+              />
+              <DarkInput
+                label="Ciudad"
+                placeholder="Buenos Aires"
+                value={form.city}
+                onChange={update('city')}
               />
             </div>
+            <DarkTextarea
+              label="Mensaje"
+              charCount={form.message.length}
+              placeholder="Tenemos un café con 20 mesas..."
+              value={form.message}
+              onChange={update('message')}
+              maxLength={500}
+              rows={3}
+            />
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold rounded-xl transition text-base shadow-md shadow-orange-500/20"
+              style={{
+                width: '100%', padding: '14px',
+                borderRadius: '50px', border: 'none',
+                background: loading ? 'rgba(244,112,90,0.45)' : 'var(--ml-salmon)',
+                color: '#fff', fontSize: '14px', fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontFamily: 'var(--font-jakarta)',
+                position: 'relative', overflow: 'hidden',
+                transition: 'all 0.2s',
+                marginTop: '4px',
+              }}
+              onMouseEnter={e => { if (!loading) { e.currentTarget.style.boxShadow = '0 0 28px rgba(244,112,90,0.45)'; e.currentTarget.style.transform = 'scale(1.01)' } }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = '' }}
             >
-              {loading ? 'Enviando...' : 'Solicitar acceso gratuito'}
+              {loading ? 'Enviando...' : 'Solicitar acceso gratuito →'}
+              {!loading && (
+                <span style={{
+                  position: 'absolute', top: 0, left: '-100%', width: '100%', height: '100%',
+                  background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)',
+                  animation: 'ml-shimmer 3s infinite',
+                }} />
+              )}
             </button>
 
-            <p className="text-xs text-center text-gray-400">
+            <p style={{ textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
               Sin tarjeta de crédito. 14 días de prueba gratis.
             </p>
           </form>
         </div>
 
-        <p className="text-center mt-6 text-sm text-gray-500">
+        <p style={{ marginTop: '18px', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
           ¿Ya tenés cuenta?{' '}
-          <Link to="/login" className="text-orange-500 hover:underline font-medium">
+          <Link to="/login" style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}>
             Iniciá sesión
           </Link>
         </p>
