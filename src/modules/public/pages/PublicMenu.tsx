@@ -560,6 +560,11 @@ export function PublicMenu() {
         const r = rest as Restaurant
         setRestaurant(r)
 
+        // Init language from restaurant default if user hasn't manually switched
+        if (!localStorage.getItem(`menulife_menu_lang_${slug as string}`)) {
+          setLanguage(r.default_language ?? 'ES')
+        }
+
         // Determine initial phase
         if (!mesaParam) {
           const storageKey = `order_type_${slug as string}`
@@ -788,13 +793,19 @@ export function PublicMenu() {
             )}
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button
-              onClick={() => setLanguage(language === 'ES' ? 'EN' : 'ES')}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
-              style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)' }}
-            >
-              <Globe className="w-3 h-3" />{language}
-            </button>
+            {(restaurant.allow_language_switch ?? true) && (
+              <button
+                onClick={() => {
+                  const next = language === 'ES' ? 'EN' : 'ES'
+                  setLanguage(next)
+                  localStorage.setItem(`menulife_menu_lang_${slug as string}`, next)
+                }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)' }}
+              >
+                <Globe className="w-3 h-3" />{language}
+              </button>
+            )}
             <button
               onClick={() => setCurrency(currency === 'ARS' ? 'USD' : 'ARS')}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
@@ -838,11 +849,17 @@ export function PublicMenu() {
               </span>
             )}
             <div className="flex items-center gap-1">
-              <button
-                onClick={() => setLanguage(language === 'ES' ? 'EN' : 'ES')}
-                className="px-2 py-1 rounded-lg text-xs font-semibold"
-                style={{ backgroundColor: 'var(--menu-card-elevated)', color: 'var(--menu-text-secondary)' }}
-              >{language}</button>
+              {(restaurant.allow_language_switch ?? true) && (
+                <button
+                  onClick={() => {
+                    const next = language === 'ES' ? 'EN' : 'ES'
+                    setLanguage(next)
+                    localStorage.setItem(`menulife_menu_lang_${slug as string}`, next)
+                  }}
+                  className="px-2 py-1 rounded-lg text-xs font-semibold"
+                  style={{ backgroundColor: 'var(--menu-card-elevated)', color: 'var(--menu-text-secondary)' }}
+                >{language}</button>
+              )}
               <button
                 onClick={() => setCurrency(currency === 'ARS' ? 'USD' : 'ARS')}
                 className="px-2 py-1 rounded-lg text-xs font-semibold"

@@ -1,5 +1,6 @@
 import { Bell, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useGreeting } from '@/hooks/useGreeting'
 
@@ -12,15 +13,16 @@ interface HeaderProps {
   coverImageUrl?: string
 }
 
-const statusConfig: Record<OperationalStatus, { text: string; cls: string }> = {
-  ok:       { text: 'Todo funcionando correctamente', cls: 'text-ok' },
-  warning:  { text: 'Hay pedidos pendientes',         cls: 'text-caution' },
-  critical: { text: 'Requiere atención',               cls: 'text-danger' },
-}
-
 export function Header({ businessName, notificationCount = 0, operationalStatus = 'ok', coverImageUrl }: HeaderProps) {
   const { text: greetingText, emoji } = useGreeting()
   const navigate = useNavigate()
+  const { t } = useTranslation()
+
+  const statusConfig: Record<OperationalStatus, { text: string; cls: string }> = {
+    ok:       { text: t('dashboard.status_ok'),        cls: 'text-ok' },
+    warning:  { text: t('dashboard.status_pending'),   cls: 'text-caution' },
+    critical: { text: t('dashboard.status_attention'), cls: 'text-danger' },
+  }
   const status = statusConfig[operationalStatus]
 
   const content = (

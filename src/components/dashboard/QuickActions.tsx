@@ -1,6 +1,7 @@
 import { Eye, ChefHat, Plus, Package, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface QuickAction {
   icon: LucideIcon
@@ -77,30 +78,32 @@ function ActionButton({ action }: { action: QuickAction }) {
 }
 
 export function QuickActions({ restaurantSlug }: { restaurantSlug?: string }) {
+  const { t } = useTranslation()
+
   const actions: QuickAction[] = [
     {
       icon: Eye,
-      label: 'Ver menú QR',
+      label: t('dashboard.action_view_qr'),
       href: restaurantSlug ? `/r/${restaurantSlug}` : undefined,
       external: true,
       delay: 0,
     },
     {
       icon: ChefHat,
-      label: 'Abrir cocina',
+      label: t('dashboard.action_open_kitchen'),
       href: restaurantSlug ? `/kitchen/${restaurantSlug}` : undefined,
       external: true,
       delay: 0.05,
     },
     {
       icon: Plus,
-      label: 'Crear mesa',
+      label: t('dashboard.action_create_table'),
       to: '/dashboard/tables',
       delay: 0.1,
     },
     {
       icon: Package,
-      label: 'Agregar producto',
+      label: t('dashboard.action_add_product'),
       to: '/dashboard/menu',
       delay: 0.15,
     },
@@ -109,7 +112,7 @@ export function QuickActions({ restaurantSlug }: { restaurantSlug?: string }) {
   return (
     <section>
       <p className="text-[10px] font-semibold text-ink-3 uppercase tracking-widest mb-3">
-        Acciones rápidas
+        {t('dashboard.quick_actions')}
       </p>
       <div className="grid grid-cols-2 gap-2">
         {actions.map((action) => (

@@ -53,6 +53,7 @@ export interface Restaurant {
   delivery_zones?: DeliveryZone[] | unknown
   takeaway_enabled?: boolean
   takeaway_time_estimate?: number | null
+  allow_language_switch?: boolean
 }
 
 export interface MenuSection {

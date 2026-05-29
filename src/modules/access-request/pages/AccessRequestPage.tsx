@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Globe } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/hooks/useLanguage'
 import toast from 'react-hot-toast'
 
 interface FormData {
@@ -79,6 +82,8 @@ function DarkTextarea({ label, charCount, ...props }: {
 }
 
 export function AccessRequestPage() {
+  const { t } = useTranslation()
+  const { currentLang, toggleLanguage } = useLanguage()
   const [form, setForm] = useState<FormData>(EMPTY)
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -89,10 +94,10 @@ export function AccessRequestPage() {
       setForm(prev => ({ ...prev, [field]: e.target.value }))
 
   const validate = (): boolean => {
-    if (form.name.trim().length < 2) { toast.error('El nombre debe tener al menos 2 caracteres'); return false }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) { toast.error('Ingresá un email válido'); return false }
-    if (!form.business_name.trim()) { toast.error('El nombre del negocio es requerido'); return false }
-    if (form.message.length > 500) { toast.error('El mensaje no puede superar los 500 caracteres'); return false }
+    if (form.name.trim().length < 2) { toast.error(t('access_request.validation_name_min')); return false }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) { toast.error(t('access_request.validation_email_invalid')); return false }
+    if (!form.business_name.trim()) { toast.error(t('access_request.validation_business_required')); return false }
+    if (form.message.length > 500) { toast.error(t('access_request.validation_message_max')); return false }
     return true
   }
 
@@ -110,13 +115,13 @@ export function AccessRequestPage() {
         message: form.message.trim() || null,
       })
       if (error) {
-        if (error.code === '23505') { toast.error('Ya existe una solicitud con ese email. Te avisamos pronto.'); return }
+        if (error.code === '23505') { toast.error(t('access_request.error_duplicate')); return }
         throw error
       }
       setSubmittedEmail(form.email.trim().toLowerCase())
       setSubmitted(true)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al enviar la solicitud')
+      toast.error(err instanceof Error ? err.message : t('access_request.error_submit'))
     } finally {
       setLoading(false)
     }
@@ -138,11 +143,11 @@ export function AccessRequestPage() {
             </svg>
           </div>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '28px', color: '#fff', marginBottom: '12px' }}>
-            ¡Solicitud enviada!
+            {t('access_request.success_title')}
           </h2>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '15px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: '24px' }}>
-            Revisamos tu solicitud en menos de 24 horas.<br />
-            Te avisamos a: <span style={{ color: '#fff', fontWeight: 600 }}>{submittedEmail}</span>
+            {t('access_request.success_subtitle')}<br />
+            {t('access_request.success_email')} <span style={{ color: '#fff', fontWeight: 600 }}>{submittedEmail}</span>
           </p>
           <div style={{
             padding: '14px 18px',
@@ -150,7 +155,7 @@ export function AccessRequestPage() {
             borderRadius: '14px', marginBottom: '32px',
           }}>
             <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)' }}>
-              Mientras tanto, seguinos en{' '}
+              {t('access_request.success_follow')}{' '}
               <a href="https://instagram.com/menulife.app" target="_blank" rel="noopener noreferrer"
                 style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}>
                 @menulife.app
@@ -158,7 +163,7 @@ export function AccessRequestPage() {
             </p>
           </div>
           <Link to="/" style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>
-            ← Volver al inicio
+            {t('access_request.success_back')}
           </Link>
         </div>
       </div>
@@ -167,6 +172,22 @@ export function AccessRequestPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0F1115' }} className="flex flex-col lg:flex-row">
+      {/* Floating language toggle */}
+      <button
+        onClick={toggleLanguage}
+        style={{
+          position: 'fixed', top: '16px', right: '16px', zIndex: 100,
+          display: 'flex', alignItems: 'center', gap: '6px',
+          padding: '6px 12px', borderRadius: '50px',
+          background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+          color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-jakarta)',
+          fontSize: '12px', fontWeight: 600, cursor: 'pointer', backdropFilter: 'blur(8px)',
+        }}
+      >
+        <Globe size={13} />
+        {currentLang === 'es' ? 'ES' : 'EN'}
+      </button>
+
       {/* Left panel — value prop (desktop only) */}
       <div
         className="hidden lg:flex lg:flex-col lg:justify-center"
@@ -206,25 +227,25 @@ export function AccessRequestPage() {
         }}>
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--ml-salmon)', flexShrink: 0, animation: 'ml-chat-dot 1.2s ease-in-out infinite' }} />
           <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '12px', fontWeight: 600, color: 'var(--ml-salmon)' }}>
-            14 días gratis — sin tarjeta
+            {t('access_request.badge')}
           </span>
         </div>
 
         {/* Headline */}
         <h1 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(30px,2.8vw,42px)', color: '#fff', lineHeight: 1.15, marginBottom: '16px' }}>
-          Tu negocio,<br />
-          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>digital desde hoy.</em>
+          {t('access_request.hero_title')}<br />
+          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('access_request.hero_accent')}</em>
         </h1>
         <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, marginBottom: '36px', maxWidth: '300px' }}>
-          Menú digital, pedidos, gestión de mozos y analytics — todo en una sola plataforma.
+          {t('access_request.hero_subtitle')}
         </p>
 
         {/* Trust list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '36px' }}>
           {[
-            { icon: '⚡', text: 'Funcionando en menos de 10 minutos' },
-            { icon: '📱', text: 'Sin app para tus clientes — solo QR' },
-            { icon: '📊', text: 'Analytics en tiempo real con IA' },
+            { icon: '⚡', text: t('access_request.point_1') },
+            { icon: '📱', text: t('access_request.point_2') },
+            { icon: '📊', text: t('access_request.point_3') },
           ].map(({ icon, text }) => (
             <div key={text} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{
@@ -245,10 +266,10 @@ export function AccessRequestPage() {
           borderRadius: '0 12px 12px 0',
         }}>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, fontStyle: 'italic', margin: '0 0 8px' }}>
-            "Empezamos el viernes, el lunes ya estábamos cobrando con QR en todas las mesas."
+            "{t('access_request.testimonial')}"
           </p>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, margin: 0 }}>
-            — Valeria M., Forest Café
+            {t('access_request.testimonial_author')}
           </p>
         </div>
       </div>
@@ -278,49 +299,49 @@ export function AccessRequestPage() {
           borderRadius: '20px', padding: '32px 28px',
         }}>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '20px', color: '#fff', margin: '0 0 4px' }}>
-            Solicitar acceso gratuito
+            {t('access_request.form_title')}
           </h2>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', margin: '0 0 24px' }}>
-            Completá el formulario y te contactamos en 24hs.
+            {t('access_request.form_subtitle')}
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <DarkInput
-              label="Tu nombre" required
-              placeholder="Juan Pérez"
+              label={t('access_request.field_name')} required
+              placeholder={t('access_request.field_name_placeholder')}
               value={form.name}
               onChange={update('name')}
             />
             <DarkInput
-              label="Email" required type="email"
-              placeholder="juan@tucafe.com"
+              label={t('access_request.field_email')} required type="email"
+              placeholder={t('access_request.field_email_placeholder')}
               value={form.email}
               onChange={update('email')}
             />
             <DarkInput
-              label="Nombre del negocio" required
-              placeholder="Forest Café"
+              label={t('access_request.field_business')} required
+              placeholder={t('access_request.field_business_placeholder')}
               value={form.business_name}
               onChange={update('business_name')}
             />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               <DarkInput
-                label="Teléfono / WhatsApp" type="tel"
-                placeholder="+54 9 11 1234-5678"
+                label={t('access_request.field_phone')} type="tel"
+                placeholder={t('access_request.field_phone_placeholder')}
                 value={form.phone}
                 onChange={update('phone')}
               />
               <DarkInput
-                label="Ciudad"
-                placeholder="Buenos Aires"
+                label={t('access_request.field_city')}
+                placeholder={t('access_request.field_city_placeholder')}
                 value={form.city}
                 onChange={update('city')}
               />
             </div>
             <DarkTextarea
-              label="Mensaje"
+              label={t('access_request.field_message')}
               charCount={form.message.length}
-              placeholder="Tenemos un café con 20 mesas..."
+              placeholder={t('access_request.field_message_placeholder')}
               value={form.message}
               onChange={update('message')}
               maxLength={500}
@@ -344,7 +365,7 @@ export function AccessRequestPage() {
               onMouseEnter={e => { if (!loading) { e.currentTarget.style.boxShadow = '0 0 28px rgba(244,112,90,0.45)'; e.currentTarget.style.transform = 'scale(1.01)' } }}
               onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = '' }}
             >
-              {loading ? 'Enviando...' : 'Solicitar acceso gratuito →'}
+              {loading ? t('access_request.submit_loading') : t('access_request.submit_button')}
               {!loading && (
                 <span style={{
                   position: 'absolute', top: 0, left: '-100%', width: '100%', height: '100%',
@@ -355,15 +376,15 @@ export function AccessRequestPage() {
             </button>
 
             <p style={{ textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-              Sin tarjeta de crédito. 14 días de prueba gratis.
+              {t('access_request.trust_1')}. {t('access_request.trust_2')}. {t('access_request.trust_3')}.
             </p>
           </form>
         </div>
 
         <p style={{ marginTop: '18px', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
-          ¿Ya tenés cuenta?{' '}
+          {t('access_request.login_link')}{' '}
           <Link to="/login" style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}>
-            Iniciá sesión
+            {t('access_request.login_cta')}
           </Link>
         </p>
       </div>

@@ -5,28 +5,29 @@ import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed, MoreHorizontal,
   QrCode, Users, ChefHat, Settings, Truck, type LucideIcon,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 interface MainTab {
   to: string
   icon: LucideIcon
-  label: string
+  labelKey: string
   exact?: boolean
 }
 
 interface MoreItem {
   icon: LucideIcon
-  label: string
+  labelKey: string
   to?: string
   href?: string
   external?: boolean
 }
 
-const mainTabs: MainTab[] = [
-  { to: '/dashboard',        icon: Home,           label: 'Inicio',  exact: true },
-  { to: '/dashboard/orders', icon: ShoppingBag,    label: 'Pedidos' },
-  { to: '/dashboard/tables', icon: LayoutGrid,     label: 'Mesas' },
-  { to: '/dashboard/menu',   icon: UtensilsCrossed, label: 'Menú' },
+const MAIN_TABS: MainTab[] = [
+  { to: '/dashboard',        icon: Home,            labelKey: 'dashboard.nav_home',   exact: true },
+  { to: '/dashboard/orders', icon: ShoppingBag,     labelKey: 'dashboard.nav_orders' },
+  { to: '/dashboard/tables', icon: LayoutGrid,      labelKey: 'dashboard.nav_tables' },
+  { to: '/dashboard/menu',   icon: UtensilsCrossed, labelKey: 'dashboard.nav_menu' },
 ]
 
 function useIsActive(path: string, exact?: boolean) {
@@ -45,6 +46,7 @@ function TabItem({
 }) {
   const active = useIsActive(tab.to, tab.exact)
   const Icon = tab.icon
+  const { t } = useTranslation()
 
   return (
     <Link
@@ -73,7 +75,7 @@ function TabItem({
       <span
         className={cn('text-[10px] font-medium transition-colors duration-150', active ? 'text-brand' : 'text-ink-3')}
       >
-        {tab.label}
+        {t(tab.labelKey)}
       </span>
     </Link>
   )
@@ -81,18 +83,19 @@ function TabItem({
 
 export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
   const [showMore, setShowMore] = useState(false)
+  const { t } = useTranslation()
 
   const moreItems: MoreItem[] = [
-    { icon: QrCode,    label: 'QR',             to: '/dashboard/qr' },
-    { icon: Users,     label: 'Mozos',          to: '/dashboard/waiters' },
-    { icon: Truck,     label: 'Repartidores',   to: '/dashboard/repartidores' },
+    { icon: QrCode,   labelKey: 'dashboard.nav_qr',      to: '/dashboard/qr' },
+    { icon: Users,    labelKey: 'dashboard.nav_waiters',  to: '/dashboard/waiters' },
+    { icon: Truck,    labelKey: 'dashboard.nav_drivers',  to: '/dashboard/repartidores' },
     {
       icon: ChefHat,
-      label: 'Cocina',
+      labelKey: 'dashboard.nav_kitchen',
       href: restaurantSlug ? `/kitchen/${restaurantSlug}` : undefined,
       external: true,
     },
-    { icon: Settings,  label: 'Configuración',  to: '/dashboard' },
+    { icon: Settings, labelKey: 'dashboard.nav_settings', to: '/dashboard' },
   ]
 
   const close = () => setShowMore(false)
@@ -139,13 +142,14 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
                 boxShadow: 'var(--shadow-lg)',
               }}
             >
-              {moreItems.map(({ icon: Icon, label, to, href, external }, idx) => {
+              {moreItems.map(({ icon: Icon, labelKey, to, href, external }, idx) => {
                 const itemCls =
                   'flex items-center gap-3.5 px-5 py-3.5 text-[13px] font-medium text-ink-2 hover:text-ink-1 hover:bg-surface-3 transition-colors cursor-pointer'
                 const divider = idx < moreItems.length - 1 && (
                   <div style={{ height: 1, background: 'var(--border-subtle)', margin: '0 16px' }} />
                 )
 
+                const label = t(labelKey)
                 const inner = (
                   <>
                     <Icon className="w-4 h-4 text-ink-3 flex-shrink-0" strokeWidth={2} />
@@ -155,7 +159,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
 
                 if (href) {
                   return (
-                    <div key={label}>
+                    <div key={labelKey}>
                       <a href={href} target={external ? '_blank' : undefined} rel="noopener noreferrer" className={itemCls} onClick={close}>
                         {inner}
                       </a>
@@ -164,7 +168,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
                   )
                 }
                 return (
-                  <div key={label}>
+                  <div key={labelKey}>
                     <Link to={to!} className={itemCls} onClick={close}>
                       {inner}
                     </Link>
@@ -191,7 +195,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
             borderTop: '1px solid var(--border-subtle)',
           }}
         >
-          {mainTabs.map((tab) => (
+          {MAIN_TABS.map((tab) => (
             <TabItem key={tab.to} tab={tab} onClick={close} />
           ))}
 
@@ -204,7 +208,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
             )}
           >
             <MoreHorizontal className="w-[22px] h-[22px]" strokeWidth={2} />
-            <span className="text-[10px] font-medium">Más</span>
+            <span className="text-[10px] font-medium">{t('dashboard.nav_more')}</span>
           </button>
         </div>
       </nav>

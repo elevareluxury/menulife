@@ -1,6 +1,7 @@
 import { ShoppingBag, UtensilsCrossed, LayoutGrid, QrCode, ArrowRight, type LucideIcon } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface Tool {
   icon: LucideIcon
@@ -63,14 +64,16 @@ function ToolCard({ tool }: { tool: Tool }) {
 }
 
 export function ToolsGrid({ ordersActive, menuProducts, tablesActive, tablesTotal, qrGenerated }: ToolsGridProps) {
+  const { t } = useTranslation()
+
   const tools: Tool[] = [
     {
       icon: ShoppingBag,
       iconColorClass: 'text-brand',
       iconBgClass: 'bg-brand-dim',
-      label: 'Pedidos',
-      description: 'Gestioná pedidos en tiempo real',
-      status: `${ordersActive} activos`,
+      label: t('dashboard.tool_orders'),
+      description: t('dashboard.tool_orders_desc'),
+      status: `${ordersActive} ${t('dashboard.tool_orders_active')}`,
       to: '/dashboard/orders',
       delay: 0,
     },
@@ -78,9 +81,9 @@ export function ToolsGrid({ ordersActive, menuProducts, tablesActive, tablesTota
       icon: UtensilsCrossed,
       iconColorClass: 'text-ok',
       iconBgClass: 'bg-ok-dim',
-      label: 'Menú',
-      description: 'Editá platos y categorías',
-      status: `${menuProducts} productos`,
+      label: t('dashboard.tool_menu'),
+      description: t('dashboard.tool_menu_desc'),
+      status: `${menuProducts} ${t('dashboard.tool_menu_products')}`,
       to: '/dashboard/menu',
       delay: 0.06,
     },
@@ -88,9 +91,9 @@ export function ToolsGrid({ ordersActive, menuProducts, tablesActive, tablesTota
       icon: LayoutGrid,
       iconColorClass: 'text-info',
       iconBgClass: 'bg-info-dim',
-      label: 'Mesas',
-      description: 'Visualizá el estado del salón',
-      status: `${tablesActive}/${tablesTotal} activas`,
+      label: t('dashboard.tool_tables'),
+      description: t('dashboard.tool_tables_desc'),
+      status: `${tablesActive}/${tablesTotal} ${t('dashboard.tool_tables_active')}`,
       to: '/dashboard/tables',
       delay: 0.12,
     },
@@ -98,9 +101,9 @@ export function ToolsGrid({ ordersActive, menuProducts, tablesActive, tablesTota
       icon: QrCode,
       iconColorClass: 'text-purple',
       iconBgClass: 'bg-purple-dim',
-      label: 'QR',
-      description: 'Administrá códigos QR',
-      status: `${qrGenerated} generados`,
+      label: t('dashboard.tool_qr'),
+      description: t('dashboard.tool_qr_desc'),
+      status: `${qrGenerated} ${t('dashboard.tool_qr_generated')}`,
       to: '/dashboard/qr',
       delay: 0.18,
     },
@@ -109,7 +112,7 @@ export function ToolsGrid({ ordersActive, menuProducts, tablesActive, tablesTota
   return (
     <section>
       <p className="text-[10px] font-semibold text-ink-3 uppercase tracking-widest mb-3">
-        Herramientas
+        {t('dashboard.tools_title')}
       </p>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {tools.map((tool) => (

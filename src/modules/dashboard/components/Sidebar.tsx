@@ -3,24 +3,25 @@ import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed,
   QrCode, Users, ChefHat, LogOut, Truck, type LucideIcon,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { cn } from '@/lib/utils'
 
 interface NavItemDef {
   to: string
   icon: LucideIcon
-  label: string
+  labelKey: string
   exact?: boolean
 }
 
-const navItems: NavItemDef[] = [
-  { to: '/dashboard',          icon: Home,            label: 'Inicio',  exact: true },
-  { to: '/dashboard/orders',   icon: ShoppingBag,     label: 'Pedidos' },
-  { to: '/dashboard/tables',   icon: LayoutGrid,      label: 'Mesas' },
-  { to: '/dashboard/menu',     icon: UtensilsCrossed, label: 'Menú' },
-  { to: '/dashboard/qr',       icon: QrCode,          label: 'QR' },
-  { to: '/dashboard/waiters',      icon: Users,  label: 'Mozos' },
-  { to: '/dashboard/repartidores', icon: Truck,  label: 'Repartidores' },
+const NAV_ITEMS: NavItemDef[] = [
+  { to: '/dashboard',          icon: Home,            labelKey: 'dashboard.nav_home',     exact: true },
+  { to: '/dashboard/orders',   icon: ShoppingBag,     labelKey: 'dashboard.nav_orders' },
+  { to: '/dashboard/tables',   icon: LayoutGrid,      labelKey: 'dashboard.nav_tables' },
+  { to: '/dashboard/menu',     icon: UtensilsCrossed, labelKey: 'dashboard.nav_menu' },
+  { to: '/dashboard/qr',       icon: QrCode,          labelKey: 'dashboard.nav_qr' },
+  { to: '/dashboard/waiters',      icon: Users,  labelKey: 'dashboard.nav_waiters' },
+  { to: '/dashboard/repartidores', icon: Truck,  labelKey: 'dashboard.nav_drivers' },
 ]
 
 interface SidebarProps {
@@ -29,6 +30,7 @@ interface SidebarProps {
 
 export function Sidebar({ restaurantSlug }: SidebarProps) {
   const { signOut } = useAuthStore()
+  const { t } = useTranslation()
 
   return (
     <aside
@@ -47,13 +49,13 @@ export function Sidebar({ restaurantSlug }: SidebarProps) {
           menu<span className="text-brand">life</span>
         </span>
         <p className="text-[10px] text-ink-3 mt-1 font-medium uppercase tracking-widest">
-          Panel de control
+          {t('dashboard.nav_panel')}
         </p>
       </div>
 
       {/* Navegación */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {navItems.map(({ to, icon: Icon, label, exact }) => (
+        {NAV_ITEMS.map(({ to, icon: Icon, labelKey, exact }) => (
           <NavLink
             key={to}
             to={to}
@@ -73,7 +75,7 @@ export function Sidebar({ restaurantSlug }: SidebarProps) {
                   className={cn('w-[17px] h-[17px] flex-shrink-0', isActive ? 'text-brand' : 'text-ink-3')}
                   strokeWidth={isActive ? 2.2 : 2}
                 />
-                {label}
+                {t(labelKey)}
               </>
             )}
           </NavLink>
@@ -83,7 +85,7 @@ export function Sidebar({ restaurantSlug }: SidebarProps) {
         {restaurantSlug && (
           <>
             <p className="px-3 pt-5 pb-1.5 text-[10px] font-semibold text-ink-4 uppercase tracking-widest">
-              Pantallas
+              {t('dashboard.nav_screens')}
             </p>
             <a
               href={`/kitchen/${restaurantSlug}`}
@@ -92,7 +94,7 @@ export function Sidebar({ restaurantSlug }: SidebarProps) {
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-ink-3 hover:text-ink-1 hover:bg-surface-3 transition-colors duration-150"
             >
               <ChefHat className="w-[17px] h-[17px] flex-shrink-0" strokeWidth={2} />
-              Cocina (KDS)
+              {t('dashboard.nav_kitchen')}
             </a>
           </>
         )}
@@ -108,7 +110,7 @@ export function Sidebar({ restaurantSlug }: SidebarProps) {
           className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-[13px] font-medium text-ink-3 hover:text-danger hover:bg-danger-dim transition-colors duration-150"
         >
           <LogOut className="w-[17px] h-[17px] flex-shrink-0" strokeWidth={2} />
-          Cerrar sesión
+          {t('dashboard.nav_logout')}
         </button>
       </div>
     </aside>

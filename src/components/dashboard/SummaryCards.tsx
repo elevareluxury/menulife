@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/utils'
 
@@ -67,14 +68,14 @@ export function SummaryCards({ data }: { data: SummaryData }) {
   const { sales, activeOrders, activeTables, avgTime } = data
   const occupancyPct = Math.round((activeTables.current / activeTables.total) * 100)
   const salesUp = sales.comparison >= 0
+  const { t } = useTranslation()
 
   return (
     <section>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {/* Ventas del día */}
         <StatCard
           icon="💰"
-          label="Ventas del día"
+          label={t('dashboard.kpi_sales')}
           delay={0}
           value={<span className="text-ink-1">{formatPrice(sales.amount)}</span>}
           subtext={
@@ -83,15 +84,14 @@ export function SummaryCards({ data }: { data: SummaryData }) {
                 ? <TrendingUp className="w-3 h-3" strokeWidth={2.5} />
                 : <TrendingDown className="w-3 h-3" strokeWidth={2.5} />
               }
-              {salesUp ? '+' : ''}{sales.comparison}% vs ayer
+              {salesUp ? '+' : ''}{sales.comparison}% {t('dashboard.kpi_vs_yesterday')}
             </span>
           }
         />
 
-        {/* Pedidos activos */}
         <StatCard
           icon="🍽️"
-          label="Pedidos activos"
+          label={t('dashboard.kpi_orders')}
           delay={0.06}
           value={<span className="text-ink-1">{activeOrders.count}</span>}
           subtext={
@@ -101,18 +101,17 @@ export function SummaryCards({ data }: { data: SummaryData }) {
                   className="w-1.5 h-1.5 rounded-full bg-brand inline-block flex-shrink-0"
                   style={{ animation: 'pulse-dot 2s ease-in-out infinite' }}
                 />
-                {activeOrders.new} nuevos
+                {activeOrders.new} {t('dashboard.kpi_new')}
               </span>
             ) : (
-              <span className="text-ink-3">Sin nuevos</span>
+              <span className="text-ink-3">{t('dashboard.kpi_no_new')}</span>
             )
           }
         />
 
-        {/* Mesas activas */}
         <StatCard
           icon="🪑"
-          label="Mesas activas"
+          label={t('dashboard.kpi_tables')}
           delay={0.12}
           value={
             <span className="text-ink-1">
@@ -122,7 +121,7 @@ export function SummaryCards({ data }: { data: SummaryData }) {
           }
           subtext={
             <div>
-              <span className="text-ink-3">{occupancyPct}% ocupación</span>
+              <span className="text-ink-3">{occupancyPct}% {t('dashboard.kpi_occupation')}</span>
               <div
                 className="mt-1.5 h-[3px] rounded-full overflow-hidden"
                 style={{ background: 'var(--border-default)' }}
@@ -143,13 +142,12 @@ export function SummaryCards({ data }: { data: SummaryData }) {
           }
         />
 
-        {/* Tiempo promedio */}
         <StatCard
           icon="⏱️"
-          label="Tiempo promedio"
+          label={t('dashboard.kpi_time')}
           delay={0.18}
           value={<span className="text-ink-1">{avgTime.minutes} min</span>}
-          subtext={<span className="text-ink-3">Cocina + atención</span>}
+          subtext={<span className="text-ink-3">{t('dashboard.kpi_kitchen')}</span>}
         />
       </div>
     </section>

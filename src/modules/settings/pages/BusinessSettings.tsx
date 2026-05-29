@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import {
   ChevronLeft, Store, MapPin, Clock, Share2, Palette,
   Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useImageUpload } from '@/modules/menu/hooks/useImageUpload'
+import { useLanguage } from '@/hooks/useLanguage'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
@@ -22,7 +24,7 @@ import type { Restaurant } from '@/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery'
+type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language'
 
 interface DeliveryZone {
   name: string
@@ -121,14 +123,6 @@ const DAYS: Array<{ key: DayKey; label: string }> = [
   { key: 'sunday',    label: 'Domingo' },
 ]
 
-const SECTIONS: Array<{ id: Section; label: string; icon: React.ReactNode }> = [
-  { id: 'general',    label: 'Información general',  icon: <Store    className="w-4 h-4" /> },
-  { id: 'location',   label: 'Ubicación',            icon: <MapPin   className="w-4 h-4" /> },
-  { id: 'hours',      label: 'Horarios',              icon: <Clock    className="w-4 h-4" /> },
-  { id: 'social',     label: 'Redes sociales',        icon: <Share2   className="w-4 h-4" /> },
-  { id: 'appearance', label: 'Apariencia del menú',   icon: <Palette  className="w-4 h-4" /> },
-  { id: 'delivery',   label: 'Delivery & Takeaway',   icon: <Truck    className="w-4 h-4" /> },
-]
 
 const COUNTRIES = [
   'Argentina','Bolivia','Brasil','Chile','Colombia','Costa Rica','Cuba','Ecuador',
@@ -253,6 +247,18 @@ export function BusinessSettings() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { uploadImage, uploading: uploadingLogo } = useImageUpload()
+  const { t } = useTranslation()
+  const { changeLanguage } = useLanguage()
+
+  const SECTIONS = useMemo<Array<{ id: Section; label: string; icon: React.ReactNode }>>(() => [
+    { id: 'general',    label: t('dashboard.settings_general'),    icon: <Store    className="w-4 h-4" /> },
+    { id: 'location',   label: t('dashboard.settings_location'),   icon: <MapPin   className="w-4 h-4" /> },
+    { id: 'hours',      label: t('dashboard.settings_hours'),      icon: <Clock    className="w-4 h-4" /> },
+    { id: 'social',     label: t('dashboard.settings_social'),     icon: <Share2   className="w-4 h-4" /> },
+    { id: 'appearance', label: t('dashboard.settings_appearance'), icon: <Palette  className="w-4 h-4" /> },
+    { id: 'delivery',   label: t('dashboard.settings_delivery'),   icon: <Truck    className="w-4 h-4" /> },
+    { id: 'language',   label: t('dashboard.settings_language'),   icon: <Globe    className="w-4 h-4" /> },
+  ], [t])
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
   const [loading, setLoading] = useState(true)
@@ -275,6 +281,13 @@ export function BusinessSettings() {
   const [coverPreview, setCoverPreview] = useState<string>('')
   const [uploadingCover, setUploadingCover] = useState(false)
   const [isDraggingCover, setIsDraggingCover] = useState(false)
+
+  // Language settings
+  const [panelLang, setPanelLang] = useState<'es' | 'en'>(() =>
+    (localStorage.getItem('menulife_lang') as 'es' | 'en') ?? 'es'
+  )
+  const [menuLang, setMenuLang] = useState<'ES' | 'EN'>('ES')
+  const [allowSwitch, setAllowSwitch] = useState(true)
 
   // Fetch restaurant
   useEffect(() => {
@@ -302,6 +315,11 @@ export function BusinessSettings() {
             takeaway_enabled: r.takeaway_enabled ?? false,
             takeaway_time_estimate: r.takeaway_time_estimate ?? 15,
           })
+          // Load language config
+          const storedLang = localStorage.getItem('menulife_lang') as 'es' | 'en' | null
+          setPanelLang(storedLang ?? (r.default_language === 'EN' ? 'en' : 'es'))
+          setMenuLang(r.default_language ?? 'ES')
+          setAllowSwitch(r.allow_language_switch ?? true)
         }
         setLoading(false)
       })
@@ -481,13 +499,16 @@ export function BusinessSettings() {
           delivery_zones:         deliveryForm.delivery_zones,
           takeaway_enabled:       deliveryForm.takeaway_enabled,
           takeaway_time_estimate: deliveryForm.takeaway_time_estimate,
+          // Language
+          default_language:       menuLang,
+          allow_language_switch:  allowSwitch,
         })
         .eq('id', restaurant.id)
 
       if (error) throw error
-      toast.success('Cambios guardados correctamente')
+      toast.success(t('dashboard.settings_saved'))
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Error al guardar')
+      toast.error(err instanceof Error ? err.message : t('dashboard.settings_error'))
     } finally {
       setSaving(false)
     }
@@ -1189,6 +1210,66 @@ export function BusinessSettings() {
     </div>
   )
 
+  const renderLanguage = () => (
+    <div className="space-y-5">
+      <SectionCard title={t('dashboard.lang_panel_title')} description={t('dashboard.lang_panel_desc')}>
+        <div className="flex gap-3">
+          {(['es', 'en'] as const).map(lang => (
+            <button
+              key={lang}
+              type="button"
+              onClick={() => {
+                setPanelLang(lang)
+                changeLanguage(lang)
+              }}
+              className={cn(
+                'flex-1 py-3 rounded-xl border text-sm font-semibold transition-colors',
+                panelLang === lang
+                  ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
+                  : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+              )}
+            >
+              {lang === 'es' ? t('dashboard.lang_es') : t('dashboard.lang_en')}
+            </button>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title={t('dashboard.lang_menu_title')} description={t('dashboard.lang_menu_desc')}>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700">{t('dashboard.lang_menu_default')}</span>
+            <div className="flex gap-2">
+              {(['ES', 'EN'] as const).map(lang => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => setMenuLang(lang)}
+                  className={cn(
+                    'px-4 py-2 rounded-xl border text-sm font-semibold transition-colors',
+                    menuLang === lang
+                      ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
+                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                  )}
+                >
+                  {lang === 'ES' ? t('dashboard.lang_es') : t('dashboard.lang_en')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700">{t('dashboard.lang_allow_switch')}</span>
+            <Toggle
+              checked={allowSwitch}
+              onChange={e => setAllowSwitch(e.target.checked)}
+            />
+          </div>
+        </div>
+      </SectionCard>
+    </div>
+  )
+
   const sectionContent: Record<Section, React.ReactNode> = {
     general:    renderGeneral(),
     location:   renderLocation(),
@@ -1196,6 +1277,7 @@ export function BusinessSettings() {
     social:     renderSocial(),
     appearance: renderAppearance(),
     delivery:   renderDelivery(),
+    language:   renderLanguage(),
   }
 
   // ─── Render ─────────────────────────────────────────────────────────────────
@@ -1211,8 +1293,8 @@ export function BusinessSettings() {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-ink-1">Configuración del negocio</h1>
-          <p className="text-sm text-ink-3 mt-0.5">Administrá la información de tu local</p>
+          <h1 className="text-xl font-bold text-ink-1">{t('dashboard.settings_title')}</h1>
+          <p className="text-sm text-ink-3 mt-0.5">{t('dashboard.settings_general')}</p>
         </div>
       </div>
 
@@ -1268,10 +1350,10 @@ export function BusinessSettings() {
               isLoading={saving || uploadingLogo || uploadingCover}
               className="bg-[#FF6B7A] hover:bg-[#e85e6b] text-white focus:ring-[#FF6B7A]"
             >
-              Guardar cambios
+              {t('dashboard.settings_save')}
             </Button>
             <Button variant="ghost" onClick={handleCancel} disabled={saving}>
-              Cancelar
+              {t('dashboard.btn_cancel')}
             </Button>
           </div>
         </div>
@@ -1283,14 +1365,14 @@ export function BusinessSettings() {
         style={{ bottom: 'calc(72px + env(safe-area-inset-bottom))' }}
       >
         <Button variant="ghost" onClick={handleCancel} disabled={saving} className="flex-1">
-          Cancelar
+          {t('dashboard.btn_cancel')}
         </Button>
         <Button
           onClick={handleSave}
           isLoading={saving || uploadingLogo || uploadingCover}
           className="flex-1 bg-[#FF6B7A] hover:bg-[#e85e6b] text-white focus:ring-[#FF6B7A]"
         >
-          Guardar cambios
+          {t('dashboard.settings_save')}
         </Button>
       </div>
     </div>
