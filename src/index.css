@@ -1,5 +1,5 @@
 /* === TIPOGRAFÍA (debe preceder a @import "tailwindcss") === */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700;800;900&family=Geist:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Geist:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
 
@@ -60,7 +60,7 @@
   --color-orange-dim:  rgba(255, 107, 107, 0.08);
 
   /* === FUENTES === */
-  --font-display: "Poppins", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   --font-sans:    "Geist", "Inter", -apple-system, BlinkMacSystemFont,
                   "SF Pro Text", "Segoe UI", system-ui, sans-serif;
 
@@ -200,8 +200,11 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Poppins', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
 }
+h1 { font-weight: 800; letter-spacing: -0.03em;  line-height: 1.05; }
+h2 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.1; }
+h3 { font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; }
 
 /* =====================================================
    UTILIDADES PERSONALIZADAS (DARK DASHBOARD)
@@ -349,11 +352,11 @@ h1, h2, h3, h4, h5, h6 {
   --ml-gray-200:      #e0ddd8;
   --ml-gray-500:      #8a8780;
   --ml-gray-700:      #3d3c39;
-  --font-syne:        'Bricolage Grotesque', -apple-system, sans-serif;
+  --font-syne:        -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   --font-jakarta:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Landing title letter-spacing (Bricolage Grotesque is wider than Syne) */
+/* Landing title letter-spacing — SF Pro Display */
 .landing-page h1,
 .landing-page h2,
 [style*="font-syne"] {
@@ -361,6 +364,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .hero-title-lg {
   letter-spacing: -0.04em;
+  line-height: 1.0;
 }
 
 @keyframes ml-shimmer {
