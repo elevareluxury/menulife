@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ShimmerButton } from './Navbar'
 
 declare const gsap: any
 declare const Splitting: any
 
 export function FinalCTA() {
+  const { t } = useTranslation()
   const titleRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export function FinalCTA() {
           fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
           textTransform: 'uppercase', color: 'var(--ml-salmon)',
           fontFamily: 'var(--font-jakarta)', marginBottom: '20px',
-        }}>Empezá hoy</p>
+        }}>{t('cta_final.label')}</p>
 
         <h2 ref={titleRef} style={{
           fontFamily:    'var(--font-syne)',
@@ -69,8 +71,8 @@ export function FinalCTA() {
           marginBottom:  '20px',
           letterSpacing: '-0.03em',
         }}>
-          Transformá la experiencia{' '}
-          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>de tu negocio.</em>
+          {t('cta_final.title')}{' '}
+          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('cta_final.title_accent')}</em>
         </h2>
 
         <p data-cta-sub style={{
@@ -82,15 +84,15 @@ export function FinalCTA() {
           marginBottom:  '48px',
           maxWidth:      '560px',
           margin:        '0 auto 48px',
+          whiteSpace:    'pre-line',
         }}>
-          Más de 1.200 negocios ya usan MenuLife.<br />
-          Tu competencia también. ¿Vas a esperar?
+          {t('cta_final.subtitle')}
         </p>
 
         <div data-cta-btns style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
           <Link to="/solicitar-acceso" style={{ textDecoration: 'none' }}>
             <ShimmerButton style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '50px' }}>
-              Solicitar acceso →
+              {t('cta_final.cta_primary')}
             </ShimmerButton>
           </Link>
           <button style={{
@@ -105,7 +107,7 @@ export function FinalCTA() {
           }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; e.currentTarget.style.color = '#fff' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
-          >Reservar demo</button>
+          >{t('cta_final.cta_secondary')}</button>
         </div>
       </div>
     </section>

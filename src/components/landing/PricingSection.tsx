@@ -1,43 +1,47 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 declare const gsap: any
 
-const PLANS = [
-  {
-    tag:      'INICIAL',
-    name:     'Esencial',
-    desc:     'Tu menú digital profesional desde hoy.',
-    monthly:  80,
-    features: ['1 local', 'Menú digital + QR', 'Onboarding por WhatsApp', 'Analytics básicos', 'Pagos móviles'],
-    cta:      'Comenzar',
-    featured: false,
-    href:     '/solicitar-acceso',
-  },
-  {
-    tag:      'CRECIMIENTO',
-    name:     'Profesional',
-    desc:     'Lo que eligen los negocios serios.',
-    monthly:  130,
-    features: ['Hasta 3 locales', 'Editor de menú + branding', 'Onboarding + videos', 'Analytics avanzados con IA', 'División de cuenta y propinas', 'Soporte prioritario'],
-    cta:      'Empezar ahora →',
-    featured: true,
-    href:     '/solicitar-acceso',
-  },
-  {
-    tag:      'ENTERPRISE',
-    name:     'Hospitalidad',
-    desc:     'Para grupos con múltiples locales y hotelería.',
-    monthly:  null,
-    features: ['Locales ilimitados', 'Integraciones personalizadas', 'Onboarding dedicado', 'Branding a medida', 'SLA + soporte dedicado', 'Opción white-label'],
-    cta:      'Hablar con el equipo',
-    featured: false,
-    href:     '/solicitar-acceso',
-  },
-]
-
 export function PricingSection() {
+  const { t } = useTranslation()
   const [annual, setAnnual] = useState(false)
+
+  const PLANS = [
+    {
+      tag:      t('pricing.plan1_tag'),
+      name:     t('pricing.plan1_name'),
+      desc:     t('pricing.plan1_desc'),
+      monthly:  80,
+      features: [t('pricing.plan1_f1'), t('pricing.plan1_f2'), t('pricing.plan1_f3'), t('pricing.plan1_f4'), t('pricing.plan1_f5')],
+      cta:      t('pricing.plan1_cta'),
+      featured: false,
+      href:     '/solicitar-acceso',
+    },
+    {
+      tag:      t('pricing.plan2_tag'),
+      name:     t('pricing.plan2_name'),
+      desc:     t('pricing.plan2_desc'),
+      monthly:  130,
+      features: [t('pricing.plan2_f1'), t('pricing.plan2_f2'), t('pricing.plan2_f3'), t('pricing.plan2_f4'), t('pricing.plan2_f5'), t('pricing.plan2_f6')],
+      cta:      t('pricing.plan2_cta'),
+      featured: true,
+      href:     '/solicitar-acceso',
+      note:     t('pricing.plan2_note'),
+    },
+    {
+      tag:      t('pricing.plan3_tag'),
+      name:     t('pricing.plan3_name'),
+      desc:     t('pricing.plan3_desc'),
+      monthly:  null,
+      customPrice: t('pricing.plan3_price'),
+      features: [t('pricing.plan3_f1'), t('pricing.plan3_f2'), t('pricing.plan3_f3'), t('pricing.plan3_f4'), t('pricing.plan3_f5'), t('pricing.plan3_f6')],
+      cta:      t('pricing.plan3_cta'),
+      featured: false,
+      href:     '/solicitar-acceso',
+    },
+  ]
 
   useEffect(() => {
     if (typeof gsap === 'undefined') return
@@ -66,11 +70,11 @@ export function PricingSection() {
         {/* Header */}
         <div data-price-title style={{ textAlign: 'center', marginBottom: '56px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px' }}>
-            PRECIOS
+            {t('pricing.label')}
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#1a1a1a', lineHeight: 1.1, margin: '0 0 32px' }}>
-            Simple y{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>transparente.</em>
+            {t('pricing.title')}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('pricing.title_accent')}</em>
           </h2>
 
           {/* Toggle */}
@@ -82,7 +86,7 @@ export function PricingSection() {
               color: !annual ? '#1a1a1a' : 'var(--ml-gray-500)',
               fontSize: '13px', fontWeight: 600, cursor: 'pointer',
               fontFamily: 'var(--font-jakarta)', transition: 'all 0.25s',
-            }}>Mensual</button>
+            }}>{t('pricing.toggle_monthly')}</button>
             <button onClick={() => setAnnual(true)} style={{
               padding: '8px 20px', borderRadius: '50px', border: 'none',
               background: annual ? '#fff' : 'transparent',
@@ -92,12 +96,12 @@ export function PricingSection() {
               fontFamily: 'var(--font-jakarta)', transition: 'all 0.25s',
               display: 'flex', alignItems: 'center', gap: '6px',
             }}>
-              Anual
+              {t('pricing.toggle_annual')}
               <span style={{
                 background: 'var(--ml-salmon)', color: '#fff',
                 fontSize: '9px', fontWeight: 700, padding: '2px 6px',
                 borderRadius: '50px', letterSpacing: '0.05em',
-              }}>−20%</span>
+              }}>{t('pricing.save')}</span>
             </button>
           </div>
         </div>
@@ -106,11 +110,17 @@ export function PricingSection() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(290px,1fr))',
-          gap: '24px',
-          alignItems: 'start',
+          gap: '24px', alignItems: 'start',
         }}>
-          {PLANS.map((plan) => (
-            <PricingCard key={plan.name} plan={plan} price={getPrice(plan.monthly)} annual={annual} />
+          {PLANS.map(plan => (
+            <PricingCard
+              key={plan.name}
+              plan={plan}
+              price={getPrice(plan.monthly)}
+              annual={annual}
+              perMonth={t('pricing.per_month')}
+              annualNote={t('pricing.annual_note')}
+            />
           ))}
         </div>
 
@@ -120,61 +130,64 @@ export function PricingSection() {
           gap: '8px 24px', marginTop: '48px',
           fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-500)',
         }}>
-          {['Sin contrato. Cancelás cuando quieras.', 'Soporte por WhatsApp incluido.', 'Probá 14 días gratis.'].map((t, i) => (
-            <span key={t} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {(['trust_1', 'trust_2', 'trust_3'] as const).map((key, i) => (
+            <span key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {i > 0 && <span style={{ color: 'var(--ml-gray-200)' }}>|</span>}
-              <span style={{ color: 'var(--ml-salmon)', fontWeight: 600 }}>✓</span> {t}
+              <span style={{ color: 'var(--ml-salmon)', fontWeight: 600 }}>✓</span> {t(`pricing.${key}`)}
             </span>
           ))}
         </div>
 
         <p style={{ textAlign: 'center', marginTop: '20px', fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'var(--ml-gray-500)' }}>
-          ¿No sabés qué plan te conviene?{' '}
+          {t('pricing.help_text')}{' '}
           <a href="#" style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}
             onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
             onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
-          >Reservá una llamada de estrategia</a>
-          {' '}— encontramos la mejor opción para tu negocio.
+          >{t('pricing.help_link')}</a>
+          {' '}{t('pricing.help_text2')}
         </p>
       </div>
     </section>
   )
 }
 
-function PricingCard({ plan, price, annual }: { plan: typeof PLANS[0]; price: number | null; annual: boolean }) {
+function PricingCard({
+  plan, price, annual, perMonth, annualNote,
+}: {
+  plan: { tag: string; name: string; desc: string; monthly: number | null; customPrice?: string; features: string[]; cta: string; featured: boolean; href: string; note?: string }
+  price: number | null
+  annual: boolean
+  perMonth: string
+  annualNote: string
+}) {
   return (
     <div
       data-price-card
       style={{
-        position:     'relative',
-        borderRadius: '24px',
-        padding:      '36px 32px',
-        background:   plan.featured ? '#0F1115' : '#fff',
-        border:       plan.featured ? '1px solid rgba(244,112,90,0.45)' : '1px solid rgba(0,0,0,0.08)',
-        boxShadow:    plan.featured ? '0 0 0 0 rgba(244,112,90,0.3)' : '0 4px 24px rgba(0,0,0,0.06)',
-        animation:    plan.featured ? 'ml-pulse-glow 3s ease-in-out infinite' : 'none',
-        transition:   'transform 0.3s ease, box-shadow 0.3s ease',
+        position: 'relative', borderRadius: '24px', padding: '36px 32px',
+        background: plan.featured ? '#0F1115' : '#fff',
+        border: plan.featured ? '1px solid rgba(244,112,90,0.45)' : '1px solid rgba(0,0,0,0.08)',
+        boxShadow: plan.featured ? '0 0 0 0 rgba(244,112,90,0.3)' : '0 4px 24px rgba(0,0,0,0.06)',
+        animation: plan.featured ? 'ml-pulse-glow 3s ease-in-out infinite' : 'none',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
       }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)' }}
       onMouseLeave={e => { e.currentTarget.style.transform = '' }}
     >
-      {/* Popular badge */}
       {plan.featured && (
         <div style={{
-          position:     'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)',
-          background:   'var(--ml-salmon)', color: '#fff',
-          padding:      '5px 16px', borderRadius: '50px',
-          fontSize:     '11px', fontWeight: 700, fontFamily: 'var(--font-jakarta)',
+          position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--ml-salmon)', color: '#fff',
+          padding: '5px 16px', borderRadius: '50px',
+          fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-jakarta)',
           letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-        }}>Más popular</div>
+        }}>{plan.tag}</div>
       )}
 
-      {/* Tag */}
       <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '8px' }}>
-        {plan.tag}
+        {!plan.featured && plan.tag}
       </p>
 
-      {/* Name */}
       <h3 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '26px', color: plan.featured ? '#fff' : '#1a1a1a', marginBottom: '8px' }}>
         {plan.name}
       </h3>
@@ -182,7 +195,6 @@ function PricingCard({ plan, price, annual }: { plan: typeof PLANS[0]; price: nu
         {plan.desc}
       </p>
 
-      {/* Price */}
       <div style={{ paddingBottom: '24px', marginBottom: '24px', borderBottom: `1px solid ${plan.featured ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}` }}>
         {price !== null ? (
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px' }}>
@@ -190,15 +202,14 @@ function PricingCard({ plan, price, annual }: { plan: typeof PLANS[0]; price: nu
               ${price}
             </span>
             <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.4)' : 'var(--ml-gray-500)', paddingBottom: '8px' }}>
-              /mes {annual && <span style={{ color: 'var(--ml-salmon)', fontWeight: 600, fontSize: '11px' }}>· facturado anual</span>}
+              {perMonth} {annual && <span style={{ color: 'var(--ml-salmon)', fontWeight: 600, fontSize: '11px' }}>{annualNote}</span>}
             </span>
           </div>
         ) : (
-          <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '36px', color: plan.featured ? '#fff' : '#1a1a1a' }}>A medida</span>
+          <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '36px', color: plan.featured ? '#fff' : '#1a1a1a' }}>{plan.customPrice}</span>
         )}
       </div>
 
-      {/* Features */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
         {plan.features.map(f => (
           <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.7)' : '#3d3c39' }}>
@@ -208,32 +219,22 @@ function PricingCard({ plan, price, annual }: { plan: typeof PLANS[0]; price: nu
         ))}
       </div>
 
-      {/* CTA */}
       <Link to={plan.href} style={{ textDecoration: 'none' }}>
         <button style={{
-          width:        '100%',
-          padding:      '14px',
-          borderRadius: '50px',
-          border:       plan.featured ? 'none' : '1px solid rgba(0,0,0,0.15)',
-          background:   plan.featured ? 'var(--ml-salmon)' : 'transparent',
-          color:        plan.featured ? '#fff' : '#3d3c39',
-          fontSize:     '14px', fontWeight: 600,
-          cursor:       'pointer', fontFamily: 'var(--font-jakarta)',
-          transition:   'all 0.2s',
-          position:     'relative', overflow: 'hidden',
+          width: '100%', padding: '14px', borderRadius: '50px',
+          border: plan.featured ? 'none' : '1px solid rgba(0,0,0,0.15)',
+          background: plan.featured ? 'var(--ml-salmon)' : 'transparent',
+          color: plan.featured ? '#fff' : '#3d3c39',
+          fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+          fontFamily: 'var(--font-jakarta)', transition: 'all 0.2s',
+          position: 'relative', overflow: 'hidden',
         }}
           onMouseEnter={e => {
-            if (plan.featured) {
-              e.currentTarget.style.boxShadow = '0 0 24px rgba(244,112,90,0.5)'
-              e.currentTarget.style.transform = 'scale(1.02)'
-            } else {
-              e.currentTarget.style.borderColor = 'var(--ml-salmon)'
-              e.currentTarget.style.color = 'var(--ml-salmon)'
-            }
+            if (plan.featured) { e.currentTarget.style.boxShadow = '0 0 24px rgba(244,112,90,0.5)'; e.currentTarget.style.transform = 'scale(1.02)' }
+            else { e.currentTarget.style.borderColor = 'var(--ml-salmon)'; e.currentTarget.style.color = 'var(--ml-salmon)' }
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.boxShadow = ''
-            e.currentTarget.style.transform = ''
+            e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = ''
             e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'
             e.currentTarget.style.color = plan.featured ? '#fff' : '#3d3c39'
           }}
@@ -249,10 +250,9 @@ function PricingCard({ plan, price, annual }: { plan: typeof PLANS[0]; price: nu
         </button>
       </Link>
 
-      {/* Conviction line on pro card */}
-      {plan.featured && (
+      {plan.featured && plan.note && (
         <p style={{ textAlign: 'center', marginTop: '12px', fontFamily: 'var(--font-jakarta)', fontSize: '12px', color: 'rgba(255,255,255,0.35)', fontStyle: 'italic' }}>
-          &ldquo;Con 2 mesas más por noche, el sistema se paga solo.&rdquo;
+          {plan.note}
         </p>
       )}
     </div>

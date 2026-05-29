@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 declare const gsap: any
 
@@ -34,6 +35,7 @@ const TAB_LABELS: Record<Tab, string> = { pastas: 'Pastas', carnes: 'Carnes', po
    SECCIÓN PRINCIPAL
 ───────────────────────────────────────────── */
 export function ExperiencesSection() {
+  const { t } = useTranslation()
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -61,11 +63,11 @@ export function ExperiencesSection() {
         {/* Header */}
         <div data-exp-title style={{ textAlign: 'center', marginBottom: '72px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px' }}>
-            PLATAFORMA
+            {t('experiences.label')}
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#1a1a1a', lineHeight: 1.1, margin: 0 }}>
-            Una plataforma.{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>Tres experiencias.</em>
+            {t('experiences.title')}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('experiences.title_accent')}</em>
           </h2>
         </div>
 
@@ -75,17 +77,17 @@ export function ExperiencesSection() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: '24px',
         }}>
-          <ExperienceCard data-exp-card index={0} role="— EXPERIENCIA DEL CLIENTE" title="Escanear. Pedir. Listo.">
+          <ExperienceCard data-exp-card index={0} role={`— ${t('experiences.client_tag')}`} title={t('experiences.client_title')}>
             <InteractiveMenu />
           </ExperienceCard>
 
-          <ExperienceCard data-exp-card index={1} role="— EXPERIENCIA DEL MOZO" title="Tu equipo lo aprende en minutos.">
+          <ExperienceCard data-exp-card index={1} role={`— ${t('experiences.waiter_tag')}`} title={t('experiences.waiter_title')}>
             <WaiterMockup />
-            <WaiterFeatures />
+            <WaiterFeatures t={t} />
           </ExperienceCard>
 
-          <ExperienceCard data-exp-card index={2} role="— EXPERIENCIA DEL DUEÑO" title="Control total.">
-            <DashboardMockup />
+          <ExperienceCard data-exp-card index={2} role={`— ${t('experiences.owner_tag')}`} title={t('experiences.owner_title')}>
+            <DashboardMockup t={t} />
           </ExperienceCard>
         </div>
       </div>
@@ -381,8 +383,8 @@ function WaiterMockup() {
   )
 }
 
-function WaiterFeatures() {
-  const feats = ['Interfaz familiar — sin curva de aprendizaje', 'Órdenes en tiempo real', 'Onboarding por WhatsApp', 'Listo en una tarde']
+function WaiterFeatures({ t }: { t: (k: string) => string }) {
+  const feats = [t('experiences.waiter_f1'), t('experiences.waiter_f2'), t('experiences.waiter_f3'), t('experiences.waiter_f4')]
   return (
     <div style={{ padding: '0 24px 4px' }}>
       {feats.map(f => (
@@ -397,7 +399,7 @@ function WaiterFeatures() {
 /* ─────────────────────────────────────────────
    CARD 3 — DASHBOARD
 ───────────────────────────────────────────── */
-function DashboardMockup() {
+function DashboardMockup({ t }: { t: (k: string) => string }) {
   const [revenue,   setRevenue]   = useState(0)
   const [cubiertos, setCubiertos] = useState(48)
   const [notif,     setNotif]     = useState<string | null>(null)
@@ -437,7 +439,7 @@ function DashboardMockup() {
     <div ref={cardRef} style={{ background: '#0F1115', padding: '16px', overflow: 'hidden', position: 'relative' }}>
       {/* Header */}
       <div style={{ marginBottom: '14px' }}>
-        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.38)', fontFamily: 'var(--font-jakarta)', marginBottom: '2px' }}>Buenos días, Carlos</div>
+        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.38)', fontFamily: 'var(--font-jakarta)', marginBottom: '2px' }}>{t('experiences.owner_greeting')}</div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
           <div style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '38px', color: '#fff', lineHeight: 1 }}>
             ${revenue.toLocaleString()}
@@ -446,17 +448,17 @@ function DashboardMockup() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '4px' }}>
           <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10B981', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
-          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-jakarta)' }}>En vivo</span>
+          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-jakarta)' }}>{t('experiences.owner_live')}</span>
         </div>
       </div>
 
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '14px' }}>
         {[
-          [cubiertos.toString(), 'Cubiertos'],
-          ['$59',   'Ticket prom.'],
-          ['94%',   'Satisfacción'],
-          ['12',    'Reseñas'],
+          [cubiertos.toString(), t('experiences.owner_covers')],
+          ['$59',   t('experiences.owner_ticket')],
+          ['94%',   t('experiences.owner_satisfaction')],
+          ['12',    t('experiences.owner_reviews')],
         ].map(([v, l]) => (
           <div key={l} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', padding: '10px' }}>
             <div style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '20px', color: '#fff' }}>{v}</div>

@@ -1,32 +1,24 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 declare const gsap: any
 
-const TESTIMONIALS = [
-  {
-    initials: 'VM',
-    color:    '#F4705A',
-    name:     'Valeria Moreno',
-    negocio:  'Trattoria Bella, Rosario',
-    quote:    'Antes mis clientes me preguntaban el precio de todo y yo tenía que ir y venir. Ahora escanean el QR y piden solos. Las fotos del menú son hermosas y el botón de pago directo desde el celular cambió todo. Mis mesas rotan más rápido y las propinas subieron porque la experiencia es otra.',
-  },
-  {
-    initials: 'RA',
-    color:    '#3B82F6',
-    name:     'Rodrigo Altamirano',
-    negocio:  'Parrilla Don Rodrigo, Córdoba',
-    quote:    'Lo que más me gustó fue poder ver todo desde el celular mientras estoy en casa. Las ventas del día, qué platos vendí más, si hay algún problema en cocina. Antes tenía que estar físicamente en el local. Ahora con MenuLife tengo el restaurante en el bolsillo, literalmente.',
-  },
-  {
-    initials: 'SC',
-    color:    '#10B981',
-    name:     'Sebastián Cruz',
-    negocio:  'Café del Puerto, Buenos Aires',
-    quote:    'Mis mozos aprendieron a usar el sistema en una tarde. Lo que me sorprendió es que lo manejan todo desde el celular — toman el pedido, lo mandan a cocina, cobran. Antes tenían comandas en papel que se perdían. Ahora todo está en tiempo real y no se equivocan más en los pedidos.',
-  },
+const T_META = [
+  { key: 't1', initials: 'VM', color: '#F4705A' },
+  { key: 't2', initials: 'RA', color: '#3B82F6' },
+  { key: 't3', initials: 'SC', color: '#10B981' },
 ]
 
 export function TestimonialsSection() {
+  const { t } = useTranslation()
+  const TESTIMONIALS = T_META.map(m => ({
+    initials: m.initials,
+    color: m.color,
+    name: t(`testimonials.${m.key}_name`),
+    negocio: t(`testimonials.${m.key}_biz`),
+    quote: t(`testimonials.${m.key}_quote`),
+  }))
+
   useEffect(() => {
     if (typeof gsap === 'undefined') return
     const ST = (window as any).ScrollTrigger
@@ -55,11 +47,11 @@ export function TestimonialsSection() {
         {/* Header */}
         <div data-test-title style={{ textAlign: 'center', marginBottom: '72px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px' }}>
-            CLIENTES
+            {t('testimonials.label')}
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#fff', lineHeight: 1.1, margin: 0 }}>
-            Lo que dicen quienes{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>ya lo usan.</em>
+            {t('testimonials.title')}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('testimonials.title_accent')}</em>
           </h2>
         </div>
 
@@ -78,7 +70,7 @@ export function TestimonialsSection() {
   )
 }
 
-function TestimonialCard({ t }: { t: typeof TESTIMONIALS[0] }) {
+function TestimonialCard({ t }: { t: { initials: string; color: string; name: string; negocio: string; quote: string } }) {
   return (
     <article
       data-test-card

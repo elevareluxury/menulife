@@ -1,18 +1,21 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 declare const gsap: any
 
-const STEPS = [
-  { icon: '⬛', emoji: '📷', num: 1, title: 'Escanear QR',      desc: 'El cliente escanea el QR de la mesa. Sin app, sin fricción.' },
-  { icon: '⚡', emoji: '⚡', num: 2, title: 'Abre al instante', desc: 'El menú carga en menos de un segundo.' },
-  { icon: '🍽️', emoji: '🍽️', num: 3, title: 'Navega el menú',  desc: 'Fotos, categorías y precios claros.' },
-  { icon: '💳', emoji: '💳', num: 4, title: 'Paga',             desc: 'Un toque. Apple Pay, Stripe, MercadoPago.' },
-  { icon: '📈', emoji: '📈', num: 5, title: 'Analytics live',   desc: 'El negocio recibe datos en tiempo real.' },
-]
+const STEP_EMOJIS = ['📷', '⚡', '🍽️', '💳', '📈']
 
 export function FlowSection() {
+  const { t } = useTranslation()
   const lineRef    = useRef<SVGPathElement>(null)
   const sectionRef = useRef<HTMLElement>(null)
+
+  const STEPS = [1,2,3,4,5].map((n, i) => ({
+    num: n,
+    emoji: STEP_EMOJIS[i],
+    title: t(`flow.step${n}_title`),
+    desc: t(`flow.step${n}_desc`),
+  }))
 
   useEffect(() => {
     if (typeof gsap === 'undefined') return
@@ -58,11 +61,11 @@ export function FlowSection() {
         {/* Header */}
         <div data-flow-title style={{ textAlign: 'center', marginBottom: '72px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px' }}>
-            CÓMO FUNCIONA
+            {t('flow.label')}
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#1a1a1a', lineHeight: 1.1, margin: 0 }}>
-            Del escaneo al pago{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>en segundos.</em>
+            {t('flow.title')}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('flow.title_accent')}</em>
           </h2>
         </div>
 
@@ -97,7 +100,7 @@ export function FlowSection() {
   )
 }
 
-function StepItem({ step }: { step: typeof STEPS[0] }) {
+function StepItem({ step }: { step: { num: number; emoji: string; title: string; desc: string } }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px' }}>
       {/* Icon circle */}

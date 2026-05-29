@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ShimmerButton } from './Navbar'
 
 declare const gsap: any
@@ -7,6 +8,7 @@ declare const Splitting: any
 declare const THREE: any
 
 export function HeroSection() {
+  const { t } = useTranslation()
   const canvasRef      = useRef<HTMLCanvasElement>(null)
   const phoneCenterRef = useRef<HTMLDivElement>(null)
   const phoneLeftRef   = useRef<HTMLDivElement>(null)
@@ -167,7 +169,7 @@ export function HeroSection() {
           }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--ml-salmon)', display: 'inline-block' }} />
             <span style={{ color: 'var(--ml-salmon)', fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-jakarta)', letterSpacing: '0.04em' }}>
-              Sistema de Hospitalidad Digital
+              {t('hero.badge')}
             </span>
           </div>
 
@@ -177,8 +179,11 @@ export function HeroSection() {
             lineHeight: 1.04, color: '#fff',
             marginBottom: '24px', letterSpacing: '-0.03em',
           }}>
-            El sistema operativo{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>del negocio moderno.</em>
+            {t('hero.title').split(/(del negocio moderno\.|for the modern business\.)/).map((part, i) =>
+              i % 2 === 1
+                ? <em key={i} style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{part}</em>
+                : part
+            )}
           </h1>
 
           <p data-hero-sub style={{
@@ -186,13 +191,13 @@ export function HeroSection() {
             lineHeight: 1.65, color: 'rgba(255,255,255,0.62)',
             marginBottom: '36px', maxWidth: '460px',
           }}>
-            Menús, pagos, herramientas para mozos y experiencias para clientes — unificados en una sola plataforma premium.
+            {t('hero.subtitle')}
           </p>
 
           <div data-hero-ctas style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginBottom: '32px' }}>
             <Link to="/solicitar-acceso" style={{ textDecoration: 'none' }}>
               <ShimmerButton style={{ padding: '15px 32px', fontSize: '15px', borderRadius: '50px' }}>
-                Solicitar acceso →
+                {t('hero.cta_primary')}
               </ShimmerButton>
             </Link>
             <button style={{
@@ -204,13 +209,13 @@ export function HeroSection() {
             }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.7)'; e.currentTarget.style.color = '#fff' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)' }}
-            >Reservar demo</button>
+            >{t('hero.cta_secondary')}</button>
           </div>
 
           <div data-hero-trust style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-            {['Sin app', 'Listo en minutos', 'Pagos móviles', 'Onboarding por WhatsApp'].map(t => (
-              <div key={t} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.42)', fontFamily: 'var(--font-jakarta)' }}>
-                <span style={{ color: 'var(--ml-salmon)', fontWeight: 700, fontSize: '11px' }}>✓</span>{t}
+            {(['trust_1', 'trust_2', 'trust_3', 'trust_4'] as const).map(key => (
+              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.42)', fontFamily: 'var(--font-jakarta)' }}>
+                <span style={{ color: 'var(--ml-salmon)', fontWeight: 700, fontSize: '11px' }}>✓</span>{t(`hero.${key}`)}
               </div>
             ))}
           </div>

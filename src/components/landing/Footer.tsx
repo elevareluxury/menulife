@@ -1,33 +1,34 @@
 import { Link } from 'react-router-dom'
-
-const COLS = [
-  {
-    title: 'Producto',
-    links: ['Menú digital', 'Gestión de mozos', 'Analytics', 'Pagos'],
-  },
-  {
-    title: 'Empresa',
-    links: ['Sobre nosotros', 'Blog', 'Contacto', 'Privacidad'],
-  },
-]
+import { useTranslation } from 'react-i18next'
 
 export function Footer() {
+  const { t } = useTranslation()
+
+  const COLS = [
+    {
+      title: t('footer.col_product'),
+      links: [t('footer.col_product_l1'), t('footer.col_product_l2'), t('footer.col_product_l3'), t('footer.col_product_l4')],
+    },
+    {
+      title: t('footer.col_company'),
+      links: [t('footer.col_company_l1'), t('footer.col_company_l2'), t('footer.col_company_l3'), t('footer.col_company_l4')],
+    },
+  ]
+
   return (
     <footer style={{
-      background:  '#0a0c10',
-      borderTop:   '1px solid rgba(255,255,255,0.05)',
-      padding:     '64px 24px 32px',
-      fontFamily:  'var(--font-jakarta)',
+      background: '#0a0c10',
+      borderTop: '1px solid rgba(255,255,255,0.05)',
+      padding: '64px 24px 32px',
+      fontFamily: 'var(--font-jakarta)',
     }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-        {/* Main grid */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(180px,1fr))',
-          gap: '40px',
-          marginBottom: '56px',
+          gap: '40px', marginBottom: '56px',
         }}>
-          {/* Col 1: Brand */}
+          {/* Brand */}
           <div>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '16px' }}>
               <div style={{
@@ -39,7 +40,7 @@ export function Footer() {
               <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '18px' }}>MenuLife</span>
             </Link>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.65, maxWidth: '220px', fontWeight: 300 }}>
-              El sistema operativo de los negocios gastronómicos modernos.
+              {t('footer.tagline')}
             </p>
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
               <SocialLink href="#" label="Instagram">
@@ -51,7 +52,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Cols 2-3 */}
+          {/* Link columns */}
           {COLS.map(col => (
             <div key={col.title}>
               <h4 style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '13px', color: '#fff', marginBottom: '16px', letterSpacing: '0.05em' }}>
@@ -70,42 +71,38 @@ export function Footer() {
             </div>
           ))}
 
-          {/* Col 4: CTA */}
+          {/* CTA col */}
           <div>
             <h4 style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '13px', color: '#fff', marginBottom: '16px' }}>
-              ¿Listo para empezar?
+              {t('footer.cta_title')}
             </h4>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: '16px', fontWeight: 300 }}>
-              Más de 1.200 negocios ya digitalizaron con MenuLife.
+              {t('footer.cta_sub')}
             </p>
             <Link to="/solicitar-acceso" style={{ textDecoration: 'none' }}>
               <button style={{
-                padding:      '10px 20px', borderRadius: '50px', border: 'none',
-                background:   'var(--ml-salmon)', color: '#fff',
-                fontSize:     '13px', fontWeight: 600, cursor: 'pointer',
-                fontFamily:   'var(--font-jakarta)', transition: 'all 0.2s',
+                padding: '10px 20px', borderRadius: '50px', border: 'none',
+                background: 'var(--ml-salmon)', color: '#fff',
+                fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                fontFamily: 'var(--font-jakarta)', transition: 'all 0.2s',
               }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 0 16px rgba(244,112,90,0.4)' }}
                 onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' }}
-              >Solicitar acceso →</button>
+              >{t('footer.cta_button')}</button>
             </Link>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div style={{
-          borderTop:    '1px solid rgba(255,255,255,0.06)',
-          paddingTop:   '24px',
-          display:      'flex', flexWrap: 'wrap',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          paddingTop: '24px',
+          display: 'flex', flexWrap: 'wrap',
           justifyContent: 'space-between', alignItems: 'center',
-          gap:          '12px',
+          gap: '12px',
         }}>
-          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>
-            © 2025 MenuLife. Todos los derechos reservados.
-          </span>
-          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>
-            Hecho con ❤️ en Argentina
-          </span>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>{t('footer.copyright')}</span>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>{t('footer.made')}</span>
         </div>
       </div>
     </footer>

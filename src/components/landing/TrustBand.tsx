@@ -1,4 +1,7 @@
+import { useTranslation } from 'react-i18next'
+
 export function TrustBand() {
+  const { t } = useTranslation()
   const logos = [
     'La Trattoria', 'Café Roma', 'El Rancho', 'Sushi Tokyo',
     'Pizzería Del Centro', 'Bar El Cóndor', 'Resto Gourmet',
@@ -25,7 +28,7 @@ export function TrustBand() {
           color:         'var(--ml-gray-500)',
           fontFamily:    'var(--font-jakarta)',
           marginBottom:  '20px',
-        }}>Negocios que ya digitalizaron con MenuLife</p>
+        }}>{t('trust_band.label')}</p>
 
         {/* Marquee track */}
         <div style={{

@@ -1,44 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 declare const gsap: any
 
-const FAQS = [
-  {
-    q: '¿Mis clientes necesitan descargar una app?',
-    a: 'No. Solo escanean el código QR de la mesa con la cámara del celular. Sin descargas, sin registros, sin fricción.',
-  },
-  {
-    q: '¿Cuánto tarda en estar funcionando?',
-    a: 'Menos de 10 minutos desde que completás el pago. Te guiamos paso a paso por WhatsApp. Tu menú estará live antes de terminar el café.',
-  },
-  {
-    q: '¿Qué pasa si cancelo?',
-    a: 'Nada. Sin contratos, sin multas. Cancelás desde tu panel en un click, cuando quieras. Te devolvemos los días no usados del mes.',
-  },
-  {
-    q: '¿Funciona con mi forma de cobrar?',
-    a: 'Sí. Aceptamos Mercado Pago, Stripe, Apple Pay, Google Pay y efectivo. Si usás otro procesador, contanos y lo vemos.',
-  },
-  {
-    q: '¿Mis mozos necesitan aprender algo complicado?',
-    a: 'Tu equipo ya sabe usar WhatsApp. MenuLife funciona igual de simple. Hay tutoriales de 2 minutos y onboarding dedicado.',
-  },
-  {
-    q: '¿Puedo personalizar el menú con mi identidad visual?',
-    a: 'Sí. Subís tu logo, definís tus colores y el menú queda con la identidad de tu negocio. En el plan Profesional tenés editor completo.',
-  },
-  {
-    q: '¿Funciona para múltiples sucursales?',
-    a: 'Desde el plan Profesional podés manejar hasta 3 locales desde una sola cuenta. Para más, el plan Hospitalidad no tiene límites.',
-  },
-  {
-    q: '¿Tengo soporte si tengo un problema?',
-    a: 'Sí. Soporte por WhatsApp en todos los planes. En Profesional y Hospitalidad tenés respuesta prioritaria.',
-  },
-]
-
 export function FAQSection() {
+  const { t } = useTranslation()
   const [open, setOpen] = useState<number | null>(null)
+
+  const FAQS = [1,2,3,4,5,6,7,8].map(n => ({
+    q: t(`faq.q${n}`),
+    a: t(`faq.a${n}`),
+  }))
 
   useEffect(() => {
     if (typeof gsap === 'undefined') return
@@ -62,11 +34,11 @@ export function FAQSection() {
         {/* Header */}
         <div data-faq-title style={{ textAlign: 'center', marginBottom: '64px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px' }}>
-            PREGUNTAS FRECUENTES
+            {t('faq.label')}
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(32px,4.5vw,48px)', color: '#1a1a1a', lineHeight: 1.1, margin: 0 }}>
-            Todo lo que{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>querés saber.</em>
+            {t('faq.title')}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('faq.title_accent')}</em>
           </h2>
         </div>
 

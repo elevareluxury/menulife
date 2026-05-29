@@ -1,16 +1,27 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 declare const gsap: any
 
-const MESSAGES = [
-  { from: 'bot',  text: '👋 ¡Bienvenido a MenuLife! Te configuro el negocio en minutos.' },
-  { from: 'bot',  text: '✅ Paso 1: ¡Tu menú está en vivo!\nAcá está tu link de onboarding:', link: '🔗 menulife.app/setup/onboard' },
-  { from: 'user', text: 'Genial. ¿Cómo acceden mis mozos?' },
-  { from: 'bot',  text: '📱 Mandales este video de 2 min:', link: '▶ Ver: inicio rápido para mozos\n¡Estarán tomando pedidos en minutos!' },
-  { from: 'bot',  text: '🎉 ¡Llegó tu primera orden!\nMesa 4 — $32.00', highlight: true },
-]
+type Message = { from: 'bot' | 'user'; text: string; link?: string; highlight?: boolean }
 
 export function WhatsAppSection() {
+  const { t } = useTranslation()
+
+  const FEATURES = [
+    { icon: '💬', title: t('whatsapp.f1_title'), desc: t('whatsapp.f1_desc') },
+    { icon: '🎬', title: t('whatsapp.f2_title'), desc: t('whatsapp.f2_desc') },
+    { icon: '🔗', title: t('whatsapp.f3_title'), desc: t('whatsapp.f3_desc') },
+  ]
+
+  const MESSAGES: Message[] = [
+    { from: 'bot',  text: t('whatsapp.msg1') },
+    { from: 'bot',  text: t('whatsapp.msg2'), link: t('whatsapp.msg2_link') },
+    { from: 'user', text: t('whatsapp.msg3') },
+    { from: 'bot',  text: t('whatsapp.msg4'), link: t('whatsapp.msg4_link') },
+    { from: 'bot',  text: t('whatsapp.msg5'), highlight: true },
+  ]
+
   const leftRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -38,21 +49,17 @@ export function WhatsAppSection() {
         {/* Left */}
         <div ref={leftRef} data-wa-left>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '14px' }}>
-            ONBOARDING
+            {t('whatsapp.label')}
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,4.5vw,52px)', color: '#1a1a1a', lineHeight: 1.1, marginBottom: '20px' }}>
-            Capacitación{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>sin capacitación.</em>
+            {t('whatsapp.title')}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('whatsapp.title_accent')}</em>
           </h2>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '16px', fontWeight: 300, color: 'var(--ml-gray-500)', lineHeight: 1.65, marginBottom: '36px' }}>
-            Onboarding instantáneo por WhatsApp para dueños, encargados y mozos. Cero resistencia, adopción máxima.
+            {t('whatsapp.subtitle')}
           </p>
 
-          {[
-            { icon: '💬', title: 'Interfaz familiar', desc: 'Tu equipo ya usa WhatsApp. Cero curva de aprendizaje.' },
-            { icon: '🎬', title: 'Tutoriales cortos en video', desc: 'Guías de 2 minutos para cada función. Lo ven una vez y ya saben.' },
-            { icon: '🔗', title: 'Configuración con un link', desc: 'Compartís un solo enlace y tu equipo está listo en minutos.' },
-          ].map(f => (
+          {FEATURES.map(f => (
             <div key={f.title} style={{ display: 'flex', gap: '14px', marginBottom: '20px' }}>
               <div style={{
                 width: '40px', height: '40px', flexShrink: 0,
@@ -67,21 +74,21 @@ export function WhatsAppSection() {
           ))}
 
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '15px', fontWeight: 500, color: '#1a1a1a', marginTop: '28px', lineHeight: 1.55 }}>
-            Tu menú live en menos de 10 minutos.<br />
-            <span style={{ color: 'var(--ml-gray-500)', fontWeight: 300 }}>Sin técnicos, sin capacitaciones, sin excusas.</span>
+            {t('whatsapp.copy')}<br />
+            <span style={{ color: 'var(--ml-gray-500)', fontWeight: 300 }}>{t('whatsapp.copy_2')}</span>
           </p>
         </div>
 
         {/* Right — animated WhatsApp chat */}
         <div data-wa-chat>
-          <AnimatedChat />
+          <AnimatedChat messages={MESSAGES} onlineLabel={t('whatsapp.online')} />
         </div>
       </div>
     </section>
   )
 }
 
-function AnimatedChat() {
+function AnimatedChat({ messages, onlineLabel }: { messages: Message[]; onlineLabel: string }) {
   const [visible, setVisible] = useState<number[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -90,10 +97,9 @@ function AnimatedChat() {
 
     const show = () => {
       setVisible([])
-      MESSAGES.forEach((_, i) => {
+      messages.forEach((_, i) => {
         const t = setTimeout(() => {
           setVisible(p => [...p, i])
-          // scroll to bottom
           if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight
           }
@@ -101,19 +107,18 @@ function AnimatedChat() {
         timers.push(t)
       })
 
-      // Restart cycle
       const restart = setTimeout(() => {
         setVisible([])
         show()
-      }, 600 + MESSAGES.length * 900 + 3000)
+      }, 600 + messages.length * 900 + 3000)
       timers.push(restart)
     }
 
-    // Delay first run until likely in view
     const init = setTimeout(show, 400)
     timers.push(init)
 
     return () => timers.forEach(clearTimeout)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -140,7 +145,7 @@ function AnimatedChat() {
           <div style={{ fontFamily: 'var(--font-jakarta)', fontWeight: 600, color: '#fff', fontSize: '14px' }}>MenuLife Asistente</div>
           <div style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: '#25D366', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#25D366', display: 'inline-block' }} />
-            En línea
+            {onlineLabel}
           </div>
         </div>
       </div>
@@ -156,7 +161,7 @@ function AnimatedChat() {
         gap:        '10px',
         scrollBehavior: 'smooth',
       }}>
-        {MESSAGES.map((msg, i) => (
+        {messages.map((msg, i) => (
           visible.includes(i) ? (
             <div key={i} style={{
               display:    'flex',
@@ -200,8 +205,7 @@ function AnimatedChat() {
               </div>
             </div>
           ) : (
-            // Typing indicator while waiting
-            i === visible.length && i < MESSAGES.length ? (
+            i === visible.length && i < messages.length ? (
               <div key={`typing-${i}`} style={{
                 display: 'flex', alignItems: 'center', gap: '4px',
                 padding: '10px 14px',
