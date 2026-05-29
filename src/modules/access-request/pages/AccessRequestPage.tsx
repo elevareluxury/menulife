@@ -208,14 +208,8 @@ export function AccessRequestPage() {
         }} />
 
         {/* Logo */}
-        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '52px' }}>
-          <div style={{
-            width: '36px', height: '36px', borderRadius: '10px',
-            background: 'var(--ml-salmon)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '18px',
-          }}>M</div>
-          <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '20px' }}>MenuLife</span>
+        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', marginBottom: '52px' }}>
+          <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
         </Link>
 
         {/* Badge */}
@@ -283,14 +277,8 @@ export function AccessRequestPage() {
         overflowY: 'auto',
       }}>
         {/* Mobile logo */}
-        <Link to="/" className="flex lg:hidden" style={{ alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '28px' }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '8px',
-            background: 'var(--ml-salmon)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '16px',
-          }}>M</div>
-          <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '18px' }}>MenuLife</span>
+        <Link to="/" className="flex lg:hidden" style={{ alignItems: 'center', textDecoration: 'none', marginBottom: '28px' }}>
+          <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
         </Link>
 
         <div style={{

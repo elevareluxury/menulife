@@ -29,14 +29,8 @@ export function LoginPage() {
       }}>
         {/* Logo + title */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '16px' }}>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '10px',
-              background: 'var(--ml-salmon)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '18px',
-            }}>M</div>
-            <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '20px' }}>MenuLife</span>
+          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', marginBottom: '16px' }}>
+            <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
           </Link>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
             Iniciá sesión en tu cuenta

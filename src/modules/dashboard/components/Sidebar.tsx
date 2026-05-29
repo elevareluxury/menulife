@@ -46,9 +46,7 @@ export function Sidebar({ restaurantSlug }: SidebarProps) {
         className="px-5 py-5"
         style={{ borderBottom: '1px solid var(--border-subtle)' }}
       >
-        <span className="text-[18px] font-bold text-ink-1 tracking-tight">
-          menu<span className="text-brand">life</span>
-        </span>
+        <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
         <p className="text-[10px] text-ink-3 mt-1 font-medium uppercase tracking-widest">
           {t('dashboard.nav_panel')}
         </p>

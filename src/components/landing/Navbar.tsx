@@ -38,16 +38,8 @@ export function Navbar() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         {/* Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <div style={{
-            width: '32px', height: '32px',
-            background: 'var(--ml-salmon)', borderRadius: '8px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '17px',
-          }}>M</div>
-          <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '20px', letterSpacing: '-0.02em' }}>
-            MenuLife
-          </span>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
         </Link>
 
         {/* Desktop links */}

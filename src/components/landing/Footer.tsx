@@ -30,14 +30,8 @@ export function Footer() {
         }}>
           {/* Brand */}
           <div>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '16px' }}>
-              <div style={{
-                width: '32px', height: '32px',
-                background: 'var(--ml-salmon)', borderRadius: '8px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '16px',
-              }}>M</div>
-              <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '18px' }}>MenuLife</span>
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', marginBottom: '16px' }}>
+              <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
             </Link>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.65, maxWidth: '220px', fontWeight: 300 }}>
               {t('footer.tagline')}
