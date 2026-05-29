@@ -1,5 +1,5 @@
 /* === TIPOGRAFÍA (debe preceder a @import "tailwindcss") === */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Geist:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ruda:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Geist:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
 
@@ -60,7 +60,7 @@
   --color-orange-dim:  rgba(255, 107, 107, 0.08);
 
   /* === FUENTES === */
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --font-display: 'Ruda', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-sans:    "Geist", "Inter", -apple-system, BlinkMacSystemFont,
                   "SF Pro Text", "Segoe UI", system-ui, sans-serif;
 
@@ -200,11 +200,12 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Ruda', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.02em;
 }
-h1 { font-weight: 800; letter-spacing: -0.03em;  line-height: 1.05; }
-h2 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.1; }
-h3 { font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; }
+h1 { font-weight: 900; letter-spacing: -0.03em;  line-height: 1.05; }
+h2 { font-weight: 800; letter-spacing: -0.025em; line-height: 1.1; }
+h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 
 /* =====================================================
    UTILIDADES PERSONALIZADAS (DARK DASHBOARD)
@@ -352,18 +353,18 @@ h3 { font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; }
   --ml-gray-200:      #e0ddd8;
   --ml-gray-500:      #8a8780;
   --ml-gray-700:      #3d3c39;
-  --font-syne:        -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --font-syne:        'Ruda', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-jakarta:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Landing title letter-spacing — SF Pro Display */
+/* Landing title letter-spacing — Ruda */
 .landing-page h1,
 .landing-page h2,
 [style*="font-syne"] {
   letter-spacing: -0.025em;
 }
 .hero-title-lg {
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   line-height: 1.0;
 }
 

@@ -15,11 +15,15 @@ export default defineConfig({
       filename: 'sw.ts',
 
       // SW registration is handled manually in notifications.ts (registerServiceWorker)
-      // so we don't double-register. VitePWA still injects the manifest link.
       injectRegister: false,
 
       // Assets to include in precache
-      includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable.png', 'offline.html'],
+      includeAssets: ['favicon-96x96.png', 'favicon.ico', 'apple-touch-icon.png', 'logo.png'],
+
+      // Raise the precache size limit above the 2 MiB default (bundle is ~2.1 MiB)
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+      },
 
       manifest: {
         name: 'MenuLife',
@@ -32,20 +36,20 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         icons: [
-          { src: 'icon-192.png',    sizes: '192x192', type: 'image/png' },
-          { src: 'icon-512.png',    sizes: '512x512', type: 'image/png' },
-          { src: 'icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'web-app-manifest-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'web-app-manifest-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'apple-touch-icon.png',         sizes: '180x180', type: 'image/png' },
         ],
         shortcuts: [
           {
             name: 'Dashboard',
             url: '/dashboard',
-            icons: [{ src: 'icon-192.png', sizes: '192x192' }],
+            icons: [{ src: 'web-app-manifest-192x192.png', sizes: '192x192' }],
           },
           {
             name: 'Pedidos',
             url: '/dashboard/orders',
-            icons: [{ src: 'icon-192.png', sizes: '192x192' }],
+            icons: [{ src: 'web-app-manifest-192x192.png', sizes: '192x192' }],
           },
         ],
         categories: ['food', 'business', 'productivity'],
