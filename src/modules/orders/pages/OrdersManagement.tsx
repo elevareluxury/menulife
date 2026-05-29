@@ -9,10 +9,11 @@ import { useOrderStats } from '@/modules/dashboard/hooks/useOrderStats'
 import { OrdersList } from '../components/OrdersList'
 import { HistorialTab } from '../components/HistorialTab'
 import { EstadisticasTab } from '../components/EstadisticasTab'
+import { DeliveryTab } from '../components/DeliveryTab'
 import { requestNotificationPermission, notifyNewOrder, notifyDelayedOrder } from '@/lib/notifications'
 import { formatPrice } from '@/lib/utils'
 
-type MainTab = 'activos' | 'historial' | 'estadisticas'
+type MainTab = 'activos' | 'delivery' | 'historial' | 'estadisticas'
 
 export function OrdersManagement() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
@@ -80,6 +81,12 @@ export function OrdersManagement() {
   const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled')
   const filteredOrders = filterStatus ? orders.filter(o => o.status === filterStatus) : activeOrders
 
+  // Delivery badge count (active delivery/takeaway orders)
+  const deliveryActiveCount = orders.filter(o =>
+    ['delivery', 'takeaway'].includes((o as unknown as { order_type_detail?: string }).order_type_detail ?? '') &&
+    !['delivered', 'cancelled'].includes(o.status)
+  ).length
+
   if (restaurantLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -118,6 +125,7 @@ export function OrdersManagement() {
       >
         {([
           { id: 'activos'      as MainTab, label: `Activos ${activeOrders.length > 0 ? `(${activeOrders.length})` : ''}` },
+          { id: 'delivery'     as MainTab, label: `Delivery${deliveryActiveCount > 0 ? ` 🔴${deliveryActiveCount}` : ''}` },
           { id: 'historial'    as MainTab, label: 'Historial' },
           { id: 'estadisticas' as MainTab, label: 'Estadísticas' },
         ]).map(tab => (
@@ -198,6 +206,11 @@ export function OrdersManagement() {
 
           <OrdersList orders={filteredOrders} />
         </>
+      )}
+
+      {/* Tab: Delivery */}
+      {mainTab === 'delivery' && restaurant && (
+        <DeliveryTab restaurantId={restaurant.id} />
       )}
 
       {/* Tab: Historial */}

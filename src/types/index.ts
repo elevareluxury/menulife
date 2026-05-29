@@ -44,6 +44,15 @@ export interface Restaurant {
   show_descriptions?: boolean
   show_calories?: boolean
   onboarding_completed?: boolean
+  // Delivery & Takeaway config
+  delivery_enabled?: boolean
+  delivery_time_estimate?: number | null
+  delivery_min_order?: number | null
+  delivery_fee_type?: 'fixed' | 'percentage' | 'zone' | null
+  delivery_fee_value?: number | null
+  delivery_zones?: DeliveryZone[] | unknown
+  takeaway_enabled?: boolean
+  takeaway_time_estimate?: number | null
 }
 
 export interface MenuSection {
@@ -129,13 +138,52 @@ export interface Order {
   restaurant_id: string
   session_id: string
   order_type: string
+  order_type_detail?: string | null
   table_number: string | null
   customer_name: string | null
+  customer_phone?: string | null
+  customer_address?: string | null
+  delivery_fee?: number | null
+  delivery_notes?: string | null
+  delivery_status?: string | null
+  delivery_driver_id?: string | null
+  picked_up_at?: string | null
+  delivered_at?: string | null
   status: string
   subtotal: number
   total: number
   currency: string
   created_at: string
+}
+
+export interface DeliveryZone {
+  name: string
+  max_km: number
+  fee: number
+}
+
+export interface DeliveryDriver {
+  id: string
+  restaurant_id: string
+  first_name: string
+  last_name: string
+  phone: string | null
+  pin?: string
+  is_active: boolean
+  is_available: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface OrderTypeData {
+  type: 'dine_in' | 'delivery' | 'takeaway'
+  customerName?: string
+  customerPhone?: string
+  customerAddress?: string
+  customerAddressExtra?: string
+  deliveryFee?: number
+  zone?: string
+  notes?: string
 }
 
 export interface Bill {

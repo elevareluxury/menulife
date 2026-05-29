@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { AnimatePresence, motion, useScroll, useMotionValueEvent } from 'framer-motion'
-import { Search, Globe, DollarSign, ShoppingCart, Bell, X, Receipt } from 'lucide-react'
+import { Search, Globe, DollarSign, ShoppingCart, Bell, X, Receipt, ArrowLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMenuStore } from '@/store/menuStore'
 import { useCartStore } from '@/store/cartStore'
@@ -10,7 +10,275 @@ import { CheckoutModal } from '../components/CheckoutModal'
 import { ItemDetailSheet } from '../components/ItemDetailSheet'
 import { ActiveOrderBanner } from '@/components/tracking/ActiveOrderBanner'
 import toast from 'react-hot-toast'
-import type { Restaurant, MenuSection, MenuItem } from '@/types'
+import type { Restaurant, MenuSection, MenuItem, OrderTypeData, DeliveryZone } from '@/types'
+
+type MenuPhase = 'selector' | 'delivery-form' | 'takeaway-form' | 'menu'
+
+function calculateDeliveryFee(restaurant: Restaurant, orderTotal: number, zone?: string): number {
+  if (restaurant.delivery_fee_type === 'fixed') return restaurant.delivery_fee_value ?? 0
+  if (restaurant.delivery_fee_type === 'percentage') return (orderTotal * (restaurant.delivery_fee_value ?? 0)) / 100
+  if (restaurant.delivery_fee_type === 'zone' && zone) {
+    const zones = Array.isArray(restaurant.delivery_zones) ? (restaurant.delivery_zones as DeliveryZone[]) : []
+    const selected = zones.find(z => z.name === zone)
+    return selected?.fee ?? 0
+  }
+  return 0
+}
+
+function OrderTypeSelector({
+  restaurant,
+  onSelect,
+}: {
+  restaurant: Restaurant
+  onSelect: (type: 'dine_in' | 'delivery' | 'takeaway') => void
+}) {
+  const accentColor = restaurant.menu_accent_color ?? '#F4705A'
+  const options = [
+    { type: 'dine_in' as const, emoji: '🪑', label: 'Mesa', show: true },
+    { type: 'delivery' as const, emoji: '🛵', label: 'Delivery', show: !!restaurant.delivery_enabled },
+    { type: 'takeaway' as const, emoji: '🥡', label: 'Para llevar', show: !!restaurant.takeaway_enabled },
+  ].filter(o => o.show)
+
+  return (
+    <div className="public-menu min-h-screen flex flex-col items-center justify-center px-6" style={{ '--menu-accent': accentColor } as React.CSSProperties}>
+      <div style={{
+        position: 'fixed', top: '-120px', left: '50%', transform: 'translateX(-50%)',
+        width: '400px', height: '250px', borderRadius: '50%',
+        background: `radial-gradient(ellipse, ${accentColor}18 0%, transparent 70%)`,
+        pointerEvents: 'none',
+      }} />
+
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        {restaurant.logo_url && (
+          <img src={restaurant.logo_url} alt={restaurant.name} className="w-20 h-20 rounded-2xl object-cover mx-auto mb-4" style={{ border: '2px solid rgba(255,255,255,0.1)' }} />
+        )}
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--menu-text-primary)', fontFamily: 'var(--font-syne)' }}>
+          {restaurant.name}
+        </h1>
+        <p className="text-sm mt-2" style={{ color: 'var(--menu-text-muted)' }}>¿Cómo querés pedir?</p>
+      </div>
+
+      <div className="flex gap-4 justify-center flex-wrap w-full max-w-xs">
+        {options.map(opt => (
+          <button
+            key={opt.type}
+            onClick={() => onSelect(opt.type)}
+            className="flex flex-col items-center gap-3 p-5 rounded-2xl transition-all active:scale-95"
+            style={{
+              flex: '1 1 calc(33% - 16px)', minWidth: '90px', maxWidth: '130px',
+              background: 'var(--menu-card, rgba(255,255,255,0.04))',
+              border: '1px solid var(--menu-border, rgba(255,255,255,0.08))',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = `${accentColor}14`
+              e.currentTarget.style.borderColor = `${accentColor}40`
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'var(--menu-card, rgba(255,255,255,0.04))'
+              e.currentTarget.style.borderColor = 'var(--menu-border, rgba(255,255,255,0.08))'
+            }}
+          >
+            <span style={{ fontSize: '32px' }}>{opt.emoji}</span>
+            <span className="text-sm font-semibold" style={{ color: 'var(--menu-text-primary)' }}>{opt.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function DeliveryFormScreen({
+  restaurant,
+  onBack,
+  onSubmit,
+}: {
+  restaurant: Restaurant
+  onBack: () => void
+  onSubmit: (data: OrderTypeData) => void
+}) {
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [addressExtra, setAddressExtra] = useState('')
+  const [zone, setZone] = useState('')
+  const [notes, setNotes] = useState('')
+  const accentColor = restaurant.menu_accent_color ?? '#F4705A'
+  const zones = Array.isArray(restaurant.delivery_zones) ? (restaurant.delivery_zones as DeliveryZone[]) : []
+  const deliveryFee = calculateDeliveryFee(restaurant, 0, zone)
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '12px 14px', borderRadius: '14px',
+    border: '1px solid rgba(255,255,255,0.1)',
+    background: 'rgba(255,255,255,0.05)',
+    color: 'var(--menu-text-primary, #f5f5f5)',
+    fontSize: '15px', outline: 'none',
+    fontFamily: 'var(--font-jakarta)',
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name || !phone || !address) { toast.error('Completá todos los campos requeridos'); return }
+    if (zones.length > 0 && !zone) { toast.error('Seleccioná una zona de entrega'); return }
+    onSubmit({
+      type: 'delivery',
+      customerName: name,
+      customerPhone: phone,
+      customerAddress: address,
+      customerAddressExtra: addressExtra,
+      deliveryFee,
+      zone: zone || undefined,
+      notes,
+    })
+  }
+
+  return (
+    <div className="public-menu min-h-screen" style={{ '--menu-accent': accentColor } as React.CSSProperties}>
+      <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={{ background: 'rgba(15,17,21,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--menu-border)' }}>
+        <button onClick={onBack} style={{ color: 'var(--menu-text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+          <ArrowLeft size={20} />
+        </button>
+        <h2 className="font-bold text-base" style={{ color: 'var(--menu-text-primary)', fontFamily: 'var(--font-syne)' }}>🛵 Delivery</h2>
+      </div>
+
+      <form onSubmit={handleSubmit} className="px-4 py-5 space-y-4 max-w-md mx-auto" style={{ paddingBottom: '100px' }}>
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--menu-text-muted)' }}>Tus datos</p>
+
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color: 'var(--menu-text-muted)' }}>Nombre completo *</label>
+          <input style={inputStyle} placeholder="Juan Pérez" value={name} onChange={e => setName(e.target.value)} required />
+        </div>
+
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color: 'var(--menu-text-muted)' }}>Teléfono / WhatsApp *</label>
+          <input style={inputStyle} type="tel" placeholder="+54 9 11 1234-5678" value={phone} onChange={e => setPhone(e.target.value)} required />
+        </div>
+
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color: 'var(--menu-text-muted)' }}>Dirección de entrega *</label>
+          <input style={inputStyle} placeholder="Av. Corrientes 1234" value={address} onChange={e => setAddress(e.target.value)} required />
+        </div>
+
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color: 'var(--menu-text-muted)' }}>Piso / Dpto / Referencias</label>
+          <input style={inputStyle} placeholder="Piso 3, Dpto B" value={addressExtra} onChange={e => setAddressExtra(e.target.value)} />
+        </div>
+
+        {zones.length > 0 && (
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: 'var(--menu-text-muted)' }}>Zona *</label>
+            <select style={{ ...inputStyle }} value={zone} onChange={e => setZone(e.target.value)} required>
+              <option value="">Seleccionar zona</option>
+              {zones.map(z => (
+                <option key={z.name} value={z.name}>{z.name} — hasta {z.max_km} km — ${z.fee.toLocaleString('es-AR')}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color: 'var(--menu-text-muted)' }}>Notas para el repartidor</label>
+          <textarea style={{ ...inputStyle, resize: 'none', height: '80px' } as React.CSSProperties} placeholder="Timbre roto, llamar por teléfono..." value={notes} onChange={e => setNotes(e.target.value)} />
+        </div>
+
+        {/* Summary */}
+        <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', padding: '14px 16px' }}>
+          <p className="text-sm" style={{ color: 'var(--menu-text-secondary)' }}>
+            ⏱️ Tiempo estimado: ~{restaurant.delivery_time_estimate ?? 30} min
+          </p>
+          {restaurant.delivery_fee_type !== 'zone' && (
+            <p className="text-sm mt-1" style={{ color: 'var(--menu-text-secondary)' }}>
+              🛵 Costo de envío: {deliveryFee === 0 ? 'Gratis' : `$${deliveryFee.toLocaleString('es-AR')}`}
+            </p>
+          )}
+          {zone && zones.length > 0 && (
+            <p className="text-sm mt-1" style={{ color: 'var(--menu-text-secondary)' }}>
+              🛵 Costo de envío: ${calculateDeliveryFee(restaurant, 0, zone).toLocaleString('es-AR')}
+            </p>
+          )}
+          {(restaurant.delivery_min_order ?? 0) > 0 && (
+            <p className="text-xs mt-1" style={{ color: 'var(--menu-text-muted)' }}>
+              Pedido mínimo: ${(restaurant.delivery_min_order ?? 0).toLocaleString('es-AR')}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-4 rounded-2xl font-semibold text-white text-base"
+          style={{ background: `linear-gradient(135deg, ${accentColor}, #F09040)`, boxShadow: `0 8px 24px ${accentColor}50` }}
+        >
+          Continuar al menú →
+        </button>
+      </form>
+    </div>
+  )
+}
+
+function TakeawayFormScreen({
+  restaurant,
+  onBack,
+  onSubmit,
+}: {
+  restaurant: Restaurant
+  onBack: () => void
+  onSubmit: (data: OrderTypeData) => void
+}) {
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const accentColor = restaurant.menu_accent_color ?? '#F4705A'
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '12px 14px', borderRadius: '14px',
+    border: '1px solid rgba(255,255,255,0.1)',
+    background: 'rgba(255,255,255,0.05)',
+    color: 'var(--menu-text-primary, #f5f5f5)',
+    fontSize: '15px', outline: 'none',
+    fontFamily: 'var(--font-jakarta)',
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name || !phone) { toast.error('Completá todos los campos requeridos'); return }
+    onSubmit({ type: 'takeaway', customerName: name, customerPhone: phone, deliveryFee: 0 })
+  }
+
+  return (
+    <div className="public-menu min-h-screen" style={{ '--menu-accent': accentColor } as React.CSSProperties}>
+      <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={{ background: 'rgba(15,17,21,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--menu-border)' }}>
+        <button onClick={onBack} style={{ color: 'var(--menu-text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+          <ArrowLeft size={20} />
+        </button>
+        <h2 className="font-bold text-base" style={{ color: 'var(--menu-text-primary)', fontFamily: 'var(--font-syne)' }}>🥡 Para llevar</h2>
+      </div>
+
+      <form onSubmit={handleSubmit} className="px-4 py-5 space-y-4 max-w-md mx-auto" style={{ paddingBottom: '100px' }}>
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color: 'var(--menu-text-muted)' }}>Nombre *</label>
+          <input style={inputStyle} placeholder="Juan Pérez" value={name} onChange={e => setName(e.target.value)} required />
+        </div>
+
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color: 'var(--menu-text-muted)' }}>Teléfono *</label>
+          <input style={inputStyle} type="tel" placeholder="+54 9 11 1234-5678" value={phone} onChange={e => setPhone(e.target.value)} required />
+        </div>
+
+        <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)', padding: '14px 16px' }}>
+          <p className="text-sm" style={{ color: 'var(--menu-text-secondary)' }}>
+            ⏱️ Tiempo estimado: ~{restaurant.takeaway_time_estimate ?? 15} min
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-4 rounded-2xl font-semibold text-white text-base"
+          style={{ background: `linear-gradient(135deg, ${accentColor}, #F09040)`, boxShadow: `0 8px 24px ${accentColor}50` }}
+        >
+          Continuar al menú →
+        </button>
+      </form>
+    </div>
+  )
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -258,6 +526,10 @@ export function PublicMenu() {
   const [billRequested,  setBillRequested]  = useState(false)
   const mesaParam = new URLSearchParams(window.location.search).get('mesa')
 
+  // Delivery/Takeaway phase
+  const [menuPhase, setMenuPhase] = useState<MenuPhase>('menu')
+  const [orderTypeData, setOrderTypeData] = useState<OrderTypeData | null>(null)
+
   const prevItemCount = useRef(itemCount)
   const [cartWiggle, setCartWiggle] = useState(false)
 
@@ -285,12 +557,26 @@ export function PublicMenu() {
           .eq('is_active', true)
           .single()
         if (restErr) throw restErr
-        setRestaurant(rest as Restaurant)
+        const r = rest as Restaurant
+        setRestaurant(r)
+
+        // Determine initial phase
+        if (!mesaParam) {
+          const storageKey = `order_type_${slug as string}`
+          const saved = sessionStorage.getItem(storageKey)
+          if (saved) {
+            try { setOrderTypeData(JSON.parse(saved) as OrderTypeData) } catch { /* ignore */ }
+            setMenuPhase('menu')
+          } else {
+            const totalOptions = 1 + (r.delivery_enabled ? 1 : 0) + (r.takeaway_enabled ? 1 : 0)
+            if (totalOptions > 1) setMenuPhase('selector')
+          }
+        }
 
         const { data: secs } = await supabase
           .from('menu_sections')
           .select('*')
-          .eq('restaurant_id', rest.id)
+          .eq('restaurant_id', r.id)
           .eq('is_active', true)
           .order('sort_order')
         setSections((secs as MenuSection[]) ?? [])
@@ -298,7 +584,7 @@ export function PublicMenu() {
         const { data: itms } = await supabase
           .from('menu_items')
           .select('*')
-          .eq('restaurant_id', rest.id)
+          .eq('restaurant_id', r.id)
           .order('sort_order')
         setItems((itms as MenuItem[]) ?? [])
       } catch (err) {
@@ -387,6 +673,36 @@ export function PublicMenu() {
   const openDetail = (item: MenuItem) => {
     setDetailItem(item)
     setIsDetailOpen(true)
+  }
+
+  const handleSelectOrderType = (type: 'dine_in' | 'delivery' | 'takeaway') => {
+    if (type === 'dine_in') {
+      const data: OrderTypeData = { type: 'dine_in' }
+      sessionStorage.setItem(`order_type_${slug as string}`, JSON.stringify(data))
+      setOrderTypeData(data)
+      setMenuPhase('menu')
+    } else if (type === 'delivery') {
+      setMenuPhase('delivery-form')
+    } else {
+      setMenuPhase('takeaway-form')
+    }
+  }
+
+  const handleOrderTypeSubmit = (data: OrderTypeData) => {
+    sessionStorage.setItem(`order_type_${slug as string}`, JSON.stringify(data))
+    setOrderTypeData(data)
+    setMenuPhase('menu')
+  }
+
+  // ── Pre-menu phases ─────────────────────────────────────────────────────────
+  if (!loading && restaurant && menuPhase === 'selector') {
+    return <OrderTypeSelector restaurant={restaurant} onSelect={handleSelectOrderType} />
+  }
+  if (!loading && restaurant && menuPhase === 'delivery-form') {
+    return <DeliveryFormScreen restaurant={restaurant} onBack={() => setMenuPhase('selector')} onSubmit={handleOrderTypeSubmit} />
+  }
+  if (!loading && restaurant && menuPhase === 'takeaway-form') {
+    return <TakeawayFormScreen restaurant={restaurant} onBack={() => setMenuPhase('selector')} onSubmit={handleOrderTypeSubmit} />
   }
 
   // ── Loading ───────────────────────────────────────────────────────────────────
@@ -788,9 +1104,15 @@ export function PublicMenu() {
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
         restaurantId={restaurant.id}
-        onSuccess={() => setIsCheckoutOpen(false)}
+        onSuccess={() => {
+          setIsCheckoutOpen(false)
+          sessionStorage.removeItem(`order_type_${slug as string}`)
+          setOrderTypeData(null)
+        }}
         slug={slug}
         restaurantName={restaurant.name}
+        orderTypeData={orderTypeData}
+        mesaParam={mesaParam}
       />
       {slug && <ActiveOrderBanner slug={slug} />}
     </div>

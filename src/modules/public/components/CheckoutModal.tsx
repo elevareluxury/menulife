@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useCartStore } from '@/store/cartStore'
 import { useMenuStore } from '@/store/menuStore'
 import toast from 'react-hot-toast'
+import type { OrderTypeData } from '@/types'
 
 interface CheckoutModalProps {
   isOpen: boolean
@@ -13,9 +14,11 @@ interface CheckoutModalProps {
   onSuccess: () => void
   slug?: string
   restaurantName?: string
+  orderTypeData?: OrderTypeData | null
+  mesaParam?: string | null
 }
 
-export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, restaurantName }: CheckoutModalProps) {
+export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, restaurantName, orderTypeData, mesaParam }: CheckoutModalProps) {
   const navigate = useNavigate()
   const { items, sessionId, clearCart, getTotal } = useCartStore()
   const { currency, language } = useMenuStore()
@@ -25,10 +28,13 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
   const [customerName, setCustomerName] = useState('')
   const [tables, setTables] = useState<{ value: string; label: string }[]>([])
 
+  // Pre-fill from orderTypeData (delivery/takeaway pre-selection)
+  const isPreSelected = !!orderTypeData && orderTypeData.type !== 'dine_in'
+  const deliveryFee = orderTypeData?.deliveryFee ?? 0
+
   useEffect(() => {
-    const mesaParam = new URLSearchParams(window.location.search).get('mesa')
     if (mesaParam) setTableNumber(mesaParam)
-  }, [])
+  }, [mesaParam])
 
   useEffect(() => {
     if (!restaurantId || orderType !== 'dine_in') return
@@ -54,19 +60,41 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
     e.preventDefault()
     setLoading(true)
     try {
+      const subtotal = getTotal(currency)
+      const total = subtotal + deliveryFee
+
+      // Build order payload
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const orderPayload: Record<string, any> = {
+        restaurant_id: restaurantId,
+        session_id: sessionId,
+        status: 'pending',
+        subtotal,
+        total,
+        currency,
+      }
+
+      if (isPreSelected && orderTypeData) {
+        orderPayload.order_type = orderTypeData.type
+        orderPayload.order_type_detail = orderTypeData.type
+        orderPayload.customer_name = orderTypeData.customerName ?? null
+        orderPayload.customer_phone = orderTypeData.customerPhone ?? null
+        orderPayload.customer_address = orderTypeData.customerAddress
+          ? [orderTypeData.customerAddress, orderTypeData.customerAddressExtra].filter(Boolean).join(', ')
+          : null
+        orderPayload.delivery_fee = deliveryFee
+        orderPayload.delivery_notes = orderTypeData.notes ?? null
+        orderPayload.delivery_status = 'pending'
+        orderPayload.table_number = null
+      } else {
+        orderPayload.order_type = orderType
+        orderPayload.table_number = orderType === 'dine_in' ? tableNumber : null
+        orderPayload.customer_name = orderType === 'takeaway' ? customerName : null
+      }
+
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          restaurant_id: restaurantId,
-          session_id: sessionId,
-          order_type: orderType,
-          table_number: orderType === 'dine_in' ? tableNumber : null,
-          customer_name: orderType === 'takeaway' ? customerName : null,
-          status: 'pending',
-          subtotal: getTotal(currency),
-          total: getTotal(currency),
-          currency,
-        })
+        .insert(orderPayload)
         .select()
         .single()
 
@@ -134,38 +162,53 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
       title={language === 'ES' ? 'Confirmar pedido' : 'Confirm order'}
     >
       <form onSubmit={handleSubmit} className="px-4 py-4 space-y-5 pb-8">
-        {/* Order type */}
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { type: 'dine_in'  as const, emoji: '🍽️', label: language === 'ES' ? 'Comer aquí' : 'Dine in'  },
-            { type: 'takeaway' as const, emoji: '📦', label: language === 'ES' ? 'Para llevar' : 'Takeaway' },
-          ].map(opt => {
-            const active = orderType === opt.type
-            return (
-              <button
-                key={opt.type}
-                type="button"
-                onClick={() => setOrderType(opt.type)}
-                className="p-4 rounded-2xl text-center transition-all"
-                style={{
-                  backgroundColor: active ? 'rgba(255,107,107,0.12)' : 'var(--menu-card-elevated, #1A1A1A)',
-                  border: `1.5px solid ${active ? 'var(--menu-accent, #FF6B6B)' : 'var(--menu-border, rgba(255,255,255,0.06))'}`,
-                }}
-              >
-                <div className="text-2xl mb-1">{opt.emoji}</div>
-                <div
-                  className="text-sm font-semibold"
-                  style={{ color: active ? 'var(--menu-accent, #FF6B6B)' : 'var(--menu-text-secondary, #888888)' }}
+        {/* Order type — only show when NOT pre-selected from delivery/takeaway flow */}
+        {!isPreSelected && (
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { type: 'dine_in'  as const, emoji: '🍽️', label: language === 'ES' ? 'Comer aquí' : 'Dine in'  },
+              { type: 'takeaway' as const, emoji: '📦', label: language === 'ES' ? 'Para llevar' : 'Takeaway' },
+            ].map(opt => {
+              const active = orderType === opt.type
+              return (
+                <button
+                  key={opt.type}
+                  type="button"
+                  onClick={() => setOrderType(opt.type)}
+                  className="p-4 rounded-2xl text-center transition-all"
+                  style={{
+                    backgroundColor: active ? 'rgba(255,107,107,0.12)' : 'var(--menu-card-elevated, #1A1A1A)',
+                    border: `1.5px solid ${active ? 'var(--menu-accent, #FF6B6B)' : 'var(--menu-border, rgba(255,255,255,0.06))'}`,
+                  }}
                 >
-                  {opt.label}
-                </div>
-              </button>
-            )
-          })}
-        </div>
+                  <div className="text-2xl mb-1">{opt.emoji}</div>
+                  <div
+                    className="text-sm font-semibold"
+                    style={{ color: active ? 'var(--menu-accent, #FF6B6B)' : 'var(--menu-text-secondary, #888888)' }}
+                  >
+                    {opt.label}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Pre-selected delivery/takeaway summary */}
+        {isPreSelected && orderTypeData && (
+          <div className="p-3 rounded-2xl text-sm space-y-1" style={{ backgroundColor: 'rgba(247,127,0,0.08)', border: '1px solid rgba(247,127,0,0.2)' }}>
+            <p className="font-semibold" style={{ color: '#F77F00' }}>
+              {orderTypeData.type === 'delivery' ? '🛵 Delivery' : '🥡 Para llevar'}
+            </p>
+            {orderTypeData.customerName && <p style={{ color: 'var(--menu-text-secondary, #888)' }}>👤 {orderTypeData.customerName}</p>}
+            {orderTypeData.customerPhone && <p style={{ color: 'var(--menu-text-secondary, #888)' }}>📱 {orderTypeData.customerPhone}</p>}
+            {orderTypeData.customerAddress && <p style={{ color: 'var(--menu-text-secondary, #888)' }}>📍 {orderTypeData.customerAddress}</p>}
+            {deliveryFee > 0 && <p style={{ color: 'var(--menu-text-secondary, #888)' }}>🛵 Envío: ${deliveryFee.toLocaleString('es-AR')}</p>}
+          </div>
+        )}
 
         {/* Dine-in: table number */}
-        {orderType === 'dine_in' && (
+        {!isPreSelected && orderType === 'dine_in' && (
           tables.length > 0 ? (
             <div>
               <label className="block text-xs font-medium mb-2" style={{ color: 'var(--menu-text-secondary, #888888)' }}>
@@ -202,8 +245,8 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
           )
         )}
 
-        {/* Takeaway: customer name */}
-        {orderType === 'takeaway' && (
+        {/* Takeaway: customer name — only when not pre-selected */}
+        {!isPreSelected && orderType === 'takeaway' && (
           <div>
             <label className="block text-xs font-medium mb-2" style={{ color: 'var(--menu-text-secondary, #888888)' }}>
               {language === 'ES' ? 'Tu nombre' : 'Your name'}
@@ -237,7 +280,9 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
               {language === 'ES' ? 'Enviando...' : 'Sending...'}
             </span>
           ) : (
-            language === 'ES' ? 'Enviar pedido' : 'Send order'
+            language === 'ES'
+            ? `Enviar pedido${deliveryFee > 0 ? ` (+$${deliveryFee.toLocaleString('es-AR')} envío)` : ''}`
+            : 'Send order'
           )}
         </button>
       </form>

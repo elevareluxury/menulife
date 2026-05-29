@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed, MoreHorizontal,
-  QrCode, Users, ChefHat, Settings, type LucideIcon,
+  QrCode, Users, ChefHat, Settings, Truck, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -83,15 +83,16 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
   const [showMore, setShowMore] = useState(false)
 
   const moreItems: MoreItem[] = [
-    { icon: QrCode,    label: 'QR',            to: '/dashboard/qr' },
-    { icon: Users,     label: 'Mozos',         to: '/dashboard/waiters' },
+    { icon: QrCode,    label: 'QR',             to: '/dashboard/qr' },
+    { icon: Users,     label: 'Mozos',          to: '/dashboard/waiters' },
+    { icon: Truck,     label: 'Repartidores',   to: '/dashboard/repartidores' },
     {
       icon: ChefHat,
       label: 'Cocina',
       href: restaurantSlug ? `/kitchen/${restaurantSlug}` : undefined,
       external: true,
     },
-    { icon: Settings,  label: 'Configuración', to: '/dashboard' },
+    { icon: Settings,  label: 'Configuración',  to: '/dashboard' },
   ]
 
   const close = () => setShowMore(false)

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import {
   ChevronLeft, Store, MapPin, Clock, Share2, Palette,
-  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2,
+  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -22,7 +22,24 @@ import type { Restaurant } from '@/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance'
+type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery'
+
+interface DeliveryZone {
+  name: string
+  max_km: number
+  fee: number
+}
+
+interface DeliveryForm {
+  delivery_enabled: boolean
+  delivery_time_estimate: number
+  delivery_min_order: number
+  delivery_fee_type: 'fixed' | 'percentage' | 'zone'
+  delivery_fee_value: number
+  delivery_zones: DeliveryZone[]
+  takeaway_enabled: boolean
+  takeaway_time_estimate: number
+}
 type DayKey = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
 
 interface DaySchedule {
@@ -105,11 +122,12 @@ const DAYS: Array<{ key: DayKey; label: string }> = [
 ]
 
 const SECTIONS: Array<{ id: Section; label: string; icon: React.ReactNode }> = [
-  { id: 'general',    label: 'Información general', icon: <Store    className="w-4 h-4" /> },
-  { id: 'location',   label: 'Ubicación',           icon: <MapPin   className="w-4 h-4" /> },
-  { id: 'hours',      label: 'Horarios',             icon: <Clock    className="w-4 h-4" /> },
-  { id: 'social',     label: 'Redes sociales',       icon: <Share2   className="w-4 h-4" /> },
-  { id: 'appearance', label: 'Apariencia del menú',  icon: <Palette  className="w-4 h-4" /> },
+  { id: 'general',    label: 'Información general',  icon: <Store    className="w-4 h-4" /> },
+  { id: 'location',   label: 'Ubicación',            icon: <MapPin   className="w-4 h-4" /> },
+  { id: 'hours',      label: 'Horarios',              icon: <Clock    className="w-4 h-4" /> },
+  { id: 'social',     label: 'Redes sociales',        icon: <Share2   className="w-4 h-4" /> },
+  { id: 'appearance', label: 'Apariencia del menú',   icon: <Palette  className="w-4 h-4" /> },
+  { id: 'delivery',   label: 'Delivery & Takeaway',   icon: <Truck    className="w-4 h-4" /> },
 ]
 
 const COUNTRIES = [
@@ -241,6 +259,16 @@ export function BusinessSettings() {
   const [saving, setSaving] = useState(false)
   const [activeSection, setActiveSection] = useState<Section>('general')
   const [formData, setFormData] = useState<SettingsForm>(DEFAULT_FORM)
+  const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
+    delivery_enabled: false,
+    delivery_time_estimate: 30,
+    delivery_min_order: 0,
+    delivery_fee_type: 'fixed',
+    delivery_fee_value: 0,
+    delivery_zones: [],
+    takeaway_enabled: false,
+    takeaway_time_estimate: 15,
+  })
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string>('')
   const [coverFile, setCoverFile] = useState<File | null>(null)
@@ -258,10 +286,22 @@ export function BusinessSettings() {
       .single()
       .then(({ data, error }) => {
         if (!error && data) {
-          setRestaurant(data as Restaurant)
-          setFormData(restaurantToForm(data as Restaurant))
+          const r = data as Restaurant
+          setRestaurant(r)
+          setFormData(restaurantToForm(r))
           if (data.logo_url) setLogoPreview(data.logo_url)
           if (data.cover_image_url) setCoverPreview(data.cover_image_url)
+          // Load delivery config
+          setDeliveryForm({
+            delivery_enabled: r.delivery_enabled ?? false,
+            delivery_time_estimate: r.delivery_time_estimate ?? 30,
+            delivery_min_order: r.delivery_min_order ?? 0,
+            delivery_fee_type: (r.delivery_fee_type as DeliveryForm['delivery_fee_type']) ?? 'fixed',
+            delivery_fee_value: r.delivery_fee_value ?? 0,
+            delivery_zones: Array.isArray(r.delivery_zones) ? (r.delivery_zones as DeliveryZone[]) : [],
+            takeaway_enabled: r.takeaway_enabled ?? false,
+            takeaway_time_estimate: r.takeaway_time_estimate ?? 15,
+          })
         }
         setLoading(false)
       })
@@ -411,27 +451,36 @@ export function BusinessSettings() {
       const { error } = await (supabase as any)
         .from('restaurants')
         .update({
-          logo_url:          finalLogoUrl,
-          cover_image_url:   finalCoverUrl,
-          name:              formData.name.trim(),
-          description:       formData.description.trim() || null,
-          phone:             formData.phone.trim() || null,
-          email:             formData.email.trim() || null,
-          website:           formData.website.trim() || null,
-          country:           formData.country || null,
-          province:          formData.province || null,
-          city:              formData.city.trim() || null,
-          address:           formData.address.trim() || null,
-          address_extra:     formData.address_extra.trim() || null,
-          postal_code:       formData.postal_code.trim() || null,
-          directions:        formData.directions.trim() || null,
-          schedule:          formData.schedule,
-          social_links:      formData.social_links,
-          menu_accent_color: formData.menu_accent_color,
-          menu_card_style:   formData.menu_card_style,
-          show_prices:       formData.show_prices,
-          show_descriptions: formData.show_descriptions,
-          show_calories:     formData.show_calories,
+          logo_url:               finalLogoUrl,
+          cover_image_url:        finalCoverUrl,
+          name:                   formData.name.trim(),
+          description:            formData.description.trim() || null,
+          phone:                  formData.phone.trim() || null,
+          email:                  formData.email.trim() || null,
+          website:                formData.website.trim() || null,
+          country:                formData.country || null,
+          province:               formData.province || null,
+          city:                   formData.city.trim() || null,
+          address:                formData.address.trim() || null,
+          address_extra:          formData.address_extra.trim() || null,
+          postal_code:            formData.postal_code.trim() || null,
+          directions:             formData.directions.trim() || null,
+          schedule:               formData.schedule,
+          social_links:           formData.social_links,
+          menu_accent_color:      formData.menu_accent_color,
+          menu_card_style:        formData.menu_card_style,
+          show_prices:            formData.show_prices,
+          show_descriptions:      formData.show_descriptions,
+          show_calories:          formData.show_calories,
+          // Delivery & Takeaway
+          delivery_enabled:       deliveryForm.delivery_enabled,
+          delivery_time_estimate: deliveryForm.delivery_time_estimate,
+          delivery_min_order:     deliveryForm.delivery_min_order,
+          delivery_fee_type:      deliveryForm.delivery_fee_type,
+          delivery_fee_value:     deliveryForm.delivery_fee_value,
+          delivery_zones:         deliveryForm.delivery_zones,
+          takeaway_enabled:       deliveryForm.takeaway_enabled,
+          takeaway_time_estimate: deliveryForm.takeaway_time_estimate,
         })
         .eq('id', restaurant.id)
 
@@ -956,12 +1005,197 @@ export function BusinessSettings() {
     </div>
   )
 
+  const setDeliveryField = <K extends keyof DeliveryForm>(key: K, value: DeliveryForm[K]) =>
+    setDeliveryForm(prev => ({ ...prev, [key]: value }))
+
+  const addZone = () =>
+    setDeliveryField('delivery_zones', [...deliveryForm.delivery_zones, { name: `Zona ${deliveryForm.delivery_zones.length + 1}`, max_km: 5, fee: 0 }])
+
+  const updateZone = (idx: number, field: keyof DeliveryZone, value: string | number) =>
+    setDeliveryField('delivery_zones', deliveryForm.delivery_zones.map((z, i) => i === idx ? { ...z, [field]: value } : z))
+
+  const removeZone = (idx: number) =>
+    setDeliveryField('delivery_zones', deliveryForm.delivery_zones.filter((_, i) => i !== idx))
+
+  const renderDelivery = () => (
+    <div className="space-y-5">
+      {/* Delivery */}
+      <SectionCard title="Delivery" description="Configurá las opciones de entrega a domicilio.">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Activar delivery</span>
+            <Toggle
+              checked={deliveryForm.delivery_enabled}
+              onChange={e => setDeliveryField('delivery_enabled', e.target.checked)}
+            />
+          </div>
+
+          {deliveryForm.delivery_enabled && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo estimado de entrega (minutos)</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={deliveryForm.delivery_time_estimate}
+                  onChange={e => setDeliveryField('delivery_time_estimate', Number(e.target.value))}
+                  className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Pedido mínimo ($)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={deliveryForm.delivery_min_order}
+                  onChange={e => setDeliveryField('delivery_min_order', Number(e.target.value))}
+                  className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de costo de envío</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { value: 'fixed',      label: '💲 Fijo' },
+                    { value: 'percentage', label: '% Porcentaje' },
+                    { value: 'zone',       label: '📍 Por zona' },
+                  ] as const).map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setDeliveryField('delivery_fee_type', opt.value)}
+                      className={cn(
+                        'p-3 rounded-xl border-2 text-sm font-medium transition-colors text-center',
+                        deliveryForm.delivery_fee_type === opt.value
+                          ? 'border-orange-500 bg-orange-50 text-orange-700'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {deliveryForm.delivery_fee_type === 'fixed' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Costo de envío fijo ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={deliveryForm.delivery_fee_value}
+                    onChange={e => setDeliveryField('delivery_fee_value', Number(e.target.value))}
+                    className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              )}
+
+              {deliveryForm.delivery_fee_type === 'percentage' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Porcentaje sobre el total (%)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={deliveryForm.delivery_fee_value}
+                    onChange={e => setDeliveryField('delivery_fee_value', Number(e.target.value))}
+                    className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              )}
+
+              {deliveryForm.delivery_fee_type === 'zone' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Zonas de entrega</label>
+                  <div className="space-y-2">
+                    {deliveryForm.delivery_zones.map((zone, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                        <input
+                          type="text"
+                          value={zone.name}
+                          onChange={e => updateZone(idx, 'name', e.target.value)}
+                          placeholder="Nombre"
+                          className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          value={zone.max_km}
+                          onChange={e => updateZone(idx, 'max_km', Number(e.target.value))}
+                          placeholder="km"
+                          className="w-16 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                        <span className="text-xs text-gray-400">km</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={zone.fee}
+                          onChange={e => updateZone(idx, 'fee', Number(e.target.value))}
+                          placeholder="$"
+                          className="w-20 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeZone(idx)}
+                          className="text-red-400 hover:text-red-600 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addZone}
+                      className="flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Agregar zona
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </SectionCard>
+
+      {/* Takeaway */}
+      <SectionCard title="Para llevar (Takeaway)" description="Opción para que los clientes retiren en el local.">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Activar para llevar</span>
+            <Toggle
+              checked={deliveryForm.takeaway_enabled}
+              onChange={e => setDeliveryField('takeaway_enabled', e.target.checked)}
+            />
+          </div>
+
+          {deliveryForm.takeaway_enabled && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo estimado de preparación (minutos)</label>
+              <input
+                type="number"
+                min={1}
+                value={deliveryForm.takeaway_time_estimate}
+                onChange={e => setDeliveryField('takeaway_time_estimate', Number(e.target.value))}
+                className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          )}
+        </div>
+      </SectionCard>
+    </div>
+  )
+
   const sectionContent: Record<Section, React.ReactNode> = {
     general:    renderGeneral(),
     location:   renderLocation(),
     hours:      renderHours(),
     social:     renderSocial(),
     appearance: renderAppearance(),
+    delivery:   renderDelivery(),
   }
 
   // ─── Render ─────────────────────────────────────────────────────────────────

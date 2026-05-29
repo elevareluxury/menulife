@@ -18,6 +18,9 @@ import { WaiterLogin } from '@/modules/waiter/pages/WaiterLogin'
 import { WaiterDashboard } from '@/modules/waiter/pages/WaiterDashboard'
 import { TableBill } from '@/modules/waiter/pages/TableBill'
 import { BusinessSettings } from '@/modules/settings/pages/BusinessSettings'
+import { DriversManagement } from '@/modules/delivery/pages/DriversManagement'
+import { DeliveryLogin } from '@/modules/delivery/pages/DeliveryLogin'
+import { DriverDashboard } from '@/modules/delivery/pages/DriverDashboard'
 import { AccessRequestPage } from '@/modules/access-request/pages/AccessRequestPage'
 import { OnboardingFlow } from '@/modules/onboarding/pages/OnboardingFlow'
 import { OrderTracking } from '@/modules/public/pages/OrderTracking'
@@ -49,6 +52,7 @@ function App() {
           <Route path="waiters" element={<WaitersManagement />} />
           <Route path="tables" element={<TablesConfiguration />} />
           <Route path="settings" element={<BusinessSettings />} />
+          <Route path="repartidores" element={<DriversManagement />} />
         </Route>
         <Route path="/r/:slug/pedido/:orderId" element={<OrderTracking />} />
         <Route path="/r/:slug" element={<PublicMenu />} />
@@ -56,6 +60,8 @@ function App() {
         <Route path="/waiter/:slug/login" element={<WaiterLogin />} />
         <Route path="/waiter/:slug/dashboard" element={<WaiterDashboard />} />
         <Route path="/waiter/:slug/table/:tableNumber" element={<TableBill />} />
+        <Route path="/delivery/:slug/login" element={<DeliveryLogin />} />
+        <Route path="/delivery/:slug/app" element={<DriverDashboard />} />
         <Route path="/super-admin/*" element={<SuperAdminPage />} />
         {/* Alias sin guión — por si alguien tipea /superadmin */}
         <Route path="/superadmin/*" element={<Navigate to="/super-admin" replace />} />
