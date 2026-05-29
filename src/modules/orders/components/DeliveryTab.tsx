@@ -1,9 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Phone, MapPin } from 'lucide-react'
+import { Phone, MapPin, Plus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Spinner } from '@/components/ui/Spinner'
+import { ExternalOrderModal } from './ExternalOrderModal'
 import toast from 'react-hot-toast'
 import type { DeliveryDriver } from '@/types'
+
+const SOURCE_META: Record<string, { label: string; color: string; emoji: string }> = {
+  rappi:     { label: 'Rappi',     color: '#FF6200', emoji: '🟠' },
+  pedidosya: { label: 'PedidosYa', color: '#FFD700', emoji: '🟡' },
+  whatsapp:  { label: 'WhatsApp',  color: '#25D366', emoji: '🟢' },
+  phone:     { label: 'Teléfono',  color: '#3B82F6', emoji: '🔵' },
+  own:       { label: 'Propio',    color: '#FF6B7A', emoji: '🔴' },
+  other:     { label: 'Otro',      color: '#6B7280', emoji: '⚫' },
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -46,6 +56,8 @@ interface DeliveryOrder {
   subtotal: number
   currency: string
   created_at: string
+  external_source: string | null
+  external_order_id: string | null
   items: { menu_item_name: string; quantity: number }[]
 }
 
@@ -65,13 +77,14 @@ export function DeliveryTab({ restaurantId }: DeliveryTabProps) {
   const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('active')
+  const [showNewOrderModal, setShowNewOrderModal] = useState(false)
   const prevCountRef = useRef(0)
 
   const fetchOrders = useCallback(async () => {
     try {
       let query = db
         .from('orders')
-        .select('id, order_type_detail, customer_name, customer_phone, customer_address, delivery_fee, delivery_status, delivery_driver_id, total, subtotal, currency, created_at, order_items(menu_item_name, quantity)')
+        .select('id, order_type_detail, customer_name, customer_phone, customer_address, delivery_fee, delivery_status, delivery_driver_id, total, subtotal, currency, created_at, external_source, external_order_id, order_items(menu_item_name, quantity)')
         .eq('restaurant_id', restaurantId)
         .in('order_type_detail', ['delivery', 'takeaway'])
         .order('created_at', { ascending: false })
@@ -170,8 +183,25 @@ export function DeliveryTab({ restaurantId }: DeliveryTabProps) {
 
   return (
     <div>
-      {/* Filters */}
-      <div className="flex gap-2 mb-5 flex-wrap">
+      {showNewOrderModal && (
+        <ExternalOrderModal
+          restaurantId={restaurantId}
+          drivers={drivers}
+          onClose={() => setShowNewOrderModal(false)}
+          onCreated={fetchOrders}
+        />
+      )}
+
+      {/* Filters + new order button */}
+      <div className="flex gap-2 mb-5 flex-wrap" style={{ alignItems: 'center' }}>
+        <button
+          onClick={() => setShowNewOrderModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all"
+          style={{ background: 'rgba(247,127,0,0.18)', border: '1px solid #F77F00', color: '#F77F00' }}
+        >
+          <Plus size={14} /> Pedido externo
+        </button>
+        <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)', margin: '0 2px', alignSelf: 'stretch' }} />
         {[
           { val: 'all', label: 'Todos' },
           { val: 'delivery', label: '🛵 Delivery' },
@@ -242,10 +272,23 @@ export function DeliveryTab({ restaurantId }: DeliveryTabProps) {
                 {/* Header */}
                 <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '13px', fontWeight: 700, color: accentColor, background: `${accentColor}18`, padding: '2px 8px', borderRadius: '20px' }}>
                         {isDelivery ? '🛵 DELIVERY' : '🥡 TAKEAWAY'}
                       </span>
+                      {order.external_source && SOURCE_META[order.external_source] && (() => {
+                        const src = SOURCE_META[order.external_source]
+                        return (
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: src.color, background: `${src.color}18`, padding: '2px 7px', borderRadius: '20px', border: `1px solid ${src.color}44` }}>
+                            {src.emoji} {src.label}
+                          </span>
+                        )
+                      })()}
+                      {order.external_order_id && (
+                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
+                          #{order.external_order_id}
+                        </span>
+                      )}
                     </div>
                     <p style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '16px', color: '#fff', margin: '0 0 2px' }}>
                       {order.customer_name ?? '—'}

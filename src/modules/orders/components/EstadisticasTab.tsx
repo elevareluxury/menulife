@@ -7,8 +7,11 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { DateRangePicker } from './DateRangePicker'
+import { DeliveryStatsSection } from './DeliveryStatsSection'
 import { useOrderAnalytics } from '../hooks/useOrderAnalytics'
 import { formatPrice } from '@/lib/utils'
+
+type StatsSubTab = 'general' | 'delivery'
 
 interface EstadisticasTabProps {
   restaurantId: string
@@ -89,6 +92,7 @@ function exportCSV(restaurantSlug: string, desde: Date, hasta: Date, data: Retur
 export function EstadisticasTab({ restaurantId, restaurantSlug }: EstadisticasTabProps) {
   const now = startOfDay(new Date())
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const [subTab, setSubTab] = useState<StatsSubTab>('general')
   const [desde, setDesde] = useState(monthStart)
   const [hasta, setHasta] = useState(now)
   const exportRef = useRef(false)
@@ -101,6 +105,32 @@ export function EstadisticasTab({ restaurantId, restaurantSlug }: EstadisticasTa
 
   return (
     <div className="space-y-6">
+      {/* Sub-tab toggle */}
+      <div
+        className="flex gap-1 p-1 rounded-xl w-fit"
+        style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        {([
+          { id: 'general' as StatsSubTab, label: '📊 General' },
+          { id: 'delivery' as StatsSubTab, label: '🛵 Delivery' },
+        ]).map(t => (
+          <button
+            key={t.id}
+            onClick={() => setSubTab(t.id)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              subTab === t.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-300'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {subTab === 'delivery' ? (
+        <DeliveryStatsSection restaurantId={restaurantId} />
+      ) : (
+        <>
+
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <DateRangePicker
@@ -266,6 +296,9 @@ export function EstadisticasTab({ restaurantId, restaurantSlug }: EstadisticasTa
               </ResponsiveContainer>
             </Card>
           )}
+        </>
+      )}
+
         </>
       )}
     </div>
