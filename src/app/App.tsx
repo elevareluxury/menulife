@@ -27,6 +27,8 @@ import { OrderTracking } from '@/modules/public/pages/OrderTracking'
 import { AuthCallback } from '@/pages/AuthCallback'
 import { ForgotPassword } from '@/pages/ForgotPassword'
 import { ResetPassword } from '@/pages/ResetPassword'
+import { ReservationFormPage } from '@/modules/public/pages/ReservationFormPage'
+import { CRMPage } from '@/modules/crm/pages/CRMPage'
 
 function App() {
   return (
@@ -53,7 +55,9 @@ function App() {
           <Route path="tables" element={<TablesConfiguration />} />
           <Route path="settings" element={<BusinessSettings />} />
           <Route path="repartidores" element={<DriversManagement />} />
+          <Route path="clientes" element={<CRMPage />} />
         </Route>
+        <Route path="/r/:slug/reservar" element={<ReservationFormPage />} />
         <Route path="/r/:slug/pedido/:orderId" element={<OrderTracking />} />
         <Route path="/r/:slug" element={<PublicMenu />} />
         <Route path="/kitchen/:slug" element={<KitchenDisplay />} />

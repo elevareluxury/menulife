@@ -54,6 +54,14 @@ export interface Restaurant {
   takeaway_enabled?: boolean
   takeaway_time_estimate?: number | null
   allow_language_switch?: boolean
+  // Reservations config
+  reservations_enabled?: boolean
+  reservations_collect_guests?: boolean
+  reservations_advance_days?: number | null
+  reservations_min_hours?: number | null
+  reservations_max_party?: number | null
+  reservations_time_slots?: string[] | null
+  reservations_message?: string | null
 }
 
 export interface MenuSection {
@@ -233,4 +241,52 @@ export interface BillSplit {
   amount: number
   items: string[] | null
   created_at: string
+}
+
+export type ReservationStatus = 'pending' | 'confirmed' | 'seated' | 'completed' | 'cancelled' | 'no_show'
+export type ReservationSource = 'menu' | 'phone' | 'manual' | 'web'
+
+export interface Reservation {
+  id: string
+  restaurant_id: string
+  first_name: string
+  last_name: string
+  phone: string
+  email: string | null
+  party_size: number
+  reservation_date: string
+  reservation_time: string
+  occasion: string | null
+  notes: string | null
+  guests_data: GuestData[]
+  collect_guests: boolean
+  source: ReservationSource
+  status: ReservationStatus
+  table_id: string | null
+  internal_notes: string | null
+  created_at: string
+  updated_at?: string
+}
+
+export interface GuestData {
+  name: string
+}
+
+export interface CRMContact {
+  id: string
+  restaurant_id: string
+  first_name: string
+  last_name: string
+  phone: string
+  email: string | null
+  total_visits: number
+  total_spent: number
+  avg_ticket: number
+  first_visit_date: string | null
+  last_visit_date: string | null
+  is_vip: boolean
+  tags: string[]
+  notes: string | null
+  created_at: string
+  updated_at?: string
 }

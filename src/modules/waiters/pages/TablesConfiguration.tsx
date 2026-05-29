@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, Trash2, Edit } from 'lucide-react'
+import { Plus, Trash2, Edit, CalendarDays, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
@@ -9,6 +9,8 @@ import { Spinner } from '@/components/ui/Spinner'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useTables } from '../hooks/useTables'
 import { useWaiters } from '../hooks/useWaiters'
+import { useReservations } from '@/modules/reservations/hooks/useReservations'
+import { ReservationsPanel } from '@/modules/reservations/components/ReservationsPanel'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import type { Table, Waiter } from '@/types'
@@ -34,6 +36,12 @@ export function TablesConfiguration() {
   const { waiters } = useWaiters(restaurant?.id)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTable, setEditingTable] = useState<Table | null>(null)
+  const [showReservations, setShowReservations] = useState(false)
+
+  // Today's reservations for table indicators
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+  const { reservations: todayReservations } = useReservations(restaurant?.id, todayStr)
 
   // Local positions for drag (avoids flicker while dragging)
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({})
@@ -138,15 +146,30 @@ export function TablesConfiguration() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4">
         <div>
-          <h1 className="text-3xl font-bold mb-1">Configuración de Mesas</h1>
-          <p className="text-gray-400 text-sm">Arrastra las mesas para organizarlas</p>
+          <h1 className="text-3xl font-bold mb-1">Mesas</h1>
+          <p className="text-gray-400 text-sm">Arrastrá las mesas para organizarlas</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nueva Mesa
-        </Button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowReservations(false)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${!showReservations ? 'bg-surface-4 text-ink-1' : 'text-ink-3 hover:bg-surface-3'}`}
+          >
+            <LayoutGrid size={15} /> Plano
+          </button>
+          <button
+            onClick={() => setShowReservations(true)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${showReservations ? 'bg-surface-4 text-ink-1' : 'text-ink-3 hover:bg-surface-3'}`}
+          >
+            <CalendarDays size={15} /> Reservas
+          </button>
+          <Button onClick={() => setIsModalOpen(true)} className="ml-2">
+            <Plus className="w-4 h-4 mr-1.5" />
+            Mesa
+          </Button>
+        </div>
       </div>
 
       {/* Legend */}
@@ -159,7 +182,15 @@ export function TablesConfiguration() {
         ))}
       </div>
 
-      {tables.length === 0 ? (
+      {showReservations ? (
+        <Card className="p-0 overflow-hidden" style={{ height: '600px' }}>
+          <ReservationsPanel
+            restaurantId={restaurant?.id ?? ''}
+            restaurantName={restaurant?.name ?? ''}
+            tables={tables}
+          />
+        </Card>
+      ) : tables.length === 0 ? (
         <Card>
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">Aún no tienes mesas configuradas</p>
@@ -183,6 +214,9 @@ export function TablesConfiguration() {
             {tables.map((table) => {
               const pos = positions[table.id] ?? { x: table.position_x, y: table.position_y }
               const waiter = waiters.find(w => w.id === table.waiter_id)
+              const nextRes = todayReservations
+                .filter(r => r.table_id === table.id && ['confirmed', 'pending', 'seated'].includes(r.status))
+                .sort((a, b) => a.reservation_time.localeCompare(b.reservation_time))[0]
               return (
                 <div
                   key={table.id}
@@ -200,6 +234,11 @@ export function TablesConfiguration() {
                     {waiter && (
                       <div className="text-xs text-emerald-600 font-medium truncate mb-1">
                         {waiter.first_name}
+                      </div>
+                    )}
+                    {nextRes && (
+                      <div className="text-xs text-blue-500 font-medium truncate mb-1">
+                        📅 {nextRes.reservation_time} {nextRes.first_name}
                       </div>
                     )}
                     <div className="flex gap-1 mt-2">

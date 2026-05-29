@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import {
   ChevronLeft, Store, MapPin, Clock, Share2, Palette,
-  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus,
+  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus, CalendarDays,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -24,7 +24,7 @@ import type { Restaurant } from '@/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language'
+type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language' | 'reservations'
 
 interface DeliveryZone {
   name: string
@@ -257,7 +257,8 @@ export function BusinessSettings() {
     { id: 'social',     label: t('dashboard.settings_social'),     icon: <Share2   className="w-4 h-4" /> },
     { id: 'appearance', label: t('dashboard.settings_appearance'), icon: <Palette  className="w-4 h-4" /> },
     { id: 'delivery',   label: t('dashboard.settings_delivery'),   icon: <Truck    className="w-4 h-4" /> },
-    { id: 'language',   label: t('dashboard.settings_language'),   icon: <Globe    className="w-4 h-4" /> },
+    { id: 'language',      label: t('dashboard.settings_language'),      icon: <Globe        className="w-4 h-4" /> },
+    { id: 'reservations',  label: 'Reservas',                            icon: <CalendarDays className="w-4 h-4" /> },
   ], [t])
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
@@ -288,6 +289,16 @@ export function BusinessSettings() {
   )
   const [menuLang, setMenuLang] = useState<'ES' | 'EN'>('ES')
   const [allowSwitch, setAllowSwitch] = useState(true)
+
+  // Reservation settings
+  const [resEnabled, setResEnabled] = useState(false)
+  const [resCollectGuests, setResCollectGuests] = useState(false)
+  const [resDays, setResDays] = useState(30)
+  const [resMinHours, setResMinHours] = useState(2)
+  const [resMaxParty, setResMaxParty] = useState(20)
+  const [resTimeSlots, setResTimeSlots] = useState<string[]>(['20:00', '21:00', '22:00'])
+  const [resMessage, setResMessage] = useState('¡Gracias por tu reserva! Te esperamos.')
+  const [newSlot, setNewSlot] = useState('')
 
   // Fetch restaurant
   useEffect(() => {
@@ -320,6 +331,14 @@ export function BusinessSettings() {
           setPanelLang(storedLang ?? (r.default_language === 'EN' ? 'en' : 'es'))
           setMenuLang(r.default_language ?? 'ES')
           setAllowSwitch(r.allow_language_switch ?? true)
+          // Load reservation config
+          setResEnabled(r.reservations_enabled ?? false)
+          setResCollectGuests(r.reservations_collect_guests ?? false)
+          setResDays(r.reservations_advance_days ?? 30)
+          setResMinHours(r.reservations_min_hours ?? 2)
+          setResMaxParty(r.reservations_max_party ?? 20)
+          setResTimeSlots(r.reservations_time_slots ?? ['20:00', '21:00', '22:00'])
+          setResMessage(r.reservations_message ?? '¡Gracias por tu reserva! Te esperamos.')
         }
         setLoading(false)
       })
@@ -502,6 +521,14 @@ export function BusinessSettings() {
           // Language
           default_language:       menuLang,
           allow_language_switch:  allowSwitch,
+          // Reservations
+          reservations_enabled:        resEnabled,
+          reservations_collect_guests: resCollectGuests,
+          reservations_advance_days:   resDays,
+          reservations_min_hours:      resMinHours,
+          reservations_max_party:      resMaxParty,
+          reservations_time_slots:     resTimeSlots,
+          reservations_message:        resMessage,
         })
         .eq('id', restaurant.id)
 
@@ -1270,14 +1297,129 @@ export function BusinessSettings() {
     </div>
   )
 
+  const renderReservations = () => {
+    const addSlot = () => {
+      const v = newSlot.trim()
+      if (!v || resTimeSlots.includes(v)) return
+      setResTimeSlots(prev => [...prev, v].sort())
+      setNewSlot('')
+    }
+    const removeSlot = (s: string) => setResTimeSlots(prev => prev.filter(x => x !== s))
+
+    return (
+      <div className="space-y-5">
+        <SectionCard title="📅 Sistema de reservas" description="Configurá cómo los clientes pueden hacer reservas desde el menú QR.">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-sm font-medium text-gray-700">Activar reservas online</span>
+              <p className="text-xs text-gray-400 mt-0.5">Los clientes podrán reservar desde el menú QR</p>
+            </div>
+            <Toggle checked={resEnabled} onChange={e => setResEnabled(e.target.checked)} />
+          </div>
+        </SectionCard>
+
+        {resEnabled && (
+          <>
+            <SectionCard title="Horarios disponibles" description="Los horarios que el cliente puede elegir al reservar.">
+              <div className="flex flex-wrap gap-2 mb-3">
+                {resTimeSlots.map(s => (
+                  <span key={s} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg text-sm font-medium text-gray-700">
+                    {s}
+                    <button type="button" onClick={() => removeSlot(s)} className="text-gray-400 hover:text-red-500 transition-colors">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="time"
+                  value={newSlot}
+                  onChange={e => setNewSlot(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#FF6B7A]"
+                />
+                <button
+                  type="button"
+                  onClick={addSlot}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#FF6B7A] text-white rounded-lg text-sm font-medium hover:bg-[#e85e6b] transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Agregar
+                </button>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Límites de reserva" description="Controlá la disponibilidad y anticipación.">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700">Anticipación máxima</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number" min={1} max={365} value={resDays}
+                      onChange={e => setResDays(Number(e.target.value))}
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#FF6B7A]"
+                    />
+                    <span className="text-sm text-gray-500">días</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700">Anticipación mínima</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number" min={0} max={72} value={resMinHours}
+                      onChange={e => setResMinHours(Number(e.target.value))}
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#FF6B7A]"
+                    />
+                    <span className="text-sm text-gray-500">horas antes</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700">Capacidad máxima por reserva</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number" min={1} max={100} value={resMaxParty}
+                      onChange={e => setResMaxParty(Number(e.target.value))}
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#FF6B7A]"
+                    />
+                    <span className="text-sm text-gray-500">personas</span>
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Datos de acompañantes" description="Pedí los datos de todos los comensales de la mesa.">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-sm font-medium text-gray-700">Pedir datos de todos los comensales</span>
+                  <p className="text-xs text-gray-400 mt-0.5">Nombre y apellido de cada persona de la mesa</p>
+                </div>
+                <Toggle checked={resCollectGuests} onChange={e => setResCollectGuests(e.target.checked)} />
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Mensaje personalizado" description="Aparece en la confirmación de la reserva.">
+              <textarea
+                value={resMessage}
+                onChange={e => setResMessage(e.target.value)}
+                rows={3}
+                placeholder="¡Gracias por tu reserva! Te esperamos."
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#FF6B7A] resize-none"
+              />
+            </SectionCard>
+          </>
+        )}
+      </div>
+    )
+  }
+
   const sectionContent: Record<Section, React.ReactNode> = {
-    general:    renderGeneral(),
-    location:   renderLocation(),
-    hours:      renderHours(),
-    social:     renderSocial(),
-    appearance: renderAppearance(),
-    delivery:   renderDelivery(),
-    language:   renderLanguage(),
+    general:      renderGeneral(),
+    location:     renderLocation(),
+    hours:        renderHours(),
+    social:       renderSocial(),
+    appearance:   renderAppearance(),
+    delivery:     renderDelivery(),
+    language:     renderLanguage(),
+    reservations: renderReservations(),
   }
 
   // ─── Render ─────────────────────────────────────────────────────────────────

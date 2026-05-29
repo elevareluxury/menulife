@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useScroll, useMotionValueEvent } from 'framer-motion'
-import { Search, Globe, DollarSign, ShoppingCart, Bell, X, Receipt, ArrowLeft } from 'lucide-react'
+import { Search, Globe, DollarSign, ShoppingCart, Bell, X, Receipt, ArrowLeft, CalendarDays } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMenuStore } from '@/store/menuStore'
 import { useCartStore } from '@/store/cartStore'
@@ -503,6 +503,7 @@ function FeaturedRow({
 
 export function PublicMenu() {
   const { slug } = useParams()
+  const navigate = useNavigate()
   const { currency, language, setCurrency, setLanguage } = useMenuStore()
   const { getItemCount, getTotal } = useCartStore()
   const itemCount = getItemCount()
@@ -793,6 +794,16 @@ export function PublicMenu() {
             )}
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            {restaurant.reservations_enabled && (
+              <button
+                onClick={() => navigate(`/r/${slug}/reservar`)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
+                style={{ backgroundColor: accentColor, color: '#fff', backdropFilter: 'blur(8px)', borderRadius: '10px' }}
+              >
+                <CalendarDays className="w-3 h-3" />
+                {language === 'ES' ? 'Reservar' : 'Book'}
+              </button>
+            )}
             {(restaurant.allow_language_switch ?? true) && (
               <button
                 onClick={() => {

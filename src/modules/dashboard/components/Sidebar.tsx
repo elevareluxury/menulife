@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed,
-  QrCode, Users, ChefHat, LogOut, Truck, type LucideIcon,
+  QrCode, Users, ChefHat, LogOut, Truck, ContactRound, type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
@@ -21,7 +21,8 @@ const NAV_ITEMS: NavItemDef[] = [
   { to: '/dashboard/menu',     icon: UtensilsCrossed, labelKey: 'dashboard.nav_menu' },
   { to: '/dashboard/qr',       icon: QrCode,          labelKey: 'dashboard.nav_qr' },
   { to: '/dashboard/waiters',      icon: Users,  labelKey: 'dashboard.nav_waiters' },
-  { to: '/dashboard/repartidores', icon: Truck,  labelKey: 'dashboard.nav_drivers' },
+  { to: '/dashboard/repartidores', icon: Truck,         labelKey: 'dashboard.nav_drivers' },
+  { to: '/dashboard/clientes',    icon: ContactRound,  labelKey: 'dashboard.nav_clients' },
 ]
 
 interface SidebarProps {
