@@ -471,68 +471,81 @@ export function BusinessSettings() {
         const { error: coverErr } = await supabase.storage
           .from('restaurant-assets')
           .upload(fileName, coverFile, { cacheControl: '3600', upsert: true })
-        if (!coverErr) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('restaurant-assets')
-            .getPublicUrl(fileName)
-          finalCoverUrl = publicUrl
-          setField('cover_image_url', publicUrl)
-          setCoverFile(null)
-        } else {
-          toast.error('Error al subir la portada')
-        }
         setUploadingCover(false)
+        if (coverErr) {
+          toast.error(`Error al subir la portada: ${coverErr.message}`)
+          setSaving(false)
+          return
+        }
+        const { data: { publicUrl } } = supabase.storage
+          .from('restaurant-assets')
+          .getPublicUrl(fileName)
+        finalCoverUrl = publicUrl
+        setField('cover_image_url', publicUrl)
+        setCoverFile(null)
+      }
+
+      const updatePayload = {
+        logo_url:               finalLogoUrl,
+        cover_image_url:        finalCoverUrl,
+        name:                   formData.name.trim(),
+        description:            formData.description.trim() || null,
+        phone:                  formData.phone.trim() || null,
+        email:                  formData.email.trim() || null,
+        website:                formData.website.trim() || null,
+        country:                formData.country || null,
+        province:               formData.province || null,
+        city:                   formData.city.trim() || null,
+        address:                formData.address.trim() || null,
+        address_extra:          formData.address_extra.trim() || null,
+        postal_code:            formData.postal_code.trim() || null,
+        directions:             formData.directions.trim() || null,
+        schedule:               formData.schedule,
+        social_links:           formData.social_links,
+        menu_accent_color:      formData.menu_accent_color,
+        menu_card_style:        formData.menu_card_style,
+        show_prices:            formData.show_prices,
+        show_descriptions:      formData.show_descriptions,
+        show_calories:          formData.show_calories,
+        // Delivery & Takeaway
+        delivery_enabled:       deliveryForm.delivery_enabled,
+        delivery_time_estimate: deliveryForm.delivery_time_estimate,
+        delivery_min_order:     deliveryForm.delivery_min_order,
+        delivery_fee_type:      deliveryForm.delivery_fee_type,
+        delivery_fee_value:     deliveryForm.delivery_fee_value,
+        delivery_zones:         deliveryForm.delivery_zones,
+        takeaway_enabled:       deliveryForm.takeaway_enabled,
+        takeaway_time_estimate: deliveryForm.takeaway_time_estimate,
+        // Language
+        default_language:       menuLang,
+        allow_language_switch:  allowSwitch,
+        // Reservations
+        reservations_enabled:        resEnabled,
+        reservations_collect_guests: resCollectGuests,
+        reservations_advance_days:   resDays,
+        reservations_min_hours:      resMinHours,
+        reservations_max_party:      resMaxParty,
+        reservations_time_slots:     resTimeSlots,
+        reservations_message:        resMessage,
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { data: updated, error } = await (supabase as any)
         .from('restaurants')
-        .update({
-          logo_url:               finalLogoUrl,
-          cover_image_url:        finalCoverUrl,
-          name:                   formData.name.trim(),
-          description:            formData.description.trim() || null,
-          phone:                  formData.phone.trim() || null,
-          email:                  formData.email.trim() || null,
-          website:                formData.website.trim() || null,
-          country:                formData.country || null,
-          province:               formData.province || null,
-          city:                   formData.city.trim() || null,
-          address:                formData.address.trim() || null,
-          address_extra:          formData.address_extra.trim() || null,
-          postal_code:            formData.postal_code.trim() || null,
-          directions:             formData.directions.trim() || null,
-          schedule:               formData.schedule,
-          social_links:           formData.social_links,
-          menu_accent_color:      formData.menu_accent_color,
-          menu_card_style:        formData.menu_card_style,
-          show_prices:            formData.show_prices,
-          show_descriptions:      formData.show_descriptions,
-          show_calories:          formData.show_calories,
-          // Delivery & Takeaway
-          delivery_enabled:       deliveryForm.delivery_enabled,
-          delivery_time_estimate: deliveryForm.delivery_time_estimate,
-          delivery_min_order:     deliveryForm.delivery_min_order,
-          delivery_fee_type:      deliveryForm.delivery_fee_type,
-          delivery_fee_value:     deliveryForm.delivery_fee_value,
-          delivery_zones:         deliveryForm.delivery_zones,
-          takeaway_enabled:       deliveryForm.takeaway_enabled,
-          takeaway_time_estimate: deliveryForm.takeaway_time_estimate,
-          // Language
-          default_language:       menuLang,
-          allow_language_switch:  allowSwitch,
-          // Reservations
-          reservations_enabled:        resEnabled,
-          reservations_collect_guests: resCollectGuests,
-          reservations_advance_days:   resDays,
-          reservations_min_hours:      resMinHours,
-          reservations_max_party:      resMaxParty,
-          reservations_time_slots:     resTimeSlots,
-          reservations_message:        resMessage,
-        })
+        .update(updatePayload)
         .eq('id', restaurant.id)
+        .select('id')
 
       if (error) throw error
+
+      // If RLS blocks the UPDATE, Supabase returns error=null but 0 rows
+      if (!updated || updated.length === 0) {
+        throw new Error('No se pudo guardar: sin permisos. Ejecutá la migración SQL en Supabase Dashboard.')
+      }
+
+      // Sync in-memory restaurant state so Cancel reverts to saved values
+      setRestaurant(prev => prev ? { ...prev, ...updatePayload } as Restaurant : prev)
+
       toast.success(t('dashboard.settings_saved'))
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : t('dashboard.settings_error'))
