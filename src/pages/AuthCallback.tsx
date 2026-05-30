@@ -1,27 +1,44 @@
-import { useEffect } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 
 export function AuthCallback() {
   const navigate = useNavigate()
 
+  // Capture URL params SYNCHRONOUSLY during render — Supabase's async _initialize()
+  // calls history.replaceState() to clear the hash during its microtask chain,
+  // which runs after render but before useEffect. Reading here guarantees we see
+  // the original tokens before they're wiped.
+  const params = useMemo(() => {
+    const search = new URLSearchParams(window.location.search)
+    const hash   = new URLSearchParams(window.location.hash.replace('#', ''))
+    return {
+      error:        search.get('error')             || hash.get('error'),
+      errorDesc:    search.get('error_description') || hash.get('error_description'),
+      type:         search.get('type')              || hash.get('type'),
+      code:         search.get('code'),
+      accessToken:  hash.get('access_token'),
+      refreshToken: hash.get('refresh_token'),
+    }
+  }, [])
+
   useEffect(() => {
-    async function handleCallback() {
+    const { error, errorDesc, type, code, accessToken, refreshToken } = params
+
+    async function redirectByRole(userId?: string) {
+      const id = userId ?? (await supabase.auth.getUser()).data.user?.id
+      if (!id) { navigate('/dashboard', { replace: true }); return }
+      const { data: superAdmin } = await supabase
+        .from('super_admins')
+        .select('id')
+        .eq('user_id', id)
+        .maybeSingle()
+      navigate(superAdmin ? '/super-admin' : '/dashboard', { replace: true })
+    }
+
+    async function handle() {
       try {
-        // Supabase JS v2 + PKCE (default): tokens come as ?code=...&type=... in query params
-        // Legacy implicit flow: tokens come as #access_token=...&type=... in hash
-        const searchParams = new URLSearchParams(window.location.search)
-        const hashParams   = new URLSearchParams(window.location.hash.replace('#', ''))
-
-        const error      = searchParams.get('error')      || hashParams.get('error')
-        const errorDesc  = searchParams.get('error_description') || hashParams.get('error_description')
-        const type       = searchParams.get('type')       || hashParams.get('type')
-
-        const code         = searchParams.get('code')
-        const accessToken  = hashParams.get('access_token')
-        const refreshToken = hashParams.get('refresh_token')
-
-        // Supabase returned an explicit error in the URL
+        // Explicit error in the URL
         if (error) {
           console.error('Auth callback error:', errorDesc)
           const dest = type === 'recovery' ? '/forgot-password' : '/login'
@@ -40,71 +57,56 @@ export function AuthCallback() {
             navigate(`${dest}?error=Sesión+inválida`, { replace: true })
             return
           }
-
           if (type === 'recovery') {
             navigate('/reset-password', { replace: true })
             return
           }
-
-          // signup / magiclink / other → check role and redirect
-          const { data: { user } } = await supabase.auth.getUser()
-          if (user) {
-            const { data: superAdmin } = await supabase
-              .from('super_admins')
-              .select('id')
-              .eq('user_id', user.id)
-              .maybeSingle()
-            navigate(superAdmin ? '/super-admin' : '/dashboard', { replace: true })
-          } else {
-            navigate('/dashboard', { replace: true })
-          }
+          await redirectByRole()
           return
         }
 
-        // ── Implicit flow: #access_token= in hash ────────────────────────────
+        // ── Implicit flow: #access_token= captured via useMemo before Supabase cleared hash
         if (accessToken && refreshToken) {
           const { error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           })
-
           if (sessionError) {
             const dest = type === 'recovery' ? '/forgot-password' : '/login'
             navigate(`${dest}?error=Sesión+inválida`, { replace: true })
             return
           }
-
           if (type === 'recovery') {
             navigate('/reset-password', { replace: true })
             return
           }
-
-          if (type === 'signup' || type === 'magiclink') {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-              const { data: superAdmin } = await supabase
-                .from('super_admins')
-                .select('id')
-                .eq('user_id', user.id)
-                .maybeSingle()
-              navigate(superAdmin ? '/super-admin' : '/dashboard', { replace: true })
-              return
-            }
-          }
-
-          navigate('/dashboard', { replace: true })
+          await redirectByRole()
           return
         }
 
-        // ── No token or code — check for an existing session ─────────────────
+        // ── type=recovery captured but tokens already consumed by Supabase initializer ──
+        // Supabase already called setSession internally; just verify the session exists.
+        if (type === 'recovery') {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) {
+            navigate('/reset-password', { replace: true })
+            return
+          }
+          // Session not ready yet — give Supabase a moment and retry once
+          await new Promise(r => setTimeout(r, 800))
+          const { data: retry } = await supabase.auth.getSession()
+          if (retry.session) {
+            navigate('/reset-password', { replace: true })
+            return
+          }
+          navigate('/forgot-password?error=expired', { replace: true })
+          return
+        }
+
+        // ── No tokens at all — use existing session and redirect normally ────
         const { data: { session } } = await supabase.auth.getSession()
         if (session) {
-          const { data: superAdmin } = await supabase
-            .from('super_admins')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .maybeSingle()
-          navigate(superAdmin ? '/super-admin' : '/dashboard', { replace: true })
+          await redirectByRole(session.user.id)
         } else {
           navigate('/login', { replace: true })
         }
@@ -114,8 +116,8 @@ export function AuthCallback() {
       }
     }
 
-    handleCallback()
-  }, [navigate])
+    handle()
+  }, [navigate, params])
 
   return (
     <div style={{
