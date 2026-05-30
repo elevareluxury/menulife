@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { ArrowLeft, Mail } from 'lucide-react'
 
@@ -103,10 +103,24 @@ const S = {
 }
 
 export function ForgotPassword() {
+  const location = useLocation()
   const [email, setEmail]         = useState('')
   const [loading, setLoading]     = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [error, setError]         = useState('')
+  const [urlError, setUrlError]   = useState('')
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const err = params.get('error')
+    if (err) {
+      const known: Record<string, string> = {
+        expired: 'El link expiró. Pedí uno nuevo.',
+        invalid: 'El link es inválido.',
+      }
+      setUrlError(known[err] ?? decodeURIComponent(err))
+    }
+  }, [location.search])
 
   const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 
@@ -195,6 +209,22 @@ export function ForgotPassword() {
         </div>
 
         <h2 style={S.title}>Recuperar contraseña</h2>
+
+        {urlError && (
+          <div style={{
+            background: 'rgba(255,107,122,0.1)',
+            border: '1px solid rgba(255,107,122,0.3)',
+            borderRadius: '10px',
+            padding: '12px 14px',
+            marginBottom: '1.25rem',
+            color: '#FF6B7A',
+            fontSize: '0.875rem',
+            lineHeight: 1.5,
+          }}>
+            {urlError}
+          </div>
+        )}
+
         <p style={S.subtitle}>
           Ingresá tu email y te enviamos un link para crear una nueva contraseña.
         </p>

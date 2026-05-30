@@ -24,8 +24,9 @@ export function AuthCallback() {
         // Supabase returned an explicit error in the URL
         if (error) {
           console.error('Auth callback error:', errorDesc)
+          const dest = type === 'recovery' ? '/forgot-password' : '/login'
           navigate(
-            `/login?error=${encodeURIComponent(errorDesc ?? 'Link inválido o expirado')}`,
+            `${dest}?error=${encodeURIComponent(errorDesc ?? 'Link inválido o expirado')}`,
             { replace: true }
           )
           return
@@ -35,7 +36,8 @@ export function AuthCallback() {
         if (code) {
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
           if (exchangeError) {
-            navigate('/login?error=Sesión+inválida', { replace: true })
+            const dest = type === 'recovery' ? '/forgot-password' : '/login'
+            navigate(`${dest}?error=Sesión+inválida`, { replace: true })
             return
           }
 
@@ -67,7 +69,8 @@ export function AuthCallback() {
           })
 
           if (sessionError) {
-            navigate('/login?error=Sesión+inválida', { replace: true })
+            const dest = type === 'recovery' ? '/forgot-password' : '/login'
+            navigate(`${dest}?error=Sesión+inválida`, { replace: true })
             return
           }
 

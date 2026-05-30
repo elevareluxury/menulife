@@ -125,8 +125,7 @@ export function ResetPassword() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        toast.error('El link expiró. Pedí uno nuevo.')
-        navigate('/forgot-password', { replace: true })
+        navigate('/forgot-password?error=expired', { replace: true })
       } else {
         setChecking(false)
       }
