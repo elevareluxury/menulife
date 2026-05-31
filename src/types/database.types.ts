@@ -74,6 +74,8 @@ export type Database = {
           show_descriptions: boolean
           show_calories: boolean
           onboarding_completed: boolean
+          features: Json | null
+          onboarding_steps: Json | null
         }
         Insert: {
           id?: string
@@ -115,6 +117,8 @@ export type Database = {
           show_descriptions?: boolean
           show_calories?: boolean
           onboarding_completed?: boolean
+          features?: Json | null
+          onboarding_steps?: Json | null
         }
         Update: {
           id?: string
@@ -156,6 +160,8 @@ export type Database = {
           show_descriptions?: boolean
           show_calories?: boolean
           onboarding_completed?: boolean
+          features?: Json | null
+          onboarding_steps?: Json | null
         }
         Relationships: []
       }
@@ -612,9 +618,145 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_drivers: {
+        Row: {
+          id: string
+          restaurant_id: string
+          name: string
+          phone: string | null
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          name: string
+          phone?: string | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          name?: string
+          phone?: string | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      admin_logs: {
+        Row: {
+          id: string
+          admin_id: string
+          action: string
+          target_type: string
+          target_id: string
+          details: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_id: string
+          action: string
+          target_type: string
+          target_id: string
+          details?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          admin_id?: string
+          action?: string
+          target_type?: string
+          target_id?: string
+          details?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      admin_notes: {
+        Row: {
+          id: string
+          restaurant_id: string
+          author_id: string | null
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          author_id?: string | null
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          author_id?: string | null
+          content?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      plan_changes: {
+        Row: {
+          id: string
+          restaurant_id: string
+          old_plan: string
+          new_plan: string
+          changed_by: string | null
+          reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          old_plan: string
+          new_plan: string
+          changed_by?: string | null
+          reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          old_plan?: string
+          new_plan?: string
+          changed_by?: string | null
+          reason?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      view_superadmin_restaurants: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          city: string | null
+          phone: string | null
+          email: string | null
+          plan: string
+          subscription_status: string
+          is_active: boolean
+          trial_ends_at: string | null
+          created_at: string
+          onboarding_completed: boolean
+          onboarding_steps: Json | null
+          features: Json | null
+          total_orders: number
+          total_revenue: number
+          total_products: number
+          total_tables: number
+          total_waiters: number
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
     }
     Functions: {
       is_super_admin: {

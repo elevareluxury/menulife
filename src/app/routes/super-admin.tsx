@@ -3,10 +3,13 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { Spinner } from '@/components/ui/Spinner'
 import { SuperAdminLayout } from '@/modules/super-admin/components/SuperAdminLayout'
-import { SuperDashboard } from '@/modules/super-admin/pages/SuperDashboard'
+import { SuperDashboard }    from '@/modules/super-admin/pages/SuperDashboard'
 import { AccessRequestsTab } from '@/modules/super-admin/pages/AccessRequestsTab'
-import { RestaurantsTab } from '@/modules/super-admin/pages/RestaurantsTab'
-import { MetricasTab } from '@/modules/super-admin/pages/MetricasTab'
+import { RestaurantsTab }    from '@/modules/super-admin/pages/RestaurantsTab'
+import { MetricasTab }       from '@/modules/super-admin/pages/MetricasTab'
+import { PlanesTab }         from '@/modules/super-admin/pages/PlanesTab'
+import { SistemaTab }        from '@/modules/super-admin/pages/SistemaTab'
+import { FeatureFlagsTab }   from '@/modules/super-admin/pages/FeatureFlagsTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
@@ -27,18 +30,21 @@ export function SuperAdminPage() {
   }
 
   if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />
-  if (!isSuperAdmin) return <Navigate to={ROUTES.DASHBOARD} replace />
+  if (!isSuperAdmin)    return <Navigate to={ROUTES.DASHBOARD} replace />
 
   return (
     <SuperAdminLayout>
       <Routes>
-        <Route index element={<SuperDashboard />} />
-        <Route path="solicitudes" element={<AccessRequestsTab />} />
-        <Route path="negocios"    element={<RestaurantsTab />} />
-        <Route path="metricas"   element={<MetricasTab />} />
-        {/* Legacy aliases → redirect to new paths */}
-        <Route path="requests"     element={<Navigate to="/super-admin/solicitudes" replace />} />
-        <Route path="restaurants"  element={<Navigate to="/super-admin/negocios" replace />} />
+        <Route index                    element={<SuperDashboard />} />
+        <Route path="solicitudes"       element={<AccessRequestsTab />} />
+        <Route path="negocios"          element={<RestaurantsTab />} />
+        <Route path="metricas"          element={<MetricasTab />} />
+        <Route path="planes"            element={<PlanesTab />} />
+        <Route path="sistema"           element={<SistemaTab />} />
+        <Route path="feature-flags"     element={<FeatureFlagsTab />} />
+        {/* Legacy aliases */}
+        <Route path="requests"          element={<Navigate to="/super-admin/solicitudes" replace />} />
+        <Route path="restaurants"       element={<Navigate to="/super-admin/negocios"    replace />} />
       </Routes>
     </SuperAdminLayout>
   )

@@ -1,20 +1,23 @@
 import { type ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, Zap } from 'lucide-react'
+import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, Zap, DollarSign, Activity, ToggleLeft } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 
-const BG = '#0F1115'
+const BG         = '#0F1115'
 const SIDEBAR_BG = '#0A0D12'
-const BORDER = 'rgba(255,255,255,0.06)'
-const TEXT = '#F5F7FA'
+const BORDER     = 'rgba(255,255,255,0.06)'
+const TEXT       = '#F5F7FA'
 const TEXT_MUTED = '#98A2B3'
-const ACCENT = '#FF6B7A'
+const ACCENT     = '#FF6B7A'
 
 const navItems = [
-  { label: 'Overview',    icon: LayoutDashboard, to: '/super-admin',             end: true  },
-  { label: 'Solicitudes', icon: ClipboardList,   to: '/super-admin/solicitudes', end: false },
-  { label: 'Negocios',    icon: Store,            to: '/super-admin/negocios',    end: false },
-  { label: 'Métricas',   icon: BarChart3,         to: '/super-admin/metricas',    end: false },
+  { label: 'Overview',      icon: LayoutDashboard, to: '/super-admin',                    end: true  },
+  { label: 'Solicitudes',   icon: ClipboardList,   to: '/super-admin/solicitudes',         end: false },
+  { label: 'Negocios',      icon: Store,           to: '/super-admin/negocios',            end: false },
+  { label: 'Métricas',      icon: BarChart3,       to: '/super-admin/metricas',            end: false },
+  { label: 'Planes',        icon: DollarSign,      to: '/super-admin/planes',              end: false },
+  { label: 'Sistema',       icon: Activity,        to: '/super-admin/sistema',             end: false },
+  { label: 'Feature Flags', icon: ToggleLeft,      to: '/super-admin/feature-flags',       end: false },
 ]
 
 export function SuperAdminLayout({ children }: { children: ReactNode }) {
@@ -50,7 +53,7 @@ export function SuperAdminLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 py-4 space-y-0.5">
+        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map(({ label, icon: Icon, to, end }) => (
             <NavLink
               key={to}

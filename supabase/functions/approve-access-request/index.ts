@@ -2,35 +2,6 @@
 // Requires secrets in Supabase dashboard:
 //   SUPABASE_SERVICE_ROLE_KEY  (auto-injected by Supabase)
 //   SITE_URL = https://menulife.app  (add manually)
-//
-// SQL needed before this works:
-//   ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT false;
-//
-//   CREATE TABLE IF NOT EXISTS access_requests (
-//     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-//     name TEXT NOT NULL,
-//     email TEXT NOT NULL UNIQUE,
-//     business_name TEXT NOT NULL,
-//     phone TEXT,
-//     city TEXT,
-//     message TEXT,
-//     status TEXT DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
-//     created_at TIMESTAMPTZ DEFAULT NOW(),
-//     reviewed_at TIMESTAMPTZ,
-//     reviewed_by UUID REFERENCES auth.users(id)
-//   );
-//   ALTER TABLE access_requests ENABLE ROW LEVEL SECURITY;
-//   CREATE POLICY "Anyone can request access" ON access_requests FOR INSERT WITH CHECK (true);
-//   CREATE POLICY "Superadmins view requests" ON access_requests FOR SELECT
-//     USING (auth.uid() IN (SELECT user_id FROM super_admins));
-//   CREATE POLICY "Superadmins update requests" ON access_requests FOR UPDATE
-//     USING (auth.uid() IN (SELECT user_id FROM super_admins));
-//
-//   -- Allow superadmins to manage restaurants
-//   CREATE POLICY "Superadmins view all restaurants" ON restaurants FOR SELECT
-//     USING (auth.uid() IN (SELECT user_id FROM super_admins));
-//   CREATE POLICY "Superadmins update restaurants" ON restaurants FOR UPDATE
-//     USING (auth.uid() IN (SELECT user_id FROM super_admins));
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -44,6 +15,33 @@ function jsonResponse(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+}
+
+const DEFAULT_FEATURES: Record<string, Record<string, boolean>> = {
+  menu: {
+    delivery: false, takeaway: false, reservations: false,
+    advanced_analytics: false, pdf_import: false,
+    multi_language: true, custom_branding: false,
+  },
+  pro: {
+    delivery: true, takeaway: true, reservations: true,
+    advanced_analytics: true, pdf_import: true,
+    multi_language: true, custom_branding: true,
+  },
+  total: {
+    delivery: true, takeaway: true, reservations: true,
+    advanced_analytics: true, pdf_import: true,
+    multi_language: true, custom_branding: true,
+  },
+}
+
+const DEFAULT_ONBOARDING = {
+  logo_uploaded:      false,
+  products_added:     false,
+  tables_created:     false,
+  waiters_registered: false,
+  qr_generated:       false,
+  first_order:        false,
 }
 
 Deno.serve(async (req: Request) => {
@@ -75,9 +73,15 @@ Deno.serve(async (req: Request) => {
       .maybeSingle()
     if (!superAdmin) return jsonResponse({ error: 'Forbidden: superadmin only' }, 403)
 
-    const body = await req.json() as { requestId: string; plan?: string }
+    const body = await req.json() as {
+      requestId: string
+      plan?: string
+      features?: Record<string, boolean>
+    }
+
     const { requestId } = body
     const plan = (['menu', 'pro', 'total'].includes(body.plan ?? '')) ? body.plan! : 'menu'
+    const features = body.features ?? DEFAULT_FEATURES[plan] ?? DEFAULT_FEATURES['menu']
 
     // Get pending request
     const { data: request, error: reqError } = await supabaseAdmin
@@ -109,24 +113,40 @@ Deno.serve(async (req: Request) => {
       .slice(0, 40)
     const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`
 
-    // Create restaurant (rollback user on error)
-    const { error: restaurantError } = await supabaseAdmin
+    // Create restaurant
+    const { data: restaurant, error: restaurantError } = await supabaseAdmin
       .from('restaurants')
       .insert({
-        owner_id: newUser.id,
+        owner_id:          newUser.id,
         slug,
-        name: request.business_name,
-        city: request.city ?? null,
-        phone: request.phone ?? null,
-        trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        subscription_status: 'trial',
+        name:              request.business_name,
+        email:             request.email,
+        city:              request.city  ?? null,
+        phone:             request.phone ?? null,
         plan,
+        features,
+        onboarding_steps:  DEFAULT_ONBOARDING,
+        subscription_status: 'trial',
+        trial_ends_at:     new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        is_active:         true,
         onboarding_completed: false,
       })
+      .select('id')
+      .single()
+
     if (restaurantError) {
       await supabaseAdmin.auth.admin.deleteUser(newUser.id)
       return jsonResponse({ error: restaurantError.message }, 400)
     }
+
+    // Log the action
+    await supabaseAdmin.from('admin_logs').insert({
+      admin_id:    callerUser.id,
+      action:      'approve_request',
+      target_type: 'access_request',
+      target_id:   requestId,
+      details:     { plan, features, restaurant_id: restaurant?.id },
+    })
 
     // Send magic link email
     const siteUrl = Deno.env.get('SITE_URL') ?? 'https://menulife.app'
@@ -144,9 +164,10 @@ Deno.serve(async (req: Request) => {
       .eq('id', requestId)
 
     return jsonResponse({
-      success: true,
-      email: request.email,
-      magicLink: linkData?.properties?.action_link ?? null,
+      success:     true,
+      email:       request.email,
+      restaurantId: restaurant?.id,
+      magicLink:   linkData?.properties?.action_link ?? null,
     })
   } catch (err) {
     console.error('Unexpected error:', err)
