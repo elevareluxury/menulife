@@ -36,8 +36,11 @@ export function useAuth() {
     // Listen for auth changes — only update user/loading, never set loading:true
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return
-      // AuthCallback.tsx manages its own routing — don't interfere while it's active
-      if (window.location.pathname === '/auth/callback') return
+      // AuthCallback.tsx manages its own routing — update state but do NOT navigate
+      if (window.location.pathname === '/auth/callback') {
+        useAuthStore.setState({ user: session?.user ?? null, loading: false, initialized: true })
+        return
+      }
       clearTimeout(safetyTimeout)
       useAuthStore.setState({
         user: session?.user ?? null,

@@ -13,17 +13,18 @@ export function AuthCallback() {
     const search = new URLSearchParams(window.location.search)
     const hash   = new URLSearchParams(window.location.hash.replace('#', ''))
     return {
-      error:        search.get('error')             || hash.get('error'),
-      errorDesc:    search.get('error_description') || hash.get('error_description'),
-      type:         search.get('type')              || hash.get('type'),
-      code:         search.get('code'),
-      accessToken:  hash.get('access_token'),
-      refreshToken: hash.get('refresh_token'),
+      error:     search.get('error')             || hash.get('error'),
+      errorDesc: search.get('error_description') || hash.get('error_description'),
+      type:      search.get('type')              || hash.get('type'),
+      code:      search.get('code'),
     }
   }, [])
 
   useEffect(() => {
-    const { error, errorDesc, type, code, accessToken, refreshToken } = params
+    const { error, errorDesc, type, code } = params
+
+    console.log('[AuthCallback] type:', type, '| code:', !!code, '| error:', error)
+    console.log('[AuthCallback] hash:', window.location.hash?.substring(0, 80))
 
     async function redirectByRole(userId?: string) {
       const id = userId ?? (await supabase.auth.getUser()).data.user?.id
@@ -38,72 +39,63 @@ export function AuthCallback() {
 
     async function handle() {
       try {
-        // Explicit error in the URL
+        // CASE 1: Explicit error in URL
         if (error) {
-          console.error('Auth callback error:', errorDesc)
+          const msg = errorDesc
+            ? decodeURIComponent(errorDesc.replace(/\+/g, ' '))
+            : 'Link inválido o expirado'
           const dest = type === 'recovery' ? '/forgot-password' : '/login'
-          navigate(
-            `${dest}?error=${encodeURIComponent(errorDesc ?? 'Link inválido o expirado')}`,
-            { replace: true }
-          )
+          navigate(`${dest}?error=${encodeURIComponent(msg)}`, { replace: true })
           return
         }
 
-        // ── PKCE flow: ?code= in query string ────────────────────────────────
-        if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-          if (exchangeError) {
-            const dest = type === 'recovery' ? '/forgot-password' : '/login'
-            navigate(`${dest}?error=Sesión+inválida`, { replace: true })
-            return
-          }
-          if (type === 'recovery') {
-            navigate('/reset-password', { replace: true })
-            return
-          }
-          await redirectByRole()
-          return
-        }
-
-        // ── Implicit flow: #access_token= captured via useMemo before Supabase cleared hash
-        if (accessToken && refreshToken) {
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })
-          if (sessionError) {
-            const dest = type === 'recovery' ? '/forgot-password' : '/login'
-            navigate(`${dest}?error=Sesión+inválida`, { replace: true })
-            return
-          }
-          if (type === 'recovery') {
-            navigate('/reset-password', { replace: true })
-            return
-          }
-          await redirectByRole()
-          return
-        }
-
-        // ── type=recovery captured but tokens already consumed by Supabase initializer ──
-        // Supabase already called setSession internally; just verify the session exists.
+        // CASE 2: Recovery — poll for session (works for both implicit & PKCE flow).
+        // Do NOT call setSession() with raw tokens — Supabase's _initialize() already
+        // consumed them; calling setSession() again causes "invalid token" errors that
+        // send the user to /forgot-password instead of /reset-password.
         if (type === 'recovery') {
-          const { data: { session } } = await supabase.auth.getSession()
+          console.log('[AuthCallback] Recovery detected, waiting for session...')
+
+          // PKCE: exchange code before polling
+          if (code) {
+            const { error: ex } = await supabase.auth.exchangeCodeForSession(code)
+            if (ex) {
+              navigate('/forgot-password?error=Sesión+inválida', { replace: true })
+              return
+            }
+          }
+
+          // Poll until Supabase's async token processing completes
+          let session = null
+          for (let i = 0; i < 10 && !session; i++) {
+            const { data } = await supabase.auth.getSession()
+            session = data.session
+            if (!session) await new Promise(r => setTimeout(r, 500))
+          }
+
           if (session) {
+            console.log('[AuthCallback] Session ready → /reset-password')
             navigate('/reset-password', { replace: true })
-            return
+          } else {
+            navigate('/forgot-password?error=expired', { replace: true })
           }
-          // Session not ready yet — give Supabase a moment and retry once
-          await new Promise(r => setTimeout(r, 800))
-          const { data: retry } = await supabase.auth.getSession()
-          if (retry.session) {
-            navigate('/reset-password', { replace: true })
-            return
-          }
-          navigate('/forgot-password?error=expired', { replace: true })
           return
         }
 
-        // ── No tokens at all — use existing session and redirect normally ────
+        // CASE 3: PKCE code, non-recovery (magic link, signup confirmation)
+        if (code) {
+          const { error: ex } = await supabase.auth.exchangeCodeForSession(code)
+          if (ex) {
+            navigate('/login?error=Sesión+inválida', { replace: true })
+            return
+          }
+          await redirectByRole()
+          return
+        }
+
+        // CASE 4: No explicit type — implicit hash tokens already consumed by Supabase.
+        // Give _initialize() a moment to finish, then use the existing session.
+        await new Promise(r => setTimeout(r, 800))
         const { data: { session } } = await supabase.auth.getSession()
         if (session) {
           await redirectByRole(session.user.id)
@@ -111,7 +103,7 @@ export function AuthCallback() {
           navigate('/login', { replace: true })
         }
       } catch (err) {
-        console.error('AuthCallback error:', err)
+        console.error('[AuthCallback] error:', err)
         navigate('/login', { replace: true })
       }
     }
