@@ -30,7 +30,10 @@ export function CRMPage() {
   const [selected, setSelected] = useState<CRMContact | null>(null)
 
   const fetchContacts = useCallback(async () => {
-    if (!restaurant?.id) return
+    if (!restaurant?.id) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     try {
       let query = db
@@ -47,10 +50,15 @@ export function CRMPage() {
       if (filter === 'new') query = query.lte('total_visits', 1)
 
       const { data, error } = await query.limit(100)
-      if (error) throw error
+      console.log('CRM query result:', { data, error, restaurantId: restaurant.id })
+      if (error) {
+        console.error('ERROR COMPLETO CRM fetch:', JSON.stringify(error, null, 2))
+        throw error
+      }
       setContacts(data ?? [])
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al cargar clientes')
+      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? 'Error al cargar clientes'
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -190,11 +198,15 @@ function ContactDetailModal({ contact, restaurantId, onClose, onUpdated }: Detai
         .from('crm_contacts')
         .update({ is_vip: isVip, notes: notes.trim() || null })
         .eq('id', contact.id)
-      if (error) throw error
+      if (error) {
+        console.error('ERROR COMPLETO CRM save:', JSON.stringify(error, null, 2))
+        throw error
+      }
       toast.success('Cliente actualizado')
       onUpdated()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error')
+      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? 'Error al guardar'
+      toast.error(msg)
     } finally {
       setSaving(false)
     }

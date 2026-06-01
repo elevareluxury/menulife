@@ -73,10 +73,14 @@ export function WaitersManagement() {
     if (!confirm('¿Eliminar este mozo?')) return
     try {
       const { error } = await db.from('waiters').delete().eq('id', id)
-      if (error) throw error
+      if (error) {
+        console.error('ERROR waiter delete:', JSON.stringify(error, null, 2))
+        throw error
+      }
       toast.success('Mozo eliminado')
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Error al eliminar')
+      const msg = error instanceof Error ? error.message : (error as { message?: string })?.message ?? 'Error al eliminar'
+      toast.error(msg)
     }
   }
 
@@ -86,10 +90,14 @@ export function WaitersManagement() {
         .from('waiters')
         .update({ is_on_shift: !waiter.is_on_shift })
         .eq('id', waiter.id)
-      if (error) throw error
+      if (error) {
+        console.error('ERROR waiter toggleShift:', JSON.stringify(error, null, 2))
+        throw error
+      }
       toast.success(waiter.is_on_shift ? 'Mozo fuera de turno' : 'Mozo en turno')
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Error')
+      const msg = error instanceof Error ? error.message : (error as { message?: string })?.message ?? 'Error'
+      toast.error(msg)
     }
   }
 
@@ -236,8 +244,12 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
         if (pinChanged) {
           updates.pin = await bcrypt.hash(formData.pin, 10)
         }
+        console.log('Updating waiter:', { waiterId: waiter.id, updates })
         const { error } = await db.from('waiters').update(updates).eq('id', waiter.id)
-        if (error) throw error
+        if (error) {
+          console.error('ERROR COMPLETO waiter update:', JSON.stringify(error, null, 2))
+          throw error
+        }
         toast.success('Mozo actualizado')
       } else {
         const hashedPin = await bcrypt.hash(formData.pin, 10)
@@ -249,12 +261,16 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
           is_active:     true,
           is_on_shift:   false,
         })
-        if (error) throw error
+        if (error) {
+          console.error('ERROR COMPLETO waiter insert:', JSON.stringify(error, null, 2))
+          throw error
+        }
         toast.success(`Mozo creado. PIN: ${formData.pin} — guardalo en un lugar seguro.`, { duration: 8000 })
       }
       onClose()
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Error')
+      const msg = error instanceof Error ? error.message : (error as { message?: string })?.message ?? 'Error al guardar mozo'
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

@@ -76,6 +76,22 @@ export type Database = {
           onboarding_completed: boolean
           features: Json | null
           onboarding_steps: Json | null
+          allow_language_switch: boolean
+          delivery_enabled: boolean
+          delivery_time_estimate: number | null
+          delivery_min_order: number | null
+          delivery_fee_type: string | null
+          delivery_fee_value: number | null
+          delivery_zones: Json | null
+          takeaway_enabled: boolean
+          takeaway_time_estimate: number | null
+          reservations_enabled: boolean
+          reservations_collect_guests: boolean
+          reservations_advance_days: number | null
+          reservations_min_hours: number | null
+          reservations_max_party: number | null
+          reservations_time_slots: Json | null
+          reservations_message: string | null
         }
         Insert: {
           id?: string
@@ -119,6 +135,22 @@ export type Database = {
           onboarding_completed?: boolean
           features?: Json | null
           onboarding_steps?: Json | null
+          allow_language_switch?: boolean
+          delivery_enabled?: boolean
+          delivery_time_estimate?: number | null
+          delivery_min_order?: number | null
+          delivery_fee_type?: string | null
+          delivery_fee_value?: number | null
+          delivery_zones?: Json | null
+          takeaway_enabled?: boolean
+          takeaway_time_estimate?: number | null
+          reservations_enabled?: boolean
+          reservations_collect_guests?: boolean
+          reservations_advance_days?: number | null
+          reservations_min_hours?: number | null
+          reservations_max_party?: number | null
+          reservations_time_slots?: Json | null
+          reservations_message?: string | null
         }
         Update: {
           id?: string
@@ -162,6 +194,79 @@ export type Database = {
           onboarding_completed?: boolean
           features?: Json | null
           onboarding_steps?: Json | null
+          allow_language_switch?: boolean
+          delivery_enabled?: boolean
+          delivery_time_estimate?: number | null
+          delivery_min_order?: number | null
+          delivery_fee_type?: string | null
+          delivery_fee_value?: number | null
+          delivery_zones?: Json | null
+          takeaway_enabled?: boolean
+          takeaway_time_estimate?: number | null
+          reservations_enabled?: boolean
+          reservations_collect_guests?: boolean
+          reservations_advance_days?: number | null
+          reservations_min_hours?: number | null
+          reservations_max_party?: number | null
+          reservations_time_slots?: Json | null
+          reservations_message?: string | null
+        }
+        Relationships: []
+      }
+      crm_contacts: {
+        Row: {
+          id: string
+          restaurant_id: string
+          first_name: string
+          last_name: string
+          phone: string
+          email: string | null
+          total_visits: number
+          total_spent: number
+          avg_ticket: number
+          first_visit_date: string | null
+          last_visit_date: string | null
+          is_vip: boolean
+          tags: string[]
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          restaurant_id: string
+          first_name?: string
+          last_name?: string
+          phone?: string
+          email?: string | null
+          total_visits?: number
+          total_spent?: number
+          avg_ticket?: number
+          first_visit_date?: string | null
+          last_visit_date?: string | null
+          is_vip?: boolean
+          tags?: string[]
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          restaurant_id?: string
+          first_name?: string
+          last_name?: string
+          phone?: string
+          email?: string | null
+          total_visits?: number
+          total_spent?: number
+          avg_ticket?: number
+          first_visit_date?: string | null
+          last_visit_date?: string | null
+          is_vip?: boolean
+          tags?: string[]
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

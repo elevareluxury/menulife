@@ -602,7 +602,8 @@ export function BusinessSettings() {
 
       toast.success(t('dashboard.settings_saved'))
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : t('dashboard.settings_error'))
+      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? t('dashboard.settings_error')
+      toast.error(msg)
     } finally {
       setSaving(false)
     }
