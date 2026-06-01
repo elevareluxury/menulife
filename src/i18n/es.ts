@@ -30,14 +30,14 @@ export default {
     title_accent: 'Tres experiencias.',
 
     client_tag: 'EXPERIENCIA DEL CLIENTE',
-    client_title: 'Escanear. Pedir. Listo.',
+    client_title: 'Del escaneo al pago en segundos.',
     client_desc: 'Tus clientes escanean el QR, navegan el menú y piden sin fricción. Sin descargas, sin registros.',
     client_feat1: 'Sin app ni registro',
     client_feat2: 'Carga en menos de 1 segundo',
     client_feat3: 'Funciona en cualquier celular',
 
-    waiter_tag: 'EXPERIENCIA DEL MOZO',
-    waiter_title: 'Tu equipo lo aprende en minutos.',
+    waiter_tag: 'EXPERIENCIA DEL EQUIPO',
+    waiter_title: 'Capacitación sin capacitación.',
     waiter_desc: 'Pedidos en tiempo real, gestión de mesas y notificaciones desde cualquier celular.',
     waiter_f1: 'Pedidos en tiempo real',
     waiter_f2: 'Gestión de mesas visual',

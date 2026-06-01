@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
+const STEP_EMOJIS = ['📷', '⚡', '🍽️', '💳', '📈']
+
 declare const gsap: any
 
 /* ─────────────────────────────────────────────
@@ -43,7 +45,7 @@ export function ExperiencesSection() {
           </h2>
         </div>
 
-        {/* 2-card grid: Cliente + Mozo */}
+        {/* 2-card grid: Cliente + Equipo */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -51,13 +53,11 @@ export function ExperiencesSection() {
           marginBottom: '32px',
         }}>
           <ExperienceCard data-exp-card index={0} role={`— ${t('experiences.client_tag')}`} title={t('experiences.client_title')}>
-            <ClientTextContent t={t} />
+            <FlowStepsContent t={t} />
           </ExperienceCard>
 
           <ExperienceCard data-exp-card index={1} role={`— ${t('experiences.waiter_tag')}`} title={t('experiences.waiter_title')}>
-            <WaiterMockup />
-            <WaiterFeatures t={t} />
-            <WaiterWhatsApp />
+            <TeamFeaturesContent t={t} />
           </ExperienceCard>
         </div>
 
@@ -115,197 +115,90 @@ function ExperienceCard({ children, role, title, index, ...rest }: {
 }
 
 /* ─────────────────────────────────────────────
-   CARD 2 — MOZO
+   CARD 1 — CLIENTE (5 pasos del flow)
 ───────────────────────────────────────────── */
-const WAITER_STATES = [
-  {
-    title: 'Vista de mesas',
-    content: (
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
-        {[
-          { n: 1, st: 'Libre',            c: '#10B981' },
-          { n: 2, st: 'Ocupada · 2p',     c: '#F4705A' },
-          { n: 3, st: 'Ocupada · 4p',     c: '#F4705A' },
-          { n: 4, st: 'Esp. pago',         c: '#F59E0B' },
-          { n: 5, st: 'Ocupada · 3p',     c: '#F4705A' },
-          { n: 6, st: 'Libre',            c: '#10B981' },
-        ].map(m => (
-          <div key={m.n} style={{
-            background:   `${m.c}18`,
-            border:       `1px solid ${m.c}44`,
-            borderRadius: '10px', padding: '8px 6px', textAlign: 'center',
-          }}>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: m.c, fontFamily: 'var(--font-syne)' }}>{m.n}</div>
-            <div style={{ fontSize: '9px', color: m.c, fontFamily: 'var(--font-jakarta)', lineHeight: 1.3, marginTop: '2px' }}>{m.st}</div>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    title: 'Mesa 3 — Pedido activo',
-    content: (
-      <div>
-        {[['Pasta Carbonara','x2','$36'],['Risotto Limone','x1','$22'],['Vino de la casa','x2','$30']].map(([name, qty, price]) => (
-          <div key={name} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '12px', fontFamily: 'var(--font-jakarta)' }}>{name} <span style={{ color: 'rgba(255,255,255,0.35)' }}>{qty}</span></span>
-            <span style={{ color: 'var(--ml-salmon)', fontSize: '12px', fontWeight: 700, fontFamily: 'var(--font-jakarta)' }}>{price}</span>
-          </div>
-        ))}
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0 0', fontWeight: 700 }}>
-          <span style={{ color: '#fff', fontFamily: 'var(--font-jakarta)', fontSize: '13px' }}>Total</span>
-          <span style={{ color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', fontSize: '13px' }}>$88</span>
-        </div>
-        <button style={{ width: '100%', marginTop: '12px', padding: '10px', background: 'var(--ml-salmon)', border: 'none', borderRadius: '50px', color: '#fff', fontFamily: 'var(--font-jakarta)', fontWeight: 600, fontSize: '12px', cursor: 'pointer' }}>
-          Enviar a cocina
-        </button>
-      </div>
-    ),
-  },
-  {
-    title: '🔔 ¡Pedido listo!',
-    content: (
-      <div style={{ textAlign: 'center', paddingTop: '8px' }}>
-        <div style={{ fontSize: '40px', marginBottom: '12px' }}>🍽️</div>
-        <div style={{ color: '#fff', fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-syne)', marginBottom: '6px' }}>Mesa 2 — Tagliata</div>
-        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontFamily: 'var(--font-jakarta)', marginBottom: '16px' }}>Retiro de cocina</div>
-        <button style={{ padding: '10px 24px', background: '#10B981', border: 'none', borderRadius: '50px', color: '#fff', fontFamily: 'var(--font-jakarta)', fontWeight: 600, fontSize: '12px', cursor: 'pointer' }}>
-          Confirmar entrega ✓
-        </button>
-      </div>
-    ),
-  },
-]
-
-function WaiterMockup() {
-  const [idx, setIdx] = useState(0)
-
-  useEffect(() => {
-    const iv = setInterval(() => setIdx(p => (p + 1) % 3), 3200)
-    return () => clearInterval(iv)
-  }, [])
-
-  const state = WAITER_STATES[idx]
+function FlowStepsContent({ t }: { t: (k: string) => string }) {
+  const steps = [1, 2, 3, 4, 5].map((n, i) => ({
+    num: n,
+    emoji: STEP_EMOJIS[i],
+    title: t(`flow.step${n}_title`),
+    desc:  t(`flow.step${n}_desc`),
+  }))
 
   return (
-    <div style={{ background: '#161a22', padding: '16px', margin: '0', minHeight: '240px', position: 'relative', overflow: 'hidden' }}>
-      {/* Phone shell */}
-      <div style={{
-        background: '#0F1115', borderRadius: '16px', padding: '14px',
-        border: '1px solid rgba(255,255,255,0.08)',
-      }}>
-        <div style={{
-          fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.5)',
-          fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
-          display: 'flex', alignItems: 'center', gap: '6px',
-        }}>
-          <span style={{ color: '#fff' }}>MenuLife</span>
-          <span style={{ background: 'var(--ml-salmon)', color: '#fff', borderRadius: '4px', padding: '1px 6px', fontSize: '8px' }}>MOZO</span>
-        </div>
-
-        <div style={{
-          fontSize: '11px', fontWeight: 600, color: 'var(--ml-salmon)',
-          fontFamily: 'var(--font-jakarta)', marginBottom: '10px',
-        }}>{state.title}</div>
-
-        <div style={{ animation: `ml-fade-up 0.35s ease both` }}>
-          {state.content}
-        </div>
-      </div>
-
-      {/* State dots */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '12px' }}>
-        {[0,1,2].map(i => (
-          <div key={i} onClick={() => setIdx(i)} style={{
-            width: '6px', height: '6px', borderRadius: '50%',
-            background: i === idx ? 'var(--ml-salmon)' : 'rgba(255,255,255,0.2)',
-            cursor: 'pointer', transition: 'all 0.2s',
-          }} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function WaiterFeatures({ t }: { t: (k: string) => string }) {
-  const feats = [t('experiences.waiter_f1'), t('experiences.waiter_f2'), t('experiences.waiter_f3'), t('experiences.waiter_f4')]
-  return (
-    <div style={{ padding: '0 24px 4px' }}>
-      {feats.map(f => (
-        <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 0', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-700)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-          <span style={{ color: 'var(--ml-salmon)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>✓</span>{f}
+    <div style={{ background: '#0F1115', padding: '24px 24px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {steps.map(step => (
+        <div key={step.num} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{
+            position: 'relative',
+            width: '44px', height: '44px', flexShrink: 0,
+            borderRadius: '50%',
+            background: '#1a1e27',
+            border: '1.5px solid rgba(244,112,90,0.28)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '18px',
+            transition: 'transform 0.45s ease, border-color 0.25s',
+            cursor: 'default',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'rotate(360deg) scale(1.1)'; e.currentTarget.style.borderColor = 'var(--ml-salmon)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'rgba(244,112,90,0.28)' }}
+          >
+            {step.emoji}
+            <span style={{
+              position: 'absolute', top: '-5px', right: '-5px',
+              width: '17px', height: '17px', borderRadius: '50%',
+              background: 'var(--ml-salmon)', color: '#fff',
+              fontSize: '9px', fontWeight: 800,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--font-syne)',
+            }}>{step.num}</span>
+          </div>
+          <div>
+            <div style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '14px', color: '#fff', lineHeight: 1.2 }}>
+              {step.title}
+            </div>
+            <div style={{ fontFamily: 'var(--font-jakarta)', fontSize: '12px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.45, marginTop: '2px' }}>
+              {step.desc}
+            </div>
+          </div>
         </div>
       ))}
     </div>
   )
 }
 
-function WaiterWhatsApp() {
-  return (
-    <div style={{ padding: '14px 24px 20px' }}>
-      <a
-        href="https://wa.me/?text=Tutorial%20de%20MenuLife"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: '8px',
-          textDecoration: 'none', color: '#25D366',
-          fontFamily: 'var(--font-jakarta)', fontSize: '13px', fontWeight: 600,
-          padding: '8px 14px', borderRadius: '50px',
-          border: '1px solid rgba(37,211,102,0.25)',
-          background: 'rgba(37,211,102,0.06)',
-          transition: 'all 0.2s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37,211,102,0.12)'; e.currentTarget.style.borderColor = 'rgba(37,211,102,0.5)' }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(37,211,102,0.06)'; e.currentTarget.style.borderColor = 'rgba(37,211,102,0.25)' }}
-      >
-        📱 Compartir tutorial por WhatsApp →
-      </a>
-    </div>
-  )
-}
+/* ─────────────────────────────────────────────
+   CARD 2 — EQUIPO (3 features, solo texto)
+───────────────────────────────────────────── */
+function TeamFeaturesContent({ t }: { t: (k: string) => string }) {
+  const features = [
+    { icon: '💬', title: t('whatsapp.f1_title'), desc: t('whatsapp.f1_desc') },
+    { icon: '🎬', title: t('whatsapp.f2_title'), desc: t('whatsapp.f2_desc') },
+    { icon: '🔗', title: t('whatsapp.f3_title'), desc: t('whatsapp.f3_desc') },
+  ]
 
-function ClientTextContent({ t }: { t: (k: string) => string }) {
   return (
-    <div style={{
-      background: '#0F1115',
-      padding: '32px 24px',
-      minHeight: '240px',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      gap: '16px',
-    }}>
-      <div style={{ fontSize: '48px', lineHeight: 1 }}>📱</div>
-      <p style={{
-        color: 'rgba(255,255,255,0.85)',
-        fontFamily: 'var(--font-jakarta)',
-        fontSize: '16px',
-        lineHeight: 1.7,
-        margin: 0,
-      }}>
-        Tus clientes <strong style={{ color: '#fff' }}>escanean el QR</strong>, exploran el menú y{' '}
-        <strong style={{ color: '#fff' }}>piden en segundos</strong>.
-      </p>
-      <p style={{
-        color: 'rgba(255,255,255,0.5)',
-        fontFamily: 'var(--font-jakarta)',
-        fontSize: '14px',
-        lineHeight: 1.65,
-        margin: 0,
-      }}>
-        Sin descargas. Sin registros.{' '}
-        <strong style={{ color: 'rgba(255,255,255,0.75)' }}>Cero fricción.</strong>
-        <br />
-        Desde cualquier celular. En cualquier mesa.
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-        {[t('experiences.client_feat1'), t('experiences.client_feat2'), t('experiences.client_feat3')].map(f => (
-          <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)' }}>
-            <span style={{ color: 'var(--ml-salmon)', fontSize: '11px', fontWeight: 700 }}>✓</span>{f}
+    <div style={{ padding: '28px 24px 20px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
+      {features.map(f => (
+        <div key={f.title} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+          <div style={{
+            width: '38px', height: '38px', flexShrink: 0,
+            background: 'rgba(244,112,90,0.08)',
+            border: '1px solid rgba(244,112,90,0.18)',
+            borderRadius: '10px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '17px',
+          }}>{f.icon}</div>
+          <div>
+            <div style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '14px', color: '#1a1a1a', marginBottom: '3px' }}>
+              {f.title}
+            </div>
+            <div style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-500)', lineHeight: 1.5 }}>
+              {f.desc}
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   )
 }

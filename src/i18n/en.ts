@@ -30,14 +30,14 @@ export default {
     title_accent: 'Three experiences.',
 
     client_tag: 'CUSTOMER EXPERIENCE',
-    client_title: 'Scan. Order. Done.',
+    client_title: 'From scan to payment in seconds.',
     client_desc: 'Your customers scan the QR, browse the menu and order without friction. No downloads, no sign-ups.',
     client_feat1: 'No app or sign-up required',
     client_feat2: 'Loads in under 1 second',
     client_feat3: 'Works on any phone',
 
-    waiter_tag: 'WAITER EXPERIENCE',
-    waiter_title: 'Your team learns it in minutes.',
+    waiter_tag: 'TEAM EXPERIENCE',
+    waiter_title: 'Training without training.',
     waiter_desc: 'Real-time orders, table management and notifications from any phone.',
     waiter_f1: 'Real-time orders',
     waiter_f2: 'Visual table management',
