@@ -1046,6 +1046,154 @@ export function PublicMenu() {
             ))
           )}
         </div>
+
+        {/* ── Menu footer: Google Reviews + Social ─────────────────────────── */}
+        {!searchQuery && activeFilters.length === 0 && (() => {
+          const socials = (restaurant.social_links as Record<string, string> | null) ?? {}
+          const googleReviewUrl = socials.google_maps ? `${socials.google_maps}/review` : null
+          const hasSocials = !!(socials.instagram || socials.facebook || socials.tiktok || socials.whatsapp)
+
+          if (!googleReviewUrl && !hasSocials) return null
+
+          return (
+            <div className="px-4 mt-8 mb-2">
+              {/* Divider */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex-1 h-px" style={{ background: 'var(--menu-border)' }} />
+                <span className="text-xs" style={{ color: 'var(--menu-text-muted)' }}>
+                  {language === 'ES' ? 'Fin del menú' : 'End of menu'}
+                </span>
+                <div className="flex-1 h-px" style={{ background: 'var(--menu-border)' }} />
+              </div>
+
+              {/* Google Reviews */}
+              {googleReviewUrl && (
+                <div className="mb-6 text-center">
+                  <p className="text-sm font-semibold mb-1" style={{ color: 'var(--menu-text-secondary)' }}>
+                    {language === 'ES' ? '¿Te gustó la experiencia?' : 'Enjoyed your experience?'}
+                  </p>
+                  <p className="text-xs mb-3" style={{ color: 'var(--menu-text-muted)' }}>
+                    {language === 'ES' ? 'Dejanos una reseña 🌟' : 'Leave us a review 🌟'}
+                  </p>
+                  <a
+                    href={googleReviewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-4 rounded-2xl font-semibold text-base transition-transform active:scale-[0.98]"
+                    style={{
+                      background: '#FFFFFF',
+                      color: '#1A1A1A',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)'
+                      ;(e.currentTarget as HTMLElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.35)'
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.transform = 'scale(1)'
+                      ;(e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)'
+                    }}
+                  >
+                    ⭐ {language === 'ES' ? 'Dejá tu reseña en Google' : 'Leave a Google review'}
+                  </a>
+                </div>
+              )}
+
+              {/* Social media */}
+              {hasSocials && (
+                <div className="mb-6">
+                  <p
+                    className="text-xs font-bold uppercase text-center mb-3"
+                    style={{ color: 'var(--menu-text-muted)', letterSpacing: '0.1em' }}
+                  >
+                    {language === 'ES' ? 'Seguinos' : 'Follow us'}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {socials.instagram && (
+                      <a
+                        href={`https://instagram.com/${socials.instagram}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold transition-colors"
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#fff',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        📸 Instagram
+                      </a>
+                    )}
+                    {socials.facebook && (
+                      <a
+                        href={`https://facebook.com/${socials.facebook}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold transition-colors"
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#fff',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        📘 Facebook
+                      </a>
+                    )}
+                    {socials.tiktok && (
+                      <a
+                        href={`https://tiktok.com/@${socials.tiktok}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold transition-colors"
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#fff',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        🎵 TikTok
+                      </a>
+                    )}
+                    {socials.whatsapp && (
+                      <a
+                        href={`https://wa.me/${socials.whatsapp.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold transition-colors"
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#fff',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        💬 WhatsApp
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Powered by */}
+              <div className="text-center pb-2">
+                <a
+                  href="https://menulife.digital"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs"
+                  style={{ color: 'rgba(255,255,255,0.2)', textDecoration: 'none' }}
+                >
+                  Powered by MenuLife
+                </a>
+              </div>
+            </div>
+          )
+        })()}
       </main>
 
       {/* ── Bill request button ──────────────────────────────────────────── */}

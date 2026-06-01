@@ -72,8 +72,8 @@ export function TablesConfiguration() {
     if (!dragging.current) return
     const { id, dx, dy } = dragging.current
     const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
-    const x = Math.max(0, Math.min(e.clientX - rect.left - dx, rect.width - 110))
-    const y = Math.max(0, Math.min(e.clientY - rect.top - dy, rect.height - 110))
+    const x = Math.max(0, Math.min(e.clientX - rect.left - dx, rect.width - 140))
+    const y = Math.max(0, Math.min(e.clientY - rect.top - dy, rect.height - 140))
     setPositions(prev => ({ ...prev, [id]: { x, y } }))
   }
 
@@ -91,8 +91,8 @@ export function TablesConfiguration() {
     const { id, dx, dy } = dragging.current
     const touch = e.touches[0]
     const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
-    const x = Math.max(0, Math.min(touch.clientX - rect.left - dx, rect.width - 110))
-    const y = Math.max(0, Math.min(touch.clientY - rect.top - dy, rect.height - 110))
+    const x = Math.max(0, Math.min(touch.clientX - rect.left - dx, rect.width - 140))
+    const y = Math.max(0, Math.min(touch.clientY - rect.top - dy, rect.height - 140))
     setPositions(prev => ({ ...prev, [id]: { x, y } }))
   }
 
@@ -202,9 +202,10 @@ export function TablesConfiguration() {
         </Card>
       ) : (
         <Card className="p-0 overflow-hidden">
+          <div style={{ overflowX: 'auto', overflowY: 'hidden', WebkitOverflowScrolling: 'touch' }}>
           <div
             className="table-canvas relative bg-gray-50 select-none"
-            style={{ height: '600px', touchAction: 'none' }}
+            style={{ height: '600px', minWidth: '600px', touchAction: 'none' }}
             onMouseMove={onCanvasMouseMove}
             onMouseUp={onCanvasMouseUp}
             onMouseLeave={onCanvasMouseUp}
@@ -221,18 +222,18 @@ export function TablesConfiguration() {
                 <div
                   key={table.id}
                   className={`absolute cursor-grab active:cursor-grabbing bg-white rounded-xl shadow-md border-2 ${STATUS_BORDERS[table.status] ?? 'border-gray-300'} hover:shadow-lg transition-shadow`}
-                  style={{ left: pos.x, top: pos.y, width: 110, userSelect: 'none', touchAction: 'none' }}
+                  style={{ left: pos.x, top: pos.y, width: 140, minHeight: 120, userSelect: 'none', touchAction: 'none' }}
                   onMouseDown={(e) => onTableMouseDown(e, table.id)}
                   onTouchStart={(e) => onTableTouchStart(e, table.id)}
                 >
                   <div className="p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-sm text-gray-900">Mesa {table.table_number}</span>
-                      <div className={`w-2.5 h-2.5 rounded-full ${STATUS_COLORS[table.status]}`} />
+                      <span className="font-bold text-base text-gray-900">Mesa {table.table_number}</span>
+                      <div className={`w-3 h-3 rounded-full ${STATUS_COLORS[table.status]}`} />
                     </div>
-                    <div className="text-xs text-gray-500 mb-2">{table.capacity} pers.</div>
+                    <div className="text-sm text-gray-500 mb-2">{table.capacity} pers.</div>
                     {waiter && (
-                      <div className="text-xs text-emerald-600 font-medium truncate mb-1">
+                      <div className="text-sm text-emerald-600 font-semibold truncate mb-1">
                         {waiter.first_name}
                       </div>
                     )}
@@ -270,6 +271,7 @@ export function TablesConfiguration() {
                 </div>
               )
             })}
+          </div>
           </div>
         </Card>
       )}

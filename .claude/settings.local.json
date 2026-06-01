@@ -36,7 +36,10 @@
       "PowerShell(Get-ChildItem -Path \"E:\\\\menulife\\\\src\\\\modules\\\\waiters\" -File | ForEach-Object { $_.Name })",
       "PowerShell(Get-ChildItem -Path \"E:\\\\menulife\\\\src\\\\modules\\\\waiters\" -Recurse | ForEach-Object { $_.FullName.Replace\\('E:\\\\menulife\\\\', ''\\) })",
       "PowerShell(Get-ChildItem -Path \"E:\\\\menulife\\\\src\\\\modules\" -Directory | Where-Object { $_.Name -match \"table\" })",
-      "PowerShell(Get-ChildItem -Path \"E:\\\\menulife\\\\src\\\\modules\" -Recurse -Depth 2 -Directory | Where-Object { $_.Parent.Name -match \"modules\" } | ForEach-Object { $_.FullName.Replace\\('E:\\\\menulife\\\\src\\\\modules\\\\', ''\\) } | Sort-Object)"
+      "PowerShell(Get-ChildItem -Path \"E:\\\\menulife\\\\src\\\\modules\" -Recurse -Depth 2 -Directory | Where-Object { $_.Parent.Name -match \"modules\" } | ForEach-Object { $_.FullName.Replace\\('E:\\\\menulife\\\\src\\\\modules\\\\', ''\\) } | Sort-Object)",
+      "Bash(Get-ChildItem -Path \"E:\\\\menulife\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(npx vite *)"
     ]
   }
 }

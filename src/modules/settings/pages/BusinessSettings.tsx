@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import {
   ChevronLeft, Store, MapPin, Clock, Share2, Palette,
-  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus, CalendarDays,
+  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus, CalendarDays, Plug,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -24,7 +24,7 @@ import type { Restaurant } from '@/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language' | 'reservations'
+type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language' | 'reservations' | 'integrations'
 
 interface DeliveryZone {
   name: string
@@ -150,6 +150,49 @@ const ACCENT_COLORS = [
   { hex: '#1E293B', name: 'Oscuro'    },
 ]
 
+// ─── Integrations data ────────────────────────────────────────────────────────
+
+const INTEGRATIONS = [
+  {
+    category: 'POS y Gestión',
+    items: [
+      { name: 'Fudo',       icon: '🟠', desc: 'Sincronizá productos y pedidos'     },
+      { name: 'Madi Rest',  icon: '🟢', desc: 'Conectá facturación electrónica'    },
+      { name: 'HivePOS',    icon: '🟣', desc: 'Sincronizá mesas y pedidos'         },
+      { name: 'Tango Restô',icon: '🔵', desc: 'Integración contable'              },
+    ],
+  },
+  {
+    category: 'Delivery',
+    items: [
+      { name: 'Rappi',      icon: '🟠', desc: 'Recibí pedidos de Rappi'          },
+      { name: 'PedidosYa',  icon: '🟡', desc: 'Recibí pedidos de PedidosYa'      },
+      { name: 'Uber Eats',  icon: '⚫', desc: 'Recibí pedidos de Uber Eats'      },
+    ],
+  },
+  {
+    category: 'Pagos',
+    items: [
+      { name: 'MercadoPago',icon: '💙', desc: 'Cobros directos desde el menú'    },
+      { name: 'Modo',       icon: '💚', desc: 'Pagos con QR desde la mesa'       },
+    ],
+  },
+  {
+    category: 'Comunicación',
+    items: [
+      { name: 'WhatsApp Business', icon: '💬', desc: 'Pedidos y reservas por WhatsApp' },
+      { name: 'Instagram',         icon: '📸', desc: 'Publicá tu menú desde MenuLife'  },
+    ],
+  },
+  {
+    category: 'Facturación',
+    items: [
+      { name: 'AFIP',  icon: '🏛️', desc: 'Facturación electrónica automática'   },
+      { name: 'Xubio', icon: '📊', desc: 'Sincronizá ventas con tu contador'    },
+    ],
+  },
+]
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function parseSchedule(raw: unknown): BusinessHours {
@@ -259,6 +302,7 @@ export function BusinessSettings() {
     { id: 'delivery',   label: t('dashboard.settings_delivery'),   icon: <Truck    className="w-4 h-4" /> },
     { id: 'language',      label: t('dashboard.settings_language'),      icon: <Globe        className="w-4 h-4" /> },
     { id: 'reservations',  label: 'Reservas',                            icon: <CalendarDays className="w-4 h-4" /> },
+    { id: 'integrations',  label: 'Integraciones',                       icon: <Plug         className="w-4 h-4" /> },
   ], [t])
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
@@ -453,6 +497,10 @@ export function BusinessSettings() {
     }
 
     setSaving(true)
+    console.log('=== SAVE DEBUG ===')
+    console.log('restaurantId:', restaurant.id)
+    console.log('formData.name:', formData.name)
+    console.log('social_links:', formData.social_links)
     try {
       let finalLogoUrl: string | null = formData.logo_url || null
       if (logoFile) {
@@ -536,10 +584,16 @@ export function BusinessSettings() {
         .eq('id', restaurant.id)
         .select('id')
 
-      if (error) throw error
+      console.log('Save result:', { data: updated, error })
+
+      if (error) {
+        console.error('Save error:', error)
+        throw error
+      }
 
       // If RLS blocks the UPDATE, Supabase returns error=null but 0 rows
       if (!updated || updated.length === 0) {
+        console.warn('Update returned 0 rows — possible RLS issue. restaurant.id:', restaurant.id)
         throw new Error('No se pudo guardar: sin permisos. Ejecutá la migración SQL en Supabase Dashboard.')
       }
 
@@ -1424,6 +1478,57 @@ export function BusinessSettings() {
     )
   }
 
+  const renderIntegrations = () => (
+    <div className="space-y-5">
+      {INTEGRATIONS.map(group => (
+        <SectionCard key={group.category} title={group.category} description="">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {group.items.map(item => (
+              <div
+                key={item.name}
+                className="flex flex-col gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl leading-none mt-0.5">{item.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800">{item.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 leading-snug">{item.desc}</p>
+                  </div>
+                </div>
+                <span
+                  className="self-start text-xs rounded-full px-3 py-1"
+                  style={{
+                    background: 'rgba(0,0,0,0.05)',
+                    color: '#9ca3af',
+                    fontSize: '0.75rem',
+                    borderRadius: '999px',
+                    padding: '4px 12px',
+                  }}
+                >
+                  Próximamente
+                </span>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      ))}
+
+      <Card className="p-5 border border-dashed border-gray-300 bg-gray-50">
+        <p className="text-sm font-medium text-gray-700 mb-1">¿Necesitás otra integración?</p>
+        <p className="text-sm text-gray-500 mb-3">Escribinos y la evaluamos.</p>
+        <a
+          href="https://wa.me/5491170000000?text=Hola%2C+quiero+sugerir+una+integraci%C3%B3n+para+MenuLife"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+        >
+          <MessageCircle className="w-4 h-4" />
+          Escribinos por WhatsApp →
+        </a>
+      </Card>
+    </div>
+  )
+
   const sectionContent: Record<Section, React.ReactNode> = {
     general:      renderGeneral(),
     location:     renderLocation(),
@@ -1433,6 +1538,7 @@ export function BusinessSettings() {
     delivery:     renderDelivery(),
     language:     renderLanguage(),
     reservations: renderReservations(),
+    integrations: renderIntegrations(),
   }
 
   // ─── Render ─────────────────────────────────────────────────────────────────
