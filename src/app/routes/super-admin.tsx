@@ -10,6 +10,8 @@ import { MetricasTab }       from '@/modules/super-admin/pages/MetricasTab'
 import { PlanesTab }         from '@/modules/super-admin/pages/PlanesTab'
 import { SistemaTab }        from '@/modules/super-admin/pages/SistemaTab'
 import { FeatureFlagsTab }   from '@/modules/super-admin/pages/FeatureFlagsTab'
+import { LandingConfigTab }  from '@/modules/super-admin/pages/LandingConfigTab'
+import { TesterTab }         from '@/modules/super-admin/pages/TesterTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
@@ -42,6 +44,8 @@ export function SuperAdminPage() {
         <Route path="planes"            element={<PlanesTab />} />
         <Route path="sistema"           element={<SistemaTab />} />
         <Route path="feature-flags"     element={<FeatureFlagsTab />} />
+        <Route path="landing"           element={<LandingConfigTab />} />
+        <Route path="tester"            element={<TesterTab />} />
         {/* Legacy aliases */}
         <Route path="requests"          element={<Navigate to="/super-admin/solicitudes" replace />} />
         <Route path="restaurants"       element={<Navigate to="/super-admin/negocios"    replace />} />

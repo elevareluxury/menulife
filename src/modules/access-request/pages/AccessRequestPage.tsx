@@ -363,9 +363,6 @@ export function AccessRequestPage() {
               )}
             </button>
 
-            <p style={{ textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-              {t('access_request.trust_1')}. {t('access_request.trust_2')}. {t('access_request.trust_3')}.
-            </p>
           </form>
         </div>
 

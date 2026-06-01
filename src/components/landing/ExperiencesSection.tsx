@@ -4,34 +4,6 @@ import { useTranslation } from 'react-i18next'
 declare const gsap: any
 
 /* ─────────────────────────────────────────────
-   DATOS DEL MENÚ INTERACTIVO
-───────────────────────────────────────────── */
-type MenuItem = { id: string; emoji: string; name: string; desc: string; price: number }
-const MENU: Record<string, MenuItem[]> = {
-  pastas: [
-    { id: 'carbonara',  emoji: '🍝', name: 'Pasta Carbonara', desc: 'Panceta, parmesano, huevo', price: 18 },
-    { id: 'risotto',    emoji: '🍋', name: 'Risotto Limone',  desc: 'Limón, albahaca, crema',   price: 22 },
-    { id: 'tagliata',   emoji: '🥩', name: 'Tagliata',        desc: 'Rúcula, parmesano, cherry', price: 34 },
-  ],
-  carnes: [
-    { id: 'bife',  emoji: '🥩', name: 'Bife de Chorizo', desc: 'Con papas rústicas',  price: 42 },
-    { id: 'pollo', emoji: '🍗', name: 'Pollo al Limón',  desc: 'Con ensalada verde',  price: 28 },
-  ],
-  postres: [
-    { id: 'tiramisu',   emoji: '🍮', name: 'Tiramisú',    desc: 'Clásico italiano',   price: 12 },
-    { id: 'pannacotta', emoji: '🍦', name: 'Panna Cotta', desc: 'Con frutos rojos',   price: 10 },
-  ],
-  bebidas: [
-    { id: 'agua', emoji: '🥤', name: 'Agua mineral',    desc: '', price: 4  },
-    { id: 'vino', emoji: '🍷', name: 'Vino de la casa', desc: '', price: 15 },
-    { id: 'cafe', emoji: '☕', name: 'Café espresso',   desc: '', price: 5  },
-  ],
-}
-type Tab = keyof typeof MENU
-const TABS: Tab[] = ['pastas', 'carnes', 'postres', 'bebidas']
-const TAB_LABELS: Record<Tab, string> = { pastas: 'Pastas', carnes: 'Carnes', postres: 'Postres', bebidas: 'Bebidas' }
-
-/* ─────────────────────────────────────────────
    SECCIÓN PRINCIPAL
 ───────────────────────────────────────────── */
 export function ExperiencesSection() {
@@ -71,25 +43,26 @@ export function ExperiencesSection() {
           </h2>
         </div>
 
-        {/* Cards grid */}
+        {/* 2-card grid: Cliente + Mozo */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: '24px',
+          marginBottom: '32px',
         }}>
           <ExperienceCard data-exp-card index={0} role={`— ${t('experiences.client_tag')}`} title={t('experiences.client_title')}>
-            <InteractiveMenu />
+            <ClientTextContent t={t} />
           </ExperienceCard>
 
           <ExperienceCard data-exp-card index={1} role={`— ${t('experiences.waiter_tag')}`} title={t('experiences.waiter_title')}>
             <WaiterMockup />
             <WaiterFeatures t={t} />
-          </ExperienceCard>
-
-          <ExperienceCard data-exp-card index={2} role={`— ${t('experiences.owner_tag')}`} title={t('experiences.owner_title')}>
-            <DashboardMockup t={t} />
+            <WaiterWhatsApp />
           </ExperienceCard>
         </div>
+
+        {/* Owner section — full width */}
+        <OwnerSection t={t} />
       </div>
     </section>
   )
@@ -136,135 +109,6 @@ function ExperienceCard({ children, role, title, index, ...rest }: {
         <h3 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '22px', color: '#1a1a1a', margin: 0, lineHeight: 1.2 }}>
           {title}
         </h3>
-      </div>
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────────
-   CARD 1 — MENÚ INTERACTIVO
-───────────────────────────────────────────── */
-function InteractiveMenu() {
-  const [tab,  setTab]  = useState<Tab>('pastas')
-  const [cart, setCart] = useState<Record<string, number>>({})
-
-  const add = (id: string) => setCart(p => ({ ...p, [id]: (p[id] || 0) + 1 }))
-  const sub = (id: string) => setCart(p => {
-    const next = { ...p, [id]: Math.max(0, (p[id] || 0) - 1) }
-    if (next[id] === 0) delete next[id]
-    return next
-  })
-
-  const allItems = Object.values(MENU).flat()
-  const total = Object.entries(cart).reduce((s, [id, qty]) => {
-    const item = allItems.find(i => i.id === id)
-    return s + (item ? item.price * qty : 0)
-  }, 0)
-  const hasCart = total > 0
-
-  return (
-    <div style={{
-      background:   '#0F1115',
-      borderRadius: '16px 16px 0 0',
-      overflow:     'hidden',
-      margin:       '0',
-      height:       '380px',
-      display:      'flex',
-      flexDirection:'column',
-      position:     'relative',
-    }}>
-      {/* Notch */}
-      <div style={{ height: '6px', background: '#0a0c10', flexShrink: 0 }} />
-
-      {/* Menu header */}
-      <div style={{ background: '#0F1115', padding: '10px 14px 8px', flexShrink: 0 }}>
-        <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-syne)' }}>La Trattoria</div>
-        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-jakarta)' }}>Menú digital · Mesa 5</div>
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: '6px', padding: '8px 12px', background: '#13161c', flexShrink: 0, overflowX: 'auto' }}>
-        {TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{
-            padding:      '5px 12px',
-            borderRadius: '50px',
-            border:       tab === t ? 'none' : '1px solid rgba(255,255,255,0.15)',
-            background:   tab === t ? 'var(--ml-salmon)' : 'transparent',
-            color:        tab === t ? '#fff' : 'rgba(255,255,255,0.55)',
-            fontSize:     '11px', fontWeight: 600,
-            cursor:       'pointer', whiteSpace: 'nowrap',
-            fontFamily:   'var(--font-jakarta)',
-            transition:   'all 0.18s',
-            flexShrink:   0,
-          }}>{TAB_LABELS[t]}</button>
-        ))}
-      </div>
-
-      {/* Items */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
-        {MENU[tab].map(item => (
-          <div key={item.id} style={{
-            display:      'flex', alignItems: 'center',
-            padding:      '10px 14px',
-            borderBottom: '1px solid rgba(255,255,255,0.04)',
-            gap:          '10px',
-          }}>
-            <span style={{ fontSize: '20px', flexShrink: 0 }}>{item.emoji}</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#fff', fontFamily: 'var(--font-jakarta)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
-              {item.desc && <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.38)', fontFamily: 'var(--font-jakarta)' }}>{item.desc}</div>}
-            </div>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--ml-salmon)', flexShrink: 0, fontFamily: 'var(--font-jakarta)' }}>${item.price}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-              <button onClick={() => sub(item.id)} style={{
-                width: '24px', height: '24px', borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.2)', background: 'transparent',
-                color: '#fff', fontSize: '14px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
-                transition: 'all 0.15s',
-              }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--ml-salmon)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
-              >−</button>
-              <span style={{ width: '18px', textAlign: 'center', fontSize: '12px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-jakarta)' }}>
-                {cart[item.id] || 0}
-              </span>
-              <button onClick={() => add(item.id)} style={{
-                width: '24px', height: '24px', borderRadius: '50%',
-                border: 'none', background: 'var(--ml-salmon)',
-                color: '#fff', fontSize: '14px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
-                transition: 'all 0.15s',
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--ml-salmon-light)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--ml-salmon)'}
-              >+</button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Cart footer — slide up when items exist */}
-      <div style={{
-        position:   'absolute', bottom: 0, left: 0, right: 0,
-        padding:    '12px',
-        transform:  hasCart ? 'translateY(0)' : 'translateY(100%)',
-        transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-        zIndex:     10,
-      }}>
-        <div style={{
-          background: 'var(--ml-salmon)', borderRadius: '50px',
-          padding: '12px 20px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          cursor: 'pointer',
-        }}>
-          <span style={{ color: '#fff', fontSize: '13px', fontWeight: 700, fontFamily: 'var(--font-jakarta)' }}>
-            Ver carrito →
-          </span>
-          <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '13px', fontWeight: 700, fontFamily: 'var(--font-jakarta)' }}>
-            ${total.toFixed(2)}
-          </span>
-        </div>
       </div>
     </div>
   )
@@ -392,6 +236,136 @@ function WaiterFeatures({ t }: { t: (k: string) => string }) {
           <span style={{ color: 'var(--ml-salmon)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>✓</span>{f}
         </div>
       ))}
+    </div>
+  )
+}
+
+function WaiterWhatsApp() {
+  return (
+    <div style={{ padding: '14px 24px 20px' }}>
+      <a
+        href="https://wa.me/?text=Tutorial%20de%20MenuLife"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: '8px',
+          textDecoration: 'none', color: '#25D366',
+          fontFamily: 'var(--font-jakarta)', fontSize: '13px', fontWeight: 600,
+          padding: '8px 14px', borderRadius: '50px',
+          border: '1px solid rgba(37,211,102,0.25)',
+          background: 'rgba(37,211,102,0.06)',
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37,211,102,0.12)'; e.currentTarget.style.borderColor = 'rgba(37,211,102,0.5)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(37,211,102,0.06)'; e.currentTarget.style.borderColor = 'rgba(37,211,102,0.25)' }}
+      >
+        📱 Compartir tutorial por WhatsApp →
+      </a>
+    </div>
+  )
+}
+
+function ClientTextContent({ t }: { t: (k: string) => string }) {
+  return (
+    <div style={{
+      background: '#0F1115',
+      padding: '32px 24px',
+      minHeight: '240px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      gap: '16px',
+    }}>
+      <div style={{ fontSize: '48px', lineHeight: 1 }}>📱</div>
+      <p style={{
+        color: 'rgba(255,255,255,0.85)',
+        fontFamily: 'var(--font-jakarta)',
+        fontSize: '16px',
+        lineHeight: 1.7,
+        margin: 0,
+      }}>
+        Tus clientes <strong style={{ color: '#fff' }}>escanean el QR</strong>, exploran el menú y{' '}
+        <strong style={{ color: '#fff' }}>piden en segundos</strong>.
+      </p>
+      <p style={{
+        color: 'rgba(255,255,255,0.5)',
+        fontFamily: 'var(--font-jakarta)',
+        fontSize: '14px',
+        lineHeight: 1.65,
+        margin: 0,
+      }}>
+        Sin descargas. Sin registros.{' '}
+        <strong style={{ color: 'rgba(255,255,255,0.75)' }}>Cero fricción.</strong>
+        <br />
+        Desde cualquier celular. En cualquier mesa.
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+        {[t('experiences.client_feat1'), t('experiences.client_feat2'), t('experiences.client_feat3')].map(f => (
+          <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)' }}>
+            <span style={{ color: 'var(--ml-salmon)', fontSize: '11px', fontWeight: 700 }}>✓</span>{f}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function OwnerSection({ t }: { t: (k: string) => string }) {
+  return (
+    <div
+      data-exp-card
+      style={{
+        background: '#0F1115',
+        borderRadius: '24px',
+        overflow: 'hidden',
+        border: '1px solid rgba(244,112,90,0.18)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
+      }}
+    >
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.2fr)',
+        gap: '0',
+      }} className="owner-section-grid">
+        {/* Text side */}
+        <div style={{ padding: '48px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px' }}>
+          <p style={{
+            fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+            color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)',
+          }}>
+            — {t('experiences.owner_tag')}
+          </p>
+          <h2 style={{
+            fontFamily: 'var(--font-syne)', fontWeight: 800,
+            fontSize: 'clamp(32px,4vw,52px)',
+            color: '#fff', lineHeight: 1.08, margin: 0,
+          }}>
+            {t('experiences.owner_title')}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'block' }}>
+              {t('experiences.owner_title_accent')}
+            </em>
+          </h2>
+          <p style={{
+            fontFamily: 'var(--font-jakarta)', fontSize: '15px', lineHeight: 1.65,
+            color: 'rgba(255,255,255,0.55)', margin: 0, maxWidth: '380px',
+          }}>
+            {t('experiences.owner_desc')}
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px' }}>
+            {[t('experiences.owner_f1'), t('experiences.owner_f2'), t('experiences.owner_f3')].map(f => (
+              <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.65)' }}>
+                <span style={{ color: 'var(--ml-salmon)', fontSize: '12px', fontWeight: 700 }}>✓</span>
+                <strong style={{ color: 'rgba(255,255,255,0.8)' }}>{f}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Dashboard mockup side */}
+        <div style={{ background: '#080b10', padding: '32px', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
+          <DashboardMockup t={t} />
+        </div>
+      </div>
     </div>
   )
 }

@@ -4,16 +4,20 @@ import { useTranslation } from 'react-i18next'
 
 declare const gsap: any
 
+type Billing = 'monthly' | '6months' | 'annual'
+
 export function PricingSection() {
   const { t } = useTranslation()
-  const [annual, setAnnual] = useState(false)
+  const [billing, setBilling] = useState<Billing>('monthly')
 
   const PLANS = [
     {
       tag:      t('pricing.plan1_tag'),
       name:     t('pricing.plan1_name'),
       desc:     t('pricing.plan1_desc'),
-      monthly:  80,
+      monthly:  70,
+      badge:    t('pricing.plan1_badge'),
+      badgeNote: t('pricing.plan1_badge_note'),
       features: [t('pricing.plan1_f1'), t('pricing.plan1_f2'), t('pricing.plan1_f3'), t('pricing.plan1_f4'), t('pricing.plan1_f5')],
       cta:      t('pricing.plan1_cta'),
       featured: false,
@@ -23,23 +27,14 @@ export function PricingSection() {
       tag:      t('pricing.plan2_tag'),
       name:     t('pricing.plan2_name'),
       desc:     t('pricing.plan2_desc'),
-      monthly:  130,
+      monthly:  150,
+      badge:    null,
+      badgeNote: null,
       features: [t('pricing.plan2_f1'), t('pricing.plan2_f2'), t('pricing.plan2_f3'), t('pricing.plan2_f4'), t('pricing.plan2_f5'), t('pricing.plan2_f6')],
       cta:      t('pricing.plan2_cta'),
       featured: true,
       href:     '/solicitar-acceso',
       note:     t('pricing.plan2_note'),
-    },
-    {
-      tag:      t('pricing.plan3_tag'),
-      name:     t('pricing.plan3_name'),
-      desc:     t('pricing.plan3_desc'),
-      monthly:  null,
-      customPrice: t('pricing.plan3_price'),
-      features: [t('pricing.plan3_f1'), t('pricing.plan3_f2'), t('pricing.plan3_f3'), t('pricing.plan3_f4'), t('pricing.plan3_f5'), t('pricing.plan3_f6')],
-      cta:      t('pricing.plan3_cta'),
-      featured: false,
-      href:     '/solicitar-acceso',
     },
   ]
 
@@ -59,10 +54,17 @@ export function PricingSection() {
         scrollTrigger: { trigger: '[data-price-card]', start: 'top 84%' } })
   }, [])
 
-  const getPrice = (monthly: number | null) => {
-    if (monthly === null) return null
-    return annual ? Math.round(monthly * 0.8) : monthly
+  const getPrice = (monthly: number): number => {
+    if (billing === '6months') return Math.round(monthly * 0.9)
+    if (billing === 'annual')  return Math.round(monthly * 0.8)
+    return monthly
   }
+
+  const TOGGLE_OPTIONS: { key: Billing; label: string; badge?: string }[] = [
+    { key: 'monthly',  label: t('pricing.toggle_monthly') },
+    { key: '6months',  label: t('pricing.toggle_6months'), badge: '−10%' },
+    { key: 'annual',   label: t('pricing.toggle_annual'),  badge: '−20%' },
+  ]
 
   return (
     <section style={{ background: 'var(--ml-off-white)', padding: '96px 24px' }}>
@@ -77,74 +79,99 @@ export function PricingSection() {
             <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('pricing.title_accent')}</em>
           </h2>
 
-          {/* Toggle */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'rgba(0,0,0,0.06)', padding: '4px', borderRadius: '50px' }}>
-            <button onClick={() => setAnnual(false)} style={{
-              padding: '8px 20px', borderRadius: '50px', border: 'none',
-              background: !annual ? '#fff' : 'transparent',
-              boxShadow: !annual ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
-              color: !annual ? '#1a1a1a' : 'var(--ml-gray-500)',
-              fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-              fontFamily: 'var(--font-jakarta)', transition: 'all 0.25s',
-            }}>{t('pricing.toggle_monthly')}</button>
-            <button onClick={() => setAnnual(true)} style={{
-              padding: '8px 20px', borderRadius: '50px', border: 'none',
-              background: annual ? '#fff' : 'transparent',
-              boxShadow: annual ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
-              color: annual ? '#1a1a1a' : 'var(--ml-gray-500)',
-              fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-              fontFamily: 'var(--font-jakarta)', transition: 'all 0.25s',
-              display: 'flex', alignItems: 'center', gap: '6px',
-            }}>
-              {t('pricing.toggle_annual')}
-              <span style={{
-                background: 'var(--ml-salmon)', color: '#fff',
-                fontSize: '9px', fontWeight: 700, padding: '2px 6px',
-                borderRadius: '50px', letterSpacing: '0.05em',
-              }}>{t('pricing.save')}</span>
-            </button>
+          {/* 3-way Toggle */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(0,0,0,0.06)', padding: '4px', borderRadius: '50px' }}>
+            {TOGGLE_OPTIONS.map(opt => (
+              <button
+                key={opt.key}
+                onClick={() => setBilling(opt.key)}
+                style={{
+                  padding: '8px 18px', borderRadius: '50px', border: 'none',
+                  background: billing === opt.key ? '#fff' : 'transparent',
+                  boxShadow: billing === opt.key ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                  color: billing === opt.key ? '#1a1a1a' : 'var(--ml-gray-500)',
+                  fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                  fontFamily: 'var(--font-jakarta)', transition: 'all 0.25s',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                }}
+              >
+                {opt.label}
+                {opt.badge && (
+                  <span style={{
+                    background: billing === opt.key ? 'var(--ml-salmon)' : 'rgba(244,112,90,0.15)',
+                    color: billing === opt.key ? '#fff' : 'var(--ml-salmon)',
+                    fontSize: '9px', fontWeight: 700, padding: '2px 6px',
+                    borderRadius: '50px', letterSpacing: '0.05em',
+                    transition: 'all 0.25s',
+                  }}>{opt.badge}</span>
+                )}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Cards */}
+        {/* 2 main plan cards */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(290px,1fr))',
           gap: '24px', alignItems: 'start',
+          maxWidth: '720px', margin: '0 auto',
         }}>
           {PLANS.map(plan => (
             <PricingCard
               key={plan.name}
               plan={plan}
               price={getPrice(plan.monthly)}
-              annual={annual}
               perMonth={t('pricing.per_month')}
-              annualNote={t('pricing.annual_note')}
+              billingNote={billing === '6months' ? t('pricing.note_6months') : billing === 'annual' ? t('pricing.annual_note') : ''}
             />
           ))}
         </div>
 
-        {/* Trust line */}
-        <div style={{
-          display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
-          gap: '8px 24px', marginTop: '48px',
-          fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-500)',
-        }}>
-          {(['trust_1', 'trust_2', 'trust_3'] as const).map((key, i) => (
-            <span key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              {i > 0 && <span style={{ color: 'var(--ml-gray-200)' }}>|</span>}
-              <span style={{ color: 'var(--ml-salmon)', fontWeight: 600 }}>✓</span> {t(`pricing.${key}`)}
-            </span>
-          ))}
+        {/* A medida card */}
+        <div data-price-card style={{ maxWidth: '720px', margin: '16px auto 0' }}>
+          <div style={{
+            borderRadius: '20px', padding: '24px 32px',
+            background: 'rgba(0,0,0,0.03)',
+            border: '1px solid rgba(0,0,0,0.06)',
+            display: 'flex', flexWrap: 'wrap',
+            alignItems: 'center', justifyContent: 'space-between',
+            gap: '16px',
+          }}>
+            <div>
+              <h3 style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '18px', color: '#1a1a1a', marginBottom: '4px' }}>
+                {t('pricing.custom_name')}
+              </h3>
+              <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-500)', margin: 0 }}>
+                {t('pricing.custom_desc')}
+              </p>
+            </div>
+            <a
+              href="mailto:contacto@menulife.digital"
+              style={{
+                padding: '10px 24px', borderRadius: '50px',
+                border: '1px solid rgba(0,0,0,0.15)',
+                background: 'transparent',
+                color: '#3d3c39',
+                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                fontFamily: 'var(--font-jakarta)', textDecoration: 'none',
+                display: 'inline-block', transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--ml-salmon)'; e.currentTarget.style.color = 'var(--ml-salmon)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'; e.currentTarget.style.color = '#3d3c39' }}
+            >
+              {t('pricing.custom_cta')}
+            </a>
+          </div>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'var(--ml-gray-500)' }}>
-          {t('pricing.help_text')}{' '}
-          <a href="#" style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}
-            onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
-            onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
-          >{t('pricing.help_link')}</a>
-          {' '}{t('pricing.help_text2')}
+        {/* Trust line */}
+        <p style={{
+          textAlign: 'center', marginTop: '40px',
+          fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-500)',
+        }}>
+          {t('pricing.trust_line')}
         </p>
       </div>
     </section>
@@ -152,13 +179,12 @@ export function PricingSection() {
 }
 
 function PricingCard({
-  plan, price, annual, perMonth, annualNote,
+  plan, price, perMonth, billingNote,
 }: {
-  plan: { tag: string; name: string; desc: string; monthly: number | null; customPrice?: string; features: string[]; cta: string; featured: boolean; href: string; note?: string }
-  price: number | null
-  annual: boolean
+  plan: { tag: string; name: string; desc: string; monthly: number; badge: string | null; badgeNote: string | null; features: string[]; cta: string; featured: boolean; href: string; note?: string }
+  price: number
   perMonth: string
-  annualNote: string
+  billingNote: string
 }) {
   return (
     <div
@@ -174,6 +200,7 @@ function PricingCard({
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)' }}
       onMouseLeave={e => { e.currentTarget.style.transform = '' }}
     >
+      {/* Featured badge */}
       {plan.featured && (
         <div style={{
           position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)',
@@ -184,29 +211,49 @@ function PricingCard({
         }}>{plan.tag}</div>
       )}
 
-      <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '8px' }}>
-        {!plan.featured && plan.tag}
-      </p>
+      {/* Tag line for non-featured */}
+      {!plan.featured && (
+        <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '8px' }}>
+          {plan.tag}
+        </p>
+      )}
 
-      <h3 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '26px', color: plan.featured ? '#fff' : '#1a1a1a', marginBottom: '8px' }}>
+      <h3 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '26px', color: plan.featured ? '#fff' : '#1a1a1a', marginBottom: '4px' }}>
         {plan.name}
       </h3>
-      <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.5)' : 'var(--ml-gray-500)', marginBottom: '24px', lineHeight: 1.5 }}>
+
+      {/* Launch badge */}
+      {plan.badge && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+          <span style={{
+            background: 'rgba(245,158,11,0.12)', color: '#D97706',
+            border: '1px solid rgba(245,158,11,0.3)',
+            fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '50px',
+            fontFamily: 'var(--font-jakarta)',
+          }}>
+            {plan.badge}
+          </span>
+        </div>
+      )}
+
+      <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.5)' : 'var(--ml-gray-500)', marginBottom: '20px', lineHeight: 1.5 }}>
         {plan.desc}
       </p>
 
       <div style={{ paddingBottom: '24px', marginBottom: '24px', borderBottom: `1px solid ${plan.featured ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}` }}>
-        {price !== null ? (
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px' }}>
-            <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '52px', lineHeight: 1, color: plan.featured ? '#fff' : '#1a1a1a', transition: 'all 0.3s' }}>
-              ${price}
-            </span>
-            <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.4)' : 'var(--ml-gray-500)', paddingBottom: '8px' }}>
-              {perMonth} {annual && <span style={{ color: 'var(--ml-salmon)', fontWeight: 600, fontSize: '11px' }}>{annualNote}</span>}
-            </span>
-          </div>
-        ) : (
-          <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '36px', color: plan.featured ? '#fff' : '#1a1a1a' }}>{plan.customPrice}</span>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px' }}>
+          <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '52px', lineHeight: 1, color: plan.featured ? '#fff' : '#1a1a1a', transition: 'all 0.3s' }}>
+            ${price}
+          </span>
+          <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.4)' : 'var(--ml-gray-500)', paddingBottom: '8px' }}>
+            {perMonth}{' '}
+            {billingNote && <span style={{ color: 'var(--ml-salmon)', fontWeight: 600, fontSize: '11px' }}>{billingNote}</span>}
+          </span>
+        </div>
+        {plan.badgeNote && (
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: '#D97706', margin: '6px 0 0', fontStyle: 'italic' }}>
+            {plan.badgeNote}
+          </p>
         )}
       </div>
 

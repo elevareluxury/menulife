@@ -482,6 +482,9 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
     --shadow-md: 0 2px 12px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
   }
+  .owner-section-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 @media (min-width: 1025px) {
