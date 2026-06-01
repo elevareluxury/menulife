@@ -485,6 +485,80 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   .owner-section-grid {
     grid-template-columns: 1fr !important;
   }
+
+  /* ── Hero mobile ─────────────────────────── */
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    padding: 32px 20px 48px !important;
+    gap: 0 !important;
+  }
+  .hero-content {
+    order: 1;
+    max-width: 100% !important;
+    text-align: center;
+  }
+  .hero-content h1 {
+    font-size: clamp(36px, 10vw, 52px) !important;
+  }
+  [data-hero-sub] {
+    font-size: 16px !important;
+    max-width: 100% !important;
+  }
+  [data-hero-trust] {
+    justify-content: center;
+  }
+  .hero-cta-group {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .hero-cta-group > a,
+  .hero-cta-group > button {
+    width: 100% !important;
+  }
+  .hero-cta-group > a > button,
+  .hero-cta-group > a > span {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+  /* Second CTA (mailto anchor) */
+  .hero-cta-group > a[href^="mailto"] {
+    display: block !important;
+    text-align: center !important;
+  }
+  .phone-3d-container {
+    order: 2;
+    height: auto !important;
+    padding: 32px 0 0 !important;
+    opacity: 1 !important;
+  }
+  .phone-3d {
+    width: 200px !important;
+    height: 400px !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Flow step animations ────────────────────── */
+.flow-step-circle {
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+}
+.flow-step-circle.flow-visible {
+  transform: scale(1);
+  opacity: 1;
+}
+.flow-step-text {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.flow-step-text.flow-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (min-width: 1025px) {

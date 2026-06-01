@@ -147,17 +147,17 @@ export function HeroSection() {
         width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none',
       }} />
 
-      <div style={{
+      <div className="hero-grid" style={{
         position: 'relative', zIndex: 1,
         maxWidth: '1280px', margin: '0 auto',
         padding: '60px 24px',
         display: 'grid',
         gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,0.9fr)',
         gap: '48px', alignItems: 'center', width: '100%',
-      }} className="lg:grid-cols-2 grid-cols-1">
+      }}>
 
         {/* Left */}
-        <div style={{ maxWidth: '560px' }}>
+        <div className="hero-content" style={{ maxWidth: '560px' }}>
           <h1 ref={titleRef} style={{
             fontFamily: 'var(--font-syne)', fontWeight: 800,
             fontSize: 'clamp(48px, 6.5vw, 96px)',
@@ -179,7 +179,7 @@ export function HeroSection() {
             {t('hero.subtitle')}
           </p>
 
-          <div data-hero-ctas style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginBottom: '32px' }}>
+          <div data-hero-ctas className="hero-cta-group" style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginBottom: '32px' }}>
             <Link to="/solicitar-acceso" style={{ textDecoration: 'none' }}>
               <ShimmerButton style={{ padding: '15px 32px', fontSize: '15px', borderRadius: '50px' }}>
                 {t('hero.cta_primary')}
@@ -213,7 +213,7 @@ export function HeroSection() {
         </div>
 
         {/* Right: Single 3D phone */}
-        <div ref={phoneWrapRef} style={{
+        <div ref={phoneWrapRef} className="phone-3d-container" style={{
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           height: '600px', position: 'relative', opacity: 0,
         }}>
@@ -225,7 +225,7 @@ export function HeroSection() {
           }} />
 
           {/* Phone frame */}
-          <div ref={phoneRef} style={{
+          <div ref={phoneRef} className="phone-3d" style={{
             width: '280px',
             height: '560px',
             borderRadius: '36px',

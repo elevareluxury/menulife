@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { QrCode, Zap, LayoutGrid, Bell, TrendingUp } from 'lucide-react'
 
-const STEP_EMOJIS = ['📷', '⚡', '🍽️', '💳', '📈']
+const STEP_ICONS = [QrCode, Zap, LayoutGrid, Bell, TrendingUp]
 
 declare const gsap: any
 
@@ -115,54 +116,109 @@ function ExperienceCard({ children, role, title, index, ...rest }: {
 }
 
 /* ─────────────────────────────────────────────
-   CARD 1 — CLIENTE (5 pasos del flow)
+   CARD 1 — CLIENTE (5 pasos animados)
 ───────────────────────────────────────────── */
 function FlowStepsContent({ t }: { t: (k: string) => string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+
   const steps = [1, 2, 3, 4, 5].map((n, i) => ({
     num: n,
-    emoji: STEP_EMOJIS[i],
+    Icon: STEP_ICONS[i],
     title: t(`flow.step${n}_title`),
     desc:  t(`flow.step${n}_desc`),
   }))
 
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      el.querySelectorAll<HTMLElement>('.flow-step-circle').forEach((node, i) => {
+        setTimeout(() => node.classList.add('flow-visible'), i * 100)
+      })
+      el.querySelectorAll<HTMLElement>('.flow-step-text').forEach((node, i) => {
+        setTimeout(() => node.classList.add('flow-visible'), 160 + i * 100)
+      })
+    }, { threshold: 0.25 })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div style={{ background: '#0F1115', padding: '24px 24px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-      {steps.map(step => (
-        <div key={step.num} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{
-            position: 'relative',
-            width: '44px', height: '44px', flexShrink: 0,
-            borderRadius: '50%',
-            background: '#1a1e27',
-            border: '1.5px solid rgba(244,112,90,0.28)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '18px',
-            transition: 'transform 0.45s ease, border-color 0.25s',
-            cursor: 'default',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'rotate(360deg) scale(1.1)'; e.currentTarget.style.borderColor = 'var(--ml-salmon)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'rgba(244,112,90,0.28)' }}
-          >
-            {step.emoji}
-            <span style={{
-              position: 'absolute', top: '-5px', right: '-5px',
-              width: '17px', height: '17px', borderRadius: '50%',
-              background: 'var(--ml-salmon)', color: '#fff',
-              fontSize: '9px', fontWeight: 800,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'var(--font-syne)',
-            }}>{step.num}</span>
-          </div>
-          <div>
-            <div style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '14px', color: '#fff', lineHeight: 1.2 }}>
-              {step.title}
+    <div style={{ background: '#0F1115', padding: '28px 16px 24px' }}>
+      <div
+        ref={containerRef}
+        style={{
+          display: 'flex', alignItems: 'flex-start',
+          overflowX: 'auto', paddingBottom: '4px',
+          scrollbarWidth: 'none',
+        }}
+      >
+        {steps.map((step, idx) => (
+          <div key={step.num} style={{ display: 'flex', alignItems: 'flex-start', flex: '1 0 auto' }}>
+            {/* Step column */}
+            <div style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              gap: '10px', minWidth: '72px', maxWidth: '96px', flex: 1,
+              textAlign: 'center',
+            }}>
+              {/* Circle */}
+              <div
+                className="flow-step-circle"
+                style={{
+                  position: 'relative',
+                  width: '64px', height: '64px', borderRadius: '50%',
+                  background: '#1a1e27',
+                  border: '1.5px solid rgba(255,255,255,0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'default', flexShrink: 0,
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'var(--ml-salmon)'
+                  e.currentTarget.style.boxShadow = '0 0 18px rgba(244,112,90,0.3)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+                  e.currentTarget.style.boxShadow = ''
+                }}
+              >
+                <step.Icon style={{ width: '26px', height: '26px', color: '#fff' }} />
+                <span style={{
+                  position: 'absolute', top: '-6px', right: '-6px',
+                  width: '20px', height: '20px', borderRadius: '50%',
+                  background: 'var(--ml-salmon)', color: '#fff',
+                  fontSize: '10px', fontWeight: 800,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'var(--font-syne)',
+                }}>{step.num}</span>
+              </div>
+              {/* Text */}
+              <div className="flow-step-text" style={{ padding: '0 2px' }}>
+                <div style={{
+                  fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '12px',
+                  color: '#fff', lineHeight: 1.2,
+                }}>{step.title}</div>
+                <div style={{
+                  fontFamily: 'var(--font-jakarta)', fontSize: '11px',
+                  color: 'rgba(255,255,255,0.38)', lineHeight: 1.4, marginTop: '3px',
+                }}>{step.desc}</div>
+              </div>
             </div>
-            <div style={{ fontFamily: 'var(--font-jakarta)', fontSize: '12px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.45, marginTop: '2px' }}>
-              {step.desc}
-            </div>
+
+            {/* Connector line */}
+            {idx < steps.length - 1 && (
+              <div style={{
+                flex: '1 0 12px',
+                height: '1.5px',
+                background: 'rgba(255,255,255,0.12)',
+                marginTop: '32px',
+                minWidth: '12px',
+              }} />
+            )}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }

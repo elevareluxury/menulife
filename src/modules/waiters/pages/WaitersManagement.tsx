@@ -225,12 +225,12 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
     const isEditing = !!waiter
     const pinChanged = formData.pin.length > 0
 
-    if (!isEditing && formData.pin.length !== 6) {
-      toast.error('El PIN debe tener 6 dígitos')
+    if (!isEditing && (formData.pin.length < 4 || formData.pin.length > 10)) {
+      toast.error('El PIN debe tener entre 4 y 10 dígitos')
       return
     }
-    if (isEditing && pinChanged && formData.pin.length !== 6) {
-      toast.error('El PIN debe tener 6 dígitos')
+    if (isEditing && pinChanged && (formData.pin.length < 4 || formData.pin.length > 10)) {
+      toast.error('El PIN debe tener entre 4 y 10 dígitos')
       return
     }
 
@@ -295,17 +295,17 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
         />
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            PIN (6 dígitos){waiter ? <span className="text-gray-400 font-normal ml-1">— dejar vacío para no cambiar</span> : null}
+            PIN (4–10 dígitos){waiter ? <span className="text-gray-400 font-normal ml-1">— dejar vacío para no cambiar</span> : null}
           </label>
           <div className="flex gap-2">
             <Input
               placeholder={waiter ? '••••••' : '123456'}
               value={formData.pin}
               onChange={(e) => {
-                const v = e.target.value.replace(/\D/g, '').slice(0, 6)
+                const v = e.target.value.replace(/\D/g, '').slice(0, 10)
                 setFormData(prev => ({ ...prev, pin: v }))
               }}
-              maxLength={6}
+              maxLength={10}
               required={!waiter}
             />
             <Button type="button" variant="secondary" onClick={generatePIN}>
