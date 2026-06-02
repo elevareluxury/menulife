@@ -22,6 +22,26 @@ import { ACCEPTED_IMAGE_TYPES } from '@/lib/constants'
 import toast from 'react-hot-toast'
 import type { Restaurant } from '@/types'
 
+// ─── Column safety ────────────────────────────────────────────────────────────
+const VALID_COLUMNS = new Set([
+  'id','user_id','name','slug','description','phone','email','website',
+  'address','address_extra','city','province','country','postal_code','directions',
+  'logo_url','cover_image_url','menu_accent_color','menu_card_style',
+  'show_prices','show_descriptions','show_calories',
+  'schedule','business_hours','social_links',
+  'delivery_enabled','delivery_time_estimate','delivery_min_order',
+  'delivery_fee_type','delivery_fee_value','delivery_zones',
+  'takeaway_enabled','takeaway_time_estimate',
+  'default_language','allow_language_switch',
+  'reservations_enabled','reservations_collect_guests','reservations_advance_days',
+  'reservations_min_hours','reservations_max_party','reservations_time_slots','reservations_message',
+  'onboarding_completed','is_active','plan','subscription_status',
+  'trial_ends_at','features','created_at','updated_at',
+])
+function sanitize(data: Record<string, unknown>) {
+  return Object.fromEntries(Object.entries(data).filter(([k]) => VALID_COLUMNS.has(k)))
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language' | 'reservations' | 'integrations'
@@ -497,10 +517,6 @@ export function BusinessSettings() {
     }
 
     setSaving(true)
-    console.log('=== SAVE DEBUG ===')
-    console.log('restaurantId:', restaurant.id)
-    console.log('formData.name:', formData.name)
-    console.log('social_links:', formData.social_links)
     try {
       let finalLogoUrl: string | null = formData.logo_url || null
       if (logoFile) {
@@ -580,20 +596,13 @@ export function BusinessSettings() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: updated, error } = await (supabase as any)
         .from('restaurants')
-        .update(updatePayload)
+        .update(sanitize(updatePayload))
         .eq('id', restaurant.id)
         .select('id')
 
-      console.log('Save result:', { data: updated, error })
+      if (error) throw error
 
-      if (error) {
-        console.error('Save error:', error)
-        throw error
-      }
-
-      // If RLS blocks the UPDATE, Supabase returns error=null but 0 rows
       if (!updated || updated.length === 0) {
-        console.warn('Update returned 0 rows — possible RLS issue. restaurant.id:', restaurant.id)
         throw new Error('No se pudo guardar: sin permisos. Ejecutá la migración SQL en Supabase Dashboard.')
       }
 
