@@ -31,7 +31,10 @@ export function ExperiencesSection() {
 
   return (
     <section ref={sectionRef} style={{
-      background: 'var(--ml-off-white)',
+      background: `
+        radial-gradient(ellipse 60% 40% at 30% 20%, rgba(244,112,90,0.04) 0%, transparent 50%),
+        var(--ml-off-white)
+      `,
       padding: '96px 24px',
     }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
@@ -82,24 +85,17 @@ function ExperienceCard({ children, role, title, index, ...rest }: {
     <div
       ref={cardRef}
       {...rest}
+      className="liquid-glass-light"
       style={{
-        background:     'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(10px)',
-        border:         '1px solid rgba(255,255,255,0.95)',
-        borderRadius:   '24px',
-        boxShadow:      '0 20px 60px rgba(0,0,0,0.07)',
-        overflow:       'hidden',
-        transition:     'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease',
-        display:        'flex',
-        flexDirection:  'column',
+        transition:    'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+        display:       'flex',
+        flexDirection: 'column',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.transform  = 'translateY(-8px) scale(1.01)'
-        e.currentTarget.style.boxShadow  = '0 30px 80px rgba(0,0,0,0.11)'
+        e.currentTarget.style.transform = 'translateY(-8px) scale(1.01)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.transform  = ''
-        e.currentTarget.style.boxShadow  = '0 20px 60px rgba(0,0,0,0.07)'
+        e.currentTarget.style.transform = ''
       }}
     >
       {children}
@@ -263,12 +259,10 @@ function OwnerSection({ t }: { t: (k: string) => string }) {
   return (
     <div
       data-exp-card
+      className="liquid-glass"
       style={{
-        background: '#0F1115',
-        borderRadius: '24px',
-        overflow: 'hidden',
-        border: '1px solid rgba(244,112,90,0.18)',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
+        background: 'rgba(15,17,21,0.97)',
+        border: '1px solid rgba(244,112,90,0.25)',
       }}
     >
       <div style={{

@@ -23,11 +23,9 @@ export function Navbar() {
   }, [])
 
   return (
-    <nav style={{
+    <nav className="liquid-glass-nav" style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-      background: 'rgba(15,17,21,0.78)',
-      backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: scrolled ? '1px solid rgba(244,112,90,0.25)' : '1px solid rgba(244,112,90,0)',
+      borderBottom: scrolled ? '1px solid rgba(244,112,90,0.3)' : '1px solid rgba(255,255,255,0.08)',
       transition: 'border-color 0.4s ease',
       fontFamily: 'var(--font-jakarta)',
       animation: 'ml-fade-up 0.4s ease both',
@@ -152,22 +150,19 @@ export function ShimmerButton({ children, style, onClick }: {
   onClick?: () => void
 }) {
   return (
-    <button onClick={onClick} style={{
-      position: 'relative', overflow: 'hidden',
-      padding: '9px 22px', borderRadius: '50px', border: 'none',
-      background: 'var(--ml-salmon)', color: '#fff',
+    <button onClick={onClick} className="liquid-glass-btn" style={{
+      padding: '9px 22px',
+      color: '#fff',
       fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-      fontFamily: 'var(--font-jakarta)', transition: 'transform 0.2s, box-shadow 0.2s',
+      fontFamily: 'var(--font-jakarta)',
       ...style,
-    }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(244,112,90,0.5)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
-    >
-      <span style={{ position: 'relative', zIndex: 1 }}>{children}</span>
+    }}>
+      <span style={{ position: 'relative', zIndex: 2 }}>{children}</span>
       <span style={{
         position: 'absolute', top: 0, left: '-100%', width: '100%', height: '100%',
-        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',
         animation: 'ml-shimmer 3s infinite',
+        zIndex: 2,
       }} />
     </button>
   )

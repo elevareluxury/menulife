@@ -29,7 +29,7 @@ export function FAQSection() {
   }, [])
 
   return (
-    <section style={{ background: '#fff', padding: '96px 24px' }}>
+    <section style={{ background: `radial-gradient(ellipse 50% 60% at 50% 100%, rgba(244,112,90,0.04) 0%, transparent 55%), var(--ml-off-white)`, padding: '96px 24px' }}>
       <div style={{ maxWidth: '760px', margin: '0 auto' }}>
         {/* Header */}
         <div data-faq-title style={{ textAlign: 'center', marginBottom: '64px' }}>
@@ -43,7 +43,7 @@ export function FAQSection() {
         </div>
 
         {/* Accordion */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {FAQS.map((faq, i) => (
             <FAQItem
               key={i}
@@ -52,6 +52,7 @@ export function FAQSection() {
               onToggle={() => setOpen(open === i ? null : i)}
             />
           ))}
+
         </div>
       </div>
     </section>
@@ -68,10 +69,10 @@ function FAQItem({ faq, isOpen, onToggle }: {
   return (
     <div
       data-faq-item
+      className="liquid-glass-light"
       style={{
-        borderLeft:  isOpen ? '3px solid var(--ml-salmon)' : '3px solid transparent',
-        borderBottom: '1px solid rgba(0,0,0,0.07)',
-        transition:  'border-color 0.25s',
+        borderLeft: isOpen ? '3px solid var(--ml-salmon)' : '3px solid transparent',
+        transition: 'border-color 0.25s, box-shadow 0.25s',
       }}
     >
       <button

@@ -136,9 +136,9 @@ export function HeroSection() {
       alignItems: 'center',
       overflow:   'hidden',
       background: `
-        radial-gradient(ellipse 70% 60% at 15% 60%, rgba(244,112,90,0.15) 0%, transparent 55%),
-        radial-gradient(ellipse 50% 70% at 85% 30%, rgba(30,36,60,0.8) 0%, transparent 60%),
-        #0F1115
+        radial-gradient(ellipse 80% 60% at 20% 50%, rgba(244,112,90,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 30%, rgba(30,36,51,0.8) 0%, transparent 70%),
+        linear-gradient(135deg, #0F1115 0%, #161a22 100%)
       `,
       paddingTop: '68px',
     }}>
@@ -187,26 +187,23 @@ export function HeroSection() {
             </Link>
             <a
               href="mailto:contacto@menulife.digital"
+              className="liquid-glass-btn-ghost"
               style={{
-                padding: '15px 28px', borderRadius: '50px',
-                border: '1px solid rgba(255,255,255,0.3)',
-                background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)',
+                padding: '15px 28px',
                 color: 'rgba(255,255,255,0.75)', fontSize: '15px', fontWeight: 500,
                 cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
                 textDecoration: 'none', display: 'inline-block',
-                transition: 'all 0.2s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.7)'; e.currentTarget.style.color = '#fff' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)' }}
             >
-              {t('hero.cta_secondary')}
+              <span>{t('hero.cta_secondary')}</span>
             </a>
           </div>
 
-          <div data-hero-trust style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+          <div data-hero-trust style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             {(['trust_1', 'trust_2', 'trust_3', 'trust_4'] as const).map(key => (
-              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'rgba(255,255,255,0.42)', fontFamily: 'var(--font-jakarta)' }}>
-                <span style={{ color: 'var(--ml-salmon)', fontWeight: 700, fontSize: '11px' }}>✓</span>{t(`hero.${key}`)}
+              <div key={key} className="liquid-glass-subtle" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 14px', fontSize: '13px', color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-jakarta)' }}>
+                <span style={{ color: 'var(--ml-salmon)', fontWeight: 700, fontSize: '11px' }}>✓</span>
+                <span>{t(`hero.${key}`)}</span>
               </div>
             ))}
           </div>
@@ -225,17 +222,11 @@ export function HeroSection() {
           }} />
 
           {/* Phone frame */}
-          <div ref={phoneRef} className="phone-3d" style={{
+          <div ref={phoneRef} className="liquid-glass-phone phone-3d" style={{
             width: '280px',
             height: '560px',
-            borderRadius: '36px',
-            border: '8px solid #2a2a2a',
-            background: '#000',
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.1)',
             transform: 'perspective(1200px) rotateY(-8deg) rotateX(3deg)',
             transition: 'transform 0.1s ease-out',
-            position: 'relative',
           }}>
             {/* Notch */}
             <div style={{

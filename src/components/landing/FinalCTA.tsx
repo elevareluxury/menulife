@@ -39,8 +39,8 @@ export function FinalCTA() {
   return (
     <section style={{
       background: `
-        linear-gradient(to top, rgba(244,112,90,0.2) 0%, transparent 55%),
-        #0F1115
+        radial-gradient(ellipse 50% 40% at 50% 0%, rgba(244,112,90,0.06) 0%, transparent 50%),
+        linear-gradient(180deg, #0F1115 0%, #161a22 50%, #0F1115 100%)
       `,
       padding:   '112px 24px',
       textAlign: 'center',
@@ -55,7 +55,7 @@ export function FinalCTA() {
         filter: 'blur(40px)', pointerEvents: 'none',
       }} />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '900px', margin: '0 auto' }}>
+      <div className="liquid-glass" style={{ position: 'relative', zIndex: 1, maxWidth: '900px', margin: '0 auto', padding: '64px 48px' }}>
         <p style={{
           fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
           textTransform: 'uppercase', color: 'var(--ml-salmon)',
@@ -95,19 +95,14 @@ export function FinalCTA() {
               {t('cta_final.cta_primary')}
             </ShimmerButton>
           </Link>
-          <button style={{
-            padding:      '16px 36px', borderRadius: '50px',
-            border:       '1px solid rgba(255,255,255,0.25)',
-            background:   'rgba(255,255,255,0.05)',
-            backdropFilter: 'blur(10px)',
-            color:        'rgba(255,255,255,0.7)',
-            fontSize:     '16px', fontWeight: 500,
-            cursor:       'pointer', fontFamily: 'var(--font-jakarta)',
-            transition:   'all 0.2s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; e.currentTarget.style.color = '#fff' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
-          >{t('cta_final.cta_secondary')}</button>
+          <button className="liquid-glass-btn-ghost" style={{
+            padding: '16px 36px',
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: '16px', fontWeight: 500,
+            cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
+          }}>
+            <span>{t('cta_final.cta_secondary')}</span>
+          </button>
         </div>
       </div>
     </section>

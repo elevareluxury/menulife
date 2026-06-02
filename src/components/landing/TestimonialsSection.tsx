@@ -38,8 +38,8 @@ export function TestimonialsSection() {
   return (
     <section style={{
       background: `
-        linear-gradient(to top, rgba(244,112,90,0.1) 0%, transparent 40%),
-        #0F1115
+        radial-gradient(ellipse 50% 40% at 50% 0%, rgba(244,112,90,0.06) 0%, transparent 50%),
+        linear-gradient(180deg, #0F1115 0%, #161a22 50%, #0F1115 100%)
       `,
       padding: '96px 24px',
     }}>
@@ -74,23 +74,17 @@ function TestimonialCard({ t }: { t: { initials: string; color: string; name: st
   return (
     <article
       data-test-card
+      className="liquid-glass"
       style={{
-        background:     'rgba(255,255,255,0.05)',
-        border:         '1px solid rgba(255,255,255,0.08)',
-        borderRadius:   '20px',
-        padding:        '28px',
-        transition:     'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s',
-        cursor:         'default',
+        padding:    '28px',
+        transition: 'transform 0.3s ease',
+        cursor:     'default',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.transform   = 'scale(1.02)'
-        e.currentTarget.style.boxShadow   = '0 0 0 1px rgba(244,112,90,0.3), 0 20px 60px rgba(244,112,90,0.08)'
-        e.currentTarget.style.borderColor = 'rgba(244,112,90,0.3)'
+        e.currentTarget.style.transform = 'scale(1.02)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.transform   = ''
-        e.currentTarget.style.boxShadow   = ''
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+        e.currentTarget.style.transform = ''
       }}
     >
       {/* Stars */}

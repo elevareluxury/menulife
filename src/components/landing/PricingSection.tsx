@@ -67,7 +67,7 @@ export function PricingSection() {
   ]
 
   return (
-    <section style={{ background: 'var(--ml-off-white)', padding: '96px 24px' }}>
+    <section style={{ background: `radial-gradient(ellipse 60% 40% at 70% 80%, rgba(244,112,90,0.05) 0%, transparent 50%), var(--ml-off-white)`, padding: '96px 24px' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div data-price-title style={{ textAlign: 'center', marginBottom: '56px' }}>
@@ -130,10 +130,8 @@ export function PricingSection() {
 
         {/* A medida card */}
         <div data-price-card style={{ maxWidth: '720px', margin: '16px auto 0' }}>
-          <div style={{
+          <div className="liquid-glass-light" style={{
             borderRadius: '20px', padding: '24px 32px',
-            background: 'rgba(0,0,0,0.03)',
-            border: '1px solid rgba(0,0,0,0.06)',
             display: 'flex', flexWrap: 'wrap',
             alignItems: 'center', justifyContent: 'space-between',
             gap: '16px',
@@ -189,13 +187,14 @@ function PricingCard({
   return (
     <div
       data-price-card
+      className={plan.featured ? 'liquid-glass-featured' : 'liquid-glass-light'}
       style={{
-        position: 'relative', borderRadius: '24px', padding: '36px 32px',
-        background: plan.featured ? '#0F1115' : '#fff',
-        border: plan.featured ? '1px solid rgba(244,112,90,0.45)' : '1px solid rgba(0,0,0,0.08)',
-        boxShadow: plan.featured ? '0 0 0 0 rgba(244,112,90,0.3)' : '0 4px 24px rgba(0,0,0,0.06)',
-        animation: plan.featured ? 'ml-pulse-glow 3s ease-in-out infinite' : 'none',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        position: 'relative', padding: '36px 32px',
+        ...(plan.featured ? {
+          background: '#0F1115',
+          animation: 'ml-pulse-glow 3s ease-in-out infinite',
+        } : {}),
+        transition: 'transform 0.3s ease',
       }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)' }}
       onMouseLeave={e => { e.currentTarget.style.transform = '' }}
@@ -266,35 +265,33 @@ function PricingCard({
         ))}
       </div>
 
-      <Link to={plan.href} style={{ textDecoration: 'none' }}>
-        <button style={{
-          width: '100%', padding: '14px', borderRadius: '50px',
-          border: plan.featured ? 'none' : '1px solid rgba(0,0,0,0.15)',
-          background: plan.featured ? 'var(--ml-salmon)' : 'transparent',
-          color: plan.featured ? '#fff' : '#3d3c39',
-          fontSize: '14px', fontWeight: 600, cursor: 'pointer',
-          fontFamily: 'var(--font-jakarta)', transition: 'all 0.2s',
-          position: 'relative', overflow: 'hidden',
-        }}
-          onMouseEnter={e => {
-            if (plan.featured) { e.currentTarget.style.boxShadow = '0 0 24px rgba(244,112,90,0.5)'; e.currentTarget.style.transform = 'scale(1.02)' }
-            else { e.currentTarget.style.borderColor = 'var(--ml-salmon)'; e.currentTarget.style.color = 'var(--ml-salmon)' }
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = ''
-            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'
-            e.currentTarget.style.color = plan.featured ? '#fff' : '#3d3c39'
-          }}
-        >
-          {plan.cta}
-          {plan.featured && (
+      <Link to={plan.href} style={{ textDecoration: 'none', display: 'block' }}>
+        {plan.featured ? (
+          <button className="liquid-glass-btn" style={{
+            width: '100%', padding: '14px',
+            color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+            fontFamily: 'var(--font-jakarta)',
+          }}>
+            <span>{plan.cta}</span>
             <span style={{
               position: 'absolute', top: 0, left: '-100%', width: '100%', height: '100%',
               background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)',
-              animation: 'ml-shimmer 3s infinite',
+              animation: 'ml-shimmer 3s infinite', zIndex: 2,
             }} />
-          )}
-        </button>
+          </button>
+        ) : (
+          <button className="liquid-glass-btn-ghost" style={{
+            width: '100%', padding: '14px',
+            color: '#3d3c39', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+            fontFamily: 'var(--font-jakarta)',
+            border: '1px solid rgba(0,0,0,0.15)',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--ml-salmon)'; e.currentTarget.style.color = 'var(--ml-salmon)' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'; e.currentTarget.style.color = '#3d3c39' }}
+          >
+            <span>{plan.cta}</span>
+          </button>
+        )}
       </Link>
 
       {plan.featured && plan.note && (
