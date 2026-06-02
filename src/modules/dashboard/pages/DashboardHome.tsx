@@ -6,11 +6,13 @@ import { ToolsGrid } from '@/components/dashboard/ToolsGrid'
 import { QuickActions } from '@/components/dashboard/QuickActions'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useOrderStats } from '@/modules/dashboard/hooks/useOrderStats'
+import { useDashboardStats } from '@/modules/dashboard/hooks/useDashboardStats'
 import { staggerSection, fadeUp } from '@/lib/animations'
 
 export function DashboardHome() {
   const { restaurant } = useRestaurant()
   const { stats } = useOrderStats(restaurant?.id)
+  const { stats: dashStats } = useDashboardStats(restaurant?.id)
 
   const realOrderCount = stats.today.pending + stats.today.cooking + stats.today.ready
 
@@ -23,7 +25,7 @@ export function DashboardHome() {
       count: realOrderCount,
       new:   stats.today.pending,
     },
-    activeTables: { current: 0, total: 0 },
+    activeTables: dashStats.activeTables,
     avgTime:      { minutes: 0 },
   }
 
@@ -57,10 +59,10 @@ export function DashboardHome() {
       <motion.div variants={fadeUp}>
         <ToolsGrid
           ordersActive={summaryData.activeOrders.count}
-          menuProducts={0}
+          menuProducts={dashStats.menuProducts}
           tablesActive={summaryData.activeTables.current}
           tablesTotal={summaryData.activeTables.total}
-          qrGenerated={0}
+          qrGenerated={dashStats.qrGenerated}
         />
       </motion.div>
 
