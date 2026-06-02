@@ -147,8 +147,8 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(data.title, {
       body: data.body,
       tag: data.tag,
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
+      icon: '/web-app-manifest-192x192.png',
+      badge: '/web-app-manifest-192x192.png',
       requireInteraction: true,
       vibrate: [200, 100, 200],
     })

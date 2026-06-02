@@ -40,7 +40,7 @@ export function CRMPage() {
         .from('crm_contacts')
         .select('*')
         .eq('restaurant_id', restaurant.id)
-        .order('last_visit_date', { ascending: false, nullsFirst: false })
+        .order('last_visit', { ascending: false, nullsFirst: false })
 
       if (search.trim()) {
         query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,phone.ilike.%${search}%`)
@@ -50,11 +50,7 @@ export function CRMPage() {
       if (filter === 'new') query = query.lte('total_visits', 1)
 
       const { data, error } = await query.limit(100)
-      console.log('CRM query result:', { data, error, restaurantId: restaurant.id })
-      if (error) {
-        console.error('ERROR COMPLETO CRM fetch:', JSON.stringify(error, null, 2))
-        throw error
-      }
+      if (error) throw error
       setContacts(data ?? [])
     } catch (err) {
       const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? 'Error al cargar clientes'
@@ -147,7 +143,7 @@ export function CRMPage() {
               <div className="flex items-center gap-4 flex-shrink-0">
                 <div className="text-right hidden sm:block">
                   <p className="text-xs font-semibold text-gray-900">{c.total_visits} visitas</p>
-                  {c.last_visit_date && <p className="text-xs text-gray-400">{c.last_visit_date}</p>}
+                  {c.last_visit && <p className="text-xs text-gray-400">{c.last_visit}</p>}
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </div>
@@ -198,10 +194,7 @@ function ContactDetailModal({ contact, restaurantId, onClose, onUpdated }: Detai
         .from('crm_contacts')
         .update({ is_vip: isVip, notes: notes.trim() || null })
         .eq('id', contact.id)
-      if (error) {
-        console.error('ERROR COMPLETO CRM save:', JSON.stringify(error, null, 2))
-        throw error
-      }
+      if (error) throw error
       toast.success('Cliente actualizado')
       onUpdated()
     } catch (err) {
@@ -222,7 +215,7 @@ function ContactDetailModal({ contact, restaurantId, onClose, onUpdated }: Detai
           {[
             { label: 'Visitas', value: contact.total_visits },
             { label: 'Total gastado', value: `$${contact.total_spent?.toLocaleString('es-AR') ?? 0}` },
-            { label: 'Ticket prom.', value: `$${Math.round(contact.avg_ticket ?? 0).toLocaleString('es-AR')}` },
+            { label: 'Ticket prom.', value: `$${contact.total_visits > 0 ? Math.round(contact.total_spent / contact.total_visits).toLocaleString('es-AR') : 0}` },
           ].map(s => (
             <div key={s.label} className="bg-surface-3 rounded-xl p-3 text-center">
               <p className="text-lg font-bold text-ink-1">{s.value}</p>
@@ -236,8 +229,8 @@ function ContactDetailModal({ contact, restaurantId, onClose, onUpdated }: Detai
           <div>
             <p className="text-sm text-ink-2">📱 {contact.phone}</p>
             {contact.email && <p className="text-sm text-ink-2">✉️ {contact.email}</p>}
-            {contact.first_visit_date && <p className="text-xs text-ink-3 mt-1">Primera visita: {contact.first_visit_date}</p>}
-            {contact.last_visit_date && <p className="text-xs text-ink-3">Última visita: {contact.last_visit_date}</p>}
+            {contact.first_visit && <p className="text-xs text-ink-3 mt-1">Primera visita: {contact.first_visit}</p>}
+            {contact.last_visit && <p className="text-xs text-ink-3">Última visita: {contact.last_visit}</p>}
           </div>
           <div className="flex gap-2">
             <a href={`tel:${contact.phone}`} className="p-2 rounded-lg hover:bg-surface-4 transition-colors" title="Llamar">

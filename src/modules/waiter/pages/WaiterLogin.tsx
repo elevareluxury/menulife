@@ -61,7 +61,7 @@ export function WaiterLogin() {
   }
 
   const handlePinInput = (digit: string) => {
-    if (pin.length < 6) setPin(p => p + digit)
+    if (pin.length < 10) setPin(p => p + digit)
   }
 
   const handleDelete = () => setPin(p => p.slice(0, -1))
@@ -106,8 +106,8 @@ export function WaiterLogin() {
   }
 
   const handleSubmit = async () => {
-    if (pin.length !== 6 || !restaurantId || !selectedWaiter) {
-      toast.error('Ingresa un PIN de 6 dígitos')
+    if (pin.length < 4 || pin.length > 10 || !restaurantId || !selectedWaiter) {
+      toast.error('Ingresá un PIN de 4 a 10 dígitos')
       return
     }
     setLoading(true)
@@ -166,7 +166,7 @@ export function WaiterLogin() {
     }
   }
 
-  // Auto-submit when 6 digits entered
+  // Auto-submit when 6 digits entered (standard PIN length)
   useEffect(() => {
     if (pin.length === 6 && step === 'pin' && !loading) {
       handleSubmit()
@@ -260,11 +260,11 @@ export function WaiterLogin() {
                 Hola, {selectedWaiter?.first_name}
               </p>
               <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0 }}>
-                Ingresá tu PIN de 6 dígitos
+                Ingresá tu PIN
               </p>
             </div>
 
-            {/* PIN dots */}
+            {/* PIN dots — show min 6 or however many digits entered */}
             <div
               style={{
                 display: 'flex', justifyContent: 'center', gap: '10px',
@@ -272,7 +272,7 @@ export function WaiterLogin() {
                 animation: pinError ? 'ml-shake 0.5s ease' : 'none',
               }}
             >
-              {[0, 1, 2, 3, 4, 5].map(i => (
+              {Array.from({ length: Math.max(6, pin.length) }, (_, i) => i).map(i => (
                 <div key={i} style={{
                   width: '14px', height: '14px', borderRadius: '50%',
                   border: `2px solid ${pin.length > i ? avatarColor : 'rgba(255,255,255,0.2)'}`,
@@ -299,7 +299,7 @@ export function WaiterLogin() {
               <NumKey
                 label={loading ? '…' : '✓'}
                 onClick={handleSubmit}
-                disabled={loading || pin.length !== 6}
+                disabled={loading || pin.length < 4}
                 accent
               />
             </div>

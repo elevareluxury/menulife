@@ -244,7 +244,6 @@ function WaiterModal({ isOpen, onClose, restaurantId, waiter }: WaiterModalProps
         if (pinChanged) {
           updates.pin = await bcrypt.hash(formData.pin, 10)
         }
-        console.log('Updating waiter:', { waiterId: waiter.id, updates })
         const { error } = await db.from('waiters').update(updates).eq('id', waiter.id)
         if (error) {
           console.error('ERROR COMPLETO waiter update:', JSON.stringify(error, null, 2))

@@ -62,7 +62,7 @@ export function DeliveryLogin() {
   }
 
   const handlePinInput = (digit: string) => {
-    if (pin.length < PIN_LENGTH) setPin(p => p + digit)
+    if (pin.length < 10) setPin(p => p + digit)
   }
 
   const handleDelete = () => setPin(p => p.slice(0, -1))
@@ -103,8 +103,8 @@ export function DeliveryLogin() {
   }
 
   const handleSubmit = async () => {
-    if (pin.length !== PIN_LENGTH || !restaurantId || !selectedDriver) {
-      toast.error(`Ingresá un PIN de ${PIN_LENGTH} dígitos`)
+    if (pin.length < PIN_LENGTH || pin.length > 10 || !restaurantId || !selectedDriver) {
+      toast.error(`Ingresá tu PIN`)
       return
     }
     setLoading(true)
@@ -212,7 +212,7 @@ export function DeliveryLogin() {
                 Hola, {selectedDriver?.first_name}
               </p>
               <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0 }}>
-                Ingresá tu PIN de {PIN_LENGTH} dígitos
+                Ingresá tu PIN
               </p>
             </div>
 
@@ -222,7 +222,7 @@ export function DeliveryLogin() {
               marginBottom: '28px',
               animation: pinError ? 'ml-shake 0.5s ease' : 'none',
             }}>
-              {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+              {Array.from({ length: Math.max(PIN_LENGTH, pin.length) }, (_, i) => i).map((i) => (
                 <div key={i} style={{
                   width: '14px', height: '14px', borderRadius: '50%',
                   border: `2px solid ${pin.length > i ? avatarColor : 'rgba(255,255,255,0.2)'}`,
@@ -240,7 +240,7 @@ export function DeliveryLogin() {
               ))}
               <NumKey label="⌫" onClick={handleDelete} disabled={loading} ghost accentColor={avatarColor} />
               <NumKey label="0" onClick={() => handlePinInput('0')} disabled={loading} accentColor={avatarColor} />
-              <NumKey label={loading ? '…' : '✓'} onClick={handleSubmit} disabled={loading || pin.length !== PIN_LENGTH} accent accentColor={avatarColor} />
+              <NumKey label={loading ? '…' : '✓'} onClick={handleSubmit} disabled={loading || pin.length < PIN_LENGTH} accent accentColor={avatarColor} />
             </div>
 
             <button

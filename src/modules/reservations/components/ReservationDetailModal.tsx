@@ -153,7 +153,7 @@ export function ReservationDetailModal({ reservation, tables, restaurantName, on
           <div className="p-3 rounded-xl bg-surface-3 space-y-1">
             <p className="text-xs font-semibold text-ink-3 uppercase tracking-widest">Historial del cliente</p>
             <p className="text-xs text-ink-2">🔄 {contact.total_visits} visitas · ${contact.total_spent.toLocaleString('es-AR')} total</p>
-            {contact.last_visit_date && <p className="text-xs text-ink-2">📅 Última visita: {contact.last_visit_date}</p>}
+            {contact.last_visit && <p className="text-xs text-ink-2">📅 Última visita: {contact.last_visit}</p>}
             {contact.is_vip && <span className="text-xs font-bold text-yellow-500">⭐ VIP</span>}
           </div>
         )}

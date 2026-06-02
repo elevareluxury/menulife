@@ -281,9 +281,8 @@ export interface CRMContact {
   email: string | null
   total_visits: number
   total_spent: number
-  avg_ticket: number
-  first_visit_date: string | null
-  last_visit_date: string | null
+  first_visit: string | null
+  last_visit: string | null
   is_vip: boolean
   tags: string[]
   notes: string | null

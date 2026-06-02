@@ -23,9 +23,6 @@ export function AuthCallback() {
   useEffect(() => {
     const { error, errorDesc, type, code } = params
 
-    console.log('[AuthCallback] type:', type, '| code:', !!code, '| error:', error)
-    console.log('[AuthCallback] hash:', window.location.hash?.substring(0, 80))
-
     async function redirectByRole(userId?: string) {
       const id = userId ?? (await supabase.auth.getUser()).data.user?.id
       if (!id) { navigate('/dashboard', { replace: true }); return }
@@ -54,8 +51,6 @@ export function AuthCallback() {
         // consumed them; calling setSession() again causes "invalid token" errors that
         // send the user to /forgot-password instead of /reset-password.
         if (type === 'recovery') {
-          console.log('[AuthCallback] Recovery detected, waiting for session...')
-
           // PKCE: exchange code before polling
           if (code) {
             const { error: ex } = await supabase.auth.exchangeCodeForSession(code)
@@ -74,7 +69,6 @@ export function AuthCallback() {
           }
 
           if (session) {
-            console.log('[AuthCallback] Session ready → /reset-password')
             navigate('/reset-password', { replace: true })
           } else {
             navigate('/forgot-password?error=expired', { replace: true })
