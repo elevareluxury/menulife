@@ -1189,70 +1189,61 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   font-weight: 500;
 }
 
-/* ── Responsive ── */
+/* ── Responsive mobile ── */
 @media (max-width: 768px) {
-  /* Mobile: disable absolute positioning, show as vertical flow */
   .ch-section {
     height: auto;
     overflow: visible;
-    display: flex;
-    flex-direction: column;
   }
 
+  /* PANTALLA 1 — intro */
   .ch-intro {
     position: relative;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    right: auto;
+    top: auto; bottom: auto; left: auto; right: auto;
     width: 100%;
     max-width: 100%;
-    padding: 56px 20px 32px;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .ch-card {
-    position: relative;
-    top: auto;
-    left: auto;
-    right: auto;
-    transform: none !important;
-    opacity: 1 !important;
-    width: 100%;
-    height: auto;
-    min-height: unset;
-    padding: 32px 16px;
+    min-height: 85vh;
+    padding: 80px 24px 48px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
+  /* PANTALLA 2 — card con phone */
+  .ch-card {
+    position: relative;
+    top: auto; left: auto; right: auto;
+    width: calc(100% - 24px);
+    margin: 0 12px;
+    max-width: 100%;
+    height: auto;
+    min-height: unset;
+    padding: 32px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    will-change: auto;
+  }
+
+  /* PANTALLA 3 — CTA */
   .ch-cta {
     position: relative;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    transform: none !important;
-    opacity: 1 !important;
-    padding: 40px 20px 48px;
+    bottom: auto; left: auto; right: auto;
+    width: 100%;
+    max-width: 100%;
+    padding: 48px 24px 64px;
+    text-align: center;
   }
 
-  .ch-line1,
-  .ch-line2 {
-    font-size: 2.25rem;
-  }
+  /* Tipografía */
+  .ch-line1, .ch-line2 { font-size: 2.25rem; }
+  .ch-card-heading { font-size: 1.375rem; margin-bottom: 8px; }
+  .ch-card-description { font-size: 0.9rem; margin-bottom: 0; }
 
-  .ch-card-heading {
-    font-size: 1.25rem;
-    margin-bottom: 8px;
-  }
-
-  .ch-card-description {
-    font-size: 0.875rem;
-    margin-bottom: 24px;
-  }
-
+  /* Phone grande */
   .ch-phone-container {
     width: 100%;
     display: flex;
@@ -1260,43 +1251,65 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   }
 
   .ch-phone-frame {
-    width: min(72vw, 260px);
-    height: min(58vw, 210px);
+    width: 280px;
+    height: 560px;
   }
 
   .ch-phone-screen,
   .ch-phone-screen iframe {
     width: 100%;
     height: 100%;
-  }
-
-  .ch-phone-screen iframe {
     pointer-events: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  .ch-metric-counter {
-    position: relative;
-    margin-top: 20px;
-  }
+  .ch-badge-left, .ch-badge-right { display: none; }
 
-  .ch-metric-value {
-    font-size: 1.75rem;
-  }
+  .ch-metric-counter { position: relative; margin-top: 16px; }
+  .ch-metric-value { font-size: 2rem; }
 
-  .ch-badge-left,
-  .ch-badge-right { display: none; }
+  /* Scroll hint */
+  .ch-scroll-hint { margin-top: 28px; }
 
+  /* CTA buttons */
   .ch-cta-buttons {
     flex-direction: column;
     width: 100%;
+    gap: 12px;
   }
-  .ch-cta-btn { width: 100%; }
-  .ch-trust-badges {
+  .ch-cta-btn { width: 100%; justify-content: center; text-align: center; }
+  .ch-trust-badges { flex-direction: column; gap: 8px; align-items: center; }
+
+  /* Mobile-only intro CTAs */
+  .ch-intro-mobile-cta {
+    display: flex;
     flex-direction: column;
-    gap: 8px;
-    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 360px;
+    margin-top: 32px;
   }
+
+  .ch-intro-mobile-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .ch-intro-mobile-trust span {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+    font-family: var(--font-jakarta);
+    font-weight: 500;
+  }
+}
+
+/* Desktop: hide mobile-only intro elements */
+@media (min-width: 769px) {
+  .ch-intro-mobile-cta,
+  .ch-intro-mobile-trust { display: none; }
 }
 
 /* =====================================================

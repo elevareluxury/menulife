@@ -21,8 +21,44 @@ export function CinematicHero() {
     if (typeof gsap === 'undefined') return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
-    if (window.innerWidth <= 768) return   // mobile: plain vertical layout, no pin
     gsap.registerPlugin(ST)
+
+    if (window.innerWidth <= 768) {
+      // Mobile: simple fade-in, no pin, no scrub
+      gsap.fromTo(introRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }
+      )
+      gsap.fromTo(cardRef.current,
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
+          scrollTrigger: { trigger: cardRef.current, start: 'top 82%' }
+        }
+      )
+      gsap.fromTo(metricRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6,
+          scrollTrigger: {
+            trigger: metricRef.current, start: 'top 85%',
+            onEnter: () => {
+              if (counterRef.current) {
+                gsap.to(counterRef.current, {
+                  textContent: 1240, duration: 1.5,
+                  snap: { textContent: 1 }, ease: 'power2.out',
+                })
+              }
+            },
+          }
+        }
+      )
+      gsap.fromTo(ctaRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
+          scrollTrigger: { trigger: ctaRef.current, start: 'top 82%' }
+        }
+      )
+      return
+    }
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -144,6 +180,23 @@ export function CinematicHero() {
           Menús, pagos, herramientas para mozos y experiencias para clientes
           — unificados en una sola plataforma premium.
         </p>
+
+        {/* Mobile-only CTAs — hidden on desktop */}
+        <div className="ch-intro-mobile-cta">
+          <Link to="/solicitar-acceso" className="liquid-glass-btn ch-cta-btn">
+            <span>Solicitar acceso →</span>
+          </Link>
+          <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost ch-cta-btn">
+            <span>Ver demo</span>
+          </Link>
+        </div>
+        <div className="ch-intro-mobile-trust">
+          <span>✓ Sin app</span>
+          <span>✓ Listo en minutos</span>
+          <span>✓ Pagos móviles</span>
+          <span>✓ Onboarding por WhatsApp</span>
+        </div>
+
         <div className="ch-scroll-hint">
           <span>Scroll</span>
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
