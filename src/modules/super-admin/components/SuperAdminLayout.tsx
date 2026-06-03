@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, Zap, DollarSign, Activity, ToggleLeft, Globe, FlaskConical } from 'lucide-react'
+import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, Zap, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 
 const BG         = '#0F1115'
@@ -17,9 +17,10 @@ const navItems = [
   { label: 'Métricas',      icon: BarChart3,       to: '/super-admin/metricas',            end: false },
   { label: 'Planes',        icon: DollarSign,      to: '/super-admin/planes',              end: false },
   { label: 'Sistema',       icon: Activity,        to: '/super-admin/sistema',             end: false },
-  { label: 'Feature Flags', icon: ToggleLeft,      to: '/super-admin/feature-flags',       end: false },
-  { label: 'Landing Config', icon: Globe,          to: '/super-admin/landing',             end: false },
-  { label: 'Tester',         icon: FlaskConical,   to: '/super-admin/tester',              end: false },
+  { label: 'Feature Flags',  icon: ToggleLeft,          to: '/super-admin/feature-flags',  end: false },
+  { label: 'Landing Config', icon: Globe,               to: '/super-admin/landing',        end: false },
+  { label: 'Testimonios',    icon: MessageSquareQuote,  to: '/super-admin/testimonios',    end: false },
+  { label: 'Tester',         icon: FlaskConical,        to: '/super-admin/tester',         end: false },
 ]
 
 export function SuperAdminLayout({ children }: { children: ReactNode }) {
