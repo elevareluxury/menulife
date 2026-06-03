@@ -193,6 +193,7 @@ function PricingCard({
         ...(plan.featured ? {
           background: '#0F1115',
           animation: 'ml-pulse-glow 3s ease-in-out infinite',
+          overflow: 'visible',
         } : {}),
         transition: 'transform 0.3s ease',
       }}
@@ -203,10 +204,12 @@ function PricingCard({
       {plan.featured && (
         <div style={{
           position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)',
-          background: 'var(--ml-salmon)', color: '#fff',
-          padding: '5px 16px', borderRadius: '50px',
-          fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-jakarta)',
-          letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+          background: '#F4705A', color: '#fff',
+          padding: '6px 16px', borderRadius: '999px',
+          fontSize: '0.6875rem', fontWeight: 700, fontFamily: 'var(--font-jakarta)',
+          letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+          border: 'none', boxShadow: 'none', zIndex: 30,
+          display: 'inline-block', lineHeight: 1.4,
         }}>{plan.tag}</div>
       )}
 
