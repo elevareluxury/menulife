@@ -181,22 +181,6 @@ export function CinematicHero() {
           — unificados en una sola plataforma premium.
         </p>
 
-        {/* Mobile-only CTAs — hidden on desktop */}
-        <div className="ch-intro-mobile-cta">
-          <Link to="/solicitar-acceso" className="liquid-glass-btn ch-cta-btn">
-            <span>Solicitar acceso →</span>
-          </Link>
-          <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost ch-cta-btn">
-            <span>Ver demo</span>
-          </Link>
-        </div>
-        <div className="ch-intro-mobile-trust">
-          <span>✓ Sin app</span>
-          <span>✓ Listo en minutos</span>
-          <span>✓ Pagos móviles</span>
-          <span>✓ Onboarding por WhatsApp</span>
-        </div>
-
         <div className="ch-scroll-hint">
           <span>Scroll</span>
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

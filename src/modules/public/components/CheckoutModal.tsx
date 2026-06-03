@@ -92,13 +92,18 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
         orderPayload.customer_name = orderType === 'takeaway' ? customerName : null
       }
 
+      console.log('[Checkout] orderPayload:', orderPayload)
+
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert(orderPayload)
         .select()
         .single()
 
-      if (orderError) throw orderError
+      if (orderError) {
+        console.error('[Checkout] orders INSERT error:', orderError)
+        throw orderError
+      }
 
       // Snapshot cart items before clearCart()
       const cartSnapshot = items.map(i => ({ name: i.name, quantity: i.quantity }))
@@ -114,8 +119,12 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
         notes: item.notes || null,
       }))
 
+      console.log('[Checkout] orderItems:', orderItems)
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
-      if (itemsError) throw itemsError
+      if (itemsError) {
+        console.error('[Checkout] order_items INSERT error:', itemsError)
+        throw itemsError
+      }
 
       // Persist order for tracking + banner
       if (slug) {
