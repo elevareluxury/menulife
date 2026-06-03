@@ -37,6 +37,13 @@ export function TablesConfiguration() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTable, setEditingTable] = useState<Table | null>(null)
   const [showReservations, setShowReservations] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   // Today's reservations for table indicators
   const today = new Date()
@@ -176,7 +183,7 @@ export function TablesConfiguration() {
       <div className="flex gap-4 mb-4 text-sm">
         {Object.entries({ free: 'Libre', occupied: 'Ocupada', reserved: 'Reservada' }).map(([k, label]) => (
           <div key={k} className="flex items-center gap-1.5">
-            <div className={`w-3 h-3 rounded-full ${STATUS_COLORS[k]}`} />
+            <div className={`w-4 h-4 rounded-full ${STATUS_COLORS[k]}`} />
             <span className="text-gray-400">{label}</span>
           </div>
         ))}
@@ -200,7 +207,60 @@ export function TablesConfiguration() {
             </Button>
           </div>
         </Card>
+      ) : isMobile ? (
+        /* ── Mobile: static 2-column grid ── */
+        <Card>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', padding: '4px' }}>
+            {tables.map((table) => {
+              const waiter = waiters.find(w => w.id === table.waiter_id)
+              const nextRes = todayReservations
+                .filter(r => r.table_id === table.id && ['confirmed', 'pending', 'seated'].includes(r.status))
+                .sort((a, b) => a.reservation_time.localeCompare(b.reservation_time))[0]
+              return (
+                <div
+                  key={table.id}
+                  className={`bg-white rounded-xl shadow-sm border-2 ${STATUS_BORDERS[table.status] ?? 'border-gray-300'}`}
+                >
+                  <div className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold text-base text-gray-900">Mesa {table.table_number}</span>
+                      <div className={`w-4 h-4 rounded-full ${STATUS_COLORS[table.status]}`} />
+                    </div>
+                    <div className="text-sm text-gray-500 mb-2">{table.capacity} pers.</div>
+                    {waiter && (
+                      <div className="text-sm text-emerald-600 font-semibold truncate mb-1">
+                        {waiter.first_name}
+                      </div>
+                    )}
+                    {nextRes && (
+                      <div className="text-xs text-blue-500 font-medium truncate mb-1">
+                        📅 {nextRes.reservation_time} {nextRes.first_name}
+                      </div>
+                    )}
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        className="flex-1 flex items-center justify-center hover:bg-gray-100 rounded-lg"
+                        style={{ minHeight: '40px' }}
+                        onClick={() => { setEditingTable(table); setIsModalOpen(true) }}
+                      >
+                        <Edit className="w-4 h-4 text-gray-500" />
+                      </button>
+                      <button
+                        className="flex-1 flex items-center justify-center hover:bg-red-50 rounded-lg"
+                        style={{ minHeight: '40px' }}
+                        onClick={() => handleDelete(table.id)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
       ) : (
+        /* ── Desktop: drag canvas ── */
         <Card className="p-0 overflow-hidden">
           <div style={{ overflowX: 'auto', overflowY: 'hidden', WebkitOverflowScrolling: 'touch' }}>
           <div
@@ -229,7 +289,7 @@ export function TablesConfiguration() {
                   <div className="p-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-bold text-base text-gray-900">Mesa {table.table_number}</span>
-                      <div className={`w-3 h-3 rounded-full ${STATUS_COLORS[table.status]}`} />
+                      <div className={`w-4 h-4 rounded-full ${STATUS_COLORS[table.status]}`} />
                     </div>
                     <div className="text-sm text-gray-500 mb-2">{table.capacity} pers.</div>
                     {waiter && (

@@ -49,6 +49,8 @@ export function ActiveOrderBanner({ slug }: Props) {
   useEffect(() => {
     if (!savedOrder?.orderId) return
 
+    let ignore = false
+
     // Fetch current status first
     supabase
       .from('orders')
@@ -56,6 +58,7 @@ export function ActiveOrderBanner({ slug }: Props) {
       .eq('id', savedOrder.orderId)
       .single()
       .then(({ data }) => {
+        if (ignore) return
         if (data) setCurrentStatus(data.status as string)
         if (data?.status === 'delivered' || data?.status === 'cancelled') {
           setTimeout(() => {
@@ -93,6 +96,7 @@ export function ActiveOrderBanner({ slug }: Props) {
       .subscribe()
 
     return () => {
+      ignore = true
       channel.unsubscribe()
     }
   }, [savedOrder?.orderId, slug])
@@ -103,14 +107,15 @@ export function ActiveOrderBanner({ slug }: Props) {
   const isReady = currentStatus === 'ready'
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
+        key={savedOrder.orderId}
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 80, opacity: 0 }}
         transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-        className="fixed left-4 right-4 z-40 rounded-2xl overflow-hidden"
-        style={{ bottom: 'calc(88px + env(safe-area-inset-bottom))' }}
+        className="fixed left-4 right-4 z-50 rounded-2xl overflow-hidden"
+        style={{ bottom: 'calc(82px + env(safe-area-inset-bottom))' }}
       >
         <div
           className="flex items-center gap-3 px-4 py-3"

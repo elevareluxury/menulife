@@ -34,14 +34,14 @@ export function MenuManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Menú</h2>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div style={{ minWidth: 0 }}>
+          <h2 className="text-2xl font-bold text-gray-900" style={{ whiteSpace: 'nowrap' }}>Menú</h2>
           <p className="text-sm text-gray-500 mt-0.5">
             {restaurant.name} · {sections.length} {sections.length === 1 ? 'sección' : 'secciones'}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0 flex-wrap">
           <Button variant="secondary" onClick={() => setIsPDFModalOpen(true)}>
             <FileUp className="h-4 w-4 mr-2" />
             Importar carta PDF

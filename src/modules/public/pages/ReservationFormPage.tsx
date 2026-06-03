@@ -150,6 +150,59 @@ const inputStyle: React.CSSProperties = {
   fontFamily: 'var(--font-jakarta)',
 }
 
+// ── Subcomponents defined OUTSIDE to prevent re-mount on every form keystroke ──
+
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: '6px', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'var(--font-jakarta)' }}>
+        {label}
+      </label>
+      {children}
+      {hint && <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '4px', fontFamily: 'var(--font-jakarta)' }}>{hint}</p>}
+    </div>
+  )
+}
+
+function FormHeader({ title, onBack, slug, accentColor }: { title: string; onBack?: () => void; slug: string; accentColor: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+      {onBack ? (
+        <button type="button" onClick={onBack} style={{ color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+          <ArrowLeft size={20} />
+        </button>
+      ) : (
+        <Link to={`/r/${slug}`} style={{ color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center' }}>
+          <ArrowLeft size={20} />
+        </Link>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+        <CalendarDays size={16} style={{ color: accentColor }} />
+        <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '15px' }}>{title}</span>
+      </div>
+    </div>
+  )
+}
+
+function CtaButton({ onClick, label, loading, accentColor }: { onClick: () => void; label: string; loading: boolean; accentColor: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading}
+      style={{
+        width: '100%', padding: '14px', borderRadius: '50px', border: 'none',
+        background: loading ? 'rgba(244,112,90,0.45)' : accentColor,
+        color: '#fff', fontSize: '15px', fontWeight: 600,
+        cursor: loading ? 'not-allowed' : 'pointer',
+        fontFamily: 'var(--font-jakarta)', transition: 'all 0.2s',
+      }}
+    >
+      {loading ? 'Cargando...' : label}
+    </button>
+  )
+}
+
 export function ReservationFormPage() {
   const { slug } = useParams()
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
@@ -237,72 +290,14 @@ export function ReservationFormPage() {
   const googleCalendarUrl = () => {
     if (!created) return '#'
     const dt = `${created.reservation_date.replace(/-/g, '')}T${created.reservation_time.replace(':', '')}00`
-    const dtEnd = dt // same time for simplicity
+    const dtEnd = dt
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`Reserva en ${restaurant.name}`)}&dates=${dt}/${dtEnd}&details=${encodeURIComponent(`Reserva para ${created.party_size} personas`)}`
   }
-
-  const downloadICS = () => {
-    if (!created) return
-    const dt = `${created.reservation_date.replace(/-/g, '')}T${created.reservation_time.replace(':', '')}00`
-    const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Reserva en ${restaurant.name}\nDTSTART:${dt}\nDTEND:${dt}\nDESCRIPTION:Reserva para ${created.party_size} personas\nEND:VEVENT\nEND:VCALENDAR`
-    const blob = new Blob([ics], { type: 'text/calendar' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'reserva.ics'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const Header = ({ title, onBack }: { title: string; onBack?: () => void }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-      {onBack ? (
-        <button type="button" onClick={onBack} style={{ color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-          <ArrowLeft size={20} />
-        </button>
-      ) : (
-        <Link to={`/r/${slug}`} style={{ color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center' }}>
-          <ArrowLeft size={20} />
-        </Link>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-        <CalendarDays size={16} style={{ color: accentColor }} />
-        <span style={{ color: '#fff', fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '15px' }}>{title}</span>
-      </div>
-    </div>
-  )
-
-  const CtaButton = ({ onClick, label }: { onClick: () => void; label: string }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={loading}
-      style={{
-        width: '100%', padding: '14px', borderRadius: '50px', border: 'none',
-        background: loading ? 'rgba(244,112,90,0.45)' : accentColor,
-        color: '#fff', fontSize: '15px', fontWeight: 600,
-        cursor: loading ? 'not-allowed' : 'pointer',
-        fontFamily: 'var(--font-jakarta)', transition: 'all 0.2s',
-      }}
-    >
-      {loading ? 'Cargando...' : label}
-    </button>
-  )
-
-  const Field = ({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) => (
-    <div>
-      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: '6px', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'var(--font-jakarta)' }}>
-        {label}
-      </label>
-      {children}
-      {hint && <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '4px', fontFamily: 'var(--font-jakarta)' }}>{hint}</p>}
-    </div>
-  )
 
   // ── STEP 1: Data ──
   if (step === 'data') return (
     <div style={{ minHeight: '100vh', background: '#0D0D0D', fontFamily: 'var(--font-jakarta)' }}>
-      <Header title="Reservar mesa" />
+      <FormHeader title="Reservar mesa" slug={slug ?? ''} accentColor={accentColor} />
       <div style={{ maxWidth: '520px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
           {restaurant.logo_url && <img src={restaurant.logo_url} alt="" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />}
@@ -342,7 +337,7 @@ export function ReservationFormPage() {
           </div>
         </Field>
 
-        <CtaButton label="Continuar →" onClick={() => { if (validateStep1()) setStep('datetime') }} />
+        <CtaButton label="Continuar →" onClick={() => { if (validateStep1()) setStep('datetime') }} loading={loading} accentColor={accentColor} />
       </div>
     </div>
   )
@@ -350,7 +345,7 @@ export function ReservationFormPage() {
   // ── STEP 2: Date + Time ──
   if (step === 'datetime') return (
     <div style={{ minHeight: '100vh', background: '#0D0D0D', fontFamily: 'var(--font-jakarta)' }}>
-      <Header title="Elegí fecha y hora" onBack={() => setStep('data')} />
+      <FormHeader title="Elegí fecha y hora" onBack={() => setStep('data')} slug={slug ?? ''} accentColor={accentColor} />
       <div style={{ maxWidth: '520px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '100px' }}>
 
         <div>
@@ -416,6 +411,8 @@ export function ReservationFormPage() {
               handleSubmit()
             }
           }}
+          loading={loading}
+          accentColor={accentColor}
         />
       </div>
     </div>
@@ -424,7 +421,7 @@ export function ReservationFormPage() {
   // ── STEP 3: Guests (optional) ──
   if (step === 'guests') return (
     <div style={{ minHeight: '100vh', background: '#0D0D0D', fontFamily: 'var(--font-jakarta)' }}>
-      <Header title="Datos de tu mesa" onBack={() => setStep('datetime')} />
+      <FormHeader title="Datos de tu mesa" onBack={() => setStep('datetime')} slug={slug ?? ''} accentColor={accentColor} />
       <div style={{ maxWidth: '520px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '100px' }}>
         <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', lineHeight: 1.6 }}>
           Completá los datos de cada persona que va a venir con vos
@@ -445,7 +442,7 @@ export function ReservationFormPage() {
           </Field>
         ))}
 
-        <CtaButton label="Confirmar reserva →" onClick={handleSubmit} />
+        <CtaButton label="Confirmar reserva →" onClick={handleSubmit} loading={loading} accentColor={accentColor} />
       </div>
     </div>
   )
@@ -490,26 +487,17 @@ export function ReservationFormPage() {
           </div>
         )}
 
-        {/* Calendar buttons */}
+        {/* Calendar — Google only */}
         <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '14px', marginBottom: '20px' }}>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
             Agregar al calendario
           </p>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-            <a
-              href={googleCalendarUrl()} target="_blank" rel="noopener noreferrer"
-              style={{ flex: 1, padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none', textAlign: 'center' }}
-            >
-              📅 Google
-            </a>
-            <button
-              type="button"
-              onClick={downloadICS}
-              style={{ flex: 1, padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-            >
-              📅 Apple
-            </button>
-          </div>
+          <a
+            href={googleCalendarUrl()} target="_blank" rel="noopener noreferrer"
+            style={{ display: 'block', padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none', textAlign: 'center' }}
+          >
+            📅 Agregar a Google Calendar
+          </a>
         </div>
 
         <Link

@@ -1240,10 +1240,11 @@ export function PublicMenu() {
             exit={{ y: 80, opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', damping: 22, stiffness: 300 }}
             onClick={() => setIsCartOpen(true)}
-            className="fixed left-1/2 z-40 flex items-center gap-3 rounded-2xl font-semibold text-white text-sm"
+            className="fixed z-40 flex items-center gap-3 rounded-2xl font-semibold text-white text-sm"
             style={{
               bottom: 'calc(20px + env(safe-area-inset-bottom))',
-              transform: 'translateX(-50%)',
+              left: '50%',
+              x: '-50%',
               padding: '14px 22px',
               background: `linear-gradient(135deg, ${accentColor}, #F09040)`,
               boxShadow: `0 8px 32px rgba(244,112,90,0.38)`,
