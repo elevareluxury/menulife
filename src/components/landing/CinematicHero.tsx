@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import FlowFieldBackground from '@/components/ui/flow-field-background'
 
 declare const gsap: any
 
@@ -166,8 +167,35 @@ export function CinematicHero() {
     }
   }, [])
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+
   return (
     <section ref={sectionRef} className="ch-section">
+
+      {/* Fondo de partículas — solo cubre la primera pantalla */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: '100vh',
+        zIndex: 0,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+      }}>
+        <FlowFieldBackground
+          color="#F4705A"
+          trailOpacity={0.08}
+          particleCount={isMobile ? 200 : 400}
+          speed={0.6}
+        />
+        {/* Gradiente que desvanece las partículas hacia abajo */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0, left: 0, right: 0,
+          height: '35%',
+          background: 'linear-gradient(to bottom, transparent, #0F1115)',
+          pointerEvents: 'none',
+        }} />
+      </div>
 
       {/* FASE 1: Intro */}
       <div ref={introRef} className="ch-intro">
