@@ -67,7 +67,7 @@ export function PricingSection() {
   ]
 
   return (
-    <section style={{ background: `radial-gradient(ellipse 60% 40% at 70% 80%, rgba(244,112,90,0.05) 0%, transparent 50%), var(--ml-off-white)`, padding: '96px 24px' }}>
+    <section style={{ background: `radial-gradient(ellipse 60% 40% at 70% 80%, rgba(244,112,90,0.05) 0%, transparent 50%), var(--ml-off-white)`, padding: '96px 24px 48px' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div data-price-title style={{ textAlign: 'center', marginBottom: '56px' }}>

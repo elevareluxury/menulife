@@ -29,7 +29,7 @@ export function FAQSection() {
   }, [])
 
   return (
-    <section style={{ background: `radial-gradient(ellipse 50% 60% at 50% 100%, rgba(244,112,90,0.04) 0%, transparent 55%), var(--ml-off-white)`, padding: '96px 24px' }}>
+    <section style={{ background: `radial-gradient(ellipse 50% 60% at 50% 100%, rgba(244,112,90,0.04) 0%, transparent 55%), var(--ml-off-white)`, padding: '48px 24px 96px' }}>
       <div style={{ maxWidth: '760px', margin: '0 auto' }}>
         {/* Header */}
         <div data-faq-title style={{ textAlign: 'center', marginBottom: '64px' }}>

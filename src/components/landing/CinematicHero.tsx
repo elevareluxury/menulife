@@ -52,10 +52,11 @@ export function CinematicHero() {
           }
         }
       )
+      // Mobile: CTA is a separate section below, animate on scroll-enter
       gsap.fromTo(ctaRef.current,
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
-          scrollTrigger: { trigger: ctaRef.current, start: 'top 82%' }
+          scrollTrigger: { trigger: ctaRef.current, start: 'top 85%' }
         }
       )
       return
@@ -65,7 +66,7 @@ export function CinematicHero() {
       scrollTrigger: {
         trigger: sectionRef.current,
         start: 'top top',
-        end: '+=300%',
+        end: '+=250%',
         pin: true,
         scrub: 1,
         anticipatePin: 1,
@@ -119,12 +120,12 @@ export function CinematicHero() {
       }
     )
 
-    // FASE 2→3: card se achica, CTAs aparecen
-    tl.to(cardRef.current, { scale: 0.85, y: -60, opacity: 0.6, duration: 0.4 })
-    tl.fromTo(ctaRef.current,
-      { opacity: 0, y: 80 },
-      { opacity: 1, y: 0, duration: 0.4 },
-      '-=0.2'
+    // CTA is now a separate section — animate it on scroll-enter after pin releases
+    gsap.fromTo(ctaRef.current,
+      { opacity: 0, y: 60 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+        scrollTrigger: { trigger: ctaRef.current, start: 'top 85%' }
+      }
     )
 
     return () => {
@@ -170,6 +171,7 @@ export function CinematicHero() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
 
   return (
+    <>
     <section ref={sectionRef} className="ch-section">
 
       {/* Fondo de partículas — solo cubre la primera pantalla */}
@@ -254,29 +256,41 @@ export function CinematicHero() {
         </div>
       </div>
 
-      {/* FASE 3: CTAs */}
-      <div ref={ctaRef} className="ch-cta">
-        <h2>Empezá hoy mismo.</h2>
-        <p>
-          Menú digital listo en minutos. Sin app. Sin complicaciones.
-          Onboarding por WhatsApp.
-        </p>
-        <div className="ch-cta-buttons">
-          <Link to="/solicitar-acceso" className="liquid-glass-btn ch-cta-btn">
-            <span>Solicitar acceso →</span>
-          </Link>
-          <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost ch-cta-btn">
-            <span>Ver demo</span>
-          </Link>
-        </div>
-        <div className="ch-trust-badges">
-          <span>✓ Sin app</span>
-          <span>✓ Listo en minutos</span>
-          <span>✓ Pagos móviles</span>
-          <span>✓ Onboarding por WhatsApp</span>
-        </div>
-      </div>
-
     </section>
+
+    {/* CTAs — sección separada, fuera del hero pinned */}
+    <div
+      ref={ctaRef}
+      className="ch-cta"
+      style={{
+        position: 'relative',
+        bottom: 'auto', left: 'auto', right: 'auto',
+        width: '100%', maxWidth: '100%',
+        background: '#0F1115',
+        padding: '80px 24px 96px',
+        zIndex: 'auto',
+      }}
+    >
+      <h2>Empezá hoy mismo.</h2>
+      <p>
+        Menú digital listo en minutos. Sin app. Sin complicaciones.
+        Onboarding por WhatsApp.
+      </p>
+      <div className="ch-cta-buttons">
+        <Link to="/solicitar-acceso" className="liquid-glass-btn ch-cta-btn">
+          <span>Solicitar acceso →</span>
+        </Link>
+        <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost ch-cta-btn">
+          <span>Ver demo</span>
+        </Link>
+      </div>
+      <div className="ch-trust-badges">
+        <span>✓ Sin app</span>
+        <span>✓ Listo en minutos</span>
+        <span>✓ Pagos móviles</span>
+        <span>✓ Onboarding por WhatsApp</span>
+      </div>
+    </div>
+    </>
   )
 }

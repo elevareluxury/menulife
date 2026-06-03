@@ -123,12 +123,18 @@ export default function FlowFieldBackground({
       animationFrameId = requestAnimationFrame(animate)
     }
 
+    // On mobile reinit only on width change (not on height-only changes from URL bar show/hide)
+    let lastWidth = width
     const handleResize = () => {
-      width = container.clientWidth
+      const newWidth = container.clientWidth
+      if (newWidth === lastWidth) return
+      lastWidth = newWidth
+      width = newWidth
       height = container.clientHeight
       init()
     }
 
+    const isTouchDevice = 'ontouchstart' in window
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
       mouse.x = e.clientX - rect.left
@@ -138,12 +144,16 @@ export default function FlowFieldBackground({
     init()
     animate()
 
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    window.addEventListener('resize', handleResize, { passive: true })
+    if (!isTouchDevice) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    }
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      window.removeEventListener('mousemove', handleMouseMove)
+      if (!isTouchDevice) {
+        window.removeEventListener('mousemove', handleMouseMove)
+      }
       cancelAnimationFrame(animationFrameId)
     }
   }, [color, trailOpacity, particleCount, speed])
