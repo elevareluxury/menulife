@@ -180,14 +180,6 @@ function FlowStepsContent({ t }: { t: (k: string) => string }) {
                 }}
               >
                 <step.Icon style={{ width: '26px', height: '26px', color: '#fff' }} />
-                <span style={{
-                  position: 'absolute', top: '-6px', right: '-6px',
-                  width: '20px', height: '20px', borderRadius: '50%',
-                  background: 'var(--ml-salmon)', color: '#fff',
-                  fontSize: '10px', fontWeight: 800,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: 'var(--font-syne)',
-                }}>{step.num}</span>
               </div>
               {/* Text */}
               <div className="flow-step-text" style={{ padding: '0 2px' }}>
