@@ -39,7 +39,12 @@
       "PowerShell(Get-ChildItem -Path \"E:\\\\menulife\\\\src\\\\modules\" -Recurse -Depth 2 -Directory | Where-Object { $_.Parent.Name -match \"modules\" } | ForEach-Object { $_.FullName.Replace\\('E:\\\\menulife\\\\src\\\\modules\\\\', ''\\) } | Sort-Object)",
       "Bash(Get-ChildItem -Path \"E:\\\\menulife\" -Directory)",
       "Bash(Select-Object -ExpandProperty Name)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(Get-Content \"E:\\\\menulife\\\\src\\\\index.css\")",
+      "Bash(Measure-Object -Line)",
+      "Bash(Select-Object -ExpandProperty Lines)",
+      "Bash(npm list *)"
     ]
   }
 }
