@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navbar }              from '@/components/landing/Navbar'
-import { HeroSection }         from '@/components/landing/HeroSection'
+// import { HeroSection }      from '@/components/landing/HeroSection'
+import { CinematicHero }       from '@/components/landing/CinematicHero'
 import { TrustBand }           from '@/components/landing/TrustBand'
 import { ExperiencesSection }  from '@/components/landing/ExperiencesSection'
 import { TestimonialsSection } from '@/components/landing/TestimonialsSection'
@@ -24,7 +25,7 @@ export function LandingPage() {
       <Navbar />
 
       <main>
-        <HeroSection />
+        <CinematicHero />
         <TrustBand />
 
         <div id="experiences">

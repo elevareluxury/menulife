@@ -875,6 +875,348 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 }
 
 /* =====================================================
+   CINEMATIC HERO — scroll pinned experience
+   ===================================================== */
+.ch-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 50%, rgba(244,112,90,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 30%, rgba(30,36,51,0.7) 0%, transparent 65%),
+    linear-gradient(145deg, #0F1115 0%, #0d1220 100%);
+  overflow: hidden;
+  font-family: var(--font-jakarta);
+}
+
+/* FASE 1: Intro — centrada debajo del navbar */
+.ch-intro {
+  position: absolute;
+  top: 68px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 90%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 10;
+}
+
+.ch-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #F4705A;
+  margin-bottom: 20px;
+}
+
+.ch-intro h1 {
+  font-family: var(--font-syne);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+}
+
+.ch-line1 {
+  display: block;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  color: #fff;
+}
+
+.ch-line2 {
+  display: block;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  color: #F4705A;
+  font-style: italic;
+}
+
+.ch-subtitle {
+  font-size: 1.125rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+  max-width: 520px;
+  font-weight: 300;
+}
+
+.ch-scroll-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 40px;
+  color: rgba(255,255,255,0.28);
+  font-size: 0.625rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  animation: ml-scroll-arrow 2.5s ease-in-out infinite;
+}
+
+/* FASE 2: Card que sube con scroll */
+.ch-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 92%;
+  max-width: 1100px;
+  height: 100vh;
+  background: linear-gradient(145deg, #12182a 0%, #0A101D 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 48px;
+  gap: 0;
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.06) inset,
+    0 2px 4px rgba(255,255,255,0.06) inset,
+    0 40px 100px rgba(0,0,0,0.6);
+  z-index: 15;
+  will-change: transform;
+  overflow: visible;
+}
+
+.ch-card-content {
+  text-align: center;
+  margin-bottom: 32px;
+  flex-shrink: 0;
+}
+
+.ch-card-heading {
+  font-family: var(--font-syne);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.ch-card-description {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.5);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.ch-card-description strong { color: #fff; font-weight: 600; }
+
+/* Phone container */
+.ch-phone-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Phone frame — dimensiones + parallax; estilos glass desde .liquid-glass-phone */
+.ch-phone-frame {
+  width: 260px;
+  height: 520px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.ch-phone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 26px;
+  background: #000;
+  border-radius: 0 0 14px 14px;
+  z-index: 20;
+}
+
+.ch-phone-screen {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #050914;
+}
+
+.ch-phone-screen iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  pointer-events: auto;
+}
+
+/* Floating badges */
+.floating-badge {
+  position: absolute;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  white-space: nowrap;
+  font-family: var(--font-jakarta);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.06) inset,
+    0 1px 3px rgba(255,255,255,0.08) inset,
+    0 12px 40px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+
+.floating-badge::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  border-radius: 16px 16px 0 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ch-badge-title {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+
+.floating-badge > span:not(.ch-badge-title) {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.ch-badge-left  { top: 18%; left: -155px; }
+.ch-badge-right { bottom: 22%; right: -170px; }
+
+/* Metric counter */
+.ch-metric-counter {
+  margin-top: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ch-metric-value {
+  font-family: var(--font-syne);
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.ch-metric-label {
+  display: block;
+  font-size: 0.8125rem;
+  color: rgba(255,255,255,0.4);
+  margin-top: 4px;
+}
+
+/* FASE 3: CTAs */
+.ch-cta {
+  position: absolute;
+  bottom: 8%;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  text-align: center;
+  z-index: 25;
+  width: 90%;
+  max-width: 600px;
+}
+
+.ch-cta h2 {
+  font-family: var(--font-syne);
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.ch-cta > p {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.ch-cta-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ch-cta-btn {
+  padding: 16px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ch-trust-badges {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.ch-trust-badges span {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .ch-line1,
+  .ch-line2 {
+    font-size: 2.25rem;
+  }
+  .ch-card {
+    width: 96%;
+    padding: 28px 20px;
+  }
+  .ch-phone-frame {
+    width: 200px;
+    height: 400px;
+  }
+  .ch-badge-left,
+  .ch-badge-right { display: none; }
+  .ch-cta-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  .ch-cta-btn { width: 100%; }
+  .ch-trust-badges {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+}
+
+/* =====================================================
    PUBLIC MENU — dark premium design system
    ===================================================== */
 /* Responsive hero height for public menu */
