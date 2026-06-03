@@ -182,7 +182,7 @@ export default {
     label: 'Start today',
     title: 'Transform the experience',
     title_accent: 'of your business.',
-    subtitle: 'More than 1,200 businesses already use MenuLife.\nSo does your competition. Will you wait?',
+    subtitle: 'Businesses are already using it. Are you going to wait?',
     cta_primary: 'Request access →',
     cta_secondary: 'View demo',
   },

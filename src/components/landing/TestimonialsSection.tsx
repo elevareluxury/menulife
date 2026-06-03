@@ -17,8 +17,9 @@ export function TestimonialsSection() {
       .select('id, name, role, business, content, content_en, avatar_url')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
-      .then(({ data }: { data: Testimonial[] | null }) => {
-        if (data) setTestimonials(data)
+      .then(({ data, error }: { data: Testimonial[] | null; error: unknown }) => {
+        if (error) console.error('[Testimonials] fetch error:', error)
+        if (data && data.length > 0) setTestimonials(data)
         setLoading(false)
       })
   }, [])
