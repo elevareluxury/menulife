@@ -199,9 +199,9 @@ export function CinematicHero() {
           <Link to="/solicitar-acceso" className="liquid-glass-btn ch-cta-btn">
             <span>Solicitar acceso →</span>
           </Link>
-          <a href="mailto:contacto@menulife.digital" className="liquid-glass-btn-ghost ch-cta-btn">
-            <span>Reservar demo</span>
-          </a>
+          <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost ch-cta-btn">
+            <span>Ver demo</span>
+          </Link>
         </div>
         <div className="ch-trust-badges">
           <span>✓ Sin app</span>

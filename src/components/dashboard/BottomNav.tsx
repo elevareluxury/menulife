@@ -95,7 +95,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
       href: restaurantSlug ? `/kitchen/${restaurantSlug}` : undefined,
       external: true,
     },
-    { icon: Settings, labelKey: 'dashboard.nav_settings', to: '/dashboard' },
+    { icon: Settings, labelKey: 'dashboard.nav_settings', to: '/dashboard/settings' },
   ]
 
   const close = () => setShowMore(false)

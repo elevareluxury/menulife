@@ -13,7 +13,7 @@ export default {
     title: 'El sistema operativo del negocio moderno.',
     subtitle: 'Menús, pagos, herramientas para mozos y experiencias para clientes — unificados en una sola plataforma premium.',
     cta_primary: 'Solicitar acceso →',
-    cta_secondary: 'Reservar demo',
+    cta_secondary: 'Ver demo',
     trust_1: 'Sin app',
     trust_2: 'Listo en minutos',
     trust_3: 'Pagos móviles',
@@ -184,7 +184,7 @@ export default {
     title_accent: 'de tu negocio.',
     subtitle: 'Más de 1.200 negocios ya usan MenuLife.\nTu competencia también. ¿Vas a esperar?',
     cta_primary: 'Solicitar acceso →',
-    cta_secondary: 'Reservar demo',
+    cta_secondary: 'Ver demo',
   },
 
   access_request: {

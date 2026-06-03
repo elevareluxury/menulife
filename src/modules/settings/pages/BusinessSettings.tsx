@@ -1614,8 +1614,8 @@ export function BusinessSettings() {
         <div>
           {sectionContent[activeSection]}
 
-          {/* Action buttons */}
-          <div className="flex gap-3 mt-5">
+          {/* Action buttons — desktop only (mobile uses sticky bar below) */}
+          <div className="hidden lg:flex gap-3 mt-5">
             <Button
               onClick={handleSave}
               isLoading={saving || uploadingLogo || uploadingCover}

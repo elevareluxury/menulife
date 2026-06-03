@@ -95,14 +95,15 @@ export function FinalCTA() {
               {t('cta_final.cta_primary')}
             </ShimmerButton>
           </Link>
-          <button className="liquid-glass-btn-ghost" style={{
+          <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost" style={{
             padding: '16px 36px',
             color: 'rgba(255,255,255,0.7)',
             fontSize: '16px', fontWeight: 500,
             cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
+            textDecoration: 'none',
           }}>
             <span>{t('cta_final.cta_secondary')}</span>
-          </button>
+          </Link>
         </div>
       </div>
     </section>

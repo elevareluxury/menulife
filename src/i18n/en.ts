@@ -13,7 +13,7 @@ export default {
     title: 'The operating system for the modern business.',
     subtitle: 'Menus, orders, waiter tools and customer experiences — unified in one premium platform.',
     cta_primary: 'Request access →',
-    cta_secondary: 'Book a demo',
+    cta_secondary: 'View demo',
     trust_1: 'No app needed',
     trust_2: 'Live in minutes',
     trust_3: 'Mobile payments',
@@ -184,7 +184,7 @@ export default {
     title_accent: 'of your business.',
     subtitle: 'More than 1,200 businesses already use MenuLife.\nSo does your competition. Will you wait?',
     cta_primary: 'Request access →',
-    cta_secondary: 'Book a demo',
+    cta_secondary: 'View demo',
   },
 
   access_request: {
