@@ -21,6 +21,7 @@ export function CinematicHero() {
     if (typeof gsap === 'undefined') return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
+    if (window.innerWidth <= 768) return   // mobile: plain vertical layout, no pin
     gsap.registerPlugin(ST)
 
     const tl = gsap.timeline({

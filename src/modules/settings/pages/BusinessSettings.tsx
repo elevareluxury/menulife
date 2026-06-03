@@ -1613,35 +1613,21 @@ export function BusinessSettings() {
         {/* ── Section content ── */}
         <div>
           {sectionContent[activeSection]}
-
-          {/* Action buttons — desktop only (mobile uses sticky bar below) */}
-          <div className="hidden lg:flex gap-3 mt-5">
-            <Button
-              onClick={handleSave}
-              isLoading={saving || uploadingLogo || uploadingCover}
-              className="bg-[#FF6B7A] hover:bg-[#e85e6b] text-white focus:ring-[#FF6B7A]"
-            >
-              {t('dashboard.settings_save')}
-            </Button>
-            <Button variant="ghost" onClick={handleCancel} disabled={saving}>
-              {t('dashboard.btn_cancel')}
-            </Button>
-          </div>
         </div>
       </div>
 
-      {/* Mobile sticky save bar */}
+      {/* Save bar — fixed on mobile, inline on desktop */}
       <div
-        className="lg:hidden fixed left-0 right-0 z-20 bg-white border-t border-gray-200 px-4 py-3 flex gap-3"
+        className="fixed left-0 right-0 z-20 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:mt-5"
         style={{ bottom: 'calc(72px + env(safe-area-inset-bottom))' }}
       >
-        <Button variant="ghost" onClick={handleCancel} disabled={saving} className="flex-1">
+        <Button variant="ghost" onClick={handleCancel} disabled={saving} className="flex-1 lg:flex-none">
           {t('dashboard.btn_cancel')}
         </Button>
         <Button
           onClick={handleSave}
           isLoading={saving || uploadingLogo || uploadingCover}
-          className="flex-1 bg-[#FF6B7A] hover:bg-[#e85e6b] text-white focus:ring-[#FF6B7A]"
+          className="flex-1 lg:flex-none bg-[#FF6B7A] hover:bg-[#e85e6b] text-white focus:ring-[#FF6B7A]"
         >
           {t('dashboard.settings_save')}
         </Button>

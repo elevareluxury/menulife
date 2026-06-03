@@ -1191,16 +1191,56 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .ch-line1,
-  .ch-line2 {
-    font-size: 2.25rem;
+  /* Mobile: disable absolute positioning, show as vertical flow */
+  .ch-section {
+    height: auto;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ch-intro {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    max-width: 100%;
+    padding: 56px 20px 32px;
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   .ch-card {
-    width: 96%;
-    padding: 24px 12px;
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none !important;
+    opacity: 1 !important;
+    width: 100%;
     height: auto;
     min-height: unset;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ch-cta {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    transform: none !important;
+    opacity: 1 !important;
+    padding: 40px 20px 48px;
+  }
+
+  .ch-line1,
+  .ch-line2 {
+    font-size: 2.25rem;
   }
 
   .ch-card-heading {
@@ -1213,9 +1253,15 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
     margin-bottom: 24px;
   }
 
+  .ch-phone-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
   .ch-phone-frame {
-    width: min(85vw, 320px);
-    height: min(70vh, 580px);
+    width: min(72vw, 260px);
+    height: min(58vw, 210px);
   }
 
   .ch-phone-screen,
@@ -1230,6 +1276,7 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   }
 
   .ch-metric-counter {
+    position: relative;
     margin-top: 20px;
   }
 

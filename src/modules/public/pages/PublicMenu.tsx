@@ -825,7 +825,7 @@ export function PublicMenu() {
       <div
         className="sticky z-30 px-4 pt-3 pb-2.5"
         style={{
-          top: 0,
+          top: scrolled ? 52 : 0,
           backgroundColor: 'rgba(15,17,21,0.95)',
           backdropFilter: 'blur(20px)',
           borderBottom: '1px solid var(--menu-border)',
