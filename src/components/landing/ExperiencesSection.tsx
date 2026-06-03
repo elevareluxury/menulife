@@ -60,8 +60,8 @@ export function ExperiencesSection() {
             <FlowStepsContent t={t} />
           </ExperienceCard>
 
-          <ExperienceCard data-exp-card index={1} role={`— ${t('experiences.waiter_tag')}`} title={t('experiences.waiter_title')}>
-            <TeamFeaturesContent t={t} />
+          <ExperienceCard data-exp-card index={1} dark role={`— ${t('experiences.waiter_tag')}`} title={t('experiences.waiter_title')}>
+            <TeamFeaturesContent t={t} dark />
           </ExperienceCard>
         </div>
 
@@ -75,8 +75,8 @@ export function ExperiencesSection() {
 /* ─────────────────────────────────────────────
    CARD WRAPPER
 ───────────────────────────────────────────── */
-function ExperienceCard({ children, role, title, index, ...rest }: {
-  children: React.ReactNode; role: string; title: string; index: number
+function ExperienceCard({ children, role, title, index, dark, ...rest }: {
+  children: React.ReactNode; role: string; title: string; index: number; dark?: boolean
   [k: string]: any
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -85,8 +85,9 @@ function ExperienceCard({ children, role, title, index, ...rest }: {
     <div
       ref={cardRef}
       {...rest}
-      className="liquid-glass-light"
+      className={dark ? 'liquid-glass' : 'liquid-glass-light'}
       style={{
+        ...(dark ? { background: 'rgba(15,17,21,0.97)', border: '1px solid rgba(255,255,255,0.08)' } : {}),
         transition:    'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
         display:       'flex',
         flexDirection: 'column',
@@ -103,7 +104,7 @@ function ExperienceCard({ children, role, title, index, ...rest }: {
         <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '6px' }}>
           {role}
         </p>
-        <h3 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '22px', color: '#1a1a1a', margin: 0, lineHeight: 1.2 }}>
+        <h3 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '22px', color: dark ? '#fff' : '#1a1a1a', margin: 0, lineHeight: 1.2 }}>
           {title}
         </h3>
       </div>
@@ -214,7 +215,7 @@ function FlowStepsContent({ t }: { t: (k: string) => string }) {
 /* ─────────────────────────────────────────────
    CARD 2 — EQUIPO (3 features, solo texto)
 ───────────────────────────────────────────── */
-function TeamFeaturesContent({ t }: { t: (k: string) => string }) {
+function TeamFeaturesContent({ t, dark }: { t: (k: string) => string; dark?: boolean }) {
   const features = [
     { icon: '💬', title: t('whatsapp.f1_title'), desc: t('whatsapp.f1_desc') },
     { icon: '🎬', title: t('whatsapp.f2_title'), desc: t('whatsapp.f2_desc') },
@@ -227,17 +228,17 @@ function TeamFeaturesContent({ t }: { t: (k: string) => string }) {
         <div key={f.title} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
           <div style={{
             width: '38px', height: '38px', flexShrink: 0,
-            background: 'rgba(244,112,90,0.08)',
+            background: dark ? 'rgba(244,112,90,0.12)' : 'rgba(244,112,90,0.08)',
             border: '1px solid rgba(244,112,90,0.18)',
             borderRadius: '10px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '17px',
           }}>{f.icon}</div>
           <div>
-            <div style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '14px', color: '#1a1a1a', marginBottom: '3px' }}>
+            <div style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '14px', color: dark ? '#fff' : '#1a1a1a', marginBottom: '3px' }}>
               {f.title}
             </div>
-            <div style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-500)', lineHeight: 1.5 }}>
+            <div style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: dark ? 'rgba(255,255,255,0.55)' : 'var(--ml-gray-500)', lineHeight: 1.5 }}>
               {f.desc}
             </div>
           </div>

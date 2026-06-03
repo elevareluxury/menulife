@@ -12,7 +12,7 @@ import { ActiveOrderBanner } from '@/components/tracking/ActiveOrderBanner'
 import toast from 'react-hot-toast'
 import type { Restaurant, MenuSection, MenuItem, OrderTypeData, DeliveryZone } from '@/types'
 
-type MenuPhase = 'selector' | 'delivery-form' | 'takeaway-form' | 'menu'
+type MenuPhase = 'delivery-form' | 'takeaway-form' | 'menu'
 
 function calculateDeliveryFee(restaurant: Restaurant, orderTotal: number, zone?: string): number {
   if (restaurant.delivery_fee_type === 'fixed') return restaurant.delivery_fee_value ?? 0
@@ -25,67 +25,6 @@ function calculateDeliveryFee(restaurant: Restaurant, orderTotal: number, zone?:
   return 0
 }
 
-function OrderTypeSelector({
-  restaurant,
-  onSelect,
-}: {
-  restaurant: Restaurant
-  onSelect: (type: 'dine_in' | 'delivery' | 'takeaway') => void
-}) {
-  const accentColor = restaurant.menu_accent_color ?? '#F4705A'
-  const options = [
-    { type: 'dine_in' as const, emoji: '🪑', label: 'Mesa', show: true },
-    { type: 'delivery' as const, emoji: '🛵', label: 'Delivery', show: !!restaurant.delivery_enabled },
-    { type: 'takeaway' as const, emoji: '🥡', label: 'Para llevar', show: !!restaurant.takeaway_enabled },
-  ].filter(o => o.show)
-
-  return (
-    <div className="public-menu min-h-screen flex flex-col items-center justify-center px-6" style={{ '--menu-accent': accentColor } as React.CSSProperties}>
-      <div style={{
-        position: 'fixed', top: '-120px', left: '50%', transform: 'translateX(-50%)',
-        width: '400px', height: '250px', borderRadius: '50%',
-        background: `radial-gradient(ellipse, ${accentColor}18 0%, transparent 70%)`,
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        {restaurant.logo_url && (
-          <img src={restaurant.logo_url} alt={restaurant.name} className="w-20 h-20 rounded-2xl object-cover mx-auto mb-4" style={{ border: '2px solid rgba(255,255,255,0.1)' }} />
-        )}
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--menu-text-primary)', fontFamily: 'var(--font-syne)' }}>
-          {restaurant.name}
-        </h1>
-        <p className="text-sm mt-2" style={{ color: 'var(--menu-text-muted)' }}>¿Cómo querés pedir?</p>
-      </div>
-
-      <div className="flex gap-4 justify-center flex-wrap w-full max-w-xs">
-        {options.map(opt => (
-          <button
-            key={opt.type}
-            onClick={() => onSelect(opt.type)}
-            className="flex flex-col items-center gap-3 p-5 rounded-2xl transition-all active:scale-95"
-            style={{
-              flex: '1 1 calc(33% - 16px)', minWidth: '90px', maxWidth: '130px',
-              background: 'var(--menu-card, rgba(255,255,255,0.04))',
-              border: '1px solid var(--menu-border, rgba(255,255,255,0.08))',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = `${accentColor}14`
-              e.currentTarget.style.borderColor = `${accentColor}40`
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'var(--menu-card, rgba(255,255,255,0.04))'
-              e.currentTarget.style.borderColor = 'var(--menu-border, rgba(255,255,255,0.08))'
-            }}
-          >
-            <span style={{ fontSize: '32px' }}>{opt.emoji}</span>
-            <span className="text-sm font-semibold" style={{ color: 'var(--menu-text-primary)' }}>{opt.label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 function DeliveryFormScreen({
   restaurant,
@@ -530,6 +469,7 @@ export function PublicMenu() {
   // Delivery/Takeaway phase
   const [menuPhase, setMenuPhase] = useState<MenuPhase>('menu')
   const [orderTypeData, setOrderTypeData] = useState<OrderTypeData | null>(null)
+  const [orderType, setOrderType] = useState<'dine_in' | 'delivery' | 'takeaway'>('dine_in')
 
   const prevItemCount = useRef(itemCount)
   const [cartWiggle, setCartWiggle] = useState(false)
@@ -566,16 +506,16 @@ export function PublicMenu() {
           setLanguage(r.default_language ?? 'ES')
         }
 
-        // Determine initial phase
+        // Always go directly to menu — restore saved order type if any
         if (!mesaParam) {
           const storageKey = `order_type_${slug as string}`
           const saved = sessionStorage.getItem(storageKey)
           if (saved) {
-            try { setOrderTypeData(JSON.parse(saved) as OrderTypeData) } catch { /* ignore */ }
-            setMenuPhase('menu')
-          } else {
-            const totalOptions = 1 + (r.delivery_enabled ? 1 : 0) + (r.takeaway_enabled ? 1 : 0)
-            if (totalOptions > 1) setMenuPhase('selector')
+            try {
+              const parsed = JSON.parse(saved) as OrderTypeData
+              setOrderTypeData(parsed)
+              setOrderType(parsed.type)
+            } catch { /* ignore */ }
           }
         }
 
@@ -682,14 +622,16 @@ export function PublicMenu() {
   }
 
   const handleSelectOrderType = (type: 'dine_in' | 'delivery' | 'takeaway') => {
+    setOrderType(type)
     if (type === 'dine_in') {
       const data: OrderTypeData = { type: 'dine_in' }
       sessionStorage.setItem(`order_type_${slug as string}`, JSON.stringify(data))
       setOrderTypeData(data)
-      setMenuPhase('menu')
     } else if (type === 'delivery') {
+      if (orderTypeData?.type === 'delivery') return
       setMenuPhase('delivery-form')
     } else {
+      if (orderTypeData?.type === 'takeaway') return
       setMenuPhase('takeaway-form')
     }
   }
@@ -697,18 +639,16 @@ export function PublicMenu() {
   const handleOrderTypeSubmit = (data: OrderTypeData) => {
     sessionStorage.setItem(`order_type_${slug as string}`, JSON.stringify(data))
     setOrderTypeData(data)
+    setOrderType(data.type)
     setMenuPhase('menu')
   }
 
   // ── Pre-menu phases ─────────────────────────────────────────────────────────
-  if (!loading && restaurant && menuPhase === 'selector') {
-    return <OrderTypeSelector restaurant={restaurant} onSelect={handleSelectOrderType} />
-  }
   if (!loading && restaurant && menuPhase === 'delivery-form') {
-    return <DeliveryFormScreen restaurant={restaurant} onBack={() => setMenuPhase('selector')} onSubmit={handleOrderTypeSubmit} />
+    return <DeliveryFormScreen restaurant={restaurant} onBack={() => setMenuPhase('menu')} onSubmit={handleOrderTypeSubmit} />
   }
   if (!loading && restaurant && menuPhase === 'takeaway-form') {
-    return <TakeawayFormScreen restaurant={restaurant} onBack={() => setMenuPhase('selector')} onSubmit={handleOrderTypeSubmit} />
+    return <TakeawayFormScreen restaurant={restaurant} onBack={() => setMenuPhase('menu')} onSubmit={handleOrderTypeSubmit} />
   }
 
   // ── Loading ───────────────────────────────────────────────────────────────────
@@ -927,6 +867,34 @@ export function PublicMenu() {
             )
           })}
         </div>
+
+        {/* Order type pills — only when delivery or takeaway is enabled and no mesa */}
+        {!mesaParam && (restaurant.delivery_enabled || restaurant.takeaway_enabled) && (
+          <div className="flex gap-2 mt-2.5 overflow-x-auto scrollbar-hide">
+            {[
+              { type: 'dine_in' as const, emoji: '🪑', label: language === 'ES' ? 'Mesa' : 'Dine in' },
+              ...(restaurant.delivery_enabled ? [{ type: 'delivery' as const, emoji: '🛵', label: 'Delivery' }] : []),
+              ...(restaurant.takeaway_enabled ? [{ type: 'takeaway' as const, emoji: '🥡', label: language === 'ES' ? 'Para llevar' : 'Takeaway' }] : []),
+            ].map(opt => {
+              const active = orderType === opt.type
+              return (
+                <button
+                  key={opt.type}
+                  onClick={() => handleSelectOrderType(opt.type)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all active:scale-95"
+                  style={{
+                    backgroundColor: active ? `${accentColor}1a` : 'var(--menu-card-elevated)',
+                    color: active ? accentColor : 'var(--menu-text-secondary)',
+                    border: `1px solid ${active ? `${accentColor}50` : 'var(--menu-border)'}`,
+                  }}
+                >
+                  <span>{opt.emoji}</span>
+                  <span>{opt.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── Category tabs ────────────────────────────────────────────────── */}
