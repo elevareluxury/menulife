@@ -464,6 +464,7 @@ export function PublicMenu() {
   const [callingWaiter,  setCallingWaiter]  = useState(false)
   const [requestingBill, setRequestingBill] = useState(false)
   const [billRequested,  setBillRequested]  = useState(false)
+  const [bannerActive,   setBannerActive]   = useState(false)
   const mesaParam = new URLSearchParams(window.location.search).get('mesa')
 
   // Delivery/Takeaway phase
@@ -697,7 +698,10 @@ export function PublicMenu() {
   } as React.CSSProperties
 
   return (
-    <div className="public-menu min-h-screen" style={menuVars}>
+    <div
+      className="public-menu min-h-screen"
+      style={{ ...menuVars, paddingBottom: bannerActive ? 'calc(64px + env(safe-area-inset-bottom))' : undefined }}
+    >
 
       {/* ── Hero (180px mobile / 280px desktop, document flow, scrolls away) ── */}
       <div className="relative menu-hero-header">
@@ -1210,7 +1214,9 @@ export function PublicMenu() {
             onClick={() => setIsCartOpen(true)}
             className="fixed z-40 flex items-center gap-3 rounded-2xl font-semibold text-white text-sm"
             style={{
-              bottom: 'calc(20px + env(safe-area-inset-bottom))',
+              bottom: bannerActive
+                ? 'calc(68px + env(safe-area-inset-bottom))'
+                : 'calc(20px + env(safe-area-inset-bottom))',
               left: '50%',
               x: '-50%',
               padding: '14px 22px',
@@ -1259,7 +1265,13 @@ export function PublicMenu() {
         orderTypeData={orderTypeData}
         mesaParam={mesaParam}
       />
-      {slug && <ActiveOrderBanner slug={slug} />}
+      {slug && (
+        <ActiveOrderBanner
+          slug={slug}
+          onCallWaiter={mesaParam ? handleCallWaiter : undefined}
+          onVisibleChange={setBannerActive}
+        />
+      )}
     </div>
   )
 }
