@@ -32,11 +32,6 @@ const INPUT_STYLE = {
   boxSizing: 'border-box' as const,
 }
 
-const SELECT_STYLE = {
-  ...INPUT_STYLE,
-  cursor: 'pointer',
-}
-
 const BTN = {
   padding: '10px 24px',
   borderRadius: '10px',
@@ -53,37 +48,23 @@ type SiteConfig = {
   id?: string
   demo_link: string
   contact_link: string
-  tester_restaurant_id: string | null
 }
-
-type Restaurant = { id: string; name: string }
 
 export function LandingConfigTab() {
   const [cfg, setCfg] = useState<SiteConfig>({
     demo_link: 'mailto:contacto@menulife.digital',
     contact_link: 'mailto:contacto@menulife.digital',
-    tester_restaurant_id: null,
   })
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [saving, setSaving] = useState(false)
   const [savedMsg, setSavedMsg] = useState('')
 
   useEffect(() => {
     void loadConfig()
-    void loadRestaurants()
   }, [])
 
   async function loadConfig() {
-    const { data } = await (supabase as any).from('site_config').select('*').limit(1).maybeSingle()
+    const { data } = await (supabase as any).from('site_config').select('id, demo_link, contact_link').limit(1).maybeSingle()
     if (data) setCfg(data as SiteConfig)
-  }
-
-  async function loadRestaurants() {
-    const { data } = await (supabase as any)
-      .from('restaurants')
-      .select('id, name')
-      .order('name')
-    if (data) setRestaurants(data as Restaurant[])
   }
 
   async function handleSave() {
@@ -92,7 +73,6 @@ export function LandingConfigTab() {
     const payload = {
       demo_link: cfg.demo_link,
       contact_link: cfg.contact_link,
-      tester_restaurant_id: cfg.tester_restaurant_id || null,
     }
 
     const { error } = cfg.id
@@ -150,31 +130,7 @@ export function LandingConfigTab() {
         </div>
       </div>
 
-      {/* Tester restaurant */}
-      <div style={CARD}>
-        <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#F5F7FA', marginBottom: '8px' }}>
-          🧪 Restaurante tester
-        </h2>
-        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginBottom: '20px' }}>
-          El restaurante cuyo menú se muestra en el iframe del Hero de la landing.
-          La ruta del iframe es <code style={{ color: '#FF6B7A' }}>/r/[slug]</code>.
-        </p>
-        <div>
-          <label style={LABEL_STYLE}>Restaurante</label>
-          <select
-            style={SELECT_STYLE}
-            value={cfg.tester_restaurant_id ?? ''}
-            onChange={e => setCfg(p => ({ ...p, tester_restaurant_id: e.target.value || null }))}
-          >
-            <option value="">— Sin seleccionar —</option>
-            {restaurants.map(r => (
-              <option key={r.id} value={r.id}>{r.name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+<div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <button style={BTN} onClick={handleSave} disabled={saving}>
           {saving ? 'Guardando...' : 'Guardar cambios'}
         </button>

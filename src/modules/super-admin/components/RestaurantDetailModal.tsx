@@ -112,21 +112,23 @@ export function RestaurantDetailModal({ restaurant, onClose, onUpdate }: Props) 
     if (!restaurant) { setFull(null); return }
     setTab('info')
     ;(async () => {
-      const { data } = await supabase
-        .from('restaurants')
-        .select('id, name, slug, city, phone, email, logo_url, plan, subscription_status, is_active, trial_ends_at, created_at, onboarding_completed, features, onboarding_steps')
-        .eq('id', restaurant.id)
-        .single()
+      try {
+        const { data } = await supabase
+          .from('restaurants')
+          .select('id, name, slug, city, phone, email, logo_url, plan, subscription_status, is_active, trial_ends_at, created_at, onboarding_completed, features, onboarding_steps')
+          .eq('id', restaurant.id)
+          .single()
 
-      if (data) {
-        const f = (data as { features?: Record<string, boolean> }).features ?? {}
-        setFull({
-          ...data,
-          features:         f,
-          onboarding_steps: (data as { onboarding_steps?: Record<string, boolean> }).onboarding_steps ?? {},
-        } as RestaurantFull)
-        setFeatures(f)
-      }
+        if (data) {
+          const f = (data as { features?: Record<string, boolean> }).features ?? {}
+          setFull({
+            ...data,
+            features:         f,
+            onboarding_steps: (data as { onboarding_steps?: Record<string, boolean> }).onboarding_steps ?? {},
+          } as RestaurantFull)
+          setFeatures(f)
+        }
+      } catch (e) { console.error('Error loading restaurant details:', e) }
     })()
   }, [restaurant?.id])
 
@@ -150,9 +152,9 @@ export function RestaurantDetailModal({ restaurant, onClose, onUpdate }: Props) 
         supabase.from('waiters').select('*', { count: 'exact', head: true }).eq('restaurant_id', restaurant.id).eq('is_active', true),
         supabase.from('tables').select('*', { count: 'exact', head: true }).eq('restaurant_id', restaurant.id).eq('is_active', true),
         supabase.from('delivery_drivers').select('*', { count: 'exact', head: true }).eq('restaurant_id', restaurant.id).eq('is_active', true),
-        supabase.from('orders').select('total, created_at').eq('restaurant_id', restaurant.id).order('created_at', { ascending: false }),
-        supabase.from('orders').select('id', { count: 'exact', head: true }).eq('restaurant_id', restaurant.id).gte('created_at', ago7d),
-        supabase.from('orders').select('id', { count: 'exact', head: true }).eq('restaurant_id', restaurant.id).gte('created_at', ago30d),
+        supabase.from('orders').select('total, created_at').eq('restaurant_id', restaurant.id).neq('status', 'cancelled').order('created_at', { ascending: false }),
+        supabase.from('orders').select('id', { count: 'exact', head: true }).eq('restaurant_id', restaurant.id).neq('status', 'cancelled').gte('created_at', ago7d),
+        supabase.from('orders').select('id', { count: 'exact', head: true }).eq('restaurant_id', restaurant.id).neq('status', 'cancelled').gte('created_at', ago30d),
       ])
 
       const ordersArr = (orders ?? []) as { total: number; created_at: string }[]
@@ -251,11 +253,13 @@ export function RestaurantDetailModal({ restaurant, onClose, onUpdate }: Props) 
     try {
       const { data: curr } = await supabase.from('restaurants').select('plan').eq('id', r.id).single()
 
+      const { data: { session } } = await supabase.auth.getSession()
       await supabase.from('plan_changes').insert({
         restaurant_id: r.id,
         old_plan:      curr?.plan ?? r.plan,
         new_plan:      newPlan,
         reason:        'Cambio manual desde superadmin',
+        changed_by:    session?.user?.id,
       })
 
       const validPlan = (['menu', 'pro', 'total'] as const).includes(newPlan as 'menu' | 'pro' | 'total')

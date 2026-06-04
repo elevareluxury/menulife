@@ -68,18 +68,28 @@ export function SistemaTab() {
       const [dbResult, storageResult, authResult] = await Promise.allSettled([
         supabase.from('restaurants').select('id', { head: true }).limit(1),
         supabase.storage.from('restaurant-assets').list('', { limit: 1 }),
-        supabase.auth.getUser(),
+        supabase.auth.getSession(),
       ])
+
+      const realtimeOk = await new Promise<boolean>(resolve => {
+        const t = setTimeout(() => resolve(false), 2500)
+        const ch = supabase.channel(`sa-health-${Date.now()}`)
+        ch.subscribe(s => {
+          clearTimeout(t)
+          void supabase.removeChannel(ch)
+          resolve(s === 'SUBSCRIBED')
+        })
+      })
 
       const dbOk      = dbResult.status === 'fulfilled' && !dbResult.value.error
       const storageOk = storageResult.status === 'fulfilled' && !storageResult.value.error
-      const authOk    = authResult.status === 'fulfilled' && !!authResult.value.data.user
+      const authOk    = authResult.status === 'fulfilled' && !!authResult.value.data.session?.user
 
       setServices([
-        { name: 'Database',  ok: dbOk,      detail: dbOk      ? 'Conectada'    : 'Sin conexión' },
-        { name: 'Storage',   ok: storageOk,  detail: storageOk ? 'Operativo'    : 'Sin acceso'   },
-        { name: 'Auth',      ok: authOk,     detail: authOk    ? 'Funcionando'  : 'Error de sesión' },
-        { name: 'Realtime',  ok: true,       detail: 'Activo' },
+        { name: 'Database',  ok: dbOk,       detail: dbOk       ? 'Conectada'      : 'Sin conexión'    },
+        { name: 'Storage',   ok: storageOk,  detail: storageOk  ? 'Operativo'      : 'Sin acceso'      },
+        { name: 'Auth',      ok: authOk,     detail: authOk     ? 'Funcionando'    : 'Error de sesión' },
+        { name: 'Realtime',  ok: realtimeOk, detail: realtimeOk ? 'Activo'         : 'Sin conexión'    },
       ])
 
       // Problems query

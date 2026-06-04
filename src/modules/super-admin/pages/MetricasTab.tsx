@@ -64,6 +64,7 @@ export function MetricasTab() {
             .from('orders')
             .select('id, total, created_at, restaurant_id')
             .gte('created_at', since)
+            .neq('status', 'cancelled')
             .order('created_at', { ascending: true }),
           supabase
             .from('restaurants')

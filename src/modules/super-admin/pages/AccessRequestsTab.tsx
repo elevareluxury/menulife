@@ -290,9 +290,11 @@ export function AccessRequestsTab() {
 
       // Save internal note if provided
       if (note.trim() && restaurant?.id) {
+        const { data: { session: noteSession } } = await supabase.auth.getSession()
         await supabase.from('admin_notes').insert({
           restaurant_id: restaurant.id,
-          content: note.trim(),
+          content:       note.trim(),
+          author_id:     noteSession?.user?.id,
         })
       }
 
