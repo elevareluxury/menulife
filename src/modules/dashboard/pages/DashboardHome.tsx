@@ -161,6 +161,26 @@ function useHourlySalesToday(restaurantId: string | undefined) {
   return data
 }
 
+function useYesterdayRevenue(restaurantId: string | undefined) {
+  const [revenue, setRevenue] = useState(0)
+  useEffect(() => {
+    if (!restaurantId) return
+    const y = new Date(); y.setDate(y.getDate() - 1)
+    const yStart = new Date(y.getFullYear(), y.getMonth(), y.getDate())
+    const yEnd   = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23, 59, 59, 999)
+    db.from('orders')
+      .select('total')
+      .eq('restaurant_id', restaurantId)
+      .in('status', ['delivered', 'completed'])
+      .gte('created_at', yStart.toISOString())
+      .lte('created_at', yEnd.toISOString())
+      .then(({ data }: { data: { total: number }[] | null }) => {
+        setRevenue((data ?? []).reduce((s, o) => s + o.total, 0))
+      })
+  }, [restaurantId])
+  return revenue
+}
+
 // ─── SVG Progress Circle ─────────────────────────────────────────────────────
 
 function ProgressCircle({ pct, size = 72 }: { pct: number; size?: number }) {
@@ -188,26 +208,28 @@ function ProgressCircle({ pct, size = 72 }: { pct: number; size?: number }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-const DAILY_GOAL = 150000 // ARS — configurable per restaurant in future
-
 export function DashboardHome() {
   const { restaurant } = useRestaurant()
   const { stats } = useOrderStats(restaurant?.id)
   const { stats: dashStats } = useDashboardStats(restaurant?.id)
   const navigate = useNavigate()
 
-  const liveTables  = useLiveTables(restaurant?.id)
-  const alerts      = useAlerts(restaurant?.id)
-  const hourlyData  = useHourlySalesToday(restaurant?.id)
+  const liveTables      = useLiveTables(restaurant?.id)
+  const alerts          = useAlerts(restaurant?.id)
+  const hourlyData      = useHourlySalesToday(restaurant?.id)
+  const yesterdayRev    = useYesterdayRevenue(restaurant?.id)
 
+  const dailyGoal     = ((restaurant?.features as Record<string, unknown>)?.daily_goal as number) ?? 50000
   const todayRevenue  = stats.today.total
   const activeOrders  = stats.today.pending + stats.today.cooking + stats.today.ready
   const avgTicket     = stats.today.count > 0 ? Math.round(stats.today.total / stats.today.count) : 0
-  const goalPct       = DAILY_GOAL > 0 ? (todayRevenue / DAILY_GOAL) * 100 : 0
-  const peakHour      = hourlyData.reduce((a, b) => a.revenue > b.revenue ? a : b, { hour: 0, revenue: 0 })
+  const goalPct       = dailyGoal > 0 ? (todayRevenue / dailyGoal) * 100 : 0
+  const currentHour   = new Date().getHours()
   const activeTbls    = liveTables.filter(t => t.is_active)
   const initial       = (restaurant?.name ?? 'M').charAt(0).toUpperCase()
-  const urgentAlert   = alerts[0]
+  const urgentAlerts  = alerts.filter(a => a.minutesWaiting > 10)
+  const urgentAlert   = urgentAlerts[0]
+  const peakHour      = hourlyData.reduce((a, b) => a.revenue > b.revenue ? a : b, { hour: 0, revenue: 0 })
 
   return (
     <div className="space-y-4 pb-6 max-w-xl mx-auto lg:max-w-none">
@@ -217,7 +239,7 @@ export function DashboardHome() {
       <div className="flex items-center justify-between pt-2">
         <div>
           <p className="text-xs text-gray-400 font-medium">{greeting()}</p>
-          <h1 className="text-xl font-bold text-gray-900 leading-tight">{restaurant?.name ?? 'Mi Local'}</h1>
+          <h1 className="text-xl font-bold text-gray-900 leading-tight">Menú Life</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -243,24 +265,29 @@ export function DashboardHome() {
         </div>
       </div>
 
-      {/* ── NIVEL 1 — ALERTA ACTIVA ──────────────────────────────── */}
+      {/* ── NIVEL 1 — ALERTA ACTIVA (solo si >10 min) ───────────── */}
       {urgentAlert && (
         <button
           onClick={() => navigate('/dashboard/tables')}
           className="w-full flex items-center justify-between px-4 py-3 rounded-2xl text-left transition-all active:scale-[0.99]"
-          style={{ backgroundColor: '#451a03', border: '1px solid #92400e' }}
+          style={{ backgroundColor: '#1a1a0f', border: '1px solid #EF9F2740', borderLeft: '3px solid #EF9F27' }}
         >
           <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#F4705A' }} />
+            <span className="relative flex h-2 w-2 flex-shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: '#EF9F27' }} />
+              <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: '#EF9F27' }} />
+            </span>
             <p className="text-sm font-semibold" style={{ color: '#FEF3C7' }}>
               {urgentAlert.type === 'bill_requested' ? '💳' : '🔔'}{' '}
               Mesa {urgentAlert.tableNumber}{' '}
               {urgentAlert.type === 'bill_requested' ? 'pidió la cuenta' : 'sin atención'}{' '}
               — {urgentAlert.minutesWaiting} min
-              {alerts.length > 1 && <span style={{ color: '#FCD34D' }}> · y {alerts.length - 1} más</span>}
+              {urgentAlerts.length > 1 && <span style={{ color: '#FCD34D' }}> · y {urgentAlerts.length - 1} más</span>}
             </p>
           </div>
-          <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
+          <span className="text-xs font-bold px-2 py-1 rounded-lg flex-shrink-0" style={{ backgroundColor: '#F4705A', color: '#fff' }}>
+            Ir →
+          </span>
         </button>
       )}
 
@@ -274,7 +301,7 @@ export function DashboardHome() {
             Ventas de hoy
           </p>
           <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Meta {formatPrice(DAILY_GOAL, 'ARS')}
+            Meta {formatPrice(dailyGoal, 'ARS')}
           </p>
         </div>
 
@@ -283,9 +310,20 @@ export function DashboardHome() {
             <p className="text-3xl font-bold text-white" style={{ fontFamily: 'var(--font-ruda, inherit)' }}>
               {formatPrice(todayRevenue, 'ARS')}
             </p>
-            <p className="text-xs mt-1" style={{ color: goalPct >= 100 ? '#22c55e' : 'rgba(255,255,255,0.45)' }}>
-              {goalPct >= 100 ? '🎉 Meta alcanzada' : `${Math.round(goalPct)}% de la meta diaria`}
-            </p>
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <p className="text-xs" style={{ color: goalPct >= 100 ? '#22c55e' : 'rgba(255,255,255,0.45)' }}>
+                {goalPct >= 100 ? '🎉 Meta alcanzada' : `${Math.round(goalPct)}% de la meta`}
+              </p>
+              {yesterdayRev > 0 && (() => {
+                const pct = Math.round(((todayRevenue - yesterdayRev) / yesterdayRev) * 100)
+                const up = pct >= 0
+                return (
+                  <span className="text-xs font-semibold" style={{ color: up ? '#22c55e' : '#F87171' }}>
+                    {up ? '↑' : '↓'} {Math.abs(pct)}% vs ayer
+                  </span>
+                )
+              })()}
+            </div>
           </div>
           <ProgressCircle pct={goalPct} />
         </div>
@@ -325,17 +363,18 @@ export function DashboardHome() {
             </button>
           </div>
 
-          <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(52px, 1fr))' }}>
-            {activeTbls.map(t => (
-              <button
-                key={t.id}
-                onClick={() => navigate('/dashboard/tables')}
-                className="aspect-square rounded-xl flex items-center justify-center text-sm font-bold text-white transition-all active:scale-95"
-                style={{ backgroundColor: tableColor(t) }}
-              >
-                {t.table_number}
-              </button>
-            ))}
+          <div className="grid grid-cols-4 gap-2">
+            {activeTbls.slice(0, 16).map(t => {
+              const color = tableColor(t)
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => navigate('/dashboard/tables')}
+                  className="aspect-square rounded-xl transition-all active:scale-95"
+                  style={{ backgroundColor: color + '33', border: `2px solid ${color}` }}
+                />
+              )
+            })}
           </div>
 
           <div className="flex items-center gap-3 mt-2">
@@ -377,7 +416,7 @@ export function DashboardHome() {
                   {hourlyData.map(entry => (
                     <Cell
                       key={entry.hour}
-                      fill={entry.hour === peakHour.hour ? '#F4705A' : 'rgba(255,255,255,0.15)'}
+                      fill={entry.hour === currentHour ? '#F4705A' : 'rgba(244,112,90,0.55)'}
                     />
                   ))}
                 </Bar>
@@ -426,16 +465,16 @@ export function DashboardHome() {
               onClick={() => navigate(card.to)}
               className="flex items-start justify-between p-4 rounded-2xl text-left transition-all active:scale-[0.98] hover:scale-[1.01]"
               style={{
-                backgroundColor: card.highlight ? '#F4705A0F' : 'var(--surface-2, #f9fafb)',
-                border: `1px solid ${card.highlight ? '#F4705A30' : 'var(--border-subtle, #e5e7eb)'}`,
+                backgroundColor: card.highlight ? '#F4705A12' : '#1a1a1a',
+                border: `1px solid ${card.highlight ? '#F4705A40' : '#333333'}`,
               }}
             >
               <div>
                 <span className="text-2xl">{card.emoji}</span>
-                <p className="font-semibold text-gray-900 mt-1 text-sm">{card.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{card.data}</p>
+                <p className="font-semibold text-white mt-1 text-sm">{card.title}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{card.data}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-300 mt-1 flex-shrink-0" />
+              <ChevronRight className="w-4 h-4 mt-1 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }} />
             </button>
           ))}
         </div>

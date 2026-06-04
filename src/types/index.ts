@@ -62,6 +62,8 @@ export interface Restaurant {
   reservations_max_party?: number | null
   reservations_time_slots?: string[] | null
   reservations_message?: string | null
+  features?: unknown
+  google_review_link?: string | null
 }
 
 export interface MenuSection {

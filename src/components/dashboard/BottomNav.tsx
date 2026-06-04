@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed, MoreHorizontal,
-  QrCode, Users, ChefHat, Settings, Truck, type LucideIcon,
+  QrCode, Users, ChefHat, Settings, Truck, ContactRound, type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
@@ -88,7 +88,8 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
   const moreItems: MoreItem[] = [
     { icon: QrCode,   labelKey: 'dashboard.nav_qr',      to: '/dashboard/qr' },
     { icon: Users,    labelKey: 'dashboard.nav_waiters',  to: '/dashboard/waiters' },
-    { icon: Truck,    labelKey: 'dashboard.nav_drivers',  to: '/dashboard/repartidores' },
+    { icon: Truck,        labelKey: 'dashboard.nav_drivers',  to: '/dashboard/repartidores' },
+    { icon: ContactRound, labelKey: 'dashboard.nav_clients',  to: '/dashboard/clientes' },
     {
       icon: ChefHat,
       labelKey: 'dashboard.nav_kitchen',

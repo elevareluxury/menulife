@@ -4,6 +4,7 @@ import {
   LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
+import { BarChart2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { formatPrice } from '@/lib/utils'
@@ -85,7 +86,7 @@ function useStats(restaurantId: string | undefined, from: Date, to: Date) {
     try {
       const prev = getPrevPeriod(from, to)
 
-      const [ordersRes, cancelledRes, itemsRes, prevRes] = await Promise.all([
+      const [ordersRes, cancelledRes, prevRes] = await Promise.all([
         db.from('orders')
           .select('id, total, order_type, table_number, created_at, status')
           .eq('restaurant_id', restaurantId)
@@ -98,8 +99,6 @@ function useStats(restaurantId: string | undefined, from: Date, to: Date) {
           .eq('status', 'cancelled')
           .gte('created_at', from.toISOString())
           .lte('created_at', to.toISOString()),
-        db.from('order_items')
-          .select('menu_item_name, quantity, order_id'),
         db.from('orders')
           .select('id, total')
           .eq('restaurant_id', restaurantId)
@@ -109,12 +108,15 @@ function useStats(restaurantId: string | undefined, from: Date, to: Date) {
       ])
 
       const orders: Array<{ id: string; total: number; order_type: string; table_number: string | null; created_at: string }> = ordersRes.data ?? []
-      const orderIds = new Set(orders.map((o) => o.id))
+      const orderIds = orders.map(o => o.id)
 
-      // Filter items to current period orders only
-      const items: Array<{ menu_item_name: string; quantity: number; order_id: string }> = (itemsRes.data ?? []).filter(
-        (i: { order_id: string }) => orderIds.has(i.order_id)
-      )
+      let items: Array<{ menu_item_name: string; quantity: number; order_id: string }> = []
+      if (orderIds.length > 0) {
+        const { data } = await db.from('order_items')
+          .select('menu_item_name, quantity, order_id')
+          .in('order_id', orderIds)
+        items = data ?? []
+      }
 
       // Sales by day
       const dayMap: Record<string, { revenue: number; orders: number }> = {}
@@ -252,14 +254,15 @@ export function EstadisticasPage() {
     <div className="space-y-6 pb-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-ruda, inherit)' }}>
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2" style={{ fontFamily: 'var(--font-ruda, inherit)' }}>
+          <BarChart2 className="w-6 h-6 text-[#F4705A]" strokeWidth={2} />
           Estadísticas
         </h1>
         <p className="text-sm text-gray-500 mt-0.5">{restaurant?.name}</p>
       </div>
 
       {/* Period selector */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
         <div className="flex gap-1 p-1 rounded-xl bg-gray-100">
           {PERIODS.map(p => (
             <button
@@ -364,8 +367,8 @@ export function EstadisticasPage() {
             </Card>
           )}
 
-          {/* BLOQUE 3 — Grid 2×2 métricas */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* BLOQUE 3 — Grid métricas */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {
                 emoji: '🍽', label: 'Platos vendidos',
@@ -440,21 +443,23 @@ export function EstadisticasPage() {
             <Card>
               <h3 className="text-base font-semibold text-gray-900 mb-4">🍽 Desglose por tipo de pedido</h3>
               <div className="flex items-center gap-6 flex-wrap">
-                <ResponsiveContainer width={160} height={160}>
-                  <PieChart>
-                    <Pie
-                      data={s.byOrderType.map(t => ({ name: TYPE_LABEL[t.type] ?? t.type, value: t.count }))}
-                      cx="50%" cy="50%"
-                      innerRadius={48} outerRadius={72}
-                      dataKey="value" strokeWidth={0}
-                    >
-                      {s.byOrderType.map(t => (
-                        <Cell key={t.type} fill={TYPE_COLOR[t.type] ?? '#888'} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v) => [`${v} pedidos`, '']} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="w-40 h-40 flex-shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={s.byOrderType.map(t => ({ name: TYPE_LABEL[t.type] ?? t.type, value: t.count }))}
+                        cx="50%" cy="50%"
+                        innerRadius={48} outerRadius={72}
+                        dataKey="value" strokeWidth={0}
+                      >
+                        {s.byOrderType.map(t => (
+                          <Cell key={t.type} fill={TYPE_COLOR[t.type] ?? '#888'} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v) => [`${v} pedidos`, '']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
                 <div className="flex flex-col gap-2 flex-1 min-w-[140px]">
                   {s.byOrderType.map(t => {
                     const pct = typeTotal > 0 ? Math.round((t.count / typeTotal) * 100) : 0
