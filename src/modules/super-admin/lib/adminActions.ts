@@ -65,7 +65,8 @@ export async function logAdminAction(
   targetId: string,
   details?: Record<string, unknown>
 ) {
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) return
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase as any).from('admin_logs').insert({

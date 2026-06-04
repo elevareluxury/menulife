@@ -342,11 +342,11 @@ export function RestaurantDetailModal({ restaurant, onClose, onUpdate }: Props) 
     if (!r || !newNote.trim()) return
     setSavingNote(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
       await supabase.from('admin_notes').insert({
         restaurant_id: r.id,
         content:       newNote.trim(),
-        author_id:     user?.id,
+        author_id:     session?.user?.id,
       })
       await logAdminAction('add_note', 'restaurant', r.id, { preview: newNote.slice(0, 50) })
       toast.success('Nota guardada')

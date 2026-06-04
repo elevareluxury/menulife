@@ -25,7 +25,7 @@ export interface KitchenOrder {
 
 const TYPE_PRIORITY: Record<string, number> = { delivery: 0, takeaway: 1, dine_in: 2 }
 
-export function useKitchenOrders(restaurantId: string) {
+export function useKitchenOrders(restaurantId: string | null | undefined) {
   const [orders, setOrders] = useState<KitchenOrder[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -65,6 +65,8 @@ export function useKitchenOrders(restaurantId: string) {
   }, [restaurantId])
 
   useEffect(() => {
+    if (!restaurantId) { setLoading(false); return }
+
     fetchOrders()
 
     const channel = supabase

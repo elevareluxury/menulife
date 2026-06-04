@@ -240,6 +240,7 @@ export default {
     nav_waiters: 'Mozos',
     nav_drivers: 'Repartidores',
     nav_clients: 'Clientes',
+    nav_estadisticas: 'Estadísticas',
     nav_kitchen: 'Cocina (KDS)',
     nav_settings: 'Configuración',
     nav_panel: 'Panel de control',

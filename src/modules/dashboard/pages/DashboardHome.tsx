@@ -165,18 +165,22 @@ function useYesterdayRevenue(restaurantId: string | undefined) {
   const [revenue, setRevenue] = useState(0)
   useEffect(() => {
     if (!restaurantId) return
+    let isMounted = true
     const y = new Date(); y.setDate(y.getDate() - 1)
     const yStart = new Date(y.getFullYear(), y.getMonth(), y.getDate())
     const yEnd   = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23, 59, 59, 999)
-    db.from('orders')
-      .select('total')
-      .eq('restaurant_id', restaurantId)
-      .in('status', ['delivered', 'completed'])
-      .gte('created_at', yStart.toISOString())
-      .lte('created_at', yEnd.toISOString())
-      .then(({ data }: { data: { total: number }[] | null }) => {
-        setRevenue((data ?? []).reduce((s, o) => s + o.total, 0))
-      })
+    ;(async () => {
+      const { data } = await db.from('orders')
+        .select('total')
+        .eq('restaurant_id', restaurantId)
+        .in('status', ['delivered', 'completed'])
+        .gte('created_at', yStart.toISOString())
+        .lte('created_at', yEnd.toISOString())
+      if (isMounted) {
+        setRevenue((data ?? []).reduce((s: number, o: { total: number }) => s + o.total, 0))
+      }
+    })()
+    return () => { isMounted = false }
   }, [restaurantId])
   return revenue
 }

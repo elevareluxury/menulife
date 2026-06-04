@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed,
-  QrCode, Users, ChefHat, LogOut, Truck, ContactRound, BarChart2, type LucideIcon,
+  QrCode, Users, ChefHat, LogOut, Truck, ContactRound, BarChart2, Settings, type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
@@ -100,11 +100,32 @@ export function Sidebar({ restaurantSlug }: SidebarProps) {
         )}
       </nav>
 
-      {/* Cerrar sesión */}
+      {/* Configuración + Cerrar sesión */}
       <div
-        className="px-3 py-4"
+        className="px-3 py-3 space-y-0.5"
         style={{ borderTop: '1px solid var(--border-subtle)' }}
       >
+        <NavLink
+          to="/dashboard/settings"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors duration-150',
+              isActive
+                ? 'bg-brand-dim text-brand'
+                : 'text-ink-3 hover:text-ink-1 hover:bg-surface-3'
+            )
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <Settings
+                className={cn('w-[17px] h-[17px] flex-shrink-0', isActive ? 'text-brand' : 'text-ink-3')}
+                strokeWidth={isActive ? 2.2 : 2}
+              />
+              {t('dashboard.nav_settings')}
+            </>
+          )}
+        </NavLink>
         <button
           onClick={() => signOut()}
           className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-[13px] font-medium text-ink-3 hover:text-danger hover:bg-danger-dim transition-colors duration-150"

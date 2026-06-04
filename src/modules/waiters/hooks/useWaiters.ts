@@ -32,6 +32,7 @@ export function useWaiters(restaurantId: string | undefined) {
 
   const fetchWaiters = useCallback(async () => {
     if (!restaurantId) return
+    setLoading(true)
     try {
       const { data, error } = await db
         .from('waiters')

@@ -229,6 +229,12 @@ export function AccessRequestsTab() {
   const fetchRequests = useCallback(async () => {
     setLoading(true)
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) {
+        toast.error('Sesión no activa. Recargá la página.')
+        return
+      }
+
       const { data, error } = await supabase
         .from('access_requests')
         .select('*')
@@ -245,7 +251,7 @@ export function AccessRequestsTab() {
       })
     } catch (err) {
       toast.error('Error cargando solicitudes')
-      console.error(err)
+      console.error('[AccessRequests] fetch error:', err)
     } finally {
       setLoading(false)
     }
@@ -301,14 +307,14 @@ export function AccessRequestsTab() {
   const handleRejectConfirm = async (reason: string) => {
     if (!rejectingRequest) return
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
 
       const { error } = await supabase
         .from('access_requests')
         .update({
           status: 'rejected',
           reviewed_at: new Date().toISOString(),
-          reviewed_by: user?.id,
+          reviewed_by: session?.user?.id,
         })
         .eq('id', rejectingRequest.id)
       if (error) throw error
@@ -391,9 +397,18 @@ export function AccessRequestsTab() {
             <>
               <div className="text-4xl mb-3">📋</div>
               <p className="text-base font-semibold mb-1" style={{ color: TEXT }}>Sin solicitudes pendientes</p>
-              <p className="text-sm mb-6" style={{ color: TEXT_MUTED }}>
-                Cuando alguien complete el formulario en menulife.digital/solicitar-acceso aparecerá acá.
-              </p>
+              {requests.length > 0 ? (
+                <p className="text-sm mb-4" style={{ color: TEXT_MUTED }}>
+                  Hay {requests.length} solicitud{requests.length !== 1 ? 'es' : ''} en otros estados.{' '}
+                  <button onClick={() => setActiveTab('all')} style={{ color: ACCENT }} className="underline">
+                    Ver todas
+                  </button>
+                </p>
+              ) : (
+                <p className="text-sm mb-6" style={{ color: TEXT_MUTED }}>
+                  Cuando alguien complete el formulario en menulife.digital/solicitar-acceso aparecerá acá.
+                </p>
+              )}
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={copyLink}
@@ -413,6 +428,13 @@ export function AccessRequestsTab() {
               <p className="text-sm" style={{ color: TEXT_MUTED }}>
                 {activeTab === 'approved' ? 'Ninguna aprobada aún' : activeTab === 'rejected' ? 'Sin rechazadas' : 'Sin solicitudes'}
               </p>
+              {requests.length > 0 && activeTab !== 'all' && (
+                <p className="text-xs mt-2">
+                  <button onClick={() => setActiveTab('all')} style={{ color: ACCENT }} className="underline">
+                    Ver las {requests.length} totales
+                  </button>
+                </p>
+              )}
             </>
           )}
         </div>

@@ -774,6 +774,24 @@ export function PublicMenu() {
           className="absolute inset-0"
           style={{ background: 'linear-gradient(to bottom, rgba(15,17,21,0.25) 0%, rgba(15,17,21,0.88) 100%)' }}
         />
+        {/* Restaurant name — top right */}
+        <div
+          className="absolute top-3 right-4"
+          style={{
+            color: '#fff',
+            fontWeight: 500,
+            fontSize: 14,
+            maxWidth: 160,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            textShadow: '0 1px 4px rgba(0,0,0,0.6)',
+            fontFamily: 'var(--font-ruda, inherit)',
+          }}
+        >
+          {restaurant.name}
+        </div>
+
         {/* Restaurant info overlay */}
         <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 flex items-end gap-3">
           {restaurant.logo_url && (
@@ -791,12 +809,6 @@ export function PublicMenu() {
             )}
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span
-              className="text-xs font-medium truncate"
-              style={{ color: '#fff', fontWeight: 500, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-            >
-              {restaurant.name}
-            </span>
             {(restaurant.allow_language_switch ?? true) && (
               <button
                 onClick={() => {

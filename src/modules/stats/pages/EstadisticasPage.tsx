@@ -247,18 +247,18 @@ export function EstadisticasPage() {
     { id: 'today', label: 'Hoy' },
     { id: 'week',  label: 'Semana' },
     { id: 'month', label: 'Mes' },
-    { id: 'custom', label: 'Custom' },
+    { id: 'custom', label: 'Personalizado' },
   ]
 
   return (
     <div className="space-y-6 pb-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2" style={{ fontFamily: 'var(--font-ruda, inherit)' }}>
+        <h1 className="text-2xl font-bold text-ink-1 flex items-center gap-2" style={{ fontFamily: 'var(--font-ruda, inherit)' }}>
           <BarChart2 className="w-6 h-6 text-[#F4705A]" strokeWidth={2} />
           Estadísticas
         </h1>
-        <p className="text-sm text-gray-500 mt-0.5">{restaurant?.name}</p>
+        <p className="text-sm text-ink-3 mt-0.5">{restaurant?.name}</p>
       </div>
 
       {/* Period selector */}

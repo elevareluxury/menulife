@@ -17,7 +17,7 @@ type MainTab = 'activos' | 'delivery' | 'historial' | 'estadisticas'
 
 export function OrdersManagement() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
-  const { orders, loading: ordersLoading } = useKitchenOrders(restaurant?.id ?? '')
+  const { orders, loading: ordersLoading } = useKitchenOrders(restaurant?.id)
   const { stats, loading: statsLoading } = useOrderStats(restaurant?.id)
   const [mainTab, setMainTab] = useState<MainTab>('activos')
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)

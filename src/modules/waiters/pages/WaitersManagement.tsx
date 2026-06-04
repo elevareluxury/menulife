@@ -91,6 +91,7 @@ function WaiterHistorial({ restaurantId }: { restaurantId: string }) {
 
   useEffect(() => {
     if (!restaurantId) return
+    let isMounted = true
     setLoading(true)
     db.from('view_waiter_daily_summary')
       .select('*')
@@ -99,9 +100,10 @@ function WaiterHistorial({ restaurantId }: { restaurantId: string }) {
       .lte('fecha', to)
       .order('fecha', { ascending: false })
       .then(({ data }: { data: DailySummary[] | null }) => {
-        setRows(data ?? [])
-        setLoading(false)
+        if (isMounted) { setRows(data ?? []); setLoading(false) }
       })
+      .catch(() => { if (isMounted) setLoading(false) })
+    return () => { isMounted = false }
   }, [restaurantId, from, to])
 
   const grouped: Record<string, DailySummary[]> = {}

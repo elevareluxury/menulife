@@ -240,6 +240,7 @@ export default {
     nav_waiters: 'Waiters',
     nav_drivers: 'Drivers',
     nav_clients: 'Clients',
+    nav_estadisticas: 'Statistics',
     nav_kitchen: 'Kitchen (KDS)',
     nav_settings: 'Settings',
     nav_panel: 'Control panel',
