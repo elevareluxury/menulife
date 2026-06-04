@@ -779,9 +779,9 @@ export function PublicMenu() {
           className="absolute top-3 right-4"
           style={{
             color: '#fff',
-            fontWeight: 500,
-            fontSize: 14,
-            maxWidth: 160,
+            fontWeight: 600,
+            fontSize: 16,
+            maxWidth: 180,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -802,12 +802,11 @@ export function PublicMenu() {
               style={{ border: '2px solid rgba(255,255,255,0.15)' }}
             />
           )}
-          <div className="flex-1 min-w-0 pb-0.5">
-            <h1 className="font-bold text-white text-xl leading-tight truncate">{restaurant.name}</h1>
-            {mesaParam && (
-              <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Mesa {mesaParam}</p>
-            )}
-          </div>
+          {mesaParam && (
+            <div className="flex-1 min-w-0 pb-0.5">
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Mesa {mesaParam}</p>
+            </div>
+          )}
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {(restaurant.allow_language_switch ?? true) && (
               <button

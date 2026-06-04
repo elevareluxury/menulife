@@ -76,7 +76,7 @@ function ReservationDetailModal({ reservation: initial, onClose, onUpdated }: Re
   )
 
   return (
-    <Modal isOpen onClose={onClose} title="Detalle de reserva">
+    <Modal isOpen onClose={onClose} title="Detalle de reserva" dark>
       <div className="space-y-4 max-h-[72vh] overflow-y-auto pr-1">
         {/* Status badge */}
         <div className="flex items-center justify-between">
@@ -559,7 +559,7 @@ function ContactDetailModal({ contact, restaurantId, onClose, onUpdated, onSelec
   const waUrl = `https://wa.me/${contact.phone.replace(/\D/g, '')}`
 
   return (
-    <Modal isOpen onClose={onClose} title={`${contact.first_name} ${contact.last_name}`}>
+    <Modal isOpen onClose={onClose} title={`${contact.first_name} ${contact.last_name}`} dark>
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
         {/* Header stats */}
         <div className="grid grid-cols-3 gap-3">

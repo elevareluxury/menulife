@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
@@ -15,7 +15,6 @@ import { OrdersManagement } from '@/modules/orders/pages/OrdersManagement'
 import { WaitersManagement } from '@/modules/waiters/pages/WaitersManagement'
 import { TablesConfiguration } from '@/modules/waiters/pages/TablesConfiguration'
 import { WaiterLogin } from '@/modules/waiter/pages/WaiterLogin'
-import { WaiterDashboard } from '@/modules/waiter/pages/WaiterDashboard'
 import { WaiterApp } from '@/modules/waiter/pages/WaiterApp'
 import { TableBill } from '@/modules/waiter/pages/TableBill'
 import { BusinessSettings } from '@/modules/settings/pages/BusinessSettings'
@@ -32,6 +31,11 @@ import { ReservationFormPage } from '@/modules/public/pages/ReservationFormPage'
 import { CRMPage } from '@/modules/crm/pages/CRMPage'
 import { EstadisticasPage } from '@/modules/stats/pages/EstadisticasPage'
 import { NotificacionesPage } from '@/modules/dashboard/pages/NotificacionesPage'
+
+function WaiterLegacyRedirect() {
+  const { slug } = useParams()
+  return <Navigate to={`/mozo/${slug ?? ''}`} replace />
+}
 
 function App() {
   return (
@@ -70,8 +74,8 @@ function App() {
         <Route path="/mozo/:slug" element={<WaiterLogin />} />
         <Route path="/mozo/:slug/app" element={<WaiterApp />} />
         {/* Rutas waiter legacy — backward compat */}
-        <Route path="/waiter/:slug/login" element={<WaiterLogin />} />
-        <Route path="/waiter/:slug/dashboard" element={<WaiterDashboard />} />
+        <Route path="/waiter/:slug/login" element={<WaiterLegacyRedirect />} />
+        <Route path="/waiter/:slug/dashboard" element={<WaiterLegacyRedirect />} />
         <Route path="/waiter/:slug/table/:tableNumber" element={<TableBill />} />
         <Route path="/delivery/:slug/login" element={<DeliveryLogin />} />
         <Route path="/delivery/:slug/app" element={<DriverDashboard />} />

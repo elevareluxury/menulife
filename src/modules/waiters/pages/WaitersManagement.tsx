@@ -17,7 +17,7 @@ import type { Waiter } from '@/types'
 const db = supabase as any
 
 function WaiterLinkBanner({ slug }: { slug: string }) {
-  const url = `${window.location.origin}/waiter/${slug}/login`
+  const url = `${window.location.origin}/mozo/${slug}`
 
   const copy = async () => {
     await navigator.clipboard.writeText(url)

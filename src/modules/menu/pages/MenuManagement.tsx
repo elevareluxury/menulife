@@ -36,8 +36,8 @@ export function MenuManagement() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div style={{ minWidth: 0 }}>
-          <h2 className="text-2xl font-bold text-gray-900" style={{ whiteSpace: 'nowrap' }}>Menú</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h2 className="text-2xl font-bold text-ink-1" style={{ whiteSpace: 'nowrap' }}>Menú</h2>
+          <p className="text-sm text-ink-3 mt-0.5">
             {restaurant.name} · {sections.length} {sections.length === 1 ? 'sección' : 'secciones'}
           </p>
         </div>
