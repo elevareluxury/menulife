@@ -32,16 +32,17 @@ interface Props {
   slug: string
   onCallWaiter?: () => void
   onVisibleChange?: (visible: boolean) => void
+  onCompleted?: (orderId: string) => void
 }
 
-export function ActiveOrderBanner({ slug, onCallWaiter, onVisibleChange }: Props) {
+export function ActiveOrderBanner({ slug, onCallWaiter, onVisibleChange, onCompleted }: Props) {
   const navigate = useNavigate()
   const [savedOrder, setSavedOrder] = useState<SavedOrder | null>(null)
   const [currentStatus, setCurrentStatus] = useState<string>('pending')
   const [orderNumber, setOrderNumber] = useState<string>('')
   const [callingWaiter, setCallingWaiter] = useState(false)
 
-  const isVisible = !!savedOrder && currentStatus !== 'delivered' && currentStatus !== 'cancelled'
+  const isVisible = !!savedOrder && currentStatus !== 'delivered' && currentStatus !== 'cancelled' && currentStatus !== 'completed'
 
   // Notify parent of visibility
   useEffect(() => {
@@ -98,9 +99,13 @@ export function ActiveOrderBanner({ slug, onCallWaiter, onVisibleChange }: Props
             if (navigator.vibrate) navigator.vibrate([300, 100, 300])
           }
 
+          if (newStatus === 'completed') {
+            onCompleted?.(savedOrder.orderId)
+          }
+
           setCurrentStatus(newStatus)
 
-          if (newStatus === 'delivered' || newStatus === 'cancelled') {
+          if (newStatus === 'delivered' || newStatus === 'cancelled' || newStatus === 'completed') {
             setTimeout(() => {
               sessionStorage.removeItem(`order_${slug}`)
               setSavedOrder(null)

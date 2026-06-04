@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   BarChart, Bar, ResponsiveContainer, Cell,
+  PieChart, Pie,
 } from 'recharts'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -188,6 +189,48 @@ export function EstadisticasTab({ restaurantId, restaurantSlug }: EstadisticasTa
               prev={0}
             />
           </div>
+
+          {/* Order type breakdown donut */}
+          {a.byOrderType.length > 0 && (
+            <Card>
+              <h3 className="text-base font-semibold text-gray-900 mb-4">🍽 Pedidos por tipo</h3>
+              <div className="flex items-center gap-6 flex-wrap">
+                <ResponsiveContainer width={160} height={160}>
+                  <PieChart>
+                    <Pie
+                      data={a.byOrderType.map(t => ({ name: t.label, value: t.count }))}
+                      cx="50%" cy="50%"
+                      innerRadius={48} outerRadius={72}
+                      dataKey="value"
+                      strokeWidth={0}
+                    >
+                      {a.byOrderType.map((t) => (
+                        <Cell
+                          key={t.type}
+                          fill={t.type === 'delivery' ? '#F4705A' : t.type === 'takeaway' ? '#EF9F27' : '#888888'}
+                        />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-col gap-2 flex-1 min-w-[140px]">
+                  {a.byOrderType.map(t => {
+                    const total = a.byOrderType.reduce((s, x) => s + x.count, 0)
+                    const pct = total > 0 ? Math.round((t.count / total) * 100) : 0
+                    const color = t.type === 'delivery' ? '#F4705A' : t.type === 'takeaway' ? '#EF9F27' : '#888888'
+                    return (
+                      <div key={t.type} className="flex items-center gap-2 text-sm">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                        <span className="text-gray-700 flex-1">{t.label}</span>
+                        <span className="font-semibold text-gray-900">{t.count}</span>
+                        <span className="text-gray-400 text-xs w-9 text-right">{pct}%</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* Sales by day chart */}
           {a.salesByDay.length > 1 && (

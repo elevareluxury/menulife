@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, Copy, MessageCircle, Smartphone, CheckCircle, XCircle } from 'lucide-react'
+import { Plus, Edit, Trash2, Copy, MessageCircle, Smartphone, CheckCircle, XCircle, BarChart2, Users } from 'lucide-react'
 import bcrypt from 'bcryptjs'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -15,6 +15,163 @@ import type { DeliveryDriver } from '@/types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
+
+interface DriverDayStat {
+  day: string
+  driver_id: string
+  first_name: string
+  last_name: string
+  total_deliveries: number
+  total_revenue: number
+  avg_time: number | null
+}
+
+interface DriverDayStatRaw extends DriverDayStat {
+  _durations: number[]
+}
+
+function DriverHistorial({ restaurantId }: { restaurantId: string }) {
+  const today = new Date().toISOString().slice(0, 10)
+  const weekAgo = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10)
+
+  const [dateFrom, setDateFrom] = useState(weekAgo)
+  const [dateTo, setDateTo] = useState(today)
+  const [stats, setStats] = useState<DriverDayStat[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => { fetchStats() }, [dateFrom, dateTo, restaurantId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchStats = async () => {
+    if (!restaurantId) return
+    setLoading(true)
+    try {
+      const [driversRes, ordersRes] = await Promise.all([
+        db.from('delivery_drivers').select('id, first_name, last_name').eq('restaurant_id', restaurantId),
+        db.from('orders')
+          .select('id, delivery_driver_id, total, completed_at, duration_minutes')
+          .eq('restaurant_id', restaurantId)
+          .eq('status', 'completed')
+          .eq('order_type', 'delivery')
+          .gte('completed_at', `${dateFrom}T00:00:00`)
+          .lte('completed_at', `${dateTo}T23:59:59`),
+      ])
+
+      const driversMap: Record<string, { first_name: string; last_name: string }> = {}
+      ;(driversRes.data ?? []).forEach((d: { id: string; first_name: string; last_name: string }) => {
+        driversMap[d.id] = { first_name: d.first_name, last_name: d.last_name }
+      })
+
+      const grouped: Record<string, Record<string, DriverDayStatRaw>> = {}
+      ;(ordersRes.data ?? []).forEach((o: { delivery_driver_id?: string; completed_at?: string; total?: number; duration_minutes?: number }) => {
+        if (!o.delivery_driver_id || !o.completed_at) return
+        const day = o.completed_at.slice(0, 10)
+        const did = o.delivery_driver_id
+        if (!grouped[day]) grouped[day] = {}
+        if (!grouped[day][did]) {
+          const d = driversMap[did] ?? { first_name: 'Desconocido', last_name: '' }
+          grouped[day][did] = { day, driver_id: did, ...d, total_deliveries: 0, total_revenue: 0, avg_time: null, _durations: [] }
+        }
+        grouped[day][did].total_deliveries++
+        grouped[day][did].total_revenue += o.total ?? 0
+        if (o.duration_minutes) grouped[day][did]._durations.push(o.duration_minutes)
+      })
+
+      const result: DriverDayStat[] = []
+      Object.keys(grouped).sort().reverse().forEach(day => {
+        Object.values(grouped[day])
+          .sort((a, b) => b.total_deliveries - a.total_deliveries)
+          .forEach(({ _durations, ...stat }) => {
+            result.push({
+              ...stat,
+              avg_time: _durations.length > 0
+                ? Math.round(_durations.reduce((s, v) => s + v, 0) / _durations.length)
+                : null,
+            })
+          })
+      })
+
+      setStats(result)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const byDay: Record<string, DriverDayStat[]> = {}
+  stats.forEach(s => { if (!byDay[s.day]) byDay[s.day] = []; byDay[s.day].push(s) })
+  const days = Object.keys(byDay).sort().reverse()
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <label className="text-sm font-medium text-gray-700">Desde</label>
+        <input
+          type="date" value={dateFrom} max={dateTo}
+          onChange={e => setDateFrom(e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+        />
+        <label className="text-sm font-medium text-gray-700">Hasta</label>
+        <input
+          type="date" value={dateTo} min={dateFrom} max={today}
+          onChange={e => setDateTo(e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+        />
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-12"><Spinner size="lg" /></div>
+      ) : days.length === 0 ? (
+        <Card>
+          <div className="text-center py-12">
+            <p className="text-4xl mb-3">📊</p>
+            <p className="text-gray-500">No hay entregas registradas en el rango seleccionado</p>
+          </div>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          {days.map(day => (
+            <div key={day}>
+              <p className="text-xs font-bold uppercase text-gray-400 mb-2 tracking-wider">
+                {new Date(day + 'T12:00:00').toLocaleDateString('es-AR', {
+                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                })}
+              </p>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {byDay[day].map(stat => (
+                  <Card key={`${stat.day}-${stat.driver_id}`} className="p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-sm font-bold text-orange-700">
+                        {stat.first_name[0]}{stat.last_name[0]}
+                      </div>
+                      <p className="font-semibold text-sm">{stat.first_name} {stat.last_name}</p>
+                    </div>
+                    <div className={`grid gap-2 text-xs ${stat.avg_time !== null ? 'grid-cols-2' : 'grid-cols-2'}`}>
+                      <div className="bg-gray-50 rounded-lg p-2 text-center">
+                        <p className="text-gray-500">Entregas</p>
+                        <p className="font-bold text-lg text-gray-800">{stat.total_deliveries}</p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-2 text-center">
+                        <p className="text-gray-500">Facturado</p>
+                        <p className="font-bold text-base text-gray-800">
+                          ${stat.total_revenue.toLocaleString('es-AR', { maximumFractionDigits: 0 })}
+                        </p>
+                      </div>
+                      {stat.avg_time !== null && (
+                        <div className="bg-gray-50 rounded-lg p-2 text-center col-span-2">
+                          <p className="text-gray-500">Tiempo promedio</p>
+                          <p className="font-bold text-base text-gray-800">{stat.avg_time} min</p>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function DriverLinkBanner({ slug }: { slug: string }) {
   const url = `${window.location.origin}/delivery/${slug}/login`
@@ -68,6 +225,7 @@ export function DriversManagement() {
   const { drivers, loading: driversLoading, refetch } = useDrivers(restaurant?.id)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingDriver, setEditingDriver] = useState<DeliveryDriver | null>(null)
+  const [activeTab, setActiveTab] = useState<'list' | 'historial'>('list')
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Eliminar este repartidor?')) return
@@ -110,73 +268,98 @@ export function DriversManagement() {
           <h1 className="text-3xl font-bold mb-1">Repartidores</h1>
           <p className="text-gray-400 text-sm">Gestiona tu equipo de delivery</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Repartidor
-        </Button>
+        {activeTab === 'list' && (
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Repartidor
+          </Button>
+        )}
       </div>
 
-      {restaurant?.slug && <DriverLinkBanner slug={restaurant.slug} />}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setActiveTab('list')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab === 'list' ? 'bg-orange-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+        >
+          <Users className="w-4 h-4" />
+          Repartidores
+        </button>
+        <button
+          onClick={() => setActiveTab('historial')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab === 'historial' ? 'bg-orange-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+        >
+          <BarChart2 className="w-4 h-4" />
+          Historial
+        </button>
+      </div>
 
-      {drivers.length === 0 ? (
-        <Card>
-          <div className="text-center py-12">
-            <p className="text-4xl mb-3">🛵</p>
-            <p className="text-gray-600 mb-4">Aún no tenés repartidores registrados</p>
-            <Button onClick={() => setIsModalOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Agregar primer repartidor
-            </Button>
-          </div>
-        </Card>
+      {activeTab === 'historial' ? (
+        <DriverHistorial restaurantId={restaurant?.id ?? ''} />
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {drivers.map((driver) => (
-            <Card key={driver.id} className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-900">
-                    {driver.first_name} {driver.last_name}
-                  </h3>
-                  <p className="text-sm text-gray-500">PIN: ••••</p>
-                  {driver.phone && (
-                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
-                      📱 {driver.phone}
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => { setEditingDriver(driver); setIsModalOpen(true) }}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(driver.id)}
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              </div>
+        <>
+          {restaurant?.slug && <DriverLinkBanner slug={restaurant.slug} />}
 
-              <div className="flex items-center gap-2">
-                {driver.is_available
-                  ? <CheckCircle className="w-4 h-4 text-green-600" />
-                  : <XCircle className="w-4 h-4 text-gray-400" />
-                }
-                <Toggle
-                  checked={driver.is_available}
-                  onChange={() => toggleAvailable(driver)}
-                  label={driver.is_available ? 'Disponible' : 'No disponible'}
-                />
+          {drivers.length === 0 ? (
+            <Card>
+              <div className="text-center py-12">
+                <p className="text-4xl mb-3">🛵</p>
+                <p className="text-gray-600 mb-4">Aún no tenés repartidores registrados</p>
+                <Button onClick={() => setIsModalOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Agregar primer repartidor
+                </Button>
               </div>
             </Card>
-          ))}
-        </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {drivers.map((driver) => (
+                <Card key={driver.id} className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900">
+                        {driver.first_name} {driver.last_name}
+                      </h3>
+                      <p className="text-sm text-gray-500">PIN: ••••</p>
+                      {driver.phone && (
+                        <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
+                          📱 {driver.phone}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setEditingDriver(driver); setIsModalOpen(true) }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(driver.id)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {driver.is_available
+                      ? <CheckCircle className="w-4 h-4 text-green-600" />
+                      : <XCircle className="w-4 h-4 text-gray-400" />
+                    }
+                    <Toggle
+                      checked={driver.is_available}
+                      onChange={() => toggleAvailable(driver)}
+                      label={driver.is_available ? 'Disponible' : 'No disponible'}
+                    />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <DriverModal

@@ -70,6 +70,10 @@ export function KitchenDisplay() {
   const getOrdersByStatus = (status: string) =>
     orders.filter(o => o.status === status)
 
+  const deliveryCount  = orders.filter(o => o.order_type === 'delivery').length
+  const takeawayCount  = orders.filter(o => o.order_type === 'takeaway').length
+  const dineInCount    = orders.filter(o => o.order_type === 'dine_in').length
+
   if (loading || !restaurantId) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -113,6 +117,18 @@ export function KitchenDisplay() {
                 </div>
               </div>
             </div>
+          </div>
+          {/* Type counters row */}
+          <div className="flex items-center gap-5 mt-2.5 text-sm">
+            <span className="flex items-center gap-1.5 text-gray-300">
+              🍽 Mesas: <strong className="text-white">{dineInCount}</strong>
+            </span>
+            <span className="flex items-center gap-1.5" style={{ color: '#F4705A' }}>
+              🛵 Delivery: <strong>{deliveryCount}</strong>
+            </span>
+            <span className="flex items-center gap-1.5 text-amber-400">
+              🥡 Para llevar: <strong>{takeawayCount}</strong>
+            </span>
           </div>
         </div>
       </div>

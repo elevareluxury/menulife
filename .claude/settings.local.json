@@ -44,7 +44,9 @@
       "Bash(Get-Content \"E:\\\\menulife\\\\src\\\\index.css\")",
       "Bash(Measure-Object -Line)",
       "Bash(Select-Object -ExpandProperty Lines)",
-      "Bash(npm list *)"
+      "Bash(npm list *)",
+      "PowerShell(Get-ChildItem -Path \"E:\\\\menulife\\\\src\\\\modules\\\\orders\\\\\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"E:\\\\menulife\\\\src\\\\modules\\\\kitchen\\\\\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName })"
     ]
   }
 }

@@ -6,6 +6,7 @@ export interface TopItem { name: string; count: number; pct: number }
 export interface WaiterStat { name: string; total: number; count: number }
 export interface HourStat { hour: number; count: number }
 export interface TableStat { table: string; avg: number; count: number }
+export interface OrderTypeStat { type: string; label: string; count: number; total: number }
 
 export interface Analytics {
   salesByDay: DayStat[]
@@ -13,14 +14,19 @@ export interface Analytics {
   byWaiter: WaiterStat[]
   byHour: HourStat[]
   byTable: TableStat[]
+  byOrderType: OrderTypeStat[]
   current: { total: number; count: number; avgTicket: number; avgMinutes: number }
   previous: { total: number; count: number; avgTicket: number }
 }
 
 const EMPTY: Analytics = {
-  salesByDay: [], topItems: [], byWaiter: [], byHour: [], byTable: [],
+  salesByDay: [], topItems: [], byWaiter: [], byHour: [], byTable: [], byOrderType: [],
   current: { total: 0, count: 0, avgTicket: 0, avgMinutes: 0 },
   previous: { total: 0, count: 0, avgTicket: 0 },
+}
+
+const ORDER_TYPE_LABEL: Record<string, string> = {
+  dine_in: 'Mesa', delivery: 'Delivery', takeaway: 'Para llevar',
 }
 
 export function useOrderAnalytics(
@@ -41,7 +47,7 @@ export function useOrderAnalytics(
       // Current period
       const { data: orders } = await supabase
         .from('orders')
-        .select('id, table_number, status, total, currency, created_at, updated_at')
+        .select('id, table_number, status, total, currency, created_at, updated_at, order_type')
         .eq('restaurant_id', restaurantId)
         .gte('created_at', desde.toISOString())
         .lte('created_at', hastaEnd.toISOString())
@@ -122,6 +128,19 @@ export function useOrderAnalytics(
         .map(([table, v]) => ({ table, avg: Math.round(v.total / v.count), count: v.count }))
         .sort((a, b) => b.avg - a.avg)
 
+      // By order type
+      const typeMap: Record<string, { count: number; total: number }> = {}
+      delivered.forEach(o => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const t: string = (o as any).order_type ?? 'dine_in'
+        if (!typeMap[t]) typeMap[t] = { count: 0, total: 0 }
+        typeMap[t].count++
+        typeMap[t].total += o.total
+      })
+      const byOrderType: OrderTypeStat[] = Object.entries(typeMap).map(([type, v]) => ({
+        type, label: ORDER_TYPE_LABEL[type] ?? type, ...v,
+      }))
+
       // Avg duration (minutes) for delivered orders
       let totalMinutes = 0
       let durCount = 0
@@ -141,6 +160,7 @@ export function useOrderAnalytics(
         byWaiter: [],
         byHour,
         byTable,
+        byOrderType,
         current: {
           total: currentTotal,
           count: currentCount,

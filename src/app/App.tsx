@@ -30,6 +30,8 @@ import { ForgotPassword } from '@/pages/ForgotPassword'
 import { ResetPassword } from '@/pages/ResetPassword'
 import { ReservationFormPage } from '@/modules/public/pages/ReservationFormPage'
 import { CRMPage } from '@/modules/crm/pages/CRMPage'
+import { EstadisticasPage } from '@/modules/stats/pages/EstadisticasPage'
+import { NotificacionesPage } from '@/modules/dashboard/pages/NotificacionesPage'
 
 function App() {
   return (
@@ -57,6 +59,8 @@ function App() {
           <Route path="settings" element={<BusinessSettings />} />
           <Route path="repartidores" element={<DriversManagement />} />
           <Route path="clientes" element={<CRMPage />} />
+          <Route path="estadisticas"    element={<EstadisticasPage />} />
+          <Route path="notificaciones" element={<NotificacionesPage />} />
         </Route>
         <Route path="/r/:slug/reservar" element={<ReservationFormPage />} />
         <Route path="/r/:slug/pedido/:orderId" element={<OrderTracking />} />

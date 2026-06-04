@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import {
   ChevronLeft, Store, MapPin, Clock, Share2, Palette,
-  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus, CalendarDays, Plug,
+  Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus, CalendarDays, Plug, Star,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -78,6 +78,7 @@ interface SocialLinks {
   tiktok: string
   whatsapp: string
   google_maps: string
+  google_review: string
 }
 
 interface SettingsForm {
@@ -117,7 +118,7 @@ const DEFAULT_SCHEDULE: BusinessHours = {
 }
 
 const DEFAULT_SOCIAL: SocialLinks = {
-  instagram: '', facebook: '', tiktok: '', whatsapp: '', google_maps: '',
+  instagram: '', facebook: '', tiktok: '', whatsapp: '', google_maps: '', google_review: '',
 }
 
 const DEFAULT_FORM: SettingsForm = {
@@ -1035,6 +1036,27 @@ export function BusinessSettings() {
               className="flex-1 px-3 py-2 text-sm text-gray-900 outline-none bg-white placeholder:text-gray-400"
             />
           </div>
+        </div>
+
+        <div>
+          <FieldLabel hint="Los clientes verán un botón para dejarte una reseña al completar su pedido.">
+            {t('dashboard.google_review_label', 'Link de reseña en Google')}
+          </FieldLabel>
+          <div className="flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-transparent">
+            <div className="flex items-center px-3 bg-gray-50 border-r border-gray-200">
+              <Star className="w-4 h-4 text-[#FBBC04]" />
+            </div>
+            <input
+              type="url"
+              value={formData.social_links.google_review}
+              onChange={e => updateSocial('google_review', e.target.value)}
+              placeholder="https://g.page/r/tu-negocio/review"
+              className="flex-1 px-3 py-2 text-sm text-gray-900 outline-none bg-white placeholder:text-gray-400"
+            />
+          </div>
+          {formData.social_links.google_review && !formData.social_links.google_review.startsWith('https://') && (
+            <p className="mt-1 text-xs text-red-500">El link debe empezar con https://</p>
+          )}
         </div>
       </div>
     </SectionCard>

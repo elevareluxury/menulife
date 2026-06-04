@@ -467,6 +467,11 @@ export function PublicMenu() {
   const [bannerActive,   setBannerActive]   = useState(false)
   const mesaParam = new URLSearchParams(window.location.search).get('mesa')
 
+  // Review modal
+  const [showReviewModal,  setShowReviewModal]  = useState(false)
+  const [reviewRating,     setReviewRating]     = useState(0)
+  const [reviewSubmitted,  setReviewSubmitted]  = useState(false)
+
   // Delivery/Takeaway phase
   const [menuPhase, setMenuPhase] = useState<MenuPhase>('menu')
   const [orderTypeData, setOrderTypeData] = useState<OrderTypeData | null>(null)
@@ -619,6 +624,35 @@ export function PublicMenu() {
     }
   }
 
+  // ── Review modal handlers ────────────────────────────────────────────────────
+  const handleOrderCompleted = (orderId: string) => {
+    const sessionKey = `review_shown_${orderId}`
+    if (sessionStorage.getItem(sessionKey)) return
+    sessionStorage.setItem(sessionKey, '1')
+    setShowReviewModal(true)
+  }
+
+  const handleStarRating = async (stars: number) => {
+    setReviewRating(stars)
+    setReviewSubmitted(true)
+    const phone = orderTypeData?.customerPhone
+    if (phone && restaurant) {
+      const tag = `reseña-${stars}-estrellas`
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const anyDb = supabase as any
+      try {
+        const { data: contact } = await anyDb.from('crm_contacts')
+          .select('id, tags').eq('restaurant_id', restaurant.id)
+          .eq('phone', phone).maybeSingle()
+        if (contact) {
+          const existing: string[] = Array.isArray(contact.tags) ? contact.tags : []
+          const next = [...new Set([...existing.filter((t: string) => !t.startsWith('reseña-')), tag])]
+          await anyDb.from('crm_contacts').update({ tags: next }).eq('id', contact.id)
+        }
+      } catch { /* ignore */ }
+    }
+  }
+
   // ── Filtering ─────────────────────────────────────────────────────────────────
   const toggleFilter = (f: string) =>
     setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f])
@@ -757,16 +791,12 @@ export function PublicMenu() {
             )}
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            {restaurant.reservations_enabled && (
-              <button
-                onClick={() => navigate(`/r/${slug}/reservar`)}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
-                style={{ backgroundColor: accentColor, color: '#fff', backdropFilter: 'blur(8px)', borderRadius: '10px' }}
-              >
-                <CalendarDays className="w-3 h-3" />
-                {language === 'ES' ? 'Reservar' : 'Book'}
-              </button>
-            )}
+            <span
+              className="text-xs font-medium truncate"
+              style={{ color: '#fff', fontWeight: 500, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {restaurant.name}
+            </span>
             {(restaurant.allow_language_switch ?? true) && (
               <button
                 onClick={() => {
@@ -787,6 +817,16 @@ export function PublicMenu() {
             >
               <DollarSign className="w-3 h-3" />{currency}
             </button>
+            {restaurant.reservations_enabled && (
+              <button
+                onClick={() => navigate(`/r/${slug}/reservar`)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
+                style={{ backgroundColor: accentColor, color: '#fff', backdropFilter: 'blur(8px)', borderRadius: '10px' }}
+              >
+                <CalendarDays className="w-3 h-3" />
+                {language === 'ES' ? 'Reservar' : 'Book'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1017,7 +1057,7 @@ export function PublicMenu() {
               <div key={section.id} className="mb-7">
                 <p
                   className="text-xs font-bold uppercase mb-3"
-                  style={{ color: 'var(--menu-text-muted)', letterSpacing: '0.1em' }}
+                  style={{ color: 'var(--menu-text-primary)', letterSpacing: '0.1em' }}
                 >
                   {language === 'EN' && section.name_en ? section.name_en : section.name}
                 </p>
@@ -1289,8 +1329,109 @@ export function PublicMenu() {
           slug={slug}
           onCallWaiter={mesaParam ? handleCallWaiter : undefined}
           onVisibleChange={setBannerActive}
+          onCompleted={handleOrderCompleted}
         />
       )}
+
+      {/* ── Review modal ──────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showReviewModal && (
+          <motion.div
+            key="review-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-end justify-center"
+            style={{ backdropFilter: 'blur(12px)', backgroundColor: 'rgba(0,0,0,0.7)' }}
+            onClick={() => setShowReviewModal(false)}
+          >
+            <motion.div
+              key="review-sheet"
+              initial={{ y: 120, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 120, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+              className="w-full max-w-md rounded-t-3xl px-6 pt-6 pb-10"
+              style={{ backgroundColor: '#111318', border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none' }}
+              onClick={e => e.stopPropagation()}
+            >
+              {!reviewSubmitted ? (
+                <>
+                  <div className="text-center mb-6">
+                    <p className="text-5xl mb-3">🎉</p>
+                    <h3 className="text-xl font-bold text-white mb-1">¡Gracias por tu visita!</h3>
+                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      Tu opinión nos ayuda a mejorar
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    {(() => {
+                      const googleUrl = (restaurant.social_links as Record<string, string> | null)?.google_review
+                      return googleUrl ? (
+                        <a
+                          href={googleUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-white transition-all active:scale-95"
+                          style={{ backgroundColor: accentColor }}
+                        >
+                          ⭐ Dejar reseña en Google
+                        </a>
+                      ) : null
+                    })()}
+
+                    <div
+                      className="w-full rounded-2xl px-4 py-4"
+                      style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    >
+                      <p className="text-sm font-medium text-center mb-3" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                        ✨ Solo puntuar
+                      </p>
+                      <div className="flex justify-center gap-3">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <button
+                            key={star}
+                            onClick={() => handleStarRating(star)}
+                            className="text-3xl transition-transform active:scale-110 hover:scale-110"
+                          >
+                            {star <= reviewRating ? '⭐' : '☆'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setShowReviewModal(false)}
+                    className="w-full mt-4 py-3 rounded-2xl text-sm font-medium transition-all active:scale-95"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)' }}
+                  >
+                    Cerrar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="text-center py-4">
+                    <p className="text-5xl mb-3">💛</p>
+                    <h3 className="text-xl font-bold text-white mb-1">¡Gracias por tu puntuación!</h3>
+                    <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      Nos ayudás a crecer día a día
+                    </p>
+                    <button
+                      onClick={() => setShowReviewModal(false)}
+                      className="px-8 py-3 rounded-2xl font-semibold text-white transition-all active:scale-95"
+                      style={{ backgroundColor: accentColor }}
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -215,7 +215,6 @@ export function CinematicHero() {
 
       {/* FASE 1: Intro */}
       <div ref={introRef} className="ch-intro">
-        <p className="ch-label">PLATAFORMA GASTRONÓMICA</p>
         <h1>
           <span className="ch-line1">El sistema operativo</span>
           <span className="ch-line2">del negocio moderno.</span>
@@ -225,12 +224,6 @@ export function CinematicHero() {
           — unificados en una sola plataforma premium.
         </p>
 
-        <div className="ch-scroll-hint">
-          <span>Scroll</span>
-          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </svg>
-        </div>
       </div>
 
       {/* FASE 2: Card que sube con scroll */}

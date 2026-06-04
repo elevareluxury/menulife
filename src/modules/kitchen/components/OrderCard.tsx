@@ -47,7 +47,7 @@ export function OrderCard({ order, onStatusChange, isFirst, isLast }: OrderCardP
   const orderDetail = (order as unknown as { order_type_detail?: string }).order_type_detail
   const isDelivery = orderDetail === 'delivery' || order.order_type === 'delivery'
   const isTakeaway = orderDetail === 'takeaway' || (order.order_type === 'takeaway' && !isDelivery)
-  const accentBorder = isDelivery ? '4px solid #F77F00' : isTakeaway ? '4px solid #3B82F6' : undefined
+  const accentBorder = isDelivery ? '4px solid #F4705A' : isTakeaway ? '4px solid #EF9F27' : undefined
 
   return (
     <div
@@ -61,11 +61,16 @@ export function OrderCard({ order, onStatusChange, isFirst, isLast }: OrderCardP
             {isDelivery ? (
               <>
                 <span className="text-2xl">🛵</span>
-                <div>
+                <div className="min-w-0">
                   <span className="text-white font-bold text-lg truncate max-w-[120px] block">
                     {order.customer_name}
                   </span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#F77F00', letterSpacing: '0.04em' }}>DELIVERY</span>
+                  {order.customer_address && (
+                    <span className="block text-xs truncate max-w-[130px]" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                      {order.customer_address}
+                    </span>
+                  )}
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#F4705A', letterSpacing: '0.04em' }}>DELIVERY</span>
                 </div>
               </>
             ) : isTakeaway ? (
@@ -75,7 +80,7 @@ export function OrderCard({ order, onStatusChange, isFirst, isLast }: OrderCardP
                   <span className="text-white font-bold text-lg truncate max-w-[120px] block">
                     {order.customer_name}
                   </span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#3B82F6', letterSpacing: '0.04em' }}>PARA LLEVAR</span>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#EF9F27', letterSpacing: '0.04em' }}>PARA LLEVAR</span>
                 </div>
               </>
             ) : order.order_type === 'dine_in' ? (

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed,
-  QrCode, Users, ChefHat, LogOut, Truck, ContactRound, type LucideIcon,
+  QrCode, Users, ChefHat, LogOut, Truck, ContactRound, BarChart2, type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
@@ -15,9 +15,10 @@ interface NavItemDef {
 }
 
 const NAV_ITEMS: NavItemDef[] = [
-  { to: '/dashboard',          icon: Home,            labelKey: 'dashboard.nav_home',     exact: true },
-  { to: '/dashboard/orders',   icon: ShoppingBag,     labelKey: 'dashboard.nav_orders' },
-  { to: '/dashboard/tables',   icon: LayoutGrid,      labelKey: 'dashboard.nav_tables' },
+  { to: '/dashboard',               icon: Home,       labelKey: 'dashboard.nav_home',        exact: true },
+  { to: '/dashboard/orders',        icon: ShoppingBag, labelKey: 'dashboard.nav_orders' },
+  { to: '/dashboard/estadisticas',  icon: BarChart2,   labelKey: 'dashboard.nav_estadisticas' },
+  { to: '/dashboard/tables',        icon: LayoutGrid,  labelKey: 'dashboard.nav_tables' },
   { to: '/dashboard/menu',     icon: UtensilsCrossed, labelKey: 'dashboard.nav_menu' },
   { to: '/dashboard/qr',       icon: QrCode,          labelKey: 'dashboard.nav_qr' },
   { to: '/dashboard/waiters',      icon: Users,  labelKey: 'dashboard.nav_waiters' },
