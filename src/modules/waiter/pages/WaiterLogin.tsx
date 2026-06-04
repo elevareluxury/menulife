@@ -21,6 +21,7 @@ export function WaiterLogin() {
   const [selectedWaiter, setSelectedWaiter] = useState<Waiter | null>(null)
   const [lastWaiterId, setLastWaiterId] = useState<string | null>(null)
   const [pinError, setPinError] = useState(false)
+  const [restaurantError, setRestaurantError] = useState(false)
 
   const lastWaiterKey = `menulife-last-waiter-${slug}`
   const { waiters, loading: loadingWaiters } = useWaiters(restaurantId ?? undefined)
@@ -34,18 +35,22 @@ export function WaiterLogin() {
 
   useEffect(() => {
     if (!slug) return
+    setLastWaiterId(localStorage.getItem(lastWaiterKey))
     supabase
       .from('restaurants')
       .select('id, name')
       .eq('slug', slug)
       .single()
-      .then(({ data }) => {
-        if (data) {
+      .then(({ data, error }) => {
+        if (data && !error) {
           setRestaurantId(data.id)
           setRestaurantName(data.name ?? '')
+        } else {
+          setRestaurantError(true)
         }
+      }, () => {
+        setRestaurantError(true)
       })
-    setLastWaiterId(localStorage.getItem(lastWaiterKey))
   }, [slug, lastWaiterKey])
 
   const handleSelectWaiter = (waiter: Waiter) => {
@@ -105,11 +110,13 @@ export function WaiterLogin() {
       is_on_shift: true,
       shift_start: new Date().toISOString(),
     }).eq('id', mozo.id)
-    await (supabase as any).from('waiter_activity_log').insert({
-      restaurant_id: restaurantId,
-      waiter_id: mozo.id,
-      action: 'login',
-    }).catch(() => {})
+    try {
+      await (supabase as any).from('waiter_activity_log').insert({
+        restaurant_id: restaurantId,
+        waiter_id: mozo.id,
+        action: 'login',
+      })
+    } catch { /* non-critical */ }
     toast.success(`Bienvenido ${mozo.first_name}!`)
     requestNotificationPermission()
     registerServiceWorker()
@@ -153,11 +160,13 @@ export function WaiterLogin() {
             is_on_shift: true,
             shift_start: new Date().toISOString(),
           }).eq('id', data.mozo.id)
-          await (supabase as any).from('waiter_activity_log').insert({
-            restaurant_id: restaurantId,
-            waiter_id: data.mozo.id,
-            action: 'login',
-          }).catch(() => {})
+          try {
+            await (supabase as any).from('waiter_activity_log').insert({
+              restaurant_id: restaurantId,
+              waiter_id: data.mozo.id,
+              action: 'login',
+            })
+          } catch { /* non-critical */ }
           toast.success(`Bienvenido ${data.mozo.first_name}!`)
           requestNotificationPermission()
           registerServiceWorker()
@@ -254,11 +263,11 @@ export function WaiterLogin() {
         {step === 'selector' ? (
           <>
             <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginBottom: '16px' }}>
-              ¿Quién sos?
+              {restaurantError ? '⚠️ Restaurante no encontrado' : '¿Quién sos?'}
             </p>
             <WaiterSelector
               waiters={activeWaiters}
-              loading={loadingWaiters || !restaurantId}
+              loading={!restaurantError && (loadingWaiters || !restaurantId)}
               lastWaiterId={lastWaiterId}
               onSelect={handleSelectWaiter}
             />

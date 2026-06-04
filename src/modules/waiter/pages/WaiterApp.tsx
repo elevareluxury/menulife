@@ -158,51 +158,56 @@ export function WaiterApp() {
     if (!waiter?.restaurant_id) return
     const today = new Date().toISOString().split('T')[0]
 
-    const [t, o, n, p] = await Promise.all([
-      db.from('tables')
-        .select('id, table_number, capacity, status, orders:orders(id, status, total, created_at, waiter_called, bill_requested, items:order_items(menu_item_name, quantity))')
-        .eq('restaurant_id', waiter.restaurant_id)
-        .eq('waiter_id', waiter.id)
-        .eq('is_active', true),
-      db.from('orders')
-        .select('id, total, created_at, table_number, status, items:order_items(menu_item_name, quantity)')
-        .eq('restaurant_id', waiter.restaurant_id)
-        .eq('waiter_id', waiter.id)
-        .gte('created_at', `${today}T00:00:00`)
-        .order('created_at', { ascending: false }),
-      db.from('waiter_notifications')
-        .select('id, type, message, is_read, created_at')
-        .eq('waiter_id', waiter.id)
-        .order('created_at', { ascending: false })
-        .limit(50),
-      db.from('waiters')
-        .select('is_on_shift, shift_start')
-        .eq('id', waiter.id)
-        .single(),
-    ])
+    try {
+      const [t, o, n, p] = await Promise.all([
+        db.from('tables')
+          .select('id, table_number, capacity, status, orders:orders(id, status, total, created_at, waiter_called, bill_requested, items:order_items(menu_item_name, quantity))')
+          .eq('restaurant_id', waiter.restaurant_id)
+          .eq('waiter_id', waiter.id)
+          .eq('is_active', true),
+        db.from('orders')
+          .select('id, total, created_at, table_number, status, items:order_items(menu_item_name, quantity)')
+          .eq('restaurant_id', waiter.restaurant_id)
+          .eq('waiter_id', waiter.id)
+          .gte('created_at', `${today}T00:00:00`)
+          .order('created_at', { ascending: false }),
+        db.from('waiter_notifications')
+          .select('id, type, message, is_read, created_at')
+          .eq('waiter_id', waiter.id)
+          .order('created_at', { ascending: false })
+          .limit(50),
+        db.from('waiters')
+          .select('is_on_shift, shift_start')
+          .eq('id', waiter.id)
+          .single(),
+      ])
 
-    setTables(t.data ?? [])
-    setToday(o.data ?? [])
+      setTables(t.data ?? [])
+      setToday(o.data ?? [])
 
-    const fresh: Notif[] = n.data ?? []
-    if (notifsReady.current) {
-      const incoming = fresh.filter(x => !prevIds.current.has(x.id))
-      if (incoming.length > 0) {
-        playBeep()
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200])
-        incoming.forEach(x => toast(x.message, { icon: notifIcon(x.type) }))
+      const fresh: Notif[] = n.data ?? []
+      if (notifsReady.current) {
+        const incoming = fresh.filter(x => !prevIds.current.has(x.id))
+        if (incoming.length > 0) {
+          playBeep()
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200])
+          incoming.forEach(x => toast(x.message, { icon: notifIcon(x.type) }))
+        }
+      } else {
+        notifsReady.current = true
       }
-    } else {
-      notifsReady.current = true
-    }
-    prevIds.current = new Set(fresh.map(x => x.id))
-    setNotifs(fresh)
+      prevIds.current = new Set(fresh.map(x => x.id))
+      setNotifs(fresh)
 
-    if (p.data) {
-      setIsOnShift(p.data.is_on_shift ?? true)
-      setShiftStart(p.data.shift_start ?? null)
+      if (p.data) {
+        setIsOnShift(p.data.is_on_shift ?? true)
+        setShiftStart(p.data.shift_start ?? null)
+      }
+    } catch (err) {
+      console.error('fetchAll error:', err)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [waiter])
 
   useEffect(() => {
@@ -218,8 +223,12 @@ export function WaiterApp() {
   }, [waiter, fetchAll])
 
   /* ── Actions ──────────────────────────────────────────────────────── */
-  const logActivity = (action: string, extra?: Record<string, string>) =>
-    waiter && db.from('waiter_activity_log').insert({ restaurant_id: waiter.restaurant_id, waiter_id: waiter.id, action, ...extra }).catch(() => {})
+  const logActivity = (action: string, extra?: Record<string, string>) => {
+    if (!waiter) return
+    void db.from('waiter_activity_log')
+      .insert({ restaurant_id: waiter.restaurant_id, waiter_id: waiter.id, action, ...extra })
+      .then(null, () => {})
+  }
 
   const attendCall = async (orderId: string) => {
     await db.from('orders').update({ waiter_called: false }).eq('id', orderId)
@@ -258,7 +267,9 @@ export function WaiterApp() {
 
   const handleLogout = async () => {
     if (waiter) {
-      await db.from('waiters').update({ is_on_shift: false }).eq('id', waiter.id).catch(() => {})
+      try {
+        await db.from('waiters').update({ is_on_shift: false }).eq('id', waiter.id)
+      } catch { /* ignore */ }
       logActivity('logout')
     }
     logout()
