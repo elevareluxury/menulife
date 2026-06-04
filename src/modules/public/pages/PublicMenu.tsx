@@ -580,19 +580,38 @@ export function PublicMenu() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any
-      const { data: tableData } = await db
-        .from('tables').select('id, waiter_id')
+
+      // Find active order → set waiter_called = true (trigger creates waiter_notification)
+      const { data: activeOrder } = await db
+        .from('orders')
+        .select('id')
         .eq('restaurant_id', restaurant.id)
         .eq('table_number', mesaParam)
+        .in('status', ['pending', 'cooking', 'ready', 'bill_requested', 'waiting'])
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle()
-      if (!tableData?.waiter_id) return
-      const { error } = await db.from('waiter_calls').insert({
-        restaurant_id: restaurant.id,
-        table_id: tableData.id,
-        waiter_id: tableData.waiter_id,
-      })
-      if (error) throw error
-      toast.success(language === 'ES' ? '¡Mozo notificado!' : 'Waiter notified!')
+
+      if (activeOrder?.id) {
+        const { error } = await db.from('orders').update({ waiter_called: true }).eq('id', activeOrder.id)
+        if (error) throw error
+      } else {
+        // No active order: fallback to waiter_calls for legacy dashboard
+        const { data: tableData } = await db
+          .from('tables').select('id, waiter_id')
+          .eq('restaurant_id', restaurant.id)
+          .eq('table_number', mesaParam)
+          .maybeSingle()
+        if (tableData?.waiter_id) {
+          await db.from('waiter_calls').insert({
+            restaurant_id: restaurant.id,
+            table_id: tableData.id,
+            waiter_id: tableData.waiter_id,
+          })
+        }
+      }
+
+      toast.success(language === 'ES' ? '🔔 ¡Tu mozo fue notificado!' : '🔔 Waiter notified!')
     } catch {
       toast.error(language === 'ES' ? 'No pudimos llamar al mozo, intentá de nuevo' : 'Could not reach waiter, please try again')
     } finally {

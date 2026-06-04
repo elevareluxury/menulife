@@ -16,6 +16,7 @@ import { WaitersManagement } from '@/modules/waiters/pages/WaitersManagement'
 import { TablesConfiguration } from '@/modules/waiters/pages/TablesConfiguration'
 import { WaiterLogin } from '@/modules/waiter/pages/WaiterLogin'
 import { WaiterDashboard } from '@/modules/waiter/pages/WaiterDashboard'
+import { WaiterApp } from '@/modules/waiter/pages/WaiterApp'
 import { TableBill } from '@/modules/waiter/pages/TableBill'
 import { BusinessSettings } from '@/modules/settings/pages/BusinessSettings'
 import { DriversManagement } from '@/modules/delivery/pages/DriversManagement'
@@ -61,6 +62,10 @@ function App() {
         <Route path="/r/:slug/pedido/:orderId" element={<OrderTracking />} />
         <Route path="/r/:slug" element={<PublicMenu />} />
         <Route path="/kitchen/:slug" element={<KitchenDisplay />} />
+        {/* Rutas mozo nueva app */}
+        <Route path="/mozo/:slug" element={<WaiterLogin />} />
+        <Route path="/mozo/:slug/app" element={<WaiterApp />} />
+        {/* Rutas waiter legacy — backward compat */}
         <Route path="/waiter/:slug/login" element={<WaiterLogin />} />
         <Route path="/waiter/:slug/dashboard" element={<WaiterDashboard />} />
         <Route path="/waiter/:slug/table/:tableNumber" element={<TableBill />} />

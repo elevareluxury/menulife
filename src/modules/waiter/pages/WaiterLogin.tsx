@@ -28,7 +28,7 @@ export function WaiterLogin() {
 
   useEffect(() => {
     if (isAuthenticated()) {
-      navigate(`/waiter/${slug}/dashboard`, { replace: true })
+      navigate(`/mozo/${slug}/app`, { replace: true })
     }
   }, [isAuthenticated, navigate, slug])
 
@@ -73,7 +73,7 @@ export function WaiterLogin() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: waiterRow, error } = await (supabase as any)
       .from('waiters')
-      .select('id, first_name, last_name, avatar_url, is_on_shift, pin')
+      .select('id, first_name, last_name, avatar_url, is_on_shift, pin, restaurant_id')
       .eq('id', selectedWaiter.id)
       .eq('restaurant_id', restaurantId)
       .eq('is_active', true)
@@ -99,10 +99,21 @@ export function WaiterLogin() {
     const { pin: _pin, ...mozo } = waiterRow
     localStorage.setItem(lastWaiterKey, selectedWaiter.id)
     setAuth(`direct-${Date.now()}`, mozo)
+    // Registrar login y arrancar turno
+    await (supabase as any).from('waiters').update({
+      last_login: new Date().toISOString(),
+      is_on_shift: true,
+      shift_start: new Date().toISOString(),
+    }).eq('id', mozo.id)
+    await (supabase as any).from('waiter_activity_log').insert({
+      restaurant_id: restaurantId,
+      waiter_id: mozo.id,
+      action: 'login',
+    }).catch(() => {})
     toast.success(`Bienvenido ${mozo.first_name}!`)
     requestNotificationPermission()
     registerServiceWorker()
-    navigate(`/waiter/${slug}/dashboard`)
+    navigate(`/mozo/${slug}/app`)
   }
 
   const handleSubmit = async () => {
@@ -136,10 +147,21 @@ export function WaiterLogin() {
 
           localStorage.setItem(lastWaiterKey, selectedWaiter.id)
           setAuth(data.token, data.mozo)
+          // Registrar login y arrancar turno
+          await (supabase as any).from('waiters').update({
+            last_login: new Date().toISOString(),
+            is_on_shift: true,
+            shift_start: new Date().toISOString(),
+          }).eq('id', data.mozo.id)
+          await (supabase as any).from('waiter_activity_log').insert({
+            restaurant_id: restaurantId,
+            waiter_id: data.mozo.id,
+            action: 'login',
+          }).catch(() => {})
           toast.success(`Bienvenido ${data.mozo.first_name}!`)
           requestNotificationPermission()
           registerServiceWorker()
-          navigate(`/waiter/${slug}/dashboard`)
+          navigate(`/mozo/${slug}/app`)
           return
         }
       } catch (fetchErr) {

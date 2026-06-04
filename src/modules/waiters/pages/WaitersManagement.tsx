@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, UserCheck, UserX, Copy, MessageCircle, Smartphone } from 'lucide-react'
+import { Plus, Edit, Trash2, UserCheck, UserX, Copy, MessageCircle, Smartphone, BarChart2, Users } from 'lucide-react'
 import bcrypt from 'bcryptjs'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -63,9 +63,126 @@ function WaiterLinkBanner({ slug }: { slug: string }) {
   )
 }
 
+/* ── Historial tab ────────────────────────────────────────────────────── */
+interface DailySummary {
+  fecha: string
+  waiter_id: string
+  waiter_name?: string
+  first_name?: string
+  last_name?: string
+  total_orders?: number
+  total_sales?: number
+  total_tips?: number
+  tables_served?: number
+  calls_attended?: number
+  avg_service_minutes?: number
+  shift_start?: string
+  shift_end?: string
+  [key: string]: unknown
+}
+
+function WaiterHistorial({ restaurantId }: { restaurantId: string }) {
+  const today = new Date().toISOString().split('T')[0]
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
+  const [from, setFrom] = useState(weekAgo)
+  const [to, setTo]   = useState(today)
+  const [rows, setRows] = useState<DailySummary[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!restaurantId) return
+    setLoading(true)
+    db.from('view_waiter_daily_summary')
+      .select('*')
+      .eq('restaurant_id', restaurantId)
+      .gte('fecha', from)
+      .lte('fecha', to)
+      .order('fecha', { ascending: false })
+      .then(({ data }: { data: DailySummary[] | null }) => {
+        setRows(data ?? [])
+        setLoading(false)
+      })
+  }, [restaurantId, from, to])
+
+  const grouped: Record<string, DailySummary[]> = {}
+  for (const r of rows) {
+    grouped[r.fecha] = [...(grouped[r.fecha] ?? []), r]
+  }
+
+  const fmt = (n: number | undefined) => n ? '$' + Number(n).toLocaleString('es-AR') : '—'
+  const name = (r: DailySummary) => r.waiter_name ?? (`${r.first_name ?? ''} ${r.last_name ?? ''}`.trim() || r.waiter_id?.slice(0, 8))
+  const time = (s: string | undefined) => s ? new Date(s).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '—'
+
+  return (
+    <div>
+      {/* Date range picker */}
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-500">Desde</label>
+          <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="border rounded-lg px-3 py-1.5 text-sm" />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-500">Hasta</label>
+          <input type="date" value={to} onChange={e => setTo(e.target.value)} className="border rounded-lg px-3 py-1.5 text-sm" />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-12"><Spinner size="lg" /></div>
+      ) : rows.length === 0 ? (
+        <Card><p className="text-center py-12 text-gray-500">Sin datos para el período seleccionado</p></Card>
+      ) : (
+        <div className="space-y-6">
+          {Object.entries(grouped).map(([fecha, items]) => (
+            <div key={fecha}>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                {new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              </h3>
+              <div className="space-y-3">
+                {items.map((r, i) => (
+                  <Card key={i} className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
+                          {String(name(r)).charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{name(r)}</p>
+                          <p className="text-xs text-gray-400">Entrada: {time(r.shift_start)} · Salida: {time(r.shift_end)}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {[
+                        { label: 'Pedidos',    value: r.total_orders ?? 0 },
+                        { label: 'Ventas',     value: fmt(r.total_sales) },
+                        { label: 'Propinas',   value: fmt(r.total_tips) },
+                        { label: 'Mesas',      value: r.tables_served ?? 0 },
+                        { label: 'Llamadas',   value: r.calls_attended ?? 0 },
+                        { label: 'T. promedio', value: r.avg_service_minutes ? `${Math.round(Number(r.avg_service_minutes))} min` : '—' },
+                      ].map(({ label, value }) => (
+                        <div key={label} className="bg-gray-50 rounded-lg px-3 py-2">
+                          <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+                          <p className="font-semibold text-gray-800 text-sm">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── Main ─────────────────────────────────────────────────────────────── */
 export function WaitersManagement() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
   const { waiters, loading: waitersLoading } = useWaiters(restaurant?.id)
+  const [activeTab, setActiveTab] = useState<'list' | 'historial'>('list')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingWaiter, setEditingWaiter] = useState<Waiter | null>(null)
 
@@ -116,71 +233,99 @@ export function WaitersManagement() {
           <h1 className="text-3xl font-bold mb-1">Mozos</h1>
           <p className="text-gray-400 text-sm">Gestiona tu equipo de mozos</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Mozo
-        </Button>
+        {activeTab === 'list' && (
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Mozo
+          </Button>
+        )}
       </div>
 
-      {/* Banner con link para mozos */}
-      {restaurant?.slug && <WaiterLinkBanner slug={restaurant.slug} />}
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 p-1 bg-gray-100 rounded-xl w-fit">
+        {([
+          { id: 'list' as const,      icon: Users,      label: 'Lista de mozos' },
+          { id: 'historial' as const, icon: BarChart2,  label: 'Historial' },
+        ]).map(({ id, icon: Icon, label }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === id ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <Icon className="w-4 h-4" />
+            {label}
+          </button>
+        ))}
+      </div>
 
-      {waiters.length === 0 ? (
-        <Card>
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">Aún no tienes mozos registrados</p>
-            <Button onClick={() => setIsModalOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Agregar primer mozo
-            </Button>
-          </div>
-        </Card>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {waiters.map((waiter) => (
-            <Card key={waiter.id} className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-900">
-                    {waiter.first_name} {waiter.last_name}
-                  </h3>
-                  <p className="text-sm text-gray-500">PIN: ••••••</p>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditingWaiter(waiter)
-                      setIsModalOpen(true)
-                    }}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(waiter.id)}
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              </div>
+      {/* Historial tab */}
+      {activeTab === 'historial' && restaurant?.id && (
+        <WaiterHistorial restaurantId={restaurant.id} />
+      )}
 
-              <div className="flex items-center gap-2">
-                {waiter.is_on_shift
-                  ? <UserCheck className="w-4 h-4 text-green-600" />
-                  : <UserX className="w-4 h-4 text-gray-400" />
-                }
-                <Toggle
-                  checked={waiter.is_on_shift}
-                  onChange={() => toggleShift(waiter)}
-                  label={waiter.is_on_shift ? 'En turno' : 'Fuera de turno'}
-                />
+      {/* Lista tab */}
+      {activeTab === 'list' && (
+        <>
+          {/* Banner con link para mozos */}
+          {restaurant?.slug && <WaiterLinkBanner slug={restaurant.slug} />}
+
+          {waiters.length === 0 ? (
+            <Card>
+              <div className="text-center py-12">
+                <p className="text-gray-600 mb-4">Aún no tienes mozos registrados</p>
+                <Button onClick={() => setIsModalOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Agregar primer mozo
+                </Button>
               </div>
             </Card>
-          ))}
-        </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {waiters.map((waiter) => (
+                <Card key={waiter.id} className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900">
+                        {waiter.first_name} {waiter.last_name}
+                      </h3>
+                      <p className="text-sm text-gray-500">PIN: ••••••</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingWaiter(waiter)
+                          setIsModalOpen(true)
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(waiter.id)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {waiter.is_on_shift
+                      ? <UserCheck className="w-4 h-4 text-green-600" />
+                      : <UserX className="w-4 h-4 text-gray-400" />
+                    }
+                    <Toggle
+                      checked={waiter.is_on_shift}
+                      onChange={() => toggleShift(waiter)}
+                      label={waiter.is_on_shift ? 'En turno' : 'Fuera de turno'}
+                    />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <WaiterModal
