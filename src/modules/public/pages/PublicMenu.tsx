@@ -776,17 +776,23 @@ export function PublicMenu() {
         />
         {/* Restaurant name — top right */}
         <div
-          className="absolute top-3 right-4"
           style={{
-            color: '#fff',
-            fontWeight: 600,
-            fontSize: 16,
-            maxWidth: 180,
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            fontFamily: "'Ruda', sans-serif",
+            fontSize: 18,
+            fontWeight: 700,
+            color: '#FFFFFF',
+            textAlign: 'right',
+            textTransform: 'capitalize',
+            maxWidth: 220,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            paddingTop: 12,
+            paddingRight: 16,
             textShadow: '0 1px 4px rgba(0,0,0,0.6)',
-            fontFamily: 'var(--font-ruda, inherit)',
           }}
         >
           {restaurant.name}

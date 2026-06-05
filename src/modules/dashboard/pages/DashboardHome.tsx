@@ -203,7 +203,7 @@ function ProgressCircle({ pct, size = 72 }: { pct: number; size?: number }) {
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
         style={{ transition: 'stroke-dashoffset 0.6s ease' }}
       />
-      <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-xs font-bold fill-gray-900" style={{ fontSize: 13, fontWeight: 700 }}>
+      <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" style={{ fontSize: 13, fontWeight: 700, fill: 'rgba(255,255,255,0.9)' }}>
         {Math.round(pct)}%
       </text>
     </svg>
@@ -243,7 +243,7 @@ export function DashboardHome() {
       <div className="flex items-center justify-between pt-2">
         <div>
           <p className="text-xs text-gray-400 font-medium">{greeting()}</p>
-          <h1 className="text-xl font-bold text-gray-900 leading-tight">Menú Life</h1>
+          <h1 className="text-xl font-bold text-white leading-tight">Menú Life</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -298,7 +298,7 @@ export function DashboardHome() {
       {/* ── NIVEL 2 — HERO DE VENTAS ─────────────────────────────── */}
       <div
         className="rounded-2xl p-4"
-        style={{ backgroundColor: 'var(--surface-2, #1c1f26)', border: '1px solid var(--border-subtle, #2a2d35)' }}
+        style={{ backgroundColor: '#1c1f26', border: '1px solid #2a2d35' }}
       >
         <div className="flex items-start justify-between mb-3">
           <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>
@@ -318,7 +318,7 @@ export function DashboardHome() {
               <p className="text-xs" style={{ color: goalPct >= 100 ? '#22c55e' : 'rgba(255,255,255,0.45)' }}>
                 {goalPct >= 100 ? '🎉 Meta alcanzada' : `${Math.round(goalPct)}% de la meta`}
               </p>
-              {yesterdayRev > 0 && (() => {
+              {yesterdayRev > 0 ? (() => {
                 const pct = Math.round(((todayRevenue - yesterdayRev) / yesterdayRev) * 100)
                 const up = pct >= 0
                 return (
@@ -326,7 +326,9 @@ export function DashboardHome() {
                     {up ? '↑' : '↓'} {Math.abs(pct)}% vs ayer
                   </span>
                 )
-              })()}
+              })() : (
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Sin datos de ayer</span>
+              )}
             </div>
           </div>
           <ProgressCircle pct={goalPct} />
@@ -357,7 +359,7 @@ export function DashboardHome() {
       {activeTbls.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-bold text-gray-900">Mesas en vivo</h2>
+            <h2 className="text-sm font-bold text-white">Mesas en vivo</h2>
             <button
               onClick={() => navigate('/dashboard/tables')}
               className="text-xs font-medium"
@@ -367,16 +369,18 @@ export function DashboardHome() {
             </button>
           </div>
 
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 justify-items-center">
             {activeTbls.slice(0, 16).map(t => {
               const color = tableColor(t)
               return (
                 <button
                   key={t.id}
                   onClick={() => navigate('/dashboard/tables')}
-                  className="aspect-square rounded-xl transition-all active:scale-95"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center transition-all active:scale-95"
                   style={{ backgroundColor: color + '33', border: `2px solid ${color}` }}
-                />
+                >
+                  <span className="text-white text-sm font-bold">{t.table_number}</span>
+                </button>
               )
             })}
           </div>
@@ -401,7 +405,7 @@ export function DashboardHome() {
       {hourlyData.length > 1 && (
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-bold text-gray-900">Ventas por hora — hoy</h2>
+            <h2 className="text-sm font-bold text-white">Ventas por hora — hoy</h2>
             <button
               onClick={() => navigate('/dashboard/estadisticas')}
               className="text-xs font-medium"
@@ -412,7 +416,7 @@ export function DashboardHome() {
           </div>
           <div
             className="rounded-2xl p-3"
-            style={{ backgroundColor: 'var(--surface-2, #1c1f26)', border: '1px solid var(--border-subtle, #2a2d35)' }}
+            style={{ backgroundColor: '#1c1f26', border: '1px solid #2a2d35' }}
           >
             <ResponsiveContainer width="100%" height={80}>
               <BarChart data={hourlyData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} barSize={12}>
@@ -432,7 +436,7 @@ export function DashboardHome() {
 
       {/* ── NIVEL 5 — ACCESOS RÁPIDOS ────────────────────────────── */}
       <div>
-        <h2 className="text-sm font-bold text-gray-900 mb-2">Acceso rápido</h2>
+        <h2 className="text-sm font-bold text-white mb-2">Acceso rápido</h2>
         <div className="grid grid-cols-2 gap-3">
           {[
             {
