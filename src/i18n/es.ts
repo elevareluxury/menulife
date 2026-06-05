@@ -200,7 +200,7 @@ export default {
     trust_1: 'Sin tarjeta de crédito',
     trust_2: '14 días gratis',
     trust_3: 'Cancelás cuando quieras',
-    form_title: 'Solicitar acceso gratuito',
+    form_title: 'Solicitar acceso',
     form_subtitle: 'Completá el formulario y te contactamos en 24hs.',
     field_name: 'Tu nombre',
     field_name_placeholder: 'Juan Pérez',

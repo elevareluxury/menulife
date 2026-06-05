@@ -10,10 +10,10 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const NAV_LINKS = [
-    { label: t('nav.product'),    href: '#experiences' },
-    { label: t('nav.how'),        href: '#flow' },
-    { label: t('nav.onboarding'), href: '#whatsapp' },
-    { label: t('nav.pricing'),    href: '#pricing' },
+    { label: 'Producto',  href: '#experiencias' },
+    { label: 'Precios',   href: '#precios' },
+    { label: 'Contacto',  href: 'mailto:contacto@menulife.digital' },
+    { label: 'FAQ',       href: '#faq' },
   ]
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed,
-  QrCode, Users, ChefHat, LogOut, Truck, ContactRound, BarChart2, Settings, type LucideIcon,
+  QrCode, Users, ChefHat, LogOut, Truck, ContactRound, BarChart2, Settings, ExternalLink, type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
@@ -95,6 +95,15 @@ export function Sidebar({ restaurantSlug }: SidebarProps) {
             >
               <ChefHat className="w-[17px] h-[17px] flex-shrink-0" strokeWidth={2} />
               {t('dashboard.nav_kitchen')}
+            </a>
+            <a
+              href={`/r/${restaurantSlug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-ink-3 hover:text-ink-1 hover:bg-surface-3 transition-colors duration-150"
+            >
+              <ExternalLink className="w-[17px] h-[17px] flex-shrink-0" strokeWidth={2} />
+              Ver Menú en vivo
             </a>
           </>
         )}

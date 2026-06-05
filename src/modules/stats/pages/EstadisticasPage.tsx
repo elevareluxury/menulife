@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   LineChart, Line, PieChart, Pie, Cell,
@@ -228,7 +228,10 @@ export function EstadisticasPage() {
   const [customFrom, setCustomFrom] = useState(() => startOfDay(new Date(Date.now() - 6 * 86400000)))
   const [customTo, setCustomTo]     = useState(() => startOfDay(new Date()))
 
-  const { from, to } = getPeriodRange(period, customFrom, customTo)
+  const { from, to } = useMemo(
+    () => getPeriodRange(period, customFrom, customTo),
+    [period, customFrom, customTo]
+  )
   const { data: s, loading } = useStats(restaurant?.id, from, to)
 
   const maxUnits = s.topItems[0]?.units ?? 1

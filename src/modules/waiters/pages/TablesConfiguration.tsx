@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, Trash2, Edit, CalendarDays, LayoutGrid } from 'lucide-react'
+import { Plus, Trash2, Edit, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
@@ -165,12 +165,6 @@ export function TablesConfiguration() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${!showReservations ? 'bg-surface-4 text-ink-1' : 'text-ink-3 hover:bg-surface-3'}`}
           >
             <LayoutGrid size={15} /> Plano
-          </button>
-          <button
-            onClick={() => setShowReservations(true)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${showReservations ? 'bg-surface-4 text-ink-1' : 'text-ink-3 hover:bg-surface-3'}`}
-          >
-            <CalendarDays size={15} /> Reservas
           </button>
           <Button onClick={() => setIsModalOpen(true)} className="ml-2">
             <Plus className="w-4 h-4 mr-1.5" />

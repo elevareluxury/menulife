@@ -200,7 +200,7 @@ export default {
     trust_1: 'No credit card',
     trust_2: '14 days free',
     trust_3: 'Cancel anytime',
-    form_title: 'Request free access',
+    form_title: 'Request access',
     form_subtitle: 'Fill out the form and we\'ll contact you within 24 hours.',
     field_name: 'Your name',
     field_name_placeholder: 'John Smith',

@@ -207,7 +207,7 @@ export function NotificacionesPage() {
     <div className="max-w-lg mx-auto pb-6">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notificaciones</h1>
+          <h1 className="text-2xl font-bold text-white">Notificaciones</h1>
           {visible.length > 0 && (
             <span
               className="text-xs font-bold px-2 py-0.5 rounded-full ml-1"
