@@ -54,6 +54,7 @@ const RESERVED_SLUGS = new Set([
   'dashboard', 'login', 'register', 'mozo', 'kitchen', 'delivery',
   'r', 'waiter', 'super-admin', 'superadmin', 'onboarding',
   'solicitar-acceso', 'auth', 'forgot-password', 'reset-password',
+  'catalogo',
 ])
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
