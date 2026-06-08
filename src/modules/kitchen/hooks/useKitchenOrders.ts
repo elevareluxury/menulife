@@ -16,6 +16,7 @@ export interface KitchenOrder {
   table_number: string | null
   customer_name: string | null
   customer_address?: string | null
+  waiter_id?: string | null
   status: string
   total: number
   currency: string
@@ -35,7 +36,7 @@ export function useKitchenOrders(restaurantId: string | null | undefined) {
     try {
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
-        .select('id, restaurant_id, session_id, order_type, table_number, customer_name, customer_address, status, total, currency, created_at, order_items(id, menu_item_name, quantity, notes)')
+        .select('id, restaurant_id, session_id, order_type, table_number, customer_name, customer_address, waiter_id, status, total, currency, created_at, order_items(id, menu_item_name, quantity, notes)')
         .eq('restaurant_id', restaurantId)
         .in('status', ['pending', 'cooking', 'ready', 'delivered'])
         .order('created_at', { ascending: true })

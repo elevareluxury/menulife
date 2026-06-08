@@ -1,15 +1,22 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, ArrowRight, Sparkles, ExternalLink } from 'lucide-react'
+import { CheckCircle2, ArrowRight, UtensilsCrossed, ShoppingBag } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
+import { useRestaurantStore } from '@/store/restaurantStore'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Spinner } from '@/components/ui/Spinner'
-import { APP_URL } from '@/lib/constants'
 import toast from 'react-hot-toast'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any
+
 const TOTAL_STEPS = 4
+const LS_STEP_KEY = 'menulife_setup_step'
+const LS_BTYPE_KEY = 'menulife_setup_btype'
+
+// ─── Progress bar ─────────────────────────────────────────────────────────────
 
 function ProgressBar({ step }: { step: number }) {
   return (
@@ -18,12 +25,11 @@ function ProgressBar({ step }: { step: number }) {
         <div key={i} className="flex items-center gap-2 flex-1">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-              i + 1 < step
-                ? 'bg-emerald-500 text-white'
-                : i + 1 === step
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-200 text-gray-400'
+              i + 1 < step ? 'bg-emerald-500 text-white'
+              : i + 1 === step ? 'text-white'
+              : 'bg-gray-200 text-gray-400'
             }`}
+            style={i + 1 === step ? { background: '#F4705A' } : undefined}
           >
             {i + 1 < step ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
           </div>
@@ -36,22 +42,150 @@ function ProgressBar({ step }: { step: number }) {
   )
 }
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export function OnboardingFlow() {
   const navigate = useNavigate()
   const { restaurant, loading: restaurantLoading } = useRestaurant()
-  const [step, setStep] = useState(1)
+  const setStoreBusinessType = useRestaurantStore(s => s.setBusinessType)
+
+  // Resume from saved step
+  const [step, setStep] = useState(() => {
+    const saved = parseInt(localStorage.getItem(LS_STEP_KEY) ?? '1', 10)
+    return isNaN(saved) || saved < 1 || saved > 4 ? 1 : saved
+  })
   const [saving, setSaving] = useState(false)
 
-  // Step 2 state
+  // Step 1: business type
+  const [businessType, setBusinessType] = useState<'gastronomy' | 'retail'>(() =>
+    (localStorage.getItem(LS_BTYPE_KEY) as 'gastronomy' | 'retail' | null) ?? 'gastronomy'
+  )
+
+  // Step 2: basic info
   const [businessName, setBusinessName] = useState('')
   const [city, setCity] = useState('')
   const [phone, setPhone] = useState('')
-  const [description, setDescription] = useState('')
 
-  // Step 3 state
-  const [sectionName, setSectionName] = useState('')
-  const [itemName, setItemName] = useState('')
-  const [itemPrice, setItemPrice] = useState('')
+  // Step 3: first section / category
+  const [firstName, setFirstName] = useState('')
+
+  // Pre-fill name from restaurant when loaded
+  useEffect(() => {
+    if (restaurant?.name) setBusinessName(restaurant.name)
+    if (restaurant?.city) setCity(restaurant.city)
+    if (restaurant?.phone) setPhone(restaurant.phone)
+    if (restaurant?.business_type) setBusinessType(restaurant.business_type)
+  }, [restaurant])
+
+  // Persist step to localStorage
+  useEffect(() => {
+    localStorage.setItem(LS_STEP_KEY, String(step))
+  }, [step])
+
+  // ── Save handlers ──────────────────────────────────────────────────────────
+
+  const saveStep1 = async () => {
+    if (!restaurant) return false
+    setSaving(true)
+    try {
+      const { error } = await db
+        .from('restaurants')
+        .update({ business_type: businessType, setup_step: 1 })
+        .eq('id', restaurant.id)
+      if (error) throw error
+      setStoreBusinessType(businessType)
+      localStorage.setItem(LS_BTYPE_KEY, businessType)
+      return true
+    } catch {
+      toast.error('Error al guardar tipo de negocio')
+      return false
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const saveStep2 = async () => {
+    if (!businessName.trim()) { toast.error('Ingresá el nombre de tu negocio'); return false }
+    if (!restaurant) return false
+    setSaving(true)
+    try {
+      const { error } = await db
+        .from('restaurants')
+        .update({
+          name: businessName.trim(),
+          city: city.trim() || null,
+          phone: phone.trim() || null,
+          setup_step: 2,
+        })
+        .eq('id', restaurant.id)
+      if (error) throw error
+      return true
+    } catch {
+      toast.error('Error guardando datos')
+      return false
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const saveStep3 = async () => {
+    if (!firstName.trim()) {
+      toast.error(businessType === 'retail'
+        ? 'Ingresá el nombre de la categoría'
+        : 'Ingresá el nombre de la sección')
+      return false
+    }
+    if (!restaurant) return false
+    setSaving(true)
+    try {
+      if (businessType === 'retail') {
+        const { error } = await db
+          .from('product_categories')
+          .insert({ restaurant_id: restaurant.id, name: firstName.trim(), sort_order: 0, is_active: true })
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('menu_sections')
+          .insert({ restaurant_id: restaurant.id, name: firstName.trim(), sort_order: 0 })
+        if (error) throw error
+      }
+      await db.from('restaurants').update({ setup_step: 3 }).eq('id', restaurant.id)
+      return true
+    } catch {
+      toast.error('Error al crear el primer elemento')
+      return false
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const completeOnboarding = async () => {
+    setSaving(true)
+    try {
+      await supabase
+        .from('restaurants')
+        .update({ onboarding_completed: true })
+        .eq('id', restaurant!.id)
+      localStorage.removeItem(LS_STEP_KEY)
+      localStorage.removeItem(LS_BTYPE_KEY)
+    } catch { /* non-fatal */ }
+    finally { setSaving(false) }
+  }
+
+  const handleNext = async () => {
+    let ok = true
+    if (step === 1) ok = await saveStep1()
+    if (step === 2) ok = await saveStep2()
+    if (step === 3) ok = await saveStep3()
+    if (ok) setStep(s => s + 1)
+  }
+
+  const handleFinish = async () => {
+    await completeOnboarding()
+    navigate('/dashboard')
+  }
+
+  // ── Guards ─────────────────────────────────────────────────────────────────
 
   if (restaurantLoading) {
     return (
@@ -69,161 +203,61 @@ export function OnboardingFlow() {
     )
   }
 
-  const saveStep2 = async () => {
-    if (!businessName.trim()) { toast.error('Ingresá el nombre de tu negocio'); return false }
-    setSaving(true)
-    try {
-      const { error } = await supabase
-        .from('restaurants')
-        .update({
-          name: businessName.trim(),
-          city: city.trim() || null,
-          phone: phone.trim() || null,
-          description: description.trim() || null,
-        })
-        .eq('id', restaurant.id)
-
-      if (error) throw error
-      return true
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error guardando datos')
-      return false
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const saveStep3 = async () => {
-    if (!sectionName.trim()) { toast.error('Ingresá el nombre de la sección'); return false }
-    if (!itemName.trim()) { toast.error('Ingresá el nombre del producto'); return false }
-    const price = parseFloat(itemPrice)
-    if (isNaN(price) || price < 0) { toast.error('Ingresá un precio válido'); return false }
-
-    setSaving(true)
-    try {
-      // Create section
-      const { data: sectionData, error: sectionError } = await supabase
-        .from('menu_sections')
-        .insert({
-          restaurant_id: restaurant.id,
-          name: sectionName.trim(),
-          sort_order: 0,
-        })
-        .select()
-        .single()
-
-      if (sectionError) throw sectionError
-
-      // Create first item
-      const { error: itemError } = await supabase
-        .from('menu_items')
-        .insert({
-          restaurant_id: restaurant.id,
-          section_id: sectionData.id,
-          name: itemName.trim(),
-          price_ars: price,
-          price_usd: 0,
-          image_url: '',
-          sort_order: 0,
-          is_available: true,
-          allergens: [],
-          tags: [],
-        })
-
-      if (itemError) throw itemError
-      return true
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error creando sección')
-      return false
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const completeOnboarding = async () => {
-    setSaving(true)
-    try {
-      const { error } = await supabase
-        .from('restaurants')
-        .update({ onboarding_completed: true })
-        .eq('id', restaurant.id)
-      if (error) throw error
-    } catch {
-      // Non-fatal: navigate anyway
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleNext = async () => {
-    if (step === 2) {
-      const ok = await saveStep2()
-      if (!ok) return
-    }
-    if (step === 3) {
-      const ok = await saveStep3()
-      if (!ok) return
-    }
-    setStep(s => s + 1)
-  }
-
-  const handleFinish = async () => {
-    await completeOnboarding()
-    navigate('/dashboard')
-  }
-
-  const menuUrl = `${APP_URL}/r/${restaurant.slug}`
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          {/* Logo */}
+
+          {/* Header */}
           <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-400 rounded-lg flex items-center justify-center text-white font-bold text-sm">M</div>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm" style={{ background: '#F4705A' }}>M</div>
             <span className="font-bold text-gray-900 text-lg">MenuLife</span>
             <span className="ml-auto text-sm text-gray-400">Paso {step} de {TOTAL_STEPS}</span>
           </div>
 
           <ProgressBar step={step} />
 
-          {/* ─── Step 1: Welcome ─── */}
+          {/* ── STEP 1: Tipo de negocio ── */}
           {step === 1 && (
-            <div className="text-center">
-              <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <Sparkles className="w-8 h-8 text-orange-500" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                ¡Bienvenido a MenuLife!
-              </h2>
-              <p className="text-gray-500 mb-2">
-                Hola, <strong className="text-gray-800">{restaurant.name}</strong>.
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">¿Qué tipo de negocio tenés?</h2>
+              <p className="text-sm text-gray-500 mb-6">
+                Esto personaliza tu panel de control y las herramientas disponibles.
               </p>
-              <p className="text-gray-500 mb-8">
-                En 4 pasos rápidos dejamos tu negocio listo para el mundo digital.
-              </p>
-              <div className="grid grid-cols-2 gap-3 text-sm mb-8">
-                {[
-                  { step: '1', label: 'Bienvenida', done: true },
-                  { step: '2', label: 'Info básica', done: false },
-                  { step: '3', label: 'Primer plato', done: false },
-                  { step: '4', label: '¡Listo!', done: false },
-                ].map(s => (
-                  <div key={s.step} className={`p-3 rounded-xl border text-left ${s.done ? 'bg-orange-50 border-orange-100' : 'bg-gray-50 border-gray-100'}`}>
-                    <span className={`text-xs font-bold ${s.done ? 'text-orange-500' : 'text-gray-400'}`}>Paso {s.step}</span>
-                    <p className={`font-medium mt-0.5 ${s.done ? 'text-orange-700' : 'text-gray-600'}`}>{s.label}</p>
-                  </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {([
+                  { mode: 'gastronomy' as const, icon: UtensilsCrossed, label: 'Gastronomía', desc: 'Restaurante, bar, café, dark kitchen' },
+                  { mode: 'retail' as const,     icon: ShoppingBag,     label: 'Retail',      desc: 'Tienda, comercio, showroom' },
+                ] as const).map(({ mode, icon: Icon, label, desc }) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setBusinessType(mode)}
+                    className="flex flex-col items-start gap-3 p-4 rounded-xl border-2 text-left transition-all"
+                    style={{
+                      borderColor: businessType === mode ? '#F4705A' : '#E5E7EB',
+                      background: businessType === mode ? 'rgba(244,112,90,0.05)' : '#fff',
+                    }}
+                  >
+                    <Icon className="w-6 h-6" style={{ color: '#F4705A' }} />
+                    <div>
+                      <p className="font-bold text-gray-900 text-sm">{label}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                    </div>
+                  </button>
                 ))}
               </div>
-              <Button onClick={() => setStep(2)} className="w-full">
-                Comenzar
-                <ArrowRight className="w-4 h-4 ml-2" />
+
+              <Button onClick={handleNext} isLoading={saving} className="w-full">
+                Continuar <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
           )}
 
-          {/* ─── Step 2: Basic info ─── */}
+          {/* ── STEP 2: Info básica ── */}
           {step === 2 && (
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">Información básica</h2>
@@ -232,8 +266,8 @@ export function OnboardingFlow() {
               <div className="space-y-4">
                 <Input
                   label="Nombre del negocio *"
-                  placeholder={restaurant.name}
-                  value={businessName || restaurant.name}
+                  placeholder="Ej: Forest Café"
+                  value={businessName}
                   onChange={e => setBusinessName(e.target.value)}
                 />
                 <Input
@@ -249,16 +283,6 @@ export function OnboardingFlow() {
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                 />
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Descripción breve</label>
-                  <textarea
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    placeholder="Un café con onda en el centro de Palermo..."
-                    rows={3}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none bg-white text-gray-900"
-                  />
-                </div>
               </div>
 
               <div className="flex gap-3 mt-6">
@@ -270,50 +294,50 @@ export function OnboardingFlow() {
             </div>
           )}
 
-          {/* ─── Step 3: First section + item ─── */}
+          {/* ── STEP 3: First content ── */}
           {step === 3 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Tu primer plato</h2>
-              <p className="text-sm text-gray-500 mb-6">
-                Creá una sección y agrega tu primer producto para que el menú tenga contenido.
-              </p>
-
-              <div className="space-y-4">
-                <div>
+              {businessType === 'retail' ? (
+                <>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">Primera categoría</h2>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Creá una categoría para organizar tus productos. Después podés agregar más.
+                  </p>
+                  <Input
+                    label="Nombre de la categoría *"
+                    placeholder="Ropa, Electrónica, Accesorios..."
+                    value={firstName}
+                    onChange={e => setFirstName(e.target.value)}
+                  />
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {['Ropa', 'Calzado', 'Accesorios', 'Electrónica', 'Hogar'].map(s => (
+                      <button key={s} type="button" onClick={() => setFirstName(s)}
+                        className="px-3 py-1 text-xs rounded-full border border-gray-200 text-gray-600 hover:border-[#F4705A] hover:text-[#F4705A] transition"
+                      >{s}</button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">Primera sección del menú</h2>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Creá una sección para agrupar tus platos. Después podés agregar productos.
+                  </p>
                   <Input
                     label="Nombre de la sección *"
                     placeholder="Principales"
-                    value={sectionName}
-                    onChange={e => setSectionName(e.target.value)}
+                    value={firstName}
+                    onChange={e => setFirstName(e.target.value)}
                   />
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {['Entradas', 'Principales', 'Postres', 'Bebidas'].map(s => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setSectionName(s)}
-                        className="px-3 py-1 text-xs rounded-full border border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-500 transition"
-                      >
-                        {s}
-                      </button>
+                      <button key={s} type="button" onClick={() => setFirstName(s)}
+                        className="px-3 py-1 text-xs rounded-full border border-gray-200 text-gray-600 hover:border-[#F4705A] hover:text-[#F4705A] transition"
+                      >{s}</button>
                     ))}
                   </div>
-                </div>
-
-                <Input
-                  label="Nombre del producto *"
-                  placeholder="Milanesa napolitana"
-                  value={itemName}
-                  onChange={e => setItemName(e.target.value)}
-                />
-                <Input
-                  label="Precio (ARS) *"
-                  type="number"
-                  placeholder="2500"
-                  value={itemPrice}
-                  onChange={e => setItemPrice(e.target.value)}
-                />
-              </div>
+                </>
+              )}
 
               <div className="flex gap-3 mt-6">
                 <Button variant="secondary" onClick={() => setStep(2)} className="flex-1">Atrás</Button>
@@ -324,47 +348,22 @@ export function OnboardingFlow() {
             </div>
           )}
 
-          {/* ─── Step 4: Done ─── */}
+          {/* ── STEP 4: Done ── */}
           {step === 4 && (
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">¡Tu negocio está listo!</h2>
-              <p className="text-gray-500 mb-6">
-                Tu menú digital ya está online. Compartí el link con tus clientes.
+              <p className="text-gray-500 mb-8">
+                Todo configurado. Ya podés empezar a usar tu panel de control.
               </p>
-
-              <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-6">
-                <p className="text-sm text-gray-500 mb-2">Tu link del menú:</p>
-                <div className="flex items-center justify-center gap-2">
-                  <code className="text-sm font-mono text-orange-700 bg-white px-3 py-1 rounded-lg border border-orange-200">
-                    {menuUrl}
-                  </code>
-                  <a
-                    href={menuUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 rounded-lg text-orange-500 hover:bg-orange-100 transition"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <a href={menuUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="secondary" className="w-full">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Ver mi menú
-                  </Button>
-                </a>
-                <Button onClick={handleFinish} isLoading={saving} className="w-full">
-                  Ir al dashboard →
-                </Button>
-              </div>
+              <Button onClick={handleFinish} isLoading={saving} className="w-full">
+                Ir al panel →
+              </Button>
             </div>
           )}
+
         </div>
       </div>
     </div>

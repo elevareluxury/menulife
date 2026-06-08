@@ -7,7 +7,9 @@ import { Spinner } from '@/components/ui/Spinner'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
-type NotifType = 'order_new' | 'order_ready' | 'order_completed' | 'bill_requested' | 'waiter_called' | 'info'
+type NotifType =
+  | 'order_new' | 'order_ready' | 'order_completed' | 'bill_requested' | 'waiter_called' | 'info'
+  | 'delivery_picked_up' | 'delivery_completed' | 'delivery_failed'
 
 interface Notif {
   id: string
@@ -17,7 +19,8 @@ interface Notif {
   created_at: string
   orderId?: string
   tableNumber?: string | null
-  itemId?: string
+  is_read?: boolean
+  source: 'order' | 'owner_notification'
 }
 
 function timeAgo(iso: string): string {
@@ -29,21 +32,27 @@ function timeAgo(iso: string): string {
 }
 
 const NOTIF_COLOR: Record<NotifType, string> = {
-  order_new:       '#F4705A',
-  order_ready:     '#22c55e',
-  order_completed: '#22c55e',
-  bill_requested:  '#EF9F27',
-  waiter_called:   '#EF9F27',
-  info:            '#888888',
+  order_new:          '#F4705A',
+  order_ready:        '#22c55e',
+  order_completed:    '#22c55e',
+  bill_requested:     '#EF9F27',
+  waiter_called:      '#EF9F27',
+  info:               '#888888',
+  delivery_picked_up: '#3B82F6',
+  delivery_completed: '#22c55e',
+  delivery_failed:    '#EF4444',
 }
 
 const NOTIF_EMOJI: Record<NotifType, string> = {
-  order_new:       '🛍',
-  order_ready:     '✅',
-  order_completed: '💰',
-  bill_requested:  '💳',
-  waiter_called:   '🔔',
-  info:            'ℹ️',
+  order_new:          '🛍',
+  order_ready:        '✅',
+  order_completed:    '💰',
+  bill_requested:     '💳',
+  waiter_called:      '🔔',
+  info:               'ℹ️',
+  delivery_picked_up: '🚗',
+  delivery_completed: '✅',
+  delivery_failed:    '❌',
 }
 
 function useNotifications(restaurantId: string | undefined) {
@@ -55,7 +64,8 @@ function useNotifications(restaurantId: string | undefined) {
     setLoading(true)
     try {
       const since = new Date(Date.now() - 24 * 3600000).toISOString()
-      const [newRes, completedRes, billRes, waiterRes] = await Promise.all([
+
+      const [newRes, completedRes, billRes, waiterRes, ownerRes] = await Promise.all([
         db.from('orders').select('id, table_number, customer_name, total, created_at, order_type')
           .eq('restaurant_id', restaurantId)
           .eq('status', 'pending')
@@ -76,6 +86,10 @@ function useNotifications(restaurantId: string | undefined) {
           .eq('waiter_called', true)
           .gte('created_at', since)
           .order('created_at', { ascending: false }).limit(10),
+        db.from('owner_notifications').select('id, type, title, message, data, is_read, created_at')
+          .eq('restaurant_id', restaurantId)
+          .gte('created_at', since)
+          .order('created_at', { ascending: false }).limit(50),
       ])
 
       const list: Notif[] = []
@@ -83,56 +97,53 @@ function useNotifications(restaurantId: string | undefined) {
       ;(newRes.data ?? []).forEach((o: { id: string; table_number: string | null; customer_name: string | null; total: number; created_at: string; order_type: string }) => {
         const where = o.table_number ? `Mesa ${o.table_number}` : (o.customer_name ?? 'Cliente')
         list.push({
-          id: `new-${o.id}`,
-          type: 'order_new',
-          title: 'Nuevo pedido',
-          subtitle: `${where} · $${o.total}`,
-          created_at: o.created_at,
-          orderId: o.id,
-          tableNumber: o.table_number,
+          id: `new-${o.id}`, type: 'order_new', title: 'Nuevo pedido',
+          subtitle: `${where} · $${o.total}`, created_at: o.created_at,
+          orderId: o.id, tableNumber: o.table_number, source: 'order',
         })
       })
 
       ;(completedRes.data ?? []).forEach((o: { id: string; table_number: string | null; customer_name: string | null; total: number; updated_at: string }) => {
         const where = o.table_number ? `Mesa ${o.table_number}` : (o.customer_name ?? 'Cliente')
         list.push({
-          id: `done-${o.id}`,
-          type: 'order_completed',
-          title: 'Pago recibido',
-          subtitle: `${where} · $${o.total}`,
-          created_at: o.updated_at,
-          orderId: o.id,
+          id: `done-${o.id}`, type: 'order_completed', title: 'Pago recibido',
+          subtitle: `${where} · $${o.total}`, created_at: o.updated_at,
+          orderId: o.id, source: 'order',
         })
       })
 
       ;(billRes.data ?? []).forEach((o: { id: string; table_number: string | null; created_at: string }) => {
         if (!o.table_number) return
         list.push({
-          id: `bill-${o.id}`,
-          type: 'bill_requested',
-          title: 'Solicitaron la cuenta',
-          subtitle: `Mesa ${o.table_number}`,
-          created_at: o.created_at,
-          orderId: o.id,
-          tableNumber: o.table_number,
+          id: `bill-${o.id}`, type: 'bill_requested', title: 'Solicitaron la cuenta',
+          subtitle: `Mesa ${o.table_number}`, created_at: o.created_at,
+          orderId: o.id, tableNumber: o.table_number, source: 'order',
         })
       })
 
       ;(waiterRes.data ?? []).forEach((o: { id: string; table_number: string | null; created_at: string }) => {
         if (!o.table_number) return
         list.push({
-          id: `call-${o.id}`,
-          type: 'waiter_called',
-          title: 'Mesa sin atención',
-          subtitle: `Mesa ${o.table_number}`,
-          created_at: o.created_at,
-          orderId: o.id,
-          tableNumber: o.table_number,
+          id: `call-${o.id}`, type: 'waiter_called', title: 'Mesa sin atención',
+          subtitle: `Mesa ${o.table_number}`, created_at: o.created_at,
+          orderId: o.id, tableNumber: o.table_number, source: 'order',
+        })
+      })
+
+      ;(ownerRes.data ?? []).forEach((n: { id: string; type: string; title: string; message: string; data: Record<string, unknown> | null; is_read: boolean; created_at: string }) => {
+        const validTypes: NotifType[] = ['delivery_picked_up', 'delivery_completed', 'delivery_failed', 'info']
+        const type = validTypes.includes(n.type as NotifType) ? (n.type as NotifType) : 'info'
+        list.push({
+          id: n.id, type, title: n.title,
+          subtitle: n.message ?? '',
+          created_at: n.created_at,
+          is_read: n.is_read,
+          source: 'owner_notification',
         })
       })
 
       list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      setNotifs(list.slice(0, 50))
+      setNotifs(list.slice(0, 60))
     } catch (err) {
       console.error('useNotifications error', err)
     } finally {
@@ -142,14 +153,32 @@ function useNotifications(restaurantId: string | undefined) {
 
   useEffect(() => {
     fetch()
-    const ch = supabase
-      .channel(`notif_${restaurantId}`)
+
+    const ordersChannel = supabase
+      .channel(`notif_orders_${restaurantId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }, fetch)
       .subscribe()
-    return () => { ch.unsubscribe() }
+
+    const ownerChannel = supabase
+      .channel(`notif_owner_${restaurantId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'owner_notifications', filter: `restaurant_id=eq.${restaurantId}` }, fetch)
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(ordersChannel)
+      supabase.removeChannel(ownerChannel)
+    }
   }, [restaurantId, fetch])
 
   return { notifs, loading, refetch: fetch }
+}
+
+async function markOwnerNotifRead(id: string) {
+  try {
+    await db.from('owner_notifications').update({ is_read: true }).eq('id', id)
+  } catch {
+    // non-critical
+  }
 }
 
 export function NotificacionesPage() {
@@ -170,10 +199,14 @@ export function NotificacionesPage() {
   function NotifRow({ n }: { n: Notif }) {
     const color = NOTIF_COLOR[n.type]
     const emoji = NOTIF_EMOJI[n.type]
-    const hasAction = n.type === 'waiter_called' || n.type === 'bill_requested' || n.type === 'order_new'
+    const hasOrderAction = n.type === 'waiter_called' || n.type === 'bill_requested' || n.type === 'order_new'
+    const isUnread = n.source === 'owner_notification' && n.is_read === false
 
     return (
-      <div className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
+      <div
+        className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0"
+        style={isUnread ? { background: 'rgba(59,130,246,0.04)' } : undefined}
+      >
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-base mt-0.5"
           style={{ backgroundColor: `${color}18` }}
@@ -181,12 +214,17 @@ export function NotificacionesPage() {
           {emoji}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900">{n.title}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-gray-900">{n.title}</p>
+            {isUnread && (
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#3B82F6' }} />
+            )}
+          </div>
           <p className="text-xs text-gray-500 mt-0.5 truncate">{n.subtitle}</p>
         </div>
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
           <span className="text-[11px] text-gray-400 whitespace-nowrap">{timeAgo(n.created_at)}</span>
-          {hasAction && (
+          {hasOrderAction && (
             <button
               onClick={() => {
                 if (n.type === 'order_new') navigate('/dashboard/orders')
@@ -196,6 +234,15 @@ export function NotificacionesPage() {
               style={{ backgroundColor: `${color}15`, color }}
             >
               {n.type === 'order_new' ? 'Ver pedido' : 'Ir a mesas'}
+            </button>
+          )}
+          {isUnread && (
+            <button
+              onClick={() => markOwnerNotifRead(n.id)}
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg"
+              style={{ backgroundColor: 'rgba(59,130,246,0.12)', color: '#3B82F6' }}
+            >
+              Marcar leída
             </button>
           )}
         </div>

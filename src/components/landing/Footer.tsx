@@ -21,7 +21,7 @@ export function Footer() {
         gap: '16px',
       }}>
         <Link to="/" style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', letterSpacing: '0.04em' }}>
-          MenuLife
+          © MenuLife 2026
         </Link>
 
         <nav style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' }}>

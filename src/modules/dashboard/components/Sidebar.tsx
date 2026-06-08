@@ -31,6 +31,7 @@ const GASTRONOMY_NAV: NavGroup[] = [
     section: 'Operaciones',
     items: [
       { to: '/dashboard',              icon: Home,            labelKey: 'dashboard.nav_home',   exact: true },
+      { to: '/dashboard/caja',         icon: Banknote,        labelKey: 'dashboard.nav_pos'     },
       { to: '/dashboard/orders',       icon: ShoppingBag,     labelKey: 'dashboard.nav_orders'  },
       { to: '/dashboard/tables',       icon: LayoutGrid,      labelKey: 'dashboard.nav_tables'  },
       { to: '/dashboard/menu',         icon: UtensilsCrossed, labelKey: 'dashboard.nav_menu'    },
@@ -67,6 +68,7 @@ const RETAIL_NAV: NavGroup[] = [
     section: 'Operaciones',
     items: [
       { to: '/dashboard',              icon: Home,         labelKey: 'dashboard.nav_home',     exact: true },
+      { to: '/dashboard/caja',         icon: Banknote,     labelKey: 'dashboard.nav_pos'       },
       { to: '/dashboard/orders',       icon: ShoppingBag,  labelKey: 'dashboard.nav_orders'    },
       { to: '/dashboard/catalogo',     icon: ShoppingBag,  labelKey: 'dashboard.nav_catalogo'  },
       { to: '/dashboard/inventario',   icon: Warehouse,    labelKey: 'dashboard.nav_inventario'},

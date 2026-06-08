@@ -233,6 +233,7 @@ export default {
     nav_clients: 'Clientes',
     nav_estadisticas: 'Estadísticas',
     nav_caja: 'Caja',
+    nav_pos: 'POS',
     nav_tickets: 'Tickets',
     nav_gastos: 'Gastos',
     nav_kitchen: 'Cocina (KDS)',

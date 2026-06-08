@@ -29,7 +29,7 @@ interface MoreItem {
 
 const MAIN_TABS: MainTab[] = [
   { to: '/dashboard',        icon: Home,        labelKey: 'dashboard.nav_home',   exact: true },
-  { to: '/dashboard/caja',   icon: Banknote,    labelKey: 'dashboard.nav_caja'                },
+  { to: '/dashboard/caja',   icon: Banknote,    labelKey: 'dashboard.nav_pos'                 },
   { to: '/dashboard/orders', icon: ShoppingBag, labelKey: 'dashboard.nav_orders'              },
 ]
 

@@ -42,7 +42,7 @@ const VALID_COLUMNS = new Set([
   'onboarding_completed','is_active','plan','subscription_status',
   'trial_ends_at','features','created_at','updated_at',
   'tax_enabled','tax_percentage','suggested_tip_percentages','enabled_payment_methods','daily_sales_goal',
-  'business_type',
+  'business_type','banner_url',
 ])
 function sanitize(data: Record<string, unknown>) {
   return Object.fromEntries(Object.entries(data).filter(([k]) => VALID_COLUMNS.has(k)))
@@ -109,6 +109,7 @@ interface SettingsForm {
   show_prices: boolean
   show_descriptions: boolean
   show_calories: boolean
+  banner_url: string
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -138,6 +139,7 @@ const DEFAULT_FORM: SettingsForm = {
   show_prices: true,
   show_descriptions: true,
   show_calories: false,
+  banner_url: '',
 }
 
 const DAYS: Array<{ key: DayKey; label: string }> = [
@@ -259,6 +261,7 @@ function restaurantToForm(r: Restaurant): SettingsForm {
     show_prices:        r.show_prices       ?? true,
     show_descriptions:  r.show_descriptions ?? true,
     show_calories:      r.show_calories     ?? false,
+    banner_url:         (r as unknown as Record<string, unknown>).banner_url as string ?? '',
   }
 }
 
@@ -361,6 +364,11 @@ export function BusinessSettings() {
   const [uploadingCover, setUploadingCover] = useState(false)
   const [isDraggingCover, setIsDraggingCover] = useState(false)
 
+  const [bannerFile, setBannerFile] = useState<File | null>(null)
+  const [bannerPreview, setBannerPreview] = useState<string>('')
+  const [uploadingBanner, setUploadingBanner] = useState(false)
+  const [isDraggingBanner, setIsDraggingBanner] = useState(false)
+
   // Language settings
   const [panelLang, setPanelLang] = useState<'es' | 'en'>(() =>
     (localStorage.getItem('menulife_lang') as 'es' | 'en') ?? 'es'
@@ -400,6 +408,8 @@ export function BusinessSettings() {
           setFormData(restaurantToForm(r))
           if (data.logo_url) setLogoPreview(data.logo_url)
           if (data.cover_image_url) setCoverPreview(data.cover_image_url)
+          const rAnyData = data as unknown as Record<string, unknown>
+          if (rAnyData.banner_url) setBannerPreview(rAnyData.banner_url as string)
           // Load delivery config
           setDeliveryForm({
             delivery_enabled: r.delivery_enabled ?? false,
@@ -452,6 +462,12 @@ export function BusinessSettings() {
       if (coverPreview.startsWith('blob:')) URL.revokeObjectURL(coverPreview)
     }
   }, [coverPreview])
+
+  useEffect(() => {
+    return () => {
+      if (bannerPreview.startsWith('blob:')) URL.revokeObjectURL(bannerPreview)
+    }
+  }, [bannerPreview])
 
   // Helpers to update form fields
   const setField = <K extends keyof SettingsForm>(key: K, value: SettingsForm[K]) =>
@@ -526,6 +542,37 @@ export function BusinessSettings() {
     multiple: false,
   })
 
+  // Banner dropzone
+  const onDropBanner = useCallback((accepted: File[], rejected: unknown[]) => {
+    if ((rejected as unknown[]).length > 0) {
+      toast.error('Imagen inválida. Usá JPG, PNG o WebP de máx. 5MB')
+      return
+    }
+    if (accepted[0]) {
+      if (bannerPreview.startsWith('blob:')) URL.revokeObjectURL(bannerPreview)
+      setBannerFile(accepted[0])
+      setBannerPreview(URL.createObjectURL(accepted[0]))
+    }
+  }, [bannerPreview])
+
+  const {
+    getRootProps: getBannerRootProps,
+    getInputProps: getBannerInputProps,
+    isDragActive: isBannerDragActive,
+  } = useDropzone({
+    onDrop: onDropBanner,
+    accept: ACCEPTED_IMAGE_TYPES,
+    maxSize: 5 * 1024 * 1024,
+    multiple: false,
+  })
+
+  const removeBanner = () => {
+    if (bannerPreview.startsWith('blob:')) URL.revokeObjectURL(bannerPreview)
+    setBannerFile(null)
+    setBannerPreview('')
+    setField('banner_url', '')
+  }
+
   const removeLogo = () => {
     if (logoPreview.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
     setLogoFile(null)
@@ -581,9 +628,32 @@ export function BusinessSettings() {
         setCoverFile(null)
       }
 
+      let finalBannerUrl: string | null = formData.banner_url || null
+      if (bannerFile) {
+        setUploadingBanner(true)
+        const ext = bannerFile.name.split('.').pop() ?? 'jpg'
+        const fileName = `banners/${restaurant.id}-${Date.now()}.${ext}`
+        const { error: bannerErr } = await supabase.storage
+          .from('restaurant-assets')
+          .upload(fileName, bannerFile, { cacheControl: '3600', upsert: true })
+        setUploadingBanner(false)
+        if (bannerErr) {
+          toast.error(`Error al subir el banner: ${bannerErr.message}`)
+          setSaving(false)
+          return
+        }
+        const { data: { publicUrl: bannerPublicUrl } } = supabase.storage
+          .from('restaurant-assets')
+          .getPublicUrl(fileName)
+        finalBannerUrl = bannerPublicUrl
+        setField('banner_url', bannerPublicUrl)
+        setBannerFile(null)
+      }
+
       const updatePayload = {
         logo_url:               finalLogoUrl,
         cover_image_url:        finalCoverUrl,
+        banner_url:             finalBannerUrl,
         name:                   formData.name.trim(),
         description:            formData.description.trim() || null,
         phone:                  formData.phone.trim() || null,
@@ -665,6 +735,10 @@ export function BusinessSettings() {
       setCoverFile(null)
       if (!restaurant.cover_image_url && coverPreview.startsWith('blob:')) URL.revokeObjectURL(coverPreview)
       setCoverPreview(restaurant.cover_image_url ?? '')
+      setBannerFile(null)
+      const savedBanner = (restaurant as unknown as Record<string, unknown>).banner_url as string ?? ''
+      if (!savedBanner && bannerPreview.startsWith('blob:')) URL.revokeObjectURL(bannerPreview)
+      setBannerPreview(savedBanner)
     }
     toast('Cambios descartados', { icon: '↩️' })
   }
@@ -1102,7 +1176,7 @@ export function BusinessSettings() {
         </div>
 
         <div>
-          <FieldLabel hint="Los clientes podrán escribirte directo desde el menú.">
+          <FieldLabel hint="Los clientes podrán escribirte desde el menú y desde el botón de consulta del catálogo público.">
             WhatsApp de atención
           </FieldLabel>
           <div className="flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-transparent">
@@ -1247,6 +1321,73 @@ export function BusinessSettings() {
             </div>
           ))}
         </div>
+      </SectionCard>
+
+      {/* Hub banner */}
+      <SectionCard title="Banner del Hub Público" description="Imagen de encabezado que aparece en tu página pública (hub) de MenuLife.">
+        <div
+          className="relative w-full rounded-xl overflow-hidden mb-4"
+          style={{ paddingBottom: '33.33%' }}
+        >
+          <div className="absolute inset-0">
+            {uploadingBanner ? (
+              <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center gap-2">
+                <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-gray-500">Subiendo banner...</span>
+              </div>
+            ) : bannerPreview ? (
+              <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover" />
+            ) : (
+              <div
+                {...getBannerRootProps()}
+                className={cn(
+                  'w-full h-full flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors',
+                  isBannerDragActive || isDraggingBanner
+                    ? 'bg-orange-50 border-2 border-dashed border-[#F4705A]'
+                    : 'bg-gray-100 border-2 border-dashed border-gray-300 hover:border-gray-400',
+                )}
+                onDragEnter={() => setIsDraggingBanner(true)}
+                onDragLeave={() => setIsDraggingBanner(false)}
+                onDrop={() => setIsDraggingBanner(false)}
+              >
+                <input {...getBannerInputProps()} />
+                <ImageIcon className={cn('w-10 h-10', isBannerDragActive ? 'text-[#F4705A]' : 'text-gray-300')} />
+                <p className={cn('text-sm font-medium', isBannerDragActive ? 'text-[#F4705A]' : 'text-gray-500')}>
+                  {isBannerDragActive ? 'Soltá la imagen aquí' : 'Arrastrá tu banner aquí'}
+                </p>
+                <p className="text-xs text-gray-400">o usá el botón de abajo para subir</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <div {...getBannerRootProps()} className="contents">
+            <input {...getBannerInputProps()} />
+            <button
+              type="button"
+              onClick={e => e.stopPropagation()}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Upload className="w-4 h-4" />
+              {bannerPreview ? 'Cambiar banner' : 'Subir banner'}
+            </button>
+          </div>
+          {bannerPreview && (
+            <button
+              type="button"
+              onClick={removeBanner}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 bg-white text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Eliminar
+            </button>
+          )}
+        </div>
+
+        <p className="text-xs text-gray-400 mt-3">
+          JPG, PNG o WEBP · Recomendado: 1200×400 px · Máximo 5 MB
+        </p>
       </SectionCard>
     </div>
   )
@@ -1861,7 +2002,7 @@ export function BusinessSettings() {
         </Button>
         <Button
           onClick={handleSave}
-          isLoading={saving || uploadingLogo || uploadingCover}
+          isLoading={saving || uploadingLogo || uploadingCover || uploadingBanner}
           className="flex-1 lg:flex-none bg-[#FF6B7A] hover:bg-[#e85e6b] text-white focus:ring-[#FF6B7A]"
         >
           {t('dashboard.settings_save')}

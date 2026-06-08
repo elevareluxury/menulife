@@ -245,19 +245,6 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div style={{
-        position: 'absolute', bottom: '28px', left: '50%',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-        color: 'rgba(255,255,255,0.28)', fontFamily: 'var(--font-jakarta)',
-        fontSize: '10px', letterSpacing: '0.15em', userSelect: 'none',
-        animation: 'ml-scroll-arrow 2.5s ease-in-out infinite',
-      }}>
-        <span style={{ textTransform: 'uppercase' }}>Scroll</span>
-        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path d="M12 5v14M5 12l7 7 7-7" />
-        </svg>
-      </div>
     </section>
   )
 }

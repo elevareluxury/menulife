@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import bcrypt from 'bcryptjs'
 import { supabase } from '@/lib/supabase'
 import { useDeliveryAuthStore } from '@/store/deliveryAuthStore'
 import { useDrivers } from '../hooks/useDrivers'
@@ -70,10 +69,20 @@ export function DeliveryLogin() {
   const loginDirect = async (currentPin: string) => {
     if (!restaurantId || !selectedDriver) throw new Error('Datos incompletos')
 
+    // Server-side PIN verification via DB RPC (hash never leaves DB)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: isValid, error: rpcError } = await (supabase as any).rpc('verify_staff_pin', {
+      p_table: 'delivery_drivers',
+      p_id: selectedDriver.id,
+      p_pin: currentPin,
+    })
+
+    if (rpcError || !isValid) throw new Error('PIN incorrecto')
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: driverRow, error } = await (supabase as any)
       .from('delivery_drivers')
-      .select('id, first_name, last_name, phone, is_available, pin')
+      .select('id, first_name, last_name, phone, is_available')
       .eq('id', selectedDriver.id)
       .eq('restaurant_id', restaurantId)
       .eq('is_active', true)
@@ -81,24 +90,15 @@ export function DeliveryLogin() {
 
     if (error || !driverRow) throw new Error('PIN incorrecto')
 
-    const storedPin: string = driverRow.pin ?? ''
-    const isHashed = storedPin.startsWith('$2')
-    const isValid = isHashed
-      ? await bcrypt.compare(currentPin, storedPin)
-      : storedPin === currentPin
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from('delivery_drivers')
+      .update({ is_available: true, last_login: new Date().toISOString() })
+      .eq('id', driverRow.id)
 
-    if (!isValid) throw new Error('PIN incorrecto')
-
-    if (!isHashed) {
-      const hashed = await bcrypt.hash(currentPin, 10)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase as any).from('delivery_drivers').update({ pin: hashed }).eq('id', driverRow.id)
-    }
-
-    const { pin: _pin, ...driverData } = driverRow
     localStorage.setItem(lastDriverKey, selectedDriver.id)
-    setAuth(`direct-${Date.now()}`, { ...driverData, restaurant_id: restaurantId })
-    toast.success(`Bienvenido ${driverData.first_name}!`)
+    setAuth(`direct-${Date.now()}`, { ...driverRow, restaurant_id: restaurantId })
+    toast.success(`Bienvenido ${driverRow.first_name}!`)
     navigate(`/delivery/${slug}/app`)
   }
 

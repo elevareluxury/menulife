@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, Trash2, Edit, LayoutGrid } from 'lucide-react'
+import { Plus, Trash2, Edit, LayoutGrid, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Spinner } from '@/components/ui/Spinner'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
+import { useAuthStore } from '@/store/authStore'
 import { useTables } from '../hooks/useTables'
 import { useWaiters } from '../hooks/useWaiters'
 import { useReservations } from '@/modules/reservations/hooks/useReservations'
@@ -21,23 +22,32 @@ const db = supabase as any
 const STATUS_COLORS: Record<string, string> = {
   free: 'bg-green-500',
   occupied: 'bg-red-500',
-  reserved: 'bg-yellow-500',
+  reserved: 'bg-purple-500',
 }
 
 const STATUS_BORDERS: Record<string, string> = {
   free: 'border-green-400',
   occupied: 'border-red-400',
-  reserved: 'border-yellow-400',
+  reserved: 'border-purple-500',
+}
+
+// Returns true if the table was freed within the last 30 minutes
+function isRecentlyFreed(table: Table): boolean {
+  if (table.status !== 'free') return false
+  const diffMs = Date.now() - new Date(table.updated_at).getTime()
+  return diffMs < 30 * 60 * 1000
 }
 
 export function TablesConfiguration() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
-  const { tables, loading: tablesLoading } = useTables(restaurant?.id)
-  const { waiters } = useWaiters(restaurant?.id)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingTable, setEditingTable] = useState<Table | null>(null)
-  const [showReservations, setShowReservations] = useState(false)
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+  const { user }                                   = useAuthStore()
+  const { tables, loading: tablesLoading }         = useTables(restaurant?.id)
+  const { waiters }                                = useWaiters(restaurant?.id)
+  const [isModalOpen, setIsModalOpen]              = useState(false)
+  const [editingTable, setEditingTable]            = useState<Table | null>(null)
+  const [showReservations, setShowReservations]    = useState(false)
+  const [isMobile, setIsMobile]                    = useState(() => window.innerWidth < 768)
+  const [reopeningId, setReopeningId]              = useState<string | null>(null)
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768)
@@ -53,6 +63,7 @@ export function TablesConfiguration() {
   // Local positions for drag (avoids flicker while dragging)
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({})
   const dragging = useRef<{ id: string; dx: number; dy: number } | null>(null)
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Sync positions from DB (only for tables not currently being dragged)
   useEffect(() => {
@@ -71,8 +82,11 @@ export function TablesConfiguration() {
     })
   }, [tables])
 
-  const updateTablePosition = useCallback(async (tableId: string, x: number, y: number) => {
-    await db.from('tables').update({ position_x: x, position_y: y }).eq('id', tableId)
+  const updateTablePosition = useCallback((tableId: string, x: number, y: number) => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => {
+      db.from('tables').update({ position_x: x, position_y: y }).eq('id', tableId)
+    }, 500)
   }, [])
 
   const onCanvasMouseMove = (e: React.MouseEvent) => {
@@ -129,6 +143,53 @@ export function TablesConfiguration() {
       id: tableId,
       dx: touch.clientX - canvasRect.left - (positions[tableId]?.x ?? 0),
       dy: touch.clientY - canvasRect.top - (positions[tableId]?.y ?? 0),
+    }
+  }
+
+  const reopenTable = async (table: Table) => {
+    if (!restaurant?.id) return
+    setReopeningId(table.id)
+    try {
+      // Restore table to occupied
+      const { error: te } = await db.from('tables').update({ status: 'occupied' }).eq('id', table.id)
+      if (te) throw te
+
+      // Find the last completed order for this table today
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      const { data: lastOrder } = await db
+        .from('orders')
+        .select('id')
+        .eq('restaurant_id', restaurant.id)
+        .eq('table_number', table.table_number)
+        .in('status', ['completed', 'paid'])
+        .gte('created_at', todayStart.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (lastOrder) {
+        await db.from('orders').update({ status: 'pending' }).eq('id', lastOrder.id)
+      }
+
+      const userName = (user?.user_metadata?.full_name as string | undefined)
+        || user?.email?.split('@')[0] || 'Dueño'
+
+      await db.from('audit_logs').insert({
+        restaurant_id: restaurant.id,
+        user_name:     userName,
+        action:        'table_reopen',
+        entity_type:   'table',
+        entity_id:     table.id,
+        details:       { table_number: table.table_number, order_id: lastOrder?.id ?? null },
+      })
+
+      toast.success(`Mesa ${table.table_number} reabierta — pedido restaurado`)
+    } catch (err) {
+      console.error(err)
+      toast.error('Error al reabrir la mesa')
+    } finally {
+      setReopeningId(null)
     }
   }
 
@@ -231,6 +292,17 @@ export function TablesConfiguration() {
                         📅 {nextRes.reservation_time} {nextRes.first_name}
                       </div>
                     )}
+                    {isRecentlyFreed(table) && (
+                      <button
+                        onClick={() => reopenTable(table)}
+                        disabled={reopeningId === table.id}
+                        className="w-full mt-2 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(244,112,90,0.12)', color: '#F4705A', border: '1px solid rgba(244,112,90,0.3)' }}
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        {reopeningId === table.id ? 'Reabriendo...' : 'Reabrir'}
+                      </button>
+                    )}
                     <div className="flex gap-2 mt-2">
                       <button
                         className="flex-1 flex items-center justify-center hover:bg-gray-100 rounded-lg"
@@ -295,6 +367,19 @@ export function TablesConfiguration() {
                       <div className="text-xs text-blue-500 font-medium truncate mb-1">
                         📅 {nextRes.reservation_time} {nextRes.first_name}
                       </div>
+                    )}
+                    {isRecentlyFreed(table) && (
+                      <button
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); reopenTable(table) }}
+                        disabled={reopeningId === table.id}
+                        className="w-full mt-1 flex items-center justify-center gap-1 py-1.5 rounded text-[10px] font-bold"
+                        style={{ background: 'rgba(244,112,90,0.12)', color: '#F4705A', border: '1px solid rgba(244,112,90,0.3)' }}
+                      >
+                        <RotateCcw className="w-2.5 h-2.5" />
+                        {reopeningId === table.id ? '...' : 'Reabrir'}
+                      </button>
                     )}
                     <div className="flex gap-1 mt-2">
                       <button

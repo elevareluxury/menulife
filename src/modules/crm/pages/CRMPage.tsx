@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Search, Star, Phone, MessageCircle, ChevronRight,
-  Calendar, Clock, Users, CheckCircle2, XCircle, UserCheck,
+  Calendar, Clock, Users, CheckCircle2, XCircle, UserCheck, ShoppingBag, TrendingUp,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
+import { useRestaurantStore } from '@/store/restaurantStore'
 import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
@@ -15,7 +16,15 @@ const db = supabase as any
 
 type FilterTab = 'all' | 'vip' | 'recurrent' | 'new'
 type ResFilter = ReservationStatus | 'all'
-type ViewMode = 'clientes' | 'reservas'
+type ViewMode = 'clientes' | 'reservas' | 'ventas'
+
+interface PurchaseRecord {
+  id: string
+  created_at: string
+  total: number
+  order_type: string | null
+  status: string
+}
 
 const STATUS_COLOR: Record<string, string> = {
   confirmed: '#3B82F6', seated: '#10B981', completed: '#6B7280',
@@ -209,6 +218,7 @@ function ActionBtn({
 
 export function CRMPage() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
+  const businessType = useRestaurantStore(s => s.businessType)
 
   // View mode
   const [viewMode, setViewMode] = useState<ViewMode>('clientes')
@@ -314,8 +324,11 @@ export function CRMPage() {
       <div className="flex gap-1 p-1 rounded-xl bg-surface-3 w-fit mb-5">
         {([
           { id: 'clientes' as ViewMode, icon: <Users className="w-3.5 h-3.5" />, label: 'Clientes' },
-          { id: 'reservas' as ViewMode, icon: <Calendar className="w-3.5 h-3.5" />, label: 'Reservas' },
-        ] as const).map(({ id, icon, label }) => (
+          ...(businessType === 'retail'
+            ? [{ id: 'ventas' as ViewMode, icon: <ShoppingBag className="w-3.5 h-3.5" />, label: 'Ventas' }]
+            : [{ id: 'reservas' as ViewMode, icon: <Calendar className="w-3.5 h-3.5" />, label: 'Reservas' }]
+          ),
+        ]).map(({ id, icon, label }) => (
           <button
             key={id}
             onClick={() => setViewMode(id)}
@@ -487,6 +500,7 @@ export function CRMPage() {
         <ContactDetailModal
           contact={selected}
           restaurantId={restaurant?.id ?? ''}
+          businessType={businessType}
           onClose={() => setSelected(null)}
           onUpdated={() => { fetchContacts(); setSelected(null) }}
           onSelectReservation={setSelectedRes}
@@ -512,31 +526,52 @@ export function CRMPage() {
 interface DetailProps {
   contact: CRMContact
   restaurantId: string
+  businessType: 'gastronomy' | 'retail'
   onClose: () => void
   onUpdated: () => void
   onSelectReservation: (r: Reservation) => void
 }
 
-function ContactDetailModal({ contact, restaurantId, onClose, onUpdated, onSelectReservation }: DetailProps) {
+function ContactDetailModal({ contact, restaurantId, businessType, onClose, onUpdated, onSelectReservation }: DetailProps) {
   const [isVip, setIsVip] = useState(contact.is_vip)
   const [notes, setNotes] = useState(contact.notes ?? '')
   const [history, setHistory] = useState<Reservation[]>([])
+  const [purchases, setPurchases] = useState<PurchaseRecord[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!restaurantId) return
     let isMounted = true
-    ;(async () => {
-      const { data } = await db.from('reservations')
+    if (businessType === 'retail') {
+      db.from('orders')
+        .select('id, created_at, total, order_type, status')
+        .eq('restaurant_id', restaurantId)
+        .or(`customer_phone.eq.${contact.phone},customer_name.ilike.${contact.first_name}%`)
+        .order('created_at', { ascending: false })
+        .limit(10)
+        .then(({ data }: { data: PurchaseRecord[] | null }) => {
+          if (isMounted) setPurchases(data ?? [])
+        })
+    } else {
+      db.from('reservations')
         .select('*')
         .eq('restaurant_id', restaurantId)
         .eq('phone', contact.phone)
         .order('reservation_date', { ascending: false })
         .limit(10)
-      if (isMounted) setHistory(data ?? [])
-    })()
+        .then(({ data }: { data: Reservation[] | null }) => {
+          if (isMounted) setHistory(data ?? [])
+        })
+    }
     return () => { isMounted = false }
-  }, [contact.phone, restaurantId])
+  }, [contact.phone, contact.first_name, restaurantId, businessType])
+
+  // Frequency calculation: (today - first_visit) / total_visits
+  const frequency = (() => {
+    if (!contact.first_visit || contact.total_visits <= 1) return null
+    const days = Math.floor((Date.now() - new Date(contact.first_visit).getTime()) / 86400000)
+    return Math.max(1, Math.round(days / contact.total_visits))
+  })()
 
   const handleSave = async () => {
     setSaving(true)
@@ -582,6 +617,12 @@ function ContactDetailModal({ contact, restaurantId, onClose, onUpdated, onSelec
             {contact.email && <p className="text-sm text-ink-2">✉️ {contact.email}</p>}
             {contact.first_visit && <p className="text-xs text-ink-3 mt-1">Primera visita: {contact.first_visit}</p>}
             {contact.last_visit && <p className="text-xs text-ink-3">Última visita: {contact.last_visit}</p>}
+            {frequency && (
+              <p className="text-xs text-ink-3 flex items-center gap-1 mt-0.5">
+                <TrendingUp className="w-3 h-3" />
+                Viene cada ~{frequency} días
+              </p>
+            )}
           </div>
           <div className="flex gap-2">
             <a href={`tel:${contact.phone}`} className="p-2 rounded-lg hover:bg-surface-4 transition-colors" title="Llamar">
@@ -630,26 +671,47 @@ function ContactDetailModal({ contact, restaurantId, onClose, onUpdated, onSelec
           </div>
         )}
 
-        {/* Reservation history */}
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-ink-3 uppercase tracking-widest">Historial de reservas</p>
-          {history.length === 0 ? (
-            <p className="text-xs text-ink-4 py-2">Sin reservas registradas</p>
-          ) : (
-            history.map(r => (
-              <button
-                key={r.id}
-                onClick={() => onSelectReservation(r)}
-                className="w-full flex items-center justify-between text-xs p-2.5 rounded-lg bg-surface-3 hover:bg-surface-4 transition-colors text-left"
-              >
-                <span className="text-ink-2">📅 {r.reservation_date} · {r.reservation_time} · {r.party_size} pers.</span>
-                <span style={{ color: STATUS_COLOR[r.status] ?? '#888', fontWeight: 600 }}>
-                  {STATUS_LABEL[r.status] ?? r.status}
-                </span>
-              </button>
-            ))
-          )}
-        </div>
+        {/* History — gastronomy: reservations, retail: purchases */}
+        {businessType === 'retail' ? (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-ink-3 uppercase tracking-widest">Historial de compras</p>
+            {purchases.length === 0 ? (
+              <p className="text-xs text-ink-4 py-2">Sin compras registradas</p>
+            ) : (
+              purchases.map(p => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-surface-3"
+                >
+                  <span className="text-ink-2">
+                    🛍 {p.created_at?.slice(0, 10)} · {p.order_type ?? 'venta'}
+                  </span>
+                  <span className="font-bold text-ink-1">${p.total?.toLocaleString('es-AR')}</span>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-ink-3 uppercase tracking-widest">Historial de reservas</p>
+            {history.length === 0 ? (
+              <p className="text-xs text-ink-4 py-2">Sin reservas registradas</p>
+            ) : (
+              history.map(r => (
+                <button
+                  key={r.id}
+                  onClick={() => onSelectReservation(r)}
+                  className="w-full flex items-center justify-between text-xs p-2.5 rounded-lg bg-surface-3 hover:bg-surface-4 transition-colors text-left"
+                >
+                  <span className="text-ink-2">📅 {r.reservation_date} · {r.reservation_time} · {r.party_size} pers.</span>
+                  <span style={{ color: STATUS_COLOR[r.status] ?? '#888', fontWeight: 600 }}>
+                    {STATUS_LABEL[r.status] ?? r.status}
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex gap-3 justify-end pt-2 border-t border-surface-3">

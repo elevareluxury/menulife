@@ -54,6 +54,27 @@ export function KitchenDisplay() {
 
   const { orders, loading, updateOrderStatus } = useKitchenOrders(restaurantId ?? '')
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    await updateOrderStatus(orderId, newStatus)
+    if (newStatus === 'ready') {
+      const order = orders.find(o => o.id === orderId)
+      if (order?.waiter_id) {
+        try {
+          await db.from('waiter_notifications').insert({
+            restaurant_id: order.restaurant_id,
+            waiter_id: order.waiter_id,
+            type: 'order_ready',
+            message: `Pedido listo — Mesa ${order.table_number ?? order.customer_name}`,
+            data: { order_id: order.id, table_number: order.table_number },
+          })
+        } catch { /* non-blocking */ }
+      }
+    }
+  }
+
   // Sound notification for new pending orders
   useEffect(() => {
     if (!soundEnabled) return
@@ -165,7 +186,7 @@ export function KitchenDisplay() {
                       <OrderCard
                         key={order.id}
                         order={order}
-                        onStatusChange={updateOrderStatus}
+                        onStatusChange={handleStatusChange}
                         isFirst={columnIndex === 0}
                         isLast={columnIndex === KDS_COLUMNS.length - 1}
                       />

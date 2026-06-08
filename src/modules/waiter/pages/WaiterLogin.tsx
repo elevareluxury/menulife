@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import bcrypt from 'bcryptjs'
 import { supabase } from '@/lib/supabase'
 import { useWaiterAuthStore } from '@/store/waiterAuthStore'
 import { useWaiters } from '@/modules/waiters/hooks/useWaiters'
@@ -71,46 +70,40 @@ export function WaiterLogin() {
 
   const handleDelete = () => setPin(p => p.slice(0, -1))
 
-  // Fallback: client-side bcrypt comparison when edge function isn't deployed
+  // Fallback: server-side PIN verification via DB RPC (hash never leaves DB)
   const loginDirect = async (currentPin: string) => {
     if (!restaurantId || !selectedWaiter) throw new Error('Datos incompletos')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: waiterRow, error } = await (supabase as any)
+    const { data: isValid, error: rpcError } = await (supabase as any).rpc('verify_staff_pin', {
+      p_table: 'waiters',
+      p_id: selectedWaiter.id,
+      p_pin: currentPin,
+    })
+
+    if (rpcError || !isValid) throw new Error('PIN incorrecto')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: mozo, error } = await (supabase as any)
       .from('waiters')
-      .select('id, first_name, last_name, avatar_url, is_on_shift, pin, restaurant_id')
+      .select('id, first_name, last_name, avatar_url, is_on_shift, restaurant_id')
       .eq('id', selectedWaiter.id)
       .eq('restaurant_id', restaurantId)
       .eq('is_active', true)
       .single()
 
-    if (error || !waiterRow) throw new Error('PIN incorrecto')
+    if (error || !mozo) throw new Error('PIN incorrecto')
 
-    const storedPin: string = waiterRow.pin ?? ''
-    const isHashed = storedPin.startsWith('$2')
-    const isValid = isHashed
-      ? await bcrypt.compare(currentPin, storedPin)
-      : storedPin === currentPin
-
-    if (!isValid) throw new Error('PIN incorrecto')
-
-    // Migrate plain-text PIN to bcrypt hash on successful login
-    if (!isHashed) {
-      const hashed = await bcrypt.hash(currentPin, 10)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase as any).from('waiters').update({ pin: hashed }).eq('id', waiterRow.id)
-    }
-
-    const { pin: _pin, ...mozo } = waiterRow
     localStorage.setItem(lastWaiterKey, selectedWaiter.id)
     setAuth(`direct-${Date.now()}`, mozo)
-    // Registrar login y arrancar turno
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any).from('waiters').update({
       last_login: new Date().toISOString(),
       is_on_shift: true,
       shift_start: new Date().toISOString(),
     }).eq('id', mozo.id)
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase as any).from('waiter_activity_log').insert({
         restaurant_id: restaurantId,
         waiter_id: mozo.id,

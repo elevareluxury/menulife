@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus, Edit, Trash2, Copy, MessageCircle, Smartphone, CheckCircle, XCircle, BarChart2, Users } from 'lucide-react'
 import bcrypt from 'bcryptjs'
 import { Button } from '@/components/ui/Button'
@@ -220,6 +220,174 @@ function DriverLinkBanner({ slug }: { slug: string }) {
   )
 }
 
+// ─── Delivery Orders Section ────────────────────────────────────────────────
+
+interface DeliveryOrder {
+  id: string
+  customer_name: string | null
+  customer_address: string | null
+  status: string
+  delivery_driver_id: string | null
+  created_at: string
+  total: number
+  currency: string
+}
+
+function relativeTime(iso: string): string {
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+  if (mins < 1) return 'Ahora'
+  if (mins < 60) return `Hace ${mins} min`
+  return `Hace ${Math.floor(mins / 60)} h`
+}
+
+const DELIVERY_STATUS_CFG: Record<string, { label: string; color: string }> = {
+  pending:    { label: 'Pendiente',         color: '#F59E0B' },
+  preparing:  { label: 'Preparando',        color: '#3B82F6' },
+  ready:      { label: 'Listo para enviar', color: '#22C55E' },
+  in_transit: { label: 'En camino',         color: '#F4705A' },
+}
+
+function DeliveryOrdersSection({ restaurantId, drivers }: { restaurantId: string; drivers: DeliveryDriver[] }) {
+  const [orders, setOrders] = useState<DeliveryOrder[]>([])
+  const [loadingOrders, setLoadingOrders] = useState(true)
+  const [assigningId, setAssigningId] = useState<string | null>(null)
+
+  const fetchOrders = useCallback(async () => {
+    const { data } = await db.from('orders')
+      .select('id, customer_name, customer_address, status, delivery_driver_id, created_at, total, currency')
+      .eq('restaurant_id', restaurantId)
+      .eq('order_type', 'delivery')
+      .in('status', ['pending', 'preparing', 'ready', 'in_transit'])
+      .order('created_at', { ascending: true })
+    setOrders(data ?? [])
+    setLoadingOrders(false)
+  }, [restaurantId])
+
+  useEffect(() => {
+    fetchOrders()
+    const ch = supabase
+      .channel(`delivery_mgmt_${restaurantId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }, fetchOrders)
+      .subscribe()
+    return () => { ch.unsubscribe() }
+  }, [restaurantId, fetchOrders])
+
+  const assignDriver = async (orderId: string, driverId: string) => {
+    setAssigningId(orderId)
+    try {
+      await Promise.all([
+        db.from('orders').update({ delivery_driver_id: driverId, delivery_status: 'assigned' }).eq('id', orderId),
+        db.from('delivery_drivers').update({ is_available: false }).eq('id', driverId),
+      ])
+      toast.success('Repartidor asignado')
+      fetchOrders()
+    } catch { toast.error('Error al asignar') }
+    finally { setAssigningId(null) }
+  }
+
+  const changeStatus = async (order: DeliveryOrder, newStatus: string) => {
+    try {
+      const updates: Record<string, unknown> = { status: newStatus }
+      if (newStatus === 'in_transit') updates.delivery_status = 'picked_up'
+      if (newStatus === 'completed') {
+        updates.delivery_status = 'delivered'
+        updates.delivered_at = new Date().toISOString()
+        if (order.delivery_driver_id) {
+          await db.from('delivery_drivers').update({ is_available: true }).eq('id', order.delivery_driver_id)
+        }
+      }
+      await db.from('orders').update(updates).eq('id', order.id)
+      toast.success(newStatus === 'completed' ? 'Pedido entregado ✓' : 'Estado actualizado')
+      fetchOrders()
+    } catch { toast.error('Error al actualizar') }
+  }
+
+  const availableDrivers = drivers.filter(d => d.is_active && d.is_available)
+
+  if (loadingOrders) return null
+
+  return (
+    <div className="mt-8">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-gray-900">Pedidos de delivery</h2>
+        <span className="text-sm text-gray-400">{orders.length} activos</span>
+      </div>
+      {orders.length === 0 ? (
+        <Card>
+          <div className="text-center py-8">
+            <p className="text-3xl mb-2">🛵</p>
+            <p className="text-gray-500 text-sm">Sin pedidos de delivery activos</p>
+          </div>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {orders.map(order => {
+            const cfg = DELIVERY_STATUS_CFG[order.status] ?? { label: order.status, color: '#888' }
+            const assignedDriver = drivers.find(d => d.id === order.delivery_driver_id)
+            return (
+              <Card key={order.id} className="p-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-mono text-gray-400">#{order.id.slice(-4).toUpperCase()}</span>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${cfg.color}18`, color: cfg.color }}>
+                        {cfg.label}
+                      </span>
+                    </div>
+                    <p className="font-semibold text-gray-900 truncate">{order.customer_name ?? '—'}</p>
+                    {order.customer_address && (
+                      <p className="text-xs text-gray-500 truncate mt-0.5">📍 {order.customer_address}</p>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-bold text-gray-900">${order.total.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</p>
+                    <p className="text-xs text-gray-400">{relativeTime(order.created_at)}</p>
+                  </div>
+                </div>
+
+                {!order.delivery_driver_id ? (
+                  <select
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    defaultValue=""
+                    onChange={e => { if (e.target.value) assignDriver(order.id, e.target.value) }}
+                    disabled={assigningId === order.id}
+                  >
+                    <option value="">— Asignar repartidor —</option>
+                    {availableDrivers.map(d => (
+                      <option key={d.id} value={d.id}>{d.first_name} {d.last_name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <span className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-orange-700">
+                        {assignedDriver?.first_name?.[0]}{assignedDriver?.last_name?.[0]}
+                      </span>
+                      {assignedDriver ? `${assignedDriver.first_name} ${assignedDriver.last_name}` : 'Repartidor asignado'}
+                    </div>
+                    <div className="flex gap-2">
+                      {order.status === 'ready' && (
+                        <button onClick={() => changeStatus(order, 'in_transit')} className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: '#F4705A' }}>
+                          Enviar
+                        </button>
+                      )}
+                      {order.status === 'in_transit' && (
+                        <button onClick={() => changeStatus(order, 'completed')} className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white bg-green-600">
+                          Entregado
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </Card>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function DriversManagement() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
   const { drivers, loading: driversLoading, refetch } = useDrivers(restaurant?.id)
@@ -358,6 +526,10 @@ export function DriversManagement() {
                 </Card>
               ))}
             </div>
+          )}
+
+          {restaurant?.id && (
+            <DeliveryOrdersSection restaurantId={restaurant.id} drivers={drivers} />
           )}
         </>
       )}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Phone, MessageCircle, Users, CalendarDays, FileText } from 'lucide-react'
+import { Phone, MessageCircle, Users, Calendar, Clock, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
@@ -81,6 +81,40 @@ export function ReservationDetailModal({ reservation, tables, restaurantName, on
         .update({ status: newStatus, table_id: tableId || null, internal_notes: internalNotes || null })
         .eq('id', reservation.id)
       if (error) throw error
+
+      // Sync table status
+      if (newStatus === 'confirmed' && tableId) {
+        if (reservation.table_id && reservation.table_id !== tableId) {
+          await db.from('tables').update({ status: 'free' }).eq('id', reservation.table_id)
+        }
+        await db.from('tables').update({ status: 'reserved' }).eq('id', tableId)
+      } else if (['completed', 'cancelled', 'no_show'].includes(newStatus)) {
+        const tableToFree = reservation.table_id || tableId
+        if (tableToFree) {
+          await db.from('tables').update({ status: 'free' }).eq('id', tableToFree)
+        }
+      }
+
+      // Send confirmation/cancellation email
+      if (reservation.email && (newStatus === 'confirmed' || newStatus === 'cancelled')) {
+        try {
+          await supabase.functions.invoke('send-reservation-email', {
+            body: {
+              to: reservation.email,
+              firstName: reservation.first_name,
+              restaurantName,
+              date: reservation.reservation_date,
+              time: reservation.reservation_time,
+              partySize: reservation.party_size,
+              status: newStatus,
+            },
+          })
+        } catch (err) {
+          console.error('Error enviando mail de reserva:', err)
+          // Non-blocking: don't surface to user
+        }
+      }
+
       toast.success('Reserva actualizada')
       onUpdated()
       onClose()
@@ -136,9 +170,19 @@ export function ReservationDetailModal({ reservation, tables, restaurantName, on
             </div>
           </div>
           <p className="text-xs text-ink-2">📱 {reservation.phone}</p>
-          <div className="flex items-center gap-4 text-xs text-ink-2">
-            <span><CalendarDays className="w-3 h-3 inline mr-1" />{formatDate(reservation.reservation_date)} · {reservation.reservation_time}</span>
-            <span><Users className="w-3 h-3 inline mr-1" />{reservation.party_size} personas</span>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-xs text-ink-2">
+              <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span>{formatDate(reservation.reservation_date)}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-ink-2">
+              <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span>{reservation.reservation_time?.slice(0, 5)} hs</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-ink-2">
+              <Users className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span>{reservation.party_size} personas</span>
+            </div>
           </div>
           {reservation.occasion && <p className="text-xs text-ink-2">🎉 {reservation.occasion}</p>}
           {reservation.notes && (
@@ -165,7 +209,7 @@ export function ReservationDetailModal({ reservation, tables, restaurantName, on
           onChange={e => setTableId(e.target.value)}
           options={[
             { value: '', label: 'Sin asignar' },
-            ...tables.filter(t => t.is_active).map(t => ({ value: t.id, label: `Mesa ${t.table_number} (${t.capacity} pers.)` })),
+            ...tables.filter(t => t.is_active && t.status !== 'occupied').map(t => ({ value: t.id, label: `Mesa ${t.table_number} (${t.capacity} pers.) — ${t.status === 'reserved' ? 'Reservada' : 'Libre'}` })),
           ]}
         />
 

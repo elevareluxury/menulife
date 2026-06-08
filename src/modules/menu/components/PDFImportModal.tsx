@@ -66,8 +66,6 @@ async function extractPDFText(file: File): Promise<string> {
 
 // ─── Claude API ──────────────────────────────────────────────────────────────
 
-const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY
-
 function buildPrompt(text: string): string {
   return `Analizá el siguiente texto extraído de una carta de restaurante y extraé TODOS los productos en JSON.
 
@@ -105,34 +103,17 @@ REGLAS:
 }
 
 async function callClaude(text: string): Promise<ClaudeMenu> {
-  if (!ANTHROPIC_KEY || ANTHROPIC_KEY.includes('REPLACE')) {
-    throw new Error('Configurá VITE_ANTHROPIC_API_KEY en tu archivo .env para usar esta función.')
-  }
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': ANTHROPIC_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 8000,
-      messages: [{ role: 'user', content: buildPrompt(text) }],
-    }),
+  const { data, error } = await supabase.functions.invoke('import-menu-pdf', {
+    body: { prompt: buildPrompt(text) },
   })
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error((err as { error?: { message?: string } }).error?.message ?? `Error ${res.status}`)
-  }
+  if (error) throw new Error(error.message ?? 'Error al contactar el servidor')
 
-  const json = await res.json() as { content: { type: string; text: string }[] }
+  const json = data as { content: { type: string; text: string }[]; error?: string }
+
+  if (json.error) throw new Error(json.error)
+
   const raw = json.content.find(b => b.type === 'text')?.text ?? ''
-
-  // Strip possible markdown fences
   const cleaned = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '').trim()
   return JSON.parse(cleaned) as ClaudeMenu
 }
