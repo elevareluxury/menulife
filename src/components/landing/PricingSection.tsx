@@ -18,7 +18,7 @@ export function PricingSection() {
       monthly:  70,
       badge:    t('pricing.plan1_badge'),
       badgeNote: t('pricing.plan1_badge_note'),
-      features: [t('pricing.plan1_f1'), t('pricing.plan1_f2'), t('pricing.plan1_f3'), t('pricing.plan1_f4'), t('pricing.plan1_f5')],
+      features: [t('pricing.plan1_f1'), t('pricing.plan1_f2'), t('pricing.plan1_f3'), t('pricing.plan1_f4')],
       cta:      t('pricing.plan1_cta'),
       featured: false,
       href:     '/solicitar-acceso',
@@ -30,7 +30,7 @@ export function PricingSection() {
       monthly:  150,
       badge:    null,
       badgeNote: null,
-      features: [t('pricing.plan2_f1'), t('pricing.plan2_f2'), t('pricing.plan2_f3'), t('pricing.plan2_f4'), t('pricing.plan2_f5'), t('pricing.plan2_f6')],
+      features: [t('pricing.plan2_f1'), t('pricing.plan2_f2'), t('pricing.plan2_f3'), t('pricing.plan2_f4')],
       cta:      t('pricing.plan2_cta'),
       featured: true,
       href:     '/solicitar-acceso',
@@ -145,7 +145,9 @@ export function PricingSection() {
               </p>
             </div>
             <a
-              href="mailto:contacto@menulife.digital"
+              href="https://wa.me/543416962827"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 padding: '10px 24px', borderRadius: '50px',
                 border: '1px solid rgba(0,0,0,0.15)',
@@ -228,8 +230,8 @@ function PricingCard({
       {plan.badge && (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
           <span style={{
-            background: 'rgba(245,158,11,0.12)', color: '#D97706',
-            border: '1px solid rgba(245,158,11,0.3)',
+            background: 'rgba(244,112,90,0.12)', color: '#F4705A',
+            border: '1px solid rgba(244,112,90,0.35)',
             fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '50px',
             fontFamily: 'var(--font-jakarta)',
           }}>
@@ -253,7 +255,7 @@ function PricingCard({
           </span>
         </div>
         {plan.badgeNote && (
-          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: '#D97706', margin: '6px 0 0', fontStyle: 'italic' }}>
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'var(--ml-gray-500)', margin: '6px 0 0', fontStyle: 'italic' }}>
             {plan.badgeNote}
           </p>
         )}
@@ -262,7 +264,7 @@ function PricingCard({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
         {plan.features.map(f => (
           <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.7)' : '#3d3c39' }}>
-            <span style={{ color: 'var(--ml-salmon)', fontWeight: 700, flexShrink: 0, fontSize: '12px' }}>✓</span>
+            <span style={{ color: '#22c55e', fontWeight: 700, flexShrink: 0, fontSize: '12px' }}>✓</span>
             {f}
           </div>
         ))}

@@ -7,7 +7,7 @@ export function FAQSection() {
   const { t } = useTranslation()
   const [open, setOpen] = useState<number | null>(null)
 
-  const FAQS = [1,2,3,4,5,6,7,8].map(n => ({
+  const FAQS = [1,2,3,4,5].map(n => ({
     q: t(`faq.q${n}`),
     a: t(`faq.a${n}`),
   }))
