@@ -212,6 +212,22 @@ function useYesterdayRevenue(restaurantId: string | undefined) {
   return revenue
 }
 
+// ─── Retail: Cash register open/closed ───────────────────────────────────────
+
+function useCashRegisterOpen(restaurantId: string | undefined) {
+  const [isOpen, setIsOpen] = useState(false)
+  useEffect(() => {
+    if (!restaurantId) return
+    db.from('cash_registers')
+      .select('id', { count: 'exact', head: true })
+      .eq('restaurant_id', restaurantId)
+      .is('closed_at', null)
+      .then(({ count }: { count: number | null }) => setIsOpen((count ?? 0) > 0))
+      .catch(() => {})
+  }, [restaurantId])
+  return isOpen
+}
+
 // ─── Retail: Inventory summary hook ──────────────────────────────────────────
 
 interface InventorySummary {
@@ -268,10 +284,11 @@ interface QuickAccessProps {
   dashStats: { menuProducts: number; qrGenerated: number }
   stats: { week: { count: number } }
   invSummary: InventorySummary | null
+  cajaAbierta: boolean
   navigate: (to: string) => void
 }
 
-function QuickAccess({ businessType, activeOrders, dashStats, stats, invSummary, navigate }: QuickAccessProps) {
+function QuickAccess({ businessType, activeOrders, dashStats, stats, invSummary, cajaAbierta, navigate }: QuickAccessProps) {
   type QuickCard = {
     label: string
     title: string
@@ -281,28 +298,31 @@ function QuickAccess({ businessType, activeOrders, dashStats, stats, invSummary,
     renderIcon: () => React.ReactNode
   }
 
+  const lowStock = invSummary?.low_stock ?? 0
+  const totalProds = invSummary?.total_products ?? 0
+
   const retailCards: QuickCard[] = [
     {
       label: 'pos', title: 'POS',
-      data: activeOrders > 0 ? `${activeOrders} activos` : 'Punto de venta',
-      to: '/dashboard/caja', highlight: activeOrders > 0,
-      renderIcon: () => <Banknote className="w-6 h-6" style={{ color: activeOrders > 0 ? '#F4705A' : 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
+      data: cajaAbierta ? 'Caja abierta' : 'Caja cerrada',
+      to: '/dashboard/caja', highlight: cajaAbierta,
+      renderIcon: () => <Banknote className="w-6 h-6" style={{ color: cajaAbierta ? '#22c55e' : 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
     },
     {
       label: 'catalogo', title: 'Catálogo',
-      data: `${dashStats.menuProducts} productos`,
+      data: `${totalProds} producto${totalProds !== 1 ? 's' : ''}`,
       to: '/dashboard/catalogo', highlight: false,
       renderIcon: () => <ShoppingBag className="w-6 h-6" style={{ color: 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
     },
     {
       label: 'inventario', title: 'Inventario',
-      data: (invSummary?.low_stock ?? 0) > 0 ? `${invSummary?.low_stock} alertas` : 'Sin alertas',
-      to: '/dashboard/inventario', highlight: (invSummary?.low_stock ?? 0) > 0,
-      renderIcon: () => <Warehouse className="w-6 h-6" style={{ color: (invSummary?.low_stock ?? 0) > 0 ? '#F4705A' : 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
+      data: lowStock > 0 ? `Stock: ${lowStock} alertas` : 'Sin alertas',
+      to: '/dashboard/inventario', highlight: lowStock > 0,
+      renderIcon: () => <Warehouse className="w-6 h-6" style={{ color: lowStock > 0 ? '#F4705A' : 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
     },
     {
       label: 'stats', title: 'Estadísticas',
-      data: stats.week.count > 0 ? `${stats.week.count} ped. esta semana` : 'Ver reportes',
+      data: stats.week.count > 0 ? `${stats.week.count} ventas sem.` : 'Ver reportes',
       to: '/dashboard/estadisticas', highlight: false,
       renderIcon: () => <BarChart2 className="w-6 h-6" style={{ color: 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
     },
@@ -379,6 +399,7 @@ export function DashboardHome() {
   const yesterdayRev    = useYesterdayRevenue(restaurant?.id)
   const notifCount      = useOwnerNotifications(restaurant?.id)
   const invSummary      = useInventorySummary(businessType === 'retail' ? restaurant?.id : undefined)
+  const cajaAbierta     = useCashRegisterOpen(businessType === 'retail' ? restaurant?.id : undefined)
 
   const dailyGoal     = (restaurant as Record<string, unknown> | null)?.daily_sales_goal as number
     ?? ((restaurant?.features as Record<string, unknown>)?.daily_goal as number)
@@ -657,6 +678,7 @@ export function DashboardHome() {
         dashStats={dashStats}
         stats={stats}
         invSummary={invSummary}
+        cajaAbierta={cajaAbierta}
         navigate={navigate}
       />
     </div>

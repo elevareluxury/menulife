@@ -37,6 +37,7 @@ import { TicketsPage } from '@/modules/pos/pages/TicketsPage'
 import { GastosPage } from '@/modules/pos/pages/GastosPage'
 import InventarioPage from '@/modules/inventory/pages/InventarioPage'
 import CatalogoPage from '@/modules/catalog/pages/CatalogoPage'
+import CatalogoPublic from '@/modules/public/pages/CatalogoPublic'
 import HubPage from '@/modules/hub/pages/HubPage'
 
 function WaiterLegacyRedirect() {
@@ -96,6 +97,8 @@ function App() {
         <Route path="/super-admin/*" element={<SuperAdminPage />} />
         {/* Alias sin guión — por si alguien tipea /superadmin */}
         <Route path="/superadmin/*" element={<Navigate to="/super-admin" replace />} />
+        {/* Catálogo retail público */}
+        <Route path="/catalogo/:slug" element={<CatalogoPublic />} />
         {/* Hub Público — /:slug debe ir antes del catch-all */}
         <Route path="/:slug" element={<HubPublicPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
