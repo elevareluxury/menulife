@@ -92,8 +92,6 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
         orderPayload.customer_name = orderType === 'takeaway' ? customerName : null
       }
 
-      console.log('[Checkout] orderPayload:', orderPayload)
-
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert(orderPayload)
@@ -119,11 +117,68 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
         notes: item.notes || null,
       }))
 
-      console.log('[Checkout] orderItems:', orderItems)
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
       if (itemsError) {
         console.error('[Checkout] order_items INSERT error:', itemsError)
         throw itemsError
+      }
+
+      // Stock decrement for retail businesses (best-effort)
+      try {
+        const { data: restaurantData } = await (supabase as any)
+          .from('restaurants')
+          .select('business_type')
+          .eq('id', restaurantId)
+          .single()
+
+        if (restaurantData?.business_type === 'retail') {
+          for (const item of items) {
+            const { data: product } = await (supabase as any)
+              .from('products')
+              .select('id, stock_current, stock_min')
+              .eq('restaurant_id', restaurantId)
+              .ilike('name', item.name)
+              .maybeSingle()
+
+            if (!product) continue
+
+            const newStock = Math.max(0, (product.stock_current ?? 0) - item.quantity)
+
+            await (supabase as any)
+              .from('products')
+              .update({ stock_current: newStock })
+              .eq('id', product.id)
+
+            await (supabase as any)
+              .from('inventory_movements')
+              .insert({
+                restaurant_id: restaurantId,
+                product_id: product.id,
+                type: 'sale',
+                quantity: item.quantity,
+                reason: `Venta online #${order.id.slice(0, 8)}`,
+              })
+
+            const alertType = newStock === 0
+              ? 'out_of_stock'
+              : product.stock_min != null && newStock <= product.stock_min
+                ? 'low_stock'
+                : null
+
+            if (alertType) {
+              await (supabase as any)
+                .from('inventory_alerts')
+                .insert({
+                  restaurant_id: restaurantId,
+                  product_id: product.id,
+                  alert_type: alertType,
+                  is_resolved: false,
+                })
+            }
+          }
+        }
+      } catch (stockErr) {
+        console.error('[Checkout] stock decrement error:', stockErr)
       }
 
       // Persist order for tracking + banner

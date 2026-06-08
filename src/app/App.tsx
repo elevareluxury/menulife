@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { HubPublicPage } from '@/modules/public/pages/HubPublicPage'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
@@ -95,6 +96,8 @@ function App() {
         <Route path="/super-admin/*" element={<SuperAdminPage />} />
         {/* Alias sin guión — por si alguien tipea /superadmin */}
         <Route path="/superadmin/*" element={<Navigate to="/super-admin" replace />} />
+        {/* Hub Público — /:slug debe ir antes del catch-all */}
+        <Route path="/:slug" element={<HubPublicPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
