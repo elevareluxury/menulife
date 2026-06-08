@@ -242,6 +242,9 @@ export default {
     nav_screens: 'Pantallas',
     nav_logout: 'Cerrar sesión',
     nav_more: 'Más',
+    nav_hub: 'Hub Público',
+    nav_catalogo: 'Catálogo',
+    nav_inventario: 'Inventario',
 
     greeting_morning: 'Buenos días',
     greeting_afternoon: 'Buenas tardes',

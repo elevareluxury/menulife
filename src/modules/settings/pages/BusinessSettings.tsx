@@ -4,12 +4,16 @@ import { useDropzone } from 'react-dropzone'
 import {
   ChevronLeft, Store, MapPin, Clock, Share2, Palette,
   Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus, CalendarDays, Plug, Star,
+  Users, History, CreditCard, UtensilsCrossed, ShoppingBag, Warehouse,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useRestaurantStore } from '@/store/restaurantStore'
 import { useImageUpload } from '@/modules/menu/hooks/useImageUpload'
 import { useLanguage } from '@/hooks/useLanguage'
+import { TeamTab } from '@/modules/admin/components/TeamTab'
+import { AuditTab } from '@/modules/admin/components/AuditTab'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
@@ -37,6 +41,8 @@ const VALID_COLUMNS = new Set([
   'reservations_min_hours','reservations_max_party','reservations_time_slots','reservations_message',
   'onboarding_completed','is_active','plan','subscription_status',
   'trial_ends_at','features','created_at','updated_at',
+  'tax_enabled','tax_percentage','suggested_tip_percentages','enabled_payment_methods','daily_sales_goal',
+  'business_type',
 ])
 function sanitize(data: Record<string, unknown>) {
   return Object.fromEntries(Object.entries(data).filter(([k]) => VALID_COLUMNS.has(k)))
@@ -44,7 +50,7 @@ function sanitize(data: Record<string, unknown>) {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language' | 'reservations' | 'integrations'
+type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language' | 'reservations' | 'integrations' | 'pos' | 'team' | 'audit'
 
 interface DeliveryZone {
   name: string
@@ -313,6 +319,7 @@ export function BusinessSettings() {
   const { uploadImage, uploading: uploadingLogo } = useImageUpload()
   const { t } = useTranslation()
   const { changeLanguage } = useLanguage()
+  const setStoreBusinessType = useRestaurantStore(s => s.setBusinessType)
 
   const SECTIONS = useMemo<Array<{ id: Section; label: string; icon: React.ReactNode }>>(() => [
     { id: 'general',    label: t('dashboard.settings_general'),    icon: <Store    className="w-4 h-4" /> },
@@ -324,12 +331,18 @@ export function BusinessSettings() {
     { id: 'language',      label: t('dashboard.settings_language'),      icon: <Globe        className="w-4 h-4" /> },
     { id: 'reservations',  label: 'Reservas',                            icon: <CalendarDays className="w-4 h-4" /> },
     { id: 'integrations',  label: 'Integraciones',                       icon: <Plug         className="w-4 h-4" /> },
+    { id: 'pos',           label: 'POS',                                  icon: <CreditCard   className="w-4 h-4" /> },
+    { id: 'team',          label: 'Equipo',                               icon: <Users        className="w-4 h-4" /> },
+    { id: 'audit',         label: 'Historial',                            icon: <History      className="w-4 h-4" /> },
   ], [t])
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeSection, setActiveSection] = useState<Section>('general')
+  const [businessType, setBusinessType] = useState<'gastronomy' | 'retail'>('gastronomy')
+  const [confirmMode, setConfirmMode] = useState<'gastronomy' | 'retail' | null>(null)
+  const [savingMode, setSavingMode] = useState(false)
   const [formData, setFormData] = useState<SettingsForm>(DEFAULT_FORM)
   const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
     delivery_enabled: false,
@@ -354,6 +367,13 @@ export function BusinessSettings() {
   )
   const [menuLang, setMenuLang] = useState<'ES' | 'EN'>('ES')
   const [allowSwitch, setAllowSwitch] = useState(true)
+
+  // POS settings
+  const [taxEnabled, setTaxEnabled] = useState(false)
+  const [taxPercentage, setTaxPercentage] = useState(21)
+  const [suggestedTips, setSuggestedTips] = useState<number[]>([10, 15, 20])
+  const [enabledPayments, setEnabledPayments] = useState<string[]>(['cash', 'debit_card', 'credit_card', 'transfer', 'mercadopago', 'other'])
+  const [dailySalesGoal, setDailySalesGoal] = useState(50000)
 
   // Reservation settings
   const [resEnabled, setResEnabled] = useState(false)
@@ -396,6 +416,15 @@ export function BusinessSettings() {
           setPanelLang(storedLang ?? (r.default_language === 'EN' ? 'en' : 'es'))
           setMenuLang(r.default_language ?? 'ES')
           setAllowSwitch(r.allow_language_switch ?? true)
+          // Load POS config
+          const rAny = r as unknown as Record<string, unknown>
+          setTaxEnabled(Boolean(rAny.tax_enabled ?? false))
+          setTaxPercentage(Number(rAny.tax_percentage ?? 21))
+          setSuggestedTips(Array.isArray(rAny.suggested_tip_percentages) ? rAny.suggested_tip_percentages as number[] : [10, 15, 20])
+          setEnabledPayments(Array.isArray(rAny.enabled_payment_methods) && (rAny.enabled_payment_methods as string[]).length > 0
+            ? rAny.enabled_payment_methods as string[]
+            : ['cash', 'debit_card', 'credit_card', 'transfer', 'mercadopago', 'other'])
+          setDailySalesGoal(Number(rAny.daily_sales_goal ?? 50000))
           // Load reservation config
           setResEnabled(r.reservations_enabled ?? false)
           setResCollectGuests(r.reservations_collect_guests ?? false)
@@ -404,6 +433,8 @@ export function BusinessSettings() {
           setResMaxParty(r.reservations_max_party ?? 20)
           setResTimeSlots(r.reservations_time_slots ?? ['20:00', '21:00', '22:00'])
           setResMessage(r.reservations_message ?? '¡Gracias por tu reserva! Te esperamos.')
+          // Load business type
+          setBusinessType(r.business_type ?? 'gastronomy')
         }
         setLoading(false)
       })
@@ -592,6 +623,12 @@ export function BusinessSettings() {
         reservations_max_party:      resMaxParty,
         reservations_time_slots:     resTimeSlots,
         reservations_message:        resMessage,
+        // POS
+        tax_enabled:                  taxEnabled,
+        tax_percentage:               taxPercentage,
+        suggested_tip_percentages:    suggestedTips,
+        enabled_payment_methods:      enabledPayments,
+        daily_sales_goal:             dailySalesGoal,
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -632,6 +669,30 @@ export function BusinessSettings() {
     toast('Cambios descartados', { icon: '↩️' })
   }
 
+  const saveBusinessType = async (mode: 'gastronomy' | 'retail') => {
+    if (!restaurant) return
+    setSavingMode(true)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from('restaurants')
+        .update({ business_type: mode })
+        .eq('id', restaurant.id)
+      if (error) throw error
+      setBusinessType(mode)
+      setStoreBusinessType(mode)
+      setRestaurant(prev => prev ? { ...prev, business_type: mode } : prev)
+      const label = mode === 'gastronomy' ? 'Gastronomía' : 'Retail'
+      toast.success(`✅ Modo actualizado a ${label}`)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al cambiar el tipo de negocio'
+      toast.error(msg)
+    } finally {
+      setSavingMode(false)
+      setConfirmMode(null)
+    }
+  }
+
   // ─── Loading state ──────────────────────────────────────────────────────────
 
   if (loading) {
@@ -646,6 +707,44 @@ export function BusinessSettings() {
 
   const renderGeneral = () => (
     <div className="space-y-5">
+      {/* Tipo de Negocio */}
+      <SectionCard title="Tipo de Negocio" description="Seleccioná el tipo para personalizar tu panel.">
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            {
+              mode: 'gastronomy' as const,
+              icon: UtensilsCrossed,
+              label: 'Gastronomía',
+              desc: 'Restaurantes, bares, cafeterías, dark kitchens',
+            },
+            {
+              mode: 'retail' as const,
+              icon: ShoppingBag,
+              label: 'Retail',
+              desc: 'Tiendas, comercios, showrooms',
+            },
+          ]).map(({ mode, icon: Icon, label, desc }) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => { if (businessType !== mode) setConfirmMode(mode) }}
+              className={cn(
+                'flex flex-col items-start gap-3 p-4 rounded-xl border-2 text-left transition-all',
+                businessType === mode
+                  ? 'border-[#F4705A] bg-[#F4705A]/10'
+                  : 'border-gray-700 bg-[#1a1a1a] hover:border-gray-500'
+              )}
+            >
+              <Icon className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
+              <div>
+                <p className="font-bold text-white text-sm">{label}</p>
+                <p className="text-[13px] mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </SectionCard>
+
       {/* Logo */}
       <SectionCard title="Logo del negocio" description="Aparece en el menú QR que ven tus clientes.">
         <div className="flex gap-5 items-start">
@@ -1510,6 +1609,107 @@ export function BusinessSettings() {
     )
   }
 
+  const ALL_PAYMENT_METHODS: Array<{ key: string; label: string }> = [
+    { key: 'cash',        label: '💵 Efectivo' },
+    { key: 'debit_card',  label: '💳 Débito' },
+    { key: 'credit_card', label: '💳 Crédito' },
+    { key: 'transfer',    label: '📱 Transferencia' },
+    { key: 'mercadopago', label: '🟣 MercadoPago' },
+    { key: 'other',       label: '📝 Otro' },
+  ]
+
+  const ALL_TIP_PCTS = [5, 10, 15, 20, 25]
+
+  const renderPOS = () => (
+    <div className="space-y-5">
+      {/* Impuestos */}
+      <SectionCard title="Impuestos" description="Si cobrás IVA u otro impuesto, configuralo aquí. Se aplica automáticamente en el checkout.">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-sm font-medium text-gray-700">Cobrar impuestos</span>
+              <p className="text-xs text-gray-400 mt-0.5">Se suma al total del cobro</p>
+            </div>
+            <Toggle checked={taxEnabled} onChange={e => setTaxEnabled(e.target.checked)} />
+          </div>
+          {taxEnabled && (
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium text-gray-700">Porcentaje (%)</label>
+              <input
+                type="number" min={0} max={100} value={taxPercentage}
+                onChange={e => setTaxPercentage(Number(e.target.value))}
+                className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <span className="text-sm text-gray-500">% sobre el subtotal</span>
+            </div>
+          )}
+        </div>
+      </SectionCard>
+
+      {/* Propina sugerida */}
+      <SectionCard title="Propina sugerida" description="Chips de porcentaje rápido que aparecen en el checkout.">
+        <div className="flex flex-wrap gap-2">
+          {ALL_TIP_PCTS.map(pct => {
+            const active = suggestedTips.includes(pct)
+            return (
+              <button
+                key={pct}
+                type="button"
+                onClick={() => setSuggestedTips(prev => active ? prev.filter(p => p !== pct) : [...prev, pct].sort((a, b) => a - b))}
+                className={cn(
+                  'px-4 py-2 rounded-xl border text-sm font-semibold transition-colors',
+                  active ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                )}
+              >
+                {pct}%
+              </button>
+            )
+          })}
+        </div>
+        <p className="text-xs text-gray-400 mt-3">Seleccioná los porcentajes que querés mostrar. El cajero también podrá ingresar un monto manual.</p>
+      </SectionCard>
+
+      {/* Métodos de pago habilitados */}
+      <SectionCard title="Métodos de pago habilitados" description="Solo los métodos seleccionados aparecerán en el checkout.">
+        <div className="space-y-2">
+          {ALL_PAYMENT_METHODS.map(m => {
+            const active = enabledPayments.includes(m.key)
+            return (
+              <div key={m.key} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-700">{m.label}</span>
+                <Toggle
+                  checked={active}
+                  onChange={e => {
+                    if (e.target.checked) {
+                      setEnabledPayments(prev => [...prev, m.key])
+                    } else {
+                      if (enabledPayments.length <= 1) return
+                      setEnabledPayments(prev => prev.filter(k => k !== m.key))
+                    }
+                  }}
+                />
+              </div>
+            )
+          })}
+        </div>
+        <p className="text-xs text-gray-400 mt-3">Al menos un método debe estar habilitado.</p>
+      </SectionCard>
+
+      {/* Meta diaria */}
+      <SectionCard title="Meta diaria de ventas" description="Aparece en el dashboard como indicador de progreso.">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-700">$</span>
+          <input
+            type="number" min={0} step={1000} value={dailySalesGoal}
+            onChange={e => setDailySalesGoal(Number(e.target.value))}
+            className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+        </div>
+        <p className="text-xs text-gray-400 mt-2">El dashboard mostrará qué porcentaje de la meta alcanzaste hoy.</p>
+      </SectionCard>
+    </div>
+  )
+
   const renderIntegrations = () => (
     <div className="space-y-5">
       {INTEGRATIONS.map(group => (
@@ -1571,6 +1771,16 @@ export function BusinessSettings() {
     language:     renderLanguage(),
     reservations: renderReservations(),
     integrations: renderIntegrations(),
+    pos:          renderPOS(),
+    team:  restaurant ? (
+      <TeamTab
+        restaurantId={restaurant.id}
+        userName={user?.user_metadata?.full_name ?? user?.email ?? 'Dueño'}
+      />
+    ) : null,
+    audit: restaurant ? (
+      <AuditTab restaurantId={restaurant.id} />
+    ) : null,
   }
 
   // ─── Render ─────────────────────────────────────────────────────────────────
@@ -1638,10 +1848,13 @@ export function BusinessSettings() {
         </div>
       </div>
 
-      {/* Save bar — fixed on mobile, inline on desktop */}
+      {/* Save bar — hidden on team/audit tabs */}
       <div
-        className="fixed left-0 right-0 z-20 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:mt-5"
-        style={{ bottom: 'calc(72px + env(safe-area-inset-bottom))' }}
+        className={cn(
+          'fixed left-0 right-0 z-20 border-t px-4 py-3 flex gap-3 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:mt-5',
+          (activeSection === 'team' || activeSection === 'audit') && 'hidden lg:hidden'
+        )}
+        style={{ bottom: 'calc(72px + env(safe-area-inset-bottom))', background: '#16181F', borderColor: 'rgba(255,255,255,0.08)' }}
       >
         <Button variant="ghost" onClick={handleCancel} disabled={saving} className="flex-1 lg:flex-none">
           {t('dashboard.btn_cancel')}
@@ -1654,6 +1867,52 @@ export function BusinessSettings() {
           {t('dashboard.settings_save')}
         </Button>
       </div>
+
+      {/* Business type confirmation modal */}
+      {confirmMode && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setConfirmMode(null)}
+        >
+          <div
+            className="rounded-2xl p-6 max-w-sm w-full"
+            style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              {confirmMode === 'gastronomy'
+                ? <UtensilsCrossed className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
+                : <Warehouse className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
+              }
+              <h3 className="text-white font-bold text-base">
+                ¿Cambiar a {confirmMode === 'gastronomy' ? 'Gastronomía' : 'Retail'}?
+              </h3>
+            </div>
+            <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Se reorganizará tu panel de control. Tus datos no se eliminan.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmMode(null)}
+                disabled={savingMode}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                style={{ border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => saveBusinessType(confirmMode)}
+                disabled={savingMode}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-60"
+                style={{ background: '#F4705A' }}
+              >
+                {savingMode ? 'Guardando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

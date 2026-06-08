@@ -64,6 +64,7 @@ export interface Restaurant {
   reservations_message?: string | null
   features?: unknown
   google_review_link?: string | null
+  business_type?: 'gastronomy' | 'retail'
 }
 
 export interface MenuSection {

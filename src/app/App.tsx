@@ -31,6 +31,12 @@ import { ReservationFormPage } from '@/modules/public/pages/ReservationFormPage'
 import { CRMPage } from '@/modules/crm/pages/CRMPage'
 import { EstadisticasPage } from '@/modules/stats/pages/EstadisticasPage'
 import { NotificacionesPage } from '@/modules/dashboard/pages/NotificacionesPage'
+import { CajaPage } from '@/modules/pos/pages/CajaPage'
+import { TicketsPage } from '@/modules/pos/pages/TicketsPage'
+import { GastosPage } from '@/modules/pos/pages/GastosPage'
+import InventarioPage from '@/modules/inventory/pages/InventarioPage'
+import CatalogoPage from '@/modules/catalog/pages/CatalogoPage'
+import HubPage from '@/modules/hub/pages/HubPage'
 
 function WaiterLegacyRedirect() {
   const { slug } = useParams()
@@ -65,6 +71,12 @@ function App() {
           <Route path="clientes" element={<CRMPage />} />
           <Route path="estadisticas"    element={<EstadisticasPage />} />
           <Route path="notificaciones" element={<NotificacionesPage />} />
+          <Route path="caja"           element={<CajaPage />} />
+          <Route path="tickets"        element={<TicketsPage />} />
+          <Route path="gastos"         element={<GastosPage />} />
+          <Route path="inventario"     element={<InventarioPage />} />
+          <Route path="catalogo"       element={<CatalogoPage />} />
+          <Route path="hub"            element={<HubPage />} />
         </Route>
         <Route path="/r/:slug/reservar" element={<ReservationFormPage />} />
         <Route path="/r/:slug/pedido/:orderId" element={<OrderTracking />} />
@@ -77,6 +89,7 @@ function App() {
         <Route path="/waiter/:slug/login" element={<WaiterLegacyRedirect />} />
         <Route path="/waiter/:slug/dashboard" element={<WaiterLegacyRedirect />} />
         <Route path="/waiter/:slug/table/:tableNumber" element={<TableBill />} />
+        <Route path="/delivery/:slug" element={<DeliveryLogin />} />
         <Route path="/delivery/:slug/login" element={<DeliveryLogin />} />
         <Route path="/delivery/:slug/app" element={<DriverDashboard />} />
         <Route path="/super-admin/*" element={<SuperAdminPage />} />

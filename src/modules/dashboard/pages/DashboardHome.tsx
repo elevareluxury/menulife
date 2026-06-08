@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, ChevronRight } from 'lucide-react'
+import { Bell, ChevronRight, Package, AlertTriangle, XCircle, DollarSign, Banknote, ShoppingBag, Warehouse, BarChart2 } from 'lucide-react'
 import { BarChart, Bar, ResponsiveContainer, Cell } from 'recharts'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
+import { useRestaurantStore } from '@/store/restaurantStore'
 import { useOrderStats } from '@/modules/dashboard/hooks/useOrderStats'
 import { useDashboardStats } from '@/modules/dashboard/hooks/useDashboardStats'
 import { formatPrice } from '@/lib/utils'
@@ -161,6 +162,32 @@ function useHourlySalesToday(restaurantId: string | undefined) {
   return data
 }
 
+function useOwnerNotifications(restaurantId: string | undefined) {
+  const [count, setCount] = useState(0)
+
+  const fetch = useCallback(async () => {
+    if (!restaurantId) return
+    const { count: n } = await db
+      .from('owner_notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('restaurant_id', restaurantId)
+      .eq('is_read', false)
+    setCount(n ?? 0)
+  }, [restaurantId])
+
+  useEffect(() => {
+    if (!restaurantId) return
+    fetch()
+    const channel = supabase
+      .channel(`owner_notifs_${restaurantId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'owner_notifications', filter: `restaurant_id=eq.${restaurantId}` }, fetch)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [restaurantId, fetch])
+
+  return count
+}
+
 function useYesterdayRevenue(restaurantId: string | undefined) {
   const [revenue, setRevenue] = useState(0)
   useEffect(() => {
@@ -183,6 +210,29 @@ function useYesterdayRevenue(restaurantId: string | undefined) {
     return () => { isMounted = false }
   }, [restaurantId])
   return revenue
+}
+
+// ─── Retail: Inventory summary hook ──────────────────────────────────────────
+
+interface InventorySummary {
+  total_products: number
+  low_stock: number
+  out_of_stock: number
+  inventory_value: number
+}
+
+function useInventorySummary(restaurantId: string | undefined) {
+  const [data, setData] = useState<InventorySummary | null>(null)
+  useEffect(() => {
+    if (!restaurantId) return
+    db.from('view_inventory_summary')
+      .select('*')
+      .eq('restaurant_id', restaurantId)
+      .maybeSingle()
+      .then(({ data: d }: { data: InventorySummary | null }) => { if (d) setData(d) })
+      .catch(() => {})
+  }, [restaurantId])
+  return data
 }
 
 // ─── SVG Progress Circle ─────────────────────────────────────────────────────
@@ -210,10 +260,115 @@ function ProgressCircle({ pct, size = 72 }: { pct: number; size?: number }) {
   )
 }
 
+// ─── Quick Access cards ───────────────────────────────────────────────────────
+
+interface QuickAccessProps {
+  businessType: 'gastronomy' | 'retail'
+  activeOrders: number
+  dashStats: { menuProducts: number; qrGenerated: number }
+  stats: { week: { count: number } }
+  invSummary: InventorySummary | null
+  navigate: (to: string) => void
+}
+
+function QuickAccess({ businessType, activeOrders, dashStats, stats, invSummary, navigate }: QuickAccessProps) {
+  type QuickCard = {
+    label: string
+    title: string
+    data: string
+    to: string
+    highlight: boolean
+    renderIcon: () => React.ReactNode
+  }
+
+  const retailCards: QuickCard[] = [
+    {
+      label: 'pos', title: 'POS',
+      data: activeOrders > 0 ? `${activeOrders} activos` : 'Punto de venta',
+      to: '/dashboard/caja', highlight: activeOrders > 0,
+      renderIcon: () => <Banknote className="w-6 h-6" style={{ color: activeOrders > 0 ? '#F4705A' : 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
+    },
+    {
+      label: 'catalogo', title: 'Catálogo',
+      data: `${dashStats.menuProducts} productos`,
+      to: '/dashboard/catalogo', highlight: false,
+      renderIcon: () => <ShoppingBag className="w-6 h-6" style={{ color: 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
+    },
+    {
+      label: 'inventario', title: 'Inventario',
+      data: (invSummary?.low_stock ?? 0) > 0 ? `${invSummary?.low_stock} alertas` : 'Sin alertas',
+      to: '/dashboard/inventario', highlight: (invSummary?.low_stock ?? 0) > 0,
+      renderIcon: () => <Warehouse className="w-6 h-6" style={{ color: (invSummary?.low_stock ?? 0) > 0 ? '#F4705A' : 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
+    },
+    {
+      label: 'stats', title: 'Estadísticas',
+      data: stats.week.count > 0 ? `${stats.week.count} ped. esta semana` : 'Ver reportes',
+      to: '/dashboard/estadisticas', highlight: false,
+      renderIcon: () => <BarChart2 className="w-6 h-6" style={{ color: 'rgba(255,255,255,0.5)' }} strokeWidth={2} />,
+    },
+  ]
+
+  const gastronomyCards: QuickCard[] = [
+    {
+      label: 'orders', title: 'Pedidos',
+      data: activeOrders > 0 ? `${activeOrders} activos` : 'Sin pedidos activos',
+      to: '/dashboard/orders', highlight: activeOrders > 0,
+      renderIcon: () => <span className="text-2xl">🛍</span>,
+    },
+    {
+      label: 'menu', title: 'Menú',
+      data: `${dashStats.menuProducts} platos`,
+      to: '/dashboard/menu', highlight: false,
+      renderIcon: () => <span className="text-2xl">🍽</span>,
+    },
+    {
+      label: 'stats', title: 'Estadísticas',
+      data: stats.week.count > 0 ? `${stats.week.count} ped. esta semana` : 'Ver reportes',
+      to: '/dashboard/estadisticas', highlight: false,
+      renderIcon: () => <span className="text-2xl">📊</span>,
+    },
+    {
+      label: 'qr', title: 'Código QR',
+      data: dashStats.qrGenerated > 0 ? 'QR activo' : 'Sin QR',
+      to: '/dashboard/qr', highlight: false,
+      renderIcon: () => <span className="text-2xl">📱</span>,
+    },
+  ]
+
+  const cards = businessType === 'retail' ? retailCards : gastronomyCards
+
+  return (
+    <div>
+      <h2 className="text-sm font-bold text-white mb-2">Acceso rápido</h2>
+      <div className="grid grid-cols-2 gap-3">
+        {cards.map(card => (
+          <button
+            key={card.label}
+            onClick={() => navigate(card.to)}
+            className="flex items-start justify-between p-4 rounded-2xl text-left transition-all active:scale-[0.98] hover:scale-[1.01]"
+            style={{
+              backgroundColor: card.highlight ? '#F4705A12' : '#1a1a1a',
+              border: `1px solid ${card.highlight ? '#F4705A40' : '#333333'}`,
+            }}
+          >
+            <div>
+              {card.renderIcon()}
+              <p className="font-semibold text-white mt-1 text-sm">{card.title}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{card.data}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 mt-1 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }} />
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function DashboardHome() {
   const { restaurant } = useRestaurant()
+  const businessType = useRestaurantStore(s => s.businessType)
   const { stats } = useOrderStats(restaurant?.id)
   const { stats: dashStats } = useDashboardStats(restaurant?.id)
   const navigate = useNavigate()
@@ -222,8 +377,12 @@ export function DashboardHome() {
   const alerts          = useAlerts(restaurant?.id)
   const hourlyData      = useHourlySalesToday(restaurant?.id)
   const yesterdayRev    = useYesterdayRevenue(restaurant?.id)
+  const notifCount      = useOwnerNotifications(restaurant?.id)
+  const invSummary      = useInventorySummary(businessType === 'retail' ? restaurant?.id : undefined)
 
-  const dailyGoal     = ((restaurant?.features as Record<string, unknown>)?.daily_goal as number) ?? 50000
+  const dailyGoal     = (restaurant as Record<string, unknown> | null)?.daily_sales_goal as number
+    ?? ((restaurant?.features as Record<string, unknown>)?.daily_goal as number)
+    ?? 50000
   const todayRevenue  = stats.today.total
   const activeOrders  = stats.today.pending + stats.today.cooking + stats.today.ready
   const avgTicket     = stats.today.count > 0 ? Math.round(stats.today.total / stats.today.count) : 0
@@ -241,22 +400,39 @@ export function DashboardHome() {
 
       {/* ── HEADER ───────────────────────────────────────────────── */}
       <div className="flex items-center justify-between pt-2">
-        <div>
-          <p className="text-xs text-gray-400 font-medium">{greeting()}</p>
-          <h1 className="text-xl font-bold text-white leading-tight">Menú Life</h1>
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Logo del restaurante */}
+          {restaurant?.logo_url ? (
+            <img
+              src={restaurant.logo_url}
+              alt={restaurant.name}
+              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+            />
+          ) : (
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
+              style={{ backgroundColor: '#F4705A' }}
+            >
+              {initial}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="text-xs text-gray-400 font-medium">{greeting()}</p>
+            <h1 className="text-xl font-bold text-white leading-tight truncate">{restaurant?.name ?? 'MenuLife'}</h1>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => navigate('/dashboard/notificaciones')}
             className="relative w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors"
           >
             <Bell className="w-5 h-5 text-gray-600" />
-            {alerts.length > 0 && (
+            {(alerts.length + notifCount) > 0 && (
               <span
                 className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
                 style={{ backgroundColor: '#F4705A' }}
               >
-                {alerts.length}
+                {alerts.length + notifCount}
               </span>
             )}
           </button>
@@ -355,50 +531,90 @@ export function DashboardHome() {
         </div>
       </div>
 
-      {/* ── NIVEL 3 — MESAS EN VIVO ──────────────────────────────── */}
-      {activeTbls.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-bold text-white">Mesas en vivo</h2>
+      {/* ── NIVEL 3 — MESAS EN VIVO (gastronomy) / INVENTARIO RÁPIDO (retail) ── */}
+      {businessType === 'retail' ? (
+        <div
+          className="rounded-2xl p-5"
+          style={{ background: '#1a1a1a', border: '1px solid #2a2d35' }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-white">Inventario</h2>
             <button
-              onClick={() => navigate('/dashboard/tables')}
+              onClick={() => navigate('/dashboard/inventario')}
               className="text-xs font-medium"
               style={{ color: '#F4705A' }}
             >
-              Ver todas →
+              Ver todo →
             </button>
           </div>
-
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 justify-items-center">
-            {activeTbls.slice(0, 16).map(t => {
-              const color = tableColor(t)
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => navigate('/dashboard/tables')}
-                  className="w-14 h-14 rounded-lg flex items-center justify-center transition-all active:scale-95"
-                  style={{ backgroundColor: color + '33', border: `2px solid ${color}` }}
-                >
-                  <span className="text-white text-sm font-bold">{t.table_number}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="flex items-center gap-3 mt-2">
+          <div className="grid grid-cols-2 gap-3">
             {[
-              { color: '#22c55e', label: 'Activa' },
-              { color: '#EF9F27', label: 'Sin atención' },
-              { color: '#F4705A', label: 'A cobrar' },
-              { color: '#374151', label: 'Libre' },
-            ].map(l => (
-              <div key={l.label} className="flex items-center gap-1 text-[10px] text-gray-400">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: l.color }} />
-                {l.label}
+              { icon: Package,       label: 'Productos activos', value: invSummary?.total_products ?? 0,     color: 'rgba(255,255,255,0.8)' },
+              { icon: AlertTriangle, label: 'Stock bajo',        value: invSummary?.low_stock ?? 0,          color: '#F59E0B' },
+              { icon: XCircle,       label: 'Sin stock',         value: invSummary?.out_of_stock ?? 0,       color: '#F87171' },
+              { icon: DollarSign,    label: 'Valor inventario',  value: formatPrice(invSummary?.inventory_value ?? 0, 'ARS'), color: 'rgba(255,255,255,0.8)', isString: true },
+            ].map(({ icon: Icon, label, value, color, isString }) => (
+              <div
+                key={label}
+                className="flex items-center gap-3 p-3 rounded-xl"
+                style={{ background: 'rgba(255,255,255,0.04)' }}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" style={{ color }} strokeWidth={2} />
+                <div>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
+                  <p className="text-sm font-bold" style={{ color }}>
+                    {isString ? value : value.toString()}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
+      ) : (
+        activeTbls.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-bold text-white">Mesas en vivo</h2>
+              <button
+                onClick={() => navigate('/dashboard/tables')}
+                className="text-xs font-medium"
+                style={{ color: '#F4705A' }}
+              >
+                Ver todas →
+              </button>
+            </div>
+
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 justify-items-center">
+              {activeTbls.slice(0, 16).map(t => {
+                const color = tableColor(t)
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => navigate('/dashboard/tables')}
+                    className="w-14 h-14 rounded-lg flex items-center justify-center transition-all active:scale-95"
+                    style={{ backgroundColor: color + '33', border: `2px solid ${color}` }}
+                  >
+                    <span className="text-white text-sm font-bold">{t.table_number}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="flex items-center gap-3 mt-2">
+              {[
+                { color: '#22c55e', label: 'Activa' },
+                { color: '#EF9F27', label: 'Sin atención' },
+                { color: '#F4705A', label: 'A cobrar' },
+                { color: '#374151', label: 'Libre' },
+              ].map(l => (
+                <div key={l.label} className="flex items-center gap-1 text-[10px] text-gray-400">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: l.color }} />
+                  {l.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
       )}
 
       {/* ── NIVEL 4 — MINI CHART ─────────────────────────────────── */}
@@ -435,58 +651,14 @@ export function DashboardHome() {
       )}
 
       {/* ── NIVEL 5 — ACCESOS RÁPIDOS ────────────────────────────── */}
-      <div>
-        <h2 className="text-sm font-bold text-white mb-2">Acceso rápido</h2>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            {
-              emoji: '🛍',
-              title: 'Pedidos',
-              data: activeOrders > 0 ? `${activeOrders} activos` : 'Sin pedidos activos',
-              to: '/dashboard/orders',
-              highlight: activeOrders > 0,
-            },
-            {
-              emoji: '🍽',
-              title: 'Menú',
-              data: `${dashStats.menuProducts} platos`,
-              to: '/dashboard/menu',
-              highlight: false,
-            },
-            {
-              emoji: '📊',
-              title: 'Estadísticas',
-              data: stats.week.count > 0 ? `${stats.week.count} ped. esta semana` : 'Ver reportes',
-              to: '/dashboard/estadisticas',
-              highlight: false,
-            },
-            {
-              emoji: '📱',
-              title: 'Código QR',
-              data: dashStats.qrGenerated > 0 ? 'QR activo' : 'Sin QR',
-              to: '/dashboard/qr',
-              highlight: false,
-            },
-          ].map(card => (
-            <button
-              key={card.to}
-              onClick={() => navigate(card.to)}
-              className="flex items-start justify-between p-4 rounded-2xl text-left transition-all active:scale-[0.98] hover:scale-[1.01]"
-              style={{
-                backgroundColor: card.highlight ? '#F4705A12' : '#1a1a1a',
-                border: `1px solid ${card.highlight ? '#F4705A40' : '#333333'}`,
-              }}
-            >
-              <div>
-                <span className="text-2xl">{card.emoji}</span>
-                <p className="font-semibold text-white mt-1 text-sm">{card.title}</p>
-                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{card.data}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 mt-1 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }} />
-            </button>
-          ))}
-        </div>
-      </div>
+      <QuickAccess
+        businessType={businessType}
+        activeOrders={activeOrders}
+        dashStats={dashStats}
+        stats={stats}
+        invSummary={invSummary}
+        navigate={navigate}
+      />
     </div>
   )
 }

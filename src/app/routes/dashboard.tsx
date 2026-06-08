@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
+import { useRestaurantStore } from '@/store/restaurantStore'
 import { Spinner } from '@/components/ui/Spinner'
 import { Sidebar } from '@/modules/dashboard/components/Sidebar'
 import { BottomNav } from '@/components/dashboard/BottomNav'
@@ -12,7 +13,12 @@ export { DashboardHome } from '@/modules/dashboard/pages/DashboardHome'
 export function DashboardPage() {
   const { loading, initialized, isAuthenticated } = useAuth()
   const { restaurant, loading: restaurantLoading } = useRestaurant()
+  const setBusinessType = useRestaurantStore(s => s.setBusinessType)
   const [timedOut, setTimedOut] = useState(false)
+
+  useEffect(() => {
+    setBusinessType(restaurant?.business_type ?? 'gastronomy')
+  }, [restaurant?.business_type, setBusinessType])
 
   useEffect(() => {
     const t = setTimeout(() => setTimedOut(true), 5_000)

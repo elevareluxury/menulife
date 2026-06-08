@@ -92,6 +92,7 @@ export type Database = {
           reservations_max_party: number | null
           reservations_time_slots: Json | null
           reservations_message: string | null
+          business_type: 'gastronomy' | 'retail' | null
         }
         Insert: {
           id?: string
@@ -151,6 +152,7 @@ export type Database = {
           reservations_max_party?: number | null
           reservations_time_slots?: Json | null
           reservations_message?: string | null
+          business_type?: 'gastronomy' | 'retail' | null
         }
         Update: {
           id?: string
@@ -210,6 +212,7 @@ export type Database = {
           reservations_max_party?: number | null
           reservations_time_slots?: Json | null
           reservations_message?: string | null
+          business_type?: 'gastronomy' | 'retail' | null
         }
         Relationships: []
       }
