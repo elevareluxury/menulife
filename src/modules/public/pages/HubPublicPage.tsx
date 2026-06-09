@@ -646,68 +646,57 @@ export function HubPublicPage() {
         </div>
       )}
 
-      {/* Floating pills — appear after 80px scroll, no solid bar */}
-      <AnimatePresence>
-        {headerVisible && (
-          <motion.div
-            initial={{opacity:0,y:-12}}
-            animate={{opacity:1,y:0}}
-            exit={{opacity:0,y:-12}}
-            transition={{duration:0.25,ease:'easeOut'}}
-            style={{
-              position:'fixed',top:12,left:'50%',transform:'translateX(-50%)',
-              width:'calc(100% - 32px)',maxWidth:398,
-              zIndex:40,display:'flex',alignItems:'center',justifyContent:'space-between',
-              gap:8,pointerEvents:'none',
-            }}
-          >
-            {/* Logo + name pill */}
-            <div style={{
-              display:'flex',alignItems:'center',gap:8,
-              padding:'6px 14px 6px 6px',borderRadius:999,
-              background:'rgba(6,8,15,0.72)',backdropFilter:'blur(20px)',
-              WebkitBackdropFilter:'blur(20px)',
-              border:'1px solid rgba(255,255,255,0.1)',
-              boxShadow:'0 4px 20px rgba(0,0,0,0.5)',
-              pointerEvents:'auto',minWidth:0,flex:1,overflow:'hidden',
-            }}>
-              {r.logo_url && (
-                <img src={r.logo_url} alt={r.name} style={{
-                  width:30,height:30,borderRadius:'50%',objectFit:'cover',
-                  border:`1px solid rgba(245,158,11,0.4)`,flexShrink:0,
-                }}/>
-              )}
-              <span style={{
-                fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:'#fff',
-                overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',
-              }}>
-                {r.name}
-              </span>
-            </div>
-
-            {/* Open/closed pill */}
-            <div style={{
-              display:'inline-flex',alignItems:'center',gap:5,
-              padding:'7px 12px',borderRadius:999,flexShrink:0,
-              background:open?'rgba(16,185,129,.15)':'rgba(239,68,68,.15)',
-              backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
-              border:`1px solid ${open?'rgba(16,185,129,.3)':'rgba(239,68,68,.3)'}`,
-              boxShadow:'0 4px 20px rgba(0,0,0,0.5)',
-              pointerEvents:'auto',
-            }}>
-              <span style={{width:6,height:6,borderRadius:'50%',background:open?C.grn:C.red,display:'inline-block'}}/>
-              <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:open?C.grn:C.red,whiteSpace:'nowrap'}}>
-                {open?'Abierto':'Cerrado'}
-              </span>
-            </div>
-          </motion.div>
+      {/* Header flotante — aparece al scrollear */}
+      <div style={{
+        position:'fixed',top:0,left:0,right:0,zIndex:50,
+        height:'56px',
+        background:headerVisible?'rgba(6,8,15,0.85)':'transparent',
+        backdropFilter:headerVisible?'blur(20px)':'none',
+        WebkitBackdropFilter:headerVisible?'blur(20px)':'none',
+        borderBottom:headerVisible?'1px solid rgba(255,255,255,0.06)':'none',
+        opacity:headerVisible?1:0,
+        transform:headerVisible?'translateY(0)':'translateY(-100%)',
+        transition:'all 0.3s ease',
+        pointerEvents:headerVisible?'auto':'none',
+        display:'flex',alignItems:'center',
+        padding:'0 16px',gap:'10px',
+        boxSizing:'border-box',
+      }}>
+        {r.logo_url && (
+          <img src={r.logo_url} alt={r.name} style={{
+            width:32,height:32,borderRadius:'50%',objectFit:'cover',flexShrink:0,
+          }}/>
         )}
-      </AnimatePresence>
+        <span style={{
+          fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15,color:'white',
+          flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',minWidth:0,
+        }}>
+          {r.name}
+        </span>
+        <div style={{
+          display:'flex',alignItems:'center',gap:5,flexShrink:0,
+          background:'rgba(255,255,255,0.06)',borderRadius:999,padding:'4px 10px',
+        }}>
+          <span style={{width:6,height:6,borderRadius:'50%',background:open?'#22C55E':'#EF4444',flexShrink:0,display:'inline-block'}}/>
+          <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:open?'#22C55E':'#EF4444'}}>
+            {open?'Abierto':'Cerrado'}
+          </span>
+        </div>
+        {ra.plan!=='hub_free' && (
+          <a href={isRetail?`/catalogo/${slug}`:`/r/${slug}`} style={{
+            flexShrink:0,width:32,height:32,borderRadius:'50%',
+            background:'rgba(255,255,255,0.06)',
+            display:'flex',alignItems:'center',justifyContent:'center',
+            color:'rgba(255,255,255,0.7)',textDecoration:'none',fontSize:14,
+          }}>
+            {isRetail?'🛍':'🍽'}
+          </a>
+        )}
+      </div>
 
       <div style={{
         fontFamily:"'DM Sans',sans-serif",
         maxWidth:430, margin:'0 auto', minHeight:'100svh', position:'relative',
-        background:C.bg,
       }}>
 
         {/* ══════════════════════════════════════════════════════
@@ -716,7 +705,7 @@ export function HubPublicPage() {
         <section id="inicio" style={{
           minHeight:'100svh',position:'relative',zIndex:1,
           display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-          paddingTop:60,paddingBottom:40,
+          paddingTop:56,paddingBottom:40,
         }}>
 
           {/* Animated mesh blobs — shown when no cover or as overlay */}
