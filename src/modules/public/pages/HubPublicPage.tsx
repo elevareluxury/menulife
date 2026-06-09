@@ -68,16 +68,6 @@ const HUB_CSS = `
   .hub-link-card:hover{transform:scale(1.01)}
 `
 
-const SCHEDULE_DAYS = [
-  { key: 'monday',    label: 'Lunes'     },
-  { key: 'tuesday',   label: 'Martes'    },
-  { key: 'wednesday', label: 'Miércoles' },
-  { key: 'thursday',  label: 'Jueves'    },
-  { key: 'friday',    label: 'Viernes'   },
-  { key: 'saturday',  label: 'Sábado'    },
-  { key: 'sunday',    label: 'Domingo'   },
-]
-const TODAY_DAY_KEY = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()]
 
 /* ── Helpers ────────────────────────────────────────────────────────────────── */
 
@@ -276,45 +266,178 @@ function BottomNav({isRetail}:{isRetail:boolean}) {
   const scroll = (id:string) => document.getElementById(id)?.scrollIntoView({behavior:'smooth'})
 
   const tabs = [
-    {id:'inicio'    as NavId, label:'Inicio',                        action:()=>scroll('inicio')},
-    {id:'menu-ctas' as NavId, label:isRetail?'Catálogo':'Menú',      action:()=>scroll('menu-ctas')},
-    {id:'locales'   as NavId, label:'Locales',                       action:()=>scroll('locales')},
-    {id:'novedades' as NavId, label:'Novedades',                     action:()=>scroll('novedades')},
-    {id:'contacto'  as NavId, label:'Contacto',                      action:()=>scroll('contacto')},
+    {id:'inicio'    as NavId, label:'Inicio',                   action:()=>scroll('inicio')},
+    {id:'menu-ctas' as NavId, label:isRetail?'Catálogo':'Menú', action:()=>scroll('menu-ctas')},
+    {id:'locales'   as NavId, label:'Locales',                  action:()=>scroll('locales')},
+    {id:'novedades' as NavId, label:'Novedades',                action:()=>scroll('novedades')},
+    {id:'contacto'  as NavId, label:'Contacto',                 action:()=>scroll('contacto')},
   ]
 
   return (
-    <nav style={{
+    <div style={{
       position:'fixed',
       bottom:16,
       left:'50%',
       transform:'translateX(-50%)',
       width:'calc(100% - 32px)',
       maxWidth:398,
+      height:64,
+      display:'flex',
+      alignItems:'center',
+      justifyContent:'space-around',
+      background:'rgba(255,255,255,0.05)',
+      backdropFilter:'blur(20px)',
+      WebkitBackdropFilter:'blur(20px)',
+      border:'1px solid rgba(255,255,255,0.08)',
       borderRadius:20,
-      padding:'8px 4px',
-      paddingBottom:'calc(8px + env(safe-area-inset-bottom, 0px))',
-      background:'rgba(6,8,15,0.82)',
-      backdropFilter:'blur(24px) saturate(200%)',
-      WebkitBackdropFilter:'blur(24px) saturate(200%)',
-      border:`1px solid rgba(255,255,255,0.10)`,
-      boxShadow:'0 8px 32px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.06) inset',
-      display:'grid',gridTemplateColumns:'repeat(5,1fr)',
-      alignItems:'center',zIndex:1000,
+      padding:'0 8px',
+      boxShadow:'0 8px 32px rgba(0,0,0,0.4)',
+      zIndex:1000,
     }}>
       {tabs.map(tab=>(
         <button key={tab.id} className="hub-tab" onClick={tab.action} style={{
-          display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-          gap:4,padding:'6px 4px',background:'transparent',border:'none',cursor:'pointer',
+          display:'flex',flexDirection:'column',alignItems:'center',
+          gap:2,padding:'8px 12px',border:'none',background:'none',cursor:'pointer',
+          flexShrink:0,width:'20%',
         }}>
           <NavIcon id={tab.id} active={active===tab.id} />
-          <span style={{fontFamily:"'DM Mono',monospace",fontSize:9,fontWeight:500,
-            color:active===tab.id?C.acc:C.t3,transition:'color .15s'}}>
+          <span style={{
+            fontSize:10,fontFamily:"'DM Sans',sans-serif",fontWeight:500,
+            color:active===tab.id?C.acc:'rgba(255,255,255,0.4)',
+            transition:'color .15s',whiteSpace:'nowrap',
+          }}>
             {tab.label}
           </span>
         </button>
       ))}
-    </nav>
+    </div>
+  )
+}
+
+/* ── Horarios compactos con tooltip ────────────────────────────────────────── */
+
+const DAYS_COMPACT = [
+  {key:'monday',    initial:'L', label:'Lunes'},
+  {key:'tuesday',   initial:'M', label:'Martes'},
+  {key:'wednesday', initial:'X', label:'Miércoles'},
+  {key:'thursday',  initial:'J', label:'Jueves'},
+  {key:'friday',    initial:'V', label:'Viernes'},
+  {key:'saturday',  initial:'S', label:'Sábado'},
+  {key:'sunday',    initial:'D', label:'Domingo'},
+]
+
+function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
+  const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()]
+  const [activeDay,setActiveDay] = useState<string|null>(null)
+  const [tooltipPos,setTooltipPos] = useState({x:0,y:0})
+
+  const handleDayPress = (e:React.TouchEvent|React.MouseEvent, key:string) => {
+    const rect = (e.target as HTMLElement).getBoundingClientRect()
+    setTooltipPos({x:rect.left+rect.width/2, y:rect.top-8})
+    setActiveDay(activeDay===key ? null : key)
+  }
+
+  useEffect(()=>{
+    const close = ()=>setActiveDay(null)
+    document.addEventListener('touchstart',close)
+    return ()=>document.removeEventListener('touchstart',close)
+  },[])
+
+  if (!schedule) return null
+
+  return (
+    <div style={{padding:'16px',position:'relative'}}>
+      <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,
+        color:'rgba(255,255,255,0.5)',textTransform:'uppercase',
+        letterSpacing:'0.08em',marginBottom:12}}>
+        Horarios
+      </p>
+      <div style={{display:'flex',justifyContent:'space-between',gap:4}}>
+        {DAYS_COMPACT.map(day=>{
+          const slot = schedule?.[day.key]
+          const isToday = day.key===todayKey
+          const isClosed = !slot||slot.closed===true
+          const isActive = activeDay===day.key
+          return (
+            <button
+              key={day.key}
+              onTouchStart={(e)=>{e.stopPropagation();handleDayPress(e,day.key)}}
+              onClick={(e)=>{e.stopPropagation();handleDayPress(e,day.key)}}
+              style={{
+                width:36,height:36,borderRadius:'50%',
+                border:isToday?`1.5px solid ${C.acc}`:'1px solid rgba(255,255,255,0.1)',
+                background:isActive?'rgba(245,158,11,0.15)':isToday?'rgba(245,158,11,0.08)':'rgba(255,255,255,0.04)',
+                color:isClosed?'rgba(255,255,255,0.2)':isToday?C.acc:'rgba(255,255,255,0.7)',
+                fontSize:12,fontFamily:"'DM Mono',monospace",fontWeight:500,
+                cursor:'pointer',flexShrink:0,position:'relative',
+                display:'flex',alignItems:'center',justifyContent:'center',
+              }}
+            >
+              {day.initial}
+              {!isClosed && (
+                <span style={{
+                  position:'absolute',bottom:2,left:'50%',
+                  transform:'translateX(-50%)',
+                  width:3,height:3,borderRadius:'50%',
+                  background:isToday?C.acc:'rgba(255,255,255,0.4)',
+                }}/>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      <AnimatePresence>
+        {activeDay && (()=>{
+          const day = DAYS_COMPACT.find(d=>d.key===activeDay)!
+          const slot = schedule?.[activeDay]
+          const isClosed = !slot||slot.closed===true
+          return (
+            <motion.div
+              key={activeDay}
+              initial={{opacity:0,y:4,scale:0.95}}
+              animate={{opacity:1,y:0,scale:1}}
+              exit={{opacity:0,y:4,scale:0.95}}
+              transition={{duration:0.15}}
+              style={{
+                position:'fixed',
+                left:tooltipPos.x,top:tooltipPos.y,
+                transform:'translate(-50%,-100%)',
+                zIndex:1001,
+                background:'rgba(20,22,30,0.95)',
+                backdropFilter:'blur(12px)',
+                border:'1px solid rgba(255,255,255,0.1)',
+                borderRadius:12,
+                padding:'10px 16px',
+                pointerEvents:'none',
+                minWidth:140,
+                textAlign:'center',
+                boxShadow:'0 8px 32px rgba(0,0,0,0.5)',
+              }}
+            >
+              <div style={{
+                position:'absolute',bottom:-5,left:'50%',
+                transform:'translateX(-50%) rotate(45deg)',
+                width:10,height:10,
+                background:'rgba(20,22,30,0.95)',
+                border:'1px solid rgba(255,255,255,0.1)',
+                borderTop:'none',borderLeft:'none',
+              }}/>
+              <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,color:'#fff',marginBottom:4}}>
+                {day.label}
+              </p>
+              {isClosed ? (
+                <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:C.red,margin:0}}>Cerrado</p>
+              ) : (
+                <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.acc,margin:0}}>
+                  {slot.open} — {slot.close}
+                </p>
+              )}
+            </motion.div>
+          )
+        })()}
+      </AnimatePresence>
+    </div>
   )
 }
 
@@ -359,6 +482,19 @@ export function HubPublicPage() {
   const [loading, setLoading]                 = useState(true)
   const [notFound, setNotFound]               = useState(false)
   const [lightboxIndex, setLightboxIndex]     = useState<number|null>(null)
+  const [scrollY, setScrollY]                 = useState(0)
+  const [headerVisible, setHeaderVisible]     = useState(false)
+
+  // Scroll tracking for parallax + floating header
+  useEffect(()=>{
+    const onScroll = ()=>{
+      const y = window.scrollY
+      setScrollY(y)
+      setHeaderVisible(y>80)
+    }
+    window.addEventListener('scroll', onScroll, {passive:true})
+    return ()=>window.removeEventListener('scroll', onScroll)
+  },[])
 
   // Inject keyframe CSS once
   useEffect(()=>{
@@ -475,6 +611,10 @@ export function HubPublicPage() {
     backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)',
   }
 
+  // Parallax calculations
+  const coverOpacity = Math.max(0, 1 - scrollY / 300)
+  const coverScale   = 1 + scrollY * 0.0003
+
   return (
     <>
       {/* Grain overlay */}
@@ -483,25 +623,77 @@ export function HubPublicPage() {
         backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
       }}/>
 
+      {/* Fixed cover image with parallax */}
+      {hubCoverUrl && (
+        <div style={{
+          position:'fixed',top:0,left:'50%',transform:'translateX(-50%)',
+          width:'100%',maxWidth:430,height:'100vh',
+          zIndex:0,opacity:coverOpacity,pointerEvents:'none',
+          transition:'none',overflow:'hidden',
+        }}>
+          <div style={{
+            width:'100%',height:'100%',
+            transform:`scale(${coverScale})`,transformOrigin:'center center',
+            backgroundImage:`url(${hubCoverUrl})`,
+            backgroundSize:'cover',backgroundPosition:'center',
+          }}>
+            <div style={{position:'absolute',inset:0,
+              background:'linear-gradient(to bottom,rgba(6,8,15,0.3) 0%,rgba(6,8,15,0.7) 60%,rgba(6,8,15,1) 100%)'}}/>
+          </div>
+        </div>
+      )}
+
+      {/* Floating header — appears after 80px scroll */}
       <div style={{
-        background:C.bg, fontFamily:"'DM Sans',sans-serif",
-        maxWidth:430, margin:'0 auto', paddingBottom:96, minHeight:'100svh', position:'relative',
+        position:'fixed',top:0,left:'50%',
+        transform:headerVisible?'translateX(-50%) translateY(0)':'translateX(-50%) translateY(-10px)',
+        width:'100%',maxWidth:430,zIndex:40,height:60,
+        display:'flex',alignItems:'center',padding:'0 16px',gap:12,
+        background:headerVisible?'rgba(6,8,15,0.85)':'transparent',
+        backdropFilter:headerVisible?'blur(20px)':'none',
+        WebkitBackdropFilter:headerVisible?'blur(20px)':'none',
+        borderBottom:headerVisible?'1px solid rgba(255,255,255,0.06)':'none',
+        opacity:headerVisible?1:0,
+        transition:'all 0.3s ease',
+        pointerEvents:headerVisible?'auto':'none',
+      }}>
+        {r.logo_url && (
+          <img src={r.logo_url} alt={r.name} style={{
+            width:32,height:32,borderRadius:'50%',objectFit:'cover',
+            border:`1px solid rgba(245,158,11,0.4)`,flexShrink:0,
+          }}/>
+        )}
+        <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16,color:'#fff',flex:1,
+          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+          {r.name}
+        </span>
+        <div style={{display:'inline-flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:100,flexShrink:0,
+          background:open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)',
+          border:`1px solid ${open?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'}`}}>
+          <span style={{width:6,height:6,borderRadius:'50%',background:open?C.grn:C.red,display:'inline-block'}}/>
+          <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:open?C.grn:C.red}}>
+            {open?'Abierto':'Cerrado'}
+          </span>
+        </div>
+      </div>
+
+      <div style={{
+        fontFamily:"'DM Sans',sans-serif",
+        maxWidth:430, margin:'0 auto', minHeight:'100svh', position:'relative',
       }}>
 
         {/* ══════════════════════════════════════════════════════
             1. HERO
         ══════════════════════════════════════════════════════ */}
-        <section id="inicio" style={{height:'100svh',minHeight:600,position:'relative',
-          display:'flex',flexDirection:'column',justifyContent:'flex-end',
-          paddingBottom:40,overflow:'hidden'}}>
+        <section id="inicio" style={{
+          minHeight:'100svh',position:'relative',zIndex:1,
+          display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+          paddingTop:60,paddingBottom:40,
+        }}>
 
-          {/* Cover image (if set) */}
-          {hubCoverUrl && (
-            <img src={hubCoverUrl} alt="" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.4,zIndex:0}}/>
-          )}
-
-          {/* Animated mesh blobs */}
-          <div style={{position:'absolute',inset:0,zIndex:1}}>
+          {/* Animated mesh blobs — shown when no cover or as overlay */}
+          <div style={{position:'absolute',inset:0,zIndex:0,pointerEvents:'none',
+            opacity:hubCoverUrl?0.4:1}}>
             <div style={{position:'absolute',width:420,height:420,top:-80,left:-100,borderRadius:'50%',
               background:'radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 68%)',
               animation:'hubMesh 12s ease-in-out infinite alternate'}}/>
@@ -514,16 +706,12 @@ export function HubPublicPage() {
           </div>
 
           {/* Scan lines */}
-          <div style={{position:'absolute',inset:0,zIndex:2,pointerEvents:'none',
+          <div style={{position:'absolute',inset:0,zIndex:1,pointerEvents:'none',
             backgroundImage:'repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0px,rgba(255,255,255,.012) 1px,transparent 1px,transparent 4px)',
             backgroundSize:'100% 4px'}}/>
 
-          {/* Bottom fade */}
-          <div style={{position:'absolute',bottom:0,left:0,right:0,height:320,
-            background:`linear-gradient(to bottom,transparent 0%,${C.bg} 92%)`,zIndex:3}}/>
-
           {/* Hero content */}
-          <div style={{position:'relative',zIndex:4,display:'flex',flexDirection:'column',
+          <div style={{position:'relative',zIndex:2,display:'flex',flexDirection:'column',
             alignItems:'center',textAlign:'center',padding:'0 24px',gap:12}}>
 
             {/* Logo */}
@@ -578,7 +766,26 @@ export function HubPublicPage() {
               {googleRating && <><span style={{color:C.t4}}>·</span><span>⭐ {googleRating}</span></>}
             </motion.div>
           </div>
+
+          {/* Scroll hint arrow */}
+          <motion.div
+            animate={{y:[0,8,0]}}
+            transition={{repeat:Infinity,duration:2,ease:'easeInOut'}}
+            style={{position:'absolute',bottom:32,color:'rgba(255,255,255,0.3)',fontSize:20,zIndex:2}}
+          >
+            ↓
+          </motion.div>
         </section>
+
+        {/* ── Solid background content wrapper ── */}
+        <div style={{
+          position:'relative',zIndex:1,
+          background:C.bg,
+          borderRadius:'24px 24px 0 0',
+          marginTop:'-24px',
+          paddingTop:24,
+          paddingBottom:100,
+        }}>
 
 
         {/* ══════════════════════════════════════════════════════
@@ -857,42 +1064,13 @@ export function HubPublicPage() {
 
 
         {/* ══════════════════════════════════════════════════════
-            9. HORARIOS (full week)
+            9. HORARIOS (compacto con tooltip)
         ══════════════════════════════════════════════════════ */}
         {hasScheduleData(schedule) && (
-          <section style={{padding:'32px 20px 0'}}>
+          <section style={{padding:'24px 20px 0'}}>
             <Reveal>
-              <SL>Horarios</SL>
-              <div style={{...cardBase,padding:'4px 0',overflow:'hidden'}}>
-                {SCHEDULE_DAYS.map(({key,label})=>{
-                  const slot = (schedule as Record<string,any>)?.[key]
-                  const isToday = key===TODAY_DAY_KEY
-                  const isClosed = slot?.closed===true || !slot
-                  const hours = slot?.open && slot?.close ? `${slot.open} – ${slot.close}` : null
-                  if (!slot && !isToday) return null
-                  return (
-                    <div key={key} style={{
-                      display:'flex',alignItems:'center',justifyContent:'space-between',
-                      padding:'11px 18px',
-                      background:isToday?'rgba(245,158,11,0.06)':'transparent',
-                      borderBottom:`1px solid ${C.bdr}`,
-                    }}>
-                      <span style={{
-                        fontFamily:"'DM Sans',sans-serif",fontSize:13.5,
-                        fontWeight:isToday?700:400,
-                        color:isToday?C.acc:C.t2,
-                      }}>
-                        {label}{isToday&&' (hoy)'}
-                      </span>
-                      <span style={{
-                        fontFamily:"'DM Mono',monospace",fontSize:12,
-                        color:isClosed?C.red:isToday?C.acc:C.t3,
-                      }}>
-                        {isClosed?'Cerrado':hours??'—'}
-                      </span>
-                    </div>
-                  )
-                })}
+              <div style={{...cardBase,overflow:'visible'}}>
+                <HorariosCompact schedule={schedule as Record<string,any>} />
               </div>
             </Reveal>
           </section>
@@ -1108,6 +1286,7 @@ export function HubPublicPage() {
           </a>
         </footer>
 
+        </div>{/* end solid-bg content wrapper */}
       </div>
 
       {/* BOTTOM NAV */}
