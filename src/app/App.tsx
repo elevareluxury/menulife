@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
 import { LandingPage } from '@/modules/landing/pages/LandingPage'
 import { LoginPage } from './routes/login'
@@ -111,7 +112,7 @@ function App() {
           {/* Catálogo retail público */}
           <Route path="/catalogo/:slug" element={<CatalogoPublic />} />
           {/* Hub Público — /:slug debe ir antes del catch-all */}
-          <Route path="/:slug" element={<HubPublicPage />} />
+          <Route path="/:slug" element={<ErrorBoundary><HubPublicPage /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

@@ -274,7 +274,7 @@ function BottomNav({isRetail}:{isRetail:boolean}) {
   ]
 
   return (
-    <div style={{
+    <div className="hub-bottom-nav hub-fixed" style={{
       position:'fixed',
       bottom:16,
       left:'50%',
@@ -439,8 +439,11 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
 function HubLoading() {
   return (
     <div style={{minHeight:'100svh',background:C.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{width:36,height:36,borderRadius:'50%',border:`2px solid ${C.acc}`,
-        borderTopColor:'transparent',animation:'hubSpin 0.8s linear infinite'}}/>
+      <style>{`@keyframes _hubSpin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{width:32,height:32,borderRadius:'50%',
+        border:`2px solid rgba(245,158,11,0.3)`,
+        borderTop:`2px solid ${C.acc}`,
+        animation:'_hubSpin 0.8s linear infinite'}}/>
     </div>
   )
 }
@@ -489,12 +492,16 @@ export function HubPublicPage() {
     return ()=>window.removeEventListener('scroll', onScroll)
   },[])
 
-  // Inject keyframe CSS once
+  // Inject keyframe CSS + override body background
   useEffect(()=>{
     const id='hub-public-css'
-    if (document.getElementById(id)) return
-    const s=document.createElement('style'); s.id=id; s.textContent=HUB_CSS
-    document.head.appendChild(s)
+    if (!document.getElementById(id)) {
+      const s=document.createElement('style'); s.id=id; s.textContent=HUB_CSS
+      document.head.appendChild(s)
+    }
+    const prev = document.body.style.background
+    document.body.style.background = C.bg
+    return ()=>{ document.body.style.background = prev }
   },[])
 
   useEffect(()=>{
@@ -504,7 +511,9 @@ export function HubPublicPage() {
 
     async function load() {
       try {
-        const {data:rest,error} = await supabase.from('restaurants').select('*').eq('slug',slug!).eq('is_active',true).single()
+        console.log('HUB LOAD - slug:', slug)
+        const {data:rest,error} = await db.from('restaurants').select('*').eq('slug',slug!).or('is_active.eq.true,is_active.is.null').single()
+        console.log('HUB LOAD - restaurant:', rest, 'error:', error)
         if (error||!rest) { setNotFound(true); return }
         setRestaurant(rest as Restaurant)
         const id=(rest as Restaurant).id
@@ -534,6 +543,7 @@ export function HubPublicPage() {
     if (restaurant?.id) trackEvent(restaurant.id, 'profile_view')
   },[restaurant?.id])
 
+  console.log('HUB RENDER - loading:', loading, 'restaurant:', restaurant?.id ?? null, 'notFound:', notFound)
   if (loading) return <HubLoading/>
   if (notFound||!restaurant) return <HubNotFound/>
 
@@ -697,6 +707,7 @@ export function HubPublicPage() {
       <div style={{
         fontFamily:"'DM Sans',sans-serif",
         maxWidth:430, margin:'0 auto', minHeight:'100svh', position:'relative',
+        background:C.bg,
       }}>
 
         {/* ══════════════════════════════════════════════════════

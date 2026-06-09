@@ -328,12 +328,19 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         google_review_count: form.google_review_count ? parseInt(form.google_review_count) : null,
         google_review_url: form.google_review_url.trim() || null,
       }
-      const { error } = await db.from('restaurants').update(payload).eq('id', restaurantId)
+      console.log('Saving hub payload:', payload)
+      const { data, error } = await db
+        .from('restaurants')
+        .update(payload)
+        .eq('id', restaurantId)
+        .select()
+        .single()
       if (error) {
         console.error('Error guardando hub:', error)
         toast.error(`Error al guardar: ${error.message}`)
         return
       }
+      console.log('Hub saved:', data)
       toast.success('Configuración guardada')
     } catch (err) {
       toast.error(`Error al guardar: ${(err as Error)?.message ?? err}`)
@@ -380,7 +387,11 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           url={form.hub_cover_url}
           onUpload={async f => {
             const r = await uploadImage(f, 'hub-assets')
-            if (r.success) setForm(p => ({ ...p, hub_cover_url: r.url }))
+            console.log('Cover upload result:', r)
+            if (r.success) {
+              console.log('Cover URL set:', r.url)
+              setForm(p => ({ ...p, hub_cover_url: r.url }))
+            }
           }}
           onClear={() => setForm(p => ({ ...p, hub_cover_url: '' }))}
           uploading={uploading}
