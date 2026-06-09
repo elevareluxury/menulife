@@ -121,15 +121,38 @@ export function ResetPassword() {
   const [checking, setChecking]       = useState(true)
   const [error, setError]             = useState('')
 
-  // Verificar que haya sesión activa (proviene del link del email)
+  // Two paths arrive here:
+  // A) Via AuthCallback.tsx (session already set) — getSession() returns immediately.
+  // B) Via useAuth PASSWORD_RECOVERY handler (link landed on '/') — session is set
+  //    by Supabase's _initialize() but may not be in localStorage yet; wait for event.
   useEffect(() => {
+    let settled = false
+
+    // Fast path: session already in localStorage (path A)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate('/forgot-password?error=expired', { replace: true })
-      } else {
+      if (session && !settled) {
+        settled = true
         setChecking(false)
       }
     })
+
+    // Event path: session coming via PASSWORD_RECOVERY (path B)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!settled && (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session))) {
+        settled = true
+        setChecking(false)
+      }
+    })
+
+    // Safety: if no valid auth after 8 seconds, the token is expired or invalid
+    const timeout = setTimeout(() => {
+      if (!settled) navigate('/forgot-password?error=expired', { replace: true })
+    }, 8_000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [navigate])
 
   const validate = (): string => {

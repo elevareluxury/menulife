@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 
 export function useAuth() {
   const store = useAuthStore()
+  const navigate = useNavigate()
 
   useEffect(() => {
     let mounted = true
@@ -36,6 +38,19 @@ export function useAuth() {
     // Listen for auth changes — only update user/loading, never set loading:true
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return
+
+      // PASSWORD_RECOVERY fires when the email link is clicked. If Supabase's
+      // redirect_to wasn't in the allowed-URLs list, it lands on '/' instead of
+      // '/auth/callback'. Handle it here so the user always reaches /reset-password.
+      if (event === 'PASSWORD_RECOVERY') {
+        useAuthStore.setState({ user: session?.user ?? null, loading: false, initialized: true })
+        const p = window.location.pathname
+        if (p !== '/auth/callback' && p !== '/reset-password') {
+          navigate('/reset-password', { replace: true })
+        }
+        return
+      }
+
       // AuthCallback.tsx manages its own routing — update state but do NOT navigate
       if (window.location.pathname === '/auth/callback') {
         useAuthStore.setState({ user: session?.user ?? null, loading: false, initialized: true })
