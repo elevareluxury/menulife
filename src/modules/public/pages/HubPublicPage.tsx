@@ -329,13 +329,6 @@ const DAYS_COMPACT = [
 function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
   const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()]
   const [activeDay,setActiveDay] = useState<string|null>(null)
-  const [tooltipPos,setTooltipPos] = useState({x:0,y:0})
-
-  const handleDayPress = (e:React.TouchEvent|React.MouseEvent, key:string) => {
-    const rect = (e.target as HTMLElement).getBoundingClientRect()
-    setTooltipPos({x:rect.left+rect.width/2, y:rect.top-8})
-    setActiveDay(activeDay===key ? null : key)
-  }
 
   useEffect(()=>{
     const close = ()=>setActiveDay(null)
@@ -346,97 +339,97 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
   if (!schedule) return null
 
   return (
-    <div style={{padding:'16px',position:'relative'}}>
+    <div style={{padding:'16px'}}>
       <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,
         color:'rgba(255,255,255,0.5)',textTransform:'uppercase',
         letterSpacing:'0.08em',marginBottom:12}}>
         Horarios
       </p>
       <div style={{display:'flex',justifyContent:'space-between',gap:4}}>
-        {DAYS_COMPACT.map(day=>{
+        {DAYS_COMPACT.map((day,index)=>{
           const slot = schedule?.[day.key]
           const isToday = day.key===todayKey
           const isClosed = !slot||slot.closed===true
           const isActive = activeDay===day.key
+          const isFirst = index===0
+          const isLast = index===DAYS_COMPACT.length-1
           return (
-            <button
-              key={day.key}
-              onTouchStart={(e)=>{e.stopPropagation();handleDayPress(e,day.key)}}
-              onClick={(e)=>{e.stopPropagation();handleDayPress(e,day.key)}}
-              style={{
-                width:36,height:36,borderRadius:'50%',
-                border:isToday?`1.5px solid ${C.acc}`:'1px solid rgba(255,255,255,0.1)',
-                background:isActive?'rgba(245,158,11,0.15)':isToday?'rgba(245,158,11,0.08)':'rgba(255,255,255,0.04)',
-                color:isClosed?'rgba(255,255,255,0.2)':isToday?C.acc:'rgba(255,255,255,0.7)',
-                fontSize:12,fontFamily:"'DM Mono',monospace",fontWeight:500,
-                cursor:'pointer',flexShrink:0,position:'relative',
-                display:'flex',alignItems:'center',justifyContent:'center',
-              }}
-            >
-              {day.initial}
-              {!isClosed && (
-                <span style={{
-                  position:'absolute',bottom:2,left:'50%',
-                  transform:'translateX(-50%)',
-                  width:3,height:3,borderRadius:'50%',
-                  background:isToday?C.acc:'rgba(255,255,255,0.4)',
-                }}/>
-              )}
-            </button>
+            <div key={day.key} style={{position:'relative',flexShrink:0}}>
+              {/* Tooltip — absolute, pegado sobre el círculo */}
+              <AnimatePresence>
+                {isActive && (
+                  <motion.div
+                    initial={{opacity:0,y:4,scale:0.95}}
+                    animate={{opacity:1,y:0,scale:1}}
+                    exit={{opacity:0,y:4,scale:0.95}}
+                    transition={{duration:0.15}}
+                    style={{
+                      position:'absolute',
+                      bottom:'calc(100% + 8px)',
+                      left: isFirst ? 0 : isLast ? 'auto' : '50%',
+                      right: isLast ? 0 : 'auto',
+                      transform: (isFirst||isLast) ? 'none' : 'translateX(-50%)',
+                      zIndex:100,
+                      background:'rgba(15,17,23,0.97)',
+                      backdropFilter:'blur(12px)',
+                      border:'1px solid rgba(255,255,255,0.12)',
+                      borderRadius:10,
+                      padding:'8px 12px',
+                      pointerEvents:'none',
+                      whiteSpace:'nowrap',
+                      boxShadow:'0 4px 20px rgba(0,0,0,0.6)',
+                    }}
+                  >
+                    <div style={{
+                      position:'absolute',bottom:-5,
+                      left: isFirst ? 16 : isLast ? 'auto' : '50%',
+                      right: isLast ? 16 : 'auto',
+                      transform: (isFirst||isLast) ? 'rotate(45deg)' : 'translateX(-50%) rotate(45deg)',
+                      width:8,height:8,
+                      background:'rgba(15,17,23,0.97)',
+                      border:'1px solid rgba(255,255,255,0.12)',
+                      borderTop:'none',borderLeft:'none',
+                    }}/>
+                    <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:11,
+                      color:'#fff',marginBottom:2}}>{day.label}</p>
+                    {isClosed ? (
+                      <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:C.red,margin:0}}>Cerrado</p>
+                    ) : (
+                      <p style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:C.acc,margin:0}}>
+                        {slot.open} — {slot.close}
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {/* Círculo */}
+              <button
+                onTouchStart={(e)=>{e.stopPropagation();setActiveDay(activeDay===day.key?null:day.key)}}
+                onClick={(e)=>{e.stopPropagation();setActiveDay(activeDay===day.key?null:day.key)}}
+                style={{
+                  width:36,height:36,borderRadius:'50%',
+                  border:isToday?`1.5px solid ${C.acc}`:'1px solid rgba(255,255,255,0.1)',
+                  background:isActive?'rgba(245,158,11,0.15)':isToday?'rgba(245,158,11,0.08)':'rgba(255,255,255,0.04)',
+                  color:isClosed?'rgba(255,255,255,0.2)':isToday?C.acc:'rgba(255,255,255,0.7)',
+                  fontSize:12,fontFamily:"'DM Mono',monospace",fontWeight:500,
+                  cursor:'pointer',
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                  position:'relative',
+                }}
+              >
+                {day.initial}
+                {!isClosed && (
+                  <span style={{
+                    position:'absolute',bottom:2,left:'50%',transform:'translateX(-50%)',
+                    width:3,height:3,borderRadius:'50%',
+                    background:isToday?C.acc:'rgba(255,255,255,0.4)',
+                  }}/>
+                )}
+              </button>
+            </div>
           )
         })}
       </div>
-
-      <AnimatePresence>
-        {activeDay && (()=>{
-          const day = DAYS_COMPACT.find(d=>d.key===activeDay)!
-          const slot = schedule?.[activeDay]
-          const isClosed = !slot||slot.closed===true
-          return (
-            <motion.div
-              key={activeDay}
-              initial={{opacity:0,y:4,scale:0.95}}
-              animate={{opacity:1,y:0,scale:1}}
-              exit={{opacity:0,y:4,scale:0.95}}
-              transition={{duration:0.15}}
-              style={{
-                position:'fixed',
-                left:tooltipPos.x,top:tooltipPos.y,
-                transform:'translate(-50%,-100%)',
-                zIndex:1001,
-                background:'rgba(20,22,30,0.95)',
-                backdropFilter:'blur(12px)',
-                border:'1px solid rgba(255,255,255,0.1)',
-                borderRadius:12,
-                padding:'10px 16px',
-                pointerEvents:'none',
-                minWidth:140,
-                textAlign:'center',
-                boxShadow:'0 8px 32px rgba(0,0,0,0.5)',
-              }}
-            >
-              <div style={{
-                position:'absolute',bottom:-5,left:'50%',
-                transform:'translateX(-50%) rotate(45deg)',
-                width:10,height:10,
-                background:'rgba(20,22,30,0.95)',
-                border:'1px solid rgba(255,255,255,0.1)',
-                borderTop:'none',borderLeft:'none',
-              }}/>
-              <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,color:'#fff',marginBottom:4}}>
-                {day.label}
-              </p>
-              {isClosed ? (
-                <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:C.red,margin:0}}>Cerrado</p>
-              ) : (
-                <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.acc,margin:0}}>
-                  {slot.open} — {slot.close}
-                </p>
-              )}
-            </motion.div>
-          )
-        })()}
-      </AnimatePresence>
     </div>
   )
 }
@@ -643,39 +636,63 @@ export function HubPublicPage() {
         </div>
       )}
 
-      {/* Floating header — appears after 80px scroll */}
-      <div style={{
-        position:'fixed',top:0,left:'50%',
-        transform:headerVisible?'translateX(-50%) translateY(0)':'translateX(-50%) translateY(-10px)',
-        width:'100%',maxWidth:430,zIndex:40,height:60,
-        display:'flex',alignItems:'center',padding:'0 16px',gap:12,
-        background:headerVisible?'rgba(6,8,15,0.85)':'transparent',
-        backdropFilter:headerVisible?'blur(20px)':'none',
-        WebkitBackdropFilter:headerVisible?'blur(20px)':'none',
-        borderBottom:headerVisible?'1px solid rgba(255,255,255,0.06)':'none',
-        opacity:headerVisible?1:0,
-        transition:'all 0.3s ease',
-        pointerEvents:headerVisible?'auto':'none',
-      }}>
-        {r.logo_url && (
-          <img src={r.logo_url} alt={r.name} style={{
-            width:32,height:32,borderRadius:'50%',objectFit:'cover',
-            border:`1px solid rgba(245,158,11,0.4)`,flexShrink:0,
-          }}/>
+      {/* Floating pills — appear after 80px scroll, no solid bar */}
+      <AnimatePresence>
+        {headerVisible && (
+          <motion.div
+            initial={{opacity:0,y:-12}}
+            animate={{opacity:1,y:0}}
+            exit={{opacity:0,y:-12}}
+            transition={{duration:0.25,ease:'easeOut'}}
+            style={{
+              position:'fixed',top:12,left:'50%',transform:'translateX(-50%)',
+              width:'calc(100% - 32px)',maxWidth:398,
+              zIndex:40,display:'flex',alignItems:'center',justifyContent:'space-between',
+              gap:8,pointerEvents:'none',
+            }}
+          >
+            {/* Logo + name pill */}
+            <div style={{
+              display:'flex',alignItems:'center',gap:8,
+              padding:'6px 14px 6px 6px',borderRadius:999,
+              background:'rgba(6,8,15,0.72)',backdropFilter:'blur(20px)',
+              WebkitBackdropFilter:'blur(20px)',
+              border:'1px solid rgba(255,255,255,0.1)',
+              boxShadow:'0 4px 20px rgba(0,0,0,0.5)',
+              pointerEvents:'auto',minWidth:0,flex:1,overflow:'hidden',
+            }}>
+              {r.logo_url && (
+                <img src={r.logo_url} alt={r.name} style={{
+                  width:30,height:30,borderRadius:'50%',objectFit:'cover',
+                  border:`1px solid rgba(245,158,11,0.4)`,flexShrink:0,
+                }}/>
+              )}
+              <span style={{
+                fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:'#fff',
+                overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',
+              }}>
+                {r.name}
+              </span>
+            </div>
+
+            {/* Open/closed pill */}
+            <div style={{
+              display:'inline-flex',alignItems:'center',gap:5,
+              padding:'7px 12px',borderRadius:999,flexShrink:0,
+              background:open?'rgba(16,185,129,.15)':'rgba(239,68,68,.15)',
+              backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
+              border:`1px solid ${open?'rgba(16,185,129,.3)':'rgba(239,68,68,.3)'}`,
+              boxShadow:'0 4px 20px rgba(0,0,0,0.5)',
+              pointerEvents:'auto',
+            }}>
+              <span style={{width:6,height:6,borderRadius:'50%',background:open?C.grn:C.red,display:'inline-block'}}/>
+              <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:open?C.grn:C.red,whiteSpace:'nowrap'}}>
+                {open?'Abierto':'Cerrado'}
+              </span>
+            </div>
+          </motion.div>
         )}
-        <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16,color:'#fff',flex:1,
-          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-          {r.name}
-        </span>
-        <div style={{display:'inline-flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:100,flexShrink:0,
-          background:open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)',
-          border:`1px solid ${open?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'}`}}>
-          <span style={{width:6,height:6,borderRadius:'50%',background:open?C.grn:C.red,display:'inline-block'}}/>
-          <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:open?C.grn:C.red}}>
-            {open?'Abierto':'Cerrado'}
-          </span>
-        </div>
-      </div>
+      </AnimatePresence>
 
       <div style={{
         fontFamily:"'DM Sans',sans-serif",

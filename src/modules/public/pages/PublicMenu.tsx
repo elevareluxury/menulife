@@ -865,12 +865,14 @@ export function PublicMenu() {
               borderBottom: '1px solid var(--menu-border)',
             }}
           >
-            {restaurant.logo_url && (
-              <img src={restaurant.logo_url} alt={restaurant.name} className="w-7 h-7 rounded-xl object-cover flex-shrink-0" />
-            )}
-            <span className="font-bold text-sm flex-1 truncate" style={{ color: 'var(--menu-text-primary)' }}>
-              {restaurant.name}
-            </span>
+            <a href={`/${slug}`} className="flex items-center gap-2.5 flex-1 min-w-0 no-underline">
+              {restaurant.logo_url && (
+                <img src={restaurant.logo_url} alt={restaurant.name} className="w-7 h-7 rounded-xl object-cover flex-shrink-0" />
+              )}
+              <span className="font-bold text-sm flex-1 truncate" style={{ color: 'var(--menu-text-primary)' }}>
+                {restaurant.name}
+              </span>
+            </a>
             {mesaParam && (
               <span
                 className="text-xs px-2 py-1 rounded-lg"

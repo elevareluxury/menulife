@@ -162,27 +162,29 @@ export default function CatalogoPublic() {
 
         {/* ── HEADER ── */}
         <div className="px-4 pt-8 pb-5 text-center">
-          {restaurant.logo_url ? (
-            <img
-              src={restaurant.logo_url}
-              alt={restaurant.name}
-              className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-              style={{ border: '2px solid #F4705A' }}
-            />
-          ) : (
-            <div
-              className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-bold text-3xl"
-              style={{ background: '#F4705A' }}
+          <a href={`/${slug}`} className="inline-block no-underline">
+            {restaurant.logo_url ? (
+              <img
+                src={restaurant.logo_url}
+                alt={restaurant.name}
+                className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                style={{ border: '2px solid #F4705A' }}
+              />
+            ) : (
+              <div
+                className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-bold text-3xl"
+                style={{ background: '#F4705A' }}
+              >
+                {restaurant.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <h1
+              className="text-2xl font-bold text-white mb-1"
+              style={{ fontFamily: 'Ruda, Inter, sans-serif' }}
             >
-              {restaurant.name.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <h1
-            className="text-2xl font-bold text-white mb-1"
-            style={{ fontFamily: 'Ruda, Inter, sans-serif' }}
-          >
-            {restaurant.name}
-          </h1>
+              {restaurant.name}
+            </h1>
+          </a>
           {restaurant.description && (
             <p className="text-sm leading-snug px-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
               {restaurant.description}

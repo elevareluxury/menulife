@@ -329,10 +329,14 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         google_review_url: form.google_review_url.trim() || null,
       }
       const { error } = await db.from('restaurants').update(payload).eq('id', restaurantId)
-      if (error) throw error
+      if (error) {
+        console.error('Error guardando hub:', error)
+        toast.error(`Error al guardar: ${error.message}`)
+        return
+      }
       toast.success('Configuración guardada')
     } catch (err) {
-      toast.error('Error al guardar')
+      toast.error(`Error al guardar: ${(err as Error)?.message ?? err}`)
       console.error(err)
     } finally {
       setSaving(false)
