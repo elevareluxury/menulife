@@ -557,14 +557,27 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
 // ─── Tab: Links ──────────────────────────────────────────────────────────────
 
 function SortableLinkItem({
-  link, onToggle, onDelete,
+  link, onToggle, onDelete, onLabelSave,
 }: {
   link: HubLink
   onToggle: (id: string, val: boolean) => void
   onDelete: (id: string) => void
+  onLabelSave: (id: string, label: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: link.id })
   const lt = LINK_TYPES.find(t => t.type === link.type)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingLabel, setEditingLabel] = useState('')
+
+  const startEdit = () => {
+    setEditingLabel(link.label)
+    setIsEditing(true)
+  }
+
+  const saveEdit = () => {
+    if (editingLabel.trim()) onLabelSave(link.id, editingLabel.trim())
+    setIsEditing(false)
+  }
 
   return (
     <div
@@ -590,13 +603,40 @@ function SortableLinkItem({
       >
         <GripVertical className="w-4 h-4" />
       </div>
-      {link.image_url ? (
-        <img src={link.image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-      ) : (
-        <span className="text-lg flex-shrink-0 w-7 text-center">{link.icon ?? lt?.icon ?? '🔗'}</span>
-      )}
+      <span className="text-lg flex-shrink-0 w-7 text-center">{link.icon ?? lt?.icon ?? '🔗'}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-white font-medium truncate">{link.label}</p>
+        {isEditing ? (
+          <input
+            autoFocus
+            value={editingLabel}
+            onChange={e => setEditingLabel(e.target.value)}
+            onBlur={saveEdit}
+            onKeyDown={e => {
+              if (e.key === 'Enter') saveEdit()
+              if (e.key === 'Escape') setIsEditing(false)
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid #F59E0B',
+              color: 'white',
+              fontFamily: 'inherit',
+              fontSize: '14px',
+              fontWeight: 500,
+              outline: 'none',
+              width: '100%',
+            }}
+          />
+        ) : (
+          <span
+            onClick={startEdit}
+            title="Tocá para editar"
+            style={{ cursor: 'text', color: 'white', fontSize: '14px', fontWeight: 500, display: 'block' }}
+            className="truncate"
+          >
+            {link.label}
+          </span>
+        )}
         <p className="text-xs text-gray-500 truncate">{link.url}</p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
@@ -610,51 +650,29 @@ function SortableLinkItem({
   )
 }
 
-interface LinkFormState { type: string; label: string; url: string; image_url: string }
-
-function getLabelPlaceholder(type: string): string {
-  const map: Record<string, string> = {
-    whatsapp: 'Ej. Contactanos por WhatsApp',
-    instagram: 'Ej. Seguinos en Instagram',
-    tiktok: 'Ej. Mirá nuestros videos',
-    facebook: 'Ej. Página de Facebook',
-    youtube: 'Ej. Canal de YouTube',
-    linkedin: 'Ej. Perfil de LinkedIn',
-    maps: 'Ej. Cómo llegar',
-    website: 'Ej. Nuestro sitio web',
-    email: 'Ej. Escribinos por email',
-    phone: 'Ej. Llamanos',
-    custom: 'Ej. Más información',
-  }
-  return map[type] ?? 'Ej. Descripción del link'
-}
+interface LinkFormState { label: string; url: string }
 
 function AddLinkModal({ restaurantId, count, onClose, onSaved }: {
   restaurantId: string; count: number
   onClose: () => void; onSaved: () => void
 }) {
-  const [step, setStep] = useState<'type' | 'form'>('type')
-  const [form, setForm] = useState<LinkFormState>({ type: '', label: '', url: '', image_url: '' })
+  const [form, setForm] = useState<LinkFormState>({ label: '', url: '' })
   const [saving, setSaving] = useState(false)
-  const { uploadImage, uploading: uploadingImg } = useImageUpload()
-  const imgInputRef = useRef<HTMLInputElement>(null)
-
-  const selectedType = LINK_TYPES.find(t => t.type === form.type)
 
   async function handleSave() {
-    if (!form.type || !form.label.trim() || !form.url.trim()) {
-      toast.error('Completá todos los campos')
+    if (!form.label.trim() || !form.url.trim()) {
+      toast.error('Completá título y URL')
       return
     }
     setSaving(true)
     try {
       const { error } = await db.from('hub_links').insert({
         restaurant_id: restaurantId,
-        type: form.type,
+        type: 'custom',
         label: form.label.trim(),
         url: form.url.trim(),
-        icon: selectedType?.icon ?? '🔗',
-        image_url: form.image_url || null,
+        icon: '🔗',
+        image_url: null,
         is_active: true,
         sort_order: count,
         click_count: 0,
@@ -678,106 +696,44 @@ function AddLinkModal({ restaurantId, count, onClose, onSaved }: {
         style={{ background: '#161A24', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex items-center justify-between px-5 py-4"
           style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="flex items-center gap-2">
-            {step === 'form' && (
-              <button type="button" onClick={() => setStep('type')} className="text-gray-400 hover:text-white transition-all">
-                ←
-              </button>
-            )}
-            <h3 className="text-white font-semibold">
-              {step === 'type' ? 'Elegir tipo de link' : `Agregar ${selectedType?.label}`}
-            </h3>
-          </div>
+          <h3 className="text-white font-semibold">Agregar link</h3>
           <button type="button" onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
         </div>
 
-        <div className="p-5">
-          {step === 'type' ? (
-            <div className="grid grid-cols-3 gap-2">
-              {LINK_TYPES.map(lt => (
-                <button
-                  key={lt.type}
-                  type="button"
-                  onClick={() => {
-                    setForm(p => ({ ...p, type: lt.type, label: '' }))
-                    setStep('form')
-                  }}
-                  className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all hover:scale-105"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: `1px solid rgba(255,255,255,0.08)`,
-                  }}
-                >
-                  <span className="text-2xl">{lt.icon}</span>
-                  <span className="text-xs text-gray-300 font-medium text-center leading-tight">{lt.label}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Optional photo */}
-              <div>
-                <label className="text-xs text-gray-400 uppercase tracking-wide mb-1.5 block">Foto del link (opcional)</label>
-                <div className="flex items-center gap-3">
-                  {form.image_url ? (
-                    <div className="relative w-12 h-12 flex-shrink-0">
-                      <img src={form.image_url} alt="" className="w-12 h-12 rounded-full object-cover" />
-                      <button type="button" onClick={() => setForm(p => ({ ...p, image_url: '' }))}
-                        className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                        style={{ background: '#EF4444' }}>
-                        <X className="w-3 h-3 text-white" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button type="button" onClick={() => imgInputRef.current?.click()} disabled={uploadingImg}
-                      className="w-12 h-12 rounded-full border-2 border-dashed border-gray-700 flex items-center justify-center flex-shrink-0 hover:border-amber-500/50 transition-all">
-                      {uploadingImg ? (
-                        <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: ACC, borderTopColor: 'transparent' }} />
-                      ) : (
-                        <ImageIcon className="w-5 h-5 text-gray-600" />
-                      )}
-                    </button>
-                  )}
-                  <p className="text-xs text-gray-600">Foto redonda que reemplaza el ícono del link</p>
-                </div>
-                <input ref={imgInputRef} type="file" accept="image/*" className="hidden"
-                  onChange={async e => {
-                    const f = e.target.files?.[0]
-                    if (!f) return
-                    const r = await uploadImage(f, 'hub-assets')
-                    if (r.success) setForm(p => ({ ...p, image_url: r.url }))
-                    e.target.value = ''
-                  }} />
-              </div>
-
-              <Field label="Nombre del link *" value={form.label}
-                onChange={v => setForm(p => ({ ...p, label: v }))}
-                placeholder={getLabelPlaceholder(form.type)} />
-              <div>
-                <label className="text-xs text-gray-400 uppercase tracking-wide mb-1.5 block">URL *</label>
-                <input
-                  className={inputCls}
-                  value={form.url}
-                  onChange={e => setForm(p => ({ ...p, url: e.target.value }))}
-                  placeholder={selectedType?.placeholder}
-                />
-                {selectedType && (
-                  <p className="text-xs text-gray-600 mt-1">Ej: {selectedType.placeholder}</p>
-                )}
-              </div>
-              <div className="flex gap-3 pt-1">
-                <button type="button" onClick={onClose}
-                  className="flex-1 py-2.5 rounded-xl text-sm text-gray-400 border border-gray-700 hover:border-gray-500 transition-all">
-                  Cancelar
-                </button>
-                <button type="button" onClick={handleSave} disabled={saving}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-80 disabled:opacity-50"
-                  style={{ background: ACC }}>
-                  {saving ? 'Guardando…' : 'Guardar link'}
-                </button>
-              </div>
-            </div>
-          )}
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="text-xs text-gray-400 uppercase tracking-wide mb-1.5 block">Título</label>
+            <input
+              className={inputCls}
+              style={{ textAlign: 'center' }}
+              value={form.label}
+              onChange={e => setForm(p => ({ ...p, label: e.target.value }))}
+              placeholder="Ej: Seguinos en Instagram"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 uppercase tracking-wide mb-1.5 block">URL</label>
+            <input
+              type="url"
+              className={inputCls}
+              value={form.url}
+              onChange={e => setForm(p => ({ ...p, url: e.target.value }))}
+              placeholder="https://..."
+              onKeyDown={e => { if (e.key === 'Enter') handleSave() }}
+            />
+          </div>
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl text-sm text-gray-400 border border-gray-700 hover:border-gray-500 transition-all">
+              Cancelar
+            </button>
+            <button type="button" onClick={handleSave} disabled={saving}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-80 disabled:opacity-50"
+              style={{ background: ACC }}>
+              {saving ? 'Guardando…' : 'Guardar'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -813,6 +769,11 @@ function TabLinks({ restaurantId }: { restaurantId: string }) {
     await db.from('hub_links').delete().eq('id', id)
     setLinks(p => p.filter(l => l.id !== id))
     toast.success('Link eliminado')
+  }
+
+  async function handleLabelSave(id: string, label: string) {
+    await db.from('hub_links').update({ label }).eq('id', id)
+    setLinks(p => p.map(l => l.id === id ? { ...l, label } : l))
   }
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -857,7 +818,7 @@ function TabLinks({ restaurantId }: { restaurantId: string }) {
           <SortableContext items={links.map(l => l.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {links.map(link => (
-                <SortableLinkItem key={link.id} link={link} onToggle={handleToggle} onDelete={handleDelete} />
+                <SortableLinkItem key={link.id} link={link} onToggle={handleToggle} onDelete={handleDelete} onLabelSave={handleLabelSave} />
               ))}
             </div>
           </SortableContext>
