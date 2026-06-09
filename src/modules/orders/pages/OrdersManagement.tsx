@@ -204,7 +204,7 @@ export function OrdersManagement() {
             </Button>
           </div>
 
-          <OrdersList orders={filteredOrders} />
+          <OrdersList orders={filteredOrders} restaurantId={restaurant?.id} />
         </>
       )}
 

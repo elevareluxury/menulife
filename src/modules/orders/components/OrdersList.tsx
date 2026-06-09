@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Clock, Utensils, Package } from 'lucide-react'
+import { Clock, Utensils, Package, CreditCard } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { supabase } from '@/lib/supabase'
 import { formatPrice, getTimeSince } from '@/lib/utils'
+import { CheckoutModal } from '@/modules/pos/components/CheckoutModal'
 import toast from 'react-hot-toast'
 
 interface OrderItem {
@@ -38,10 +39,12 @@ const STATUS_BADGES: Record<string, { label: string; color: string }> = {
 interface OrdersListProps {
   orders: Order[]
   showActions?: boolean
+  restaurantId?: string
 }
 
-export function OrdersList({ orders, showActions = true }: OrdersListProps) {
+export function OrdersList({ orders, showActions = true, restaurantId }: OrdersListProps) {
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set())
+  const [checkoutOrder, setCheckoutOrder] = useState<{ id: string; tableNumber: string } | null>(null)
 
   const toggleExpand = (orderId: string) => {
     setExpandedOrders(prev => {
@@ -151,7 +154,7 @@ export function OrdersList({ orders, showActions = true }: OrdersListProps) {
                 </div>
 
                 {showActions && order.status !== 'cancelled' && order.status !== 'delivered' && (
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex gap-2 pt-2 flex-wrap">
                     {order.status === 'pending' && (
                       <Button size="sm" onClick={() => updateStatus(order.id, 'cooking')}>
                         Aceptar
@@ -167,6 +170,21 @@ export function OrdersList({ orders, showActions = true }: OrdersListProps) {
                         Entregar
                       </Button>
                     )}
+                    {restaurantId && (
+                      <Button
+                        size="sm"
+                        onClick={() => setCheckoutOrder({
+                          id: order.id,
+                          tableNumber: order.order_type === 'dine_in'
+                            ? (order.table_number ?? 'S/N')
+                            : (order.customer_name ?? 'Mostrador'),
+                        })}
+                        style={{ background: '#22c55e', color: '#fff', borderColor: '#22c55e' }}
+                      >
+                        <CreditCard className="w-3.5 h-3.5 mr-1" />
+                        Cobrar
+                      </Button>
+                    )}
                     <Button size="sm" variant="danger" onClick={() => cancelOrder(order.id)}>
                       Cancelar
                     </Button>
@@ -177,6 +195,18 @@ export function OrdersList({ orders, showActions = true }: OrdersListProps) {
           </Card>
         )
       })}
+
+      {checkoutOrder && restaurantId && (
+        <CheckoutModal
+          isOpen={true}
+          onClose={() => setCheckoutOrder(null)}
+          onSuccess={() => setCheckoutOrder(null)}
+          orderId={checkoutOrder.id}
+          tableNumber={checkoutOrder.tableNumber}
+          restaurantId={restaurantId}
+          cashRegisterId={null}
+        />
+      )}
     </div>
   )
 }

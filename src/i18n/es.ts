@@ -247,6 +247,11 @@ export default {
     nav_catalogo: 'Catálogo',
     nav_inventario: 'Inventario',
 
+    section_operations: 'Operaciones',
+    section_screens: 'Pantallas',
+    section_pos: 'POS',
+    section_finance: 'Finanzas',
+
     greeting_morning: 'Buenos días',
     greeting_afternoon: 'Buenas tardes',
     greeting_evening: 'Buenas noches',

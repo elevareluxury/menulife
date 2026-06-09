@@ -28,31 +28,35 @@ interface NavGroup {
 
 const GASTRONOMY_NAV: NavGroup[] = [
   {
-    section: 'Operaciones',
+    section: 'dashboard.section_operations',
     items: [
-      { to: '/dashboard',              icon: Home,            labelKey: 'dashboard.nav_home',   exact: true },
-      { to: '/dashboard/caja',         icon: Banknote,        labelKey: 'dashboard.nav_pos'     },
-      { to: '/dashboard/orders',       icon: ShoppingBag,     labelKey: 'dashboard.nav_orders'  },
-      { to: '/dashboard/tables',       icon: LayoutGrid,      labelKey: 'dashboard.nav_tables'  },
-      { to: '/dashboard/menu',         icon: UtensilsCrossed, labelKey: 'dashboard.nav_menu'    },
-      { to: '/dashboard/qr',           icon: QrCode,          labelKey: 'dashboard.nav_qr'      },
-      { to: '/dashboard/waiters',      icon: Users,           labelKey: 'dashboard.nav_waiters' },
-      { to: '/dashboard/repartidores', icon: Truck,           labelKey: 'dashboard.nav_drivers' },
-      { to: '/dashboard/clientes',     icon: ContactRound,    labelKey: 'dashboard.nav_clients' },
+      { to: '/dashboard',              icon: Home,            labelKey: 'dashboard.nav_home',    exact: true },
+      { to: '/dashboard/orders',       icon: ShoppingBag,     labelKey: 'dashboard.nav_orders'   },
+      { to: '/dashboard/tables',       icon: LayoutGrid,      labelKey: 'dashboard.nav_tables'   },
+      { to: '/dashboard/menu',         icon: UtensilsCrossed, labelKey: 'dashboard.nav_menu'     },
+      { to: '/dashboard/qr',           icon: QrCode,          labelKey: 'dashboard.nav_qr'       },
+      { to: '/dashboard/waiters',      icon: Users,           labelKey: 'dashboard.nav_waiters'  },
+      { to: '/dashboard/repartidores', icon: Truck,           labelKey: 'dashboard.nav_drivers'  },
+      { to: '/dashboard/clientes',     icon: ContactRound,    labelKey: 'dashboard.nav_clients'  },
     ],
   },
   {
-    section: 'Pantallas',
+    section: 'dashboard.section_screens',
     items: [],
     showKitchen: true,
   },
   {
-    section: 'Finanzas',
+    section: 'dashboard.section_pos',
     items: [
-      { to: '/dashboard/caja',         icon: Banknote,    labelKey: 'dashboard.nav_caja'         },
-      { to: '/dashboard/tickets',      icon: Receipt,     labelKey: 'dashboard.nav_tickets'      },
-      { to: '/dashboard/gastos',       icon: TrendingDown,labelKey: 'dashboard.nav_gastos'       },
-      { to: '/dashboard/estadisticas', icon: BarChart2,   labelKey: 'dashboard.nav_estadisticas' },
+      { to: '/dashboard/caja',    icon: Banknote,    labelKey: 'dashboard.nav_caja'    },
+      { to: '/dashboard/tickets', icon: Receipt,     labelKey: 'dashboard.nav_tickets' },
+      { to: '/dashboard/gastos',  icon: TrendingDown,labelKey: 'dashboard.nav_gastos'  },
+    ],
+  },
+  {
+    section: 'dashboard.section_finance',
+    items: [
+      { to: '/dashboard/estadisticas', icon: BarChart2, labelKey: 'dashboard.nav_estadisticas' },
     ],
   },
   {
@@ -65,23 +69,27 @@ const GASTRONOMY_NAV: NavGroup[] = [
 
 const RETAIL_NAV: NavGroup[] = [
   {
-    section: 'Operaciones',
+    section: 'dashboard.section_operations',
     items: [
-      { to: '/dashboard',              icon: Home,         labelKey: 'dashboard.nav_home',     exact: true },
-      { to: '/dashboard/caja',         icon: Banknote,     labelKey: 'dashboard.nav_pos'       },
-      { to: '/dashboard/orders',       icon: ShoppingBag,  labelKey: 'dashboard.nav_orders'    },
-      { to: '/dashboard/catalogo',     icon: ShoppingBag,  labelKey: 'dashboard.nav_catalogo'  },
-      { to: '/dashboard/inventario',   icon: Warehouse,    labelKey: 'dashboard.nav_inventario'},
-      { to: '/dashboard/clientes',     icon: ContactRound, labelKey: 'dashboard.nav_clients'   },
+      { to: '/dashboard',            icon: Home,         labelKey: 'dashboard.nav_home',      exact: true },
+      { to: '/dashboard/orders',     icon: ShoppingBag,  labelKey: 'dashboard.nav_orders'     },
+      { to: '/dashboard/catalogo',   icon: ShoppingBag,  labelKey: 'dashboard.nav_catalogo'   },
+      { to: '/dashboard/inventario', icon: Warehouse,    labelKey: 'dashboard.nav_inventario' },
+      { to: '/dashboard/clientes',   icon: ContactRound, labelKey: 'dashboard.nav_clients'    },
     ],
   },
   {
-    section: 'Finanzas',
+    section: 'dashboard.section_pos',
     items: [
-      { to: '/dashboard/caja',         icon: Banknote,    labelKey: 'dashboard.nav_caja'         },
-      { to: '/dashboard/tickets',      icon: Receipt,     labelKey: 'dashboard.nav_tickets'      },
-      { to: '/dashboard/gastos',       icon: TrendingDown,labelKey: 'dashboard.nav_gastos'       },
-      { to: '/dashboard/estadisticas', icon: BarChart2,   labelKey: 'dashboard.nav_estadisticas' },
+      { to: '/dashboard/caja',    icon: Banknote,    labelKey: 'dashboard.nav_caja'    },
+      { to: '/dashboard/tickets', icon: Receipt,     labelKey: 'dashboard.nav_tickets' },
+      { to: '/dashboard/gastos',  icon: TrendingDown,labelKey: 'dashboard.nav_gastos'  },
+    ],
+  },
+  {
+    section: 'dashboard.section_finance',
+    items: [
+      { to: '/dashboard/estadisticas', icon: BarChart2, labelKey: 'dashboard.nav_estadisticas' },
     ],
   },
   {
@@ -121,9 +129,10 @@ function NavItem({ to, icon: Icon, labelKey, exact }: NavItemDef) {
 }
 
 function SectionLabel({ label }: { label: string }) {
+  const { t } = useTranslation()
   return (
     <p className="px-3 pt-5 pb-1.5 text-[10px] font-semibold text-ink-4 uppercase tracking-widest">
-      {label}
+      {t(label)}
     </p>
   )
 }

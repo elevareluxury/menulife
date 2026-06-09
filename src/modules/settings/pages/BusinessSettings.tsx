@@ -43,6 +43,7 @@ const VALID_COLUMNS = new Set([
   'trial_ends_at','features','created_at','updated_at',
   'tax_enabled','tax_percentage','suggested_tip_percentages','enabled_payment_methods','daily_sales_goal',
   'business_type','banner_url',
+  'short_description','short_description_en','setup_completed','setup_step',
 ])
 function sanitize(data: Record<string, unknown>) {
   return Object.fromEntries(Object.entries(data).filter(([k]) => VALID_COLUMNS.has(k)))

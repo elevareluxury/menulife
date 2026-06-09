@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, Trash2, Edit, LayoutGrid, RotateCcw } from 'lucide-react'
+import { Plus, Trash2, Edit, LayoutGrid, RotateCcw, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
@@ -13,6 +13,7 @@ import { useWaiters } from '../hooks/useWaiters'
 import { useReservations } from '@/modules/reservations/hooks/useReservations'
 import { ReservationsPanel } from '@/modules/reservations/components/ReservationsPanel'
 import { supabase } from '@/lib/supabase'
+import { CheckoutModal } from '@/modules/pos/components/CheckoutModal'
 import toast from 'react-hot-toast'
 import type { Table, Waiter } from '@/types'
 
@@ -48,6 +49,7 @@ export function TablesConfiguration() {
   const [showReservations, setShowReservations]    = useState(false)
   const [isMobile, setIsMobile]                    = useState(() => window.innerWidth < 768)
   const [reopeningId, setReopeningId]              = useState<string | null>(null)
+  const [checkoutTableInfo, setCheckoutTableInfo]  = useState<{ orderId: string; tableNumber: string } | null>(null)
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768)
@@ -193,6 +195,21 @@ export function TablesConfiguration() {
     }
   }
 
+  const handleCobrarTable = async (table: Table) => {
+    if (!restaurant?.id) return
+    const { data: activeOrder } = await db
+      .from('orders')
+      .select('id')
+      .eq('restaurant_id', restaurant.id)
+      .eq('table_number', table.table_number)
+      .in('status', ['pending', 'cooking', 'ready'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (!activeOrder) { toast.error('No hay pedido activo para esta mesa'); return }
+    setCheckoutTableInfo({ orderId: activeOrder.id, tableNumber: table.table_number })
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm('¿Eliminar esta mesa?')) return
     try {
@@ -292,6 +309,16 @@ export function TablesConfiguration() {
                         📅 {nextRes.reservation_time} {nextRes.first_name}
                       </div>
                     )}
+                    {table.status === 'occupied' && (
+                      <button
+                        onClick={() => handleCobrarTable(table)}
+                        className="w-full mt-2 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)' }}
+                      >
+                        <CreditCard className="w-3 h-3" />
+                        Cobrar
+                      </button>
+                    )}
                     {isRecentlyFreed(table) && (
                       <button
                         onClick={() => reopenTable(table)}
@@ -368,6 +395,18 @@ export function TablesConfiguration() {
                         📅 {nextRes.reservation_time} {nextRes.first_name}
                       </div>
                     )}
+                    {table.status === 'occupied' && (
+                      <button
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); handleCobrarTable(table) }}
+                        className="w-full mt-1 flex items-center justify-center gap-1 py-1.5 rounded text-[10px] font-bold"
+                        style={{ background: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)' }}
+                      >
+                        <CreditCard className="w-2.5 h-2.5" />
+                        Cobrar
+                      </button>
+                    )}
                     {isRecentlyFreed(table) && (
                       <button
                         onMouseDown={(e) => e.stopPropagation()}
@@ -425,6 +464,18 @@ export function TablesConfiguration() {
         table={editingTable}
         waiters={waiters}
       />
+
+      {checkoutTableInfo && restaurant && (
+        <CheckoutModal
+          isOpen={true}
+          onClose={() => setCheckoutTableInfo(null)}
+          onSuccess={() => setCheckoutTableInfo(null)}
+          orderId={checkoutTableInfo.orderId}
+          tableNumber={checkoutTableInfo.tableNumber}
+          restaurantId={restaurant.id}
+          cashRegisterId={null}
+        />
+      )}
     </div>
   )
 }
