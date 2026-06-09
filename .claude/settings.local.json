@@ -50,7 +50,9 @@
       "Bash(Select-Object FullName)",
       "Bash(npx supabase *)",
       "Bash(dir E:\\\\menulife\\\\supabase /s /b)",
-      "Bash(grep -v \"//.*useEffect\")"
+      "Bash(grep -v \"//.*useEffect\")",
+      "Bash(grep *)",
+      "Bash(dir E:\\\\menulife\\\\.env*)"
     ]
   }
 }
