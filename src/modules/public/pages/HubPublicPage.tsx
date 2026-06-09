@@ -1,471 +1,914 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
-import {
-  MapPin,
-  Phone,
-  Globe,
-  ExternalLink,
-  MessageCircle,
-} from 'lucide-react'
 import type { Restaurant } from '@/types'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+const db = supabase as any
+
+/* ── Types ──────────────────────────────────────────────────────────────────── */
 
 interface HubStory {
-  id: string
-  restaurant_id: string
-  image_url: string | null
-  title: string | null
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
+  id: string; image_url: string | null; title: string | null
+  description: string | null; is_active: boolean
 }
-
-interface HubFeatured {
-  id: string
-  restaurant_id: string
-  title: string
-  title_en: string | null
-  description: string | null
-  description_en: string | null
-  image_url: string | null
-  cta_text: string | null
-  cta_url: string | null
-  sort_order: number
-  is_active: boolean
-  created_at: string
-  updated_at: string
+interface HubFeaturedProduct {
+  id: string; name: string; description: string | null
+  price: number | null; image_url: string | null; tag: string | null
+  cta_text: string | null; cta_url: string | null
 }
-
+interface HubGalleryItem {
+  id: string; url: string; type: 'image' | 'video'
+  caption: string | null; sort_order: number
+}
+interface HubReview {
+  id: string; author_name: string; author_initial: string | null
+  profile_color: string | null; rating: number; text: string
+  relative_time: string | null
+}
 interface SocialLinks {
-  instagram?: string | null
-  facebook?: string | null
-  tiktok?: string | null
-  whatsapp?: string | null
-  google_maps?: string | null
+  instagram?: string | null; facebook?: string | null; tiktok?: string | null
+  whatsapp?: string | null; youtube?: string | null
+  google_review?: string | null; google_maps?: string | null
 }
 
-// ─── Known route prefixes ─────────────────────────────────────────────────────
+/* ── Reserved slugs ─────────────────────────────────────────────────────────── */
 
 const RESERVED_SLUGS = new Set([
-  'dashboard', 'login', 'register', 'mozo', 'kitchen', 'delivery',
-  'r', 'waiter', 'super-admin', 'superadmin', 'onboarding',
-  'solicitar-acceso', 'auth', 'forgot-password', 'reset-password',
-  'catalogo',
+  'dashboard','login','register','mozo','kitchen','delivery','r','waiter',
+  'super-admin','superadmin','onboarding','solicitar-acceso','auth',
+  'forgot-password','reset-password','catalogo',
 ])
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+/* ── Design tokens ──────────────────────────────────────────────────────────── */
 
-function parseSocialLinks(raw: unknown): SocialLinks {
+const C = {
+  bg:'#06080F', bg2:'#0A0D16',
+  sur:'rgba(255,255,255,0.04)', sur2:'rgba(255,255,255,0.07)',
+  bdr:'rgba(255,255,255,0.08)', bdr2:'rgba(255,255,255,0.16)',
+  acc:'#F59E0B', acc2:'#FCD34D', grn:'#10B981', red:'#EF4444',
+  t1:'#F8F9FA', t2:'rgba(248,249,250,0.60)',
+  t3:'rgba(248,249,250,0.32)', t4:'rgba(248,249,250,0.14)',
+}
+
+const HUB_CSS = `
+  @keyframes hubMesh{0%{transform:translate(0,0) scale(1)}100%{transform:translate(20px,-25px) scale(1.1)}}
+  @keyframes hubSpin{to{transform:rotate(360deg)}}
+  @keyframes hubPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+  @keyframes hubPopIn{0%{transform:scale(0) rotate(-8deg);opacity:0}65%{transform:scale(1.12) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+  .hub-btn{display:flex;cursor:pointer;transition:opacity .15s,transform .15s;text-decoration:none}
+  .hub-btn:active{transform:scale(.97) !important}
+  .hub-tab:active{transform:scale(.9) !important}
+`
+
+/* ── Helpers ────────────────────────────────────────────────────────────────── */
+
+function parseSocial(raw: unknown): SocialLinks {
   if (!raw || typeof raw !== 'object') return {}
   return raw as SocialLinks
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+function isOpen(bh: unknown): boolean {
+  if (!bh || typeof bh !== 'object') return true
+  const day = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()]
+  const slot = (bh as Record<string,any>)[day]
+  if (!slot) return true
+  if (slot.closed === true) return false
+  if (!slot.open || !slot.close) return true
+  const now = new Date()
+  const cur = now.getHours()*60+now.getMinutes()
+  const [oh,om] = (slot.open as string).split(':').map(Number)
+  const [ch,cm] = (slot.close as string).split(':').map(Number)
+  return cur>=oh*60+om && cur<ch*60+cm
+}
 
-function NotFoundPage() {
+function todayHours(bh: unknown): string {
+  if (!bh || typeof bh !== 'object') return ''
+  const day = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()]
+  const slot = (bh as Record<string,any>)[day]
+  if (!slot) return ''
+  if (slot.closed===true) return 'Cerrado hoy'
+  if (slot.open && slot.close) return `${slot.open} – ${slot.close}`
+  return ''
+}
+
+function starStr(n: number) { return '⭐'.repeat(Math.min(5,Math.max(1,Math.round(n)))) }
+
+/* ── Scroll-reveal wrapper ──────────────────────────────────────────────────── */
+
+function Reveal({children,delay=0}:{children:React.ReactNode;delay?:number}) {
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center text-center px-4"
-      style={{ background: '#0F1115' }}
+    <motion.div
+      initial={{opacity:0,y:20}}
+      whileInView={{opacity:1,y:0}}
+      viewport={{once:true,amount:0.08}}
+      transition={{duration:0.6,delay,ease:[0.22,1,0.36,1]}}
     >
-      <Globe className="w-16 h-16 mb-4" style={{ color: '#F4705A' }} />
-      <h1 className="text-3xl font-bold text-white mb-2">404</h1>
-      <p className="text-gray-400 mb-6">Este Hub no fue encontrado.</p>
-      <a
-        href="/"
-        className="text-sm font-semibold px-6 py-3 rounded-xl"
-        style={{ background: '#F4705A', color: '#fff' }}
-      >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ── Section label ──────────────────────────────────────────────────────────── */
+
+function SL({children}:{children:React.ReactNode}) {
+  return (
+    <p style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:C.acc,
+      textTransform:'uppercase',letterSpacing:'0.14em',marginBottom:12,margin:'0 0 12px'}}>
+      {children}
+    </p>
+  )
+}
+
+/* ── Gallery lightbox ───────────────────────────────────────────────────────── */
+
+function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:number;onClose:()=>void}) {
+  const [cur,setCur] = useState(startIndex)
+  const startX = useRef(0)
+
+  useEffect(()=>{
+    const handler = (e:KeyboardEvent)=>{
+      if (e.key==='Escape') onClose()
+      if (e.key==='ArrowLeft') setCur(c=>(c-1+items.length)%items.length)
+      if (e.key==='ArrowRight') setCur(c=>(c+1)%items.length)
+    }
+    window.addEventListener('keydown',handler)
+    return ()=>window.removeEventListener('keydown',handler)
+  },[items.length,onClose])
+
+  const item = items[cur]
+  return (
+    <motion.div
+      initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+      style={{position:'fixed',inset:0,zIndex:2000,background:'rgba(0,0,0,0.95)',
+        display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(8px)'}}
+      onClick={onClose}
+      onTouchStart={e=>{ startX.current=e.touches[0].clientX }}
+      onTouchEnd={e=>{
+        const dx=e.changedTouches[0].clientX-startX.current
+        if (dx>50) setCur(c=>(c-1+items.length)%items.length)
+        else if (dx<-50) setCur(c=>(c+1)%items.length)
+      }}
+    >
+      <button onClick={e=>{e.stopPropagation();onClose()}}
+        style={{position:'absolute',top:20,right:20,width:44,height:44,borderRadius:'50%',
+          background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:22,
+          cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1}}>
+        ×
+      </button>
+      <motion.div key={cur} initial={{opacity:0,scale:.95}} animate={{opacity:1,scale:1}}
+        exit={{opacity:0,scale:.95}} transition={{duration:.2}} onClick={e=>e.stopPropagation()}
+        style={{maxWidth:'90vw',maxHeight:'80vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
+        {item.type==='video'
+          ? <video src={item.url} controls style={{maxWidth:'100%',maxHeight:'80vh',borderRadius:12}}/>
+          : <img src={item.url} alt={item.caption||''} style={{maxWidth:'100%',maxHeight:'80vh',borderRadius:12,objectFit:'contain'}}/>
+        }
+      </motion.div>
+      {items.length>1 && <>
+        <button onClick={e=>{e.stopPropagation();setCur(c=>(c-1+items.length)%items.length)}}
+          style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',width:44,height:44,borderRadius:'50%',
+            background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:28,cursor:'pointer',
+            display:'flex',alignItems:'center',justifyContent:'center'}}>‹</button>
+        <button onClick={e=>{e.stopPropagation();setCur(c=>(c+1)%items.length)}}
+          style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',width:44,height:44,borderRadius:'50%',
+            background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:28,cursor:'pointer',
+            display:'flex',alignItems:'center',justifyContent:'center'}}>›</button>
+      </>}
+      <p style={{position:'absolute',bottom:16,fontFamily:"'DM Mono',monospace",fontSize:12,color:'rgba(255,255,255,.4)'}}>
+        {cur+1} / {items.length}
+      </p>
+    </motion.div>
+  )
+}
+
+/* ── Bottom navigation ──────────────────────────────────────────────────────── */
+
+const NAV_IDS = ['inicio','menu-ctas','novedades','locales','contacto'] as const
+type NavId = typeof NAV_IDS[number]
+
+function BottomNav({isRetail}:{isRetail:boolean}) {
+  const [active,setActive] = useState<NavId>('inicio')
+
+  useEffect(()=>{
+    const obs: IntersectionObserver[] = []
+    NAV_IDS.forEach(id=>{
+      const el = document.getElementById(id)
+      if (!el) return
+      const o = new IntersectionObserver(
+        ([e])=>{ if (e.isIntersecting) setActive(id) },
+        {threshold:0.25,rootMargin:'-20% 0px -60% 0px'}
+      )
+      o.observe(el)
+      obs.push(o)
+    })
+    return ()=>obs.forEach(o=>o.disconnect())
+  },[])
+
+  const scroll = (id:string) => document.getElementById(id)?.scrollIntoView({behavior:'smooth'})
+
+  const tabs = [
+    {id:'inicio'    as NavId, icon:'🏠', label:'Inicio',              action:()=>scroll('inicio')},
+    {id:'menu-ctas' as NavId, icon:isRetail?'🛍':'🍽', label:isRetail?'Catálogo':'Menú', action:()=>scroll('menu-ctas')},
+    {id:'locales'   as NavId, icon:'📍', label:'Locales',             action:()=>scroll('locales')},
+    {id:'novedades' as NavId, icon:'⭐', label:'Novedades',           action:()=>scroll('novedades')},
+    {id:'contacto'  as NavId, icon:'💬', label:'Contacto',            action:()=>scroll('contacto')},
+  ]
+
+  return (
+    <nav style={{
+      position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',
+      width:'100%',maxWidth:430,
+      height:'calc(64px + env(safe-area-inset-bottom, 0px))',
+      paddingBottom:'env(safe-area-inset-bottom, 0px)',
+      background:'rgba(8,10,18,0.88)',
+      backdropFilter:'blur(24px) saturate(180%)',
+      WebkitBackdropFilter:'blur(24px) saturate(180%)',
+      borderTop:`1px solid ${C.bdr}`,
+      display:'grid',gridTemplateColumns:'repeat(5,1fr)',
+      alignItems:'center',zIndex:1000,
+    }}>
+      {tabs.map(tab=>(
+        <button key={tab.id} className="hub-tab" onClick={tab.action} style={{
+          display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+          gap:3,padding:'6px 4px',background:'transparent',border:'none',cursor:'pointer',
+          position:'relative',height:'100%',
+        }}>
+          {active===tab.id && (
+            <span style={{position:'absolute',top:0,width:20,height:3,borderRadius:2,background:C.acc}}/>
+          )}
+          <span style={{fontSize:17,lineHeight:1}}>{tab.icon}</span>
+          <span style={{fontFamily:"'DM Mono',monospace",fontSize:9.5,fontWeight:500,
+            color:active===tab.id?C.acc:C.t3,transition:'color .15s'}}>
+            {tab.label}
+          </span>
+        </button>
+      ))}
+    </nav>
+  )
+}
+
+/* ── Loading / 404 ──────────────────────────────────────────────────────────── */
+
+function HubLoading() {
+  return (
+    <div style={{minHeight:'100svh',background:C.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{width:36,height:36,borderRadius:'50%',border:`2px solid ${C.acc}`,
+        borderTopColor:'transparent',animation:'hubSpin 0.8s linear infinite'}}/>
+    </div>
+  )
+}
+
+function HubNotFound() {
+  return (
+    <div style={{minHeight:'100svh',background:C.bg,display:'flex',flexDirection:'column',
+      alignItems:'center',justifyContent:'center',padding:'0 24px',textAlign:'center',
+      fontFamily:"'DM Sans',sans-serif"}}>
+      <p style={{fontFamily:"'Syne',sans-serif",fontSize:64,fontWeight:800,color:C.t3,marginBottom:8}}>404</p>
+      <p style={{color:C.t2,marginBottom:24}}>Este Hub no fue encontrado.</p>
+      <a href="/" style={{background:C.acc,color:'#000',padding:'10px 24px',borderRadius:100,
+        fontWeight:600,fontSize:14,fontFamily:"'DM Sans',sans-serif",textDecoration:'none'}}>
         Volver al inicio
       </a>
     </div>
   )
 }
 
-function LoadingSpinner() {
-  return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{ background: '#0F1115' }}
-    >
-      <div
-        className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin"
-        style={{ borderColor: '#F4705A', borderTopColor: 'transparent' }}
-      />
-    </div>
-  )
-}
-
-// ─── Main Component ───────────────────────────────────────────────────────────
+/* ── Main component ─────────────────────────────────────────────────────────── */
 
 export function HubPublicPage() {
-  const { slug } = useParams<{ slug: string }>()
+  const { slug } = useParams<{slug:string}>()
   const navigate = useNavigate()
 
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
-  const [story, setStory] = useState<HubStory | null>(null)
-  const [featured, setFeatured] = useState<HubFeatured[]>([])
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+  const [restaurant, setRestaurant]               = useState<Restaurant|null>(null)
+  const [story, setStory]                         = useState<HubStory|null>(null)
+  const [gallery, setGallery]                     = useState<HubGalleryItem[]>([])
+  const [featuredProduct, setFeaturedProduct]     = useState<HubFeaturedProduct|null>(null)
+  const [reviews, setReviews]                     = useState<HubReview[]>([])
+  const [loading, setLoading]                     = useState(true)
+  const [notFound, setNotFound]                   = useState(false)
+  const [lightboxIndex, setLightboxIndex]         = useState<number|null>(null)
 
-  useEffect(() => {
+  // Inject keyframe CSS once
+  useEffect(()=>{
+    const id='hub-public-css'
+    if (document.getElementById(id)) return
+    const s=document.createElement('style'); s.id=id; s.textContent=HUB_CSS
+    document.head.appendChild(s)
+  },[])
+
+  useEffect(()=>{
     if (!slug) { setNotFound(true); setLoading(false); return }
+    const first=slug.split('/')[0].toLowerCase()
+    if (RESERVED_SLUGS.has(first)) { navigate('/',{replace:true}); return }
 
-    // Guard reserved slugs
-    const firstSegment = slug.split('/')[0].toLowerCase()
-    if (RESERVED_SLUGS.has(firstSegment)) {
-      navigate('/', { replace: true })
-      return
-    }
-
-    async function loadData() {
+    async function load() {
       try {
-        // 1. Fetch restaurant
-        const { data: rest, error: restErr } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('slug', slug!)
-          .eq('is_active', true)
-          .single()
-
-        if (restErr || !rest) {
-          setNotFound(true)
-          return
-        }
-
+        const {data:rest,error} = await supabase.from('restaurants').select('*').eq('slug',slug!).eq('is_active',true).single()
+        if (error||!rest) { setNotFound(true); return }
         setRestaurant(rest as Restaurant)
+        const id=(rest as Restaurant).id
 
-        // 2. Fetch story (single, may not exist)
-        const { data: storyData } = await (supabase as any)
-          .from('hub_stories')
-          .select('*')
-          .eq('restaurant_id', (rest as Restaurant).id)
-          .eq('is_active', true)
-          .limit(1)
-          .single()
+        const [storyRes,gallRes,fpRes,revRes] = await Promise.all([
+          db.from('hub_stories').select('*').eq('restaurant_id',id).eq('is_active',true).limit(1).maybeSingle(),
+          db.from('hub_gallery').select('*').eq('restaurant_id',id).eq('is_active',true).order('sort_order').limit(12),
+          db.from('hub_featured_product').select('*').eq('restaurant_id',id).eq('is_active',true).limit(1).maybeSingle(),
+          db.from('hub_reviews').select('*').eq('restaurant_id',id).order('sort_order').limit(3),
+        ])
 
-        setStory(storyData ?? null)
-
-        // 3. Fetch featured items
-        const { data: featuredData } = await (supabase as any)
-          .from('hub_featured')
-          .select('*')
-          .eq('restaurant_id', (rest as Restaurant).id)
-          .eq('is_active', true)
-          .order('sort_order')
-          .limit(10)
-
-        setFeatured(featuredData ?? [])
-      } catch (err) {
-        console.error('HubPublicPage error:', err)
-        setNotFound(true)
-      } finally {
-        setLoading(false)
-      }
+        setStory(storyRes.data??null)
+        setGallery(gallRes.data??[])
+        setFeaturedProduct(fpRes.data??null)
+        setReviews(revRes.data??[])
+      } catch(e) {
+        console.error(e); setNotFound(true)
+      } finally { setLoading(false) }
     }
+    load()
+  },[slug,navigate])
 
-    loadData()
-  }, [slug, navigate])
+  if (loading) return <HubLoading/>
+  if (notFound||!restaurant) return <HubNotFound/>
 
-  if (loading) return <LoadingSpinner />
-  if (notFound || !restaurant) return <NotFoundPage />
+  // ── Derived values
+  const r  = restaurant
+  const ra = r as any
+  const social       = parseSocial(r.social_links)
+  const waPhone      = social.whatsapp||r.phone||''
+  const cleanWa      = waPhone.replace(/\D/g,'')
+  const isRetail     = r.business_type==='retail'
+  const open         = isOpen(ra.business_hours??r.schedule)
+  const hoursText    = todayHours(ra.business_hours??r.schedule)
+  const categoryTags: string[] = ra.hub_category_tags??[]
+  const hubAbout: string       = ra.hub_about??''
+  const googleRating: number|null = ra.google_rating??null
+  const googleReviewCount: number|null = ra.google_review_count??null
+  const address = [r.address,r.city].filter(Boolean).join(', ')
+  const menuHref = isRetail ? `/catalogo/${slug}` : `/r/${slug}`
 
-  const social = parseSocialLinks(restaurant.social_links)
-  const waPhone = social.whatsapp || restaurant.phone || ''
-
-  // ── Contact links
-  type ContactItem = { href: string; label: string; icon: React.ReactNode }
-  const contacts: ContactItem[] = []
-
-  if (waPhone) {
-    const cleanPhone = waPhone.replace(/\D/g, '')
-    contacts.push({
-      href: `https://wa.me/${cleanPhone}`,
-      label: 'WhatsApp',
-      icon: <MessageCircle className="w-5 h-5" />,
-    })
-  }
-  if (restaurant.phone && !social.whatsapp) {
-    contacts.push({
-      href: `tel:${restaurant.phone}`,
-      label: 'Teléfono',
-      icon: <Phone className="w-5 h-5" />,
-    })
-  }
-  if (social.instagram) {
-    contacts.push({
-      href: `https://instagram.com/${social.instagram}`,
-      label: 'Instagram',
-      icon: <ExternalLink className="w-5 h-5" />,
-    })
-  }
-  if (social.facebook) {
-    contacts.push({
-      href: `https://facebook.com/${social.facebook}`,
-      label: 'Facebook',
-      icon: <ExternalLink className="w-5 h-5" />,
-    })
-  }
-  if (restaurant.website) {
-    contacts.push({
-      href: restaurant.website,
-      label: 'Web',
-      icon: <Globe className="w-5 h-5" />,
-    })
-  }
-
-  // ── Action buttons
-  type ActionBtn = { label: string; href: string; external?: boolean }
-  const actions: ActionBtn[] = []
-
-  if (restaurant.business_type === 'retail') {
-    actions.push({ label: '🛍 Ver Catálogo', href: `/r/${slug}` })
-    if (waPhone) {
-      const cleanPhone = waPhone.replace(/\D/g, '')
-      actions.push({ label: '💬 Contacto', href: `https://wa.me/${cleanPhone}`, external: true })
-    }
+  // ── CTA buttons
+  type CTABtn={icon:string;label:string;href?:string;scroll?:string;primary?:boolean}
+  const ctaBtns: CTABtn[] = []
+  if (isRetail) {
+    ctaBtns.push({icon:'🛍',label:'Ver catálogo',href:menuHref,primary:true})
+    if (cleanWa) ctaBtns.push({icon:'💬',label:'WhatsApp',href:`https://wa.me/${cleanWa}`})
+    ctaBtns.push({icon:'📍',label:'Cómo llegar',scroll:'locales'})
+    if (r.phone) ctaBtns.push({icon:'📞',label:'Llamar',href:`tel:${r.phone}`})
   } else {
-    // gastronomy (default)
-    actions.push({ label: '🍽 Ver Menú', href: `/r/${slug}` })
-    if (restaurant.reservations_enabled) {
-      actions.push({ label: '📅 Reservar', href: `/r/${slug}/reservar` })
-    }
-    if (restaurant.delivery_enabled) {
-      actions.push({ label: '🛵 Delivery', href: `/r/${slug}?type=delivery` })
-    }
-    if (waPhone) {
-      const cleanPhone = waPhone.replace(/\D/g, '')
-      actions.push({ label: '💬 Contacto', href: `https://wa.me/${cleanPhone}`, external: true })
-    }
+    ctaBtns.push({icon:'🍽',label:'Ver menú',href:menuHref,primary:true})
+    if (r.reservations_enabled) ctaBtns.push({icon:'📅',label:'Reservar',href:`/r/${slug}/reservar`})
+    if (cleanWa) ctaBtns.push({icon:'💬',label:'WhatsApp',href:`https://wa.me/${cleanWa}`})
+    ctaBtns.push({icon:'📍',label:'Cómo llegar',scroll:'locales'})
   }
 
-  const addressFull = [restaurant.address, restaurant.city].filter(Boolean).join(', ')
+  // ── Social entries
+  type SocialEntry={key:string;label:string;icon:string;url:string;color:string;bg:string}
+  const socialEntries: SocialEntry[] = []
+  if (social.instagram) socialEntries.push({key:'ig',label:'Instagram',icon:'📸',url:`https://instagram.com/${social.instagram}`,color:'#E1306C',bg:'rgba(225,48,108,.06)'})
+  if (social.tiktok)    socialEntries.push({key:'tt',label:'TikTok',icon:'🎵',url:`https://tiktok.com/@${social.tiktok}`,color:'rgba(255,255,255,.9)',bg:'rgba(255,255,255,.04)'})
+  if (social.youtube)   socialEntries.push({key:'yt',label:'YouTube',icon:'▶',url:String(social.youtube),color:'#FF4444',bg:'rgba(255,0,0,.06)'})
+  if (social.facebook)  socialEntries.push({key:'fb',label:'Facebook',icon:'f',url:`https://facebook.com/${social.facebook}`,color:'#3B82F6',bg:'rgba(59,130,246,.06)'})
+  if (cleanWa)          socialEntries.push({key:'wa',label:'WhatsApp',icon:'💬',url:`https://wa.me/${cleanWa}`,color:'#25D366',bg:'rgba(37,211,102,.06)'})
+
+  // ── Contact items
+  type ContactItem={icon:string;label:string;value:string;href:string;iconBg:string}
+  const contactItems: ContactItem[] = []
+  if (cleanWa) contactItems.push({icon:'💬',label:'WhatsApp',value:waPhone,href:`https://wa.me/${cleanWa}`,iconBg:'rgba(37,211,102,.15)'})
+  if (r.phone&&!social.whatsapp) contactItems.push({icon:'📞',label:'Teléfono',value:r.phone,href:`tel:${r.phone}`,iconBg:'rgba(59,130,246,.15)'})
+  if (r.email) contactItems.push({icon:'✉',label:'Email',value:r.email,href:`mailto:${r.email}`,iconBg:'rgba(245,158,11,.15)'})
+
+  const cardBase: React.CSSProperties = {
+    background:C.sur, border:`1px solid ${C.bdr}`, borderRadius:16,
+    backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)',
+  }
 
   return (
-    <div className="min-h-screen" style={{ background: '#0F1115' }}>
-      <div className="max-w-[480px] mx-auto pb-8">
+    <>
+      {/* Grain overlay */}
+      <div style={{
+        position:'fixed',inset:0,zIndex:999,pointerEvents:'none',opacity:0.035,
+        backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+      }}/>
 
-        {/* ── 1. Historia ── */}
-        {story && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="relative w-full h-48 overflow-hidden"
-          >
-            {story.image_url ? (
-              <img
-                src={story.image_url}
-                alt={story.title ?? 'Historia'}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full" style={{ background: 'linear-gradient(135deg,#F4705A,#0F1115)' }} />
-            )}
-            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center px-4">
-              {story.title && (
-                <p className="font-bold text-white text-xl mb-1">{story.title}</p>
-              )}
-              {story.description && (
-                <p className="text-gray-300 text-sm">{story.description}</p>
-              )}
-            </div>
-          </motion.div>
-        )}
+      <div style={{
+        background:C.bg, fontFamily:"'DM Sans',sans-serif",
+        maxWidth:430, margin:'0 auto', paddingBottom:88, minHeight:'100svh', position:'relative',
+      }}>
 
-        {/* ── 2. Header ── */}
-        <div className="relative">
-          {/* Banner */}
-          {restaurant.cover_image_url ? (
-            <img
-              src={restaurant.cover_image_url}
-              alt="banner"
-              className="w-full h-40 object-cover"
-            />
-          ) : (
-            <div
-              className="w-full h-40"
-              style={{ background: 'linear-gradient(135deg,#F4705A,#0F1115)' }}
-            />
-          )}
+        {/* ══════════════════════════════════════════════════════
+            1. HERO
+        ══════════════════════════════════════════════════════ */}
+        <section id="inicio" style={{height:'100svh',minHeight:600,position:'relative',
+          display:'flex',flexDirection:'column',justifyContent:'flex-end',
+          paddingBottom:40,overflow:'hidden'}}>
 
-          {/* Logo */}
-          <div className="absolute -bottom-10 left-4">
-            {restaurant.logo_url ? (
-              <img
-                src={restaurant.logo_url}
-                alt={restaurant.name}
-                className="w-20 h-20 rounded-full border-2 border-white object-cover"
-                style={{ background: '#1a1a1a' }}
-              />
-            ) : (
-              <div
-                className="w-20 h-20 rounded-full border-2 border-white flex items-center justify-center text-3xl font-bold text-white"
-                style={{ background: '#F4705A' }}
-              >
-                {restaurant.name[0]?.toUpperCase()}
+          {/* Animated mesh blobs */}
+          <div style={{position:'absolute',inset:0,zIndex:0}}>
+            <div style={{position:'absolute',width:420,height:420,top:-80,left:-100,borderRadius:'50%',
+              background:'radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 68%)',
+              animation:'hubMesh 12s ease-in-out infinite alternate'}}/>
+            <div style={{position:'absolute',width:360,height:360,top:80,right:-100,borderRadius:'50%',
+              background:'radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 68%)',
+              animation:'hubMesh 15s ease-in-out infinite alternate-reverse'}}/>
+            <div style={{position:'absolute',width:300,height:300,bottom:80,left:10,borderRadius:'50%',
+              background:'radial-gradient(circle,rgba(20,184,166,.10) 0%,transparent 68%)',
+              animation:'hubMesh 10s ease-in-out infinite alternate'}}/>
+          </div>
+
+          {/* Scan lines */}
+          <div style={{position:'absolute',inset:0,zIndex:1,pointerEvents:'none',
+            backgroundImage:'repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0px,rgba(255,255,255,.012) 1px,transparent 1px,transparent 4px)',
+            backgroundSize:'100% 4px'}}/>
+
+          {/* Bottom fade to page background */}
+          <div style={{position:'absolute',bottom:0,left:0,right:0,height:320,
+            background:`linear-gradient(to bottom,transparent 0%,${C.bg} 92%)`,zIndex:2}}/>
+
+          {/* Hero content */}
+          <div style={{position:'relative',zIndex:3,display:'flex',flexDirection:'column',
+            alignItems:'center',textAlign:'center',padding:'0 24px',gap:12}}>
+
+            {/* Logo with spinning conic border */}
+            <motion.div initial={{opacity:0,scale:.8}} animate={{opacity:1,scale:1}}
+              transition={{duration:.8,ease:[.34,1.56,.64,1]}} style={{position:'relative',marginBottom:4}}>
+              <div style={{position:'absolute',inset:-4,borderRadius:'50%',
+                background:'conic-gradient(from 0deg,transparent 0%,rgba(245,158,11,.8) 25%,transparent 50%,rgba(245,158,11,.35) 75%,transparent 100%)',
+                animation:'hubSpin 8s linear infinite',zIndex:0}}/>
+              <div style={{position:'relative',zIndex:1,width:92,height:92,borderRadius:'50%',
+                background:'linear-gradient(135deg,#1A1F2E,#0F1219)',border:`2px solid ${C.bdr2}`,
+                display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',
+                boxShadow:'0 0 40px rgba(245,158,11,.18)'}}>
+                {r.logo_url
+                  ? <img src={r.logo_url} alt={r.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                  : <span style={{fontFamily:"'Syne',sans-serif",fontSize:30,fontWeight:800,color:C.acc}}>{r.name[0]?.toUpperCase()}</span>
+                }
               </div>
+            </motion.div>
+
+            {/* Open/closed pill */}
+            <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.3,duration:.5}}
+              style={{display:'inline-flex',alignItems:'center',gap:7,padding:'5px 14px',borderRadius:100,
+                background:open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)',
+                border:`1px solid ${open?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'}`}}>
+              <span style={{width:7,height:7,borderRadius:'50%',background:open?C.grn:C.red,
+                animation:'hubPulse 1.5s ease-in-out infinite',display:'inline-block'}}/>
+              <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:open?C.grn:C.red}}>
+                {open?'Abierto ahora':'Cerrado'}
+              </span>
+            </motion.div>
+
+            {/* Business name */}
+            <motion.h1 initial={{opacity:0,y:20}} animate={{opacity:1,y:0}}
+              transition={{delay:.42,duration:.7,ease:[.22,1,.36,1]}}
+              style={{fontFamily:"'Syne',sans-serif",fontSize:34,fontWeight:800,
+                letterSpacing:-1,color:C.t1,margin:0,lineHeight:1.1}}>
+              {r.name}
+            </motion.h1>
+
+            {/* Category tags */}
+            {categoryTags.length>0 && (
+              <motion.p initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.55,duration:.6}}
+                style={{fontFamily:"'DM Mono',monospace",fontSize:12.5,color:C.t3,margin:0}}>
+                {categoryTags.join(' · ')}
+              </motion.p>
             )}
+
+            {/* Meta: city + rating */}
+            <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.6}}
+              style={{display:'flex',alignItems:'center',gap:10,fontSize:13,color:C.t3,flexWrap:'wrap',justifyContent:'center'}}>
+              {r.city && <span>📍 {r.city}</span>}
+              {googleRating && <><span style={{color:C.t4}}>·</span><span>⭐ {googleRating}</span></>}
+            </motion.div>
           </div>
-        </div>
+        </section>
 
-        {/* ── Name + Description ── */}
-        <div className="pt-14 px-4">
-          <h1 className="font-bold text-2xl text-white">{restaurant.name}</h1>
-          {restaurant.description && (
-            <p
-              className="text-gray-400 text-sm mt-1"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {restaurant.description}
-            </p>
-          )}
-        </div>
 
-        {/* ── 3. Contact Icons ── */}
-        {contacts.length > 0 && (
-          <div className="flex flex-wrap gap-3 px-4 mt-4">
-            {contacts.map((c) => (
-              <a
-                key={c.label}
-                href={c.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={c.label}
-                className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                style={{
-                  background: 'rgba(244,112,90,0.15)',
-                  border: '1px solid rgba(244,112,90,0.4)',
-                  color: '#F4705A',
-                }}
-              >
-                {c.icon}
-              </a>
-            ))}
-          </div>
-        )}
-
-        {/* ── 4. Location ── */}
-        {addressFull && (
-          <div
-            className="mx-4 mt-4 rounded-xl p-4"
-            style={{ background: '#1a1a1a', border: '1px solid #374151' }}
-          >
-            <div className="flex items-start gap-2 mb-3">
-              <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#F4705A' }} />
-              <p className="text-gray-300 text-sm">{addressFull}</p>
+        {/* ══════════════════════════════════════════════════════
+            2. CTA BUTTONS
+        ══════════════════════════════════════════════════════ */}
+        <section id="menu-ctas" style={{padding:'24px 20px 0'}}>
+          <Reveal>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+              {ctaBtns.slice(0,4).map((btn,i)=>{
+                const isPrimary=!!btn.primary
+                const btnStyle: React.CSSProperties = {
+                  background:isPrimary
+                    ?'linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.06))'
+                    :C.sur,
+                  border:`1px solid ${isPrimary?'rgba(245,158,11,.25)':C.bdr}`,
+                  borderRadius:16,padding:'18px 14px',
+                  flexDirection:'column',alignItems:'center',justifyContent:'center',
+                  backdropFilter:'blur(12px)',WebkitBackdropFilter:'blur(12px)',
+                }
+                const inner = (
+                  <>
+                    <div style={{width:48,height:48,borderRadius:14,marginBottom:10,
+                      display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,
+                      background:isPrimary?'rgba(245,158,11,.15)':'rgba(255,255,255,0.07)',
+                      boxShadow:isPrimary?'0 0 20px rgba(245,158,11,.12)':'none'}}>
+                      {btn.icon}
+                    </div>
+                    <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:13.5,fontWeight:500,
+                      color:isPrimary?C.acc2:C.t1,textAlign:'center',lineHeight:1.2}}>
+                      {btn.label}
+                    </span>
+                  </>
+                )
+                if (btn.scroll) return (
+                  <button key={i} className="hub-btn" onClick={()=>document.getElementById(btn.scroll!)?.scrollIntoView({behavior:'smooth'})} style={btnStyle as any}>
+                    {inner}
+                  </button>
+                )
+                return (
+                  <a key={i} className="hub-btn" href={btn.href!}
+                    target={btn.href?.startsWith('http')?'_blank':undefined} rel="noopener noreferrer"
+                    style={btnStyle}>
+                    {inner}
+                  </a>
+                )
+              })}
             </div>
-            <button
-              onClick={() => window.open(`https://maps.google.com/maps?q=${encodeURIComponent(addressFull)}`)}
-              className="text-xs font-semibold px-4 py-2 rounded-lg transition-all hover:opacity-80"
-              style={{ background: 'rgba(244,112,90,0.15)', color: '#F4705A', border: '1px solid rgba(244,112,90,0.3)' }}
-            >
-              Ver en mapa
-            </button>
-          </div>
+          </Reveal>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════
+            3. NOVEDAD / STORY
+        ══════════════════════════════════════════════════════ */}
+        {story && (
+          <section id="novedades" style={{padding:'28px 20px 0'}}>
+            <Reveal>
+              <div style={{borderRadius:20,overflow:'hidden',position:'relative',
+                background:story.image_url?'transparent':'linear-gradient(135deg,#1A2040,#0F1525)',
+                border:`1px solid ${C.bdr2}`,minHeight:200}}>
+                {story.image_url && (
+                  <img src={story.image_url} alt="" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'}}/>
+                )}
+                <div style={{position:'absolute',inset:0,background:story.image_url
+                  ?'linear-gradient(to bottom,rgba(0,0,0,.08) 0%,rgba(0,0,0,.68) 100%)'
+                  :'linear-gradient(135deg,rgba(245,158,11,.08),rgba(139,92,246,.06))'}}/>
+                {!story.image_url && <>
+                  <div style={{position:'absolute',width:200,height:200,top:-50,right:-50,borderRadius:'50%',
+                    background:'radial-gradient(circle,rgba(245,158,11,.15) 0%,transparent 70%)'}}/>
+                  <div style={{position:'absolute',width:160,height:160,bottom:-40,left:-40,borderRadius:'50%',
+                    background:'radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%)'}}/>
+                </>}
+                {/* Badge */}
+                <div style={{position:'absolute',top:14,left:14,background:C.acc,color:'#000',
+                  fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:600,padding:'4px 10px',
+                  borderRadius:100,textTransform:'uppercase',letterSpacing:'0.08em',
+                  animation:'hubPopIn .4s cubic-bezier(.34,1.56,.64,1) .8s both'}}>
+                  ★ Nuevo
+                </div>
+                {/* Content */}
+                <div style={{position:'relative',padding:'52px 18px 20px'}}>
+                  {story.title && (
+                    <h3 style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:C.t1,margin:'0 0 8px'}}>
+                      {story.title}
+                    </h3>
+                  )}
+                  {story.description && (
+                    <p style={{fontSize:13.5,color:C.t2,margin:'0 0 16px',lineHeight:1.6}}>{story.description}</p>
+                  )}
+                  <a href={menuHref} className="hub-btn" style={{display:'inline-flex',alignItems:'center',
+                    background:C.acc,color:'#000',fontSize:13,fontWeight:600,
+                    padding:'10px 20px',borderRadius:100,textDecoration:'none'}}>
+                    {isRetail?'Ver catálogo →':'Ver menú →'}
+                  </a>
+                </div>
+              </div>
+            </Reveal>
+          </section>
         )}
 
-        {/* ── 5. Featured ── */}
-        {featured.length > 0 && (
-          <div className="mt-6 px-4">
-            <h2 className="text-white font-semibold text-lg mb-3">Destacados</h2>
-            <div className="flex overflow-x-auto gap-3 pb-2" style={{ scrollbarWidth: 'none' }}>
-              {featured.map((item) => (
-                <div
-                  key={item.id}
-                  className="w-56 flex-shrink-0 rounded-xl overflow-hidden flex flex-col"
-                  style={{ background: '#1a1a1a', border: '1px solid #374151' }}
-                >
-                  {item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={item.title}
-                      className="w-full h-32 object-cover"
-                    />
-                  ) : (
-                    <div
-                      className="w-full h-32"
-                      style={{ background: 'linear-gradient(135deg,#F4705A44,#1a1a1a)' }}
-                    />
+
+        {/* ══════════════════════════════════════════════════════
+            4. ABOUT
+        ══════════════════════════════════════════════════════ */}
+        {hubAbout && (
+          <section style={{padding:'32px 20px 0'}}>
+            <Reveal>
+              <SL>Quiénes somos</SL>
+              <p style={{fontSize:14,color:C.t2,lineHeight:1.7,margin:0}}>{hubAbout.slice(0,500)}</p>
+            </Reveal>
+          </section>
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════
+            5. FEATURED PRODUCT
+        ══════════════════════════════════════════════════════ */}
+        {featuredProduct && (
+          <section style={{padding:'32px 20px 0'}}>
+            <Reveal>
+              <SL>{isRetail?'Destacado':'Más pedido'}</SL>
+              <div style={{...cardBase,display:'flex',overflow:'hidden'}}>
+                {/* Image */}
+                <div style={{width:110,flexShrink:0,position:'relative',overflow:'hidden',minHeight:110,
+                  background:featuredProduct.image_url?'transparent':'linear-gradient(135deg,rgba(245,158,11,.12),rgba(139,92,246,.08))'}}>
+                  {featuredProduct.image_url
+                    ? <img src={featuredProduct.image_url} alt={featuredProduct.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                    : <div style={{width:'100%',height:'100%',minHeight:110,display:'flex',alignItems:'center',justifyContent:'center',fontSize:32}}>
+                        {isRetail?'🛍':'🍽'}
+                      </div>
+                  }
+                </div>
+                {/* Info */}
+                <div style={{padding:'14px 16px',flex:1,display:'flex',flexDirection:'column',gap:5}}>
+                  {featuredProduct.tag && (
+                    <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,color:C.acc,textTransform:'uppercase',letterSpacing:'0.1em'}}>
+                      {featuredProduct.tag}
+                    </span>
                   )}
-                  <div className="p-3 flex-1 flex flex-col">
-                    <p className="font-semibold text-white text-sm">{item.title}</p>
-                    {item.description && (
-                      <p
-                        className="text-gray-400 text-xs mt-1"
-                        style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        {item.description}
+                  <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0,lineHeight:1.2}}>
+                    {featuredProduct.name}
+                  </p>
+                  {featuredProduct.description && (
+                    <p style={{fontSize:12.5,color:C.t3,margin:0,lineHeight:1.5,
+                      display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+                      {featuredProduct.description}
+                    </p>
+                  )}
+                  {featuredProduct.price!=null && (
+                    <p style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:700,color:C.acc,margin:'2px 0 0'}}>
+                      ${featuredProduct.price.toLocaleString('es-AR')}
+                    </p>
+                  )}
+                  {featuredProduct.cta_text&&featuredProduct.cta_url && (
+                    <a href={featuredProduct.cta_url} target="_blank" rel="noopener noreferrer"
+                      className="hub-btn"
+                      style={{marginTop:4,display:'inline-flex',alignItems:'center',
+                        background:'rgba(245,158,11,.1)',border:'1px solid rgba(245,158,11,.2)',
+                        color:C.acc,fontSize:12,fontWeight:600,padding:'5px 12px',
+                        borderRadius:100,textDecoration:'none',width:'fit-content'}}>
+                      {featuredProduct.cta_text}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </Reveal>
+          </section>
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════
+            6. GALLERY
+        ══════════════════════════════════════════════════════ */}
+        {gallery.length>0 && (
+          <section id="galeria" style={{padding:'32px 20px 0'}}>
+            <Reveal>
+              <SL>Galería</SL>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:3,borderRadius:16,overflow:'hidden'}}>
+                {gallery.slice(0,12).map((item,i)=>(
+                  <button key={item.id} className="hub-btn" onClick={()=>setLightboxIndex(i)}
+                    style={{aspectRatio:'1',background:'transparent',border:'none',cursor:'pointer',
+                      padding:0,position:'relative',overflow:'hidden',display:'block'}}>
+                    {item.type==='video'
+                      ? <>
+                          <video src={item.url} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',
+                            justifyContent:'center',background:'rgba(0,0,0,.4)'}}>
+                            <span style={{width:38,height:38,borderRadius:'50%',background:'rgba(0,0,0,.6)',
+                              display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#fff'}}>▶</span>
+                          </div>
+                        </>
+                      : <img src={item.url} alt={item.caption||''} loading="lazy"
+                          style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
+                    }
+                  </button>
+                ))}
+              </div>
+            </Reveal>
+          </section>
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════
+            7. MENU / CATALOG BANNER
+        ══════════════════════════════════════════════════════ */}
+        <section style={{padding:'28px 20px 0'}}>
+          <Reveal>
+            <a href={menuHref} className="hub-btn"
+              style={{
+                display:'flex',alignItems:'center',justifyContent:'space-between',
+                padding:'18px 20px',
+                background:'linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.06))',
+                border:'1px solid rgba(245,158,11,.25)',borderRadius:20,textDecoration:'none',
+              }}>
+              <div>
+                <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:'0 0 4px'}}>
+                  {isRetail?'Ver catálogo completo':'Ver el menú completo'}
+                </p>
+                <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,margin:0}}>
+                  {isRetail?'Productos · Precios · Categorías':'Carta · Bebidas · Postres'}
+                </p>
+              </div>
+              <div style={{width:40,height:40,borderRadius:12,background:C.acc,flexShrink:0,marginLeft:12,
+                display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <span style={{color:'#000',fontSize:18,fontWeight:700}}>→</span>
+              </div>
+            </a>
+          </Reveal>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════
+            8. LOCATIONS
+        ══════════════════════════════════════════════════════ */}
+        <section id="locales" style={{padding:'32px 20px 0'}}>
+          <Reveal>
+            <SL>Locales</SL>
+            <div style={{...cardBase,padding:18}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+                <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0}}>{r.name}</p>
+                <span style={{padding:'4px 10px',borderRadius:100,fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,
+                  background:open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)',
+                  border:`1px solid ${open?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'}`,
+                  color:open?C.grn:C.red}}>
+                  {open?'Abierto':'Cerrado'}
+                </span>
+              </div>
+              {address && (
+                <p style={{fontSize:13.5,color:C.t2,marginBottom:10,display:'flex',alignItems:'flex-start',gap:8,margin:'0 0 10px'}}>
+                  <span>📍</span>{address}
+                </p>
+              )}
+              {hoursText && (
+                <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,marginBottom:14,margin:'0 0 14px'}}>
+                  Hoy: {hoursText}
+                </p>
+              )}
+              <div style={{display:'flex',gap:8}}>
+                {address && (
+                  <a href={`https://maps.google.com/maps?q=${encodeURIComponent(address)}`}
+                    target="_blank" rel="noopener noreferrer" className="hub-btn"
+                    style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
+                      borderRadius:12,background:C.acc,color:'#000',fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
+                    🗺 Maps
+                  </a>
+                )}
+                {r.phone && (
+                  <a href={`tel:${r.phone}`} className="hub-btn"
+                    style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
+                      borderRadius:12,background:C.sur2,border:`1px solid ${C.bdr}`,
+                      color:C.t1,fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
+                    📞 Llamar
+                  </a>
+                )}
+                {cleanWa && (
+                  <a href={`https://wa.me/${cleanWa}`} target="_blank" rel="noopener noreferrer" className="hub-btn"
+                    style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
+                      borderRadius:12,background:C.sur2,border:`1px solid ${C.bdr}`,
+                      color:C.t1,fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
+                    💬 WA
+                  </a>
+                )}
+              </div>
+            </div>
+          </Reveal>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════
+            9. REVIEWS
+        ══════════════════════════════════════════════════════ */}
+        {(reviews.length>0||googleRating) && (
+          <section style={{padding:'32px 20px 0'}}>
+            <Reveal>
+              <SL>Reseñas</SL>
+              {googleRating && (
+                <div style={{...cardBase,padding:'20px',marginBottom:10,display:'flex',alignItems:'center',gap:16}}>
+                  <span style={{fontFamily:"'Syne',sans-serif",fontSize:44,fontWeight:800,color:C.t1,lineHeight:1}}>{googleRating}</span>
+                  <div>
+                    <p style={{margin:'0 0 4px',fontSize:16,lineHeight:1}}>{starStr(googleRating)}</p>
+                    {googleReviewCount && (
+                      <p style={{fontFamily:"'DM Mono',monospace",fontSize:11.5,color:C.t3,margin:0}}>
+                        {googleReviewCount} reseñas · Google
                       </p>
-                    )}
-                    {item.cta_text && item.cta_url && (
-                      <a
-                        href={item.cta_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-auto text-center text-xs font-semibold py-2 rounded-lg mt-3 transition-all hover:opacity-80"
-                        style={{ background: '#F4705A', color: '#fff', marginTop: 'auto' }}
-                      >
-                        {item.cta_text}
-                      </a>
                     )}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              )}
+              {reviews.length>0 && (
+                <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                  {reviews.map(rev=>(
+                    <div key={rev.id} style={{...cardBase,padding:16}}>
+                      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                        <div style={{width:36,height:36,borderRadius:'50%',flexShrink:0,
+                          background:`linear-gradient(135deg,${rev.profile_color||C.acc},rgba(139,92,246,.7))`,
+                          display:'flex',alignItems:'center',justifyContent:'center',
+                          fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15,color:'#fff'}}>
+                          {rev.author_initial||rev.author_name[0]?.toUpperCase()}
+                        </div>
+                        <div style={{flex:1}}>
+                          <p style={{margin:0,fontWeight:600,fontSize:13.5,color:C.t1}}>{rev.author_name}</p>
+                          <p style={{margin:0,fontFamily:"'DM Mono',monospace",fontSize:10.5,color:C.t3}}>
+                            {rev.relative_time||'Hace poco'} · {starStr(rev.rating)}
+                          </p>
+                        </div>
+                      </div>
+                      <p style={{margin:0,fontSize:13.5,color:C.t2,lineHeight:1.6}}>{rev.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {social.google_review && (
+                <a href={social.google_review} target="_blank" rel="noopener noreferrer"
+                  style={{display:'block',textAlign:'center',marginTop:12,
+                    fontFamily:"'DM Mono',monospace",fontSize:12.5,color:C.acc,textDecoration:'none'}}>
+                  Ver en Google →
+                </a>
+              )}
+            </Reveal>
+          </section>
         )}
 
-        {/* ── 6. Action Buttons ── */}
-        {actions.length > 0 && (
-          <div
-            className={`px-4 mt-6 grid gap-3 ${actions.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}
-          >
-            {actions.map((btn) =>
-              btn.external ? (
-                <a
-                  key={btn.label}
-                  href={btn.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-center py-4 rounded-xl font-semibold text-white transition-all hover:opacity-80 active:scale-95"
-                  style={{ background: '#F4705A' }}
-                >
-                  {btn.label}
-                </a>
-              ) : (
-                <a
-                  key={btn.label}
-                  href={btn.href}
-                  className="text-center py-4 rounded-xl font-semibold text-white transition-all hover:opacity-80 active:scale-95"
-                  style={{ background: '#F4705A' }}
-                >
-                  {btn.label}
-                </a>
-              )
-            )}
-          </div>
+
+        {/* ══════════════════════════════════════════════════════
+            10. SOCIAL LINKS
+        ══════════════════════════════════════════════════════ */}
+        {socialEntries.length>0 && (
+          <section style={{padding:'32px 20px 0'}}>
+            <Reveal>
+              <SL>Redes</SL>
+              <div style={{display:'grid',gridTemplateColumns:`repeat(${Math.min(5,socialEntries.length)},1fr)`,gap:8}}>
+                {socialEntries.map(s=>(
+                  <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer" className="hub-btn"
+                    style={{aspectRatio:'1',borderRadius:16,background:s.bg,
+                      border:`1px solid ${s.color}33`,
+                      flexDirection:'column',alignItems:'center',justifyContent:'center',
+                      textDecoration:'none',gap:4}}>
+                    <span style={{fontSize:18}}>{s.icon}</span>
+                    <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,color:s.color,fontWeight:500}}>
+                      {s.label}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </Reveal>
+          </section>
         )}
 
-        {/* ── 7. Footer ── */}
-        <p className="text-center text-xs mt-8 mb-4" style={{ color: '#4B5563' }}>
-          Creado con MenuLife
-        </p>
+
+        {/* ══════════════════════════════════════════════════════
+            11. CONTACT LIST
+        ══════════════════════════════════════════════════════ */}
+        {contactItems.length>0 && (
+          <section id="contacto" style={{padding:'32px 20px 0'}}>
+            <Reveal>
+              <SL>Contacto</SL>
+              <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                {contactItems.map(c=>(
+                  <a key={c.label} href={c.href}
+                    target={c.href.startsWith('http')?'_blank':undefined}
+                    rel="noopener noreferrer" className="hub-btn"
+                    style={{...cardBase,padding:'14px 18px',alignItems:'center',gap:14,textDecoration:'none'}}>
+                    <div style={{width:40,height:40,borderRadius:12,background:c.iconBg,flexShrink:0,
+                      display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>
+                      {c.icon}
+                    </div>
+                    <div style={{flex:1}}>
+                      <p style={{margin:0,fontFamily:"'DM Mono',monospace",fontSize:10,color:C.t3,
+                        textTransform:'uppercase',letterSpacing:'0.1em'}}>{c.label}</p>
+                      <p style={{margin:'2px 0 0',fontSize:13.5,color:C.t1,fontWeight:500}}>{c.value}</p>
+                    </div>
+                    <span style={{color:C.t3,fontSize:18,lineHeight:1}}>›</span>
+                  </a>
+                ))}
+              </div>
+            </Reveal>
+          </section>
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════
+            12. FOOTER
+        ══════════════════════════════════════════════════════ */}
+        <footer style={{margin:'40px 20px 0',padding:'24px 0',
+          borderTop:`1px solid ${C.bdr}`,textAlign:'center'}}>
+          <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:C.t1,margin:'0 0 4px'}}>{r.name}</p>
+          {hoursText && <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,margin:'0 0 4px'}}>{hoursText}</p>}
+          {r.city && <p style={{fontSize:12,color:C.t4,margin:'0 0 16px'}}>{r.city}</p>}
+          <a href="https://menulife.digital" target="_blank" rel="noopener noreferrer"
+            style={{display:'inline-flex',alignItems:'center',gap:5,padding:'7px 14px',borderRadius:100,
+              background:C.sur,border:`1px solid ${C.bdr}`,textDecoration:'none'}}>
+            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:C.t3}}>Powered by</span>
+            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:C.acc}}>MenuLife</span>
+          </a>
+        </footer>
+
       </div>
-    </div>
+
+      {/* ══════════════════════════════════════════════════════
+          BOTTOM NAV (fixed)
+      ══════════════════════════════════════════════════════ */}
+      <BottomNav isRetail={isRetail}/>
+
+      {/* GALLERY LIGHTBOX */}
+      <AnimatePresence>
+        {lightboxIndex!==null && gallery.length>0 && (
+          <Lightbox items={gallery} startIndex={lightboxIndex} onClose={()=>setLightboxIndex(null)}/>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
