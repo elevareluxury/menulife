@@ -116,7 +116,7 @@ export function RestaurantsTab() {
   useEffect(() => { fetchRestaurants() }, [fetchRestaurants])
 
   const cities   = ['all', ...Array.from(new Set(restaurants.map(r => r.city).filter(Boolean)))] as string[]
-  const plans    = ['all', 'menu', 'pro', 'total']
+  const plans    = ['all', 'hub_free', 'os_gastronomy', 'os_full']
   const statuses = ['all', 'trial', 'active', 'past_due', 'cancelled']
 
   const filtered = restaurants.filter(r => {

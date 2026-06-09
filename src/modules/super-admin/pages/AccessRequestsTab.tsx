@@ -28,9 +28,9 @@ interface AccessRequest {
 type Tab = 'pending' | 'approved' | 'rejected' | 'all'
 
 const PLAN_OPTIONS = [
-  { value: 'menu',  label: 'Menu  — Menú Digital',   sub: 'Trial 14d · $9/mes'  },
-  { value: 'pro',   label: 'Pro   — Pedidos + KDS',   sub: 'Trial 14d · $19/mes' },
-  { value: 'total', label: 'Total — Suite Completa',  sub: 'Trial 14d · $32/mes' },
+  { value: 'hub_free',      label: 'Hub Free — Menú Digital',    sub: 'Trial 14d · $9/mes'  },
+  { value: 'os_gastronomy', label: 'OS Gastronomy — Pedidos + KDS', sub: 'Trial 14d · $19/mes' },
+  { value: 'os_full',       label: 'OS Full — Suite Completa',   sub: 'Trial 14d · $32/mes' },
 ]
 
 function timeSince(dateStr: string): string {
@@ -53,8 +53,8 @@ function ApproveModal({
   onClose: () => void
   onConfirm: (requestId: string, plan: string, features: Record<string, boolean>, note: string) => Promise<void>
 }) {
-  const [plan, setPlan] = useState('menu')
-  const [features, setFeatures] = useState<Record<string, boolean>>(PLAN_FEATURES['menu'])
+  const [plan, setPlan] = useState('hub_free')
+  const [features, setFeatures] = useState<Record<string, boolean>>(PLAN_FEATURES['hub_free'])
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
 

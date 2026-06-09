@@ -54,7 +54,7 @@ export type Database = {
           schedule: Json
           is_open: boolean
           is_active: boolean
-          plan: 'menu' | 'pro' | 'total'
+          plan: 'hub_free' | 'os_gastronomy' | 'os_full'
           trial_ends_at: string | null
           subscription_status: 'trial' | 'active' | 'past_due' | 'cancelled'
           mercadopago_enabled: boolean
@@ -114,7 +114,7 @@ export type Database = {
           schedule?: Json
           is_open?: boolean
           is_active?: boolean
-          plan?: 'menu' | 'pro' | 'total'
+          plan?: 'hub_free' | 'os_gastronomy' | 'os_full'
           trial_ends_at?: string | null
           subscription_status?: 'trial' | 'active' | 'past_due' | 'cancelled'
           mercadopago_enabled?: boolean
@@ -174,7 +174,7 @@ export type Database = {
           schedule?: Json
           is_open?: boolean
           is_active?: boolean
-          plan?: 'menu' | 'pro' | 'total'
+          plan?: 'hub_free' | 'os_gastronomy' | 'os_full'
           trial_ends_at?: string | null
           subscription_status?: 'trial' | 'active' | 'past_due' | 'cancelled'
           mercadopago_enabled?: boolean

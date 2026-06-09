@@ -26,7 +26,7 @@ export interface Restaurant {
   schedule?: unknown
   is_open: boolean
   is_active: boolean
-  plan: 'menu' | 'pro' | 'total'
+  plan: 'hub_free' | 'os_gastronomy' | 'os_full'
   subscription_status: 'trial' | 'active' | 'past_due' | 'cancelled'
   mercadopago_enabled: boolean
   created_at: string

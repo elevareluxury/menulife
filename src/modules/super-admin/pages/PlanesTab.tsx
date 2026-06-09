@@ -248,7 +248,7 @@ export function PlanesTab() {
             </p>
           ) : (
             <div className="space-y-3">
-              {(['menu', 'pro', 'total'] as const).map(plan => {
+              {(['hub_free', 'os_gastronomy', 'os_full'] as const).map(plan => {
                 const mrr = mrrByPlan[plan] ?? 0
                 if (!mrr) return null
                 const count = Math.round(mrr / PLAN_PRICES[plan])
