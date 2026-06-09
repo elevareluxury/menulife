@@ -288,8 +288,8 @@ export function CinematicHero() {
         Onboarding por WhatsApp.
       </p>
       <div className="ch-cta-buttons">
-        <Link to="/solicitar-acceso" className="liquid-glass-btn ch-cta-btn">
-          <span>Solicitar acceso →</span>
+        <Link to="/register" className="liquid-glass-btn ch-cta-btn">
+          <span>Crear mi perfil gratis →</span>
         </Link>
         <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost ch-cta-btn">
           <span>Ver demo</span>

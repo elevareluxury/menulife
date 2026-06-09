@@ -14,11 +14,13 @@ export function DashboardPage() {
   const { loading, initialized, isAuthenticated } = useAuth()
   const { restaurant, loading: restaurantLoading } = useRestaurant()
   const setBusinessType = useRestaurantStore(s => s.setBusinessType)
+  const setPlan         = useRestaurantStore(s => s.setPlan)
   const [timedOut, setTimedOut] = useState(false)
 
   useEffect(() => {
     setBusinessType(restaurant?.business_type ?? 'gastronomy')
-  }, [restaurant?.business_type, setBusinessType])
+    setPlan(restaurant?.plan ?? null)
+  }, [restaurant?.business_type, restaurant?.plan, setBusinessType, setPlan])
 
   useEffect(() => {
     const t = setTimeout(() => setTimedOut(true), 5_000)
@@ -35,8 +37,12 @@ export function DashboardPage() {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
-  // Redirect new users to onboarding until they complete it
-  if (!restaurantLoading && restaurant && restaurant.onboarding_completed === false) {
+  // hub_free users skip onboarding — they go straight to the hub editor
+  if (!restaurantLoading && restaurant?.plan === 'hub_free' && restaurant.onboarding_completed === false) {
+    return <Navigate to="/dashboard/hub" replace />
+  }
+  // Redirect new OS users to onboarding until they complete it
+  if (!restaurantLoading && restaurant && restaurant.plan !== 'hub_free' && restaurant.onboarding_completed === false) {
     return <Navigate to="/onboarding" replace />
   }
 
@@ -44,7 +50,7 @@ export function DashboardPage() {
     <div className="min-h-screen bg-surface-1 text-ink-1 dashboard-body">
       <ImpersonationBanner />
       {/* Sidebar — visible sólo en desktop */}
-      <Sidebar restaurantSlug={restaurant?.slug} />
+      <Sidebar restaurantSlug={restaurant?.slug} restaurantName={restaurant?.name} />
 
       {/* Área de contenido — se desplaza a la derecha del sidebar en desktop */}
       <div className="lg:pl-60">

@@ -21,7 +21,7 @@ export function PricingSection() {
       features: [t('pricing.plan1_f1'), t('pricing.plan1_f2'), t('pricing.plan1_f3'), t('pricing.plan1_f4')],
       cta:      t('pricing.plan1_cta'),
       featured: false,
-      href:     '/solicitar-acceso',
+      href:     '/register',
     },
     {
       tag:      t('pricing.plan2_tag'),
@@ -33,7 +33,7 @@ export function PricingSection() {
       features: [t('pricing.plan2_f1'), t('pricing.plan2_f2'), t('pricing.plan2_f3'), t('pricing.plan2_f4')],
       cta:      t('pricing.plan2_cta'),
       featured: true,
-      href:     '/solicitar-acceso',
+      href:     '/register',
       note:     t('pricing.plan2_note'),
     },
   ]

@@ -90,7 +90,7 @@ export function FinalCTA() {
         </p>
 
         <div data-cta-btns style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
-          <Link to="/solicitar-acceso" style={{ textDecoration: 'none' }}>
+          <Link to="/register" style={{ textDecoration: 'none' }}>
             <ShimmerButton style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '50px' }}>
               {t('cta_final.cta_primary')}
             </ShimmerButton>

@@ -59,7 +59,7 @@ export function Navbar() {
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)' }}
             >{t('nav.login')}</button>
           </Link>
-          <Link to="/solicitar-acceso" style={{ textDecoration: 'none' }}>
+          <Link to="/register" style={{ textDecoration: 'none' }}>
             <ShimmerButton>{t('nav.cta')}</ShimmerButton>
           </Link>
         </div>
@@ -96,7 +96,7 @@ export function Navbar() {
                 {t('nav.login')}
               </button>
             </Link>
-            <Link to="/solicitar-acceso" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
+            <Link to="/register" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
               <ShimmerButton style={{ width: '100%' }}>{t('nav.cta')}</ShimmerButton>
             </Link>
           </div>

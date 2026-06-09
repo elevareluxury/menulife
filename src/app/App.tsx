@@ -13,7 +13,6 @@ import { PublicMenu } from '@/modules/public/pages/PublicMenu'
 import { WaiterLogin } from '@/modules/waiter/pages/WaiterLogin'
 import { WaiterApp } from '@/modules/waiter/pages/WaiterApp'
 import { TableBill } from '@/modules/waiter/pages/TableBill'
-import { AccessRequestPage } from '@/modules/access-request/pages/AccessRequestPage'
 import { OnboardingFlow } from '@/modules/onboarding/pages/OnboardingFlow'
 import { OrderTracking } from '@/modules/public/pages/OrderTracking'
 import { AuthCallback } from '@/pages/AuthCallback'
@@ -71,7 +70,7 @@ function App() {
           <Route path="/auth/callback"    element={<AuthCallback />} />
           <Route path="/forgot-password"  element={<ForgotPassword />} />
           <Route path="/reset-password"   element={<ResetPassword />} />
-          <Route path="/solicitar-acceso" element={<AccessRequestPage />} />
+          <Route path="/solicitar-acceso" element={<Navigate to="/register" replace />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
           <Route path="/dashboard" element={<DashboardPage />}>
             <Route index element={<DashboardHome />} />

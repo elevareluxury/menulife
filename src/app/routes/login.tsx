@@ -53,9 +53,9 @@ export function LoginPage() {
         <LoginForm />
 
         <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)' }}>
-          ¿Querés unirte?{' '}
-          <Link to="/solicitar-acceso" style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}>
-            Solicitar acceso
+          ¿Sos nuevo?{' '}
+          <Link to="/register" style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}>
+            Creá tu perfil gratis →
           </Link>
         </p>
 

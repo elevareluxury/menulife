@@ -55,13 +55,18 @@ export function LoginForm() {
 
       toast.success('¡Bienvenido!')
 
-      const { data: superAdmin } = await supabase
-        .from('super_admins')
-        .select('id')
-        .eq('user_id', data.user.id)
-        .maybeSingle()
+      const [{ data: superAdmin }, { data: restaurant }] = await Promise.all([
+        supabase.from('super_admins').select('id').eq('user_id', data.user.id).maybeSingle(),
+        supabase.from('restaurants').select('plan').eq('owner_id', data.user.id).maybeSingle(),
+      ])
 
-      navigate(superAdmin ? ROUTES.SUPER_ADMIN : ROUTES.DASHBOARD)
+      if (superAdmin) {
+        navigate(ROUTES.SUPER_ADMIN)
+      } else if (restaurant?.plan === 'hub_free') {
+        navigate('/dashboard/hub')
+      } else {
+        navigate(ROUTES.DASHBOARD)
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al iniciar sesión'
       setError(msg)
