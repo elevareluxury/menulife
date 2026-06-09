@@ -138,7 +138,7 @@ function Reveal({children,delay=0}:{children:React.ReactNode;delay?:number}) {
 
 function SL({children}:{children:React.ReactNode}) {
   return (
-    <p style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:C.acc,
+    <p style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:'var(--acc)',
       textTransform:'uppercase',letterSpacing:'0.14em',marginBottom:12,margin:'0 0 12px'}}>
       {children}
     </p>
@@ -212,7 +212,7 @@ const NAV_IDS = ['inicio','menu-ctas','novedades','locales','contacto'] as const
 type NavId = typeof NAV_IDS[number]
 
 function NavIcon({id,active}:{id:string;active:boolean}) {
-  const color = active ? C.acc : C.t3
+  const color = active ? 'var(--acc)' : C.t3
   const s = {width:20,height:20,display:'block'} as React.CSSProperties
   if (id==='inicio') return (
     <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -303,7 +303,7 @@ function BottomNav({isRetail}:{isRetail:boolean}) {
           <NavIcon id={tab.id} active={active===tab.id} />
           <span style={{
             fontSize:10,fontFamily:"'DM Sans',sans-serif",fontWeight:500,
-            color:active===tab.id?C.acc:'rgba(255,255,255,0.4)',
+            color:active===tab.id?'var(--acc)':'rgba(255,255,255,0.4)',
             transition:'color .15s',whiteSpace:'nowrap',
           }}>
             {tab.label}
@@ -395,7 +395,7 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
                     {isClosed ? (
                       <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:C.red,margin:0}}>Cerrado</p>
                     ) : (
-                      <p style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:C.acc,margin:0}}>
+                      <p style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:'var(--acc)',margin:0}}>
                         {slot.open} — {slot.close}
                       </p>
                     )}
@@ -408,9 +408,9 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
                 onClick={(e)=>{e.stopPropagation();setActiveDay(activeDay===day.key?null:day.key)}}
                 style={{
                   width:36,height:36,borderRadius:'50%',
-                  border:isToday?`1.5px solid ${C.acc}`:'1px solid rgba(255,255,255,0.1)',
+                  border:isToday?`1.5px solid ${'var(--acc)'}`:'1px solid rgba(255,255,255,0.1)',
                   background:isActive?'rgba(245,158,11,0.15)':isToday?'rgba(245,158,11,0.08)':'rgba(255,255,255,0.04)',
-                  color:isClosed?'rgba(255,255,255,0.2)':isToday?C.acc:'rgba(255,255,255,0.7)',
+                  color:isClosed?'rgba(255,255,255,0.2)':isToday?'var(--acc)':'rgba(255,255,255,0.7)',
                   fontSize:12,fontFamily:"'DM Mono',monospace",fontWeight:500,
                   cursor:'pointer',
                   display:'flex',alignItems:'center',justifyContent:'center',
@@ -422,7 +422,7 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
                   <span style={{
                     position:'absolute',bottom:2,left:'50%',transform:'translateX(-50%)',
                     width:3,height:3,borderRadius:'50%',
-                    background:isToday?C.acc:'rgba(255,255,255,0.4)',
+                    background:isToday?'var(--acc)':'rgba(255,255,255,0.4)',
                   }}/>
                 )}
               </button>
@@ -442,7 +442,7 @@ function HubLoading() {
       <style>{`@keyframes _hubSpin{to{transform:rotate(360deg)}}`}</style>
       <div style={{width:32,height:32,borderRadius:'50%',
         border:`2px solid rgba(245,158,11,0.3)`,
-        borderTop:`2px solid ${C.acc}`,
+        borderTop:`2px solid ${'var(--acc)'}`,
         animation:'_hubSpin 0.8s linear infinite'}}/>
     </div>
   )
@@ -455,7 +455,7 @@ function HubNotFound() {
       fontFamily:"'DM Sans',sans-serif"}}>
       <p style={{fontFamily:"'Syne',sans-serif",fontSize:64,fontWeight:800,color:C.t3,marginBottom:8}}>404</p>
       <p style={{color:C.t2,marginBottom:24}}>Este Hub no fue encontrado.</p>
-      <a href="/" style={{background:C.acc,color:'#000',padding:'10px 24px',borderRadius:100,
+      <a href="/" style={{background:'var(--acc)',color:'#000',padding:'10px 24px',borderRadius:100,
         fontWeight:600,fontSize:14,fontFamily:"'DM Sans',sans-serif",textDecoration:'none'}}>
         Volver al inicio
       </a>
@@ -480,6 +480,7 @@ export function HubPublicPage() {
   const [lightboxIndex, setLightboxIndex]     = useState<number|null>(null)
   const [scrollY, setScrollY]                 = useState(0)
   const [headerVisible, setHeaderVisible]     = useState(false)
+  const [accentColor, setAccentColor]         = useState('var(--acc)')
 
   // Scroll tracking for parallax + floating header
   useEffect(()=>{
@@ -531,6 +532,10 @@ export function HubPublicPage() {
         setFeaturedProduct(fpRes.data??null)
         setReviews(revRes.data??[])
         setLinks(linksRes.data??[])
+
+        const { data: hubCfg } = await db.from('hub_config').select('accent_color').eq('restaurant_id', id).maybeSingle()
+        const defaultAccent = (rest as any).plan === 'hub_free' ? '#F4705A' : 'var(--acc)'
+        setAccentColor(hubCfg?.accent_color || defaultAccent)
       } catch(e) {
         console.error(e); setNotFound(true)
       } finally { setLoading(false) }
@@ -619,7 +624,7 @@ export function HubPublicPage() {
   const coverScale   = 1 + scrollY * 0.0003
 
   return (
-    <>
+    <div style={{'--acc': accentColor} as React.CSSProperties}>
       {/* Grain overlay */}
       <div style={{
         position:'fixed',inset:0,zIndex:999,pointerEvents:'none',opacity:0.035,
@@ -743,7 +748,7 @@ export function HubPublicPage() {
                 boxShadow:'0 0 40px rgba(245,158,11,.18)'}}>
                 {r.logo_url
                   ? <img src={r.logo_url} alt={r.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-                  : <span style={{fontFamily:"'Syne',sans-serif",fontSize:30,fontWeight:800,color:C.acc}}>{r.name[0]?.toUpperCase()}</span>
+                  : <span style={{fontFamily:"'Syne',sans-serif",fontSize:30,fontWeight:800,color:'var(--acc)'}}>{r.name[0]?.toUpperCase()}</span>
                 }
               </div>
             </motion.div>
@@ -941,7 +946,7 @@ export function HubPublicPage() {
                   <div style={{position:'absolute',width:160,height:160,bottom:-40,left:-40,borderRadius:'50%',
                     background:'radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%)'}}/>
                 </>}
-                <div style={{position:'absolute',top:14,left:14,background:C.acc,color:'#000',
+                <div style={{position:'absolute',top:14,left:14,background:'var(--acc)',color:'#000',
                   fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:600,padding:'4px 10px',
                   borderRadius:100,textTransform:'uppercase',letterSpacing:'0.08em',
                   animation:'hubPopIn .4s cubic-bezier(.34,1.56,.64,1) .8s both'}}>
@@ -957,7 +962,7 @@ export function HubPublicPage() {
                     <p style={{fontSize:13.5,color:C.t2,margin:'0 0 16px',lineHeight:1.6}}>{story.description}</p>
                   )}
                   <a href={menuHref} className="hub-btn" style={{display:'inline-flex',alignItems:'center',
-                    background:C.acc,color:'#000',fontSize:13,fontWeight:600,
+                    background:'var(--acc)',color:'#000',fontSize:13,fontWeight:600,
                     padding:'10px 20px',borderRadius:100,textDecoration:'none'}}>
                     {isRetail?'Ver catálogo →':'Ver menú →'}
                   </a>
@@ -987,7 +992,7 @@ export function HubPublicPage() {
                 </div>
                 <div style={{padding:'14px 16px',flex:1,display:'flex',flexDirection:'column',gap:5}}>
                   {featuredProduct.tag && (
-                    <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,color:C.acc,textTransform:'uppercase',letterSpacing:'0.1em'}}>
+                    <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,color:'var(--acc)',textTransform:'uppercase',letterSpacing:'0.1em'}}>
                       {featuredProduct.tag}
                     </span>
                   )}
@@ -1001,7 +1006,7 @@ export function HubPublicPage() {
                     </p>
                   )}
                   {featuredProduct.price!=null && (
-                    <p style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:700,color:C.acc,margin:'2px 0 0'}}>
+                    <p style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:700,color:'var(--acc)',margin:'2px 0 0'}}>
                       ${featuredProduct.price.toLocaleString('es-AR')}
                     </p>
                   )}
@@ -1009,7 +1014,7 @@ export function HubPublicPage() {
                     <a href={featuredProduct.cta_url} target="_blank" rel="noopener noreferrer" className="hub-btn"
                       style={{marginTop:4,display:'inline-flex',alignItems:'center',
                         background:'rgba(245,158,11,.1)',border:'1px solid rgba(245,158,11,.2)',
-                        color:C.acc,fontSize:12,fontWeight:600,padding:'5px 12px',
+                        color:'var(--acc)',fontSize:12,fontWeight:600,padding:'5px 12px',
                         borderRadius:100,textDecoration:'none',width:'fit-content'}}>
                       {featuredProduct.cta_text}
                     </a>
@@ -1071,7 +1076,7 @@ export function HubPublicPage() {
                   {isRetail?'Productos · Precios · Categorías':'Carta · Bebidas · Postres'}
                 </p>
               </div>
-              <div style={{width:40,height:40,borderRadius:12,background:C.acc,flexShrink:0,marginLeft:12,
+              <div style={{width:40,height:40,borderRadius:12,background:'var(--acc)',flexShrink:0,marginLeft:12,
                 display:'flex',alignItems:'center',justifyContent:'center'}}>
                 <span style={{color:'#000',fontSize:18,fontWeight:700}}>→</span>
               </div>
@@ -1126,7 +1131,7 @@ export function HubPublicPage() {
                     target="_blank" rel="noopener noreferrer" className="hub-btn"
                     onClick={()=>trackEvent(r.id,'maps_click')}
                     style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
-                      borderRadius:12,background:C.acc,color:'#000',fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
+                      borderRadius:12,background:'var(--acc)',color:'#000',fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
                     🗺 Maps
                   </a>
                 )}
@@ -1185,10 +1190,10 @@ export function HubPublicPage() {
                     )}
                   </div>
                   <div style={{display:'flex',alignItems:'center',gap:4}}>
-                    <span style={{fontFamily:"'Syne',sans-serif",fontSize:24,fontWeight:800,color:C.acc,lineHeight:1}}>
+                    <span style={{fontFamily:"'Syne',sans-serif",fontSize:24,fontWeight:800,color:'var(--acc)',lineHeight:1}}>
                       {googleRating}
                     </span>
-                    <span style={{color:C.acc,fontSize:20}}>★</span>
+                    <span style={{color:'var(--acc)',fontSize:20}}>★</span>
                   </div>
                 </div>
               )}
@@ -1198,7 +1203,7 @@ export function HubPublicPage() {
                     <div key={rev.id} style={{...cardBase,padding:16}}>
                       <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
                         <div style={{width:36,height:36,borderRadius:'50%',flexShrink:0,
-                          background:`linear-gradient(135deg,${rev.profile_color||C.acc},rgba(139,92,246,.7))`,
+                          background:`linear-gradient(135deg,${rev.profile_color||'var(--acc)'},rgba(139,92,246,.7))`,
                           display:'flex',alignItems:'center',justifyContent:'center',
                           fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15,color:'#fff'}}>
                           {rev.author_initial||rev.author_name[0]?.toUpperCase()}
@@ -1219,7 +1224,7 @@ export function HubPublicPage() {
                 <a href={social.google_review} target="_blank" rel="noopener noreferrer"
                   onClick={()=>trackEvent(r.id,'link_click')}
                   style={{display:'block',textAlign:'center',marginTop:12,
-                    fontFamily:"'DM Mono',monospace",fontSize:12.5,color:C.acc,textDecoration:'none'}}>
+                    fontFamily:"'DM Mono',monospace",fontSize:12.5,color:'var(--acc)',textDecoration:'none'}}>
                   Ver en Google →
                 </a>
               )}
@@ -1299,7 +1304,7 @@ export function HubPublicPage() {
             style={{display:'inline-flex',alignItems:'center',gap:5,padding:'7px 14px',borderRadius:100,
               background:C.sur,border:`1px solid ${C.bdr}`,textDecoration:'none'}}>
             <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:C.t3}}>Powered by</span>
-            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:C.acc}}>MenuLife</span>
+            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:'var(--acc)'}}>MenuLife</span>
           </a>
         </footer>
 
@@ -1315,6 +1320,6 @@ export function HubPublicPage() {
           <Lightbox items={gallery} startIndex={lightboxIndex} onClose={()=>setLightboxIndex(null)}/>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }

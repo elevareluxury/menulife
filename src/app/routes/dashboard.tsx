@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useRestaurantStore } from '@/store/restaurantStore'
@@ -15,6 +15,7 @@ export function DashboardPage() {
   const { restaurant, loading: restaurantLoading } = useRestaurant()
   const setBusinessType = useRestaurantStore(s => s.setBusinessType)
   const setPlan         = useRestaurantStore(s => s.setPlan)
+  const location        = useLocation()
   const [timedOut, setTimedOut] = useState(false)
 
   useEffect(() => {
@@ -37,8 +38,9 @@ export function DashboardPage() {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
-  // hub_free users skip onboarding — they go straight to the hub editor
-  if (!restaurantLoading && restaurant?.plan === 'hub_free' && restaurant.onboarding_completed === false) {
+  // hub_free users: always redirect to hub editor (only page available)
+  if (!restaurantLoading && restaurant?.plan === 'hub_free' &&
+      !location.pathname.startsWith('/dashboard/hub')) {
     return <Navigate to="/dashboard/hub" replace />
   }
   // Redirect new OS users to onboarding until they complete it

@@ -290,7 +290,7 @@ export function Sidebar({ restaurantSlug, restaurantName = '' }: SidebarProps) {
   const plan           = useRestaurantStore(s => s.plan)
   const [showUpgrade, setShowUpgrade] = useState(false)
 
-  const isHubFree  = plan === 'hub_free'
+  const isHubFree  = !plan || plan === 'hub_free'
   const navConfig  = businessType === 'retail' ? RETAIL_NAV : GASTRONOMY_NAV
 
   return (

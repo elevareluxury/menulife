@@ -265,7 +265,15 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
     google_review_count: '',
     google_review_url: '',
   })
+  const [accentColor, setAccentColor] = useState('#F4705A')
   const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    db.from('hub_config').select('accent_color').eq('restaurant_id', restaurantId).maybeSingle()
+      .then(({ data }: { data: { accent_color: string } | null }) => {
+        if (data?.accent_color) setAccentColor(data.accent_color)
+      })
+  }, [restaurantId])
 
   useEffect(() => {
     db.from('restaurants').select(
@@ -341,6 +349,11 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         return
       }
       console.log('Hub saved:', data)
+      await db.from('hub_config').upsert({
+        restaurant_id: restaurantId,
+        accent_color: accentColor,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'restaurant_id' })
       toast.success('Configuración guardada')
     } catch (err) {
       toast.error(`Error al guardar: ${(err as Error)?.message ?? err}`)
@@ -503,6 +516,50 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
             <p className="text-xs text-gray-500">Muestra la barra de navegación con secciones</p>
           </div>
           <Toggle value={form.hub_bottom_nav} onChange={v => setForm(p => ({ ...p, hub_bottom_nav: v }))} />
+        </div>
+      </Card>
+
+      {/* Accent color */}
+      <Card className="space-y-3">
+        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Color de acento</h3>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {[
+            { name: 'Coral',   value: '#F4705A' },
+            { name: 'Amber',   value: '#F59E0B' },
+            { name: 'Verde',   value: '#22C55E' },
+            { name: 'Azul',    value: '#3B82F6' },
+            { name: 'Violeta', value: '#8B5CF6' },
+            { name: 'Rosa',    value: '#EC4899' },
+            { name: 'Cyan',    value: '#06B6D4' },
+            { name: 'Blanco',  value: '#FFFFFF' },
+          ].map(c => (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => setAccentColor(c.value)}
+              title={c.name}
+              style={{
+                width: 32, height: 32, borderRadius: '50%', background: c.value,
+                border: accentColor === c.value ? '3px solid white' : '3px solid transparent',
+                cursor: 'pointer', outline: 'none', flexShrink: 0,
+                boxSizing: 'border-box',
+              }}
+            />
+          ))}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <input
+            type="color"
+            value={accentColor}
+            onChange={e => setAccentColor(e.target.value)}
+            style={{ width: 40, height: 40, border: 'none', borderRadius: 8, cursor: 'pointer', background: 'none', padding: 0 }}
+          />
+          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+            {accentColor}
+          </span>
+          <div style={{ marginLeft: 'auto', background: accentColor, borderRadius: 8, padding: '6px 14px', fontSize: 12, color: 'white', fontWeight: 600 }}>
+            Preview
+          </div>
         </div>
       </Card>
 
