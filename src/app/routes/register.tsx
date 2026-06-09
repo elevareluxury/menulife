@@ -116,10 +116,21 @@ export function RegisterPage() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name, business_name: businessName } },
+        options: {
+          data: { name, business_name: businessName },
+          emailRedirectTo: window.location.origin + '/auth/callback',
+        },
       })
       if (authError) throw authError
       if (!authData.user) throw new Error('No se pudo crear el usuario')
+
+      // If email confirmation is enabled, signUp returns user but no session.
+      // The INSERT needs an authenticated JWT — show a pending message instead.
+      if (!authData.session) {
+        toast.success('¡Cuenta creada! Revisá tu email para confirmar.')
+        navigate('/login')
+        return
+      }
 
       const { error: restError } = await db
         .from('restaurants')

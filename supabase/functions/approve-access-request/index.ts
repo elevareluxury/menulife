@@ -18,17 +18,22 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 const DEFAULT_FEATURES: Record<string, Record<string, boolean>> = {
-  menu: {
+  hub_free: {
     delivery: false, takeaway: false, reservations: false,
     advanced_analytics: false, pdf_import: false,
     multi_language: true, custom_branding: false,
   },
-  pro: {
+  os_gastronomy: {
     delivery: true, takeaway: true, reservations: true,
     advanced_analytics: true, pdf_import: true,
     multi_language: true, custom_branding: true,
   },
-  total: {
+  os_retail: {
+    delivery: true, takeaway: true, reservations: false,
+    advanced_analytics: true, pdf_import: false,
+    multi_language: true, custom_branding: true,
+  },
+  os_full: {
     delivery: true, takeaway: true, reservations: true,
     advanced_analytics: true, pdf_import: true,
     multi_language: true, custom_branding: true,
@@ -80,8 +85,9 @@ Deno.serve(async (req: Request) => {
     }
 
     const { requestId } = body
-    const plan = (['menu', 'pro', 'total'].includes(body.plan ?? '')) ? body.plan! : 'menu'
-    const features = body.features ?? DEFAULT_FEATURES[plan] ?? DEFAULT_FEATURES['menu']
+    const VALID_PLANS = ['hub_free', 'os_gastronomy', 'os_retail', 'os_full']
+    const plan = VALID_PLANS.includes(body.plan ?? '') ? body.plan! : 'os_gastronomy'
+    const features = body.features ?? DEFAULT_FEATURES[plan] ?? DEFAULT_FEATURES['os_gastronomy']
 
     // Get pending request
     const { data: request, error: reqError } = await supabaseAdmin

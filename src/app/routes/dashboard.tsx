@@ -46,6 +46,50 @@ export function DashboardPage() {
     return <Navigate to="/onboarding" replace />
   }
 
+  // Auth succeeded but no restaurant found — INSERT probably failed during registration
+  if (!restaurantLoading && isAuthenticated && !restaurant) {
+    return (
+      <div style={{
+        minHeight: '100vh', background: '#0F1115',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '24px',
+      }}>
+        <div style={{
+          width: '100%', maxWidth: '420px',
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '20px', padding: '36px 32px', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: '36px', marginBottom: '16px' }}>⚠️</div>
+          <h2 style={{ fontFamily: 'var(--font-jakarta)', fontSize: '17px', fontWeight: 700, color: '#F5F7FA', margin: '0 0 10px' }}>
+            Hubo un problema al crear tu perfil
+          </h2>
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.45)', margin: '0 0 24px', lineHeight: 1.6 }}>
+            Tu cuenta fue creada pero no pudimos configurar tu negocio.
+            Intentá de nuevo o contactanos.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              width: '100%', padding: '12px', borderRadius: '50px', border: 'none',
+              background: '#F4705A', color: '#fff', fontSize: '14px', fontWeight: 600,
+              cursor: 'pointer', fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
+            }}
+          >
+            Reintentar
+          </button>
+          <a
+            href="https://wa.me/543416962827"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}
+          >
+            Contactar soporte →
+          </a>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-surface-1 text-ink-1 dashboard-body">
       <ImpersonationBanner />
