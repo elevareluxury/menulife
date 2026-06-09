@@ -1356,3 +1356,7 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   color: var(--menu-text-primary);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Hide scrollbar — cross-browser */
+.scrollbar-hide { scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }

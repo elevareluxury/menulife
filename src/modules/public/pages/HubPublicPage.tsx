@@ -28,7 +28,7 @@ interface HubReview {
 }
 interface HubLink {
   id: string; type: string; label: string; url: string
-  icon: string | null; is_active: boolean; sort_order: number; click_count: number
+  icon: string | null; image_url: string | null; is_active: boolean; sort_order: number; click_count: number
 }
 interface SocialLinks {
   instagram?: string | null; facebook?: string | null; tiktok?: string | null
@@ -221,6 +221,40 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
 const NAV_IDS = ['inicio','menu-ctas','novedades','locales','contacto'] as const
 type NavId = typeof NAV_IDS[number]
 
+function NavIcon({id,active}:{id:string;active:boolean}) {
+  const color = active ? C.acc : C.t3
+  const s = {width:20,height:20,display:'block'} as React.CSSProperties
+  if (id==='inicio') return (
+    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/>
+      <path d="M9 21V12h6v9"/>
+    </svg>
+  )
+  if (id==='menu-ctas') return (
+    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 3v5a3 3 0 006 0V3"/>
+      <line x1="11" y1="8" x2="11" y2="21"/>
+      <line x1="17" y1="3" x2="17" y2="21"/>
+    </svg>
+  )
+  if (id==='locales') return (
+    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 14 6 14s6-9.5 6-14c0-3.31-2.69-6-6-6z"/>
+      <circle cx="12" cy="8" r="2.5"/>
+    </svg>
+  )
+  if (id==='novedades') return (
+    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  )
+  return (
+    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/>
+    </svg>
+  )
+}
+
 function BottomNav({isRetail}:{isRetail:boolean}) {
   const [active,setActive] = useState<NavId>('inicio')
 
@@ -242,37 +276,39 @@ function BottomNav({isRetail}:{isRetail:boolean}) {
   const scroll = (id:string) => document.getElementById(id)?.scrollIntoView({behavior:'smooth'})
 
   const tabs = [
-    {id:'inicio'    as NavId, icon:'🏠', label:'Inicio',              action:()=>scroll('inicio')},
-    {id:'menu-ctas' as NavId, icon:isRetail?'🛍':'🍽', label:isRetail?'Catálogo':'Menú', action:()=>scroll('menu-ctas')},
-    {id:'locales'   as NavId, icon:'📍', label:'Locales',             action:()=>scroll('locales')},
-    {id:'novedades' as NavId, icon:'⭐', label:'Novedades',           action:()=>scroll('novedades')},
-    {id:'contacto'  as NavId, icon:'💬', label:'Contacto',            action:()=>scroll('contacto')},
+    {id:'inicio'    as NavId, label:'Inicio',                        action:()=>scroll('inicio')},
+    {id:'menu-ctas' as NavId, label:isRetail?'Catálogo':'Menú',      action:()=>scroll('menu-ctas')},
+    {id:'locales'   as NavId, label:'Locales',                       action:()=>scroll('locales')},
+    {id:'novedades' as NavId, label:'Novedades',                     action:()=>scroll('novedades')},
+    {id:'contacto'  as NavId, label:'Contacto',                      action:()=>scroll('contacto')},
   ]
 
   return (
     <nav style={{
-      position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',
-      width:'100%',maxWidth:430,
-      height:'calc(64px + env(safe-area-inset-bottom, 0px))',
-      paddingBottom:'env(safe-area-inset-bottom, 0px)',
-      background:'rgba(8,10,18,0.88)',
-      backdropFilter:'blur(24px) saturate(180%)',
-      WebkitBackdropFilter:'blur(24px) saturate(180%)',
-      borderTop:`1px solid ${C.bdr}`,
+      position:'fixed',
+      bottom:16,
+      left:'50%',
+      transform:'translateX(-50%)',
+      width:'calc(100% - 32px)',
+      maxWidth:398,
+      borderRadius:20,
+      padding:'8px 4px',
+      paddingBottom:'calc(8px + env(safe-area-inset-bottom, 0px))',
+      background:'rgba(6,8,15,0.82)',
+      backdropFilter:'blur(24px) saturate(200%)',
+      WebkitBackdropFilter:'blur(24px) saturate(200%)',
+      border:`1px solid rgba(255,255,255,0.10)`,
+      boxShadow:'0 8px 32px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.06) inset',
       display:'grid',gridTemplateColumns:'repeat(5,1fr)',
       alignItems:'center',zIndex:1000,
     }}>
       {tabs.map(tab=>(
         <button key={tab.id} className="hub-tab" onClick={tab.action} style={{
           display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-          gap:3,padding:'6px 4px',background:'transparent',border:'none',cursor:'pointer',
-          position:'relative',height:'100%',
+          gap:4,padding:'6px 4px',background:'transparent',border:'none',cursor:'pointer',
         }}>
-          {active===tab.id && (
-            <span style={{position:'absolute',top:0,width:20,height:3,borderRadius:2,background:C.acc}}/>
-          )}
-          <span style={{fontSize:17,lineHeight:1}}>{tab.icon}</span>
-          <span style={{fontFamily:"'DM Mono',monospace",fontSize:9.5,fontWeight:500,
+          <NavIcon id={tab.id} active={active===tab.id} />
+          <span style={{fontFamily:"'DM Mono',monospace",fontSize:9,fontWeight:500,
             color:active===tab.id?C.acc:C.t3,transition:'color .15s'}}>
             {tab.label}
           </span>
@@ -449,7 +485,7 @@ export function HubPublicPage() {
 
       <div style={{
         background:C.bg, fontFamily:"'DM Sans',sans-serif",
-        maxWidth:430, margin:'0 auto', paddingBottom:88, minHeight:'100svh', position:'relative',
+        maxWidth:430, margin:'0 auto', paddingBottom:96, minHeight:'100svh', position:'relative',
       }}>
 
         {/* ══════════════════════════════════════════════════════
@@ -627,21 +663,27 @@ export function HubPublicPage() {
                     key={link.id}
                     className="hub-link-card"
                     initial={{opacity:0,y:16}}
-                    whileInView={{opacity:1,y:0}}
-                    viewport={{once:true,amount:0.1}}
+                    animate={{opacity:1,y:0}}
                     transition={{duration:0.5,delay:i*0.07,ease:[0.22,1,0.36,1]}}
                     onClick={()=>handleLinkClick(link)}
                     style={{
                       width:'100%',display:'flex',alignItems:'center',gap:14,
-                      padding:'16px 18px',borderRadius:16,cursor:'pointer',
+                      padding:'14px 18px',borderRadius:16,cursor:'pointer',
                       background:C.card,border:`1px solid rgba(255,255,255,0.08)`,
                       textAlign:'left',
                     }}
                   >
-                    <span style={{fontSize:22,flexShrink:0,lineHeight:1}}>{link.icon??'🔗'}</span>
+                    {link.image_url ? (
+                      <div style={{width:42,height:42,borderRadius:'50%',overflow:'hidden',
+                        flexShrink:0,border:`1px solid ${C.bdr}`}}>
+                        <img src={link.image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                      </div>
+                    ) : (
+                      <span style={{fontSize:22,flexShrink:0,lineHeight:1}}>{link.icon??'🔗'}</span>
+                    )}
                     <span style={{
                       fontFamily:"'DM Sans',sans-serif",fontSize:15,fontWeight:700,
-                      color:C.t1,flex:1,
+                      color:C.t1,flex:1,textAlign:'left',
                     }}>
                       {link.label}
                     </span>

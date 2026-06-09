@@ -59,7 +59,7 @@ interface HubReview {
 interface HubLink {
   id: string; restaurant_id: string
   type: string; label: string; url: string
-  icon: string | null; is_active: boolean
+  icon: string | null; image_url: string | null; is_active: boolean
   sort_order: number; click_count: number
 }
 
@@ -575,7 +575,11 @@ function SortableLinkItem({
       >
         <GripVertical className="w-4 h-4" />
       </div>
-      <span className="text-lg flex-shrink-0 w-7 text-center">{link.icon ?? lt?.icon ?? '🔗'}</span>
+      {link.image_url ? (
+        <img src={link.image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+      ) : (
+        <span className="text-lg flex-shrink-0 w-7 text-center">{link.icon ?? lt?.icon ?? '🔗'}</span>
+      )}
       <div className="flex-1 min-w-0">
         <p className="text-sm text-white font-medium truncate">{link.label}</p>
         <p className="text-xs text-gray-500 truncate">{link.url}</p>
@@ -591,15 +595,34 @@ function SortableLinkItem({
   )
 }
 
-interface LinkFormState { type: string; label: string; url: string }
+interface LinkFormState { type: string; label: string; url: string; image_url: string }
+
+function getLabelPlaceholder(type: string): string {
+  const map: Record<string, string> = {
+    whatsapp: 'Ej. Contactanos por WhatsApp',
+    instagram: 'Ej. Seguinos en Instagram',
+    tiktok: 'Ej. Mirá nuestros videos',
+    facebook: 'Ej. Página de Facebook',
+    youtube: 'Ej. Canal de YouTube',
+    linkedin: 'Ej. Perfil de LinkedIn',
+    maps: 'Ej. Cómo llegar',
+    website: 'Ej. Nuestro sitio web',
+    email: 'Ej. Escribinos por email',
+    phone: 'Ej. Llamanos',
+    custom: 'Ej. Más información',
+  }
+  return map[type] ?? 'Ej. Descripción del link'
+}
 
 function AddLinkModal({ restaurantId, count, onClose, onSaved }: {
   restaurantId: string; count: number
   onClose: () => void; onSaved: () => void
 }) {
   const [step, setStep] = useState<'type' | 'form'>('type')
-  const [form, setForm] = useState<LinkFormState>({ type: '', label: '', url: '' })
+  const [form, setForm] = useState<LinkFormState>({ type: '', label: '', url: '', image_url: '' })
   const [saving, setSaving] = useState(false)
+  const { uploadImage, uploading: uploadingImg } = useImageUpload()
+  const imgInputRef = useRef<HTMLInputElement>(null)
 
   const selectedType = LINK_TYPES.find(t => t.type === form.type)
 
@@ -616,6 +639,7 @@ function AddLinkModal({ restaurantId, count, onClose, onSaved }: {
         label: form.label.trim(),
         url: form.url.trim(),
         icon: selectedType?.icon ?? '🔗',
+        image_url: form.image_url || null,
         is_active: true,
         sort_order: count,
         click_count: 0,
@@ -660,7 +684,7 @@ function AddLinkModal({ restaurantId, count, onClose, onSaved }: {
                   key={lt.type}
                   type="button"
                   onClick={() => {
-                    setForm(p => ({ ...p, type: lt.type, label: lt.label }))
+                    setForm(p => ({ ...p, type: lt.type, label: '' }))
                     setStep('form')
                   }}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all hover:scale-105"
@@ -676,9 +700,44 @@ function AddLinkModal({ restaurantId, count, onClose, onSaved }: {
             </div>
           ) : (
             <div className="space-y-4">
-              <Field label="Label *" value={form.label}
+              {/* Optional photo */}
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide mb-1.5 block">Foto del link (opcional)</label>
+                <div className="flex items-center gap-3">
+                  {form.image_url ? (
+                    <div className="relative w-12 h-12 flex-shrink-0">
+                      <img src={form.image_url} alt="" className="w-12 h-12 rounded-full object-cover" />
+                      <button type="button" onClick={() => setForm(p => ({ ...p, image_url: '' }))}
+                        className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                        style={{ background: '#EF4444' }}>
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => imgInputRef.current?.click()} disabled={uploadingImg}
+                      className="w-12 h-12 rounded-full border-2 border-dashed border-gray-700 flex items-center justify-center flex-shrink-0 hover:border-amber-500/50 transition-all">
+                      {uploadingImg ? (
+                        <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: ACC, borderTopColor: 'transparent' }} />
+                      ) : (
+                        <ImageIcon className="w-5 h-5 text-gray-600" />
+                      )}
+                    </button>
+                  )}
+                  <p className="text-xs text-gray-600">Foto redonda que reemplaza el ícono del link</p>
+                </div>
+                <input ref={imgInputRef} type="file" accept="image/*" className="hidden"
+                  onChange={async e => {
+                    const f = e.target.files?.[0]
+                    if (!f) return
+                    const r = await uploadImage(f, 'hub-assets')
+                    if (r.success) setForm(p => ({ ...p, image_url: r.url }))
+                    e.target.value = ''
+                  }} />
+              </div>
+
+              <Field label="Nombre del link *" value={form.label}
                 onChange={v => setForm(p => ({ ...p, label: v }))}
-                placeholder={`Ej. Seguinos en ${selectedType?.label}`} />
+                placeholder={getLabelPlaceholder(form.type)} />
               <div>
                 <label className="text-xs text-gray-400 uppercase tracking-wide mb-1.5 block">URL *</label>
                 <input
@@ -1646,7 +1705,7 @@ export default function HubPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-xl p-1 mb-6 gap-1 overflow-x-auto scrollbar-none"
+      <div className="flex rounded-xl p-1 mb-6 gap-1 overflow-x-auto scrollbar-hide"
         style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
         {TABS.map(tab => (
           <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
