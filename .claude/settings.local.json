@@ -52,7 +52,8 @@
       "Bash(dir E:\\\\menulife\\\\supabase /s /b)",
       "Bash(grep -v \"//.*useEffect\")",
       "Bash(grep *)",
-      "Bash(dir E:\\\\menulife\\\\.env*)"
+      "Bash(dir E:\\\\menulife\\\\.env*)",
+      "Bash(echo \"Exit code: $?\")"
     ]
   }
 }
