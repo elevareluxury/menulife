@@ -238,105 +238,144 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
 
 /* ── Bottom navigation ──────────────────────────────────────────────────────── */
 
-const NAV_IDS = ['inicio','menu-ctas','novedades','locales','contacto'] as const
-type NavId = typeof NAV_IDS[number]
+function BottomNav({
+  isRetail, plan, hubConfig, hasFeatured,
+}: {
+  isRetail: boolean
+  plan: string | null
+  hubConfig: Record<string,any>
+  hasFeatured: boolean
+}) {
+  const [activeSection, setActiveSection] = useState('inicio')
 
-function NavIcon({id,active}:{id:string;active:boolean}) {
-  const color = active ? '#FFFFFF' : C.t3
-  const s = {width:20,height:20,display:'block'} as React.CSSProperties
-  if (id==='inicio') return (
-    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/>
-      <path d="M9 21V12h6v9"/>
-    </svg>
-  )
-  if (id==='menu-ctas') return (
-    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 3v5a3 3 0 006 0V3"/>
-      <line x1="11" y1="8" x2="11" y2="21"/>
-      <line x1="17" y1="3" x2="17" y2="21"/>
-    </svg>
-  )
-  if (id==='locales') return (
-    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 14 6 14s6-9.5 6-14c0-3.31-2.69-6-6-6z"/>
-      <circle cx="12" cy="8" r="2.5"/>
-    </svg>
-  )
-  if (id==='novedades') return (
-    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>
-  )
-  return (
-    <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/>
-    </svg>
-  )
-}
-
-function BottomNav({isRetail}:{isRetail:boolean}) {
-  const [active,setActive] = useState<NavId>('inicio')
-
-  useEffect(()=>{
+  useEffect(() => {
+    const ids = ['inicio','menu-ctas','novedades','locales','contacto']
     const obs: IntersectionObserver[] = []
-    NAV_IDS.forEach(id=>{
+    ids.forEach(id => {
       const el = document.getElementById(id)
       if (!el) return
       const o = new IntersectionObserver(
-        ([e])=>{ if (e.isIntersecting) setActive(id) },
-        {threshold:0.25,rootMargin:'-20% 0px -60% 0px'}
+        ([e]) => { if (e.isIntersecting) setActiveSection(id) },
+        { threshold: 0.25, rootMargin: '-20% 0px -60% 0px' }
       )
       o.observe(el)
       obs.push(o)
     })
-    return ()=>obs.forEach(o=>o.disconnect())
-  },[])
+    return () => obs.forEach(o => o.disconnect())
+  }, [])
 
-  const scroll = (id:string) => document.getElementById(id)?.scrollIntoView({behavior:'smooth'})
+  const scrollTo = (id: string) =>
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
-  const tabs = [
-    {id:'inicio'    as NavId, label:'Inicio',                   action:()=>scroll('inicio')},
-    {id:'menu-ctas' as NavId, label:isRetail?'Catálogo':'Menú', action:()=>scroll('menu-ctas')},
-    {id:'locales'   as NavId, label:'Locales',                  action:()=>scroll('locales')},
-    {id:'novedades' as NavId, label:'Novedades',                action:()=>scroll('novedades')},
-    {id:'contacto'  as NavId, label:'Contacto',                 action:()=>scroll('contacto')},
-  ]
+  // Build dynamic nav items
+  const items: { id: string; label: string; icon: React.ReactNode; section: string }[] = []
+
+  // Menú/Catálogo — solo OS
+  if (plan && plan !== 'hub_free') {
+    items.push({
+      id: isRetail ? 'catalog' : 'menu',
+      label: isRetail ? 'Catálogo' : 'Menú',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20">
+          <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+        </svg>
+      ),
+      section: 'menu-ctas',
+    })
+  }
+
+  // Inicio — siempre (se inserta en el centro)
+  items.splice(Math.floor(items.length / 2), 0, {
+    id: 'inicio',
+    label: 'Inicio',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+    ),
+    section: 'inicio',
+  })
+
+  // Locales
+  if (hubConfig.show_locations !== false) {
+    items.push({
+      id: 'locales',
+      label: 'Locales',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20">
+          <path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 14 6 14s6-9.5 6-14c0-3.31-2.69-6-6-6z"/>
+          <circle cx="12" cy="8" r="2.5"/>
+        </svg>
+      ),
+      section: 'locales',
+    })
+  }
+
+  // Novedades — si hay featured product activo
+  if (hasFeatured) {
+    items.push({
+      id: 'novedades',
+      label: 'Novedades',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      ),
+      section: 'novedades',
+    })
+  }
+
+  const soloInicio = items.length === 1
 
   return (
-    <div className="hub-bottom-nav hub-fixed" style={{
-      position:'fixed',
-      bottom:16,
-      left:'50%',
-      transform:'translateX(-50%)',
-      width:'calc(100% - 32px)',
-      maxWidth:398,
-      height:64,
-      display:'flex',
-      alignItems:'center',
-      justifyContent:'space-around',
-      background:'rgba(255,255,255,0.05)',
-      backdropFilter:'blur(20px)',
-      WebkitBackdropFilter:'blur(20px)',
-      border:'1px solid rgba(255,255,255,0.08)',
-      borderRadius:20,
-      padding:'0 8px',
-      boxShadow:'0 8px 32px rgba(0,0,0,0.4)',
-      zIndex:1000,
+    <div style={{
+      position: 'fixed',
+      bottom: 16,
+      left: 16,
+      right: 16,
+      height: 60,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: soloInicio ? 'center' : 'space-around',
+      background: 'rgba(255,255,255,0.05)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 20,
+      padding: '0 8px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+      zIndex: 1000,
+      boxSizing: 'border-box',
     }}>
-      {tabs.map(tab=>(
-        <button key={tab.id} className="hub-tab" onClick={tab.action} style={{
-          display:'flex',flexDirection:'column',alignItems:'center',
-          gap:2,padding:'8px 12px',border:'none',background:'none',cursor:'pointer',
-          flexShrink:0,width:'20%',
-        }}>
-          <NavIcon id={tab.id} active={active===tab.id} />
+      {items.map(item => (
+        <button
+          key={item.id}
+          className="hub-tab"
+          onClick={() => scrollTo(item.section)}
+          style={{
+            display: 'flex',
+            flexDirection: soloInicio ? 'row' : 'column',
+            alignItems: 'center',
+            gap: soloInicio ? 8 : 2,
+            padding: '8px 12px',
+            border: 'none',
+            background: 'none',
+            cursor: 'pointer',
+            color: activeSection === item.section ? '#FFFFFF' : 'rgba(255,255,255,0.35)',
+            flexShrink: 0,
+            transition: 'color 0.15s',
+          }}
+        >
+          {item.icon}
           <span style={{
-            fontSize:10,fontFamily:"'DM Sans',sans-serif",fontWeight:500,
-            color:active===tab.id?'#FFFFFF':'rgba(255,255,255,0.4)',
-            transition:'color .15s',whiteSpace:'nowrap',
+            fontSize: soloInicio ? 13 : 10,
+            fontFamily: "'DM Sans',sans-serif",
+            fontWeight: 500,
+            whiteSpace: 'nowrap',
           }}>
-            {tab.label}
+            {item.label}
           </span>
         </button>
       ))}
@@ -499,6 +538,7 @@ export function HubPublicPage() {
   const { slug } = useParams<{slug:string}>()
   const navigate = useNavigate()
 
+  const [hubConfig, setHubConfig]             = useState<Record<string,any>>({})
   const [restaurant, setRestaurant]           = useState<Restaurant|null>(null)
   const [story, setStory]                     = useState<HubStory|null>(null)
   const [gallery, setGallery]                 = useState<HubGalleryItem[]>([])
@@ -561,6 +601,9 @@ export function HubPublicPage() {
         setFeaturedProduct(fpRes.data??null)
         setReviews(revRes.data??[])
         setLinks(linksRes.data??[])
+
+        const { data: hubCfg } = await db.from('hub_config').select('*').eq('restaurant_id', id).maybeSingle()
+        if (hubCfg) setHubConfig(hubCfg)
 
       } catch(e) {
         console.error(e); setNotFound(true)
@@ -644,6 +687,17 @@ export function HubPublicPage() {
     background:C.sur, border:`1px solid ${C.bdr}`, borderRadius:16,
     backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)',
   }
+
+  const displayTitle = hubConfig.hub_title || r.name
+  const FONT_MAP: Record<string,{family:string;weight:number}> = {
+    syne:          {family:"'Syne',sans-serif",         weight:800},
+    playfair:      {family:"'Playfair Display',serif",  weight:700},
+    'space-grotesk':{family:"'Space Grotesk',sans-serif",weight:700},
+    bebas:         {family:"'Bebas Neue',sans-serif",   weight:400},
+    'dm-sans':     {family:"'DM Sans',sans-serif",      weight:700},
+    inter:         {family:"'Inter',sans-serif",        weight:700},
+  }
+  const titleFont = FONT_MAP[hubConfig.title_font || 'syne'] || FONT_MAP.syne
 
   // Parallax calculations
   const coverOpacity = Math.max(0, 1 - scrollY / 300)
@@ -780,6 +834,7 @@ export function HubPublicPage() {
             </motion.div>
 
             {/* Open/closed pill */}
+            {hubConfig.show_open_status !== false && (
             <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.3,duration:.5}}
               style={{display:'inline-flex',alignItems:'center',gap:7,padding:'5px 14px',borderRadius:100,
                 background:open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)',
@@ -790,13 +845,14 @@ export function HubPublicPage() {
                 {open?'Abierto ahora':'Cerrado'}
               </span>
             </motion.div>
+            )}
 
             {/* Business name */}
             <motion.h1 initial={{opacity:0,y:20}} animate={{opacity:1,y:0}}
               transition={{delay:.42,duration:.7,ease:[.22,1,.36,1]}}
-              style={{fontFamily:"'Syne',sans-serif",fontSize:34,fontWeight:800,
+              style={{fontFamily:titleFont.family,fontSize:34,fontWeight:titleFont.weight,
                 letterSpacing:-1,color:C.t1,margin:0,lineHeight:1.1}}>
-              {r.name}
+              {displayTitle}
             </motion.h1>
 
             {/* Category tags / hub_category */}
@@ -815,14 +871,6 @@ export function HubPublicPage() {
             </motion.div>
           </div>
 
-          {/* Scroll hint arrow */}
-          <motion.div
-            animate={{y:[0,8,0]}}
-            transition={{repeat:Infinity,duration:2,ease:'easeInOut'}}
-            style={{position:'absolute',bottom:32,color:'rgba(255,255,255,0.3)',fontSize:20,zIndex:2}}
-          >
-            ↓
-          </motion.div>
         </section>
 
         {/* ── Solid background content wrapper ── */}
@@ -1122,6 +1170,7 @@ export function HubPublicPage() {
         {/* ══════════════════════════════════════════════════════
             8. MENU / CATALOG BANNER
         ══════════════════════════════════════════════════════ */}
+        {hubConfig.show_catalog_banner !== false && (
         <section style={{padding:'28px 20px 0'}}>
           <Reveal>
             <a href={menuHref} className="hub-btn"
@@ -1144,12 +1193,13 @@ export function HubPublicPage() {
             </a>
           </Reveal>
         </section>
+        )}
 
 
         {/* ══════════════════════════════════════════════════════
             9. HORARIOS (compacto con tooltip)
         ══════════════════════════════════════════════════════ */}
-        {hasScheduleData(schedule) && (
+        {hubConfig.show_schedule !== false && hasScheduleData(schedule) && (
           <section style={{padding:'24px 20px 0'}}>
             <Reveal>
               <div style={{...cardBase,overflow:'visible'}}>
@@ -1163,6 +1213,7 @@ export function HubPublicPage() {
         {/* ══════════════════════════════════════════════════════
             10. LOCATIONS
         ══════════════════════════════════════════════════════ */}
+        {hubConfig.show_locations !== false && (
         <section id="locales" style={{padding:'32px 20px 0'}}>
           <Reveal>
             <SL>Locales</SL>
@@ -1217,6 +1268,7 @@ export function HubPublicPage() {
             </div>
           </Reveal>
         </section>
+        )}
 
 
         {/* ══════════════════════════════════════════════════════
@@ -1348,7 +1400,12 @@ export function HubPublicPage() {
       </div>
 
       {/* BOTTOM NAV */}
-      <BottomNav isRetail={isRetail}/>
+      <BottomNav
+        isRetail={isRetail}
+        plan={ra.plan ?? null}
+        hubConfig={hubConfig}
+        hasFeatured={!!featuredProduct}
+      />
 
       {/* GALLERY LIGHTBOX */}
       <AnimatePresence>

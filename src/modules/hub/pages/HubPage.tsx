@@ -266,6 +266,16 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
     google_review_url: '',
   })
   const [loaded, setLoaded] = useState(false)
+  const [hubConfig, setHubConfig] = useState<Record<string,any>>({
+    show_open_status: true,
+    show_catalog_banner: true,
+    show_locations: true,
+    show_contact: true,
+    show_schedule: true,
+    hub_title: '',
+    title_font: 'syne',
+  })
+  const [scheduleForm, setScheduleForm] = useState<Record<string,any>>({})
 
   useEffect(() => {
     db.from('restaurants').select(
@@ -290,6 +300,25 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           })
         }
         setLoaded(true)
+      })
+  }, [restaurantId])
+
+  useEffect(() => {
+    db.from('hub_config').select('*').eq('restaurant_id', restaurantId).maybeSingle()
+      .then(({ data }: { data: Record<string,any> | null }) => {
+        if (data) setHubConfig({
+          show_open_status:    data.show_open_status    ?? true,
+          show_catalog_banner: data.show_catalog_banner ?? true,
+          show_locations:      data.show_locations      ?? true,
+          show_contact:        data.show_contact        ?? true,
+          show_schedule:       data.show_schedule       ?? true,
+          hub_title:           data.hub_title           || '',
+          title_font:          data.title_font          || 'syne',
+        })
+      })
+    db.from('restaurants').select('schedule,name').eq('id', restaurantId).maybeSingle()
+      .then(({ data }: { data: Record<string,any> | null }) => {
+        if (data?.schedule) setScheduleForm(data.schedule)
       })
   }, [restaurantId])
 
@@ -342,6 +371,19 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
       }
       console.log('Hub saved:', data)
       toast.success('Configuración guardada')
+      await db.from('hub_config').upsert({
+        restaurant_id: restaurantId,
+        accent_color: '#FFFFFF',
+        show_open_status:    hubConfig.show_open_status    ?? true,
+        show_catalog_banner: hubConfig.show_catalog_banner ?? true,
+        show_locations:      hubConfig.show_locations      ?? true,
+        show_contact:        hubConfig.show_contact        ?? true,
+        show_schedule:       hubConfig.show_schedule       ?? true,
+        hub_title:           hubConfig.hub_title           || null,
+        title_font:          hubConfig.title_font          || 'syne',
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'restaurant_id' })
+      await db.from('restaurants').update({ schedule: scheduleForm }).eq('id', restaurantId)
     } catch (err) {
       toast.error(`Error al guardar: ${(err as Error)?.message ?? err}`)
       console.error(err)
@@ -503,6 +545,139 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
             <p className="text-xs text-gray-500">Muestra la barra de navegación con secciones</p>
           </div>
           <Toggle value={form.hub_bottom_nav} onChange={v => setForm(p => ({ ...p, hub_bottom_nav: v }))} />
+        </div>
+      </Card>
+
+      {/* Nombre y tipografía */}
+      <Card className="space-y-4">
+        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Nombre y Tipografía</h3>
+        <div>
+          <label className="text-xs text-gray-400 uppercase tracking-wide mb-1.5 block">Título personalizado</label>
+          <input
+            className={inputCls}
+            style={{ textAlign: 'center' }}
+            value={hubConfig.hub_title || ''}
+            onChange={e => setHubConfig({ ...hubConfig, hub_title: e.target.value })}
+            placeholder="Por defecto usa el nombre del negocio"
+          />
+        </div>
+        <div className="space-y-2">
+          {[
+            { id: 'syne',          family: 'Syne',            weight: 800, preview: 'Moderno'   },
+            { id: 'playfair',      family: 'Playfair Display', weight: 700, preview: 'Elegante'  },
+            { id: 'space-grotesk', family: 'Space Grotesk',   weight: 700, preview: 'Técnico'   },
+            { id: 'bebas',         family: 'Bebas Neue',      weight: 400, preview: 'Impacto'   },
+            { id: 'dm-sans',       family: 'DM Sans',         weight: 700, preview: 'Limpio'    },
+            { id: 'inter',         family: 'Inter',           weight: 700, preview: 'Neutral'   },
+          ].map(font => (
+            <button
+              key={font.id}
+              type="button"
+              onClick={() => setHubConfig({ ...hubConfig, title_font: font.id })}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                width: '100%', padding: '12px 14px', borderRadius: 10,
+                border: hubConfig.title_font === font.id
+                  ? '1.5px solid rgba(255,255,255,0.7)'
+                  : '1px solid rgba(255,255,255,0.08)',
+                background: hubConfig.title_font === font.id
+                  ? 'rgba(255,255,255,0.08)'
+                  : 'rgba(255,255,255,0.02)',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ fontFamily: font.family, fontWeight: font.weight, fontSize: 20, color: 'white' }}>
+                {hubConfig.hub_title || 'Tu negocio'}
+              </span>
+              <span style={{
+                fontSize: 11, color: hubConfig.title_font === font.id ? 'white' : 'rgba(255,255,255,0.3)',
+                fontFamily: 'DM Sans',
+              }}>
+                {font.preview}
+              </span>
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* Visibilidad */}
+      <Card className="space-y-3">
+        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Visibilidad de secciones</h3>
+        {[
+          { key: 'show_open_status',    label: 'Badge "Abierto ahora"',    desc: 'Estado en tiempo real' },
+          { key: 'show_catalog_banner', label: 'Banner menú / catálogo',   desc: '"Ver el menú completo"' },
+          { key: 'show_locations',      label: 'Sección Locales',          desc: 'Dirección, Maps y teléfono' },
+          { key: 'show_schedule',       label: 'Horarios',                 desc: 'Horarios por día' },
+        ].map(({ key, label, desc }) => (
+          <div key={key} className="flex items-center justify-between py-1">
+            <div>
+              <p className="text-sm text-white font-medium">{label}</p>
+              <p className="text-xs text-gray-500">{desc}</p>
+            </div>
+            <Toggle
+              value={hubConfig[key] !== false}
+              onChange={v => setHubConfig({ ...hubConfig, [key]: v })}
+            />
+          </div>
+        ))}
+      </Card>
+
+      {/* Horarios */}
+      <Card className="space-y-3">
+        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Horarios</h3>
+        <div className="space-y-0">
+          {[
+            { key: 'monday',    label: 'Lunes'     },
+            { key: 'tuesday',   label: 'Martes'    },
+            { key: 'wednesday', label: 'Miércoles' },
+            { key: 'thursday',  label: 'Jueves'    },
+            { key: 'friday',    label: 'Viernes'   },
+            { key: 'saturday',  label: 'Sábado'    },
+            { key: 'sunday',    label: 'Domingo'   },
+          ].map(day => {
+            const s = scheduleForm[day.key] || { open: '09:00', close: '23:00', closed: false }
+            return (
+              <div key={day.key} style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}>
+                <span style={{ width: 82, fontSize: 13, color: 'white', fontFamily: 'DM Sans', flexShrink: 0 }}>
+                  {day.label}
+                </span>
+                <Toggle
+                  value={!s.closed}
+                  onChange={v => setScheduleForm((p: Record<string,any>) => ({ ...p, [day.key]: { ...s, closed: !v } }))}
+                />
+                {!s.closed ? (
+                  <>
+                    <input
+                      type="time"
+                      value={s.open || '09:00'}
+                      onChange={e => setScheduleForm((p: Record<string,any>) => ({ ...p, [day.key]: { ...s, open: e.target.value } }))}
+                      style={{
+                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: 8, padding: '5px 7px', color: 'white', fontSize: 12,
+                        fontFamily: 'DM Mono, monospace', width: 82, flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>—</span>
+                    <input
+                      type="time"
+                      value={s.close || '23:00'}
+                      onChange={e => setScheduleForm((p: Record<string,any>) => ({ ...p, [day.key]: { ...s, close: e.target.value } }))}
+                      style={{
+                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: 8, padding: '5px 7px', color: 'white', fontSize: 12,
+                        fontFamily: 'DM Mono, monospace', width: 82, flexShrink: 0,
+                      }}
+                    />
+                  </>
+                ) : (
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans' }}>Cerrado</span>
+                )}
+              </div>
+            )
+          })}
         </div>
       </Card>
 
