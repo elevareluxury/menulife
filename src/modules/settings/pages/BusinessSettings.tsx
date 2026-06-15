@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone'
 import {
   ChevronLeft, Store, MapPin, Clock, Share2, Palette,
   Globe, MessageCircle, X, Upload, Image as ImageIcon, Trash2, Truck, Plus, CalendarDays, Plug, Star,
-  Users, History, CreditCard, UtensilsCrossed, ShoppingBag, Warehouse,
+  Users, History, CreditCard, UtensilsCrossed, ShoppingBag, Warehouse, Languages,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -12,8 +12,12 @@ import { useAuthStore } from '@/store/authStore'
 import { useRestaurantStore } from '@/store/restaurantStore'
 import { useImageUpload } from '@/modules/menu/hooks/useImageUpload'
 import { useLanguage } from '@/hooks/useLanguage'
+import { CURRENCY_OPTIONS } from '@/lib/currency'
+import { DATE_FORMAT_OPTIONS, NUMBER_FORMAT_OPTIONS, TIMEZONE_OPTIONS } from '@/lib/locale'
+import type { DateFormat, TimeFormat } from '@/modules/globalization/globalizationTypes'
 import { TeamTab } from '@/modules/admin/components/TeamTab'
 import { AuditTab } from '@/modules/admin/components/AuditTab'
+import { TerminologiaTab } from '../components/TerminologiaTab'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
@@ -37,6 +41,7 @@ const VALID_COLUMNS = new Set([
   'delivery_fee_type','delivery_fee_value','delivery_zones',
   'takeaway_enabled','takeaway_time_estimate',
   'default_language','allow_language_switch',
+  'timezone','default_currency','locale','date_format','time_format','number_format',
   'reservations_enabled','reservations_collect_guests','reservations_advance_days',
   'reservations_min_hours','reservations_max_party','reservations_time_slots','reservations_message',
   'onboarding_completed','is_active','plan','subscription_status',
@@ -53,7 +58,7 @@ function sanitize(data: Record<string, unknown>) {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language' | 'reservations' | 'integrations' | 'pos' | 'team' | 'audit'
+type Section = 'general' | 'location' | 'hours' | 'social' | 'appearance' | 'delivery' | 'language' | 'reservations' | 'integrations' | 'pos' | 'team' | 'audit' | 'terminology'
 
 interface DeliveryZone {
   name: string
@@ -327,6 +332,8 @@ export function BusinessSettings() {
   const { changeLanguage } = useLanguage()
   const setStoreBusinessType = useRestaurantStore(s => s.setBusinessType)
 
+  const [businessType, setBusinessType] = useState<'gastronomy' | 'retail' | 'services'>('gastronomy')
+
   const SECTIONS = useMemo<Array<{ id: Section; label: string; icon: React.ReactNode }>>(() => [
     { id: 'general',    label: t('dashboard.settings_general'),    icon: <Store    className="w-4 h-4" /> },
     { id: 'location',   label: t('dashboard.settings_location'),   icon: <MapPin   className="w-4 h-4" /> },
@@ -340,14 +347,16 @@ export function BusinessSettings() {
     { id: 'pos',           label: 'POS',                                  icon: <CreditCard   className="w-4 h-4" /> },
     { id: 'team',          label: 'Equipo',                               icon: <Users        className="w-4 h-4" /> },
     { id: 'audit',         label: 'Historial',                            icon: <History      className="w-4 h-4" /> },
-  ], [t])
+    ...(businessType === 'services'
+      ? [{ id: 'terminology' as Section, label: 'Terminología', icon: <Languages className="w-4 h-4" /> }]
+      : []),
+  ], [t, businessType])
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeSection, setActiveSection] = useState<Section>('general')
-  const [businessType, setBusinessType] = useState<'gastronomy' | 'retail'>('gastronomy')
-  const [confirmMode, setConfirmMode] = useState<'gastronomy' | 'retail' | null>(null)
+  const [confirmMode, setConfirmMode] = useState<'gastronomy' | 'retail' | 'services' | null>(null)
   const [savingMode, setSavingMode] = useState(false)
   const [formData, setFormData] = useState<SettingsForm>(DEFAULT_FORM)
   const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
@@ -373,11 +382,18 @@ export function BusinessSettings() {
   const [isDraggingBanner, setIsDraggingBanner] = useState(false)
 
   // Language settings
-  const [panelLang, setPanelLang] = useState<'es' | 'en'>(() =>
-    (localStorage.getItem('menulife_lang') as 'es' | 'en') ?? 'es'
+  const [panelLang, setPanelLang] = useState<string>(() =>
+    localStorage.getItem('menulife_lang') ?? 'es'
   )
-  const [menuLang, setMenuLang] = useState<'ES' | 'EN'>('ES')
+  const [menuLang, setMenuLang] = useState<string>('ES')
   const [allowSwitch, setAllowSwitch] = useState(true)
+
+  // Globalization settings — Phase 17
+  const [timezone,     setTimezone]     = useState('America/Argentina/Buenos_Aires')
+  const [currency,     setCurrency]     = useState('ARS')
+  const [dateFormat,   setDateFormat]   = useState<DateFormat>('DD/MM/YYYY')
+  const [timeFormat,   setTimeFormat]   = useState<TimeFormat>('24h')
+  const [numberFormat, setNumberFormat] = useState('es-AR')
 
   // POS settings
   const [taxEnabled, setTaxEnabled] = useState(false)
@@ -425,10 +441,17 @@ export function BusinessSettings() {
             takeaway_time_estimate: r.takeaway_time_estimate ?? 15,
           })
           // Load language config
-          const storedLang = localStorage.getItem('menulife_lang') as 'es' | 'en' | null
-          setPanelLang(storedLang ?? (r.default_language === 'EN' ? 'en' : 'es'))
+          const storedLang = localStorage.getItem('menulife_lang')
+          setPanelLang(storedLang ?? (r.default_language?.toUpperCase() === 'EN' ? 'en' : 'es'))
           setMenuLang(r.default_language ?? 'ES')
           setAllowSwitch(r.allow_language_switch ?? true)
+          // Load globalization config (Phase 17 columns — may not exist on older rows)
+          const rGlob = r as unknown as Record<string, unknown>
+          if (rGlob.timezone)      setTimezone(String(rGlob.timezone))
+          if (r.default_currency)  setCurrency(r.default_currency)
+          if (rGlob.date_format)   setDateFormat(rGlob.date_format as DateFormat)
+          if (rGlob.time_format)   setTimeFormat(rGlob.time_format as TimeFormat)
+          if (rGlob.number_format) setNumberFormat(String(rGlob.number_format))
           // Load POS config
           const rAny = r as unknown as Record<string, unknown>
           setTaxEnabled(Boolean(rAny.tax_enabled ?? false))
@@ -688,6 +711,12 @@ export function BusinessSettings() {
         // Language
         default_language:       menuLang,
         allow_language_switch:  allowSwitch,
+        // Globalization — Phase 17
+        timezone,
+        default_currency:       currency,
+        date_format:            dateFormat,
+        time_format:            timeFormat,
+        number_format:          numberFormat,
         // Reservations
         reservations_enabled:        resEnabled,
         reservations_collect_guests: resCollectGuests,
@@ -746,7 +775,8 @@ export function BusinessSettings() {
     toast('Cambios descartados', { icon: '↩️' })
   }
 
-  const saveBusinessType = async (mode: 'gastronomy' | 'retail') => {
+  const saveBusinessType = async (mode: 'gastronomy' | 'retail' | 'services' | null) => {
+    if (!mode) return
     if (!restaurant) return
     setSavingMode(true)
     try {
@@ -759,7 +789,7 @@ export function BusinessSettings() {
       setBusinessType(mode)
       setStoreBusinessType(mode)
       setRestaurant(prev => prev ? { ...prev, business_type: mode } : prev)
-      const label = mode === 'gastronomy' ? 'Gastronomía' : 'Retail'
+      const label = mode === 'gastronomy' ? 'Gastronomía' : mode === 'retail' ? 'Retail' : 'Servicios'
       toast.success(`✅ Modo actualizado a ${label}`)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al cambiar el tipo de negocio'
@@ -1579,65 +1609,176 @@ export function BusinessSettings() {
     </div>
   )
 
-  const renderLanguage = () => (
-    <div className="space-y-5">
-      <SectionCard title={t('dashboard.lang_panel_title')} description={t('dashboard.lang_panel_desc')}>
-        <div className="flex gap-3">
-          {(['es', 'en'] as const).map(lang => (
-            <button
-              key={lang}
-              type="button"
-              onClick={() => {
-                setPanelLang(lang)
-                changeLanguage(lang)
-              }}
-              className={cn(
-                'flex-1 py-3 rounded-xl border text-sm font-semibold transition-colors',
-                panelLang === lang
-                  ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
-                  : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-              )}
-            >
-              {lang === 'es' ? t('dashboard.lang_es') : t('dashboard.lang_en')}
-            </button>
-          ))}
-        </div>
-      </SectionCard>
+  const renderLanguage = () => {
+    const ACTIVE_LANGS = [
+      { code: 'es', labelKey: 'dashboard.lang_es' },
+      { code: 'en', labelKey: 'dashboard.lang_en' },
+      { code: 'pt', labelKey: 'dashboard.lang_pt' },
+      { code: 'fr', labelKey: 'dashboard.lang_fr' },
+      { code: 'it', labelKey: 'dashboard.lang_it' },
+      { code: 'de', labelKey: 'dashboard.lang_de' },
+    ]
+    const MENU_LANGS = [
+      { code: 'ES', labelKey: 'dashboard.lang_es' },
+      { code: 'EN', labelKey: 'dashboard.lang_en' },
+    ]
+    return (
+      <div className="space-y-5">
+        {/* Panel language — all active locales */}
+        <SectionCard title={t('dashboard.lang_panel_title')} description={t('dashboard.lang_panel_desc')}>
+          <div className="grid grid-cols-3 gap-2">
+            {ACTIVE_LANGS.map(({ code, labelKey }) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => {
+                  setPanelLang(code)
+                  changeLanguage(code)
+                }}
+                className={cn(
+                  'py-2.5 rounded-xl border text-sm font-semibold transition-colors',
+                  panelLang === code
+                    ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
+                    : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                )}
+              >
+                {t(labelKey)}
+              </button>
+            ))}
+          </div>
+        </SectionCard>
 
-      <SectionCard title={t('dashboard.lang_menu_title')} description={t('dashboard.lang_menu_desc')}>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">{t('dashboard.lang_menu_default')}</span>
-            <div className="flex gap-2">
-              {(['ES', 'EN'] as const).map(lang => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => setMenuLang(lang)}
-                  className={cn(
-                    'px-4 py-2 rounded-xl border text-sm font-semibold transition-colors',
-                    menuLang === lang
-                      ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
-                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                  )}
-                >
-                  {lang === 'ES' ? t('dashboard.lang_es') : t('dashboard.lang_en')}
-                </button>
-              ))}
+        {/* Digital menu default language */}
+        <SectionCard title={t('dashboard.lang_menu_title')} description={t('dashboard.lang_menu_desc')}>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700">{t('dashboard.lang_menu_default')}</span>
+              <div className="flex gap-2">
+                {MENU_LANGS.map(({ code, labelKey }) => (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => setMenuLang(code)}
+                    className={cn(
+                      'px-4 py-2 rounded-xl border text-sm font-semibold transition-colors',
+                      menuLang === code
+                        ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
+                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                    )}
+                  >
+                    {t(labelKey)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700">{t('dashboard.lang_allow_switch')}</span>
+              <Toggle checked={allowSwitch} onChange={e => setAllowSwitch(e.target.checked)} />
             </div>
           </div>
+        </SectionCard>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">{t('dashboard.lang_allow_switch')}</span>
-            <Toggle
-              checked={allowSwitch}
-              onChange={e => setAllowSwitch(e.target.checked)}
-            />
+        {/* Globalization: Timezone & Currency */}
+        <SectionCard title={t('dashboard.glob_region_title')} description={t('dashboard.glob_region_desc')}>
+          <div className="space-y-5">
+            {/* Timezone */}
+            <div>
+              <FieldLabel hint={t('dashboard.glob_timezone_desc')}>{t('dashboard.glob_timezone_title')}</FieldLabel>
+              <select
+                value={timezone}
+                onChange={e => setTimezone(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                {TIMEZONE_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Base currency */}
+            <div>
+              <FieldLabel hint={t('dashboard.glob_currency_desc')}>{t('dashboard.glob_currency_title')}</FieldLabel>
+              <select
+                value={currency}
+                onChange={e => setCurrency(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                {CURRENCY_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Date format */}
+            <div>
+              <FieldLabel>{t('dashboard.glob_date_format_title')}</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {DATE_FORMAT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setDateFormat(opt.value)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg border text-xs font-mono font-semibold transition-colors',
+                      dateFormat === opt.value
+                        ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
+                        : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+                    )}
+                  >
+                    {opt.example}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Time format */}
+            <div>
+              <FieldLabel>{t('dashboard.glob_time_format_title')}</FieldLabel>
+              <div className="flex gap-2">
+                {(['24h', '12h'] as TimeFormat[]).map(fmt => (
+                  <button
+                    key={fmt}
+                    type="button"
+                    onClick={() => setTimeFormat(fmt)}
+                    className={cn(
+                      'flex-1 py-2 rounded-xl border text-sm font-semibold transition-colors',
+                      timeFormat === fmt
+                        ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
+                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                    )}
+                  >
+                    {fmt === '24h' ? '14:30' : '2:30 PM'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Number format */}
+            <div>
+              <FieldLabel hint={t('dashboard.glob_number_format_desc')}>{t('dashboard.glob_number_format_title')}</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {NUMBER_FORMAT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setNumberFormat(opt.value)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg border text-xs font-mono font-semibold transition-colors',
+                      numberFormat === opt.value
+                        ? 'border-[#FF6B7A] bg-[#FF6B7A]/10 text-[#FF6B7A]'
+                        : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+                    )}
+                  >
+                    {opt.example}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </SectionCard>
-    </div>
-  )
+        </SectionCard>
+      </div>
+    )
+  }
 
   const renderReservations = () => {
     const addSlot = () => {
@@ -1925,6 +2066,9 @@ export function BusinessSettings() {
     audit: restaurant ? (
       <AuditTab restaurantId={restaurant.id} />
     ) : null,
+    terminology: restaurant ? (
+      <TerminologiaTab restaurantId={restaurant.id} />
+    ) : null,
   }
 
   // ─── Render ─────────────────────────────────────────────────────────────────
@@ -1996,7 +2140,7 @@ export function BusinessSettings() {
       <div
         className={cn(
           'fixed left-0 right-0 z-20 border-t px-4 py-3 flex gap-3 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:mt-5',
-          (activeSection === 'team' || activeSection === 'audit') && 'hidden lg:hidden'
+          (activeSection === 'team' || activeSection === 'audit' || activeSection === 'terminology') && 'hidden lg:hidden'
         )}
         style={{ bottom: 'calc(72px + env(safe-area-inset-bottom))', background: '#16181F', borderColor: 'rgba(255,255,255,0.08)' }}
       >

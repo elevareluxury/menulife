@@ -53,7 +53,10 @@
       "Bash(grep -v \"//.*useEffect\")",
       "Bash(grep *)",
       "Bash(dir E:\\\\menulife\\\\.env*)",
-      "Bash(echo \"Exit code: $?\")"
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(npx grep *)",
+      "Bash(Sort-Object)"
     ]
   }
 }

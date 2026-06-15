@@ -20,7 +20,7 @@ interface CartState {
   updateNotes: (id: string, notes: string) => void
   removeItem: (id: string) => void
   clearCart: () => void
-  getTotal: (currency: 'ARS' | 'USD') => number
+  getTotal: (currency: string) => number
   getItemCount: () => number
 }
 

@@ -1,21 +1,25 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed,
   QrCode, Users, ChefHat, LogOut, Truck, ContactRound,
   BarChart2, Settings, Banknote, Receipt, TrendingDown,
-  Globe, Warehouse, Lock, X,
+  Globe, Warehouse, Lock, X, CalendarDays, Layers,
+  FolderOpen, TrendingUp, FileText, BadgeCheck, Package2, ClipboardList, ScrollText,
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import { useRestaurantStore } from '@/store/restaurantStore'
+import { useTerminology } from '@/modules/services/hooks/useTerminology'
+import { LocationSwitcher } from '@/modules/enterprise/components/LocationSwitcher'
 import { cn } from '@/lib/utils'
 
 interface NavItemDef {
   to: string
   icon: LucideIcon
-  labelKey: string
+  labelKey?: string   // i18n key (gastronomy / retail)
+  label?: string      // direct string (services — from naming layer)
   exact?: boolean
 }
 
@@ -100,6 +104,44 @@ const RETAIL_NAV: NavGroup[] = [
     ],
   },
 ]
+
+/* ── Services nav (dynamic via terminology) ──────────────────────────────── */
+
+function useServicesNav(): NavGroup[] {
+  const { term } = useTerminology()
+  return useMemo(() => [
+    {
+      section: 'dashboard.section_operations',
+      items: [
+        { to: '/dashboard',                   icon: Home,         labelKey: 'dashboard.nav_home', exact: true },
+        { to: '/dashboard/services/clientes', icon: ContactRound, label: term('customers') },
+        { to: '/dashboard/services/agenda',   icon: CalendarDays, labelKey: 'dashboard.nav_agenda' },
+      ],
+    },
+    {
+      section: 'dashboard.section_business',
+      items: [
+        { to: '/dashboard/services/servicios',  icon: Layers,     label: term('services')   },
+        { to: '/dashboard/services/recursos',   icon: FolderOpen, label: term('resources')  },
+        { to: '/dashboard/services/membresias',   icon: BadgeCheck,    label: 'Membresías'    },
+        { to: '/dashboard/services/paquetes',    icon: Package2,      label: 'Paquetes'      },
+        { to: '/dashboard/services/presupuestos',icon: ScrollText,    label: 'Presupuestos'  },
+        { to: '/dashboard/services/forms',       icon: ClipboardList, label: 'Formularios'   },
+      ],
+    },
+    {
+      section: 'dashboard.section_finance',
+      items: [
+        { to: '/dashboard/services/ventas',   icon: TrendingUp, labelKey: 'dashboard.nav_ventas'   },
+        { to: '/dashboard/services/reportes', icon: FileText,   labelKey: 'dashboard.nav_reportes' },
+      ],
+    },
+    {
+      section: null,
+      items: [{ to: '/dashboard/hub', icon: Globe, labelKey: 'dashboard.nav_hub' }],
+    },
+  ], [term])
+}
 
 /* ── UpgradeModal ────────────────────────────────────────────────────────── */
 
@@ -226,8 +268,9 @@ function UpgradeModal({ restaurantName, onClose }: { restaurantName: string; onC
 
 /* ── Nav item renderers ──────────────────────────────────────────────────── */
 
-function NavItem({ to, icon: Icon, labelKey, exact }: NavItemDef) {
+function NavItem({ to, icon: Icon, labelKey, label, exact }: NavItemDef) {
   const { t } = useTranslation()
+  const text = label ?? t(labelKey ?? '')
   return (
     <NavLink
       to={to}
@@ -245,15 +288,16 @@ function NavItem({ to, icon: Icon, labelKey, exact }: NavItemDef) {
             className={cn('w-[17px] h-[17px] flex-shrink-0', isActive ? 'text-brand' : 'text-ink-3')}
             strokeWidth={isActive ? 2.2 : 2}
           />
-          {t(labelKey)}
+          {text}
         </>
       )}
     </NavLink>
   )
 }
 
-function LockedNavItem({ icon: Icon, labelKey, onUnlock }: { icon: LucideIcon; labelKey: string; onUnlock: () => void }) {
+function LockedNavItem({ icon: Icon, labelKey, label, onUnlock }: { icon: LucideIcon; labelKey?: string; label?: string; onUnlock: () => void }) {
   const { t } = useTranslation()
+  const text = label ?? t(labelKey ?? '')
   return (
     <button
       onClick={onUnlock}
@@ -261,7 +305,7 @@ function LockedNavItem({ icon: Icon, labelKey, onUnlock }: { icon: LucideIcon; l
       style={{ opacity: 0.4 }}
     >
       <Icon className="w-[17px] h-[17px] flex-shrink-0 text-ink-3" strokeWidth={2} />
-      <span className="flex-1 text-ink-3">{t(labelKey)}</span>
+      <span className="flex-1 text-ink-3">{text}</span>
       <Lock className="w-3 h-3 text-ink-4 flex-shrink-0" strokeWidth={2} />
     </button>
   )
@@ -290,8 +334,13 @@ export function Sidebar({ restaurantSlug, restaurantName = '' }: SidebarProps) {
   const plan           = useRestaurantStore(s => s.plan)
   const [showUpgrade, setShowUpgrade] = useState(false)
 
-  const isHubFree  = !plan || plan === 'hub_free'
-  const navConfig  = businessType === 'retail' ? RETAIL_NAV : GASTRONOMY_NAV
+  const servicesNav = useServicesNav()
+  const isHubFree   = !plan || plan === 'hub_free'
+  const navConfig   = businessType === 'services'
+    ? servicesNav
+    : businessType === 'retail'
+      ? RETAIL_NAV
+      : GASTRONOMY_NAV
 
   return (
     <>
@@ -306,6 +355,9 @@ export function Sidebar({ restaurantSlug, restaurantName = '' }: SidebarProps) {
             {t('dashboard.nav_panel')}
           </p>
         </div>
+
+        {/* Location Switcher (multi-location only) */}
+        <LocationSwitcher />
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">

@@ -526,7 +526,7 @@ export function CRMPage() {
 interface DetailProps {
   contact: CRMContact
   restaurantId: string
-  businessType: 'gastronomy' | 'retail'
+  businessType: 'gastronomy' | 'retail' | 'services'
   onClose: () => void
   onUpdated: () => void
   onSelectReservation: (r: Reservation) => void

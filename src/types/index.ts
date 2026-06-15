@@ -20,9 +20,9 @@ export interface Restaurant {
   cover_image_url?: string | null
   description?: string | null
   description_en?: string | null
-  default_currency: 'ARS' | 'USD'
-  default_language: 'ES' | 'EN'
-  timezone?: string
+  default_currency: string            // ISO 4217 — any code (ARS, USD, EUR, BRL…)
+  default_language: string            // BCP-47 lowercase: 'es', 'en', 'pt', 'fr', 'it', 'de'
+  timezone?: string                   // IANA timezone string
   schedule?: unknown
   is_open: boolean
   is_active: boolean
@@ -54,6 +54,11 @@ export interface Restaurant {
   takeaway_enabled?: boolean
   takeaway_time_estimate?: number | null
   allow_language_switch?: boolean
+  // Globalization — Phase 17
+  locale?: string | null              // BCP-47 full tag: 'es-AR', 'en-US', 'pt-BR'
+  date_format?: string | null         // 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD' | …
+  time_format?: string | null         // '24h' | '12h'
+  number_format?: string | null       // Intl.NumberFormat locale: 'es-AR' | 'en-US' | …
   // Reservations config
   reservations_enabled?: boolean
   reservations_collect_guests?: boolean
@@ -64,7 +69,7 @@ export interface Restaurant {
   reservations_message?: string | null
   features?: unknown
   google_review_link?: string | null
-  business_type?: 'gastronomy' | 'retail'
+  business_type?: 'gastronomy' | 'retail' | 'services'
 }
 
 export interface MenuSection {
@@ -100,8 +105,10 @@ export interface MenuItem {
   updated_at: string
 }
 
-export type Currency = 'ARS' | 'USD'
-export type Language = 'ES' | 'EN'
+/** @deprecated Use string (ISO 4217) — kept for backward compat */
+export type Currency = string
+/** @deprecated Use string (BCP-47 lowercase) — kept for backward compat */
+export type Language = string
 
 export interface MenuFilters {
   search: string

@@ -1,23 +1,24 @@
 import { useTranslation } from 'react-i18next'
+import { changeLocaleTo, LOCALE_META, ACTIVE_LOCALES, type ActiveLocale } from '@/i18n'
 
 export function useLanguage() {
   const { i18n } = useTranslation()
 
   const toggleLanguage = () => {
     const next = i18n.language === 'es' ? 'en' : 'es'
-    i18n.changeLanguage(next)
-    localStorage.setItem('menulife_lang', next)
+    changeLocaleTo(next)
   }
 
-  const changeLanguage = (lang: 'es' | 'en') => {
-    i18n.changeLanguage(lang)
-    localStorage.setItem('menulife_lang', lang)
+  const changeLanguage = (lang: ActiveLocale | string) => {
+    changeLocaleTo(lang)
   }
 
   return {
-    currentLang: i18n.language,
-    isSpanish: i18n.language === 'es',
-    isEnglish: i18n.language === 'en',
+    currentLang:    i18n.language,
+    isSpanish:      i18n.language === 'es',
+    isEnglish:      i18n.language === 'en',
+    activeLocales:  ACTIVE_LOCALES,
+    localeMeta:     LOCALE_META,
     toggleLanguage,
     changeLanguage,
   }

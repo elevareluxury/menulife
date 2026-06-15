@@ -14,7 +14,7 @@ export function generateSlug(name: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-export function formatPrice(amount: number, currency: 'ARS' | 'USD' = 'ARS'): string {
+export function formatPrice(amount: number, currency: string = 'ARS'): string {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency,

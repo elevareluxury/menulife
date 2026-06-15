@@ -252,8 +252,8 @@ function ItemCard({
   onTap,
 }: {
   item: MenuItem
-  language: 'ES' | 'EN'
-  currency: 'ARS' | 'USD'
+  language: string
+  currency: string
   onTap: (item: MenuItem) => void
 }) {
   const { addItem, items: cartItems, updateQuantity } = useCartStore()
@@ -364,8 +364,8 @@ function FeaturedRow({
   onTap,
 }: {
   items: MenuItem[]
-  language: 'ES' | 'EN'
-  currency: 'ARS' | 'USD'
+  language: string
+  currency: string
   onTap: (item: MenuItem) => void
 }) {
   const { addItem, items: cartItems } = useCartStore()

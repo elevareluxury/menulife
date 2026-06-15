@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, ArrowRight, UtensilsCrossed, ShoppingBag } from 'lucide-react'
+import { CheckCircle2, ArrowRight, UtensilsCrossed, ShoppingBag, Briefcase } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useRestaurantStore } from '@/store/restaurantStore'
@@ -57,8 +57,8 @@ export function OnboardingFlow() {
   const [saving, setSaving] = useState(false)
 
   // Step 1: business type
-  const [businessType, setBusinessType] = useState<'gastronomy' | 'retail'>(() =>
-    (localStorage.getItem(LS_BTYPE_KEY) as 'gastronomy' | 'retail' | null) ?? 'gastronomy'
+  const [businessType, setBusinessType] = useState<'gastronomy' | 'retail' | 'services'>(() =>
+    (localStorage.getItem(LS_BTYPE_KEY) as 'gastronomy' | 'retail' | 'services' | null) ?? 'gastronomy'
   )
 
   // Step 2: basic info
@@ -74,7 +74,7 @@ export function OnboardingFlow() {
     if (restaurant?.name) setBusinessName(restaurant.name)
     if (restaurant?.city) setCity(restaurant.city)
     if (restaurant?.phone) setPhone(restaurant.phone)
-    if (restaurant?.business_type) setBusinessType(restaurant.business_type)
+    if (restaurant?.business_type) setBusinessType(restaurant.business_type as 'gastronomy' | 'retail' | 'services')
   }, [restaurant])
 
   // Persist step to localStorage
@@ -129,15 +129,20 @@ export function OnboardingFlow() {
   }
 
   const saveStep3 = async () => {
-    if (!firstName.trim()) {
-      toast.error(businessType === 'retail'
-        ? 'Ingresá el nombre de la categoría'
-        : 'Ingresá el nombre de la sección')
-      return false
-    }
     if (!restaurant) return false
     setSaving(true)
     try {
+      if (businessType === 'services') {
+        await db.from('restaurants').update({ setup_step: 3 }).eq('id', restaurant.id)
+        return true
+      }
+      if (!firstName.trim()) {
+        toast.error(businessType === 'retail'
+          ? 'Ingresá el nombre de la categoría'
+          : 'Ingresá el nombre de la sección')
+        setSaving(false)
+        return false
+      }
       if (businessType === 'retail') {
         const { error } = await db
           .from('product_categories')
@@ -227,22 +232,23 @@ export function OnboardingFlow() {
                 Esto personaliza tu panel de control y las herramientas disponibles.
               </p>
 
-              <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="grid grid-cols-1 gap-3 mb-6">
                 {([
-                  { mode: 'gastronomy' as const, icon: UtensilsCrossed, label: 'Gastronomía', desc: 'Restaurante, bar, café, dark kitchen' },
-                  { mode: 'retail' as const,     icon: ShoppingBag,     label: 'Retail',      desc: 'Tienda, comercio, showroom' },
+                  { mode: 'gastronomy' as const, icon: UtensilsCrossed, label: 'Gastronomía',  desc: 'Restaurante, bar, café, dark kitchen' },
+                  { mode: 'retail'     as const, icon: ShoppingBag,     label: 'Retail',       desc: 'Tienda, comercio, showroom' },
+                  { mode: 'services'   as const, icon: Briefcase,       label: 'Servicios',    desc: 'Psicólogos, coaches, gimnasios, estudios, talleres' },
                 ] as const).map(({ mode, icon: Icon, label, desc }) => (
                   <button
                     key={mode}
                     type="button"
                     onClick={() => setBusinessType(mode)}
-                    className="flex flex-col items-start gap-3 p-4 rounded-xl border-2 text-left transition-all"
+                    className="flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all"
                     style={{
                       borderColor: businessType === mode ? '#F4705A' : '#E5E7EB',
                       background: businessType === mode ? 'rgba(244,112,90,0.05)' : '#fff',
                     }}
                   >
-                    <Icon className="w-6 h-6" style={{ color: '#F4705A' }} />
+                    <Icon className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
                     <div>
                       <p className="font-bold text-gray-900 text-sm">{label}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
@@ -297,7 +303,29 @@ export function OnboardingFlow() {
           {/* ── STEP 3: First content ── */}
           {step === 3 && (
             <div>
-              {businessType === 'retail' ? (
+              {businessType === 'services' ? (
+                <>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">¡Tu espacio está listo!</h2>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Configurá tu agenda, servicios y clientes desde el panel. Todo en un solo lugar.
+                  </p>
+                  <div className="space-y-2">
+                    {[
+                      { icon: '📅', label: 'Agenda inteligente', desc: 'Gestioná turnos y disponibilidad' },
+                      { icon: '👥', label: 'Gestión de clientes', desc: 'Historial y seguimiento completo' },
+                      { icon: '💼', label: 'Catálogo de servicios', desc: 'Definí duraciones y precios' },
+                    ].map(item => (
+                      <div key={item.label} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50">
+                        <span className="text-xl">{item.icon}</span>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{item.label}</p>
+                          <p className="text-xs text-gray-400">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : businessType === 'retail' ? (
                 <>
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Primera categoría</h2>
                   <p className="text-sm text-gray-500 mb-6">

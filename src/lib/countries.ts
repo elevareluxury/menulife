@@ -1,0 +1,80 @@
+// ─── Country catalog ──────────────────────────────────────────────────────────
+// Static, tree-shakeable. Extend as new markets are added.
+// Seeded with 50 key markets. Structure ready for 190+ countries.
+
+import type { CountryRecord } from '@/modules/globalization/globalizationTypes'
+
+export const COUNTRIES: CountryRecord[] = [
+  // ── Latin America ────────────────────────────────────────────────────────────
+  { code:'AR', name:'Argentina',        name_local:'Argentina',       currency:'ARS', timezone:'America/Argentina/Buenos_Aires', locale:'es-AR', phone_prefix:'+54',  date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'iva',       tax_name:'IVA',        tax_rate:0.21,  rtl:false },
+  { code:'BR', name:'Brazil',           name_local:'Brasil',          currency:'BRL', timezone:'America/Sao_Paulo',              locale:'pt-BR', phone_prefix:'+55',  date_format:'DD/MM/YYYY', number_format:'pt-BR', tax_type:'vat',       tax_name:'ICMS',       tax_rate:0.17,  rtl:false },
+  { code:'CL', name:'Chile',            name_local:'Chile',           currency:'CLP', timezone:'America/Santiago',               locale:'es-CL', phone_prefix:'+56',  date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'iva',       tax_name:'IVA',        tax_rate:0.19,  rtl:false },
+  { code:'CO', name:'Colombia',         name_local:'Colombia',        currency:'COP', timezone:'America/Bogota',                 locale:'es-CO', phone_prefix:'+57',  date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.19,  rtl:false },
+  { code:'MX', name:'Mexico',           name_local:'México',          currency:'MXN', timezone:'America/Mexico_City',            locale:'es-MX', phone_prefix:'+52',  date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.16,  rtl:false },
+  { code:'PE', name:'Peru',             name_local:'Perú',            currency:'PEN', timezone:'America/Lima',                   locale:'es-PE', phone_prefix:'+51',  date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IGV',        tax_rate:0.18,  rtl:false },
+  { code:'VE', name:'Venezuela',        name_local:'Venezuela',       currency:'USD', timezone:'America/Caracas',                locale:'es-VE', phone_prefix:'+58',  date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.16,  rtl:false },
+  { code:'EC', name:'Ecuador',          name_local:'Ecuador',         currency:'USD', timezone:'America/Guayaquil',              locale:'es-EC', phone_prefix:'+593', date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.12,  rtl:false },
+  { code:'BO', name:'Bolivia',          name_local:'Bolivia',         currency:'BOB', timezone:'America/La_Paz',                 locale:'es-BO', phone_prefix:'+591', date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.13,  rtl:false },
+  { code:'PY', name:'Paraguay',         name_local:'Paraguay',        currency:'PYG', timezone:'America/Asuncion',               locale:'es-PY', phone_prefix:'+595', date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.10,  rtl:false },
+  { code:'UY', name:'Uruguay',          name_local:'Uruguay',         currency:'UYU', timezone:'America/Montevideo',             locale:'es-UY', phone_prefix:'+598', date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'iva',       tax_name:'IVA',        tax_rate:0.22,  rtl:false },
+  { code:'GT', name:'Guatemala',        name_local:'Guatemala',       currency:'GTQ', timezone:'America/Guatemala',              locale:'es-GT', phone_prefix:'+502', date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.12,  rtl:false },
+  { code:'CR', name:'Costa Rica',       name_local:'Costa Rica',      currency:'CRC', timezone:'America/Costa_Rica',             locale:'es-CR', phone_prefix:'+506', date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.13,  rtl:false },
+  { code:'PA', name:'Panama',           name_local:'Panamá',          currency:'USD', timezone:'America/Panama',                 locale:'es-PA', phone_prefix:'+507', date_format:'MM/DD/YYYY', number_format:'en-US', tax_type:'sales_tax', tax_name:'ITBMS',      tax_rate:0.07,  rtl:false },
+  { code:'DO', name:'Dominican Republic',name_local:'Rep. Dominicana',currency:'USD', timezone:'America/Santo_Domingo',          locale:'es-DO', phone_prefix:'+1',   date_format:'MM/DD/YYYY', number_format:'en-US', tax_type:'sales_tax', tax_name:'ITBIS',      tax_rate:0.18,  rtl:false },
+  { code:'CU', name:'Cuba',             name_local:'Cuba',            currency:'CUP', timezone:'America/Havana',                 locale:'es-CU', phone_prefix:'+53',  date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'none',      tax_name:'',           tax_rate:0,     rtl:false },
+  // ── North America ─────────────────────────────────────────────────────────────
+  { code:'US', name:'United States',    name_local:'United States',   currency:'USD', timezone:'America/New_York',               locale:'en-US', phone_prefix:'+1',   date_format:'MM/DD/YYYY', number_format:'en-US', tax_type:'sales_tax', tax_name:'Sales Tax',  tax_rate:0.07,  rtl:false },
+  { code:'CA', name:'Canada',           name_local:'Canada',          currency:'CAD', timezone:'America/Toronto',                locale:'en-CA', phone_prefix:'+1',   date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'gst',       tax_name:'GST/HST',    tax_rate:0.13,  rtl:false },
+  // ── Europe ────────────────────────────────────────────────────────────────────
+  { code:'ES', name:'Spain',            name_local:'España',          currency:'EUR', timezone:'Europe/Madrid',                  locale:'es-ES', phone_prefix:'+34',  date_format:'DD/MM/YYYY', number_format:'es-AR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.21,  rtl:false },
+  { code:'FR', name:'France',           name_local:'France',          currency:'EUR', timezone:'Europe/Paris',                   locale:'fr-FR', phone_prefix:'+33',  date_format:'DD/MM/YYYY', number_format:'fr-FR', tax_type:'vat',       tax_name:'TVA',        tax_rate:0.20,  rtl:false },
+  { code:'DE', name:'Germany',          name_local:'Deutschland',     currency:'EUR', timezone:'Europe/Berlin',                  locale:'de-DE', phone_prefix:'+49',  date_format:'DD.MM.YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'MwSt',       tax_rate:0.19,  rtl:false },
+  { code:'IT', name:'Italy',            name_local:'Italia',          currency:'EUR', timezone:'Europe/Rome',                    locale:'it-IT', phone_prefix:'+39',  date_format:'DD/MM/YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.22,  rtl:false },
+  { code:'PT', name:'Portugal',         name_local:'Portugal',        currency:'EUR', timezone:'Europe/Lisbon',                  locale:'pt-PT', phone_prefix:'+351', date_format:'DD/MM/YYYY', number_format:'pt-BR', tax_type:'vat',       tax_name:'IVA',        tax_rate:0.23,  rtl:false },
+  { code:'GB', name:'United Kingdom',   name_local:'United Kingdom',  currency:'GBP', timezone:'Europe/London',                  locale:'en-GB', phone_prefix:'+44',  date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'vat',       tax_name:'VAT',        tax_rate:0.20,  rtl:false },
+  { code:'NL', name:'Netherlands',      name_local:'Nederland',       currency:'EUR', timezone:'Europe/Amsterdam',               locale:'nl-NL', phone_prefix:'+31',  date_format:'DD-MM-YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'BTW',        tax_rate:0.21,  rtl:false },
+  { code:'CH', name:'Switzerland',      name_local:'Schweiz',         currency:'CHF', timezone:'Europe/Zurich',                  locale:'de-CH', phone_prefix:'+41',  date_format:'DD.MM.YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'MWST',       tax_rate:0.077, rtl:false },
+  { code:'AT', name:'Austria',          name_local:'Österreich',      currency:'EUR', timezone:'Europe/Vienna',                  locale:'de-AT', phone_prefix:'+43',  date_format:'DD.MM.YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'MwSt',       tax_rate:0.20,  rtl:false },
+  { code:'BE', name:'Belgium',          name_local:'Belgique',        currency:'EUR', timezone:'Europe/Brussels',                locale:'fr-BE', phone_prefix:'+32',  date_format:'DD/MM/YYYY', number_format:'fr-FR', tax_type:'vat',       tax_name:'TVA',        tax_rate:0.21,  rtl:false },
+  { code:'SE', name:'Sweden',           name_local:'Sverige',         currency:'SEK', timezone:'Europe/Stockholm',               locale:'sv-SE', phone_prefix:'+46',  date_format:'YYYY-MM-DD', number_format:'de-DE', tax_type:'vat',       tax_name:'Moms',       tax_rate:0.25,  rtl:false },
+  { code:'NO', name:'Norway',           name_local:'Norge',           currency:'NOK', timezone:'Europe/Oslo',                    locale:'nb-NO', phone_prefix:'+47',  date_format:'DD.MM.YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'MVA',        tax_rate:0.25,  rtl:false },
+  { code:'DK', name:'Denmark',          name_local:'Danmark',         currency:'DKK', timezone:'Europe/Copenhagen',              locale:'da-DK', phone_prefix:'+45',  date_format:'DD.MM.YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'Moms',       tax_rate:0.25,  rtl:false },
+  { code:'PL', name:'Poland',           name_local:'Polska',          currency:'PLN', timezone:'Europe/Warsaw',                  locale:'pl-PL', phone_prefix:'+48',  date_format:'DD.MM.YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'VAT',        tax_rate:0.23,  rtl:false },
+  { code:'TR', name:'Turkey',           name_local:'Türkiye',         currency:'TRY', timezone:'Europe/Istanbul',                locale:'tr-TR', phone_prefix:'+90',  date_format:'DD.MM.YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'KDV',        tax_rate:0.20,  rtl:false },
+  // ── Middle East ───────────────────────────────────────────────────────────────
+  { code:'AE', name:'United Arab Emirates',name_local:'الإمارات',    currency:'AED', timezone:'Asia/Dubai',                     locale:'ar-AE', phone_prefix:'+971', date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'vat',       tax_name:'VAT',        tax_rate:0.05,  rtl:true  },
+  { code:'SA', name:'Saudi Arabia',     name_local:'السعودية',        currency:'SAR', timezone:'Asia/Riyadh',                    locale:'ar-SA', phone_prefix:'+966', date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'vat',       tax_name:'VAT',        tax_rate:0.15,  rtl:true  },
+  { code:'QA', name:'Qatar',            name_local:'قطر',             currency:'QAR', timezone:'Asia/Qatar',                     locale:'ar-QA', phone_prefix:'+974', date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'none',      tax_name:'',           tax_rate:0,     rtl:true  },
+  { code:'IL', name:'Israel',           name_local:'ישראל',           currency:'ILS', timezone:'Asia/Jerusalem',                 locale:'he-IL', phone_prefix:'+972', date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'vat',       tax_name:'מע"מ',       tax_rate:0.17,  rtl:true  },
+  { code:'EG', name:'Egypt',            name_local:'مصر',             currency:'EGP', timezone:'Africa/Cairo',                   locale:'ar-EG', phone_prefix:'+20',  date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'vat',       tax_name:'VAT',        tax_rate:0.14,  rtl:true  },
+  // ── Asia-Pacific ──────────────────────────────────────────────────────────────
+  { code:'JP', name:'Japan',            name_local:'日本',             currency:'JPY', timezone:'Asia/Tokyo',                     locale:'ja-JP', phone_prefix:'+81',  date_format:'YYYY-MM-DD', number_format:'ja-JP', tax_type:'gst',       tax_name:'消費税',      tax_rate:0.10,  rtl:false },
+  { code:'CN', name:'China',            name_local:'中国',             currency:'CNY', timezone:'Asia/Shanghai',                  locale:'zh-CN', phone_prefix:'+86',  date_format:'YYYY-MM-DD', number_format:'zh-CN', tax_type:'vat',       tax_name:'增值税',      tax_rate:0.13,  rtl:false },
+  { code:'KR', name:'South Korea',      name_local:'대한민국',          currency:'KRW', timezone:'Asia/Seoul',                     locale:'ko-KR', phone_prefix:'+82',  date_format:'YYYY-MM-DD', number_format:'ja-JP', tax_type:'vat',       tax_name:'부가세',      tax_rate:0.10,  rtl:false },
+  { code:'AU', name:'Australia',        name_local:'Australia',       currency:'AUD', timezone:'Australia/Sydney',               locale:'en-AU', phone_prefix:'+61',  date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'gst',       tax_name:'GST',        tax_rate:0.10,  rtl:false },
+  { code:'NZ', name:'New Zealand',      name_local:'New Zealand',     currency:'NZD', timezone:'Pacific/Auckland',               locale:'en-NZ', phone_prefix:'+64',  date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'gst',       tax_name:'GST',        tax_rate:0.15,  rtl:false },
+  { code:'SG', name:'Singapore',        name_local:'Singapore',       currency:'SGD', timezone:'Asia/Singapore',                 locale:'en-SG', phone_prefix:'+65',  date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'gst',       tax_name:'GST',        tax_rate:0.09,  rtl:false },
+  { code:'IN', name:'India',            name_local:'भारत',             currency:'INR', timezone:'Asia/Kolkata',                   locale:'hi-IN', phone_prefix:'+91',  date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'gst',       tax_name:'GST',        tax_rate:0.18,  rtl:false },
+  { code:'TH', name:'Thailand',         name_local:'ประเทศไทย',        currency:'THB', timezone:'Asia/Bangkok',                   locale:'th-TH', phone_prefix:'+66',  date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'vat',       tax_name:'VAT',        tax_rate:0.07,  rtl:false },
+  { code:'ID', name:'Indonesia',        name_local:'Indonesia',       currency:'IDR', timezone:'Asia/Jakarta',                   locale:'id-ID', phone_prefix:'+62',  date_format:'DD/MM/YYYY', number_format:'de-DE', tax_type:'vat',       tax_name:'PPN',        tax_rate:0.11,  rtl:false },
+  { code:'HK', name:'Hong Kong',        name_local:'香港',             currency:'HKD', timezone:'Asia/Hong_Kong',                 locale:'zh-HK', phone_prefix:'+852', date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'none',      tax_name:'',           tax_rate:0,     rtl:false },
+  // ── Africa ────────────────────────────────────────────────────────────────────
+  { code:'ZA', name:'South Africa',     name_local:'South Africa',    currency:'ZAR', timezone:'Africa/Johannesburg',            locale:'en-ZA', phone_prefix:'+27',  date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'vat',       tax_name:'VAT',        tax_rate:0.15,  rtl:false },
+  { code:'NG', name:'Nigeria',          name_local:'Nigeria',         currency:'NGN', timezone:'Africa/Lagos',                   locale:'en-NG', phone_prefix:'+234', date_format:'DD/MM/YYYY', number_format:'en-US', tax_type:'vat',       tax_name:'VAT',        tax_rate:0.075, rtl:false },
+  { code:'MA', name:'Morocco',          name_local:'المغرب',           currency:'MAD', timezone:'Africa/Casablanca',              locale:'fr-MA', phone_prefix:'+212', date_format:'DD/MM/YYYY', number_format:'fr-FR', tax_type:'vat',       tax_name:'TVA',        tax_rate:0.20,  rtl:false },
+]
+
+// ─── Lookup utilities ─────────────────────────────────────────────────────────
+
+export const COUNTRY_BY_CODE: Map<string, CountryRecord> = new Map(
+  COUNTRIES.map(c => [c.code, c])
+)
+
+export function findCountry(code: string): CountryRecord | undefined {
+  return COUNTRY_BY_CODE.get(code.toUpperCase())
+}
+
+// Sorted select options for UI
+export const COUNTRY_OPTIONS = [...COUNTRIES]
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map(c => ({ value: c.code, label: c.name, flag: '' }))

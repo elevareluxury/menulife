@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 
 interface RestaurantState {
-  businessType: 'gastronomy' | 'retail'
+  businessType: 'gastronomy' | 'retail' | 'services'
   plan: 'hub_free' | 'os_gastronomy' | 'os_full' | null
-  setBusinessType: (type: 'gastronomy' | 'retail') => void
+  setBusinessType: (type: 'gastronomy' | 'retail' | 'services') => void
   setPlan: (plan: 'hub_free' | 'os_gastronomy' | 'os_full' | null) => void
 }
 

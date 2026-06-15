@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { Sidebar } from '@/modules/dashboard/components/Sidebar'
 import { BottomNav } from '@/components/dashboard/BottomNav'
 import { ImpersonationBanner } from '@/modules/super-admin/components/ImpersonationBanner'
+import { useLoadTerminology } from '@/modules/services/hooks/useLoadTerminology'
 
 export { DashboardHome } from '@/modules/dashboard/pages/DashboardHome'
 
@@ -22,6 +23,9 @@ export function DashboardPage() {
     setBusinessType(restaurant?.business_type ?? 'gastronomy')
     setPlan(restaurant?.plan ?? null)
   }, [restaurant?.business_type, restaurant?.plan, setBusinessType, setPlan])
+
+  // Load terminology for Services vertical (no-op for gastronomy/retail)
+  useLoadTerminology(restaurant?.id)
 
   useEffect(() => {
     const t = setTimeout(() => setTimedOut(true), 5_000)
