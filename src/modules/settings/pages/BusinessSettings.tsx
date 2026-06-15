@@ -791,6 +791,7 @@ export function BusinessSettings() {
       setRestaurant(prev => prev ? { ...prev, business_type: mode } : prev)
       const label = mode === 'gastronomy' ? 'Gastronomía' : mode === 'retail' ? 'Retail' : 'Servicios'
       toast.success(`✅ Modo actualizado a ${label}`)
+      navigate('/dashboard')
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al cambiar el tipo de negocio'
       toast.error(msg)
@@ -816,7 +817,7 @@ export function BusinessSettings() {
     <div className="space-y-5">
       {/* Tipo de Negocio */}
       <SectionCard title="Tipo de Negocio" description="Seleccioná el tipo para personalizar tu panel.">
-        <div className="grid grid-cols-2 gap-3">
+        <div className={cn('grid gap-3', restaurant?.plan === 'os_full' ? 'grid-cols-3' : 'grid-cols-2')}>
           {([
             {
               mode: 'gastronomy' as const,
@@ -830,13 +831,19 @@ export function BusinessSettings() {
               label: 'Retail',
               desc: 'Tiendas, comercios, showrooms',
             },
+            ...(restaurant?.plan === 'os_full' ? [{
+              mode: 'services' as const,
+              icon: CalendarDays,
+              label: 'Servicios',
+              desc: 'Turnos, clientes, agenda, membresías',
+            }] : []),
           ]).map(({ mode, icon: Icon, label, desc }) => (
             <button
               key={mode}
               type="button"
               onClick={() => { if (businessType !== mode) setConfirmMode(mode) }}
               className={cn(
-                'flex flex-col items-start gap-3 p-4 rounded-xl border-2 text-left transition-all',
+                'flex flex-col items-start gap-3 p-4 rounded-xl border-2 text-left transition-all duration-150',
                 businessType === mode
                   ? 'border-[#F4705A] bg-[#F4705A]/10'
                   : 'border-gray-700 bg-[#1a1a1a] hover:border-gray-500'
@@ -2171,10 +2178,12 @@ export function BusinessSettings() {
             <div className="flex items-center gap-3 mb-3">
               {confirmMode === 'gastronomy'
                 ? <UtensilsCrossed className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
-                : <Warehouse className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
+                : confirmMode === 'retail'
+                  ? <Warehouse className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
+                  : <CalendarDays className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
               }
               <h3 className="text-white font-bold text-base">
-                ¿Cambiar a {confirmMode === 'gastronomy' ? 'Gastronomía' : 'Retail'}?
+                ¿Cambiar a {confirmMode === 'gastronomy' ? 'Gastronomía' : confirmMode === 'retail' ? 'Retail' : 'Servicios'}?
               </h3>
             </div>
             <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
