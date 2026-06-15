@@ -20,6 +20,7 @@ import { AuthCallback } from '@/pages/AuthCallback'
 import { ForgotPassword } from '@/pages/ForgotPassword'
 import { ResetPassword } from '@/pages/ResetPassword'
 import { ReservationFormPage } from '@/modules/public/pages/ReservationFormPage'
+import { RequirePlan } from '@/app/RequirePlan'
 
 // Heavy modules — lazy loaded
 const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
@@ -41,7 +42,21 @@ const GastosPage       = lazy(() => import('@/modules/pos/pages/GastosPage').the
 const InventarioPage   = lazy(() => import('@/modules/inventory/pages/InventarioPage'))
 const CatalogoPage     = lazy(() => import('@/modules/catalog/pages/CatalogoPage'))
 const CatalogoPublic   = lazy(() => import('@/modules/public/pages/CatalogoPublic'))
-const HubPage          = lazy(() => import('@/modules/hub/pages/HubPage'))
+const HubPage                = lazy(() => import('@/modules/hub/pages/HubPage'))
+const ServicesClientesPage   = lazy(() => import('@/modules/services/pages/ServicesClientesPage').then(m => ({ default: m.ServicesClientesPage })))
+const CustomerProfilePage    = lazy(() => import('@/modules/services/pages/CustomerProfilePage').then(m => ({ default: m.CustomerProfilePage })))
+const ServicesAgendaPage     = lazy(() => import('@/modules/services/pages/ServicesAgendaPage').then(m => ({ default: m.ServicesAgendaPage })))
+const ServicesServiciosPage  = lazy(() => import('@/modules/services/pages/ServicesServiciosPage').then(m => ({ default: m.ServicesServiciosPage })))
+const ServicesRecursosPage   = lazy(() => import('@/modules/services/pages/ServicesRecursosPage').then(m => ({ default: m.ServicesRecursosPage })))
+const ServicesVentasPage     = lazy(() => import('@/modules/services/pages/ServicesVentasPage').then(m => ({ default: m.ServicesVentasPage })))
+const ServicesReportesPage   = lazy(() => import('@/modules/services/pages/ServicesReportesPage').then(m => ({ default: m.ServicesReportesPage })))
+const ServicesMembresiasPage = lazy(() => import('@/modules/services/pages/ServicesMembresiasPage').then(m => ({ default: m.ServicesMembresiasPage })))
+const ServicesPackagesPage   = lazy(() => import('@/modules/services/pages/ServicesPackagesPage').then(m => ({ default: m.ServicesPackagesPage })))
+const ServicesFormsPage         = lazy(() => import('@/modules/services/pages/ServicesFormsPage').then(m => ({ default: m.ServicesFormsPage })))
+const FormBuilderPage           = lazy(() => import('@/modules/services/pages/FormBuilderPage').then(m => ({ default: m.FormBuilderPage })))
+const ServicesPresupuestosPage  = lazy(() => import('@/modules/services/pages/ServicesPresupuestosPage').then(m => ({ default: m.ServicesPresupuestosPage })))
+const QuotePublicPage           = lazy(() => import('@/modules/public/pages/QuotePublicPage').then(m => ({ default: m.QuotePublicPage })))
+const PortalApp                 = lazy(() => import('@/modules/portal/PortalApp').then(m => ({ default: m.PortalApp })))
 
 function LoadingSpinner() {
   return (
@@ -91,7 +106,24 @@ function App() {
             <Route path="inventario"    element={<InventarioPage />} />
             <Route path="catalogo"      element={<CatalogoPage />} />
             <Route path="hub"           element={<HubPage />} />
+            {/* ── Servicios routes — all require os_full plan ── */}
+            <Route path="services/clientes"     element={<RequirePlan feature="services_catalog"><ServicesClientesPage /></RequirePlan>} />
+            <Route path="services/clientes/:id" element={<RequirePlan feature="services_catalog"><CustomerProfilePage /></RequirePlan>} />
+            <Route path="services/agenda"       element={<RequirePlan feature="agenda"><ServicesAgendaPage /></RequirePlan>} />
+            <Route path="services/servicios"    element={<RequirePlan feature="services_catalog"><ServicesServiciosPage /></RequirePlan>} />
+            <Route path="services/recursos"     element={<RequirePlan feature="resources"><ServicesRecursosPage /></RequirePlan>} />
+            <Route path="services/ventas"       element={<RequirePlan feature="services_catalog"><ServicesVentasPage /></RequirePlan>} />
+            <Route path="services/reportes"     element={<RequirePlan feature="analytics_advanced"><ServicesReportesPage /></RequirePlan>} />
+            <Route path="services/membresias"   element={<RequirePlan feature="services_catalog"><ServicesMembresiasPage /></RequirePlan>} />
+            <Route path="services/paquetes"     element={<RequirePlan feature="services_catalog"><ServicesPackagesPage /></RequirePlan>} />
+            <Route path="services/presupuestos" element={<RequirePlan feature="services_catalog"><ServicesPresupuestosPage /></RequirePlan>} />
+            <Route path="services/forms"              element={<RequirePlan feature="services_catalog"><ServicesFormsPage /></RequirePlan>} />
+            <Route path="services/forms/:id/builder"  element={<RequirePlan feature="services_catalog"><FormBuilderPage /></RequirePlan>} />
           </Route>
+          {/* Portal del cliente */}
+          <Route path="/portal/:restaurantId/*" element={<PortalApp />} />
+          {/* Cotizaciones públicas por token */}
+          <Route path="/q/:token" element={<QuotePublicPage />} />
           <Route path="/r/:slug/reservar"           element={<ReservationFormPage />} />
           <Route path="/r/:slug/pedido/:orderId"    element={<OrderTracking />} />
           <Route path="/r/:slug"                    element={<PublicMenu />} />

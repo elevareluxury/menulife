@@ -4,12 +4,13 @@ type Feature =
   | 'menu' | 'orders' | 'tables' | 'waiters' | 'kitchen'
   | 'delivery' | 'reservations' | 'crm' | 'pos' | 'caja'
   | 'inventory' | 'catalog' | 'analytics_advanced'
+  | 'agenda' | 'services_catalog' | 'resources'
 
 const PLAN_FEATURES: Record<string, Feature[]> = {
   hub_free:      [],
   os_gastronomy: ['menu','orders','tables','waiters','kitchen','delivery','reservations','crm','pos','caja','analytics_advanced'],
   os_retail:     ['inventory','catalog','crm','pos','caja','analytics_advanced'],
-  os_full:       ['menu','orders','tables','waiters','kitchen','delivery','reservations','crm','pos','caja','inventory','catalog','analytics_advanced'],
+  os_full:       ['menu','orders','tables','waiters','kitchen','delivery','reservations','crm','pos','caja','inventory','catalog','analytics_advanced','agenda','services_catalog','resources'],
 }
 
 export const usePlanGuard = () => {

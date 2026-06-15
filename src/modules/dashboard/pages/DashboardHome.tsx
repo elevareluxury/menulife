@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { Bell, ChevronRight, Package, AlertTriangle, XCircle, DollarSign, Banknote, ShoppingBag, Warehouse, BarChart2 } from 'lucide-react'
 import { BarChart, Bar, ResponsiveContainer, Cell } from 'recharts'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useRestaurantStore } from '@/store/restaurantStore'
@@ -9,6 +10,8 @@ import { useOrderStats } from '@/modules/dashboard/hooks/useOrderStats'
 import { useDashboardStats } from '@/modules/dashboard/hooks/useDashboardStats'
 import { formatPrice } from '@/lib/utils'
 import { InstallBanner } from '@/components/ui/InstallBanner'
+import { ServicesDashboard } from '@/modules/services/pages/ServicesDashboard'
+import { usePlanGuard } from '@/hooks/usePlanGuard'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -34,11 +37,11 @@ interface AlertItem {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
-function greeting(): string {
+function greetingKey(): 'dashboard.greeting_morning' | 'dashboard.greeting_afternoon' | 'dashboard.greeting_evening' {
   const h = new Date().getHours()
-  if (h < 12) return 'Buenos días'
-  if (h < 20) return 'Buenas tardes'
-  return 'Buenas noches'
+  if (h < 12) return 'dashboard.greeting_morning'
+  if (h < 20) return 'dashboard.greeting_afternoon'
+  return 'dashboard.greeting_evening'
 }
 
 function tableColor(t: LiveTable): string {
@@ -279,7 +282,7 @@ function ProgressCircle({ pct, size = 72 }: { pct: number; size?: number }) {
 // ─── Quick Access cards ───────────────────────────────────────────────────────
 
 interface QuickAccessProps {
-  businessType: 'gastronomy' | 'retail'
+  businessType: 'gastronomy' | 'retail' | 'services'
   activeOrders: number
   dashStats: { menuProducts: number; qrGenerated: number }
   stats: { week: { count: number } }
@@ -392,6 +395,13 @@ export function DashboardHome() {
   const { stats } = useOrderStats(restaurant?.id)
   const { stats: dashStats } = useDashboardStats(restaurant?.id)
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const { hasFeature } = usePlanGuard()
+
+  if (businessType === 'services') {
+    if (!hasFeature('services_catalog')) return <Navigate to="/dashboard/hub" replace />
+    return <ServicesDashboard />
+  }
 
   const liveTables      = useLiveTables(restaurant?.id)
   const alerts          = useAlerts(restaurant?.id)
@@ -438,7 +448,7 @@ export function DashboardHome() {
             </div>
           )}
           <div className="min-w-0">
-            <p className="text-xs text-gray-400 font-medium">{greeting()}</p>
+            <p className="text-xs text-gray-400 font-medium">{t(greetingKey())}</p>
             <h1 className="text-xl font-bold text-white leading-tight truncate">{restaurant?.name ?? 'MenuLife'}</h1>
           </div>
         </div>

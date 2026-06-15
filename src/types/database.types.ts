@@ -48,8 +48,8 @@ export type Database = {
           cover_image_url: string | null
           description: string | null
           description_en: string | null
-          default_currency: 'ARS' | 'USD'
-          default_language: 'ES' | 'EN'
+          default_currency: string
+          default_language: string
           timezone: string
           schedule: Json
           is_open: boolean
@@ -92,7 +92,7 @@ export type Database = {
           reservations_max_party: number | null
           reservations_time_slots: Json | null
           reservations_message: string | null
-          business_type: 'gastronomy' | 'retail' | null
+          business_type: 'gastronomy' | 'retail' | 'services' | null
         }
         Insert: {
           id?: string
@@ -152,7 +152,7 @@ export type Database = {
           reservations_max_party?: number | null
           reservations_time_slots?: Json | null
           reservations_message?: string | null
-          business_type?: 'gastronomy' | 'retail' | null
+          business_type?: 'gastronomy' | 'retail' | 'services' | null
         }
         Update: {
           id?: string
@@ -212,7 +212,7 @@ export type Database = {
           reservations_max_party?: number | null
           reservations_time_slots?: Json | null
           reservations_message?: string | null
-          business_type?: 'gastronomy' | 'retail' | null
+          business_type?: 'gastronomy' | 'retail' | 'services' | null
         }
         Relationships: []
       }
