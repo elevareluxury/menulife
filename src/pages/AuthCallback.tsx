@@ -25,14 +25,16 @@ export function AuthCallback() {
 
     async function redirectByRole(userId?: string) {
       const id = userId ?? (await supabase.auth.getUser()).data.user?.id
-      if (!id) { navigate('/dashboard', { replace: true }); return }
+      if (!id) { navigate('/life', { replace: true }); return }
       const [{ data: superAdmin }, { data: restaurant }] = await Promise.all([
         supabase.from('super_admins').select('id').eq('user_id', id).maybeSingle(),
         supabase.from('restaurants').select('plan').eq('owner_id', id).maybeSingle(),
       ])
       if (superAdmin) {
         navigate('/super-admin', { replace: true })
-      } else if (restaurant?.plan === 'hub_free') {
+      } else if (!restaurant) {
+        navigate('/life', { replace: true })
+      } else if (restaurant.plan === 'hub_free') {
         navigate('/dashboard/hub', { replace: true })
       } else {
         navigate('/dashboard', { replace: true })
