@@ -1,37 +1,52 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Home, ShoppingBag, LayoutGrid, UtensilsCrossed, MoreHorizontal,
   QrCode, Users, ChefHat, Settings, Truck, ContactRound, BarChart2,
   Banknote, Receipt, TrendingDown, Bell, Globe, Warehouse,
+  CalendarDays, Layers, FolderOpen, BadgeCheck, Package2,
+  ScrollText, ClipboardList, TrendingUp, FileText,
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useRestaurantStore } from '@/store/restaurantStore'
+import { useTerminology } from '@/modules/services/hooks/useTerminology'
 import { cn } from '@/lib/utils'
 
 interface MainTab {
   to: string
   icon: LucideIcon
-  labelKey: string
+  labelKey?: string
+  label?: string
   exact?: boolean
 }
 
 interface MoreItem {
   icon: LucideIcon
-  labelKey: string
+  labelKey?: string
+  label?: string
   to?: string
   href?: string
   external?: boolean
   sectionLabel?: string
 }
 
-const MAIN_TABS: MainTab[] = [
+const GASTRONOMY_RETAIL_TABS: MainTab[] = [
   { to: '/dashboard',        icon: Home,        labelKey: 'dashboard.nav_home',   exact: true },
   { to: '/dashboard/caja',   icon: Banknote,    labelKey: 'dashboard.nav_pos'                 },
   { to: '/dashboard/orders', icon: ShoppingBag, labelKey: 'dashboard.nav_orders'              },
 ]
+
+function useServicesMainTabs(): MainTab[] {
+  const { term } = useTerminology()
+  return useMemo(() => [
+    { to: '/dashboard',                   icon: Home,        labelKey: 'dashboard.nav_home', exact: true },
+    { to: '/dashboard/services/clientes', icon: ContactRound, label: term('customers')                   },
+    { to: '/dashboard/services/agenda',   icon: CalendarDays, labelKey: 'dashboard.nav_agenda'           },
+    { to: '/dashboard/services/servicios',icon: Layers,       label: term('services')                    },
+  ], [term])
+}
 
 function useIsActive(path: string, exact?: boolean) {
   const { pathname } = useLocation()
@@ -44,6 +59,7 @@ function TabItem({ tab, onClick }: { tab: MainTab; onClick: () => void }) {
   const active = useIsActive(tab.to, tab.exact)
   const Icon   = tab.icon
   const { t }  = useTranslation()
+  const text   = tab.label ?? t(tab.labelKey ?? '')
 
   return (
     <Link
@@ -62,7 +78,7 @@ function TabItem({ tab, onClick }: { tab: MainTab; onClick: () => void }) {
         strokeWidth={active ? 2.2 : 2}
       />
       <span className={cn('text-[10px] font-medium transition-colors duration-150', active ? 'text-brand' : 'text-ink-3')}>
-        {t(tab.labelKey)}
+        {text}
       </span>
     </Link>
   )
@@ -72,6 +88,10 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
   const [showMore, setShowMore] = useState(false)
   const { t } = useTranslation()
   const businessType = useRestaurantStore(s => s.businessType)
+  const { term } = useTerminology()
+
+  const servicesMainTabs = useServicesMainTabs()
+  const mainTabs = businessType === 'services' ? servicesMainTabs : GASTRONOMY_RETAIL_TABS
 
   const gastronomyMore: MoreItem[] = [
     { icon: LayoutGrid,   labelKey: 'dashboard.nav_tables',        to: '/dashboard/tables',        sectionLabel: 'Operaciones' },
@@ -104,7 +124,20 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
     { icon: Settings,     labelKey: 'dashboard.nav_settings',      to: '/dashboard/settings'       },
   ]
 
-  const moreItems = businessType === 'retail' ? retailMore : gastronomyMore
+  const servicesMore: MoreItem[] = [
+    { icon: FolderOpen,    label: term('resources'),    to: '/dashboard/services/recursos',    sectionLabel: 'Negocio' },
+    { icon: BadgeCheck,    label: term('memberships'),  to: '/dashboard/services/membresias'   },
+    { icon: Package2,      label: term('packages'),     to: '/dashboard/services/paquetes'     },
+    { icon: ScrollText,    label: term('quotes'),       to: '/dashboard/services/presupuestos' },
+    { icon: ClipboardList, labelKey: 'dashboard.nav_forms', to: '/dashboard/services/forms'   },
+    { icon: TrendingUp,    labelKey: 'dashboard.nav_ventas',   to: '/dashboard/services/ventas',   sectionLabel: 'Finanzas' },
+    { icon: FileText,      labelKey: 'dashboard.nav_reportes', to: '/dashboard/services/reportes' },
+    { icon: Globe,         labelKey: 'dashboard.nav_hub',      to: '/dashboard/hub',               sectionLabel: '·' },
+    { icon: Bell,          labelKey: 'dashboard.nav_notifications', to: '/dashboard/notificaciones' },
+    { icon: Settings,      labelKey: 'dashboard.nav_settings',     to: '/dashboard/settings'       },
+  ]
+
+  const moreItems = businessType === 'services' ? servicesMore : businessType === 'retail' ? retailMore : gastronomyMore
 
   const close = () => setShowMore(false)
 
@@ -142,10 +175,10 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
               className="overflow-hidden rounded-2xl"
               style={{ background: '#13161C', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-lg)' }}
             >
-              {moreItems.map(({ icon: Icon, labelKey, to, href, external, sectionLabel }, idx) => {
+              {moreItems.map(({ icon: Icon, labelKey, label: directLabel, to, href, external, sectionLabel }, idx) => {
                 const itemCls =
                   'flex items-center gap-3.5 px-5 py-3.5 text-[13px] font-medium text-ink-2 hover:text-ink-1 hover:bg-surface-3 transition-colors cursor-pointer'
-                const label = t(labelKey)
+                const label = directLabel ?? t(labelKey ?? '')
                 const inner = (
                   <>
                     <Icon className="w-4 h-4 text-ink-3 flex-shrink-0" strokeWidth={2} />
@@ -158,7 +191,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
                 )
 
                 return (
-                  <div key={labelKey}>
+                  <div key={labelKey ?? directLabel}>
                     {sectionLabel && sectionLabel !== '·' && (
                       <p style={{ padding: '10px 20px 4px', fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                         {sectionLabel}
@@ -197,7 +230,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
             borderTop: '1px solid var(--border-subtle)',
           }}
         >
-          {MAIN_TABS.map((tab) => (
+          {mainTabs.map((tab) => (
             <TabItem key={tab.to} tab={tab} onClick={close} />
           ))}
 

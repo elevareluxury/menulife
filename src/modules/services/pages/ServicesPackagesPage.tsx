@@ -4,11 +4,14 @@ import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { usePackageTemplates } from '../hooks/usePackageTemplates'
 import { PackageTemplateCard } from '../components/packages/PackageTemplateCard'
 import { CreatePackageTemplateDrawer } from '../components/packages/CreatePackageTemplateDrawer'
+import { useTerminology } from '../hooks/useTerminology'
+import { ServiceEmptyState } from '../components/ServiceEmptyState'
 import type { PackageTemplate } from '../packages/packageTypes'
 
 export function ServicesPackagesPage() {
   const { restaurant } = useRestaurant()
   const hook           = usePackageTemplates(restaurant?.id)
+  const { term }       = useTerminology()
 
   const [showCreate, setShowCreate] = useState(false)
   const [editTpl,    setEditTpl]    = useState<PackageTemplate | null>(null)
@@ -34,9 +37,9 @@ export function ServicesPackagesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-bold text-white">Paquetes</h1>
+          <h1 className="text-lg font-bold text-white">{term('packages')}</h1>
           <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Definí plantillas de paquetes para ofrecer a tus clientes
+            Definí plantillas para ofrecer a tus {term('customers').toLowerCase()}
           </p>
         </div>
         <button
@@ -78,25 +81,12 @@ export function ServicesPackagesPage() {
           />
         </div>
       ) : hook.templates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div
-            className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
-            style={{ background: 'rgba(244,112,90,0.08)', border: '1px solid rgba(244,112,90,0.15)' }}
-          >
-            <Package2 className="w-7 h-7" style={{ color: 'rgba(244,112,90,0.5)' }} />
-          </div>
-          <p className="text-sm font-semibold text-white mb-1">Sin plantillas creadas</p>
-          <p className="text-xs mb-5 max-w-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            Creá tu primera plantilla de paquete y empezá a vender bundles de sesiones, horas o créditos.
-          </p>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: '#F4705A', color: '#fff' }}
-          >
-            Crear primera plantilla
-          </button>
-        </div>
+        <ServiceEmptyState
+          icon={Package2}
+          title="Sin plantillas creadas"
+          description="Creá tu primera plantilla y empezá a vender bundles de sesiones, horas o créditos."
+          action={{ label: 'Crear primera plantilla', onClick: () => setShowCreate(true) }}
+        />
       ) : (
         <div className="space-y-3">
           {hook.templates.map(t => (

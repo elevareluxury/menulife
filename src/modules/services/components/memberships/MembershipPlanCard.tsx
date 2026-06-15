@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { MoreVertical, Edit2, Archive, MapPin } from 'lucide-react'
 import type { MembershipPlan } from '../../membership/membershipTypes'
 import { BILLING_CYCLE_LABELS, ALLOWANCE_TYPE_CONFIG } from '../../membership/membershipTypes'
+import { ServiceBadge } from '../ServiceBadge'
 
 interface MembershipPlanCardProps {
   plan:       MembershipPlan
@@ -42,26 +43,14 @@ export function MembershipPlanCard({ plan, onEdit, onArchive }: MembershipPlanCa
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Status badge */}
-            <span
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{
-                background: plan.status === 'active' ? 'rgba(34,197,94,0.12)' : 'rgba(107,114,128,0.12)',
-                color:      plan.status === 'active' ? '#22C55E'               : '#6B7280',
-              }}
-            >
+            <ServiceBadge variant={plan.status === 'active' ? 'success' : 'neutral'}>
               {plan.status === 'active' ? 'Activo' : 'Inactivo'}
-            </span>
+            </ServiceBadge>
 
-            {/* Visibility badge — multi-location signal */}
             {plan.visibility === 'specific_locations' && (
-              <span
-                className="flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                style={{ background: 'rgba(139,92,246,0.12)', color: '#8B5CF6' }}
-              >
-                <MapPin className="w-2.5 h-2.5" />
+              <ServiceBadge variant="purple" icon={<MapPin className="w-2.5 h-2.5" />}>
                 Local
-              </span>
+              </ServiceBadge>
             )}
 
             {(onEdit || onArchive) && (

@@ -4,11 +4,14 @@ import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useMembershipPlans } from '../hooks/useMembershipPlans'
 import { MembershipPlanCard } from '../components/memberships/MembershipPlanCard'
 import { CreatePlanDrawer } from '../components/memberships/CreatePlanDrawer'
+import { useTerminology } from '../hooks/useTerminology'
+import { ServiceEmptyState } from '../components/ServiceEmptyState'
 import type { MembershipPlan } from '../membership/membershipTypes'
 
 export function ServicesMembresiasPage() {
   const { restaurant } = useRestaurant()
   const plansHook      = useMembershipPlans(restaurant?.id)
+  const { term }       = useTerminology()
 
   const [showCreate, setShowCreate] = useState(false)
   const [editPlan,   setEditPlan]   = useState<MembershipPlan | null>(null)
@@ -34,9 +37,9 @@ export function ServicesMembresiasPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-bold text-white">Planes de Membresía</h1>
+          <h1 className="text-lg font-bold text-white">{term('memberships')}</h1>
           <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Definí los planes que podés ofrecer a tus clientes
+            Definí los planes que podés ofrecer a tus {term('customers').toLowerCase()}
           </p>
         </div>
         <button
@@ -78,25 +81,12 @@ export function ServicesMembresiasPage() {
           />
         </div>
       ) : plansHook.plans.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div
-            className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
-            style={{ background: 'rgba(244,112,90,0.08)', border: '1px solid rgba(244,112,90,0.15)' }}
-          >
-            <BadgeCheck className="w-7 h-7" style={{ color: 'rgba(244,112,90,0.5)' }} />
-          </div>
-          <p className="text-sm font-semibold text-white mb-1">Sin planes creados</p>
-          <p className="text-xs mb-5 max-w-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            Creá tu primer plan de membresía y empezá a construir ingresos recurrentes.
-          </p>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: '#F4705A', color: '#fff' }}
-          >
-            Crear primer plan
-          </button>
-        </div>
+        <ServiceEmptyState
+          icon={BadgeCheck}
+          title="Sin planes creados"
+          description="Creá tu primer plan y empezá a construir ingresos recurrentes."
+          action={{ label: 'Crear primer plan', onClick: () => setShowCreate(true) }}
+        />
       ) : (
         <div className="space-y-3">
           {plansHook.plans.map(plan => (

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useAnalytics } from '../hooks/useAnalytics'
+import { useTerminology } from '../hooks/useTerminology'
 import type { ComparisonPeriod, KPIResult, TrendDirection } from '../analytics/analyticsTypes'
 import { PERIOD_LABELS, formatAnalyticsValue } from '../analytics/analyticsTypes'
 
@@ -82,6 +83,7 @@ function MetricRow({ label, value, color, bar, total }: {
 export function ServicesReportesPage() {
   const { restaurant }  = useRestaurant()
   const analytics       = useAnalytics(restaurant?.id)
+  const { term }        = useTerminology()
 
   useEffect(() => {
     if (restaurant?.id) analytics.load('week')
@@ -142,7 +144,7 @@ export function ServicesReportesPage() {
               sub={`${health.sales_today.value} ventas`}
             />
             <KPICard
-              label="Clientes Nuevos"
+              label={`${term('customers')} Nuevos`}
               kpi={health.new_customers}
               icon={<Users className="w-4 h-4" />}
               color="#3B82F6"

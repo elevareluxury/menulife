@@ -123,10 +123,10 @@ function useServicesNav(): NavGroup[] {
       items: [
         { to: '/dashboard/services/servicios',  icon: Layers,     label: term('services')   },
         { to: '/dashboard/services/recursos',   icon: FolderOpen, label: term('resources')  },
-        { to: '/dashboard/services/membresias',   icon: BadgeCheck,    label: 'Membresías'    },
-        { to: '/dashboard/services/paquetes',    icon: Package2,      label: 'Paquetes'      },
-        { to: '/dashboard/services/presupuestos',icon: ScrollText,    label: 'Presupuestos'  },
-        { to: '/dashboard/services/forms',       icon: ClipboardList, label: 'Formularios'   },
+        { to: '/dashboard/services/membresias',   icon: BadgeCheck,    label: term('memberships') },
+        { to: '/dashboard/services/paquetes',    icon: Package2,      label: term('packages')    },
+        { to: '/dashboard/services/presupuestos',icon: ScrollText,    label: term('quotes')      },
+        { to: '/dashboard/services/forms',       icon: ClipboardList, labelKey: 'dashboard.nav_forms' },
       ],
     },
     {

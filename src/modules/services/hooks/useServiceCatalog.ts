@@ -10,6 +10,7 @@ export function useServiceCatalog(restaurantId: string | undefined) {
   const [items, setItems] = useState<ServiceCatalogItem[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Active-only — for booking drawer and public selectors
   const fetch = useCallback(async () => {
     if (!restaurantId) { setLoading(false); return }
     setLoading(true)
@@ -28,22 +29,41 @@ export function useServiceCatalog(restaurantId: string | undefined) {
     }
   }, [restaurantId])
 
+  // All items (active + inactive) — for management page
+  const fetchForManagement = useCallback(async () => {
+    if (!restaurantId) { setLoading(false); return }
+    setLoading(true)
+    try {
+      const { data, error } = await db
+        .from('service_catalog')
+        .select('*')
+        .eq('restaurant_id', restaurantId)
+        .order('sort_order')
+        .order('created_at')
+      if (error) throw error
+      setItems(data ?? [])
+    } finally {
+      setLoading(false)
+    }
+  }, [restaurantId])
+
   useEffect(() => { fetch() }, [fetch])
 
-  const create = async (input: Partial<ServiceCatalogItem>): Promise<boolean> => {
+  // Returns the new item's UUID on success, null on failure
+  const create = async (input: Partial<ServiceCatalogItem>): Promise<string | null> => {
     try {
-      const { error } = await db.from('service_catalog').insert({
-        ...input,
-        restaurant_id: restaurantId,
-        sort_order: items.length,
-      })
+      const { data, error } = await db
+        .from('service_catalog')
+        .insert({ ...input, restaurant_id: restaurantId, sort_order: items.length })
+        .select('id')
+        .single()
       if (error) throw error
-      await fetch()
+      await fetchForManagement()
       toast.success('Servicio creado')
-      return true
+      return (data as { id: string }).id
     } catch {
       toast.error('Error al crear el servicio')
-      return false
+      return null
     }
   }
 
@@ -59,9 +79,23 @@ export function useServiceCatalog(restaurantId: string | undefined) {
     }
   }
 
+  const toggleActive = async (id: string, isActive: boolean): Promise<boolean> => {
+    try {
+      const { error } = await db.from('service_catalog').update({ is_active: isActive }).eq('id', id)
+      if (error) throw error
+      setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: isActive } : i))
+      toast.success(isActive ? 'Servicio activado' : 'Servicio desactivado')
+      return true
+    } catch {
+      toast.error('Error al actualizar')
+      return false
+    }
+  }
+
   const remove = async (id: string): Promise<void> => {
     try {
-      await db.from('service_catalog').update({ is_active: false }).eq('id', id)
+      const { error } = await db.from('service_catalog').delete().eq('id', id)
+      if (error) throw error
       setItems(prev => prev.filter(i => i.id !== id))
       toast.success('Servicio eliminado')
     } catch {
@@ -69,5 +103,5 @@ export function useServiceCatalog(restaurantId: string | undefined) {
     }
   }
 
-  return { items, loading, fetch, create, update, remove }
+  return { items, loading, fetch, fetchForManagement, create, update, toggleActive, remove }
 }

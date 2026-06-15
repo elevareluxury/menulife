@@ -249,6 +249,7 @@ export default {
     nav_agenda: 'Agenda',
     nav_servicios: 'Services',
     nav_recursos: 'Ressources',
+    nav_forms: 'Formulaires',
     nav_ventas: 'Ventes',
     nav_reportes: 'Rapports',
 

@@ -3,6 +3,7 @@ import { MoreVertical, Edit2, Archive } from 'lucide-react'
 import type { PackageTemplate } from '../../packages/packageTypes'
 import { CONSUMPTION_STRATEGY_CONFIG } from '../../packages/packageTypes'
 import { ALLOWANCE_TYPE_CONFIG } from '../../membership/membershipTypes'
+import { ServiceBadge } from '../ServiceBadge'
 
 interface PackageTemplateCardProps {
   template:  PackageTemplate
@@ -43,15 +44,9 @@ export function PackageTemplateCard({ template, onEdit, onArchive }: PackageTemp
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{
-                background: template.status === 'active' ? 'rgba(34,197,94,0.12)' : 'rgba(107,114,128,0.12)',
-                color:      template.status === 'active' ? '#22C55E'               : '#6B7280',
-              }}
-            >
+            <ServiceBadge variant={template.status === 'active' ? 'success' : 'neutral'}>
               {template.status === 'active' ? 'Activo' : 'Inactivo'}
-            </span>
+            </ServiceBadge>
 
             {(onEdit || onArchive) && (
               <div className="relative">

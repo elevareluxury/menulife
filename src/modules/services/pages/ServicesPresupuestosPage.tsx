@@ -4,11 +4,14 @@ import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useQuoteTemplates } from '../hooks/useQuoteTemplates'
 import { QuoteTemplateCard } from '../components/quotes/QuoteTemplateCard'
 import { CreateQuoteTemplateDrawer } from '../components/quotes/CreateQuoteTemplateDrawer'
+import { useTerminology } from '../hooks/useTerminology'
+import { ServiceEmptyState } from '../components/ServiceEmptyState'
 import type { QuoteTemplate } from '../quotes/quoteTypes'
 
 export function ServicesPresupuestosPage() {
   const { restaurant } = useRestaurant()
   const hook           = useQuoteTemplates(restaurant?.id)
+  const { term }       = useTerminology()
 
   const [showCreate, setShowCreate] = useState(false)
   const [editTpl,    setEditTpl]    = useState<QuoteTemplate | null>(null)
@@ -34,7 +37,7 @@ export function ServicesPresupuestosPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-bold text-white">Presupuestos</h1>
+          <h1 className="text-lg font-bold text-white">{term('quotes')}</h1>
           <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
             Plantillas reutilizables para crear cotizaciones y propuestas
           </p>
@@ -78,25 +81,12 @@ export function ServicesPresupuestosPage() {
           />
         </div>
       ) : hook.templates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div
-            className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
-            style={{ background: 'rgba(244,112,90,0.08)', border: '1px solid rgba(244,112,90,0.15)' }}
-          >
-            <ScrollText className="w-7 h-7" style={{ color: 'rgba(244,112,90,0.5)' }} />
-          </div>
-          <p className="text-sm font-semibold text-white mb-1">Sin plantillas creadas</p>
-          <p className="text-xs mb-5 max-w-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            Creá tu primera plantilla para empezar a generar cotizaciones y cerrar ventas más rápido.
-          </p>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: '#F4705A', color: '#fff' }}
-          >
-            Crear primera plantilla
-          </button>
-        </div>
+        <ServiceEmptyState
+          icon={ScrollText}
+          title="Sin plantillas creadas"
+          description="Creá tu primera plantilla para generar cotizaciones y cerrar ventas más rápido."
+          action={{ label: 'Crear primera plantilla', onClick: () => setShowCreate(true) }}
+        />
       ) : (
         <div className="space-y-3">
           {hook.templates.map(t => (
