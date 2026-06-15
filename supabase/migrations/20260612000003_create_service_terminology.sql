@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS service_terminology (
 
 ALTER TABLE service_terminology ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "owner_all" ON service_terminology;
 CREATE POLICY "owner_all" ON service_terminology
   FOR ALL USING (
     restaurant_id IN (
@@ -26,6 +27,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trg_service_terminology_updated_at ON service_terminology;
 CREATE TRIGGER trg_service_terminology_updated_at
   BEFORE UPDATE ON service_terminology
   FOR EACH ROW EXECUTE FUNCTION update_service_terminology_updated_at();

@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS service_membership_plans (
 );
 
 ALTER TABLE service_membership_plans ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "smp_owner" ON service_membership_plans;
 CREATE POLICY "smp_owner" ON service_membership_plans
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -60,6 +61,7 @@ CREATE OR REPLACE FUNCTION membership_engine_update_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$;
 
+DROP TRIGGER IF EXISTS trg_smp_uat ON service_membership_plans;
 CREATE TRIGGER trg_smp_uat
   BEFORE UPDATE ON service_membership_plans
   FOR EACH ROW EXECUTE FUNCTION membership_engine_update_updated_at();
@@ -87,6 +89,7 @@ CREATE TABLE IF NOT EXISTS service_memberships (
 );
 
 ALTER TABLE service_memberships ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "sm_owner" ON service_memberships;
 CREATE POLICY "sm_owner" ON service_memberships
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -101,6 +104,7 @@ CREATE INDEX IF NOT EXISTS idx_sm_plan
 CREATE INDEX IF NOT EXISTS idx_sm_location
   ON service_memberships(location_id) WHERE location_id IS NOT NULL;
 
+DROP TRIGGER IF EXISTS trg_sm_uat ON service_memberships;
 CREATE TRIGGER trg_sm_uat
   BEFORE UPDATE ON service_memberships
   FOR EACH ROW EXECUTE FUNCTION membership_engine_update_updated_at();
@@ -123,6 +127,7 @@ CREATE TABLE IF NOT EXISTS service_membership_usage (
 );
 
 ALTER TABLE service_membership_usage ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "smu_owner" ON service_membership_usage;
 CREATE POLICY "smu_owner" ON service_membership_usage
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 

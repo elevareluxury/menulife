@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS service_catalog (
 );
 
 ALTER TABLE service_catalog ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_catalog;
 CREATE POLICY "owner_all" ON service_catalog
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -59,6 +60,7 @@ CREATE TABLE IF NOT EXISTS service_catalog_resources (
 );
 
 ALTER TABLE service_catalog_resources ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_catalog_resources;
 CREATE POLICY "owner_all" ON service_catalog_resources
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -121,6 +123,7 @@ CREATE TABLE IF NOT EXISTS service_bookings (
 );
 
 ALTER TABLE service_bookings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_bookings;
 CREATE POLICY "owner_all" ON service_bookings
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -147,6 +150,7 @@ CREATE TABLE IF NOT EXISTS service_booking_resources (
 );
 
 ALTER TABLE service_booking_resources ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_booking_resources;
 CREATE POLICY "owner_all" ON service_booking_resources
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -168,6 +172,7 @@ CREATE TABLE IF NOT EXISTS service_booking_waitlist (
 );
 
 ALTER TABLE service_booking_waitlist ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_booking_waitlist;
 CREATE POLICY "owner_all" ON service_booking_waitlist
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -192,6 +197,7 @@ CREATE TABLE IF NOT EXISTS service_blocks (
 );
 
 ALTER TABLE service_blocks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_blocks;
 CREATE POLICY "owner_all" ON service_blocks
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -203,10 +209,12 @@ CREATE OR REPLACE FUNCTION booking_engine_update_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$;
 
+DROP TRIGGER IF EXISTS trg_service_catalog_uat ON service_catalog;
 CREATE TRIGGER trg_service_catalog_uat
   BEFORE UPDATE ON service_catalog
   FOR EACH ROW EXECUTE FUNCTION booking_engine_update_updated_at();
 
+DROP TRIGGER IF EXISTS trg_service_bookings_uat ON service_bookings;
 CREATE TRIGGER trg_service_bookings_uat
   BEFORE UPDATE ON service_bookings
   FOR EACH ROW EXECUTE FUNCTION booking_engine_update_updated_at();

@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS service_resource_types (
 );
 
 ALTER TABLE service_resource_types ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_resource_types;
 CREATE POLICY "owner_all" ON service_resource_types
   FOR ALL USING (
     is_system = true
@@ -97,6 +98,7 @@ CREATE TABLE IF NOT EXISTS service_resources (
 );
 
 ALTER TABLE service_resources ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_resources;
 CREATE POLICY "owner_all" ON service_resources
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -119,6 +121,7 @@ CREATE TABLE IF NOT EXISTS service_resource_schedules (
 );
 
 ALTER TABLE service_resource_schedules ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_resource_schedules;
 CREATE POLICY "owner_all" ON service_resource_schedules
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -138,6 +141,7 @@ CREATE TABLE IF NOT EXISTS service_resource_blocks (
 );
 
 ALTER TABLE service_resource_blocks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_resource_blocks;
 CREATE POLICY "owner_all" ON service_resource_blocks
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -149,10 +153,12 @@ CREATE OR REPLACE FUNCTION service_resources_update_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$;
 
+DROP TRIGGER IF EXISTS trg_service_resource_types_uat ON service_resource_types;
 CREATE TRIGGER trg_service_resource_types_uat
   BEFORE UPDATE ON service_resource_types
   FOR EACH ROW EXECUTE FUNCTION service_resources_update_updated_at();
 
+DROP TRIGGER IF EXISTS trg_service_resources_uat ON service_resources;
 CREATE TRIGGER trg_service_resources_uat
   BEFORE UPDATE ON service_resources
   FOR EACH ROW EXECUTE FUNCTION service_resources_update_updated_at();

@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS service_customers (
 );
 
 ALTER TABLE service_customers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_customers;
 CREATE POLICY "owner_all" ON service_customers
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -80,6 +81,7 @@ CREATE OR REPLACE FUNCTION service_customers_update_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$;
 
+DROP TRIGGER IF EXISTS trg_service_customers_uat ON service_customers;
 CREATE TRIGGER trg_service_customers_uat
   BEFORE UPDATE ON service_customers
   FOR EACH ROW EXECUTE FUNCTION service_customers_update_updated_at();
@@ -106,6 +108,7 @@ CREATE TABLE IF NOT EXISTS service_customer_scores (
 );
 
 ALTER TABLE service_customer_scores ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_customer_scores;
 CREATE POLICY "owner_all" ON service_customer_scores
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
@@ -114,6 +117,7 @@ CREATE INDEX IF NOT EXISTS idx_scs_restaurant_tier
 CREATE INDEX IF NOT EXISTS idx_scs_customer
   ON service_customer_scores(customer_id);
 
+DROP TRIGGER IF EXISTS trg_service_customer_scores_uat ON service_customer_scores;
 CREATE TRIGGER trg_service_customer_scores_uat
   BEFORE UPDATE ON service_customer_scores
   FOR EACH ROW EXECUTE FUNCTION service_customers_update_updated_at();
@@ -140,6 +144,7 @@ CREATE TABLE IF NOT EXISTS service_customer_timeline (
 );
 
 ALTER TABLE service_customer_timeline ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "owner_all" ON service_customer_timeline;
 CREATE POLICY "owner_all" ON service_customer_timeline
   FOR ALL USING (restaurant_id IN (SELECT id FROM restaurants WHERE owner_id = auth.uid()));
 
