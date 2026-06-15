@@ -817,7 +817,7 @@ export function BusinessSettings() {
     <div className="space-y-5">
       {/* Tipo de Negocio */}
       <SectionCard title="Tipo de Negocio" description="Seleccioná el tipo para personalizar tu panel.">
-        <div className={cn('grid gap-3', restaurant?.plan === 'os_full' ? 'grid-cols-3' : 'grid-cols-2')}>
+        <div className={cn('grid gap-3', restaurant?.plan === 'os_full' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2')}>
           {([
             {
               mode: 'gastronomy' as const,
@@ -835,7 +835,7 @@ export function BusinessSettings() {
               mode: 'services' as const,
               icon: CalendarDays,
               label: 'Servicios',
-              desc: 'Turnos, clientes, agenda, membresías',
+              desc: 'Academias, gimnasios, estudios, consultorios',
             }] : []),
           ]).map(({ mode, icon: Icon, label, desc }) => (
             <button
