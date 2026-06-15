@@ -6,6 +6,7 @@ import { useFormTemplates } from '../hooks/useFormTemplates'
 import { useFormFields } from '../hooks/useFormFields'
 import { FormTemplateCard } from '../components/forms/FormTemplateCard'
 import { FormPreview } from '../components/forms/FormPreview'
+import { ServiceEmptyState } from '../components/ServiceEmptyState'
 import type { FormTemplate } from '../forms/formTypes'
 
 function CreateFormModal({
@@ -166,25 +167,12 @@ export function ServicesFormsPage() {
             style={{ borderColor: 'rgba(255,255,255,0.08)', borderTopColor: '#F4705A' }} />
         </div>
       ) : templateHook.templates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div
-            className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
-            style={{ background: 'rgba(244,112,90,0.08)', border: '1px solid rgba(244,112,90,0.15)' }}
-          >
-            <ClipboardList className="w-7 h-7" style={{ color: 'rgba(244,112,90,0.5)' }} />
-          </div>
-          <p className="text-sm font-semibold text-white mb-1">Sin formularios creados</p>
-          <p className="text-xs mb-5 max-w-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            Creá fichas, historias clínicas, encuestas, briefs o cualquier estructura de información para tus clientes.
-          </p>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: '#F4705A', color: '#fff' }}
-          >
-            Crear primer formulario
-          </button>
-        </div>
+        <ServiceEmptyState
+          icon={ClipboardList}
+          title="Sin formularios creados"
+          description="Creá fichas, historias clínicas, encuestas, briefs o cualquier estructura de información para tus clientes."
+          action={{ label: 'Crear primer formulario', onClick: () => setShowCreate(true) }}
+        />
       ) : (
         <div className="space-y-3">
           {templateHook.templates.map(t => (
