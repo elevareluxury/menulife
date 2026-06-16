@@ -94,7 +94,7 @@ function App() {
           <Route path="/reset-password"   element={<ResetPassword />} />
           <Route path="/solicitar-acceso" element={<Navigate to="/register" replace />} />
           <Route path="/onboarding" element={<OnboardingFlow />} />
-          <Route path="/dashboard" element={<DashboardPage />}>
+          <Route path="/dashboard" element={<ErrorBoundary label="dashboard"><DashboardPage /></ErrorBoundary>}>
             <Route index element={<DashboardHome />} />
             <Route path="menu"          element={<MenuManagement />} />
             <Route path="qr"            element={<QRGenerator />} />

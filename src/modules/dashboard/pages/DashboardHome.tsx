@@ -86,6 +86,7 @@ function useLiveTables(restaurantId: string | undefined) {
   }, [restaurantId])
 
   useEffect(() => {
+    if (!restaurantId) return
     fetch()
     const ch = supabase
       .channel(`live_tables_${restaurantId}`)
@@ -124,6 +125,7 @@ function useAlerts(restaurantId: string | undefined) {
   }, [restaurantId])
 
   useEffect(() => {
+    if (!restaurantId) return
     fetch()
     const ch = supabase
       .channel(`alerts_${restaurantId}`)

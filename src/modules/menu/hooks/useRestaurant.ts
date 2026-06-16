@@ -25,12 +25,12 @@ export function useRestaurant() {
           .from('restaurants')
           .select('*')
           .eq('owner_id', user!.id)
-          .single()
+          .maybeSingle()
 
         if (!active) return
         clearTimeout(timer)
         if (error) throw error
-        setRestaurant(data as Restaurant)
+        setRestaurant(data as Restaurant | null)
       } catch (error) {
         console.error('Error fetching restaurant:', error)
       } finally {

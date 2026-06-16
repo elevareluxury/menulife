@@ -1,7 +1,7 @@
 import { Component, ReactNode } from 'react'
 
 class ErrorBoundary extends Component<
-  { children: ReactNode },
+  { children: ReactNode; label?: string },
   { hasError: boolean; error: Error | null }
 > {
   constructor(props: any) {
@@ -14,7 +14,7 @@ class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: any) {
-    console.error('HUB ERROR:', error, info)
+    console.error(`[ErrorBoundary:${this.props.label ?? 'app'}]`, error, info)
   }
 
   render() {
@@ -32,13 +32,27 @@ class ErrorBoundary extends Component<
           fontFamily: 'DM Sans, sans-serif',
         }}>
           <h1 style={{ fontSize: '24px', marginBottom: '12px' }}>
-            Error en el Hub
+            Algo salió mal
           </h1>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginBottom: '16px' }}>
+            Recargá la página para continuar.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '10px 20px', borderRadius: '10px',
+              background: '#F4705A', color: '#fff',
+              fontSize: '14px', fontWeight: 600,
+              border: 'none', cursor: 'pointer', marginBottom: '24px',
+            }}
+          >
+            Recargar
+          </button>
           <pre style={{
             background: 'rgba(255,255,255,0.05)',
             padding: '16px',
             borderRadius: '8px',
-            fontSize: '12px',
+            fontSize: '11px',
             color: '#EF4444',
             maxWidth: '100%',
             overflow: 'auto',
