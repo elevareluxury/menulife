@@ -398,11 +398,7 @@ export function DashboardHome() {
   const { t } = useTranslation()
   const { hasFeature } = usePlanGuard()
 
-  if (businessType === 'services') {
-    if (!hasFeature('services_catalog')) return <Navigate to="/dashboard/hub" replace />
-    return <ServicesDashboard />
-  }
-
+  // All hooks must be called before any conditional return (Rules of Hooks)
   const liveTables      = useLiveTables(restaurant?.id)
   const alerts          = useAlerts(restaurant?.id)
   const hourlyData      = useHourlySalesToday(restaurant?.id)
@@ -410,6 +406,11 @@ export function DashboardHome() {
   const notifCount      = useOwnerNotifications(restaurant?.id)
   const invSummary      = useInventorySummary(businessType === 'retail' ? restaurant?.id : undefined)
   const cajaAbierta     = useCashRegisterOpen(businessType === 'retail' ? restaurant?.id : undefined)
+
+  if (businessType === 'services') {
+    if (!hasFeature('services_catalog')) return <Navigate to="/dashboard/hub" replace />
+    return <ServicesDashboard />
+  }
 
   const dailyGoal     = (restaurant as Record<string, unknown> | null)?.daily_sales_goal as number
     ?? ((restaurant?.features as Record<string, unknown>)?.daily_goal as number)

@@ -32,7 +32,7 @@ export function DashboardPage() {
     return () => clearTimeout(t)
   }, [])
 
-  if ((!initialized || loading) && !timedOut) {
+  if ((!initialized || loading || restaurantLoading) && !timedOut) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-1">
         <Spinner size="lg" />
