@@ -56,7 +56,8 @@
       "Bash(echo \"Exit code: $?\")",
       "Bash(Select-Object Name, PSIsContainer)",
       "Bash(npx grep *)",
-      "Bash(Sort-Object)"
+      "Bash(Sort-Object)",
+      "Bash(curl *)"
     ]
   }
 }
