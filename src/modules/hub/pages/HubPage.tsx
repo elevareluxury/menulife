@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Globe, Plus, Trash2, Eye, EyeOff, ExternalLink,
   ImageIcon, X, Star, GripVertical, Save, Download, Link2,
-  BarChart2,
+  BarChart2, ArrowLeft,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/store/authStore'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useImageUpload } from '@/modules/menu/hooks/useImageUpload'
 import { QRCodeSVG } from 'qrcode.react'
@@ -246,8 +248,15 @@ function ImageUploadArea({
 
 function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string | undefined }) {
   const { uploadImage, uploading } = useImageUpload()
+  const { user } = useAuthStore()
   const qrRef = useRef<HTMLDivElement>(null)
+  const fileAvatarRef = useRef<HTMLInputElement>(null)
   const [saving, setSaving] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
+    const m = (user as any)?.user_metadata ?? {}
+    return (m.avatar_url as string | undefined) ?? (m.picture as string | undefined) ?? ''
+  })
   const [tagInput, setTagInput] = useState('')
   const [tagInputEn, setTagInputEn] = useState('')
   const [form, setForm] = useState({
@@ -339,6 +348,25 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
     else setForm(p => ({ ...p, hub_category_tags_en: p.hub_category_tags_en.filter((_, idx) => idx !== i) }))
   }
 
+  async function handleAvatarUpload(file: File) {
+    setAvatarUploading(true)
+    try {
+      const r = await uploadImage(file, 'hub-assets')
+      if (r.success) {
+        await db.auth.updateUser({ data: { avatar_url: r.url } })
+        setAvatarUrl(r.url)
+        toast.success('Foto de perfil actualizada')
+      } else {
+        toast.error('Error al subir la foto')
+      }
+    } catch (e) {
+      toast.error('Error al subir la foto')
+      console.error(e)
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
+
   async function handleSave() {
     setSaving(true)
     try {
@@ -373,7 +401,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
       toast.success('Configuración guardada')
       await db.from('hub_config').upsert({
         restaurant_id: restaurantId,
-        accent_color: '#FFFFFF',
+        accent_color: '#F4705A',
         show_open_status:    hubConfig.show_open_status    ?? true,
         show_catalog_banner: hubConfig.show_catalog_banner ?? true,
         show_locations:      hubConfig.show_locations      ?? true,
@@ -421,6 +449,44 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
 
   return (
     <div className="space-y-5">
+      {/* Profile photo */}
+      <Card className="space-y-3">
+        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Foto de perfil</h3>
+        <p className="text-xs text-gray-500">Aparece en tu Hub público, en la esfera de Life y en el saludo.</p>
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => fileAvatarRef.current?.click()}
+            disabled={avatarUploading}
+            className="relative w-24 h-24 rounded-full overflow-hidden group"
+            style={{
+              background: 'linear-gradient(135deg, rgba(244,112,90,0.85) 0%, rgba(139,92,246,0.85) 100%)',
+              border: '2px solid rgba(255,255,255,0.12)',
+              cursor: 'pointer',
+            }}
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-white text-3xl font-bold select-none">
+                {((user as any)?.email?.[0] ?? '?').toUpperCase()}
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ background: 'rgba(0,0,0,0.55)' }}>
+              {avatarUploading ? (
+                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              ) : (
+                <span className="text-white text-xs font-semibold">Cambiar</span>
+              )}
+            </div>
+          </button>
+          <p className="text-xs text-gray-600">Tocá para cambiar · JPG o PNG</p>
+        </div>
+        <input ref={fileAvatarRef} type="file" accept="image/*" className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = '' }} />
+      </Card>
+
       {/* Cover image */}
       <Card className="space-y-3">
         <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Imagen de portada</h3>
@@ -1780,10 +1846,14 @@ function TabPreview({ slug }: { slug: string | undefined }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function HubPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const { restaurant, loading } = useRestaurant()
   const [activeTab, setActiveTab] = useState<Tab>('general')
   const [hubEnabled, setHubEnabled] = useState<boolean | null>(null)
   const [savingEnabled, setSavingEnabled] = useState(false)
+
+  const isLifeContext = location.pathname.startsWith('/life')
 
   useEffect(() => {
     if (restaurant?.id) {
@@ -1833,7 +1903,15 @@ export default function HubPage() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {isLifeContext && (
+            <button type="button" onClick={() => navigate('/life')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)' }}>
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Life
+            </button>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500 hidden sm:block">{hubEnabled ? 'Activo' : 'Inactivo'}</span>
             <button type="button" onClick={toggleHubEnabled}

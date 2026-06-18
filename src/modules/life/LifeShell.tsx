@@ -13,7 +13,7 @@ const db = supabase as any
 
 export function LifeShell() {
   const { user, loading, initialized } = useAuthStore()
-  const { setHasRestaurant, setRestaurantName, setRestaurantSlug } = useLifeStore()
+  const { setHasRestaurant, setRestaurantName, setRestaurantSlug, setRestaurantPlan } = useLifeStore()
   const [timedOut, setTimedOut] = useState(false)
 
   // Force body background dark so no white flash between Life OS pages
@@ -33,13 +33,14 @@ export function LifeShell() {
   useEffect(() => {
     if (!user) return
     db.from('restaurants')
-      .select('id,name,slug')
+      .select('id,name,slug,plan')
       .eq('owner_id', user.id)
       .maybeSingle()
-      .then(({ data }: { data: { id: string; name: string; slug: string } | null }) => {
+      .then(({ data }: { data: { id: string; name: string; slug: string; plan: string | null } | null }) => {
         setHasRestaurant(!!data)
         setRestaurantName(data?.name ?? null)
         setRestaurantSlug(data?.slug ?? null)
+        setRestaurantPlan(data?.plan ?? null)
       })
   }, [user, setHasRestaurant])
 

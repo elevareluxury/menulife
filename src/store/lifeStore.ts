@@ -12,6 +12,8 @@ interface LifeState {
   setRestaurantName: (v: string | null) => void
   restaurantSlug: string | null
   setRestaurantSlug: (v: string | null) => void
+  restaurantPlan: string | null
+  setRestaurantPlan: (v: string | null) => void
   achievementToast: AchievementToastData | null
   showAchievement: (a: AchievementToastData) => void
   clearAchievement: () => void
@@ -24,6 +26,8 @@ export const useLifeStore = create<LifeState>((set) => ({
   setRestaurantName: (v) => set({ restaurantName: v }),
   restaurantSlug: null,
   setRestaurantSlug: (v) => set({ restaurantSlug: v }),
+  restaurantPlan: null,
+  setRestaurantPlan: (v) => set({ restaurantPlan: v }),
   achievementToast: null,
   showAchievement: (a) => set({ achievementToast: a }),
   clearAchievement: () => set({ achievementToast: null }),

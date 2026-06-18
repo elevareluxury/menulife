@@ -459,7 +459,7 @@ function PageSkeleton() {
 export function LifePage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { hasRestaurant, restaurantSlug } = useLifeStore()
+  const { hasRestaurant, restaurantSlug, restaurantPlan } = useLifeStore()
   const { currency } = useLocaleStore()
   const data = useLifeData()
 
@@ -515,20 +515,22 @@ export function LifePage() {
                 {firstName}
               </p>
             </div>
-            {hasRestaurant && (
-              <button
-                onClick={() => navigate('/dashboard')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '4px',
-                  padding: '5px 11px', borderRadius: radius.full,
-                  background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
-                  color: colors.text.tertiary, fontFamily: font, fontSize: '11px', fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Mi negocio
-              </button>
-            )}
+            <button
+              onClick={() => {
+                const isPaid = restaurantPlan?.startsWith('os_') ?? false
+                if (isPaid) navigate('/dashboard')
+                else window.location.href = '/#pricing'
+              }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                padding: '5px 11px', borderRadius: radius.full,
+                background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+                color: colors.text.tertiary, fontFamily: font, fontSize: '11px', fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Mi negocio
+            </button>
           </motion.div>
 
           {/* ── Hub Digital ────────────────────────────────────────────────── */}

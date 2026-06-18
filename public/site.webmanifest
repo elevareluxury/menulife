@@ -1,10 +1,6 @@
 {
-  "name": "MenuLife",
-  "short_name": "MenuLife",
-  "theme_color": "#0F1115",
-  "background_color": "#0F1115",
-  "display": "standalone",
-  "start_url": "/",
+  "name": "MyWebSite",
+  "short_name": "MySite",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -18,5 +14,8 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
 }
