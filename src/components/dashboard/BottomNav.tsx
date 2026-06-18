@@ -175,8 +175,17 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
             style={{ bottom: 'calc(68px + env(safe-area-inset-bottom))', left: 12, right: 12 }}
           >
             <div
-              className="overflow-hidden rounded-2xl"
-              style={{ background: '#13161C', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-lg)' }}
+              className="rounded-2xl"
+              style={{
+                background: '#13161C',
+                border: '1px solid var(--border-default)',
+                boxShadow: 'var(--shadow-lg)',
+                overflowY: 'auto',
+                maxHeight: 'calc(100svh - 160px)',
+                WebkitOverflowScrolling: 'touch' as any,
+                overscrollBehavior: 'contain',
+                paddingBottom: 'max(env(safe-area-inset-bottom), 12px)',
+              }}
             >
               {moreItems.map(({ icon: Icon, labelKey, label: directLabel, to, href, external, sectionLabel }, idx) => {
                 const itemCls =
