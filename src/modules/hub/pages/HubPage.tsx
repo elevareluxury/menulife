@@ -27,7 +27,7 @@ import {
 import toast from 'react-hot-toast'
 
 const db = supabase as any
-const ACC = '#F59E0B'
+const ACC = '#F4705A'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -123,7 +123,7 @@ function svgToCanvas(svg: SVGElement, size: number): Promise<HTMLCanvasElement> 
 // ─── Shared UI ──────────────────────────────────────────────────────────────
 
 const inputCls =
-  'w-full rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 bg-[#0F1115] border border-gray-800 focus:outline-none transition-all resize-none focus:border-amber-500'
+  'w-full rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 bg-[#0F1115] border border-gray-800 focus:outline-none transition-all resize-none focus:border-[#F4705A]'
 
 function Field({
   label, value, onChange, placeholder, textarea, type = 'text',
@@ -233,7 +233,7 @@ function ImageUploadArea({
         </div>
       ) : (
         <button type="button" onClick={() => ref.current?.click()} disabled={uploading}
-          className="w-full h-24 rounded-xl border-dashed border-2 border-gray-700 flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-amber-400 hover:border-amber-500/50 transition-all">
+          className="w-full h-24 rounded-xl border-dashed border-2 border-gray-700 flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#F4705A] hover:border-[#F4705A]/50 transition-all">
           <ImageIcon className="w-6 h-6" />
           <span className="text-xs">{uploading ? 'Subiendo…' : 'Subir imagen'}</span>
         </button>
@@ -566,7 +566,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
                 <div className="flex flex-wrap gap-2">
                   {tags.map((t, i) => (
                     <span key={i} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs"
-                      style={{ background: 'rgba(245,158,11,0.15)', color: ACC }}>
+                      style={{ background: 'rgba(244,112,90,0.15)', color: ACC }}>
                       {t}
                       <button type="button" onClick={() => removeTag(lang, i)}>
                         <X className="w-3 h-3" />
@@ -784,7 +784,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
             </button>
             <button type="button" onClick={downloadSVG}
               className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
-              style={{ background: 'rgba(245,158,11,0.12)', color: ACC, border: `1px solid rgba(245,158,11,0.25)` }}>
+              style={{ background: 'rgba(244,112,90,0.12)', color: ACC, border: `1px solid rgba(244,112,90,0.25)` }}>
               <Download className="w-4 h-4" />
               Descargar SVG
             </button>
@@ -859,7 +859,7 @@ function SortableLinkItem({
             style={{
               background: 'transparent',
               border: 'none',
-              borderBottom: '1px solid #F59E0B',
+              borderBottom: '1px solid #F4705A',
               color: 'white',
               fontFamily: 'inherit',
               fontSize: '14px',
@@ -1433,7 +1433,7 @@ function TabGaleria({ restaurantId }: { restaurantId: string }) {
       {items.length === 0 ? (
         <Card>
           <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-            className="w-full h-32 flex flex-col items-center justify-center gap-3 text-gray-500 hover:text-amber-400 transition-all">
+            className="w-full h-32 flex flex-col items-center justify-center gap-3 text-gray-500 hover:text-[#F4705A] transition-all">
             <ImageIcon className="w-8 h-8" />
             <span className="text-sm">Subí las primeras fotos de tu local</span>
           </button>
@@ -1456,7 +1456,7 @@ function TabGaleria({ restaurantId }: { restaurantId: string }) {
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                 <button type="button" onClick={() => toggleItem(item)}
                   className="w-7 h-7 rounded-full bg-black/70 flex items-center justify-center">
-                  {item.is_active ? <EyeOff className="w-3.5 h-3.5 text-white" /> : <Eye className="w-3.5 h-3.5 text-amber-400" />}
+                  {item.is_active ? <EyeOff className="w-3.5 h-3.5 text-white" /> : <Eye className="w-3.5 h-3.5 text-[#F4705A]" />}
                 </button>
                 <button type="button" onClick={() => setEditCaption({ id: item.id, val: item.caption ?? '' })}
                   className="w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white text-xs font-bold">
@@ -1591,7 +1591,7 @@ function ReviewModal({ restaurantId, review, count, onClose, onSaved }: {
               {[1,2,3,4,5].map(n => (
                 <button key={n} type="button" onClick={() => setForm(p => ({ ...p, rating: n }))}
                   className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
-                  style={{ background: form.rating >= n ? 'rgba(245,158,11,0.2)' : 'transparent' }}>
+                  style={{ background: form.rating >= n ? 'rgba(244,112,90,0.2)' : 'transparent' }}>
                   <Star className="w-4 h-4" style={{ color: form.rating >= n ? ACC : '#374151', fill: form.rating >= n ? ACC : 'none' }} />
                 </button>
               ))}
@@ -1886,51 +1886,55 @@ export default function HubPage() {
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 mb-6">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(245,158,11,0.15)' }}>
-            <Globe className="w-5 h-5" style={{ color: ACC }} />
+      <div className="mb-6 space-y-3">
+        {/* Row 1: title/URL left — Life + toggle right */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(244,112,90,0.15)' }}>
+              <Globe className="w-5 h-5" style={{ color: ACC }} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Hub Público</h1>
+              {restaurant?.slug && (
+                <a href={`/${restaurant.slug}`} target="_blank" rel="noreferrer"
+                  className="text-xs font-mono px-2 py-0.5 rounded-md inline-block mt-0.5 hover:opacity-80 transition-all"
+                  style={{ background: 'rgba(244,112,90,0.12)', color: ACC }}>
+                  menulife.digital/{restaurant.slug}
+                </a>
+              )}
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">Hub Público</h1>
-            {restaurant?.slug && (
-              <a href={`/${restaurant.slug}`} target="_blank" rel="noreferrer"
-                className="text-xs font-mono px-2 py-0.5 rounded-md inline-block mt-0.5 hover:opacity-80 transition-all"
-                style={{ background: 'rgba(245,158,11,0.12)', color: ACC }}>
-                menulife.digital/{restaurant.slug}
-              </a>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {isLifeContext && (
+              <button type="button" onClick={() => navigate('/life')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)' }}>
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Life
+              </button>
             )}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 hidden sm:block">{hubEnabled ? 'Activo' : 'Inactivo'}</span>
+              <button type="button" onClick={toggleHubEnabled}
+                disabled={savingEnabled || hubEnabled === null}
+                className="relative w-11 h-6 rounded-full transition-all duration-200 disabled:opacity-50"
+                style={{ background: hubEnabled ? ACC : '#374151' }}>
+                <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+                  style={{ transform: hubEnabled ? 'translateX(20px)' : 'translateX(0)' }} />
+              </button>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {isLifeContext && (
-            <button type="button" onClick={() => navigate('/life')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)' }}>
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Life
-            </button>
-          )}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 hidden sm:block">{hubEnabled ? 'Activo' : 'Inactivo'}</span>
-            <button type="button" onClick={toggleHubEnabled}
-              disabled={savingEnabled || hubEnabled === null}
-              className="relative w-11 h-6 rounded-full transition-all duration-200 disabled:opacity-50"
-              style={{ background: hubEnabled ? ACC : '#374151' }}>
-              <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
-                style={{ transform: hubEnabled ? 'translateX(20px)' : 'translateX(0)' }} />
-            </button>
-          </div>
-          {restaurant?.slug && (
-            <button type="button" onClick={() => window.open(`/${restaurant.slug}`, '_blank')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
-              style={{ background: 'rgba(245,158,11,0.15)', color: ACC }}>
-              <ExternalLink className="w-3.5 h-3.5" />
-              Ver Hub
-            </button>
-          )}
-        </div>
+        {/* Row 2: Ver perfil — full width below */}
+        {restaurant?.slug && (
+          <button type="button" onClick={() => window.open(`/${restaurant.slug}`, '_blank')}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+            style={{ border: `1px solid rgba(244,112,90,0.35)`, color: ACC, background: 'rgba(244,112,90,0.06)' }}>
+            <ExternalLink className="w-4 h-4" />
+            Ver perfil público
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
