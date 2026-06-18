@@ -16,6 +16,13 @@ export function LifeShell() {
   const { setHasRestaurant, setRestaurantName, setRestaurantSlug } = useLifeStore()
   const [timedOut, setTimedOut] = useState(false)
 
+  // Force body background dark so no white flash between Life OS pages
+  useEffect(() => {
+    const prev = document.body.style.background
+    document.body.style.background = '#0A0B0F'
+    return () => { document.body.style.background = prev }
+  }, [])
+
   // Safety timeout — same pattern as DashboardPage
   useEffect(() => {
     const t = setTimeout(() => setTimedOut(true), 5_000)

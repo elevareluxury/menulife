@@ -37,15 +37,22 @@ export function useBrain() {
   const load = useCallback(async () => {
     if (!user) { setLoading(false); return }
     setLoading(true)
-    const { data } = await db
-      .from('life_brain_items')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_archived', false)
-      .order('created_at', { ascending: false })
-      .limit(200)
-    setItems(data ?? [])
-    setLoading(false)
+    try {
+      const { data, error } = await db
+        .from('life_brain_items')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_archived', false)
+        .order('created_at', { ascending: false })
+        .limit(200)
+      if (error) console.error('[useBrain] query error:', error)
+      setItems(data ?? [])
+    } catch (e) {
+      console.error('[useBrain] unexpected error:', e)
+      setItems([])
+    } finally {
+      setLoading(false)
+    }
   }, [user])
 
   useEffect(() => { load() }, [load])

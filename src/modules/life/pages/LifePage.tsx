@@ -262,7 +262,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
               Ver hub
             </button>
             <button
-              onClick={() => navigate('/dashboard/hub')}
+              onClick={() => navigate('/life/hub')}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '4px',
                 padding: '6px 12px', borderRadius: radius.full,
@@ -276,7 +276,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
           </div>
         ) : (
           <button
-            onClick={() => navigate('/dashboard/hub')}
+            onClick={() => navigate('/life/hub')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
               padding: '8px 16px', borderRadius: radius.full,
