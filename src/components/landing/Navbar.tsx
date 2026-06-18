@@ -35,7 +35,7 @@ export function Navbar() {
       }}>
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
+          <img src="/logo.png" alt="Mycen" className="h-8 w-auto" />
         </Link>
 
         {/* Desktop links */}

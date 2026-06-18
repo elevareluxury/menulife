@@ -71,8 +71,10 @@ export function FinalCTA() {
           marginBottom:  '20px',
           letterSpacing: '-0.03em',
         }}>
-          {t('cta_final.title')}{' '}
-          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('cta_final.title_accent')}</em>
+          {t('cta_final.title')}
+          {t('cta_final.title_accent') && (
+            <>{' '}<em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('cta_final.title_accent')}</em></>
+          )}
         </h2>
 
         <p data-cta-sub style={{
@@ -95,7 +97,7 @@ export function FinalCTA() {
               {t('cta_final.cta_primary')}
             </ShimmerButton>
           </Link>
-          <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost" style={{
+          <Link to="/register" className="liquid-glass-btn-ghost" style={{
             padding: '16px 36px',
             color: 'rgba(255,255,255,0.7)',
             fontSize: '16px', fontWeight: 500,

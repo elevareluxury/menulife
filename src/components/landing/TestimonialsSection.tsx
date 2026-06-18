@@ -19,8 +19,8 @@ const FALLBACK_TESTIMONIALS: Testimonial[] = [
     name: 'Rodrigo Altamirano',
     role: 'Dueño',
     business: 'Parrilla Don Rodrigo, Córdoba',
-    content: 'Lo que más me gustó fue poder ver todo desde el celular mientras estoy en casa. Las ventas del día, qué platos vendí más, si hay algún problema en cocina. Antes tenía que estar físicamente en el local. Ahora con MenuLife tengo el restaurante en el bolsillo, literalmente.',
-    content_en: "What I liked most was being able to see everything from my phone while at home. The day's sales, which dishes sold most, if there's any issue in the kitchen. Before I had to be physically at the restaurant. Now with MenuLife I have the restaurant in my pocket, literally.",
+    content: 'Lo que más me gustó fue poder ver todo desde el celular mientras estoy en casa. Las ventas del día, qué platos vendí más, si hay algún problema en cocina. Antes tenía que estar físicamente en el local. Ahora con Mycen tengo el restaurante en el bolsillo, literalmente.',
+    content_en: "What I liked most was being able to see everything from my phone while at home. The day's sales, which dishes sold most, if there's any issue in the kitchen. Before I had to be physically at the restaurant. Now with Mycen I have the restaurant in my pocket, literally.",
   },
   {
     id: 'f3',

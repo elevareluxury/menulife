@@ -21,7 +21,7 @@ export default {
   },
 
   trust_band: {
-    label: 'Businesses already using MenuLife',
+    label: 'Businesses already using Mycen',
   },
 
   experiences: {
@@ -91,7 +91,7 @@ export default {
     online: 'Online',
     copy: 'Your menu live in less than 10 minutes.',
     copy_2: 'No technicians, no training sessions, no excuses.',
-    msg1: '👋 Welcome to MenuLife! I\'ll set up your business in minutes.',
+    msg1: '👋 Welcome to Mycen! I\'ll set up your business in minutes.',
     msg2: '✅ Step 1: Your menu is live!\nHere\'s your onboarding link:',
     msg2_link: '🔗 menulife.app/setup/onboard',
     msg3: 'Great. How do my waiters log in?',
@@ -109,7 +109,7 @@ export default {
     t1_quote: 'Before, customers kept asking me prices and I had to run back and forth. Now they scan the QR and order on their own. The menu photos are beautiful and the direct payment button from the phone changed everything. My tables turn over faster and tips went up because the experience is different.',
     t2_name: 'Rodrigo Altamirano',
     t2_biz: 'Parrilla Don Rodrigo, Córdoba',
-    t2_quote: 'What I liked most was being able to see everything from my phone while I\'m at home. Today\'s sales, what dishes I sold most, if there\'s any issue in the kitchen. Before I had to be physically at the place. Now with MenuLife I have the restaurant in my pocket, literally.',
+    t2_quote: 'What I liked most was being able to see everything from my phone while I\'m at home. Today\'s sales, what dishes I sold most, if there\'s any issue in the kitchen. Before I had to be physically at the place. Now with Mycen I have the restaurant in my pocket, literally.',
     t3_name: 'Sebastián Cruz',
     t3_biz: 'Café del Puerto, Buenos Aires',
     t3_quote: 'My waiters learned the system in an afternoon. What surprised me is they manage everything from their phones — take orders, send them to the kitchen, collect payments. Before they had paper tickets that got lost. Now everything is real time and they no longer make order mistakes.',
@@ -162,7 +162,7 @@ export default {
     q2: 'Does it work with my payment methods?',
     a2: 'It works with all digital and cash payment methods. Use the ones your business already has.',
     q3: 'Do my staff need to learn something complicated?',
-    a3: 'Your team already knows how to use WhatsApp. MenuLife is just as simple. They learn it on their own when they start using it.',
+    a3: 'Your team already knows how to use WhatsApp. Mycen is just as simple. They learn it on their own when they start using it.',
     q4: 'Does it work for multiple locations?',
     a4: 'From the Professional plan you can manage multiple locations from a single account.',
     q5: 'Do I get support if I have a problem?',
@@ -171,10 +171,10 @@ export default {
 
   cta_final: {
     label: 'Start today',
-    title: 'Transform the experience',
-    title_accent: 'of your business.',
-    subtitle: 'Businesses are already using it. Are you going to wait?',
-    cta_primary: 'Request access →',
+    title: 'Start today.',
+    title_accent: '',
+    subtitle: 'Build your digital identity. Organize your life. Power your business.',
+    cta_primary: 'Create My Space Free →',
     cta_secondary: 'View demo',
   },
 
@@ -393,9 +393,9 @@ export default {
     col_company_l3: 'Contact',
     col_company_l4: 'Privacy',
     cta_title: 'Ready to start?',
-    cta_sub: 'More than 1,200 businesses already use MenuLife.',
+    cta_sub: 'More than 1,200 businesses already use Mycen.',
     cta_button: 'Request access →',
-    copyright: '© 2026 MenuLife. All rights reserved.',
+    copyright: '© 2026 Mycen. All rights reserved.',
     made: 'Made with ❤️ in Argentina',
   },
 }

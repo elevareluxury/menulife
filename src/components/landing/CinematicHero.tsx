@@ -11,9 +11,6 @@ export function CinematicHero() {
   const phoneContRef  = useRef<HTMLDivElement>(null)
   const badgeLeftRef  = useRef<HTMLDivElement>(null)
   const badgeRightRef = useRef<HTMLDivElement>(null)
-  const metricRef     = useRef<HTMLDivElement>(null)
-  const ctaRef        = useRef<HTMLDivElement>(null)
-  const counterRef    = useRef<HTMLSpanElement>(null)
   const phoneRef      = useRef<HTMLDivElement>(null)
   const screenRef     = useRef<HTMLDivElement>(null)
   const tlRef         = useRef<any>(null)
@@ -27,7 +24,6 @@ export function CinematicHero() {
     gsap.registerPlugin(ST)
 
     if (window.innerWidth <= 768) {
-      // Mobile: simple fade-in, no pin, no scrub
       gsap.fromTo(introRef.current,
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }
@@ -36,29 +32,6 @@ export function CinematicHero() {
         { opacity: 0, y: 50 },
         { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
           scrollTrigger: { trigger: cardRef.current, start: 'top 82%' }
-        }
-      )
-      gsap.fromTo(metricRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.6,
-          scrollTrigger: {
-            trigger: metricRef.current, start: 'top 85%',
-            onEnter: () => {
-              if (counterRef.current) {
-                gsap.to(counterRef.current, {
-                  textContent: 1240, duration: 1.5,
-                  snap: { textContent: 1 }, ease: 'power2.out',
-                })
-              }
-            },
-          }
-        }
-      )
-      // Mobile: CTA is a separate section below, animate on scroll-enter
-      gsap.fromTo(ctaRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
-          scrollTrigger: { trigger: ctaRef.current, start: 'top 85%' }
         }
       )
       return
@@ -101,33 +74,6 @@ export function CinematicHero() {
       { opacity: 0, x: 60, y: -20 },
       { opacity: 1, x: 0, y: 0, duration: 0.3 },
       '-=0.2'
-    )
-
-    // Counter anima de 0 a 1240
-    tl.fromTo(metricRef.current,
-      { opacity: 0, y: 30 },
-      {
-        opacity: 1, y: 0, duration: 0.3,
-        onStart: () => {
-          if (counterRef.current) {
-            gsap.to(counterRef.current, {
-              textContent: 1240,
-              duration: 1.5,
-              snap: { textContent: 1 },
-              ease: 'power2.out',
-              overwrite: true,
-            })
-          }
-        }
-      }
-    )
-
-    // CTA is now a separate section — animate it on scroll-enter after pin releases
-    gsap.fromTo(ctaRef.current,
-      { opacity: 0, y: 60 },
-      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
-        scrollTrigger: { trigger: ctaRef.current, start: 'top 85%' }
-      }
     )
 
     return () => {
@@ -185,7 +131,6 @@ export function CinematicHero() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
 
   return (
-    <>
     <section ref={sectionRef} className="ch-section">
 
       {/* Fondo de partículas — solo cubre la primera pantalla */}
@@ -203,7 +148,6 @@ export function CinematicHero() {
           particleCount={isMobile ? 200 : 400}
           speed={0.6}
         />
-        {/* Gradiente que desvanece las partículas hacia abajo */}
         <div style={{
           position: 'absolute',
           bottom: 0, left: 0, right: 0,
@@ -216,23 +160,42 @@ export function CinematicHero() {
       {/* FASE 1: Intro */}
       <div ref={introRef} className="ch-intro">
         <h1>
-          <span className="ch-line1">El sistema operativo</span>
-          <span className="ch-line2">del negocio moderno.</span>
+          <span className="ch-line1">Tu mundo digital</span>
+          <span className="ch-line2">en un solo lugar.</span>
         </h1>
         <p className="ch-subtitle">
-          Menús, pagos, herramientas para mozos y experiencias para clientes
-          — unificados en una sola plataforma premium.
+          Construye tu identidad digital, organiza tu vida y potencia tu negocio
+          desde una única plataforma.
         </p>
-
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '8px' }}>
+          <Link to="/register" style={{ textDecoration: 'none' }}>
+            <button className="liquid-glass-btn" style={{
+              padding: '12px 28px', fontSize: '14px', fontWeight: 600,
+              color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
+              borderRadius: '50px',
+            }}>
+              <span>Crear Mi Espacio Gratis →</span>
+            </button>
+          </Link>
+          <a href="#soluciones" style={{ textDecoration: 'none' }}>
+            <button className="liquid-glass-btn-ghost" style={{
+              padding: '12px 24px', fontSize: '14px', fontWeight: 500,
+              color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
+              borderRadius: '50px',
+            }}>
+              Ver Soluciones
+            </button>
+          </a>
+        </div>
       </div>
 
       {/* FASE 2: Card que sube con scroll */}
       <div ref={cardRef} className="ch-card">
         <div className="ch-card-content">
-          <h2 className="ch-card-heading">Todo el restaurante, una sola pantalla.</h2>
+          <h2 className="ch-card-heading">Tu identidad digital, tu negocio y tu vida. Todo en uno.</h2>
           <p className="ch-card-description">
-            <strong>Tu plataforma</strong> unifica el menú digital QR, pagos,
-            gestión de mozos y la experiencia del cliente — sin apps que instalar.
+            <strong>Mycen</strong> unifica tu Hub Digital, tu sistema personal y tu
+            plataforma de negocio — sin apps que instalar, sin silos.
           </p>
         </div>
 
@@ -245,63 +208,22 @@ export function CinematicHero() {
               className="ch-phone-screen"
               style={{ '--phone-scale': phoneScale } as React.CSSProperties}
             >
-              <iframe src="/r/test-restaurant" title="MenuLife Demo" />
+              <iframe src="/r/test-restaurant" title="Mycen Demo" />
             </div>
           </div>
 
           {/* Floating badges */}
           <div ref={badgeLeftRef} className="floating-badge ch-badge-left">
-            <span className="ch-badge-title">🧾 Nuevo pedido</span>
-            <span>Mesa 4 — 3 items</span>
+            <span className="ch-badge-title">✨ Hub creado</span>
+            <span>mycen.digital/tu-perfil</span>
           </div>
           <div ref={badgeRightRef} className="floating-badge ch-badge-right">
-            <span className="ch-badge-title">💳 Pago recibido</span>
-            <span>$48.000 — MercadoPago</span>
+            <span className="ch-badge-title">🎯 Meta alcanzada</span>
+            <span>6/10 hábitos este mes</span>
           </div>
-        </div>
-
-        {/* Metric counter */}
-        <div ref={metricRef} className="ch-metric-counter">
-          <span ref={counterRef} className="ch-metric-value">0</span>
-          <span className="ch-metric-label">Pedidos este mes</span>
         </div>
       </div>
 
     </section>
-
-    {/* CTAs — sección separada, fuera del hero pinned */}
-    <div
-      ref={ctaRef}
-      className="ch-cta"
-      style={{
-        position: 'relative',
-        bottom: 'auto', left: 'auto', right: 'auto',
-        width: '100%', maxWidth: '100%',
-        background: '#0F1115',
-        padding: '80px 24px 96px',
-        zIndex: 'auto',
-      }}
-    >
-      <h2>Empezá hoy mismo.</h2>
-      <p>
-        Menú digital listo en minutos. Sin app. Sin complicaciones.
-        Onboarding por WhatsApp.
-      </p>
-      <div className="ch-cta-buttons">
-        <Link to="/register" className="liquid-glass-btn ch-cta-btn">
-          <span>Crear mi perfil gratis →</span>
-        </Link>
-        <Link to="/r/test-restaurant" className="liquid-glass-btn-ghost ch-cta-btn">
-          <span>Ver demo</span>
-        </Link>
-      </div>
-      <div className="ch-trust-badges">
-        <span>✓ Sin app</span>
-        <span>✓ Listo en minutos</span>
-        <span>✓ Pagos móviles</span>
-        <span>✓ Onboarding por WhatsApp</span>
-      </div>
-    </div>
-    </>
   )
 }
