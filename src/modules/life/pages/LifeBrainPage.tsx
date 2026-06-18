@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Lightbulb, StickyNote, CheckSquare, Check, MoreHorizontal, Pencil, Archive, Trash2, Search, X } from 'lucide-react'
+import { Zap, Lightbulb, StickyNote, CheckSquare, Check, MoreHorizontal, Pencil, Archive, Trash2, Search, X, AlertTriangle } from 'lucide-react'
 import {
   LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
   colors, font, radius, stagger, fadeInUp, scaleIn,
@@ -264,7 +264,7 @@ function QuickCapture({ onCapture }: { onCapture: (type: BrainItemType, title: s
 // ── Page ──────────────────────────────────────────────────────────────────────
 export function LifeBrainPage() {
   const {
-    items, loading,
+    items, loading, error, reload,
     ideasCount, notesCount, tasksCount,
     createItem, updateItem, deleteItem, toggleComplete, archiveItem,
   } = useBrain()
@@ -277,6 +277,20 @@ export function LifeBrainPage() {
   const [deleteTarget, setDeleteTarget] = useState<BrainItem | null>(null)
 
   if (loading) return <BrainSkeleton />
+
+  if (error) return (
+    <LifeScreenContainer>
+      <LifeCard style={{ marginTop: '24px' }}>
+        <LifeEmptyState
+          icon={AlertTriangle}
+          iconColor={colors.semantic.error}
+          title="Algo salió mal"
+          subtitle={error}
+          action={{ label: 'Reintentar', onClick: reload }}
+        />
+      </LifeCard>
+    </LifeScreenContainer>
+  )
 
   // Filtered + searched items
   const visible = useMemo(() => {

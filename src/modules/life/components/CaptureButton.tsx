@@ -8,6 +8,7 @@ import { BrainItemSheet } from './BrainItemSheet'
 import { GoalSheet } from './GoalSheet'
 import { TransactionSheet } from './TransactionSheet'
 import { colors, font, radius } from '../design-system'
+import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
 import type { BrainItemType } from '../hooks/useBrain'
 import type { GoalFormData } from '../hooks/useGoals'
 import type { TransactionFormData } from '../hooks/useMoney'
@@ -53,6 +54,7 @@ export function CaptureButton() {
     await db.from('life_brain_items').insert({
       ...data, user_id: user.id, is_completed: false, is_archived: false,
     })
+    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
     ;(async () => {
       const { count: total } = await db.from('life_brain_items')
         .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
@@ -71,6 +73,7 @@ export function CaptureButton() {
     const { count: existing } = await db.from('life_goals')
       .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
     await db.from('life_goals').insert({ ...data, user_id: user.id, sort_order: existing ?? 0 })
+    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'goals' } }))
     void award(user.id, 'first_goal', 'Primera meta definida')
     const newCount = (existing ?? 0) + 1
     if (newCount >= 5) void award(user.id, 'goals_5', 'Cinco metas')
@@ -79,6 +82,7 @@ export function CaptureButton() {
   const handleMoneySave = async (data: TransactionFormData) => {
     if (!user) return
     await db.from('life_transactions').insert({ ...data, user_id: user.id })
+    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'money' } }))
     const { count } = await db.from('life_transactions')
       .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
     if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
