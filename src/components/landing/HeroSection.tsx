@@ -237,7 +237,7 @@ export function HeroSection() {
               zIndex: 10,
             }} />
             <iframe
-              src="/r/test-restaurant"
+              src="https://www.menulife.digital/test-restaurant"
               style={{ width: '100%', height: '100%', border: 'none', borderRadius: '28px' }}
               title="MenuLife Demo"
             />
