@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Bell, CalendarDays, Users, Layers, TrendingUp, ChevronRight, CheckCircle2, Clock } from 'lucide-react'
+import { Bell, CalendarDays, Users, Layers, TrendingUp, ChevronRight, CheckCircle2, Clock, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useTerminology } from '../hooks/useTerminology'
@@ -215,6 +215,16 @@ export function ServicesDashboard() {
           />
         </div>
       </div>
+
+      {/* ── LIFE OS ──────────────────────────────────────────────── */}
+      <QuickCard
+        icon={<Sun className="w-6 h-6" style={{ color: '#F4705A' }} />}
+        title="Life OS"
+        subtitle="Tu sistema de vida personal"
+        to="/life"
+        accent
+        navigate={navigate}
+      />
 
     </div>
   )

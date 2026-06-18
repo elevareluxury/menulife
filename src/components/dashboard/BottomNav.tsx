@@ -6,7 +6,7 @@ import {
   QrCode, Users, ChefHat, Settings, Truck, ContactRound, BarChart2,
   Banknote, Receipt, TrendingDown, Bell, Globe, Warehouse,
   CalendarDays, Layers, FolderOpen, BadgeCheck, Package2,
-  ScrollText, ClipboardList, TrendingUp, FileText,
+  ScrollText, ClipboardList, TrendingUp, FileText, Sun,
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -110,6 +110,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
     { icon: Globe,        labelKey: 'dashboard.nav_hub',           to: '/dashboard/hub',           sectionLabel: '·' },
     { icon: Bell,         labelKey: 'dashboard.nav_notifications', to: '/dashboard/notificaciones' },
     { icon: Settings,     labelKey: 'dashboard.nav_settings',      to: '/dashboard/settings'       },
+    { icon: Sun,          label: 'Life',                           to: '/life',                     sectionLabel: '·' },
   ]
 
   const retailMore: MoreItem[] = [
@@ -122,6 +123,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
     { icon: Globe,        labelKey: 'dashboard.nav_hub',           to: '/dashboard/hub',           sectionLabel: '·' },
     { icon: Bell,         labelKey: 'dashboard.nav_notifications', to: '/dashboard/notificaciones' },
     { icon: Settings,     labelKey: 'dashboard.nav_settings',      to: '/dashboard/settings'       },
+    { icon: Sun,          label: 'Life',                           to: '/life',                     sectionLabel: '·' },
   ]
 
   const servicesMore: MoreItem[] = [
@@ -135,6 +137,7 @@ export function BottomNav({ restaurantSlug }: { restaurantSlug?: string }) {
     { icon: Globe,         labelKey: 'dashboard.nav_hub',      to: '/dashboard/hub',               sectionLabel: '·' },
     { icon: Bell,          labelKey: 'dashboard.nav_notifications', to: '/dashboard/notificaciones' },
     { icon: Settings,      labelKey: 'dashboard.nav_settings',     to: '/dashboard/settings'       },
+    { icon: Sun,           label: 'Life',                          to: '/life',                     sectionLabel: '·' },
   ]
 
   const moreItems = businessType === 'services' ? servicesMore : businessType === 'retail' ? retailMore : gastronomyMore

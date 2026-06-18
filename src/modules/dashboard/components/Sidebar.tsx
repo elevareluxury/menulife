@@ -5,7 +5,7 @@ import {
   QrCode, Users, ChefHat, LogOut, Truck, ContactRound,
   BarChart2, Settings, Banknote, Receipt, TrendingDown,
   Globe, Warehouse, Lock, X, CalendarDays, Layers,
-  FolderOpen, TrendingUp, FileText, BadgeCheck, Package2, ClipboardList, ScrollText,
+  FolderOpen, TrendingUp, FileText, BadgeCheck, Package2, ClipboardList, ScrollText, Sun,
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -401,6 +401,19 @@ export function Sidebar({ restaurantSlug, restaurantName = '' }: SidebarProps) {
             })
           )}
         </nav>
+
+        {/* Life OS shortcut */}
+        {!isHubFree && (
+          <div className="px-3 py-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+            <NavLink
+              to="/life"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-ink-3 hover:text-ink-1 hover:bg-surface-3 transition-colors duration-150"
+            >
+              <Sun className="w-[17px] h-[17px] flex-shrink-0 text-ink-3" strokeWidth={2} />
+              Life
+            </NavLink>
+          </div>
+        )}
 
         {/* Bottom — Config + Logout */}
         <div className="px-3 py-3 space-y-0.5" style={{ borderTop: '1px solid var(--border-subtle)' }}>

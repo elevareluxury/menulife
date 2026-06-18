@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
-import { Bell, ChevronRight, Package, AlertTriangle, XCircle, DollarSign, Banknote, ShoppingBag, Warehouse, BarChart2 } from 'lucide-react'
+import { Bell, ChevronRight, Package, AlertTriangle, XCircle, DollarSign, Banknote, ShoppingBag, Warehouse, BarChart2, Sun } from 'lucide-react'
 import { BarChart, Bar, ResponsiveContainer, Cell } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -694,6 +694,26 @@ export function DashboardHome() {
         cajaAbierta={cajaAbierta}
         navigate={navigate}
       />
+
+      {/* ── LIFE OS ──────────────────────────────────────────────── */}
+      <div
+        role="button"
+        onClick={() => navigate('/life')}
+        className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all active:scale-[0.98] hover:scale-[1.01]"
+        style={{ backgroundColor: '#13161C', border: '1px solid #1e2229' }}
+      >
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #F4705A 0%, #E05A45 100%)' }}
+        >
+          <Sun className="w-5 h-5 text-white" strokeWidth={2} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-white">Life OS</p>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Tu sistema de vida personal</p>
+        </div>
+        <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.2)' }} />
+      </div>
     </div>
   )
 }
