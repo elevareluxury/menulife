@@ -353,7 +353,12 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
     try {
       const r = await uploadImage(file, 'hub-assets')
       if (r.success) {
-        await db.auth.updateUser({ data: { avatar_url: r.url } })
+        // Guardar en auth.user_metadata (esfera + header de /life)
+        // y en restaurants.logo_url (Hub Público /:slug) — misma fuente de verdad
+        await Promise.all([
+          db.auth.updateUser({ data: { avatar_url: r.url } }),
+          db.from('restaurants').update({ logo_url: r.url }).eq('id', restaurantId),
+        ])
         setAvatarUrl(r.url)
         toast.success('Foto de perfil actualizada')
       } else {
