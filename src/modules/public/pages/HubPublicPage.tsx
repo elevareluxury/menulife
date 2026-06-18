@@ -549,14 +549,12 @@ export function HubPublicPage() {
   const [notFound, setNotFound]               = useState(false)
   const [lightboxIndex, setLightboxIndex]     = useState<number|null>(null)
   const [scrollY, setScrollY]                 = useState(0)
-  const [headerVisible, setHeaderVisible]     = useState(false)
 
-  // Scroll tracking for parallax + floating header
+  // Scroll tracking for parallax
   useEffect(()=>{
     const onScroll = ()=>{
       const y = window.scrollY
       setScrollY(y)
-      setHeaderVisible(y>80)
     }
     window.addEventListener('scroll', onScroll, {passive:true})
     return ()=>window.removeEventListener('scroll', onScroll)
@@ -730,54 +728,6 @@ export function HubPublicPage() {
           </div>
         </div>
       )}
-
-      {/* Header flotante — aparece al scrollear */}
-      <div style={{
-        position:'fixed',top:0,left:0,right:0,zIndex:50,
-        height:'56px',
-        background:headerVisible?'rgba(6,8,15,0.85)':'transparent',
-        backdropFilter:headerVisible?'blur(20px)':'none',
-        WebkitBackdropFilter:headerVisible?'blur(20px)':'none',
-        borderBottom:headerVisible?'1px solid rgba(255,255,255,0.06)':'none',
-        opacity:headerVisible?1:0,
-        transform:headerVisible?'translateY(0)':'translateY(-100%)',
-        transition:'all 0.3s ease',
-        pointerEvents:headerVisible?'auto':'none',
-        display:'flex',alignItems:'center',
-        padding:'0 16px',gap:'10px',
-        boxSizing:'border-box',
-      }}>
-        {r.logo_url && (
-          <img src={r.logo_url} alt={r.name} style={{
-            width:32,height:32,borderRadius:'50%',objectFit:'cover',flexShrink:0,
-          }}/>
-        )}
-        <span style={{
-          fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15,color:'white',
-          flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',minWidth:0,
-        }}>
-          {r.name}
-        </span>
-        <div style={{
-          display:'flex',alignItems:'center',gap:5,flexShrink:0,
-          background:'rgba(255,255,255,0.06)',borderRadius:999,padding:'4px 10px',
-        }}>
-          <span style={{width:6,height:6,borderRadius:'50%',background:open?'#22C55E':'#EF4444',flexShrink:0,display:'inline-block'}}/>
-          <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:open?'#22C55E':'#EF4444'}}>
-            {open?'Abierto':'Cerrado'}
-          </span>
-        </div>
-        {ra.plan!=='hub_free' && (
-          <a href={isRetail?`/catalogo/${slug}`:`/r/${slug}`} style={{
-            flexShrink:0,width:32,height:32,borderRadius:'50%',
-            background:'rgba(255,255,255,0.06)',
-            display:'flex',alignItems:'center',justifyContent:'center',
-            color:'rgba(255,255,255,0.7)',textDecoration:'none',fontSize:14,
-          }}>
-            {isRetail?'🛍':'🍽'}
-          </a>
-        )}
-      </div>
 
       <div style={{
         fontFamily:"'DM Sans',sans-serif",
