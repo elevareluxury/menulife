@@ -129,7 +129,7 @@ function App() {
             <Route path="services/forms/:id/builder"  element={<RequirePlan feature="services_catalog"><FormBuilderPage /></RequirePlan>} />
           </Route>
           {/* ── Life OS — capa personal, no requiere restaurant ── */}
-          <Route path="/life" element={<LifeShell />}>
+          <Route path="/life" element={<ErrorBoundary label="life"><LifeShell /></ErrorBoundary>}>
             <Route index element={<LifePage />} />
             <Route path="money"  element={<LifeMoneyPage />}  />
             <Route path="goals"  element={<LifeGoalsPage />}  />

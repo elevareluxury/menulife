@@ -276,23 +276,7 @@ export function LifeBrainPage() {
   const [sheetOpen, setSheetOpen]   = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<BrainItem | null>(null)
 
-  if (loading) return <BrainSkeleton />
-
-  if (error) return (
-    <LifeScreenContainer>
-      <LifeCard style={{ marginTop: '24px' }}>
-        <LifeEmptyState
-          icon={AlertTriangle}
-          iconColor={colors.semantic.error}
-          title="Algo salió mal"
-          subtitle={error}
-          action={{ label: 'Reintentar', onClick: reload }}
-        />
-      </LifeCard>
-    </LifeScreenContainer>
-  )
-
-  // Filtered + searched items
+  // Hooks ANTES de cualquier early return — Rules of Hooks
   const visible = useMemo(() => {
     let list = items
     if (filter !== 'todo') list = list.filter(i => i.type === filter)
@@ -306,7 +290,6 @@ export function LifeBrainPage() {
     return list
   }, [items, filter, searchQ])
 
-  // Group by date label
   const grouped = useMemo(() => {
     const today = new Date().toDateString()
     const yesterday = new Date(Date.now() - 86400000).toDateString()
@@ -323,6 +306,22 @@ export function LifeBrainPage() {
     }
     return [...map.entries()]
   }, [visible])
+
+  if (loading) return <BrainSkeleton />
+
+  if (error) return (
+    <LifeScreenContainer>
+      <LifeCard style={{ marginTop: '24px' }}>
+        <LifeEmptyState
+          icon={AlertTriangle}
+          iconColor={colors.semantic.error}
+          title="Algo salió mal"
+          subtitle={error}
+          action={{ label: 'Reintentar', onClick: reload }}
+        />
+      </LifeCard>
+    </LifeScreenContainer>
+  )
 
   const handleQuickCapture = async (type: BrainItemType, title: string) => {
     await createItem({ type, title })
