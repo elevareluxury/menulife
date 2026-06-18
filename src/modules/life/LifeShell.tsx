@@ -6,13 +6,14 @@ import { supabase } from '@/lib/supabase'
 import { Spinner } from '@/components/ui/Spinner'
 import { LifeNav } from './components/LifeNav'
 import { CaptureButton } from './components/CaptureButton'
+import { AchievementToast } from './components/AchievementToast'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
 export function LifeShell() {
   const { user, loading, initialized } = useAuthStore()
-  const { setHasRestaurant } = useLifeStore()
+  const { setHasRestaurant, setRestaurantName, setRestaurantSlug } = useLifeStore()
   const [timedOut, setTimedOut] = useState(false)
 
   // Safety timeout — same pattern as DashboardPage
@@ -25,10 +26,14 @@ export function LifeShell() {
   useEffect(() => {
     if (!user) return
     db.from('restaurants')
-      .select('id')
+      .select('id,name,slug')
       .eq('owner_id', user.id)
       .maybeSingle()
-      .then(({ data }: { data: { id: string } | null }) => setHasRestaurant(!!data))
+      .then(({ data }: { data: { id: string; name: string; slug: string } | null }) => {
+        setHasRestaurant(!!data)
+        setRestaurantName(data?.name ?? null)
+        setRestaurantSlug(data?.slug ?? null)
+      })
   }, [user, setHasRestaurant])
 
   if ((!initialized || loading) && !timedOut) {
@@ -53,6 +58,7 @@ export function LifeShell() {
     }}>
       <Outlet />
       <CaptureButton />
+      <AchievementToast />
       <LifeNav />
     </div>
   )

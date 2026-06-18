@@ -1,0 +1,12 @@
+// Life OS Design System — single entry point for all consumers
+export * from './tokens'
+export * from './motion'
+export { LifeCard }            from './components/LifeCard'
+export { LifeScreenContainer } from './components/LifeScreenContainer'
+export { LifeSectionHeader }   from './components/LifeSectionHeader'
+export { LifeEmptyState }      from './components/LifeEmptyState'
+export { LifeButton }          from './components/LifeButton'
+export { LifeMetric }          from './components/LifeMetric'
+export { LifeSheet }           from './components/LifeSheet'
+export { LifeConfirmDialog }   from './components/LifeConfirmDialog'
+export { MiniProgressRing }    from './components/MiniProgressRing'

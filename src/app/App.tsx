@@ -57,12 +57,13 @@ const FormBuilderPage           = lazy(() => import('@/modules/services/pages/Fo
 const ServicesPresupuestosPage  = lazy(() => import('@/modules/services/pages/ServicesPresupuestosPage').then(m => ({ default: m.ServicesPresupuestosPage })))
 const QuotePublicPage           = lazy(() => import('@/modules/public/pages/QuotePublicPage').then(m => ({ default: m.QuotePublicPage })))
 const PortalApp                 = lazy(() => import('@/modules/portal/PortalApp').then(m => ({ default: m.PortalApp })))
-const LifeShell     = lazy(() => import('@/modules/life/LifeShell').then(m => ({ default: m.LifeShell })))
-const LifePage      = lazy(() => import('@/modules/life/pages/LifePage').then(m => ({ default: m.LifePage })))
+const LifeShell      = lazy(() => import('@/modules/life/LifeShell').then(m => ({ default: m.LifeShell })))
+const LifePage       = lazy(() => import('@/modules/life/pages/LifePage').then(m => ({ default: m.LifePage })))
 const LifeMoneyPage  = lazy(() => import('@/modules/life/pages/LifeMoneyPage').then(m => ({ default: m.LifeMoneyPage })))
 const LifeGoalsPage  = lazy(() => import('@/modules/life/pages/LifeGoalsPage').then(m => ({ default: m.LifeGoalsPage })))
 const LifeHabitsPage = lazy(() => import('@/modules/life/pages/LifeHabitsPage').then(m => ({ default: m.LifeHabitsPage })))
 const LifeBrainPage  = lazy(() => import('@/modules/life/pages/LifeBrainPage').then(m => ({ default: m.LifeBrainPage })))
+const LifeReplayPage = lazy(() => import('@/modules/life/pages/LifeReplayPage').then(m => ({ default: m.LifeReplayPage })))
 
 function LoadingSpinner() {
   return (
@@ -133,6 +134,7 @@ function App() {
             <Route path="goals"  element={<LifeGoalsPage />}  />
             <Route path="habits" element={<LifeHabitsPage />} />
             <Route path="brain"  element={<LifeBrainPage />}  />
+            <Route path="replay" element={<LifeReplayPage />} />
           </Route>
           {/* Portal del cliente */}
           <Route path="/portal/:restaurantId/*" element={<PortalApp />} />
