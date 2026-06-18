@@ -5,7 +5,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts'
 import { supabase } from '@/lib/supabase'
-import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useAuthStore } from '@/store/authStore'
 import { useCashRegister } from '../hooks/useCashRegister'
 import { Spinner } from '@/components/ui/Spinner'
@@ -130,7 +129,7 @@ function NewExpenseModal({ restaurantId, userName, cashRegisterId, onClose, onSa
       if (ee) throw ee
 
       // 2. financial_transaction
-      await db.from('financial_transactions').insert({
+      const { error: ftErr } = await db.from('financial_transactions').insert({
         restaurant_id:    restaurantId,
         type:             'expense',
         amount:           amt,
@@ -139,10 +138,11 @@ function NewExpenseModal({ restaurantId, userName, cashRegisterId, onClose, onSa
         cash_register_id: cashRegisterId,
         description:      `${category}${description.trim() ? ' — ' + description.trim() : ''}`,
       })
+      if (ftErr) throw ftErr
 
       // 3. cash_movement (solo si hay caja abierta)
       if (cashRegisterId) {
-        await db.from('cash_movements').insert({
+        const { error: cmErr } = await db.from('cash_movements').insert({
           cash_register_id: cashRegisterId,
           restaurant_id:    restaurantId,
           type:             'expense',
@@ -151,10 +151,11 @@ function NewExpenseModal({ restaurantId, userName, cashRegisterId, onClose, onSa
           category,
           created_by_name:  userName,
         })
+        if (cmErr) throw cmErr
       }
 
-      // 4. audit_log
-      await db.from('audit_logs').insert({
+      // 4. audit_log (warn only — no debe bloquear el gasto)
+      const { error: alErr } = await db.from('audit_logs').insert({
         restaurant_id: restaurantId,
         user_name:     userName,
         action:        'expense_created',
@@ -162,6 +163,7 @@ function NewExpenseModal({ restaurantId, userName, cashRegisterId, onClose, onSa
         entity_id:     expense.id,
         details:       { amount: amt, category, description: description.trim() || null },
       })
+      if (alErr) console.warn('audit_log failed:', alErr)
 
       toast.success('✅ Gasto registrado')
       onSaved()
@@ -462,9 +464,8 @@ function AnalyticsSection({ restaurantId }: { restaurantId: string }) {
 
 /* ── Main page ───────────────────────────────────────────────────────── */
 export function GastosPage() {
-  const { restaurant }                           = useRestaurant()
   const { user }                                 = useAuthStore()
-  const { register: cashRegister }               = useCashRegister()
+  const { register: cashRegister, restaurantId, loading: cashLoading } = useCashRegister()
   const [expenses,     setExpenses]              = useState<Expense[]>([])
   const [loading,      setLoading]               = useState(true)
   const [showModal,    setShowModal]             = useState(false)
@@ -478,14 +479,14 @@ export function GastosPage() {
     || 'Dueño'
 
   const load = useCallback(async () => {
-    if (!restaurant?.id) return
+    if (!restaurantId) return
     setLoading(true)
     try {
       const from = getRangeStart(range, customFrom)
       let q = db
         .from('expenses')
         .select('*')
-        .eq('restaurant_id', restaurant.id)
+        .eq('restaurant_id', restaurantId)
         .is('deleted_at', null)
         .gte('created_at', from)
         .order('created_at', { ascending: false })
@@ -503,9 +504,16 @@ export function GastosPage() {
     } finally {
       setLoading(false)
     }
-  }, [restaurant?.id, range, customFrom, customTo])
+  }, [restaurantId, range, customFrom, customTo])
 
   useEffect(() => { load() }, [load])
+
+  // FIX 3: si no llega restaurantId en 3s (restaurant no encontrado), para el spinner
+  useEffect(() => {
+    if (restaurantId || cashLoading) return
+    const timer = setTimeout(() => setLoading(false), 3000)
+    return () => clearTimeout(timer)
+  }, [restaurantId, cashLoading])
 
   async function softDelete(expense: Expense) {
     if (!confirm(`¿Eliminar gasto de ${fmtARS(expense.amount)} (${expense.category})?`)) return
@@ -513,7 +521,7 @@ export function GastosPage() {
     try {
       await db.from('expenses').update({ deleted_at: new Date().toISOString() }).eq('id', expense.id)
       await db.from('audit_logs').insert({
-        restaurant_id: restaurant?.id,
+        restaurant_id: restaurantId,
         user_name:     userName,
         action:        'expense_deleted',
         entity_type:   'expense',
@@ -560,7 +568,8 @@ export function GastosPage() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: ACCENT, border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+            disabled={!restaurantId}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: ACCENT, border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, cursor: !restaurantId ? 'not-allowed' : 'pointer', opacity: !restaurantId ? 0.5 : 1 }}
           >
             <Plus style={{ width: 18, height: 18 }} />
             Nuevo Gasto
@@ -607,13 +616,27 @@ export function GastosPage() {
         ) : expenses.length === 0 ? (
           <div style={{ background: CARD, border: BDR, borderRadius: 16, padding: '48px 16px', textAlign: 'center', color: MUTED }}>
             <TrendingDown style={{ width: 40, height: 40, color: 'rgba(255,255,255,0.12)', margin: '0 auto 12px' }} />
-            <p style={{ fontSize: 14, margin: 0 }}>Sin gastos en este período</p>
-            <button
-              onClick={() => setShowModal(true)}
-              style={{ marginTop: 16, padding: '9px 20px', background: ACCENT, border: 'none', borderRadius: 9, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
-            >
-              + Registrar primer gasto
-            </button>
+            {!restaurantId ? (
+              <>
+                <p style={{ fontSize: 14, margin: '0 0 4px' }}>No se pudo cargar el negocio</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  style={{ marginTop: 16, padding: '9px 20px', background: 'rgba(255,255,255,0.08)', border: BDR, borderRadius: 9, color: MUTED, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Reintentar
+                </button>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 14, margin: 0 }}>Sin gastos en este período</p>
+                <button
+                  onClick={() => setShowModal(true)}
+                  style={{ marginTop: 16, padding: '9px 20px', background: ACCENT, border: 'none', borderRadius: 9, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  + Registrar primer gasto
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <div style={{ background: SURFACE, border: BDR, borderRadius: 16, overflow: 'hidden' }}>
@@ -692,14 +715,14 @@ export function GastosPage() {
         )}
 
         {/* Analytics */}
-        {restaurant?.id && <AnalyticsSection restaurantId={restaurant.id} />}
+        {restaurantId && <AnalyticsSection restaurantId={restaurantId} />}
 
       </div>
 
       {/* Modal */}
-      {showModal && restaurant?.id && (
+      {showModal && restaurantId && (
         <NewExpenseModal
-          restaurantId={restaurant.id}
+          restaurantId={restaurantId}
           userName={userName}
           cashRegisterId={cashRegister?.id ?? null}
           onClose={() => setShowModal(false)}
