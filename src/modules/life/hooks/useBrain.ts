@@ -35,7 +35,7 @@ export function useBrain() {
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
-    if (!user) return
+    if (!user) { setLoading(false); return }
     setLoading(true)
     const { data } = await db
       .from('life_brain_items')

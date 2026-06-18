@@ -48,6 +48,12 @@ function getFirstName(user: { user_metadata?: Record<string, unknown>; email?: s
   return raw.trim().split(/\s+/)[0] ?? ''
 }
 
+function getAvatarUrl(user: { user_metadata?: Record<string, unknown> } | null): string | null {
+  if (!user) return null
+  const m = user.user_metadata ?? {}
+  return (m['avatar_url'] as string | undefined) ?? (m['picture'] as string | undefined) ?? null
+}
+
 // ── SVG Textures ──────────────────────────────────────────────────────────────
 
 function WavesTexture() {
@@ -126,13 +132,162 @@ function StarfieldBackground() {
           <circle key={i} cx={st.x} cy={st.y} r={st.r * 0.11} fill="white" opacity={st.o} />
         ))}
       </svg>
-      {/* Warm halo behind orb area */}
       <div style={{
         position: 'absolute',
         top: '42%', left: '50%', transform: 'translate(-50%, -50%)',
         width: '420px', height: '320px', borderRadius: '50%',
         background: 'radial-gradient(ellipse, rgba(244,112,90,0.05) 0%, transparent 68%)',
       }} />
+    </div>
+  )
+}
+
+// ── HubSection ────────────────────────────────────────────────────────────────
+
+interface HubSectionProps {
+  hasRestaurant: boolean
+  restaurantSlug: string | null
+  avatarUrl: string | null
+  initials: string
+}
+
+function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubSectionProps) {
+  const navigate = useNavigate()
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '16px',
+      background: 'rgba(99,102,241,0.04)',
+      border: '1px solid rgba(99,102,241,0.11)',
+      borderRadius: radius.xl,
+      padding: '14px 16px 14px 14px',
+    }}>
+
+      {/* LEFT — orb with profile photo */}
+      <motion.div
+        animate={{ scale: [1, 1.016, 1] }}
+        transition={{ duration: 5.0, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'relative',
+          width: 130, height: 130,
+          borderRadius: '50%',
+          flexShrink: 0,
+          background: 'radial-gradient(circle at 36% 32%, #5C60C0 0%, #3730A3 32%, #1E1B4B 65%, #0E0D1F 100%)',
+          boxShadow: '0 0 38px rgba(99,102,241,0.30), 0 0 88px rgba(99,102,241,0.09), 0 14px 36px rgba(0,0,0,0.52)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Rotating shimmer */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 26, repeat: Infinity, ease: 'linear' }}
+          style={{
+            position: 'absolute', inset: 0, borderRadius: '50%', zIndex: 1,
+            background: 'conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.024) 20%, transparent 40%, rgba(255,255,255,0.013) 65%, transparent 80%)',
+          }}
+        />
+        {/* Specular highlight */}
+        <div style={{
+          position: 'absolute', top: '8%', left: '12%',
+          width: '44%', height: '42%', borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(255,255,255,0.11) 0%, transparent 70%)',
+          zIndex: 2, pointerEvents: 'none',
+        }} />
+        {/* Bottom inner glow */}
+        <div style={{
+          position: 'absolute', bottom: '-6%', left: '20%',
+          width: '58%', height: '46%', borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(99,102,241,0.24) 0%, transparent 70%)',
+          zIndex: 2, pointerEvents: 'none',
+        }} />
+        {/* Profile photo / initials */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 3,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt=""
+              style={{
+                width: '68%', height: '68%',
+                borderRadius: '50%', objectFit: 'cover',
+                border: '2.5px solid rgba(255,255,255,0.18)',
+                boxShadow: '0 2px 14px rgba(0,0,0,0.45)',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '64%', height: '64%',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, rgba(244,112,90,0.85) 0%, rgba(139,92,246,0.85) 100%)',
+              border: '2.5px solid rgba(255,255,255,0.14)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: font, fontSize: '22px', fontWeight: 800, color: '#fff',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.38)',
+            }}>
+              {initials}
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* RIGHT — title + subtitle + buttons */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{
+          fontFamily: font, fontSize: '15px', fontWeight: 700,
+          color: colors.text.primary, margin: '0 0 2px', letterSpacing: '-0.01em',
+        }}>
+          Hub Digital
+        </p>
+        <p style={{
+          fontFamily: font, fontSize: '12px', color: colors.text.tertiary,
+          margin: '0 0 13px', lineHeight: 1.4,
+        }}>
+          {hasRestaurant && restaurantSlug ? `@${restaurantSlug}` : 'Tu presencia en la web'}
+        </p>
+
+        {hasRestaurant ? (
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => navigate(`/${restaurantSlug ?? ''}`)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                padding: '6px 12px', borderRadius: radius.full,
+                background: 'rgba(99,102,241,0.13)', border: '1px solid rgba(99,102,241,0.28)',
+                color: '#818CF8', fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              <Link2 size={11} strokeWidth={2.5} />
+              Ver hub
+            </button>
+            <button
+              onClick={() => navigate('/dashboard/hub')}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                padding: '6px 12px', borderRadius: radius.full,
+                background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+                color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              <Settings2 size={11} strokeWidth={2.5} />
+              Configurar
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => navigate('/dashboard/hub')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              padding: '8px 16px', borderRadius: radius.full,
+              background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.30)',
+              color: '#818CF8', fontFamily: font, fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            Crear mi hub
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -220,109 +375,6 @@ function HoySummaryCard({ goalsCount, habitsCompleted, habitsTotal, moneyBalance
   )
 }
 
-// ── HubOrb ────────────────────────────────────────────────────────────────────
-
-interface HubOrbProps {
-  restaurantName: string | null
-  restaurantSlug: string | null
-  hasRestaurant: boolean
-}
-
-function HubOrb({ restaurantName, restaurantSlug, hasRestaurant }: HubOrbProps) {
-  const navigate = useNavigate()
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
-      <motion.div
-        animate={{ scale: [1, 1.026, 1] }}
-        transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          position: 'relative', width: 188, height: 188, borderRadius: '50%',
-          background: 'radial-gradient(circle at 36% 32%, #5C60C0 0%, #3730A3 32%, #1E1B4B 65%, #0E0D1F 100%)',
-          boxShadow: '0 0 52px rgba(99,102,241,0.28), 0 0 130px rgba(99,102,241,0.09), 0 28px 64px rgba(0,0,0,0.55)',
-          overflow: 'hidden',
-          cursor: hasRestaurant ? 'pointer' : 'default',
-        }}
-        onClick={() => { if (hasRestaurant) navigate('/dashboard') }}
-      >
-        {/* Rotating shimmer */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
-          style={{
-            position: 'absolute', inset: 0, borderRadius: '50%',
-            background: 'conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.032) 22%, transparent 42%, rgba(255,255,255,0.016) 68%, transparent 84%)',
-          }}
-        />
-        {/* Specular highlight */}
-        <div style={{
-          position: 'absolute', top: '9%', left: '14%',
-          width: '46%', height: '44%', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(255,255,255,0.10) 0%, transparent 70%)',
-        }} />
-        {/* Inner depth glow */}
-        <div style={{
-          position: 'absolute', bottom: '-8%', left: '22%',
-          width: '56%', height: '48%', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(99,102,241,0.18) 0%, transparent 70%)',
-        }} />
-      </motion.div>
-
-      <div style={{ textAlign: 'center' }}>
-        <p style={{
-          fontFamily: font, fontSize: '17px', fontWeight: 700,
-          color: colors.text.primary, margin: '0 0 3px', letterSpacing: '-0.01em',
-        }}>
-          {hasRestaurant ? (restaurantName ?? 'Mi negocio') : 'Hub Digital'}
-        </p>
-        <p style={{ fontFamily: font, fontSize: '12px', color: colors.text.tertiary, margin: 0 }}>
-          {hasRestaurant && restaurantSlug ? `@${restaurantSlug}` : 'Tu presencia en la web'}
-        </p>
-      </div>
-
-      <div style={{ display: 'flex', gap: '8px' }}>
-        {hasRestaurant ? (
-          <>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                padding: '7px 14px', borderRadius: radius.full,
-                background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)',
-                color: '#818CF8', fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-              }}
-            >
-              <Link2 size={11} strokeWidth={2.5} /> Ver link
-            </button>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                padding: '7px 14px', borderRadius: radius.full,
-                background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
-                color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-              }}
-            >
-              <Settings2 size={11} strokeWidth={2.5} /> Configurar
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={() => navigate('/register')}
-            style={{
-              padding: '7px 18px', borderRadius: radius.full,
-              background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)',
-              color: '#818CF8', fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-            }}
-          >
-            Crear mi hub
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
 // ── ModuleGrid ────────────────────────────────────────────────────────────────
 
 const MODULES = [
@@ -392,7 +444,7 @@ function PageSkeleton() {
           padding: '32px', width: '100%', maxWidth: '420px',
         }}
       >
-        {([48, 140, 210, 136] as const).map((h, i) => (
+        {([48, 158, 140, 136] as const).map((h, i) => (
           <div key={i} style={{
             height: h, background: 'rgba(255,255,255,0.04)', borderRadius: radius.xl,
           }} />
@@ -407,7 +459,7 @@ function PageSkeleton() {
 export function LifePage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { hasRestaurant, restaurantName, restaurantSlug } = useLifeStore()
+  const { hasRestaurant, restaurantSlug } = useLifeStore()
   const { currency } = useLocaleStore()
   const data = useLifeData()
 
@@ -415,6 +467,7 @@ export function LifePage() {
 
   const firstName = getFirstName(user)
   const initials  = getInitials(user)
+  const avatarUrl = getAvatarUrl(user)
   const balance   = data.monthIncome - data.monthExpense
 
   return (
@@ -442,8 +495,11 @@ export function LifePage() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: font, fontSize: '15px', fontWeight: 800, color: '#fff',
               boxShadow: '0 0 0 2px rgba(244,112,90,0.22)',
+              overflow: 'hidden',
             }}>
-              {initials}
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : initials}
             </div>
             <div style={{ flex: 1 }}>
               <p style={{
@@ -475,6 +531,16 @@ export function LifePage() {
             )}
           </motion.div>
 
+          {/* ── Hub Digital ────────────────────────────────────────────────── */}
+          <motion.div variants={fadeInUp}>
+            <HubSection
+              hasRestaurant={hasRestaurant}
+              restaurantSlug={restaurantSlug}
+              avatarUrl={avatarUrl}
+              initials={initials}
+            />
+          </motion.div>
+
           {/* ── Hoy card ───────────────────────────────────────────────────── */}
           <motion.div variants={fadeInUp}>
             <HoySummaryCard
@@ -484,17 +550,6 @@ export function LifePage() {
               moneyBalance={balance}
               pendingTasks={data.pendingTasksCount}
               currency={currency}
-            />
-          </motion.div>
-
-          {/* ── Hub Orb hero ────────────────────────────────────────────────── */}
-          <motion.div variants={fadeInUp} style={{
-            display: 'flex', justifyContent: 'center', padding: '18px 0 10px',
-          }}>
-            <HubOrb
-              restaurantName={restaurantName}
-              restaurantSlug={restaurantSlug}
-              hasRestaurant={hasRestaurant}
             />
           </motion.div>
 
