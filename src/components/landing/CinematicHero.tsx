@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import FlowFieldBackground from '@/components/ui/flow-field-background'
+import { HubPhonePreview } from './HubPhonePreview'
 
 declare const gsap: any
 
@@ -12,9 +13,7 @@ export function CinematicHero() {
   const badgeLeftRef  = useRef<HTMLDivElement>(null)
   const badgeRightRef = useRef<HTMLDivElement>(null)
   const phoneRef      = useRef<HTMLDivElement>(null)
-  const screenRef     = useRef<HTMLDivElement>(null)
   const tlRef         = useRef<any>(null)
-  const [phoneScale, setPhoneScale] = useState(260 / 390)
 
   /* ── ScrollTrigger pinned timeline ── */
   useEffect(() => {
@@ -116,18 +115,6 @@ export function CinematicHero() {
     }
   }, [])
 
-  /* ── Scale iframe to fit phone screen ── */
-  useEffect(() => {
-    const el = screenRef.current
-    if (!el) return
-    const ro = new ResizeObserver(([entry]) => {
-      const w = entry.contentRect.width
-      if (w > 0) setPhoneScale(w / 390)
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
 
   return (
@@ -203,12 +190,8 @@ export function CinematicHero() {
         <div ref={phoneContRef} className="ch-phone-container">
           <div ref={phoneRef} className="liquid-glass-phone ch-phone-frame">
             <div className="ch-phone-notch" />
-            <div
-              ref={screenRef}
-              className="ch-phone-screen"
-              style={{ '--phone-scale': phoneScale } as React.CSSProperties}
-            >
-              <iframe src="/r/test-restaurant" title="Mycen Demo" />
+            <div className="ch-phone-screen">
+              <HubPhonePreview />
             </div>
           </div>
 
