@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { FEATURE_LABELS, ALL_FEATURES, PLAN_FEATURES, PLAN_LABELS, logAdminAction } from '../lib/adminActions'
+import { FEATURE_LABELS, ALL_FEATURES, PLAN_FEATURES, PLAN_LABELS, PLAN_COLORS, logAdminAction } from '../lib/adminActions'
 import { RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -220,16 +220,16 @@ export function FeatureFlagsTab() {
                     })}
                     <td className="px-3 py-3">
                       <div className="flex gap-1 justify-center">
-                        {(['hub_free', 'os_gastronomy', 'os_full'] as const).map(plan => (
+                        {(['hub_free', 'os_gastronomy', 'os_retail', 'os_full'] as const).map(plan => (
                           <button
                             key={plan}
                             onClick={() => applyTemplate(rest.id, plan)}
                             disabled={!!saving}
                             className="px-2 py-0.5 rounded text-[10px] font-semibold transition-opacity disabled:opacity-40"
                             style={{
-                              backgroundColor: `${plan === 'hub_free' ? '#F59E0B' : plan === 'os_gastronomy' ? '#3B82F6' : '#10B981'}18`,
-                              color:           plan === 'hub_free' ? '#F59E0B' : plan === 'os_gastronomy' ? '#3B82F6' : '#10B981',
-                              border: `1px solid ${plan === 'hub_free' ? '#F59E0B30' : plan === 'os_gastronomy' ? '#3B82F630' : '#10B98130'}`,
+                              backgroundColor: `${PLAN_COLORS[plan]}18`,
+                              color:           PLAN_COLORS[plan],
+                              border: `1px solid ${PLAN_COLORS[plan]}30`,
                             }}
                           >
                             {PLAN_LABELS[plan]}

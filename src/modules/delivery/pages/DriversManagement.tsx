@@ -10,6 +10,7 @@ import { Toggle } from '@/components/ui/Toggle'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useDrivers } from '../hooks/useDrivers'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import toast from 'react-hot-toast'
 import type { DeliveryDriver } from '@/types'
 
@@ -263,14 +264,14 @@ function DeliveryOrdersSection({ restaurantId, drivers }: { restaurantId: string
     setLoadingOrders(false)
   }, [restaurantId])
 
-  useEffect(() => {
-    fetchOrders()
-    const ch = supabase
-      .channel(`delivery_mgmt_${restaurantId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }, fetchOrders)
-      .subscribe()
-    return () => { ch.unsubscribe() }
-  }, [restaurantId, fetchOrders])
+  useEffect(() => { if (restaurantId) fetchOrders() }, [restaurantId, fetchOrders])
+
+  useRealtimeChannel({
+    channelName: `delivery_mgmt_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: '*', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetchOrders() },
+  })
 
   const assignDriver = async (orderId: string, driverId: string) => {
     setAssigningId(orderId)

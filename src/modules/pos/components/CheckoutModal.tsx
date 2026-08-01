@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { X, Gift, Plus, Trash2, Tag, Percent } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurantStore } from '@/store/restaurantStore'
 import toast from 'react-hot-toast'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -196,6 +197,10 @@ export function CheckoutModal({
   const [customerPhone, setCustomerPhone] = useState<string | null>(null)
   const [customerName,  setCustomerName]  = useState<string | null>(null)
 
+  // Read from store when available (owner/orders dashboard context)
+  const storeRestaurant   = useRestaurantStore(s => s.restaurant)
+  const storeRestaurantId = useRestaurantStore(s => s.restaurantId)
+
   /* ── POS settings cache (per restaurantId, survives modal re-opens) ── */
   const posSettingsCache = useRef<Map<string, POSSettings>>(new Map())
 
@@ -206,6 +211,23 @@ export function CheckoutModal({
       setSingleMethod(prev => cached.enabled_payment_methods.includes(prev) ? prev : cached.enabled_payment_methods[0] ?? 'cash')
       return
     }
+    // Use store when this is the owner's restaurant (no Supabase call)
+    if (storeRestaurantId === restaurantId && storeRestaurant) {
+      const methods = Array.isArray(storeRestaurant.enabled_payment_methods) && storeRestaurant.enabled_payment_methods.length > 0
+        ? storeRestaurant.enabled_payment_methods as PaymentMethod[]
+        : ALL_METHODS
+      const settings: POSSettings = {
+        tax_enabled: storeRestaurant.tax_enabled ?? false,
+        tax_percentage: Number(storeRestaurant.tax_percentage ?? 0),
+        suggested_tip_percentages: Array.isArray(storeRestaurant.suggested_tip_percentages) ? storeRestaurant.suggested_tip_percentages as number[] : [],
+        enabled_payment_methods: methods,
+      }
+      posSettingsCache.current.set(restaurantId, settings)
+      setPosSettings(settings)
+      setSingleMethod(prev => methods.includes(prev) ? prev : methods[0] ?? 'cash')
+      return
+    }
+    // Fallback: Supabase fetch (waiter context — store not hydrated with owner data)
     const { data } = await db
       .from('restaurants')
       .select('tax_enabled, tax_percentage, suggested_tip_percentages, enabled_payment_methods')
@@ -225,7 +247,7 @@ export function CheckoutModal({
       setPosSettings(settings)
       setSingleMethod(prev => methods.includes(prev) ? prev : methods[0] ?? 'cash')
     }
-  }, [restaurantId])
+  }, [restaurantId, storeRestaurantId, storeRestaurant])
 
   /* ── Fetch order items + customer data ── */
   const fetchItems = useCallback(async () => {

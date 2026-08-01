@@ -34,7 +34,7 @@ export interface RestaurantRow {
   slug: string
   city: string | null
   phone: string | null
-  plan: 'hub_free' | 'os_gastronomy' | 'os_full'
+  plan: 'hub_free' | 'os_gastronomy' | 'os_retail' | 'os_full'
   subscription_status: 'trial' | 'active' | 'past_due' | 'cancelled'
   is_active: boolean
   trial_ends_at: string | null
@@ -262,8 +262,8 @@ export function RestaurantDetailModal({ restaurant, onClose, onUpdate }: Props) 
         changed_by:    session?.user?.id,
       })
 
-      const validPlan = (['hub_free', 'os_gastronomy', 'os_full'] as const).includes(newPlan as 'hub_free' | 'os_gastronomy' | 'os_full')
-        ? newPlan as 'hub_free' | 'os_gastronomy' | 'os_full'
+      const validPlan = (['hub_free', 'os_gastronomy', 'os_retail', 'os_full'] as const).includes(newPlan as 'hub_free' | 'os_gastronomy' | 'os_retail' | 'os_full')
+        ? newPlan as 'hub_free' | 'os_gastronomy' | 'os_retail' | 'os_full'
         : 'hub_free' as const
       const isNewTrial = validPlan === 'hub_free' && r.subscription_status !== 'active'
       await supabase.from('restaurants').update({
@@ -631,8 +631,8 @@ export function RestaurantDetailModal({ restaurant, onClose, onUpdate }: Props) 
               {/* Change plan */}
               <div>
                 <p className="text-xs font-medium mb-2" style={{ color: TEXT_MUTED }}>Cambiar plan</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['hub_free', 'os_gastronomy', 'os_full'] as const).map(p => (
+                <div className="grid grid-cols-4 gap-2">
+                  {(['hub_free', 'os_gastronomy', 'os_retail', 'os_full'] as const).map(p => (
                     <button
                       key={p}
                       onClick={() => changePlan(p)}
@@ -722,7 +722,7 @@ export function RestaurantDetailModal({ restaurant, onClose, onUpdate }: Props) 
               <div>
                 <p className="text-xs font-medium mb-2" style={{ color: TEXT_MUTED }}>Aplicar template</p>
                 <div className="flex gap-2">
-                  {(['hub_free', 'os_gastronomy', 'os_full'] as const).map(p => (
+                  {(['hub_free', 'os_gastronomy', 'os_retail', 'os_full'] as const).map(p => (
                     <button
                       key={p}
                       onClick={() => setFeatures({ ...PLAN_FEATURES[p] })}

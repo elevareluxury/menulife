@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import type { Waiter } from '@/types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,30 +55,18 @@ export function useWaiters(restaurantId: string | undefined) {
   }, [restaurantId])
 
   useEffect(() => {
-    if (!restaurantId) {
-      setLoading(false)
-      return
-    }
-
+    if (!restaurantId) { setLoading(false); return }
     const cached = readCache(restaurantId)
-    if (cached) {
-      setWaiters(cached)
-      setLoading(false)
-    }
-
+    if (cached) { setWaiters(cached); setLoading(false) }
     fetchWaiters()
-
-    const channel = supabase
-      .channel(`waiters_changes_${restaurantId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'waiters', filter: `restaurant_id=eq.${restaurantId}` },
-        fetchWaiters
-      )
-      .subscribe()
-
-    return () => { channel.unsubscribe() }
   }, [restaurantId, fetchWaiters])
+
+  useRealtimeChannel({
+    channelName: `waiters_changes_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: '*', table: 'waiters', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetchWaiters() },
+  })
 
   return { waiters, loading }
 }

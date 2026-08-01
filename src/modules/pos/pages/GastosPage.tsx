@@ -6,6 +6,7 @@ import {
 } from 'recharts'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useRestaurantStore } from '@/store/restaurantStore'
 import { useCashRegister } from '../hooks/useCashRegister'
 import { Spinner } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
@@ -465,7 +466,8 @@ function AnalyticsSection({ restaurantId }: { restaurantId: string }) {
 /* ── Main page ───────────────────────────────────────────────────────── */
 export function GastosPage() {
   const { user }                                 = useAuthStore()
-  const { register: cashRegister, restaurantId, loading: cashLoading } = useCashRegister()
+  const { restaurantId }                         = useRestaurantStore()
+  const { register: cashRegister, loading: cashLoading } = useCashRegister()
   const [expenses,     setExpenses]              = useState<Expense[]>([])
   const [loading,      setLoading]               = useState(true)
   const [showModal,    setShowModal]             = useState(false)

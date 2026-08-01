@@ -77,8 +77,7 @@ const RETAIL_NAV: NavGroup[] = [
     section: 'dashboard.section_operations',
     items: [
       { to: '/dashboard',            icon: Home,         labelKey: 'dashboard.nav_home',      exact: true },
-      { to: '/dashboard/orders',     icon: ShoppingBag,  labelKey: 'dashboard.nav_orders'     },
-      { to: '/dashboard/catalogo',   icon: ShoppingBag,  labelKey: 'dashboard.nav_catalogo'   },
+      { to: '/dashboard/catalogo',   icon: Package2,     labelKey: 'dashboard.nav_catalogo'   },
       { to: '/dashboard/inventario', icon: Warehouse,    labelKey: 'dashboard.nav_inventario' },
       { to: '/dashboard/clientes',   icon: ContactRound, labelKey: 'dashboard.nav_clients'    },
     ],

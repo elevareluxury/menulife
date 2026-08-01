@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 
 interface DashboardStats {
   menuProducts: number
@@ -14,47 +15,40 @@ export function useDashboardStats(restaurantId: string | undefined) {
     activeTables: { current: 0, total: 0 },
   })
 
-  useEffect(() => {
+  const fetchStats = useCallback(async () => {
     if (!restaurantId) return
+    const [menuResult, tablesResult] = await Promise.all([
+      supabase
+        .from('menu_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('restaurant_id', restaurantId),
+      supabase
+        .from('tables')
+        .select('id, status, is_active')
+        .eq('restaurant_id', restaurantId),
+    ])
 
-    async function fetchStats() {
-      const [menuResult, tablesResult] = await Promise.all([
-        supabase
-          .from('menu_items')
-          .select('*', { count: 'exact', head: true })
-          .eq('restaurant_id', restaurantId!),
-        supabase
-          .from('tables')
-          .select('id, status, is_active')
-          .eq('restaurant_id', restaurantId!),
-      ])
+    const tables = tablesResult.data ?? []
+    const activeTables = tables.filter(t => t.is_active)
 
-      const tables = tablesResult.data ?? []
-      const activeTables = tables.filter(t => t.is_active)
-
-      setStats({
-        menuProducts: menuResult.count ?? 0,
-        qrGenerated: tables.length,
-        activeTables: {
-          total: activeTables.length,
-          current: activeTables.filter(t => t.status === 'occupied').length,
-        },
-      })
-    }
-
-    fetchStats()
-
-    const channel = supabase
-      .channel(`dashboard_tables_${restaurantId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'tables', filter: `restaurant_id=eq.${restaurantId}` },
-        () => fetchStats()
-      )
-      .subscribe()
-
-    return () => { channel.unsubscribe() }
+    setStats({
+      menuProducts: menuResult.count ?? 0,
+      qrGenerated: tables.length,
+      activeTables: {
+        total: activeTables.length,
+        current: activeTables.filter(t => t.status === 'occupied').length,
+      },
+    })
   }, [restaurantId])
+
+  useEffect(() => { if (restaurantId) fetchStats() }, [restaurantId, fetchStats])
+
+  useRealtimeChannel({
+    channelName: `dashboard_tables_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: '*', table: 'tables', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetchStats() },
+  })
 
   return { stats }
 }

@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { ThemeSelector } from '../components/ThemeSelector'
+import type { HubTheme } from '../lib/themeConfig'
+import { THEME_META } from '../lib/themeConfig'
+import { HubBlockEditor } from '../components/HubBlockEditor'
+import type { BlockType } from '../lib/blocksConfig'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Globe, Plus, Trash2, Eye, EyeOff, ExternalLink,
@@ -8,6 +13,8 @@ import {
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
+import { useRestaurantStore } from '@/store/restaurantStore'
+import type { Restaurant } from '@/types/restaurant'
 import { useImageUpload } from '@/modules/menu/hooks/useImageUpload'
 import { QRCodeSVG } from 'qrcode.react'
 import {
@@ -86,10 +93,11 @@ const HUB_CATEGORIES = [
   'Delivery', 'Ropa', 'Accesorios', 'Tecnología', 'Servicios', 'Otro',
 ]
 
-type Tab = 'general' | 'links' | 'novedad' | 'destacado' | 'galeria' | 'resenas' | 'analytics' | 'preview'
+type Tab = 'general' | 'blocks' | 'links' | 'novedad' | 'destacado' | 'galeria' | 'resenas' | 'analytics' | 'preview'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'general',   label: 'General'      },
+  { id: 'blocks',    label: 'Bloques'      },
   { id: 'links',     label: 'Links'        },
   { id: 'novedad',   label: 'Novedad'      },
   { id: 'destacado', label: 'Destacado'    },
@@ -249,6 +257,8 @@ function ImageUploadArea({
 function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string | undefined }) {
   const { uploadImage, uploading } = useImageUpload()
   const { user } = useAuthStore()
+  const { restaurant: storeRestaurant } = useRestaurant()
+  const updateRestaurant = useRestaurantStore(s => s.updateRestaurant)
   const qrRef = useRef<HTMLDivElement>(null)
   const fileAvatarRef = useRef<HTMLInputElement>(null)
   const [saving, setSaving] = useState(false)
@@ -283,35 +293,34 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
     show_schedule: true,
     hub_title: '',
     title_font: 'syne',
+    theme: null,
+    accent_color: '#F4705A',
   })
   const [scheduleForm, setScheduleForm] = useState<Record<string,any>>({})
 
+  // Initialize hub form fields from store (no Supabase SELECT needed)
   useEffect(() => {
-    db.from('restaurants').select(
-      'hub_about,hub_about_en,hub_category_tags,hub_category_tags_en,hub_enabled,hub_bottom_nav,hub_cover_url,hub_category,hub_main_cta_text,hub_main_cta_url,google_rating,google_review_count,google_review_url'
-    ).eq('id', restaurantId).maybeSingle()
-      .then(({ data }: { data: Record<string, unknown> | null }) => {
-        if (data) {
-          setForm({
-            hub_about: (data.hub_about as string) ?? '',
-            hub_about_en: (data.hub_about_en as string) ?? '',
-            hub_category_tags: (data.hub_category_tags as string[]) ?? [],
-            hub_category_tags_en: (data.hub_category_tags_en as string[]) ?? [],
-            hub_enabled: data.hub_enabled !== false,
-            hub_bottom_nav: data.hub_bottom_nav !== false,
-            hub_cover_url: (data.hub_cover_url as string) ?? '',
-            hub_category: (data.hub_category as string) ?? '',
-            hub_main_cta_text: (data.hub_main_cta_text as string) ?? '',
-            hub_main_cta_url: (data.hub_main_cta_url as string) ?? '',
-            google_rating: data.google_rating != null ? String(data.google_rating) : '',
-            google_review_count: data.google_review_count != null ? String(data.google_review_count) : '',
-            google_review_url: (data.google_review_url as string) ?? '',
-          })
-        }
-        setLoaded(true)
-      })
-  }, [restaurantId])
+    if (!storeRestaurant) return
+    setForm({
+      hub_about: storeRestaurant.hub_about ?? '',
+      hub_about_en: storeRestaurant.hub_about_en ?? '',
+      hub_category_tags: (storeRestaurant.hub_category_tags as string[]) ?? [],
+      hub_category_tags_en: (storeRestaurant.hub_category_tags_en as string[]) ?? [],
+      hub_enabled: storeRestaurant.hub_enabled !== false,
+      hub_bottom_nav: (storeRestaurant.hub_bottom_nav as any) !== false,
+      hub_cover_url: storeRestaurant.hub_cover_url ?? '',
+      hub_category: storeRestaurant.hub_category ?? '',
+      hub_main_cta_text: storeRestaurant.hub_main_cta_text ?? '',
+      hub_main_cta_url: storeRestaurant.hub_main_cta_url ?? '',
+      google_rating: storeRestaurant.google_rating != null ? String(storeRestaurant.google_rating) : '',
+      google_review_count: storeRestaurant.google_review_count != null ? String(storeRestaurant.google_review_count) : '',
+      google_review_url: storeRestaurant.google_review_url ?? '',
+    })
+    if (storeRestaurant.schedule) setScheduleForm(storeRestaurant.schedule as Record<string, any>)
+    setLoaded(true)
+  }, [storeRestaurant])
 
+  // Fetch hub_config (separate table, not in restaurant store)
   useEffect(() => {
     db.from('hub_config').select('*').eq('restaurant_id', restaurantId).maybeSingle()
       .then(({ data }: { data: Record<string,any> | null }) => {
@@ -323,11 +332,9 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           show_schedule:       data.show_schedule       ?? true,
           hub_title:           data.hub_title           || '',
           title_font:          data.title_font          || 'syne',
+          theme:               data.theme               ?? null,
+          accent_color:        data.accent_color        || '#F4705A',
         })
-      })
-    db.from('restaurants').select('schedule,name').eq('id', restaurantId).maybeSingle()
-      .then(({ data }: { data: Record<string,any> | null }) => {
-        if (data?.schedule) setScheduleForm(data.schedule)
       })
   }, [restaurantId])
 
@@ -360,6 +367,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           db.from('restaurants').update({ logo_url: r.url }).eq('id', restaurantId),
         ])
         setAvatarUrl(r.url)
+        updateRestaurant({ logo_url: r.url })
         toast.success('Foto de perfil actualizada')
       } else {
         toast.error('Error al subir la foto')
@@ -403,10 +411,12 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         return
       }
       console.log('Hub saved:', data)
+      updateRestaurant(payload as Partial<Restaurant>)
       toast.success('Configuración guardada')
       await db.from('hub_config').upsert({
-        restaurant_id: restaurantId,
-        accent_color: '#F4705A',
+        restaurant_id:       restaurantId,
+        accent_color:        hubConfig.accent_color        || '#F4705A',
+        theme:               hubConfig.theme               ?? null,
         show_open_status:    hubConfig.show_open_status    ?? true,
         show_catalog_banner: hubConfig.show_catalog_banner ?? true,
         show_locations:      hubConfig.show_locations      ?? true,
@@ -414,9 +424,10 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         show_schedule:       hubConfig.show_schedule       ?? true,
         hub_title:           hubConfig.hub_title           || null,
         title_font:          hubConfig.title_font          || 'syne',
-        updated_at: new Date().toISOString(),
+        updated_at:          new Date().toISOString(),
       }, { onConflict: 'restaurant_id' })
       await db.from('restaurants').update({ schedule: scheduleForm }).eq('id', restaurantId)
+      updateRestaurant({ schedule: scheduleForm as Restaurant['schedule'] })
     } catch (err) {
       toast.error(`Error al guardar: ${(err as Error)?.message ?? err}`)
       console.error(err)
@@ -457,7 +468,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
       {/* Profile photo */}
       <Card className="space-y-3">
         <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Foto de perfil</h3>
-        <p className="text-xs text-gray-500">Aparece en tu Hub público, en la esfera de Life y en el saludo.</p>
+        <p className="text-xs text-gray-500">Aparece en tu ID público, en la esfera de Life y en el saludo.</p>
         <div className="flex flex-col items-center gap-2">
           <button
             type="button"
@@ -604,19 +615,38 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         <h3 className="text-white font-semibold text-sm uppercase tracking-wide mb-1">Visibilidad</h3>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-white font-medium">Hub activo</p>
-            <p className="text-xs text-gray-500">Los clientes pueden ver tu Hub Público</p>
+            <p className="text-sm text-white font-medium">ID activo</p>
+            <p className="text-xs text-gray-500">Los clientes pueden ver tu ID Público</p>
           </div>
           <Toggle value={form.hub_enabled} onChange={v => setForm(p => ({ ...p, hub_enabled: v }))} />
         </div>
         <div className="w-full h-px bg-white/5" />
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-white font-medium">Nav inferior en Hub</p>
+            <p className="text-sm text-white font-medium">Nav inferior en ID</p>
             <p className="text-xs text-gray-500">Muestra la barra de navegación con secciones</p>
           </div>
           <Toggle value={form.hub_bottom_nav} onChange={v => setForm(p => ({ ...p, hub_bottom_nav: v }))} />
         </div>
+      </Card>
+
+      {/* Tema visual */}
+      <Card className="space-y-4">
+        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Apariencia</h3>
+        <ThemeSelector
+          value={(hubConfig.theme as HubTheme | null) ?? null}
+          onChange={(newTheme) => {
+            const currentAccent = hubConfig.accent_color
+            const oldThemeDefault = hubConfig.theme
+              ? THEME_META[hubConfig.theme as HubTheme]?.defaultAccent
+              : '#F4705A'
+            // Reset accent only if it was the old theme's default
+            const newAccent = (currentAccent === oldThemeDefault || !currentAccent)
+              ? THEME_META[newTheme].defaultAccent
+              : currentAccent
+            setHubConfig({ ...hubConfig, theme: newTheme, accent_color: newAccent })
+          }}
+        />
       </Card>
 
       {/* Nombre y tipografía */}
@@ -762,7 +792,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
       {/* QR Section */}
       {slug && (
         <Card className="space-y-4">
-          <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Tu QR del Hub</h3>
+          <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Tu QR del ID</h3>
           <p className="text-xs text-gray-500">
             Compartí este QR en tu local, menús impresos o redes sociales.
           </p>
@@ -1160,7 +1190,7 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-400">Novedad destacada en la parte superior del Hub.</p>
+        <p className="text-sm text-gray-400">Novedad destacada en la parte superior del ID.</p>
         {story && (
           <button type="button" onClick={handleDelete} className="text-xs text-red-400 hover:text-red-300">
             Eliminar
@@ -1193,8 +1223,8 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
         </div>
         <div className="flex items-center justify-between pt-1">
           <div>
-            <p className="text-sm text-white font-medium">Visible en Hub</p>
-            <p className="text-xs text-gray-500">Muestra este banner en el Hub Público</p>
+            <p className="text-sm text-white font-medium">Visible en ID</p>
+            <p className="text-xs text-gray-500">Muestra este banner en el ID Público</p>
           </div>
           <Toggle value={form.is_active} onChange={v => setForm(p => ({ ...p, is_active: v }))} />
         </div>
@@ -1289,7 +1319,7 @@ function TabDestacado({ restaurantId }: { restaurantId: string }) {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-400">Producto o plato destacado en tu Hub.</p>
+        <p className="text-sm text-gray-400">Producto o plato destacado en tu ID.</p>
         {product && (
           <button type="button" onClick={handleDelete} className="text-xs text-red-400 hover:text-red-300">
             Eliminar
@@ -1325,8 +1355,8 @@ function TabDestacado({ restaurantId }: { restaurantId: string }) {
           onChange={v => setForm(p => ({ ...p, cta_url: v }))} placeholder="https://…" />
         <div className="flex items-center justify-between pt-1">
           <div>
-            <p className="text-sm text-white font-medium">Visible en Hub</p>
-            <p className="text-xs text-gray-500">Muestra este destacado en el Hub Público</p>
+            <p className="text-sm text-white font-medium">Visible en ID</p>
+            <p className="text-xs text-gray-500">Muestra este destacado en el ID Público</p>
           </div>
           <Toggle value={form.is_active} onChange={v => setForm(p => ({ ...p, is_active: v }))} />
         </div>
@@ -1842,7 +1872,7 @@ function TabPreview({ slug }: { slug: string | undefined }) {
       </button>
       <div className="rounded-[2.5rem] overflow-hidden shadow-2xl"
         style={{ width: 300, height: 600, border: '6px solid rgba(255,255,255,0.1)', boxShadow: '0 0 0 1px rgba(255,255,255,0.05), 0 40px 80px rgba(0,0,0,0.6)' }}>
-        <iframe src={`/${slug}`} className="w-full h-full" title="Hub preview" />
+        <iframe src={`/${slug}`} className="w-full h-full" title="ID preview" />
       </div>
     </div>
   )
@@ -1854,20 +1884,17 @@ export default function HubPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { restaurant, loading } = useRestaurant()
+  const updateRestaurant = useRestaurantStore(s => s.updateRestaurant)
   const [activeTab, setActiveTab] = useState<Tab>('general')
   const [hubEnabled, setHubEnabled] = useState<boolean | null>(null)
   const [savingEnabled, setSavingEnabled] = useState(false)
 
   const isLifeContext = location.pathname.startsWith('/life')
 
+  // Derive hub_enabled from store — no SELECT needed
   useEffect(() => {
-    if (restaurant?.id) {
-      db.from('restaurants').select('hub_enabled').eq('id', restaurant.id).maybeSingle()
-        .then(({ data }: { data: { hub_enabled: boolean } | null }) => {
-          setHubEnabled(data?.hub_enabled !== false)
-        })
-    }
-  }, [restaurant?.id])
+    if (restaurant) setHubEnabled(restaurant.hub_enabled !== false)
+  }, [restaurant?.hub_enabled])
 
   async function toggleHubEnabled() {
     if (!restaurant?.id || hubEnabled === null) return
@@ -1875,8 +1902,11 @@ export default function HubPage() {
     setSavingEnabled(true)
     const { error } = await db.from('restaurants').update({ hub_enabled: next }).eq('id', restaurant.id)
     setSavingEnabled(false)
-    if (!error) { setHubEnabled(next); toast.success(next ? 'Hub activado' : 'Hub desactivado') }
-    else toast.error('Error al actualizar')
+    if (!error) {
+      setHubEnabled(next)
+      updateRestaurant({ hub_enabled: next })
+      toast.success(next ? 'Hub activado' : 'Hub desactivado')
+    } else toast.error('Error al actualizar')
   }
 
   if (loading) {
@@ -1900,7 +1930,7 @@ export default function HubPage() {
               <Globe className="w-5 h-5" style={{ color: ACC }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Hub Público</h1>
+              <h1 className="text-xl font-bold text-white">ID Público</h1>
               {restaurant?.slug && (
                 <a href={`/${restaurant.slug}`} target="_blank" rel="noreferrer"
                   className="text-xs font-mono px-2 py-0.5 rounded-md inline-block mt-0.5 hover:opacity-80 transition-all"
@@ -1963,6 +1993,24 @@ export default function HubPage() {
       ) : (
         <>
           {activeTab === 'general'   && <TabGeneral   restaurantId={restaurant.id} slug={restaurant.slug} />}
+          {activeTab === 'blocks'    && (
+            <HubBlockEditor
+              restaurantId={restaurant.id}
+              onEditLegacyBlock={(blockType: BlockType) => {
+                // Redirigir al tab del editor legacy correspondiente
+                const legacyTabMap: Partial<Record<BlockType, Tab>> = {
+                  links:            'links',
+                  stories:          'novedad',
+                  featured:         'destacado',
+                  featured_products:'destacado',
+                  gallery:          'galeria',
+                  reviews:          'resenas',
+                }
+                const dest = legacyTabMap[blockType]
+                if (dest) setActiveTab(dest)
+              }}
+            />
+          )}
           {activeTab === 'links'     && <TabLinks     restaurantId={restaurant.id} />}
           {activeTab === 'novedad'   && <TabNovedad   restaurantId={restaurant.id} />}
           {activeTab === 'destacado' && <TabDestacado restaurantId={restaurant.id} />}

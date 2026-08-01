@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils'
 import { ACCEPTED_IMAGE_TYPES } from '@/lib/constants'
 import toast from 'react-hot-toast'
 import type { Restaurant } from '@/types'
+import { useRestaurant } from '@/hooks/useRestaurant'
 
 // ─── Column safety ────────────────────────────────────────────────────────────
 const VALID_COLUMNS = new Set([
@@ -330,7 +331,7 @@ export function BusinessSettings() {
   const { uploadImage, uploading: uploadingLogo } = useImageUpload()
   const { t } = useTranslation()
   const { changeLanguage } = useLanguage()
-  const setStoreBusinessType = useRestaurantStore(s => s.setBusinessType)
+  const updateStoreRestaurant = useRestaurantStore(s => s.updateRestaurant)
 
   const [businessType, setBusinessType] = useState<'gastronomy' | 'retail' | 'services'>('gastronomy')
 
@@ -352,8 +353,8 @@ export function BusinessSettings() {
       : []),
   ], [t, businessType])
 
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { restaurant, isLoading: storeLoading } = useRestaurant()
+  const [formInitialized, setFormInitialized] = useState(false)
   const [saving, setSaving] = useState(false)
   const [activeSection, setActiveSection] = useState<Section>('general')
   const [confirmMode, setConfirmMode] = useState<'gastronomy' | 'retail' | 'services' | null>(null)
@@ -412,69 +413,52 @@ export function BusinessSettings() {
   const [resMessage, setResMessage] = useState('¡Gracias por tu reserva! Te esperamos.')
   const [newSlot, setNewSlot] = useState('')
 
-  // Fetch restaurant
+  // Initialize form once when restaurant arrives from store (no Supabase fetch)
   useEffect(() => {
-    if (!user) return
-    supabase
-      .from('restaurants')
-      .select('*')
-      .eq('owner_id', user.id)
-      .single()
-      .then(({ data, error }) => {
-        if (!error && data) {
-          const r = data as Restaurant
-          setRestaurant(r)
-          setFormData(restaurantToForm(r))
-          if (data.logo_url) setLogoPreview(data.logo_url)
-          if (data.cover_image_url) setCoverPreview(data.cover_image_url)
-          const rAnyData = data as unknown as Record<string, unknown>
-          if (rAnyData.banner_url) setBannerPreview(rAnyData.banner_url as string)
-          // Load delivery config
-          setDeliveryForm({
-            delivery_enabled: r.delivery_enabled ?? false,
-            delivery_time_estimate: r.delivery_time_estimate ?? 30,
-            delivery_min_order: r.delivery_min_order ?? 0,
-            delivery_fee_type: (r.delivery_fee_type as DeliveryForm['delivery_fee_type']) ?? 'fixed',
-            delivery_fee_value: r.delivery_fee_value ?? 0,
-            delivery_zones: Array.isArray(r.delivery_zones) ? (r.delivery_zones as DeliveryZone[]) : [],
-            takeaway_enabled: r.takeaway_enabled ?? false,
-            takeaway_time_estimate: r.takeaway_time_estimate ?? 15,
-          })
-          // Load language config
-          const storedLang = localStorage.getItem('menulife_lang')
-          setPanelLang(storedLang ?? (r.default_language?.toUpperCase() === 'EN' ? 'en' : 'es'))
-          setMenuLang(r.default_language ?? 'ES')
-          setAllowSwitch(r.allow_language_switch ?? true)
-          // Load globalization config (Phase 17 columns — may not exist on older rows)
-          const rGlob = r as unknown as Record<string, unknown>
-          if (rGlob.timezone)      setTimezone(String(rGlob.timezone))
-          if (r.default_currency)  setCurrency(r.default_currency)
-          if (rGlob.date_format)   setDateFormat(rGlob.date_format as DateFormat)
-          if (rGlob.time_format)   setTimeFormat(rGlob.time_format as TimeFormat)
-          if (rGlob.number_format) setNumberFormat(String(rGlob.number_format))
-          // Load POS config
-          const rAny = r as unknown as Record<string, unknown>
-          setTaxEnabled(Boolean(rAny.tax_enabled ?? false))
-          setTaxPercentage(Number(rAny.tax_percentage ?? 21))
-          setSuggestedTips(Array.isArray(rAny.suggested_tip_percentages) ? rAny.suggested_tip_percentages as number[] : [10, 15, 20])
-          setEnabledPayments(Array.isArray(rAny.enabled_payment_methods) && (rAny.enabled_payment_methods as string[]).length > 0
-            ? rAny.enabled_payment_methods as string[]
-            : ['cash', 'debit_card', 'credit_card', 'transfer', 'mercadopago', 'other'])
-          setDailySalesGoal(Number(rAny.daily_sales_goal ?? 50000))
-          // Load reservation config
-          setResEnabled(r.reservations_enabled ?? false)
-          setResCollectGuests(r.reservations_collect_guests ?? false)
-          setResDays(r.reservations_advance_days ?? 30)
-          setResMinHours(r.reservations_min_hours ?? 2)
-          setResMaxParty(r.reservations_max_party ?? 20)
-          setResTimeSlots(r.reservations_time_slots ?? ['20:00', '21:00', '22:00'])
-          setResMessage(r.reservations_message ?? '¡Gracias por tu reserva! Te esperamos.')
-          // Load business type
-          setBusinessType(r.business_type ?? 'gastronomy')
-        }
-        setLoading(false)
-      })
-  }, [user])
+    if (!restaurant || formInitialized) return
+    setFormInitialized(true)
+    setFormData(restaurantToForm(restaurant))
+    if (restaurant.logo_url) setLogoPreview(restaurant.logo_url)
+    if (restaurant.cover_image_url) setCoverPreview(restaurant.cover_image_url)
+    const rAnyData = restaurant as unknown as Record<string, unknown>
+    if (rAnyData.banner_url) setBannerPreview(rAnyData.banner_url as string)
+    setDeliveryForm({
+      delivery_enabled: restaurant.delivery_enabled ?? false,
+      delivery_time_estimate: restaurant.delivery_time_estimate ?? 30,
+      delivery_min_order: restaurant.delivery_min_order ?? 0,
+      delivery_fee_type: (restaurant.delivery_fee_type as DeliveryForm['delivery_fee_type']) ?? 'fixed',
+      delivery_fee_value: restaurant.delivery_fee_value ?? 0,
+      delivery_zones: Array.isArray(restaurant.delivery_zones) ? (restaurant.delivery_zones as DeliveryZone[]) : [],
+      takeaway_enabled: restaurant.takeaway_enabled ?? false,
+      takeaway_time_estimate: restaurant.takeaway_time_estimate ?? 15,
+    })
+    const storedLang = localStorage.getItem('menulife_lang')
+    setPanelLang(storedLang ?? (restaurant.default_language?.toUpperCase() === 'EN' ? 'en' : 'es'))
+    setMenuLang(restaurant.default_language ?? 'ES')
+    setAllowSwitch(restaurant.allow_language_switch ?? true)
+    const rGlob = restaurant as unknown as Record<string, unknown>
+    if (rGlob.timezone)             setTimezone(String(rGlob.timezone))
+    if (restaurant.default_currency) setCurrency(restaurant.default_currency)
+    if (rGlob.date_format)          setDateFormat(rGlob.date_format as DateFormat)
+    if (rGlob.time_format)          setTimeFormat(rGlob.time_format as TimeFormat)
+    if (rGlob.number_format)        setNumberFormat(String(rGlob.number_format))
+    const rAny = restaurant as unknown as Record<string, unknown>
+    setTaxEnabled(Boolean(rAny.tax_enabled ?? false))
+    setTaxPercentage(Number(rAny.tax_percentage ?? 21))
+    setSuggestedTips(Array.isArray(rAny.suggested_tip_percentages) ? rAny.suggested_tip_percentages as number[] : [10, 15, 20])
+    setEnabledPayments(Array.isArray(rAny.enabled_payment_methods) && (rAny.enabled_payment_methods as string[]).length > 0
+      ? rAny.enabled_payment_methods as string[]
+      : ['cash', 'debit_card', 'credit_card', 'transfer', 'mercadopago', 'other'])
+    setDailySalesGoal(Number(rAny.daily_sales_goal ?? 50000))
+    setResEnabled(restaurant.reservations_enabled ?? false)
+    setResCollectGuests(restaurant.reservations_collect_guests ?? false)
+    setResDays(restaurant.reservations_advance_days ?? 30)
+    setResMinHours(restaurant.reservations_min_hours ?? 2)
+    setResMaxParty(restaurant.reservations_max_party ?? 20)
+    setResTimeSlots(restaurant.reservations_time_slots ?? ['20:00', '21:00', '22:00'])
+    setResMessage(restaurant.reservations_message ?? '¡Gracias por tu reserva! Te esperamos.')
+    setBusinessType(restaurant.business_type ?? 'gastronomy')
+  }, [restaurant, formInitialized])
 
   // Revoke blob URLs on unmount / change
   useEffect(() => {
@@ -746,8 +730,8 @@ export function BusinessSettings() {
         throw new Error('No se pudo guardar: sin permisos. Ejecutá la migración SQL en Supabase Dashboard.')
       }
 
-      // Sync in-memory restaurant state so Cancel reverts to saved values
-      setRestaurant(prev => prev ? { ...prev, ...updatePayload } as Restaurant : prev)
+      // Sync store so Cancel reverts to saved values
+      updateStoreRestaurant(updatePayload as unknown as Partial<Restaurant>)
 
       toast.success(t('dashboard.settings_saved'))
     } catch (err: unknown) {
@@ -787,8 +771,7 @@ export function BusinessSettings() {
         .eq('id', restaurant.id)
       if (error) throw error
       setBusinessType(mode)
-      setStoreBusinessType(mode)
-      setRestaurant(prev => prev ? { ...prev, business_type: mode } : prev)
+      updateStoreRestaurant({ business_type: mode })
       const label = mode === 'gastronomy' ? 'Gastronomía' : mode === 'retail' ? 'Retail' : 'Servicios'
       toast.success(`✅ Modo actualizado a ${label}`)
       navigate('/dashboard')
@@ -803,7 +786,7 @@ export function BusinessSettings() {
 
   // ─── Loading state ──────────────────────────────────────────────────────────
 
-  if (loading) {
+  if (storeLoading || !restaurant) {
     return (
       <div className="flex items-center justify-center py-16">
         <Spinner size="lg" />
@@ -1364,7 +1347,7 @@ export function BusinessSettings() {
       </SectionCard>
 
       {/* Hub banner */}
-      <SectionCard title="Banner del Hub Público" description="Imagen de encabezado que aparece en tu página pública (hub) de MenuLife.">
+      <SectionCard title="Banner del ID Público" description="Imagen de encabezado que aparece en tu página pública de Mycen.">
         <div
           className="relative w-full rounded-xl overflow-hidden mb-4"
           style={{ paddingBottom: '33.33%' }}

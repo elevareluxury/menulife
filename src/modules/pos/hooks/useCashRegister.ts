@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -93,29 +94,18 @@ export function useCashRegister() {
 
   useEffect(() => { load() }, [load])
 
-  /* ── Realtime: refrescar KPIs cuando otro cobro entra a esta caja ── */
   const openRegisterIdRef = useRef<string | null>(null)
-  useEffect(() => {
-    openRegisterIdRef.current = register?.id ?? null
-  }, [register?.id])
+  useEffect(() => { openRegisterIdRef.current = register?.id ?? null }, [register?.id])
 
-  useEffect(() => {
-    if (!register?.id) return
-    const registerId = register.id
-
-    const channel = supabase.channel(`caja-live-${registerId}`)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'cash_movements',
-        filter: `cash_register_id=eq.${registerId}`,
-      }, load)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'financial_transactions',
-        filter: `cash_register_id=eq.${registerId}`,
-      }, load)
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [register?.id, load])
+  useRealtimeChannel({
+    channelName: `caja-live-${register?.id ?? 'none'}`,
+    enabled: !!register?.id,
+    changes: [
+      { event: 'INSERT', table: 'cash_movements',         filter: `cash_register_id=eq.${register?.id}` },
+      { event: 'INSERT', table: 'financial_transactions', filter: `cash_register_id=eq.${register?.id}` },
+    ],
+    onEvent: () => { load() },
+  })
 
   return { register, movements, summary, loading, reload: load, restaurantId: restaurant?.id ?? null }
 }

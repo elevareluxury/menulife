@@ -3,10 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import type { Restaurant } from '@/types'
+import { buildHubC, NULL_C, isValidTheme, getBodyFont, type HubC } from '@/modules/hub/lib/themeConfig'
+import { useThemeFonts } from '@/modules/hub/hooks/useThemeFonts'
+import { useHubBlocks } from '@/modules/hub/hooks/useHubBlocks'
+import { HubBlockRenderer } from '@/modules/hub/components/HubBlockRenderer'
 
 const db = supabase as any
 
-/* ── Types ──────────────────────────────────────────────────────────────────── */
+/* â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 interface HubStory {
   id: string; image_url: string | null; title: string | null
@@ -36,7 +40,7 @@ interface SocialLinks {
   google_review?: string | null; google_maps?: string | null
 }
 
-/* ── Reserved slugs ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Reserved slugs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 const RESERVED_SLUGS = new Set([
   'dashboard','login','register','mozo','kitchen','delivery','r','waiter',
@@ -44,17 +48,10 @@ const RESERVED_SLUGS = new Set([
   'forgot-password','reset-password','catalogo',
 ])
 
-/* ── Design tokens ──────────────────────────────────────────────────────────── */
-
-const C = {
-  bg:'#06080F', bg2:'#0A0D16',
-  sur:'rgba(255,255,255,0.04)', sur2:'rgba(255,255,255,0.07)',
-  bdr:'rgba(255,255,255,0.08)', bdr2:'rgba(255,255,255,0.16)',
-  acc:'#F59E0B', acc2:'#FCD34D', grn:'#10B981', red:'#EF4444',
-  t1:'#F8F9FA', t2:'rgba(248,249,250,0.60)',
-  t3:'rgba(248,249,250,0.32)', t4:'rgba(248,249,250,0.14)',
-  card:'#111318',
-}
+/* â”€â”€ Design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// C is computed inside HubPublicPage from hubConfig.theme.
+// NULL_C is used only in pre-data states (HubLoading, HubNotFound)
+// to preserve the exact current dark look.
 
 const HUB_CSS = `
   @keyframes hubMesh{0%{transform:translate(0,0) scale(1)}100%{transform:translate(20px,-25px) scale(1.1)}}
@@ -69,7 +66,7 @@ const HUB_CSS = `
 `
 
 
-/* ── Social icons (SVG blancos inline) ─────────────────────────────────────── */
+/* â”€â”€ Social icons (SVG blancos inline) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   ig: (
@@ -99,7 +96,7 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   ),
 }
 
-/* ── Helpers ────────────────────────────────────────────────────────────────── */
+/* â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function parseSocial(raw: unknown): SocialLinks {
   if (!raw || typeof raw !== 'object') return {}
@@ -126,7 +123,7 @@ function todayHours(bh: unknown): string {
   const slot = (bh as Record<string,any>)[day]
   if (!slot) return ''
   if (slot.closed===true) return 'Cerrado hoy'
-  if (slot.open && slot.close) return `${slot.open} – ${slot.close}`
+  if (slot.open && slot.close) return `${slot.open} â€“ ${slot.close}`
   return ''
 }
 
@@ -135,9 +132,9 @@ function hasScheduleData(bh: unknown): boolean {
   return Object.values(bh as Record<string, any>).some(d => d?.open || d?.closed === true)
 }
 
-function starStr(n: number) { return '⭐'.repeat(Math.min(5,Math.max(1,Math.round(n)))) }
+function starStr(n: number) { return 'â­'.repeat(Math.min(5,Math.max(1,Math.round(n)))) }
 
-/* ── Analytics ──────────────────────────────────────────────────────────────── */
+/* â”€â”€ Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function trackEvent(restaurantId: string, eventType: string, linkId?: string) {
   db.from('hub_analytics').insert({
@@ -149,7 +146,7 @@ function trackEvent(restaurantId: string, eventType: string, linkId?: string) {
   }).then()
 }
 
-/* ── Scroll-reveal wrapper ──────────────────────────────────────────────────── */
+/* â”€â”€ Scroll-reveal wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function Reveal({children,delay=0}:{children:React.ReactNode;delay?:number}) {
   return (
@@ -164,18 +161,19 @@ function Reveal({children,delay=0}:{children:React.ReactNode;delay?:number}) {
   )
 }
 
-/* ── Section label ──────────────────────────────────────────────────────────── */
+/* â”€â”€ Section label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-function SL({children}:{children:React.ReactNode}) {
+function SL({children, color}:{children:React.ReactNode; color?: string}) {
   return (
-    <p style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:'#FFFFFF',
-      textTransform:'uppercase',letterSpacing:'0.14em',marginBottom:12,margin:'0 0 12px'}}>
+    <p style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,
+      color: color || NULL_C.t1,
+      textTransform:'uppercase',letterSpacing:'0.14em',margin:'0 0 12px'}}>
       {children}
     </p>
   )
 }
 
-/* ── Gallery lightbox ───────────────────────────────────────────────────────── */
+/* â”€â”€ Gallery lightbox â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:number;onClose:()=>void}) {
   const [cur,setCur] = useState(startIndex)
@@ -209,7 +207,7 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
         style={{position:'absolute',top:20,right:20,width:44,height:44,borderRadius:'50%',
           background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:22,
           cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1}}>
-        ×
+        Ã—
       </button>
       <motion.div key={cur} initial={{opacity:0,scale:.95}} animate={{opacity:1,scale:1}}
         exit={{opacity:0,scale:.95}} transition={{duration:.2}} onClick={e=>e.stopPropagation()}
@@ -223,11 +221,11 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
         <button onClick={e=>{e.stopPropagation();setCur(c=>(c-1+items.length)%items.length)}}
           style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',width:44,height:44,borderRadius:'50%',
             background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:28,cursor:'pointer',
-            display:'flex',alignItems:'center',justifyContent:'center'}}>‹</button>
+            display:'flex',alignItems:'center',justifyContent:'center'}}>â€¹</button>
         <button onClick={e=>{e.stopPropagation();setCur(c=>(c+1)%items.length)}}
           style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',width:44,height:44,borderRadius:'50%',
             background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:28,cursor:'pointer',
-            display:'flex',alignItems:'center',justifyContent:'center'}}>›</button>
+            display:'flex',alignItems:'center',justifyContent:'center'}}>â€º</button>
       </>}
       <p style={{position:'absolute',bottom:16,fontFamily:"'DM Mono',monospace",fontSize:12,color:'rgba(255,255,255,.4)'}}>
         {cur+1} / {items.length}
@@ -236,15 +234,16 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
   )
 }
 
-/* ── Bottom navigation ──────────────────────────────────────────────────────── */
+/* â”€â”€ Bottom navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function BottomNav({
-  isRetail, plan, hubConfig, hasFeatured,
+  isRetail, plan, hubConfig, hasFeatured, C,
 }: {
   isRetail: boolean
   plan: string | null
   hubConfig: Record<string,any>
   hasFeatured: boolean
+  C: HubC
 }) {
   const [activeSection, setActiveSection] = useState('inicio')
 
@@ -270,11 +269,11 @@ function BottomNav({
   // Build dynamic nav items
   const items: { id: string; label: string; icon: React.ReactNode; section: string }[] = []
 
-  // Menú/Catálogo — solo OS
+  // MenÃº/CatÃ¡logo â€” solo OS
   if (plan && plan !== 'hub_free') {
     items.push({
       id: isRetail ? 'catalog' : 'menu',
-      label: isRetail ? 'Catálogo' : 'Menú',
+      label: isRetail ? 'CatÃ¡logo' : 'MenÃº',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20">
           <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
@@ -285,7 +284,7 @@ function BottomNav({
     })
   }
 
-  // Inicio — siempre (se inserta en el centro)
+  // Inicio â€” siempre (se inserta en el centro)
   items.splice(Math.floor(items.length / 2), 0, {
     id: 'inicio',
     label: 'Inicio',
@@ -313,7 +312,7 @@ function BottomNav({
     })
   }
 
-  // Novedades — si hay featured product activo
+  // Novedades â€” si hay featured product activo
   if (hasFeatured) {
     items.push({
       id: 'novedades',
@@ -339,13 +338,13 @@ function BottomNav({
       display: 'flex',
       alignItems: 'center',
       justifyContent: soloInicio ? 'center' : 'space-around',
-      background: 'rgba(255,255,255,0.05)',
+      background: C.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.85)',
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
-      border: '1px solid rgba(255,255,255,0.08)',
+      border: `1px solid ${C.isDark ? 'rgba(255,255,255,0.08)' : C.bdr}`,
       borderRadius: 20,
       padding: '0 8px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+      boxShadow: C.isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(0,0,0,0.12)',
       zIndex: 1000,
       boxSizing: 'border-box',
     }}>
@@ -363,7 +362,7 @@ function BottomNav({
             border: 'none',
             background: 'none',
             cursor: 'pointer',
-            color: activeSection === item.section ? '#FFFFFF' : 'rgba(255,255,255,0.35)',
+            color: activeSection === item.section ? C.t1 : C.t3,
             flexShrink: 0,
             transition: 'color 0.15s',
           }}
@@ -383,19 +382,19 @@ function BottomNav({
   )
 }
 
-/* ── Horarios compactos con tooltip ────────────────────────────────────────── */
+/* â”€â”€ Horarios compactos con tooltip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 const DAYS_COMPACT = [
   {key:'monday',    initial:'L', label:'Lunes'},
   {key:'tuesday',   initial:'M', label:'Martes'},
-  {key:'wednesday', initial:'X', label:'Miércoles'},
+  {key:'wednesday', initial:'X', label:'MiÃ©rcoles'},
   {key:'thursday',  initial:'J', label:'Jueves'},
   {key:'friday',    initial:'V', label:'Viernes'},
-  {key:'saturday',  initial:'S', label:'Sábado'},
+  {key:'saturday',  initial:'S', label:'SÃ¡bado'},
   {key:'sunday',    initial:'D', label:'Domingo'},
 ]
 
-function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
+function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: HubC}) {
   const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()]
   const [activeDay,setActiveDay] = useState<string|null>(null)
 
@@ -410,7 +409,7 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
   return (
     <div style={{padding:'16px'}}>
       <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,
-        color:'rgba(255,255,255,0.5)',textTransform:'uppercase',
+        color:C.t3,textTransform:'uppercase',
         letterSpacing:'0.08em',marginBottom:12}}>
         Horarios
       </p>
@@ -424,7 +423,7 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
           const isLast = index===DAYS_COMPACT.length-1
           return (
             <div key={day.key} style={{position:'relative',flexShrink:0}}>
-              {/* Tooltip — absolute, pegado sobre el círculo */}
+              {/* Tooltip â€” absolute, pegado sobre el cÃ­rculo */}
               <AnimatePresence>
                 {isActive && (
                   <motion.div
@@ -465,21 +464,21 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
                       <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:C.red,margin:0}}>Cerrado</p>
                     ) : (
                       <p style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:'#FFFFFF',margin:0}}>
-                        {slot.open} — {slot.close}
+                        {slot.open} â€” {slot.close}
                       </p>
                     )}
                   </motion.div>
                 )}
               </AnimatePresence>
-              {/* Círculo */}
+              {/* CÃ­rculo */}
               <button
                 onTouchStart={(e)=>{e.stopPropagation();setActiveDay(activeDay===day.key?null:day.key)}}
                 onClick={(e)=>{e.stopPropagation();setActiveDay(activeDay===day.key?null:day.key)}}
                 style={{
                   width:36,height:36,borderRadius:'50%',
-                  border:isToday?`1.5px solid ${'#FFFFFF'}`:'1px solid rgba(255,255,255,0.1)',
-                  background:isActive?'rgba(245,158,11,0.15)':isToday?'rgba(245,158,11,0.08)':'rgba(255,255,255,0.04)',
-                  color:isClosed?'rgba(255,255,255,0.2)':isToday?'#FFFFFF':'rgba(255,255,255,0.7)',
+                  border:isToday?`1.5px solid ${C.t1}`:`1px solid ${C.bdr}`,
+                  background:isActive?`${C.acc}26`:isToday?`${C.acc}14`:C.sur,
+                  color:isClosed?C.t4:isToday?C.t1:C.t2,
                   fontSize:12,fontFamily:"'DM Mono',monospace",fontWeight:500,
                   cursor:'pointer',
                   display:'flex',alignItems:'center',justifyContent:'center',
@@ -491,7 +490,7 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
                   <span style={{
                     position:'absolute',bottom:2,left:'50%',transform:'translateX(-50%)',
                     width:3,height:3,borderRadius:'50%',
-                    background:isToday?'#FFFFFF':'rgba(255,255,255,0.4)',
+                    background:isToday?C.t1:C.t3,
                   }}/>
                 )}
               </button>
@@ -503,15 +502,15 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
   )
 }
 
-/* ── Loading / 404 ──────────────────────────────────────────────────────────── */
+/* â”€â”€ Loading / 404 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function HubLoading() {
   return (
-    <div style={{minHeight:'100svh',background:C.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <div style={{minHeight:'100svh',background:NULL_C.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
       <style>{`@keyframes _hubSpin{to{transform:rotate(360deg)}}`}</style>
       <div style={{width:32,height:32,borderRadius:'50%',
         border:`2px solid rgba(245,158,11,0.3)`,
-        borderTop:`2px solid ${'#FFFFFF'}`,
+        borderTop:`2px solid ${NULL_C.t1}`,
         animation:'_hubSpin 0.8s linear infinite'}}/>
     </div>
   )
@@ -519,11 +518,11 @@ function HubLoading() {
 
 function HubNotFound() {
   return (
-    <div style={{minHeight:'100svh',background:C.bg,display:'flex',flexDirection:'column',
+    <div style={{minHeight:'100svh',background:NULL_C.bg,display:'flex',flexDirection:'column',
       alignItems:'center',justifyContent:'center',padding:'0 24px',textAlign:'center',
       fontFamily:"'DM Sans',sans-serif"}}>
-      <p style={{fontFamily:"'Syne',sans-serif",fontSize:64,fontWeight:800,color:C.t3,marginBottom:8}}>404</p>
-      <p style={{color:C.t2,marginBottom:24}}>Este Hub no fue encontrado.</p>
+      <p style={{fontFamily:"'Syne',sans-serif",fontSize:64,fontWeight:800,color:NULL_C.t3,marginBottom:8}}>404</p>
+      <p style={{color:NULL_C.t2,marginBottom:24}}>Este Hub no fue encontrado.</p>
       <a href="/" style={{background:'#FFFFFF',color:'#000',padding:'10px 24px',borderRadius:100,
         fontWeight:600,fontSize:14,fontFamily:"'DM Sans',sans-serif",textDecoration:'none'}}>
         Volver al inicio
@@ -532,7 +531,7 @@ function HubNotFound() {
   )
 }
 
-/* ── Main component ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 export function HubPublicPage() {
   const { slug } = useParams<{slug:string}>()
@@ -550,6 +549,12 @@ export function HubPublicPage() {
   const [lightboxIndex, setLightboxIndex]     = useState<number|null>(null)
   const [scrollY, setScrollY]                 = useState(0)
 
+  // Hub blocks — realtime habilitado (activeOnly=true activa el canal)
+  const { blocks: hubBlocks } = useHubBlocks({
+    restaurantId: restaurant?.id,
+    activeOnly: true,
+  })
+
   // Scroll tracking for parallax
   useEffect(()=>{
     const onScroll = ()=>{
@@ -560,17 +565,28 @@ export function HubPublicPage() {
     return ()=>window.removeEventListener('scroll', onScroll)
   },[])
 
-  // Inject keyframe CSS + override body background
+  // Compute theme-aware palette â€” NULL_C for theme=null (zero regression for existing users)
+  const C = buildHubC((hubConfig as any).theme, (hubConfig as any).accent_color)
+
+  // Load dynamic fonts (only Source Sans 3 for warm; others are in index.html)
+  const activeTheme = isValidTheme((hubConfig as any).theme) ? (hubConfig as any).theme : null
+  useThemeFonts(activeTheme)
+
+  // Inject keyframe CSS once
   useEffect(()=>{
     const id='hub-public-css'
     if (!document.getElementById(id)) {
       const s=document.createElement('style'); s.id=id; s.textContent=HUB_CSS
       document.head.appendChild(s)
     }
+  },[])
+
+  // Body background synced to theme
+  useEffect(()=>{
     const prev = document.body.style.background
     document.body.style.background = C.bg
     return ()=>{ document.body.style.background = prev }
-  },[])
+  },[C.bg])
 
   useEffect(()=>{
     if (!slug) { setNotFound(true); setLoading(false); return }
@@ -622,6 +638,28 @@ export function HubPublicPage() {
   // ── Derived values
   const r  = restaurant
   const ra = r as any
+
+  // Hub blocks: visibilidad de bloques legacy + slots para bloques nuevos.
+  // Si hub_blocks tiene datos para este restaurant, usarlos para controlar visibilidad.
+  // Si está vacío (restaurant nunca abrió el editor), usar lógica legacy (mostrar todo).
+  const hasBlocksConfig = hubBlocks.length > 0
+
+  function isLegacyBlockActive(blockType: string): boolean {
+    if (!hasBlocksConfig) return true // fallback legacy
+    const block = hubBlocks.find(b => b.block_type === blockType)
+    return block ? block.is_active : false
+  }
+
+  // Bloques nuevos (JSONB) activos, ordenados por sort_order
+  const activeNewBlocks = hubBlocks
+    .filter(b => ['video', 'bio', 'stats', 'contact_form'].includes(b.block_type) && b.is_active)
+    .sort((a, b) => a.sort_order - b.sort_order)
+
+  // Slot 1: bloques nuevos con sort_order < 10 (antes de links, ej: bio)
+  const preLinksNewBlocks = activeNewBlocks.filter(b => b.sort_order < 10)
+  // Slot 2: bloques nuevos con sort_order >= 10 (después de reviews, ej: stats, video)
+  const postReviewsNewBlocks = activeNewBlocks.filter(b => b.sort_order >= 10)
+
   const social            = parseSocial(r.social_links)
   const waPhone           = social.whatsapp||r.phone||''
   const cleanWa           = waPhone.replace(/\D/g,'')
@@ -641,45 +679,45 @@ export function HubPublicPage() {
   const address = [r.address,r.city].filter(Boolean).join(', ')
   const menuHref = isRetail ? `/catalogo/${slug}` : `/r/${slug}`
 
-  // ── CTA buttons
+  // â”€â”€ CTA buttons
   type CTABtn={icon:string;label:string;href?:string;scroll?:string;primary?:boolean;trackEvent?:string}
   const ctaBtns: CTABtn[] = []
-  const primaryLabel = hubMainCtaText || (isRetail ? 'Ver catálogo' : 'Ver menú')
+  const primaryLabel = hubMainCtaText || (isRetail ? 'Ver catÃ¡logo' : 'Ver menÃº')
   const primaryHref  = hubMainCtaUrl  || menuHref
-  const primaryIcon  = isRetail ? '🛍' : '🍽'
+  const primaryIcon  = isRetail ? 'ðŸ›' : 'ðŸ½'
   ctaBtns.push({ icon: primaryIcon, label: primaryLabel, href: primaryHref, primary: true, trackEvent: 'cta_click' })
   if (isRetail) {
-    if (cleanWa) ctaBtns.push({ icon:'💬', label:'WhatsApp', href:`https://wa.me/${cleanWa}`, trackEvent: 'whatsapp_click' })
-    ctaBtns.push({ icon:'📍', label:'Cómo llegar', scroll:'locales', trackEvent: 'maps_click' })
-    if (r.phone) ctaBtns.push({ icon:'📞', label:'Llamar', href:`tel:${r.phone}` })
+    if (cleanWa) ctaBtns.push({ icon:'ðŸ’¬', label:'WhatsApp', href:`https://wa.me/${cleanWa}`, trackEvent: 'whatsapp_click' })
+    ctaBtns.push({ icon:'ðŸ“', label:'CÃ³mo llegar', scroll:'locales', trackEvent: 'maps_click' })
+    if (r.phone) ctaBtns.push({ icon:'ðŸ“ž', label:'Llamar', href:`tel:${r.phone}` })
   } else {
-    if (r.reservations_enabled) ctaBtns.push({ icon:'📅', label:'Reservar', href:`/r/${slug}/reservar` })
-    if (cleanWa) ctaBtns.push({ icon:'💬', label:'WhatsApp', href:`https://wa.me/${cleanWa}`, trackEvent: 'whatsapp_click' })
-    ctaBtns.push({ icon:'📍', label:'Cómo llegar', scroll:'locales', trackEvent: 'maps_click' })
+    if (r.reservations_enabled) ctaBtns.push({ icon:'ðŸ“…', label:'Reservar', href:`/r/${slug}/reservar` })
+    if (cleanWa) ctaBtns.push({ icon:'ðŸ’¬', label:'WhatsApp', href:`https://wa.me/${cleanWa}`, trackEvent: 'whatsapp_click' })
+    ctaBtns.push({ icon:'ðŸ“', label:'CÃ³mo llegar', scroll:'locales', trackEvent: 'maps_click' })
   }
 
-  // ── Smart link click handler
+  // â”€â”€ Smart link click handler
   async function handleLinkClick(link: HubLink) {
     trackEvent(r.id, 'link_click', link.id)
     db.from('hub_links').update({ click_count: (link.click_count || 0) + 1 }).eq('id', link.id).then()
     window.open(link.url, '_blank', 'noopener,noreferrer')
   }
 
-  // ── Social entries
+  // â”€â”€ Social entries
   type SocialEntry={key:string;label:string;icon:string;url:string;color:string;bg:string}
   const socialEntries: SocialEntry[] = []
-  if (social.instagram) socialEntries.push({key:'ig',label:'Instagram',icon:'📸',url:`https://instagram.com/${social.instagram}`,color:'#E1306C',bg:'rgba(225,48,108,.06)'})
-  if (social.tiktok)    socialEntries.push({key:'tt',label:'TikTok',icon:'🎵',url:`https://tiktok.com/@${social.tiktok}`,color:'rgba(255,255,255,.9)',bg:'rgba(255,255,255,.04)'})
-  if (social.youtube)   socialEntries.push({key:'yt',label:'YouTube',icon:'▶',url:String(social.youtube),color:'#FF4444',bg:'rgba(255,0,0,.06)'})
+  if (social.instagram) socialEntries.push({key:'ig',label:'Instagram',icon:'ðŸ“¸',url:`https://instagram.com/${social.instagram}`,color:'#E1306C',bg:'rgba(225,48,108,.06)'})
+  if (social.tiktok)    socialEntries.push({key:'tt',label:'TikTok',icon:'ðŸŽµ',url:`https://tiktok.com/@${social.tiktok}`,color:'rgba(255,255,255,.9)',bg:'rgba(255,255,255,.04)'})
+  if (social.youtube)   socialEntries.push({key:'yt',label:'YouTube',icon:'â–¶',url:String(social.youtube),color:'#FF4444',bg:'rgba(255,0,0,.06)'})
   if (social.facebook)  socialEntries.push({key:'fb',label:'Facebook',icon:'f',url:`https://facebook.com/${social.facebook}`,color:'#3B82F6',bg:'rgba(59,130,246,.06)'})
-  if (cleanWa)          socialEntries.push({key:'wa',label:'WhatsApp',icon:'💬',url:`https://wa.me/${cleanWa}`,color:'#25D366',bg:'rgba(37,211,102,.06)'})
+  if (cleanWa)          socialEntries.push({key:'wa',label:'WhatsApp',icon:'ðŸ’¬',url:`https://wa.me/${cleanWa}`,color:'#25D366',bg:'rgba(37,211,102,.06)'})
 
-  // ── Contact items
+  // â”€â”€ Contact items
   type ContactItem={icon:string;label:string;value:string;href:string;iconBg:string}
   const contactItems: ContactItem[] = []
-  if (cleanWa) contactItems.push({icon:'💬',label:'WhatsApp',value:waPhone,href:`https://wa.me/${cleanWa}`,iconBg:'rgba(37,211,102,.15)'})
-  if (r.phone&&!social.whatsapp) contactItems.push({icon:'📞',label:'Teléfono',value:r.phone,href:`tel:${r.phone}`,iconBg:'rgba(59,130,246,.15)'})
-  if (r.email) contactItems.push({icon:'✉',label:'Email',value:r.email,href:`mailto:${r.email}`,iconBg:'rgba(245,158,11,.15)'})
+  if (cleanWa) contactItems.push({icon:'ðŸ’¬',label:'WhatsApp',value:waPhone,href:`https://wa.me/${cleanWa}`,iconBg:'rgba(37,211,102,.15)'})
+  if (r.phone&&!social.whatsapp) contactItems.push({icon:'ðŸ“ž',label:'TelÃ©fono',value:r.phone,href:`tel:${r.phone}`,iconBg:'rgba(59,130,246,.15)'})
+  if (r.email) contactItems.push({icon:'âœ‰',label:'Email',value:r.email,href:`mailto:${r.email}`,iconBg:'rgba(245,158,11,.15)'})
 
   const cardBase: React.CSSProperties = {
     background:C.sur, border:`1px solid ${C.bdr}`, borderRadius:16,
@@ -695,7 +733,17 @@ export function HubPublicPage() {
     'dm-sans':     {family:"'DM Sans',sans-serif",      weight:700},
     inter:         {family:"'Inter',sans-serif",        weight:700},
   }
-  const titleFont = FONT_MAP[hubConfig.title_font || 'syne'] || FONT_MAP.syne
+  const rawFont = hubConfig.title_font || 'syne'
+  const isDefaultFont = !hubConfig.title_font || hubConfig.title_font === 'syne'
+  // User's explicit font choice wins; if on default 'syne', use the theme's title font
+  const finalTitleFont = (() => {
+    if (isDefaultFont && activeTheme === 'dark')  return {family:"'Syne',sans-serif",         weight:800}
+    if (isDefaultFont && activeTheme === 'light') return {family:"'Inter',sans-serif",         weight:700}
+    if (isDefaultFont && activeTheme === 'warm')  return {family:"'Playfair Display',serif",   weight:700}
+    if (isDefaultFont && activeTheme === 'blue')  return {family:"'Space Grotesk',sans-serif", weight:700}
+    return FONT_MAP[rawFont] || FONT_MAP.syne
+  })()
+  const bodyFont = getBodyFont(activeTheme)
 
   // Parallax calculations
   const coverOpacity = Math.max(0, 1 - scrollY / 300)
@@ -724,26 +772,27 @@ export function HubPublicPage() {
             backgroundSize:'cover',backgroundPosition:'center',
           }}>
             <div style={{position:'absolute',inset:0,
-              background:'linear-gradient(to bottom,rgba(6,8,15,0.3) 0%,rgba(6,8,15,0.7) 60%,rgba(6,8,15,1) 100%)'}}/>
+              background:`linear-gradient(to bottom,${C.bg}4D 0%,${C.bg}B3 60%,${C.bg}FF 100%)`}}/>
           </div>
         </div>
       )}
 
       <div style={{
-        fontFamily:"'DM Sans',sans-serif",
+        fontFamily: bodyFont,
+        color: C.t1,
         maxWidth:430, margin:'0 auto', minHeight:'100svh', position:'relative',
       }}>
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             1. HERO
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         <section id="inicio" style={{
           minHeight:'100svh',position:'relative',zIndex:1,
           display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
           paddingTop:56,paddingBottom:40,
         }}>
 
-          {/* Animated mesh blobs — shown when no cover or as overlay */}
+          {/* Animated mesh blobs â€” shown when no cover or as overlay */}
           <div style={{position:'absolute',inset:0,zIndex:0,pointerEvents:'none',
             opacity:hubCoverUrl?0.4:1}}>
             <div style={{position:'absolute',width:420,height:420,top:-80,left:-100,borderRadius:'50%',
@@ -800,7 +849,7 @@ export function HubPublicPage() {
             {/* Business name */}
             <motion.h1 initial={{opacity:0,y:20}} animate={{opacity:1,y:0}}
               transition={{delay:.42,duration:.7,ease:[.22,1,.36,1]}}
-              style={{fontFamily:titleFont.family,fontSize:34,fontWeight:titleFont.weight,
+              style={{fontFamily:finalTitleFont.family,fontSize:34,fontWeight:finalTitleFont.weight,
                 letterSpacing:-1,color:C.t1,margin:0,lineHeight:1.1}}>
               {displayTitle}
             </motion.h1>
@@ -809,24 +858,24 @@ export function HubPublicPage() {
             {(categoryTags.length>0||hubCategory) && (
               <motion.p initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.55,duration:.6}}
                 style={{fontFamily:"'DM Mono',monospace",fontSize:12.5,color:C.t3,margin:0}}>
-                {categoryTags.length>0 ? categoryTags.join(' · ') : hubCategory}
+                {categoryTags.length>0 ? categoryTags.join(' Â· ') : hubCategory}
               </motion.p>
             )}
 
             {/* Meta: city + rating */}
             <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.6}}
               style={{display:'flex',alignItems:'center',gap:10,fontSize:13,color:C.t3,flexWrap:'wrap',justifyContent:'center'}}>
-              {r.city && <span>📍 {r.city}</span>}
-              {googleRating && <><span style={{color:C.t4}}>·</span><span>⭐ {googleRating}</span></>}
+              {r.city && <span>ðŸ“ {r.city}</span>}
+              {googleRating && <><span style={{color:C.t4}}>Â·</span><span>â­ {googleRating}</span></>}
             </motion.div>
           </div>
 
         </section>
 
-        {/* ── Solid background content wrapper ── */}
+        {/* â”€â”€ Solid background content wrapper â”€â”€ */}
         <div style={{
           position:'relative',zIndex:1,
-          background:C.bg,
+          background: C.bg,
           borderRadius:'24px 24px 0 0',
           marginTop:'-24px',
           paddingTop:24,
@@ -834,9 +883,9 @@ export function HubPublicPage() {
         }}>
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             2. SOCIAL ICONS ROW
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {socialEntries.length>0 && (
           <motion.div
             initial={{opacity:0,y:12}}
@@ -869,9 +918,9 @@ export function HubPublicPage() {
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             3. CTA BUTTONS
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         <section id="menu-ctas" style={{padding:'12px 20px 0'}}>
           <Reveal>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
@@ -879,9 +928,9 @@ export function HubPublicPage() {
                 const isPrimary=!!btn.primary
                 const btnStyle: React.CSSProperties = {
                   background:isPrimary
-                    ?'linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.06))'
+                    ?`${C.acc}26`
                     :C.sur,
-                  border:`1px solid ${isPrimary?'rgba(245,158,11,.25)':C.bdr}`,
+                  border:`1px solid ${isPrimary?`${C.acc}40`:C.bdr}`,
                   borderRadius:16,padding:'18px 14px',
                   flexDirection:'column',alignItems:'center',justifyContent:'center',
                   backdropFilter:'blur(12px)',WebkitBackdropFilter:'blur(12px)',
@@ -890,12 +939,12 @@ export function HubPublicPage() {
                   <>
                     <div style={{width:48,height:48,borderRadius:14,marginBottom:10,
                       display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,
-                      background:isPrimary?'rgba(245,158,11,.15)':'rgba(255,255,255,0.07)',
-                      boxShadow:isPrimary?'0 0 20px rgba(245,158,11,.12)':'none'}}>
+                      background:isPrimary?`${C.acc}26`:C.sur2,
+                      boxShadow:isPrimary?`0 0 20px ${C.acc}20`:'none'}}>
                       {btn.icon}
                     </div>
                     <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:13.5,fontWeight:500,
-                      color:isPrimary?C.acc2:C.t1,textAlign:'center',lineHeight:1.2}}>
+                      color:isPrimary?C.acc:C.t1,textAlign:'center',lineHeight:1.2}}>
                       {btn.label}
                     </span>
                   </>
@@ -925,26 +974,33 @@ export function HubPublicPage() {
         </section>
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             3. SOBRE NOSOTROS
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {hubAbout && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>Quiénes somos</SL>
+              <SL>QuiÃ©nes somos</SL>
               <p style={{fontSize:14,color:C.t2,lineHeight:1.7,margin:0}}>{hubAbout.slice(0,500)}</p>
             </Reveal>
           </section>
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             4. SMART LINKS
-        ══════════════════════════════════════════════════════ */}
-        {links.length>0 && (
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {/* SLOT 1 — Bloques nuevos con sort_order < 10 (ej: bio extendida) */}
+        {preLinksNewBlocks.map(block => (
+          <Reveal key={block.id}>
+            <HubBlockRenderer block={block} restaurantId={r.id} C={C} />
+          </Reveal>
+        ))}
+
+        {isLegacyBlockActive('links') && links.length>0 && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>Links</SL>
+              <SL color={C.t1}>Links</SL>
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {links.map((link,i)=>(
                   <motion.button
@@ -957,7 +1013,7 @@ export function HubPublicPage() {
                     style={{
                       width:'100%',display:'flex',alignItems:'center',gap:14,
                       padding:'14px 18px',borderRadius:16,cursor:'pointer',
-                      background:C.card,border:`1px solid rgba(255,255,255,0.08)`,
+                      background:C.card,border:`1px solid ${C.bdr}`,
                       textAlign:'left',
                     }}
                   >
@@ -967,7 +1023,7 @@ export function HubPublicPage() {
                         <img src={link.image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                       </div>
                     ) : (
-                      <span style={{fontSize:22,flexShrink:0,lineHeight:1}}>{link.icon??'🔗'}</span>
+                      <span style={{fontSize:22,flexShrink:0,lineHeight:1}}>{link.icon??'ðŸ”—'}</span>
                     )}
                     <span style={{
                       fontFamily:"'DM Sans',sans-serif",fontSize:15,fontWeight:700,
@@ -975,7 +1031,7 @@ export function HubPublicPage() {
                     }}>
                       {link.label}
                     </span>
-                    <span style={{color:C.t3,fontSize:18,lineHeight:1,flexShrink:0}}>›</span>
+                    <span style={{color:C.t3,fontSize:18,lineHeight:1,flexShrink:0}}>â€º</span>
                   </motion.button>
                 ))}
               </div>
@@ -984,10 +1040,10 @@ export function HubPublicPage() {
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             5. NOVEDAD / STORY
-        ══════════════════════════════════════════════════════ */}
-        {story && (
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {isLegacyBlockActive('stories') && story && (
           <section id="novedades" style={{padding:'28px 20px 0'}}>
             <Reveal>
               <div style={{borderRadius:20,overflow:'hidden',position:'relative',
@@ -1009,7 +1065,7 @@ export function HubPublicPage() {
                   fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:600,padding:'4px 10px',
                   borderRadius:100,textTransform:'uppercase',letterSpacing:'0.08em',
                   animation:'hubPopIn .4s cubic-bezier(.34,1.56,.64,1) .8s both'}}>
-                  ★ Nuevo
+                  â˜… Nuevo
                 </div>
                 <div style={{position:'relative',padding:'52px 18px 20px'}}>
                   {story.title && (
@@ -1023,7 +1079,7 @@ export function HubPublicPage() {
                   <a href={menuHref} className="hub-btn" style={{display:'inline-flex',alignItems:'center',
                     background:'#FFFFFF',color:'#000',fontSize:13,fontWeight:600,
                     padding:'10px 20px',borderRadius:100,textDecoration:'none'}}>
-                    {isRetail?'Ver catálogo →':'Ver menú →'}
+                    {isRetail?'Ver catÃ¡logo â†’':'Ver menÃº â†’'}
                   </a>
                 </div>
               </div>
@@ -1032,20 +1088,20 @@ export function HubPublicPage() {
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             6. FEATURED PRODUCT
-        ══════════════════════════════════════════════════════ */}
-        {featuredProduct && (
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {isLegacyBlockActive('featured_products') && featuredProduct && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>{isRetail?'Destacado':'Más pedido'}</SL>
+              <SL>{isRetail?'Destacado':'MÃ¡s pedido'}</SL>
               <div style={{...cardBase,display:'flex',overflow:'hidden'}}>
                 <div style={{width:110,flexShrink:0,position:'relative',overflow:'hidden',minHeight:110,
                   background:featuredProduct.image_url?'transparent':'linear-gradient(135deg,rgba(245,158,11,.12),rgba(139,92,246,.08))'}}>
                   {featuredProduct.image_url
                     ? <img src={featuredProduct.image_url} alt={featuredProduct.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                     : <div style={{width:'100%',height:'100%',minHeight:110,display:'flex',alignItems:'center',justifyContent:'center',fontSize:32}}>
-                        {isRetail?'🛍':'🍽'}
+                        {isRetail?'ðŸ›':'ðŸ½'}
                       </div>
                   }
                 </div>
@@ -1085,13 +1141,13 @@ export function HubPublicPage() {
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             7. GALLERY
-        ══════════════════════════════════════════════════════ */}
-        {gallery.length>0 && (
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {isLegacyBlockActive('gallery') && gallery.length>0 && (
           <section id="galeria" style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>Galería</SL>
+              <SL>GalerÃ­a</SL>
               <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:3,borderRadius:16,overflow:'hidden'}}>
                 {gallery.slice(0,12).map((item,i)=>(
                   <button key={item.id} className="hub-btn" onClick={()=>setLightboxIndex(i)}
@@ -1103,7 +1159,7 @@ export function HubPublicPage() {
                           <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',
                             justifyContent:'center',background:'rgba(0,0,0,.4)'}}>
                             <span style={{width:38,height:38,borderRadius:'50%',background:'rgba(0,0,0,.6)',
-                              display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#fff'}}>▶</span>
+                              display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#fff'}}>â–¶</span>
                           </div>
                         </>
                       : <img src={item.url} alt={item.caption||''} loading="lazy"
@@ -1117,9 +1173,9 @@ export function HubPublicPage() {
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             8. MENU / CATALOG BANNER
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {hubConfig.show_catalog_banner !== false && (
         <section style={{padding:'28px 20px 0'}}>
           <Reveal>
@@ -1130,15 +1186,15 @@ export function HubPublicPage() {
                 border:'1px solid rgba(245,158,11,.25)',borderRadius:20,textDecoration:'none'}}>
               <div>
                 <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:'0 0 4px'}}>
-                  {isRetail?'Ver catálogo completo':'Ver el menú completo'}
+                  {isRetail?'Ver catÃ¡logo completo':'Ver el menÃº completo'}
                 </p>
                 <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,margin:0}}>
-                  {isRetail?'Productos · Precios · Categorías':'Carta · Bebidas · Postres'}
+                  {isRetail?'Productos Â· Precios Â· CategorÃ­as':'Carta Â· Bebidas Â· Postres'}
                 </p>
               </div>
               <div style={{width:40,height:40,borderRadius:12,background:'#FFFFFF',flexShrink:0,marginLeft:12,
                 display:'flex',alignItems:'center',justifyContent:'center'}}>
-                <span style={{color:'#000',fontSize:18,fontWeight:700}}>→</span>
+                <span style={{color:'#000',fontSize:18,fontWeight:700}}>â†’</span>
               </div>
             </a>
           </Reveal>
@@ -1146,27 +1202,27 @@ export function HubPublicPage() {
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             9. HORARIOS (compacto con tooltip)
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {hubConfig.show_schedule !== false && hasScheduleData(schedule) && (
           <section style={{padding:'24px 20px 0'}}>
             <Reveal>
               <div style={{...cardBase,overflow:'visible'}}>
-                <HorariosCompact schedule={schedule as Record<string,any>} />
+                <HorariosCompact schedule={schedule as Record<string,any>} C={C} />
               </div>
             </Reveal>
           </section>
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             10. LOCATIONS
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {hubConfig.show_locations !== false && (
         <section id="locales" style={{padding:'32px 20px 0'}}>
           <Reveal>
-            <SL>Locales</SL>
+            <SL color={C.t1}>Locales</SL>
             <div style={{...cardBase,padding:18}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
                 <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0}}>{r.name}</p>
@@ -1179,7 +1235,7 @@ export function HubPublicPage() {
               </div>
               {address && (
                 <p style={{fontSize:13.5,color:C.t2,marginBottom:10,display:'flex',alignItems:'flex-start',gap:8,margin:'0 0 10px'}}>
-                  <span>📍</span>{address}
+                  <span>ðŸ“</span>{address}
                 </p>
               )}
               {hoursText && (
@@ -1194,7 +1250,7 @@ export function HubPublicPage() {
                     onClick={()=>trackEvent(r.id,'maps_click')}
                     style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
                       borderRadius:12,background:'#FFFFFF',color:'#000',fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
-                    🗺 Maps
+                    ðŸ—º Maps
                   </a>
                 )}
                 {r.phone && (
@@ -1202,7 +1258,7 @@ export function HubPublicPage() {
                     style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
                       borderRadius:12,background:C.sur2,border:`1px solid ${C.bdr}`,
                       color:C.t1,fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
-                    📞 Llamar
+                    ðŸ“ž Llamar
                   </a>
                 )}
                 {cleanWa && (
@@ -1211,7 +1267,7 @@ export function HubPublicPage() {
                     style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
                       borderRadius:12,background:C.sur2,border:`1px solid ${C.bdr}`,
                       color:C.t1,fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
-                    💬 WA
+                    ðŸ’¬ WA
                   </a>
                 )}
               </div>
@@ -1221,13 +1277,13 @@ export function HubPublicPage() {
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             11. REVIEWS
-        ══════════════════════════════════════════════════════ */}
-        {(reviews.length>0||googleRating) && (
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {isLegacyBlockActive('reviews') && (reviews.length>0||googleRating) && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>Reseñas</SL>
+              <SL>ReseÃ±as</SL>
               {googleRating && (
                 <div
                   style={{...cardBase,padding:'20px',marginBottom:10,display:'flex',alignItems:'center',gap:16,
@@ -1248,7 +1304,7 @@ export function HubPublicPage() {
                     <p style={{margin:'0 0 2px',fontSize:13.5,fontWeight:600,color:C.t1}}>Google Reviews</p>
                     {googleReviewCount && (
                       <p style={{fontFamily:"'DM Mono',monospace",fontSize:11.5,color:C.t3,margin:0}}>
-                        {googleReviewCount} reseñas
+                        {googleReviewCount} reseÃ±as
                       </p>
                     )}
                   </div>
@@ -1256,7 +1312,7 @@ export function HubPublicPage() {
                     <span style={{fontFamily:"'Syne',sans-serif",fontSize:24,fontWeight:800,color:'#FFFFFF',lineHeight:1}}>
                       {googleRating}
                     </span>
-                    <span style={{color:'#FFFFFF',fontSize:20}}>★</span>
+                    <span style={{color:'#FFFFFF',fontSize:20}}>â˜…</span>
                   </div>
                 </div>
               )}
@@ -1274,7 +1330,7 @@ export function HubPublicPage() {
                         <div style={{flex:1}}>
                           <p style={{margin:0,fontWeight:600,fontSize:13.5,color:C.t1}}>{rev.author_name}</p>
                           <p style={{margin:0,fontFamily:"'DM Mono',monospace",fontSize:10.5,color:C.t3}}>
-                            {rev.relative_time||'Hace poco'} · {starStr(rev.rating)}
+                            {rev.relative_time||'Hace poco'} Â· {starStr(rev.rating)}
                           </p>
                         </div>
                       </div>
@@ -1288,7 +1344,7 @@ export function HubPublicPage() {
                   onClick={()=>trackEvent(r.id,'link_click')}
                   style={{display:'block',textAlign:'center',marginTop:12,
                     fontFamily:"'DM Mono',monospace",fontSize:12.5,color:'#FFFFFF',textDecoration:'none'}}>
-                  Ver en Google →
+                  Ver en Google â†’
                 </a>
               )}
             </Reveal>
@@ -1298,13 +1354,20 @@ export function HubPublicPage() {
 
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             13. CONTACT LIST
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {/* SLOT 2 — Bloques nuevos con sort_order >= 10 (ej: stats, video) */}
+        {postReviewsNewBlocks.map(block => (
+          <Reveal key={block.id}>
+            <HubBlockRenderer block={block} restaurantId={r.id} C={C} />
+          </Reveal>
+        ))}
+
         {contactItems.length>0 && (
           <section id="contacto" style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>Contacto</SL>
+              <SL color={C.t1}>Contacto</SL>
               <div style={{display:'flex',flexDirection:'column',gap:6}}>
                 {contactItems.map(c=>(
                   <a key={c.label} href={c.href}
@@ -1321,7 +1384,7 @@ export function HubPublicPage() {
                         textTransform:'uppercase',letterSpacing:'0.1em'}}>{c.label}</p>
                       <p style={{margin:'2px 0 0',fontSize:13.5,color:C.t1,fontWeight:500}}>{c.value}</p>
                     </div>
-                    <span style={{color:C.t3,fontSize:18,lineHeight:1}}>›</span>
+                    <span style={{color:C.t3,fontSize:18,lineHeight:1}}>â€º</span>
                   </a>
                 ))}
               </div>
@@ -1330,9 +1393,9 @@ export function HubPublicPage() {
         )}
 
 
-        {/* ══════════════════════════════════════════════════════
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             14. FOOTER
-        ══════════════════════════════════════════════════════ */}
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         <footer style={{margin:'40px 20px 0',padding:'24px 0',
           borderTop:`1px solid ${C.bdr}`,textAlign:'center'}}>
           <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:C.t1,margin:'0 0 4px'}}>{r.name}</p>
@@ -1342,7 +1405,7 @@ export function HubPublicPage() {
             style={{display:'inline-flex',alignItems:'center',gap:5,padding:'7px 14px',borderRadius:100,
               background:C.sur,border:`1px solid ${C.bdr}`,textDecoration:'none'}}>
             <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:C.t3}}>Powered by</span>
-            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:'#FFFFFF'}}>MenuLife</span>
+            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:C.t1}}>MenuLife</span>
           </a>
         </footer>
 
@@ -1355,6 +1418,7 @@ export function HubPublicPage() {
         plan={ra.plan ?? null}
         hubConfig={hubConfig}
         hasFeatured={!!featuredProduct}
+        C={C}
       />
 
       {/* GALLERY LIGHTBOX */}

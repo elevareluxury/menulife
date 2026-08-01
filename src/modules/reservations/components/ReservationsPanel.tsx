@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Plus, ChevronLeft, ChevronRight, Bell } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
 import { useReservations } from '../hooks/useReservations'
 import { ReservationDetailModal } from './ReservationDetailModal'
 import { NewReservationModal } from './NewReservationModal'
@@ -38,43 +37,30 @@ function formatDateShort(d: string) {
 
 export function ReservationsPanel({ restaurantId, restaurantName, tables }: Props) {
   const [selectedDate, setSelectedDate] = useState(todayStr())
-  const { reservations, loading, refetch } = useReservations(restaurantId, selectedDate)
-  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null)
-  const [showNew, setShowNew] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  // Real-time new reservation notification
-  useEffect(() => {
-    if (!restaurantId) return
-    const channel = supabase
-      .channel(`res-notify:${restaurantId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'reservations',
-        filter: `restaurant_id=eq.${restaurantId}`,
-      }, payload => {
-        const r = payload.new as Reservation
-        if (audioRef.current) {
-          audioRef.current.currentTime = 0
-          audioRef.current.play().catch(() => {})
-        }
-        toast.custom(t => (
-          <div
-            onClick={() => { setSelectedDate(r.reservation_date); setSelectedReservation(r) }}
-            className={`${t.visible ? 'animate-enter' : 'animate-leave'} cursor-pointer max-w-sm w-full bg-[#1a2035] border border-blue-500/30 shadow-lg rounded-2xl pointer-events-auto flex items-center gap-3 p-4`}
-          >
-            <Bell className="w-5 h-5 text-blue-400 flex-shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-white">📅 Nueva reserva</p>
-              <p className="text-xs text-gray-400">{r.first_name} {r.last_name} · {r.reservation_time} · {r.party_size} pers.</p>
-            </div>
-          </div>
-        ), { duration: 6000 })
-      })
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [restaurantId])
+  const handleNewReservation = (r: Reservation) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch(() => {})
+    }
+    toast.custom(t => (
+      <div
+        onClick={() => { setSelectedDate(r.reservation_date); setSelectedReservation(r) }}
+        className={`${t.visible ? 'animate-enter' : 'animate-leave'} cursor-pointer max-w-sm w-full bg-[#1a2035] border border-blue-500/30 shadow-lg rounded-2xl pointer-events-auto flex items-center gap-3 p-4`}
+      >
+        <Bell className="w-5 h-5 text-blue-400 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-white">📅 Nueva reserva</p>
+          <p className="text-xs text-gray-400">{r.first_name} {r.last_name} · {r.reservation_time} · {r.party_size} pers.</p>
+        </div>
+      </div>
+    ), { duration: 6000 })
+  }
+
+  const { reservations, loading, refetch } = useReservations(restaurantId, selectedDate, handleNewReservation)
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null)
+  const [showNew, setShowNew] = useState(false)
 
   const prevDay = () => setSelectedDate(d => addDays(d, -1))
   const nextDay = () => setSelectedDate(d => addDays(d, 1))

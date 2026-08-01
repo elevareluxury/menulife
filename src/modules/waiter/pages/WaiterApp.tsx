@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useWaiterAuthStore } from '@/store/waiterAuthStore'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import { CheckoutModal } from '@/modules/pos/components/CheckoutModal'
 import toast from 'react-hot-toast'
 
@@ -189,7 +190,7 @@ function BackBtn({ onBack, label = 'Volver' }: { onBack: () => void; label?: str
 export function WaiterApp() {
   const { slug } = useParams()
   const navigate = useNavigate()
-  const { waiter, logout, isAuthenticated } = useWaiterAuthStore()
+  const { waiter, logout } = useWaiterAuthStore()
 
   /* ── State ── */
   const [tab, setTab]               = useState<TabId>('home')
@@ -225,12 +226,6 @@ export function WaiterApp() {
 
   const notifsReady = useRef(false)
   const prevIds     = useRef<Set<string>>(new Set())
-
-  useEffect(() => {
-    if (!isAuthenticated() || !waiter?.restaurant_id) {
-      navigate(`/mozo/${slug}`, { replace: true })
-    }
-  }, [isAuthenticated, navigate, slug, waiter])
 
   /* ── Caja abierta para vincular cobros ── */
   useEffect(() => {
@@ -305,14 +300,28 @@ export function WaiterApp() {
   useEffect(() => {
     if (!waiter?.restaurant_id) return
     fetchAll()
-    const s1 = db.channel(`wa-o-${waiter.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders',               filter: `restaurant_id=eq.${waiter.restaurant_id}` }, fetchAll).subscribe()
-    const s2 = db.channel(`wa-n-${waiter.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'waiter_notifications', filter: `waiter_id=eq.${waiter.id}` },               fetchAll).subscribe()
-    const s3 = db.channel(`wa-t-${waiter.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tables',               filter: `waiter_id=eq.${waiter.id}` },               fetchAll).subscribe()
-    return () => { s1.unsubscribe(); s2.unsubscribe(); s3.unsubscribe() }
   }, [waiter, fetchAll])
+
+  useRealtimeChannel({
+    channelName: `wa-o-${waiter?.id ?? 'none'}`,
+    enabled: !!waiter?.restaurant_id,
+    changes: [{ event: '*', table: 'orders', filter: `restaurant_id=eq.${waiter?.restaurant_id}` }],
+    onEvent: () => { fetchAll() },
+  })
+
+  useRealtimeChannel({
+    channelName: `wa-n-${waiter?.id ?? 'none'}`,
+    enabled: !!waiter?.id,
+    changes: [{ event: '*', table: 'waiter_notifications', filter: `waiter_id=eq.${waiter?.id}` }],
+    onEvent: () => { fetchAll() },
+  })
+
+  useRealtimeChannel({
+    channelName: `wa-t-${waiter?.id ?? 'none'}`,
+    enabled: !!waiter?.id,
+    changes: [{ event: '*', table: 'tables', filter: `waiter_id=eq.${waiter?.id}` }],
+    onEvent: () => { fetchAll() },
+  })
 
   /* ── Mesa detail fetch ── */
   const openDetail = useCallback(async (table: TableRow) => {

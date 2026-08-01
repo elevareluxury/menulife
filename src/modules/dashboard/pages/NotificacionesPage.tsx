@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import { Spinner } from '@/components/ui/Spinner'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -151,24 +152,21 @@ function useNotifications(restaurantId: string | undefined) {
     }
   }, [restaurantId])
 
-  useEffect(() => {
-    fetch()
+  useEffect(() => { fetch() }, [restaurantId, fetch])
 
-    const ordersChannel = supabase
-      .channel(`notif_orders_${restaurantId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }, fetch)
-      .subscribe()
+  useRealtimeChannel({
+    channelName: `notif_orders_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: '*', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetch() },
+  })
 
-    const ownerChannel = supabase
-      .channel(`notif_owner_${restaurantId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'owner_notifications', filter: `restaurant_id=eq.${restaurantId}` }, fetch)
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(ordersChannel)
-      supabase.removeChannel(ownerChannel)
-    }
-  }, [restaurantId, fetch])
+  useRealtimeChannel({
+    channelName: `notif_owner_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: 'INSERT', table: 'owner_notifications', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetch() },
+  })
 
   return { notifs, loading, refetch: fetch }
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 
 interface OrderItem {
   id: string
@@ -49,7 +50,6 @@ export function useKitchenOrders(restaurantId: string | null | undefined) {
         items: order.order_items ?? [],
       }))
 
-      // Sort: delivery → takeaway → dine_in, then by created_at ASC within each group
       ordersWithItems.sort((a, b) => {
         const pa = TYPE_PRIORITY[a.order_type] ?? 3
         const pb = TYPE_PRIORITY[b.order_type] ?? 3
@@ -67,25 +67,18 @@ export function useKitchenOrders(restaurantId: string | null | undefined) {
 
   useEffect(() => {
     if (!restaurantId) { setLoading(false); return }
-
     fetchOrders()
-
-    const channel = supabase
-      .channel(`orders_realtime_${restaurantId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` },
-        () => { fetchOrders() }
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'order_items' },
-        () => { fetchOrders() }
-      )
-      .subscribe()
-
-    return () => { channel.unsubscribe() }
   }, [restaurantId, fetchOrders])
+
+  useRealtimeChannel({
+    channelName: `orders_realtime_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [
+      { event: '*', table: 'orders',      filter: `restaurant_id=eq.${restaurantId}` },
+      { event: '*', table: 'order_items' },
+    ],
+    onEvent: () => { fetchOrders() },
+  })
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {

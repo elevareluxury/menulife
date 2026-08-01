@@ -500,7 +500,7 @@ export function CRMPage() {
         <ContactDetailModal
           contact={selected}
           restaurantId={restaurant?.id ?? ''}
-          businessType={businessType}
+          businessType={businessType ?? 'gastronomy'}
           onClose={() => setSelected(null)}
           onUpdated={() => { fetchContacts(); setSelected(null) }}
           onSelectReservation={setSelectedRes}

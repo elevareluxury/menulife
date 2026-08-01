@@ -1,4 +1,5 @@
 import type { QuoteItemInput } from './quoteTypes'
+export { formatCurrency } from '@/lib/currency'
 
 export function computeItemTotal(item: QuoteItemInput): number {
   return Math.max(0, item.quantity * item.unit_price - item.discount)
@@ -31,9 +32,6 @@ export function isQuoteDueSoon(expiresAt: string | null, daysAhead = 7): boolean
   return diffMs > 0 && diffMs <= daysAhead * 86_400_000
 }
 
-export function formatCurrency(amount: number, currency: string): string {
-  return `${currency} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
-}
 
 export function blankItem(): QuoteItemInput {
   return {

@@ -4,6 +4,7 @@ import { Bell, ChevronRight, Package, AlertTriangle, XCircle, DollarSign, Bankno
 import { BarChart, Bar, ResponsiveContainer, Cell } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { useRestaurantStore } from '@/store/restaurantStore'
 import { useOrderStats } from '@/modules/dashboard/hooks/useOrderStats'
@@ -85,16 +86,17 @@ function useLiveTables(restaurantId: string | undefined) {
     setTables(live)
   }, [restaurantId])
 
-  useEffect(() => {
-    if (!restaurantId) return
-    fetch()
-    const ch = supabase
-      .channel(`live_tables_${restaurantId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tables',  filter: `restaurant_id=eq.${restaurantId}` }, fetch)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders',  filter: `restaurant_id=eq.${restaurantId}` }, fetch)
-      .subscribe()
-    return () => { ch.unsubscribe() }
-  }, [restaurantId, fetch])
+  useEffect(() => { if (restaurantId) fetch() }, [restaurantId, fetch])
+
+  useRealtimeChannel({
+    channelName: `live_tables_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [
+      { event: '*', table: 'tables', filter: `restaurant_id=eq.${restaurantId}` },
+      { event: '*', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` },
+    ],
+    onEvent: () => { fetch() },
+  })
 
   return tables
 }
@@ -124,15 +126,14 @@ function useAlerts(restaurantId: string | undefined) {
     setAlerts(list)
   }, [restaurantId])
 
-  useEffect(() => {
-    if (!restaurantId) return
-    fetch()
-    const ch = supabase
-      .channel(`alerts_${restaurantId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }, fetch)
-      .subscribe()
-    return () => { ch.unsubscribe() }
-  }, [restaurantId, fetch])
+  useEffect(() => { if (restaurantId) fetch() }, [restaurantId, fetch])
+
+  useRealtimeChannel({
+    channelName: `alerts_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: '*', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetch() },
+  })
 
   return alerts
 }
@@ -180,15 +181,14 @@ function useOwnerNotifications(restaurantId: string | undefined) {
     setCount(n ?? 0)
   }, [restaurantId])
 
-  useEffect(() => {
-    if (!restaurantId) return
-    fetch()
-    const channel = supabase
-      .channel(`owner_notifs_${restaurantId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'owner_notifications', filter: `restaurant_id=eq.${restaurantId}` }, fetch)
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [restaurantId, fetch])
+  useEffect(() => { if (restaurantId) fetch() }, [restaurantId, fetch])
+
+  useRealtimeChannel({
+    channelName: `owner_notifs_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: 'INSERT', table: 'owner_notifications', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetch() },
+  })
 
   return count
 }
@@ -686,7 +686,7 @@ export function DashboardHome() {
 
       {/* ── NIVEL 5 — ACCESOS RÁPIDOS ────────────────────────────── */}
       <QuickAccess
-        businessType={businessType}
+        businessType={businessType ?? 'gastronomy'}
         activeOrders={activeOrders}
         dashStats={dashStats}
         stats={stats}

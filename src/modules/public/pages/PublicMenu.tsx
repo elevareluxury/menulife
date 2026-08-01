@@ -267,7 +267,7 @@ function ItemCard({
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation()
-    addItem({ id: item.id, name: item.name, name_en: item.name_en, price_ars: item.price_ars, price_usd: item.price_usd, image_url: item.image_url })
+    addItem({ id: item.id, product_id: item.product_id ?? undefined, name: item.name, name_en: item.name_en, price_ars: item.price_ars, price_usd: item.price_usd, image_url: item.image_url })
   }
 
   return (
@@ -425,7 +425,7 @@ function FeaturedRow({
               <button
                 onClick={e => {
                   e.stopPropagation()
-                  addItem({ id: item.id, name: item.name, name_en: item.name_en, price_ars: item.price_ars, price_usd: item.price_usd, image_url: item.image_url })
+                  addItem({ id: item.id, product_id: item.product_id ?? undefined, name: item.name, name_en: item.name_en, price_ars: item.price_ars, price_usd: item.price_usd, image_url: item.image_url })
                 }}
                 className="absolute bottom-2.5 right-2.5 w-7 h-7 rounded-xl flex items-center justify-center text-white font-bold text-base"
                 style={{ background: 'var(--menu-accent-gradient)' }}
@@ -504,7 +504,7 @@ export function PublicMenu() {
           .eq('is_active', true)
           .single()
         if (restErr) throw restErr
-        const r = rest as Restaurant
+        const r = rest as unknown as Restaurant
         setRestaurant(r)
 
         // Init language from restaurant default if user hasn't manually switched
@@ -1340,6 +1340,7 @@ export function PublicMenu() {
         }}
         slug={slug}
         restaurantName={restaurant.name}
+        businessType={restaurant.business_type}
         orderTypeData={orderTypeData}
         mesaParam={mesaParam}
       />

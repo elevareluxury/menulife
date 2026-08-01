@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { AlertTriangle, XCircle, CheckCircle, ShoppingCart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import toast from 'react-hot-toast'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,24 +69,16 @@ export function AlertasTab({ restaurantId, onReponer }: Props) {
     fetchAlerts().finally(() => setLoading(false))
   }, [fetchAlerts])
 
-  // Realtime subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel(`inventory_alerts_${restaurantId}`)
-      .on(
-        'postgres_changes' as Parameters<ReturnType<typeof supabase.channel>['on']>[0],
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'inventory_alerts',
-          filter: `restaurant_id=eq.${restaurantId}`,
-        },
-        () => { fetchAlerts() }
-      )
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [restaurantId, fetchAlerts])
+  useRealtimeChannel({
+    channelName: `inventory_alerts_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{
+      event: 'INSERT',
+      table: 'inventory_alerts',
+      filter: `restaurant_id=eq.${restaurantId}`,
+    }],
+    onEvent: () => { fetchAlerts() },
+  })
 
   async function handleResolve(alertId: string) {
     setResolving(alertId)

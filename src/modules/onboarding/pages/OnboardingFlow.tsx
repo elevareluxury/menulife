@@ -8,13 +8,24 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Spinner } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import type { HubTemplateId } from '@/modules/hub/lib/hubTemplates'
+import { HubTypeSelector } from '../components/HubTypeSelector'
+import { createHubFromTemplate } from '@/modules/hub/lib/createHubFromTemplate'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
-const TOTAL_STEPS = 4
-const LS_STEP_KEY = 'menulife_setup_step'
-const LS_BTYPE_KEY = 'menulife_setup_btype'
+const TOTAL_STEPS = 5
+const LS_STEP_KEY     = 'menulife_setup_step'
+const LS_BTYPE_KEY    = 'menulife_setup_btype'
+const LS_HTEMPLATE_KEY = 'menulife_setup_htemplate'
+
+// Step numbers — named constants to avoid magic numbers
+const STEP_BTYPE   = 1
+const STEP_INFO    = 2
+const STEP_HUBTYPE = 3
+const STEP_SECTION = 4
+const STEP_DONE    = 5
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -25,7 +36,7 @@ function ProgressBar({ step }: { step: number }) {
         <div key={i} className="flex items-center gap-2 flex-1">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-              i + 1 < step ? 'bg-emerald-500 text-white'
+              i + 1 < step  ? 'bg-emerald-500 text-white'
               : i + 1 === step ? 'text-white'
               : 'bg-gray-200 text-gray-400'
             }`}
@@ -47,12 +58,12 @@ function ProgressBar({ step }: { step: number }) {
 export function OnboardingFlow() {
   const navigate = useNavigate()
   const { restaurant, loading: restaurantLoading } = useRestaurant()
-  const setStoreBusinessType = useRestaurantStore(s => s.setBusinessType)
+  const updateRestaurant = useRestaurantStore(s => s.updateRestaurant)
 
   // Resume from saved step
   const [step, setStep] = useState(() => {
     const saved = parseInt(localStorage.getItem(LS_STEP_KEY) ?? '1', 10)
-    return isNaN(saved) || saved < 1 || saved > 4 ? 1 : saved
+    return isNaN(saved) || saved < 1 || saved > TOTAL_STEPS ? 1 : saved
   })
   const [saving, setSaving] = useState(false)
 
@@ -63,17 +74,30 @@ export function OnboardingFlow() {
 
   // Step 2: basic info
   const [businessName, setBusinessName] = useState('')
-  const [city, setCity] = useState('')
-  const [phone, setPhone] = useState('')
+  const [city, setCity]                 = useState('')
+  const [phone, setPhone]               = useState('')
 
-  // Step 3: first section / category
+  // Step 3: hub template
+  const [hubTemplate, setHubTemplate] = useState<HubTemplateId | null>(() => {
+    const saved = localStorage.getItem(LS_HTEMPLATE_KEY)
+    const valid: HubTemplateId[] = [
+      'restaurant', 'services_pro', 'retail', 'artist',
+      'coach', 'gym', 'individual'
+    ]
+    if (saved && valid.includes(saved as HubTemplateId)) {
+      return saved as HubTemplateId
+    }
+    return null
+  })
+
+  // Step 4: first section / category
   const [firstName, setFirstName] = useState('')
 
-  // Pre-fill name from restaurant when loaded
+  // Pre-fill from restaurant when loaded
   useEffect(() => {
-    if (restaurant?.name) setBusinessName(restaurant.name)
-    if (restaurant?.city) setCity(restaurant.city)
-    if (restaurant?.phone) setPhone(restaurant.phone)
+    if (restaurant?.name)          setBusinessName(restaurant.name)
+    if (restaurant?.city)          setCity(restaurant.city)
+    if (restaurant?.phone)         setPhone(restaurant.phone)
     if (restaurant?.business_type) setBusinessType(restaurant.business_type as 'gastronomy' | 'retail' | 'services')
   }, [restaurant])
 
@@ -81,6 +105,13 @@ export function OnboardingFlow() {
   useEffect(() => {
     localStorage.setItem(LS_STEP_KEY, String(step))
   }, [step])
+
+  // Persist hub template selection
+  useEffect(() => {
+    if (hubTemplate) {
+      localStorage.setItem(LS_HTEMPLATE_KEY, hubTemplate)
+    }
+  }, [hubTemplate])
 
   // ── Save handlers ──────────────────────────────────────────────────────────
 
@@ -93,7 +124,7 @@ export function OnboardingFlow() {
         .update({ business_type: businessType, setup_step: 1 })
         .eq('id', restaurant.id)
       if (error) throw error
-      setStoreBusinessType(businessType)
+      updateRestaurant({ business_type: businessType })
       localStorage.setItem(LS_BTYPE_KEY, businessType)
       return true
     } catch {
@@ -112,9 +143,9 @@ export function OnboardingFlow() {
       const { error } = await db
         .from('restaurants')
         .update({
-          name: businessName.trim(),
-          city: city.trim() || null,
-          phone: phone.trim() || null,
+          name:       businessName.trim(),
+          city:       city.trim() || null,
+          phone:      phone.trim() || null,
           setup_step: 2,
         })
         .eq('id', restaurant.id)
@@ -128,7 +159,16 @@ export function OnboardingFlow() {
     }
   }
 
-  const saveStep3 = async () => {
+  // Step 3 (hub type) — no DB write here, guardamos todo al finalizar
+  const saveStep3 = () => {
+    if (!hubTemplate) {
+      toast.error('Elegí el tipo de Hub para continuar')
+      return false
+    }
+    return true
+  }
+
+  const saveStep4 = async () => {
     if (!restaurant) return false
     setSaving(true)
     try {
@@ -173,21 +213,44 @@ export function OnboardingFlow() {
         .eq('id', restaurant!.id)
       localStorage.removeItem(LS_STEP_KEY)
       localStorage.removeItem(LS_BTYPE_KEY)
+      localStorage.removeItem(LS_HTEMPLATE_KEY)
     } catch { /* non-fatal */ }
     finally { setSaving(false) }
   }
 
   const handleNext = async () => {
-    let ok = true
-    if (step === 1) ok = await saveStep1()
-    if (step === 2) ok = await saveStep2()
-    if (step === 3) ok = await saveStep3()
+    let ok: boolean = true
+    if (step === STEP_BTYPE)   ok = await saveStep1()
+    if (step === STEP_INFO)    ok = await saveStep2()
+    if (step === STEP_HUBTYPE) ok = saveStep3()
+    if (step === STEP_SECTION) ok = await saveStep4()
     if (ok) setStep(s => s + 1)
   }
 
   const handleFinish = async () => {
-    await completeOnboarding()
-    navigate('/dashboard')
+    setSaving(true)
+    try {
+      await completeOnboarding()
+
+      // Aplicar el template al Hub — non-blocking si falla
+      if (hubTemplate && restaurant) {
+        const result = await createHubFromTemplate(hubTemplate, restaurant.id)
+        if (!result.success) {
+          console.error('Error aplicando template de Hub:', result.error)
+          // No bloquear al usuario — el Hub queda vacío y puede configurarse
+          // manualmente desde el editor de bloques
+        }
+      }
+
+      updateRestaurant({
+        onboarding_completed: true,
+        ...(hubTemplate ? { hub_category: hubTemplate } : {}),
+      })
+
+      navigate('/life')
+    } finally {
+      setSaving(false)
+    }
   }
 
   // ── Guards ─────────────────────────────────────────────────────────────────
@@ -225,7 +288,7 @@ export function OnboardingFlow() {
           <ProgressBar step={step} />
 
           {/* ── STEP 1: Tipo de negocio ── */}
-          {step === 1 && (
+          {step === STEP_BTYPE && (
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">¿Qué tipo de negocio tenés?</h2>
               <p className="text-sm text-gray-500 mb-6">
@@ -245,7 +308,7 @@ export function OnboardingFlow() {
                     className="flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all"
                     style={{
                       borderColor: businessType === mode ? '#F4705A' : '#E5E7EB',
-                      background: businessType === mode ? 'rgba(244,112,90,0.05)' : '#fff',
+                      background:  businessType === mode ? 'rgba(244,112,90,0.05)' : '#fff',
                     }}
                   >
                     <Icon className="w-6 h-6 flex-shrink-0" style={{ color: '#F4705A' }} />
@@ -264,7 +327,7 @@ export function OnboardingFlow() {
           )}
 
           {/* ── STEP 2: Info básica ── */}
-          {step === 2 && (
+          {step === STEP_INFO && (
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">Información básica</h2>
               <p className="text-sm text-gray-500 mb-6">Completá los datos de tu negocio.</p>
@@ -292,7 +355,7 @@ export function OnboardingFlow() {
               </div>
 
               <div className="flex gap-3 mt-6">
-                <Button variant="secondary" onClick={() => setStep(1)} className="flex-1">Atrás</Button>
+                <Button variant="secondary" onClick={() => setStep(STEP_BTYPE)} className="flex-1">Atrás</Button>
                 <Button onClick={handleNext} isLoading={saving} className="flex-1">
                   Continuar <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -300,8 +363,31 @@ export function OnboardingFlow() {
             </div>
           )}
 
-          {/* ── STEP 3: First content ── */}
-          {step === 3 && (
+          {/* ── STEP 3: Tipo de Hub ── */}
+          {step === STEP_HUBTYPE && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">¿Qué tipo de Hub es?</h2>
+              <p className="text-sm text-gray-500 mb-6">
+                Vamos a preconfigurar tu ID con los bloques correctos para tu tipo de creador.
+              </p>
+
+              <HubTypeSelector value={hubTemplate} onChange={setHubTemplate} />
+
+              <div className="flex gap-3 mt-6">
+                <Button variant="secondary" onClick={() => setStep(STEP_INFO)} className="flex-1">Atrás</Button>
+                <Button
+                  onClick={handleNext}
+                  disabled={!hubTemplate}
+                  className="flex-1"
+                >
+                  Continuar <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 4: Primera sección / categoría ── */}
+          {step === STEP_SECTION && (
             <div>
               {businessType === 'services' ? (
                 <>
@@ -311,8 +397,8 @@ export function OnboardingFlow() {
                   </p>
                   <div className="space-y-2">
                     {[
-                      { icon: '📅', label: 'Agenda inteligente', desc: 'Gestioná turnos y disponibilidad' },
-                      { icon: '👥', label: 'Gestión de clientes', desc: 'Historial y seguimiento completo' },
+                      { icon: '📅', label: 'Agenda inteligente',    desc: 'Gestioná turnos y disponibilidad' },
+                      { icon: '👥', label: 'Gestión de clientes',   desc: 'Historial y seguimiento completo' },
                       { icon: '💼', label: 'Catálogo de servicios', desc: 'Definí duraciones y precios' },
                     ].map(item => (
                       <div key={item.label} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50">
@@ -368,7 +454,7 @@ export function OnboardingFlow() {
               )}
 
               <div className="flex gap-3 mt-6">
-                <Button variant="secondary" onClick={() => setStep(2)} className="flex-1">Atrás</Button>
+                <Button variant="secondary" onClick={() => setStep(STEP_HUBTYPE)} className="flex-1">Atrás</Button>
                 <Button onClick={handleNext} isLoading={saving} className="flex-1">
                   Continuar <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -376,8 +462,8 @@ export function OnboardingFlow() {
             </div>
           )}
 
-          {/* ── STEP 4: Done ── */}
-          {step === 4 && (
+          {/* ── STEP 5: Done ── */}
+          {step === STEP_DONE && (
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />

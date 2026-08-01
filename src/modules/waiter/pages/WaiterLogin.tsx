@@ -95,7 +95,7 @@ export function WaiterLogin() {
     if (error || !mozo) throw new Error('PIN incorrecto')
 
     localStorage.setItem(lastWaiterKey, selectedWaiter.id)
-    setAuth(`direct-${Date.now()}`, mozo)
+    setAuth(`direct-${Date.now()}`, mozo, slug ?? '')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any).from('waiters').update({
       last_login: new Date().toISOString(),
@@ -146,7 +146,7 @@ export function WaiterLogin() {
           if (!response.ok) throw new Error(data.error || 'PIN incorrecto')
 
           localStorage.setItem(lastWaiterKey, selectedWaiter.id)
-          setAuth(data.token, data.mozo)
+          setAuth(data.token, data.mozo, slug ?? '')
           // Registrar login y arrancar turno
           await (supabase as any).from('waiters').update({
             last_login: new Date().toISOString(),

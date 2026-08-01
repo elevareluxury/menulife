@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { LogOut, Phone, MapPin, CheckCircle, Truck, History, User, Home } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useDeliveryAuthStore } from '@/store/deliveryAuthStore'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import { Spinner } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 
@@ -54,7 +55,7 @@ function playBip() {
 export function DriverDashboard() {
   const { slug } = useParams()
   const navigate = useNavigate()
-  const { driver, logout, isAuthenticated } = useDeliveryAuthStore()
+  const { driver, logout } = useDeliveryAuthStore()
   const [tab, setTab] = useState<TabId>('orders')
   const [orders, setOrders] = useState<DeliveryOrder[]>([])
   const [histOrders, setHistOrders] = useState<DeliveryOrder[]>([])
@@ -64,12 +65,6 @@ export function DriverDashboard() {
   const [todayCount, setTodayCount] = useState(0)
   const [todayEarnings, setTodayEarnings] = useState(0)
   const prevOrderCount = useRef(0)
-
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate(`/delivery/${slug}/login`, { replace: true })
-    }
-  }, [isAuthenticated, navigate, slug])
 
   const fetchOrders = useCallback(async () => {
     if (!driver?.id) return
@@ -140,18 +135,14 @@ export function DriverDashboard() {
     fetchOrders()
     fetchAvailability()
     fetchHistorial()
-
-    if (!driver?.id) return
-    const channel = supabase
-      .channel(`driver_orders_${driver.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        fetchOrders()
-        fetchHistorial()
-      })
-      .subscribe()
-
-    return () => { void channel.unsubscribe() }
   }, [fetchOrders, fetchAvailability, fetchHistorial, driver?.id])
+
+  useRealtimeChannel({
+    channelName: `driver_orders_${driver?.id ?? 'none'}`,
+    enabled: !!driver?.id,
+    changes: [{ event: '*', table: 'orders' }],
+    onEvent: () => { fetchOrders(); fetchHistorial() },
+  })
 
   const toggleAvailability = async () => {
     if (!driver?.id) return

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import type { MenuItem } from '@/types'
 
 const cacheKey = (sectionId: string) => `ml_menu_items_${sectionId}`
@@ -50,32 +51,22 @@ export function useMenuItems(sectionId: string | null) {
   }, [sectionId])
 
   useEffect(() => {
-    if (!sectionId) {
-      setItems([])
-      setLoading(false)
-      return
-    }
-
-    // Seed from cache immediately so the UI isn't blank while fetching
+    if (!sectionId) { setItems([]); setLoading(false); return }
     const cached = readCache(sectionId)
-    if (cached) {
-      setItems(cached)
-      setLoading(false)
-    }
-
+    if (cached) { setItems(cached); setLoading(false) }
     fetchItems()
-
-    const channel = supabase
-      .channel(`menu_items:${sectionId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'menu_items', filter: `section_id=eq.${sectionId}` },
-        fetchItems
-      )
-      .subscribe()
-
-    return () => { channel.unsubscribe() }
   }, [sectionId, fetchItems])
+
+  useRealtimeChannel({
+    channelName: `menu_items:${sectionId}`,
+    enabled: !!sectionId,
+    changes: [{
+      event: '*',
+      table: 'menu_items',
+      filter: `section_id=eq.${sectionId}`,
+    }],
+    onEvent: () => { fetchItems() },
+  })
 
   return { items, loading, refetch: fetchItems }
 }

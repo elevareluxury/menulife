@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Target, TrendingUp, CheckSquare, Brain,
-  Link2, Settings2, ChevronRight,
+  Link2, Settings2, ChevronRight, Sparkles,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useLifeStore } from '@/store/lifeStore'
@@ -147,11 +147,12 @@ function StarfieldBackground() {
 interface HubSectionProps {
   hasRestaurant: boolean
   restaurantSlug: string | null
+  onboardingCompleted: boolean | null
   avatarUrl: string | null
   initials: string
 }
 
-function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubSectionProps) {
+function HubSection({ hasRestaurant, restaurantSlug, onboardingCompleted, avatarUrl, initials }: HubSectionProps) {
   const navigate = useNavigate()
 
   return (
@@ -238,7 +239,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
           fontFamily: font, fontSize: '15px', fontWeight: 700,
           color: colors.text.primary, margin: '0 0 2px', letterSpacing: '-0.01em',
         }}>
-          Hub Digital
+          ID Digital
         </p>
         <p style={{
           fontFamily: font, fontSize: '12px', color: colors.text.tertiary,
@@ -247,46 +248,69 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
           {hasRestaurant && restaurantSlug ? `@${restaurantSlug}` : 'Tu presencia en la web'}
         </p>
 
-        {hasRestaurant ? (
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => navigate(`/${restaurantSlug ?? ''}`)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                padding: '6px 12px', borderRadius: radius.full,
-                background: 'rgba(99,102,241,0.13)', border: '1px solid rgba(99,102,241,0.28)',
-                color: '#818CF8', fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-              }}
-            >
-              <Link2 size={11} strokeWidth={2.5} />
-              Ver hub
-            </button>
-            <button
-              onClick={() => navigate('/life/hub')}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                padding: '6px 12px', borderRadius: radius.full,
-                background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
-                color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-              }}
-            >
-              <Settings2 size={11} strokeWidth={2.5} />
-              Configurar
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => navigate('/life/hub')}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '6px',
-              padding: '8px 16px', borderRadius: radius.full,
-              background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.30)',
-              color: '#818CF8', fontFamily: font, fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-            }}
-          >
-            Crear mi hub
-          </button>
-        )}
+        {(() => {
+          if (!hasRestaurant) {
+            return (
+              <button
+                onClick={() => navigate('/life/hub')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  padding: '8px 16px', borderRadius: radius.full,
+                  background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.30)',
+                  color: '#818CF8', fontFamily: font, fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                Crear mi ID
+              </button>
+            )
+          }
+
+          if (onboardingCompleted !== true) {
+            return (
+              <button
+                onClick={() => navigate('/onboarding')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  padding: '8px 16px', borderRadius: radius.full,
+                  background: 'rgba(244,112,90,0.13)', border: '1px solid rgba(244,112,90,0.30)',
+                  color: '#F4705A', fontFamily: font, fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                <Sparkles size={12} strokeWidth={2.5} />
+                Continuar configurando mi ID
+              </button>
+            )
+          }
+
+          return (
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => navigate(`/${restaurantSlug ?? ''}`)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  padding: '6px 12px', borderRadius: radius.full,
+                  background: 'rgba(99,102,241,0.13)', border: '1px solid rgba(99,102,241,0.28)',
+                  color: '#818CF8', fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                <Link2 size={11} strokeWidth={2.5} />
+                Ver ID
+              </button>
+              <button
+                onClick={() => navigate('/life/hub')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  padding: '6px 12px', borderRadius: radius.full,
+                  background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+                  color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                <Settings2 size={11} strokeWidth={2.5} />
+                Configurar
+              </button>
+            </div>
+          )
+        })()}
       </div>
     </div>
   )
@@ -459,7 +483,7 @@ function PageSkeleton() {
 export function LifePage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { hasRestaurant, restaurantSlug, restaurantPlan } = useLifeStore()
+  const { hasRestaurant, restaurantSlug, restaurantPlan, onboardingCompleted } = useLifeStore()
   const { currency } = useLocaleStore()
   const data = useLifeData()
 
@@ -533,11 +557,12 @@ export function LifePage() {
             </button>
           </motion.div>
 
-          {/* ── Hub Digital ────────────────────────────────────────────────── */}
+          {/* ── ID Digital ─────────────────────────────────────────────────── */}
           <motion.div variants={fadeInUp}>
             <HubSection
               hasRestaurant={hasRestaurant}
               restaurantSlug={restaurantSlug}
+              onboardingCompleted={onboardingCompleted}
               avatarUrl={avatarUrl}
               initials={initials}
             />

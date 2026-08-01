@@ -181,7 +181,7 @@ export function CinematicHero() {
         <div className="ch-card-content">
           <h2 className="ch-card-heading">Tu identidad digital, tu negocio y tu vida. Todo en uno.</h2>
           <p className="ch-card-description">
-            <strong>Mycen</strong> unifica tu Hub Digital, tu sistema personal y tu
+            <strong>Mycen</strong> unifica tu ID Digital, tu sistema personal y tu
             plataforma de negocio — sin apps que instalar, sin silos.
           </p>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Phone, MapPin, Plus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import { Spinner } from '@/components/ui/Spinner'
 import { ExternalOrderModal } from './ExternalOrderModal'
 import toast from 'react-hot-toast'
@@ -128,12 +129,14 @@ export function DeliveryTab({ restaurantId }: DeliveryTabProps) {
   useEffect(() => {
     fetchOrders()
     fetchDrivers()
-    const channel = supabase
-      .channel(`delivery_orders_${restaurantId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }, fetchOrders)
-      .subscribe()
-    return () => { channel.unsubscribe() }
   }, [restaurantId, fetchOrders, fetchDrivers])
+
+  useRealtimeChannel({
+    channelName: `delivery_orders_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: '*', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetchOrders() },
+  })
 
   const updateStatus = async (orderId: string, status: string) => {
     try {

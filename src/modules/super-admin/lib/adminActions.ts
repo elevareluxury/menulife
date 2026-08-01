@@ -3,18 +3,21 @@ import { supabase } from '@/lib/supabase'
 export const PLAN_COLORS: Record<string, string> = {
   hub_free:      '#F59E0B',
   os_gastronomy: '#3B82F6',
+  os_retail:     '#8B5CF6',
   os_full:       '#10B981',
 }
 
 export const PLAN_LABELS: Record<string, string> = {
   hub_free:      'Hub Free',
   os_gastronomy: 'OS Gastronomy',
+  os_retail:     'OS Retail',
   os_full:       'OS Full',
 }
 
 export const PLAN_PRICES: Record<string, number> = {
   hub_free:      9,
   os_gastronomy: 19,
+  os_retail:     19,
   os_full:       32,
 }
 
@@ -26,6 +29,11 @@ export const PLAN_FEATURES: Record<string, Record<string, boolean>> = {
   },
   os_gastronomy: {
     delivery: true, takeaway: true, reservations: true,
+    advanced_analytics: true, pdf_import: true,
+    multi_language: true, custom_branding: true,
+  },
+  os_retail: {
+    delivery: false, takeaway: false, reservations: false,
     advanced_analytics: true, pdf_import: true,
     multi_language: true, custom_branding: true,
   },

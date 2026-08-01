@@ -11,7 +11,8 @@ interface WaiterInfo {
 interface WaiterAuthState {
   token: string | null
   waiter: WaiterInfo | null
-  setAuth: (token: string, waiter: WaiterInfo) => void
+  restaurantSlug: string | null
+  setAuth: (token: string, waiter: WaiterInfo, slug: string) => void
   logout: () => void
   isAuthenticated: () => boolean
 }
@@ -21,10 +22,11 @@ export const useWaiterAuthStore = create<WaiterAuthState>()(
     (set, get) => ({
       token: null,
       waiter: null,
+      restaurantSlug: null,
 
-      setAuth: (token, waiter) => set({ token, waiter }),
+      setAuth: (token, waiter, slug) => set({ token, waiter, restaurantSlug: slug }),
 
-      logout: () => set({ token: null, waiter: null }),
+      logout: () => set({ token: null, waiter: null, restaurantSlug: null }),
 
       isAuthenticated: () => !!get().token && !!get().waiter,
     }),

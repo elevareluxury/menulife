@@ -28,9 +28,10 @@ interface AccessRequest {
 type Tab = 'pending' | 'approved' | 'rejected' | 'all'
 
 const PLAN_OPTIONS = [
-  { value: 'hub_free',      label: 'Hub Free — Menú Digital',    sub: 'Trial 14d · $9/mes'  },
+  { value: 'hub_free',      label: 'Hub Free — Menú Digital',       sub: 'Trial 14d · $9/mes'  },
   { value: 'os_gastronomy', label: 'OS Gastronomy — Pedidos + KDS', sub: 'Trial 14d · $19/mes' },
-  { value: 'os_full',       label: 'OS Full — Suite Completa',   sub: 'Trial 14d · $32/mes' },
+  { value: 'os_retail',     label: 'OS Retail — Inventario + Caja', sub: 'Trial 14d · $19/mes' },
+  { value: 'os_full',       label: 'OS Full — Suite Completa',      sub: 'Trial 14d · $32/mes' },
 ]
 
 function timeSince(dateStr: string): string {

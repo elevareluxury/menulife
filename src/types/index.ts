@@ -6,71 +6,7 @@ export interface User {
   role: UserRole
 }
 
-export interface Restaurant {
-  id: string
-  owner_id: string
-  slug: string
-  name: string
-  name_en?: string | null
-  email?: string | null
-  phone?: string | null
-  address?: string | null
-  city?: string | null
-  logo_url?: string | null
-  cover_image_url?: string | null
-  description?: string | null
-  description_en?: string | null
-  default_currency: string            // ISO 4217 — any code (ARS, USD, EUR, BRL…)
-  default_language: string            // BCP-47 lowercase: 'es', 'en', 'pt', 'fr', 'it', 'de'
-  timezone?: string                   // IANA timezone string
-  schedule?: unknown
-  is_open: boolean
-  is_active: boolean
-  plan: 'hub_free' | 'os_gastronomy' | 'os_full'
-  subscription_status: 'trial' | 'active' | 'past_due' | 'cancelled'
-  mercadopago_enabled: boolean
-  created_at: string
-  // Settings fields
-  website?: string | null
-  country?: string | null
-  province?: string | null
-  address_extra?: string | null
-  postal_code?: string | null
-  directions?: string | null
-  social_links?: unknown
-  menu_accent_color?: string | null
-  menu_card_style?: string | null
-  show_prices?: boolean
-  show_descriptions?: boolean
-  show_calories?: boolean
-  onboarding_completed?: boolean
-  // Delivery & Takeaway config
-  delivery_enabled?: boolean
-  delivery_time_estimate?: number | null
-  delivery_min_order?: number | null
-  delivery_fee_type?: 'fixed' | 'percentage' | 'zone' | null
-  delivery_fee_value?: number | null
-  delivery_zones?: DeliveryZone[] | unknown
-  takeaway_enabled?: boolean
-  takeaway_time_estimate?: number | null
-  allow_language_switch?: boolean
-  // Globalization — Phase 17
-  locale?: string | null              // BCP-47 full tag: 'es-AR', 'en-US', 'pt-BR'
-  date_format?: string | null         // 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD' | …
-  time_format?: string | null         // '24h' | '12h'
-  number_format?: string | null       // Intl.NumberFormat locale: 'es-AR' | 'en-US' | …
-  // Reservations config
-  reservations_enabled?: boolean
-  reservations_collect_guests?: boolean
-  reservations_advance_days?: number | null
-  reservations_min_hours?: number | null
-  reservations_max_party?: number | null
-  reservations_time_slots?: string[] | null
-  reservations_message?: string | null
-  features?: unknown
-  google_review_link?: string | null
-  business_type?: 'gastronomy' | 'retail' | 'services'
-}
+export type { Restaurant, RestaurantPlan, BusinessType, SubscriptionStatus } from './restaurant'
 
 export interface MenuSection {
   id: string
@@ -103,6 +39,7 @@ export interface MenuItem {
   tags: string[]
   created_at: string
   updated_at: string
+  product_id?: string | null
 }
 
 /** @deprecated Use string (ISO 4217) — kept for backward compat */

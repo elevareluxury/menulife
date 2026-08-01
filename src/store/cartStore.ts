@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 
 export interface CartItem {
   id: string
+  product_id?: string  // ID real en tabla products (retail); undefined si viene de menu_items
   name: string
   name_en: string | null
   price_ars: number

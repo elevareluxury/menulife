@@ -1,11 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import type { Reservation } from '@/types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
-export function useReservations(restaurantId: string | undefined, date?: string) {
+export function useReservations(
+  restaurantId: string | undefined,
+  date?: string,
+  onNewReservation?: (r: Reservation) => void
+) {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -28,20 +33,21 @@ export function useReservations(restaurantId: string | undefined, date?: string)
 
   useEffect(() => { fetch() }, [fetch])
 
-  // Real-time subscription
-  useEffect(() => {
-    if (!restaurantId) return
-    const channel = supabase
-      .channel(`reservations:${restaurantId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'reservations',
-        filter: `restaurant_id=eq.${restaurantId}`,
-      }, () => fetch())
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [restaurantId, fetch])
+  useRealtimeChannel({
+    channelName: `reservations:${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{
+      event: '*',
+      table: 'reservations',
+      filter: `restaurant_id=eq.${restaurantId}`,
+    }],
+    onEvent: (payload) => {
+      fetch()
+      if (payload.eventType === 'INSERT' && onNewReservation) {
+        onNewReservation(payload.new as Reservation)
+      }
+    },
+  })
 
   return { reservations, loading, refetch: fetch }
 }

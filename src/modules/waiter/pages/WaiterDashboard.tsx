@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LogOut, Bell, Clock, Receipt } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { InstallBanner } from '@/components/ui/InstallBanner'
 import { supabase } from '@/lib/supabase'
 import { useWaiterAuthStore } from '@/store/waiterAuthStore'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import { getTimeSince } from '@/lib/utils'
 import { useWaiterNotifications } from '../hooks/useWaiterNotifications'
 import { NotificationBanner } from '../components/NotificationBanner'
@@ -50,87 +51,87 @@ export function WaiterDashboard() {
     }
   }, [isAuthenticated, navigate, slug])
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!waiter) return
+    try {
+      const { data: tablesData } = await supabase
+        .from('tables')
+        .select('*')
+        .eq('waiter_id', waiter.id)
+        .eq('is_active', true)
 
-    async function fetchData() {
-      try {
-        const { data: tablesData } = await supabase
-          .from('tables')
-          .select('*')
-          .eq('waiter_id', waiter!.id)
-          .eq('is_active', true)
+      const fetchedTables: Table[] = tablesData ?? []
+      setTables(fetchedTables)
 
-        const fetchedTables: Table[] = tablesData ?? []
-        setTables(fetchedTables)
+      const tableNumbers = fetchedTables.map(t => t.table_number)
+      if (tableNumbers.length > 0) {
+        const { data: ordersData } = await supabase
+          .from('orders')
+          .select('id, table_number, status, created_at')
+          .eq('restaurant_id', waiter.restaurant_id)
+          .in('table_number', tableNumbers)
+          .in('status', ['pending', 'cooking', 'ready', 'bill_requested'])
 
-        const tableNumbers = fetchedTables.map(t => t.table_number)
-        if (tableNumbers.length > 0) {
-          const { data: ordersData } = await supabase
-            .from('orders')
-            .select('id, table_number, status, created_at')
-            .eq('restaurant_id', waiter!.restaurant_id)
-            .in('table_number', tableNumbers)
-            .in('status', ['pending', 'cooking', 'ready', 'bill_requested'])
-
-          const orders: OrderWithItems[] = await Promise.all(
-            (ordersData ?? []).map(async (order) => {
-              const { data: items } = await supabase
-                .from('order_items')
-                .select('id, menu_item_name, quantity')
-                .eq('order_id', order.id)
-              return { ...order, items: items ?? [] }
-            })
-          )
-          setOrders(orders)
-        } else {
-          setOrders([])
-        }
-
-        const { data: callsData } = await supabase
-          .from('waiter_calls')
-          .select('id, created_at, table_id, type')
-          .eq('waiter_id', waiter!.id)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false })
-
-        const resolvedCalls: CallWithTable[] = (callsData ?? []).map(c => ({
-          id: c.id,
-          created_at: c.created_at,
-          type: (c.type ?? 'call') as 'call' | 'bill_request',
-          table: { table_number: fetchedTables.find(t => t.id === c.table_id)?.table_number ?? '' },
-        }))
-        setCalls(resolvedCalls)
-      } catch (error) {
-        console.error('Error fetching waiter data:', error)
-      } finally {
-        setLoading(false)
+        const orders: OrderWithItems[] = await Promise.all(
+          (ordersData ?? []).map(async (order) => {
+            const { data: items } = await supabase
+              .from('order_items')
+              .select('id, menu_item_name, quantity')
+              .eq('order_id', order.id)
+            return { ...order, items: items ?? [] }
+          })
+        )
+        setOrders(orders)
+      } else {
+        setOrders([])
       }
-    }
 
-    fetchData()
+      const { data: callsData } = await supabase
+        .from('waiter_calls')
+        .select('id, created_at, table_id, type')
+        .eq('waiter_id', waiter.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
 
-    const ordersChannel = supabase
-      .channel(`waiter_orders_${waiter.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${waiter.restaurant_id}` }, fetchData)
-      .subscribe()
-
-    const callsChannel = supabase
-      .channel(`waiter_calls_${waiter.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'waiter_calls' }, fetchData)
-      .subscribe()
-
-    const tablesChannel = supabase
-      .channel(`waiter_tables_${waiter.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tables', filter: `waiter_id=eq.${waiter.id}` }, fetchData)
-      .subscribe()
-
-    return () => {
-      ordersChannel.unsubscribe()
-      callsChannel.unsubscribe()
-      tablesChannel.unsubscribe()
+      const resolvedCalls: CallWithTable[] = (callsData ?? []).map(c => ({
+        id: c.id,
+        created_at: c.created_at,
+        type: (c.type ?? 'call') as 'call' | 'bill_request',
+        table: { table_number: fetchedTables.find(t => t.id === c.table_id)?.table_number ?? '' },
+      }))
+      setCalls(resolvedCalls)
+    } catch (error) {
+      console.error('Error fetching waiter data:', error)
+    } finally {
+      setLoading(false)
     }
   }, [waiter])
+
+  useEffect(() => {
+    if (!waiter) return
+    fetchData()
+  }, [waiter, fetchData])
+
+  useRealtimeChannel({
+    channelName: `waiter_orders_${waiter?.id ?? 'none'}`,
+    enabled: !!waiter?.id,
+    changes: [{ event: '*', table: 'orders', filter: `restaurant_id=eq.${waiter?.restaurant_id}` }],
+    onEvent: () => { fetchData() },
+  })
+
+  useRealtimeChannel({
+    channelName: `waiter_calls_${waiter?.id ?? 'none'}`,
+    enabled: !!waiter?.id,
+    changes: [{ event: '*', table: 'waiter_calls' }],
+    onEvent: () => { fetchData() },
+  })
+
+  useRealtimeChannel({
+    channelName: `waiter_tables_${waiter?.id ?? 'none'}`,
+    enabled: !!waiter?.id,
+    changes: [{ event: '*', table: 'tables', filter: `waiter_id=eq.${waiter?.id}` }],
+    onEvent: () => { fetchData() },
+  })
 
   const attendCall = async (callId: string) => {
     await supabase

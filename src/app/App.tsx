@@ -21,6 +21,7 @@ import { ForgotPassword } from '@/pages/ForgotPassword'
 import { ResetPassword } from '@/pages/ResetPassword'
 import { ReservationFormPage } from '@/modules/public/pages/ReservationFormPage'
 import { RequirePlan } from '@/app/RequirePlan'
+import { RequireStaffAuth } from '@/app/RequireStaffAuth'
 
 // Heavy modules — lazy loaded
 const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
@@ -145,17 +146,53 @@ function App() {
           <Route path="/r/:slug/reservar"           element={<ReservationFormPage />} />
           <Route path="/r/:slug/pedido/:orderId"    element={<OrderTracking />} />
           <Route path="/r/:slug"                    element={<PublicMenu />} />
-          <Route path="/kitchen/:slug"              element={<KitchenDisplay />} />
+          <Route
+            path="/kitchen/:slug"
+            element={
+              <RequireStaffAuth
+                loginPath={(slug) => `/mozo/${slug}`}
+                allowOwner={true}
+                allowWaiter={true}
+                allowDelivery={true}
+              >
+                <KitchenDisplay />
+              </RequireStaffAuth>
+            }
+          />
           {/* Rutas mozo nueva app */}
           <Route path="/mozo/:slug"      element={<WaiterLogin />} />
-          <Route path="/mozo/:slug/app"  element={<WaiterApp />} />
+          <Route
+            path="/mozo/:slug/app"
+            element={
+              <RequireStaffAuth
+                loginPath={(slug) => `/mozo/${slug}`}
+                allowOwner={false}
+                allowWaiter={true}
+                allowDelivery={false}
+              >
+                <WaiterApp />
+              </RequireStaffAuth>
+            }
+          />
           {/* Rutas waiter legacy — backward compat */}
           <Route path="/waiter/:slug/login"               element={<WaiterLegacyRedirect />} />
           <Route path="/waiter/:slug/dashboard"           element={<WaiterLegacyRedirect />} />
           <Route path="/waiter/:slug/table/:tableNumber"  element={<TableBill />} />
           <Route path="/delivery/:slug"       element={<DeliveryLogin />} />
           <Route path="/delivery/:slug/login" element={<DeliveryLogin />} />
-          <Route path="/delivery/:slug/app"   element={<DriverDashboard />} />
+          <Route
+            path="/delivery/:slug/app"
+            element={
+              <RequireStaffAuth
+                loginPath={(slug) => `/delivery/${slug}`}
+                allowOwner={false}
+                allowWaiter={false}
+                allowDelivery={true}
+              >
+                <DriverDashboard />
+              </RequireStaffAuth>
+            }
+          />
           <Route path="/super-admin/*" element={<SuperAdminPage />} />
           {/* Alias sin guión — por si alguien tipea /superadmin */}
           <Route path="/superadmin/*" element={<Navigate to="/super-admin" replace />} />

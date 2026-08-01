@@ -97,7 +97,7 @@ export function DeliveryLogin() {
       .eq('id', driverRow.id)
 
     localStorage.setItem(lastDriverKey, selectedDriver.id)
-    setAuth(`direct-${Date.now()}`, { ...driverRow, restaurant_id: restaurantId })
+    setAuth(`direct-${Date.now()}`, { ...driverRow, restaurant_id: restaurantId }, slug ?? '')
     toast.success(`Bienvenido ${driverRow.first_name}!`)
     navigate(`/delivery/${slug}/app`)
   }

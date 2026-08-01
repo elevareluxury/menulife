@@ -40,12 +40,13 @@ export function ItemDetailSheet({ item, isOpen, onClose }: ItemDetailSheetProps)
   const handleAdd = () => {
     for (let i = 0; i < qty; i++) {
       addItem({
-        id:        item.id,
-        name:      item.name,
-        name_en:   item.name_en,
-        price_ars: item.price_ars,
-        price_usd: item.price_usd,
-        image_url: item.image_url,
+        id:         item.id,
+        product_id: item.product_id ?? undefined,
+        name:       item.name,
+        name_en:    item.name_en,
+        price_ars:  item.price_ars,
+        price_usd:  item.price_usd,
+        image_url:  item.image_url,
       })
     }
     onClose()

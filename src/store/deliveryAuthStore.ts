@@ -12,7 +12,8 @@ interface DriverInfo {
 interface DeliveryAuthState {
   token: string | null
   driver: DriverInfo | null
-  setAuth: (token: string, driver: DriverInfo) => void
+  restaurantSlug: string | null
+  setAuth: (token: string, driver: DriverInfo, slug: string) => void
   logout: () => void
   isAuthenticated: () => boolean
 }
@@ -22,8 +23,9 @@ export const useDeliveryAuthStore = create<DeliveryAuthState>()(
     (set, get) => ({
       token: null,
       driver: null,
-      setAuth: (token, driver) => set({ token, driver }),
-      logout: () => set({ token: null, driver: null }),
+      restaurantSlug: null,
+      setAuth: (token, driver, slug) => set({ token, driver, restaurantSlug: slug }),
+      logout: () => set({ token: null, driver: null, restaurantSlug: null }),
       isAuthenticated: () => !!get().token && !!get().driver,
     }),
     { name: 'delivery-auth' }

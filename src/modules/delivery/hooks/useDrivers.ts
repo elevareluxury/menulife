@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import type { DeliveryDriver } from '@/types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,23 +53,17 @@ export function useDrivers(restaurantId: string | undefined) {
 
   useEffect(() => {
     if (!restaurantId) { setLoading(false); return }
-
     const cached = readCache(restaurantId)
     if (cached) { setDrivers(cached); setLoading(false) }
-
     fetchDrivers()
-
-    const channel = supabase
-      .channel(`drivers_changes_${restaurantId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'delivery_drivers', filter: `restaurant_id=eq.${restaurantId}` },
-        fetchDrivers
-      )
-      .subscribe()
-
-    return () => { channel.unsubscribe() }
   }, [restaurantId, fetchDrivers])
+
+  useRealtimeChannel({
+    channelName: `drivers_changes_${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{ event: '*', table: 'delivery_drivers', filter: `restaurant_id=eq.${restaurantId}` }],
+    onEvent: () => { fetchDrivers() },
+  })
 
   return { drivers, loading, refetch: fetchDrivers }
 }

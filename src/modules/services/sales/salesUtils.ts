@@ -1,4 +1,5 @@
 import type { SaleItemInput } from './salesTypes'
+export { formatCurrency } from '@/lib/currency'
 
 export function computeItemTotal(item: SaleItemInput): number {
   return Math.max(0, item.quantity * item.unit_price - item.discount)
@@ -15,9 +16,6 @@ export function computeSaleTotals(
   return { subtotal, discount, tax, total: subtotal + tax }
 }
 
-export function formatCurrency(amount: number, currency: string): string {
-  return `${currency} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
-}
 
 export function blankSaleItem(): SaleItemInput {
   return {

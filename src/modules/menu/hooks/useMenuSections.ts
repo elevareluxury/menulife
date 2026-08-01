@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeChannel } from '@/hooks/useRealtimeChannel'
 import type { MenuSection } from '@/types'
 
 const cacheKey = (restaurantId: string) => `ml_menu_sections_${restaurantId}`
@@ -50,30 +51,22 @@ export function useMenuSections(restaurantId: string | undefined) {
   }, [restaurantId])
 
   useEffect(() => {
-    if (!restaurantId) {
-      setLoading(false)
-      return
-    }
-
+    if (!restaurantId) { setLoading(false); return }
     const cached = readCache(restaurantId)
-    if (cached) {
-      setSections(cached)
-      setLoading(false)
-    }
-
+    if (cached) { setSections(cached); setLoading(false) }
     fetchSections()
-
-    const channel = supabase
-      .channel(`menu_sections:${restaurantId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'menu_sections', filter: `restaurant_id=eq.${restaurantId}` },
-        fetchSections
-      )
-      .subscribe()
-
-    return () => { channel.unsubscribe() }
   }, [restaurantId, fetchSections])
+
+  useRealtimeChannel({
+    channelName: `menu_sections:${restaurantId}`,
+    enabled: !!restaurantId,
+    changes: [{
+      event: '*',
+      table: 'menu_sections',
+      filter: `restaurant_id=eq.${restaurantId}`,
+    }],
+    onEvent: () => { fetchSections() },
+  })
 
   return { sections, loading, refetch: fetchSections }
 }

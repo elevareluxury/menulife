@@ -14,11 +14,12 @@ interface CheckoutModalProps {
   onSuccess: () => void
   slug?: string
   restaurantName?: string
+  businessType?: string
   orderTypeData?: OrderTypeData | null
   mesaParam?: string | null
 }
 
-export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, restaurantName, orderTypeData, mesaParam }: CheckoutModalProps) {
+export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, restaurantName, businessType: businessTypeProp, orderTypeData, mesaParam }: CheckoutModalProps) {
   const navigate = useNavigate()
   const { items, sessionId, clearCart, getTotal } = useCartStore()
   const { currency, language } = useMenuStore()
@@ -125,22 +126,31 @@ export function CheckoutModal({ isOpen, onClose, restaurantId, onSuccess, slug, 
 
       // Stock decrement for retail businesses (best-effort)
       try {
-        const { data: restaurantData } = await (supabase as any)
+        const effectiveBusinessType = businessTypeProp ?? (await (supabase as any)
           .from('restaurants')
           .select('business_type')
           .eq('id', restaurantId)
           .single()
+          .then(({ data }: { data: { business_type: string } | null }) => data?.business_type))
 
-        if (restaurantData?.business_type === 'retail') {
+        if (effectiveBusinessType === 'retail') {
           for (const item of items) {
-            const { data: product } = await (supabase as any)
+            // Prefer ID lookup (exact, no ambiguity); fall back to exact name match
+            // Note: .ilike was replaced with .eq — ilike matches substrings ('Café' → 'Café con leche')
+            let productQuery = (supabase as any)
               .from('products')
               .select('id, stock_current, stock_min')
               .eq('restaurant_id', restaurantId)
-              .ilike('name', item.name)
-              .maybeSingle()
 
-            if (!product) continue
+            if (item.product_id) {
+              productQuery = productQuery.eq('id', item.product_id)
+            } else {
+              productQuery = productQuery.eq('name', item.name)
+            }
+
+            const { data: product } = await productQuery.maybeSingle()
+
+            if (!product || (product.stock_current ?? 0) <= 0) continue
 
             const newStock = Math.max(0, (product.stock_current ?? 0) - item.quantity)
 
