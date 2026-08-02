@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Globe, Plus, Trash2, Eye, EyeOff, ExternalLink,
   ImageIcon, X, Star, GripVertical, Save, Download, Link2,
-  BarChart2, ArrowLeft,
+  ArrowLeft,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -27,10 +27,7 @@ import {
   arrayMove, sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import {
-  LineChart, Line, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid,
-} from 'recharts'
+import { TabAnalytics } from '../components/analytics/TabAnalytics'
 import toast from 'react-hot-toast'
 
 const db = supabase as any
@@ -103,7 +100,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'destacado', label: 'Destacado'    },
   { id: 'galeria',   label: 'Galería'      },
   { id: 'resenas',   label: 'Reseñas'      },
-  { id: 'analytics', label: 'Analytics'   },
+  { id: 'analytics', label: 'Estadísticas' },
   { id: 'preview',   label: 'Vista previa' },
 ]
 
@@ -207,16 +204,6 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
     <div className={`rounded-2xl p-5 ${className}`}
       style={{ background: '#161A24', border: '1px solid rgba(255,255,255,0.08)' }}>
       {children}
-    </div>
-  )
-}
-
-function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
-  return (
-    <div className="rounded-xl p-4" style={{ background: '#0F1115', border: '1px solid rgba(255,255,255,0.06)' }}>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-xs text-gray-400 mt-0.5">{label}</p>
-      {sub && <p className="text-[11px] mt-0.5" style={{ color: ACC }}>{sub}</p>}
     </div>
   )
 }
@@ -1745,113 +1732,6 @@ function TabResenas({ restaurantId }: { restaurantId: string }) {
 }
 
 // ─── Tab: Analytics ──────────────────────────────────────────────────────────
-
-interface AnalyticsEvent { event_type: string; link_id: string | null; created_at: string; user_agent: string | null }
-interface LinkLabel { id: string; label: string }
-
-function TabAnalytics({ restaurantId }: { restaurantId: string }) {
-  const [loading, setLoading] = useState(true)
-  const [profileViews, setProfileViews] = useState(0)
-  const [linkClicks, setLinkClicks] = useState(0)
-  const [topLink, setTopLink] = useState<string | null>(null)
-  const [uniqueVisitors, setUniqueVisitors] = useState(0)
-  const [chartData, setChartData] = useState<{ day: string; visitas: number }[]>([])
-
-  useEffect(() => {
-    async function load() {
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-      const [{ data: events }, { data: linkRows }] = await Promise.all([
-        db.from('hub_analytics')
-          .select('event_type, link_id, created_at, user_agent')
-          .eq('restaurant_id', restaurantId)
-          .gte('created_at', thirtyDaysAgo.toISOString()),
-        db.from('hub_links').select('id, label').eq('restaurant_id', restaurantId),
-      ])
-
-      const evts = (events ?? []) as AnalyticsEvent[]
-      const links = (linkRows ?? []) as LinkLabel[]
-
-      const views = evts.filter(e => e.event_type === 'profile_view').length
-      const clicks = evts.filter(e => e.event_type === 'link_click').length
-      setProfileViews(views)
-      setLinkClicks(clicks)
-
-      // Unique visitors: unique user_agent+date combos
-      const uniqSet = new Set(evts.map(e => `${(e.user_agent ?? '').slice(0, 30)}_${e.created_at?.slice(0, 10)}`))
-      setUniqueVisitors(uniqSet.size)
-
-      // Top link
-      const linkCounts: Record<string, number> = {}
-      evts.filter(e => e.event_type === 'link_click' && e.link_id).forEach(e => {
-        linkCounts[e.link_id!] = (linkCounts[e.link_id!] ?? 0) + 1
-      })
-      const topId = Object.entries(linkCounts).sort((a, b) => b[1] - a[1])[0]?.[0]
-      const topLabel = links.find(l => l.id === topId)?.label ?? null
-      setTopLink(topLabel)
-
-      // Chart: last 14 days profile views
-      const chart: { day: string; visitas: number }[] = []
-      for (let i = 13; i >= 0; i--) {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        const key = d.toISOString().slice(0, 10)
-        chart.push({
-          day: d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
-          visitas: evts.filter(e => e.event_type === 'profile_view' && e.created_at?.startsWith(key)).length,
-        })
-      }
-      setChartData(chart)
-      setLoading(false)
-    }
-    load()
-  }, [restaurantId])
-
-  if (loading) return <Spinner />
-
-  return (
-    <div className="space-y-5">
-      <p className="text-sm text-gray-400">Últimos 30 días</p>
-
-      <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Visitas al perfil" value={profileViews} sub="profile views" />
-        <StatCard label="Clicks en links" value={linkClicks} sub="link clicks" />
-        <StatCard label="Link más clickeado" value={topLink ?? '—'} />
-        <StatCard label="Visitantes únicos" value={uniqueVisitors} sub="aprox." />
-      </div>
-
-      <Card className="space-y-3">
-        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">
-          Visitas últimos 14 días
-        </h3>
-        {chartData.every(d => d.visitas === 0) ? (
-          <div className="flex items-center justify-center h-32">
-            <div className="text-center">
-              <BarChart2 className="w-8 h-8 mx-auto mb-2" style={{ color: '#374151' }} />
-              <p className="text-sm text-gray-500">Sin datos aún</p>
-            </div>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={160}>
-            <LineChart data={chartData} margin={{ top: 5, right: 8, bottom: 5, left: -28 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="day" tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} interval={1} />
-              <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip
-                contentStyle={{ background: '#1F2937', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
-                labelStyle={{ color: '#9CA3AF' }}
-                itemStyle={{ color: ACC }}
-                formatter={(v) => [v, 'visitas']}
-              />
-              <Line type="monotone" dataKey="visitas" stroke={ACC} strokeWidth={2} dot={false} activeDot={{ r: 4, fill: ACC }} />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </Card>
-    </div>
-  )
-}
 
 // ─── Tab: Vista previa ────────────────────────────────────────────────────────
 
