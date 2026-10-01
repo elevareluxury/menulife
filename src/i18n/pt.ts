@@ -243,7 +243,7 @@ export default {
     nav_screens: 'Telas',
     nav_logout: 'Sair',
     nav_more: 'Mais',
-    nav_hub: 'Hub Público',
+    nav_hub: 'Minha identidade',
     nav_catalogo: 'Catálogo',
     nav_inventario: 'Estoque',
     nav_agenda: 'Agenda',

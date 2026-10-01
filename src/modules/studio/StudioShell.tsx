@@ -11,7 +11,7 @@ import {
 import { publicBaseUrl, toPublicProfile } from './lib/preview'
 import type { ProfilePatch, SaveState, StudioBusiness, StudioModule, StudioProfile } from './lib/studioTypes'
 import { PreviewPane } from './components/PreviewPane'
-import { CreateProfileScreen } from './components/CreateProfileScreen'
+import { OnboardingWizard } from './components/OnboardingWizard'
 import { Button } from './components/ui'
 import './studio.css'
 
@@ -83,10 +83,22 @@ export function StudioShell() {
       </Centered>
     )
   }
-  if (load.kind === 'empty') {
+  // Onboarding guiado: sin perfil, o con un onboarding a medio terminar (pasos 3–4)
+  const resuming = load.kind === 'ready' && (load.profile.onboarding_step === 3 || load.profile.onboarding_step === 4)
+  if (load.kind === 'empty' || resuming) {
+    const suggestedName = (user.user_metadata as { name?: string } | undefined)?.name
     return (
       <div className="st-root">
-        <CreateProfileScreen userId={user.id} onCreated={profile => setLoad({ kind: 'ready', profile, modules: [], business: null })} />
+        <OnboardingWizard
+          userId={user.id}
+          initialProfile={load.kind === 'ready' ? load.profile : null}
+          initialModules={load.kind === 'ready' ? load.modules : []}
+          suggestedName={suggestedName}
+          onDone={(profile, modules) => setLoad({
+            kind: 'ready', profile, modules,
+            business: load.kind === 'ready' ? load.business : null,
+          })}
+        />
       </div>
     )
   }

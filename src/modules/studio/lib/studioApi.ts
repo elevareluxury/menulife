@@ -136,3 +136,45 @@ export async function loadStats(profileId: string, days: number): Promise<DailyS
   if (error) throw error
   return ((data ?? []) as DailyStat[]).map(r => ({ ...r, events: Number(r.events), visitors: Number(r.visitors) }))
 }
+
+// ── Privacidad: exportar y eliminar ──────────────────────────────────────────
+
+const LIFE_TABLES = [
+  'life_goals', 'life_goal_milestones', 'life_tasks', 'life_habits', 'life_habit_logs',
+  'life_transactions', 'life_brain_items', 'life_achievements', 'life_score',
+]
+
+/** Copia de los datos del usuario (lo que su sesión puede leer) en un JSON descargable. */
+export async function exportMyData(userId: string, email: string | undefined): Promise<Blob> {
+  const { data: profiles } = await db.from('profiles').select('*').eq('user_id', userId)
+  const profileIds = (profiles ?? []).map((p: { id: string }) => p.id)
+  const { data: modules } = profileIds.length
+    ? await db.from('profile_modules').select('*').in('profile_id', profileIds).is('deleted_at', null)
+    : { data: [] }
+  const life: Record<string, unknown[]> = {}
+  for (const table of LIFE_TABLES) {
+    const { data, error } = await db.from(table).select('*').eq('user_id', userId)
+    if (!error) life[table] = data ?? []
+  }
+  const payload = {
+    exported_at: new Date().toISOString(),
+    account: { id: userId, email },
+    profiles: profiles ?? [],
+    profile_modules: modules ?? [],
+    life_os: life,
+  }
+  return new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+}
+
+export type DeleteResult = 'deleted' | 'has_business' | 'error'
+
+/** Borra las imágenes subidas y la cuenta (perfiles y datos de Life OS caen en cascada). */
+export async function deleteMyAccount(userId: string): Promise<DeleteResult> {
+  try {
+    const { data: files } = await db.storage.from(MEDIA_BUCKET).list(userId, { limit: 1000 })
+    if (files?.length) await db.storage.from(MEDIA_BUCKET).remove(files.map(f => `${userId}/${f.name}`))
+  } catch { /* si falla la limpieza de imágenes, se sigue con la cuenta */ }
+  const { error } = await db.rpc('delete_my_account')
+  if (!error) return 'deleted'
+  return (error.message ?? '').includes('HAS_BUSINESS') ? 'has_business' : 'error'
+}

@@ -1,6 +1,7 @@
 import { useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export function AuthCallback() {
   const navigate = useNavigate()
@@ -33,9 +34,13 @@ export function AuthCallback() {
       if (superAdmin) {
         navigate('/super-admin', { replace: true })
       } else if (!restaurant) {
-        navigate('/life', { replace: true })
+        // Sin negocio: si todavía no armó su identidad, va al onboarding de Studio
+        // profiles todavía no está en database.types.ts
+        const { data: profile } = await (supabase as unknown as SupabaseClient)
+          .from('profiles').select('id').eq('user_id', id).limit(1).maybeSingle()
+        navigate(profile ? '/life' : '/studio', { replace: true })
       } else if (restaurant.plan === 'hub_free') {
-        navigate('/dashboard/hub', { replace: true })
+        navigate('/studio', { replace: true })
       } else {
         navigate('/dashboard', { replace: true })
       }

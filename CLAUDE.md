@@ -22,10 +22,12 @@ Referencia de producto: "MYCEN — Etapa 2" (UX/UI, arquitectura y criterios de 
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
 ## Código
-- Profile público: `src/modules/profile/` (página `/:slug?v=2` mientras dure la transición; `ProfileView` se reutiliza en la vista previa de Studio).
+- Profile público: `src/modules/profile/` en `/:slug` (el Hub viejo queda con `?v=1` como respaldo temporal). `ProfileView` se reutiliza en la vista previa de Studio y en el onboarding.
+- Vista previa al compartir: `api/og.ts` (Vercel Edge) + regla en `vercel.json` sólo para previsualizadores (WhatsApp, Facebook, X…).
 - Studio: `src/modules/studio/` en `/studio/*` (Inicio, Mi identidad, Módulos, Apariencia, Compartir, Analítica, Ajustes).
   El perfil se guarda solo (autosave con estados Guardando/Guardado/Error); los módulos se guardan al confirmar el panel.
-- El editor viejo (`/dashboard/hub`, `HubPage.tsx`) sigue escribiendo en las tablas `hub_*` hasta el corte.
+- Corte hecho: `/dashboard/hub` y `/life/hub` redirigen a `/studio`. Usuarios sin perfil ven el onboarding de 5 pasos (`OnboardingWizard`).
+- Life OS Goals tiene Agenda (`life_tasks`): recordatorios con la app abierta + `.ics` para el calendario del celular.
 
 ## Idioma
 - Interfaz en español (rioplatense) primero, con i18n (`src/i18n`).

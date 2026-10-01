@@ -243,7 +243,7 @@ export default {
     nav_screens: 'Schermi',
     nav_logout: 'Esci',
     nav_more: 'Altro',
-    nav_hub: 'Hub pubblico',
+    nav_hub: 'La mia identità',
     nav_catalogo: 'Catalogo',
     nav_inventario: 'Magazzino',
     nav_agenda: 'Agenda',

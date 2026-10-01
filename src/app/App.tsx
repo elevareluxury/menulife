@@ -25,6 +25,7 @@ import { RequirePlan } from '@/app/RequirePlan'
 // Heavy modules — lazy loaded
 const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
 const ProfilePublicPage = lazy(() => import('@/modules/profile/pages/ProfilePublicPage').then(m => ({ default: m.ProfilePublicPage })))
+const LegalPage       = lazy(() => import('@/modules/legal/LegalPage').then(m => ({ default: m.LegalPage })))
 const StudioShell     = lazy(() => import('@/modules/studio/StudioShell').then(m => ({ default: m.StudioShell })))
 const StudioOverview  = lazy(() => import('@/modules/studio/pages/OverviewPage').then(m => ({ default: m.OverviewPage })))
 const StudioIdentity  = lazy(() => import('@/modules/studio/pages/IdentityPage').then(m => ({ default: m.IdentityPage })))
@@ -53,7 +54,6 @@ const GastosPage       = lazy(() => import('@/modules/pos/pages/GastosPage').the
 const InventarioPage   = lazy(() => import('@/modules/inventory/pages/InventarioPage'))
 const CatalogoPage     = lazy(() => import('@/modules/catalog/pages/CatalogoPage'))
 const CatalogoPublic   = lazy(() => import('@/modules/public/pages/CatalogoPublic'))
-const HubPage                = lazy(() => import('@/modules/hub/pages/HubPage'))
 const ServicesClientesPage   = lazy(() => import('@/modules/services/pages/ServicesClientesPage').then(m => ({ default: m.ServicesClientesPage })))
 const CustomerProfilePage    = lazy(() => import('@/modules/services/pages/CustomerProfilePage').then(m => ({ default: m.CustomerProfilePage })))
 const ServicesAgendaPage     = lazy(() => import('@/modules/services/pages/ServicesAgendaPage').then(m => ({ default: m.ServicesAgendaPage })))
@@ -75,7 +75,6 @@ const LifeGoalsPage  = lazy(() => import('@/modules/life/pages/LifeGoalsPage').t
 const LifeHabitsPage = lazy(() => import('@/modules/life/pages/LifeHabitsPage').then(m => ({ default: m.LifeHabitsPage })))
 const LifeBrainPage  = lazy(() => import('@/modules/life/pages/LifeBrainPage').then(m => ({ default: m.LifeBrainPage })))
 const LifeReplayPage = lazy(() => import('@/modules/life/pages/LifeReplayPage').then(m => ({ default: m.LifeReplayPage })))
-const LifeHubPage    = lazy(() => import('@/modules/life/pages/LifeHubPage').then(m => ({ default: m.LifeHubPage })))
 
 function LoadingSpinner() {
   return (
@@ -90,11 +89,11 @@ function WaiterLegacyRedirect() {
   return <Navigate to={`/mozo/${slug ?? ''}`} replace />
 }
 
-// Transición Hub → Mycen Profile: el perfil nuevo se ve con ?v=2 hasta que
-// Studio reemplace al editor viejo (ahí pasa a ser el default).
+// Mycen Profile es la página pública. El Hub viejo queda accesible con ?v=1
+// como respaldo temporal durante la transición.
 function PublicSlugRoute() {
   const [params] = useSearchParams()
-  return params.get('v') === '2' ? <ProfilePublicPage /> : <HubPublicPage />
+  return params.get('v') === '1' ? <HubPublicPage /> : <ProfilePublicPage />
 }
 
 function App() {
@@ -131,7 +130,8 @@ function App() {
             <Route path="gastos"        element={<GastosPage />} />
             <Route path="inventario"    element={<InventarioPage />} />
             <Route path="catalogo"      element={<CatalogoPage />} />
-            <Route path="hub"           element={<HubPage />} />
+            {/* El editor del Hub fue reemplazado por Mycen Studio */}
+            <Route path="hub"           element={<Navigate to="/studio" replace />} />
             {/* ── Servicios routes — all require os_full plan ── */}
             <Route path="services/clientes"     element={<RequirePlan feature="services_catalog"><ServicesClientesPage /></RequirePlan>} />
             <Route path="services/clientes/:id" element={<RequirePlan feature="services_catalog"><CustomerProfilePage /></RequirePlan>} />
@@ -146,6 +146,8 @@ function App() {
             <Route path="services/forms"              element={<RequirePlan feature="services_catalog"><ServicesFormsPage /></RequirePlan>} />
             <Route path="services/forms/:id/builder"  element={<RequirePlan feature="services_catalog"><FormBuilderPage /></RequirePlan>} />
           </Route>
+          <Route path="/terminos"   element={<LegalPage doc="terms" />} />
+          <Route path="/privacidad" element={<LegalPage doc="privacy" />} />
           {/* ── Mycen Studio — edición de la identidad (Profile) ── */}
           <Route path="/studio" element={<ErrorBoundary label="studio"><StudioShell /></ErrorBoundary>}>
             <Route index element={<StudioOverview />} />
@@ -166,7 +168,7 @@ function App() {
             <Route path="goals"  element={<LifeGoalsPage />}  />
             <Route path="habits" element={<LifeHabitsPage />} />
             <Route path="brain"  element={<LifeBrainPage />}  />
-            <Route path="hub"    element={<LifeHubPage />}    />
+            <Route path="hub"    element={<Navigate to="/studio" replace />} />
             <Route path="replay" element={<LifeReplayPage />} />
           </Route>
           {/* Portal del cliente */}

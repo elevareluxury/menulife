@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { ROUTES } from '@/lib/constants'
 import toast from 'react-hot-toast'
+import { authErrorMessage } from '@/lib/authErrors'
 
 const BASE_INPUT: React.CSSProperties = {
   width: '100%',
@@ -63,13 +64,12 @@ export function LoginForm() {
       if (superAdmin) {
         navigate(ROUTES.SUPER_ADMIN)
       } else if (restaurant?.plan === 'hub_free') {
-        navigate('/dashboard/hub')
+        navigate('/studio')
       } else {
         navigate(ROUTES.DASHBOARD)
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al iniciar sesión'
-      setError(msg)
+      setError(authErrorMessage(err, 'No pudimos iniciar sesión. Intentá de nuevo.'))
     } finally {
       setLoading(false)
     }

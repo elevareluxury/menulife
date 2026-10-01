@@ -410,7 +410,7 @@ export function DashboardHome() {
   const cajaAbierta     = useCashRegisterOpen(businessType === 'retail' ? restaurant?.id : undefined)
 
   if (businessType === 'services') {
-    if (!hasFeature('services_catalog')) return <Navigate to="/dashboard/hub" replace />
+    if (!hasFeature('services_catalog')) return <Navigate to="/studio" replace />
     return <ServicesDashboard />
   }
 
