@@ -590,10 +590,15 @@ export function HubPublicPage() {
           db.from('hub_links').select('*').eq('restaurant_id',id).eq('is_active',true).order('sort_order'),
         ])
 
-        setStory(storyRes.data??null)
+        // Columnas reales: hub_stories.text, hub_reviews.reviewer_name / reviewer_initial
+        setStory(storyRes.data ? { ...storyRes.data, description: storyRes.data.text ?? storyRes.data.description ?? null } : null)
         setGallery(gallRes.data??[])
         setFeaturedProduct(fpRes.data??null)
-        setReviews(revRes.data??[])
+        setReviews(((revRes.data??[]) as (HubReview & {reviewer_name?:string;reviewer_initial?:string|null})[]).map(rv=>({
+          ...rv,
+          author_name: rv.reviewer_name ?? rv.author_name ?? '',
+          author_initial: rv.reviewer_initial ?? rv.author_initial ?? null,
+        })) as HubReview[])
         setLinks(linksRes.data??[])
 
         const { data: hubCfg } = await db.from('hub_config').select('*').eq('restaurant_id', id).maybeSingle()
@@ -621,9 +626,10 @@ export function HubPublicPage() {
   const waPhone           = social.whatsapp||r.phone||''
   const cleanWa           = waPhone.replace(/\D/g,'')
   const isRetail          = r.business_type==='retail'
-  const open              = isOpen(ra.business_hours??r.schedule)
-  const hoursText         = todayHours(ra.business_hours??r.schedule)
-  const schedule          = ra.business_hours??r.schedule
+  // Los editores (Hub y Configuración) guardan en `schedule`; business_hours sólo tiene el default de la DB
+  const open              = isOpen(r.schedule)
+  const hoursText         = todayHours(r.schedule)
+  const schedule          = r.schedule
   const categoryTags: string[] = ra.hub_category_tags??[]
   const hubCategory: string    = ra.hub_category??''
   const hubAbout: string       = ra.hub_about??''

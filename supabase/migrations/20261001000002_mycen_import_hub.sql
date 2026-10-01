@@ -115,11 +115,11 @@ begin
 
       update profiles set
         display_name = left(coalesce(nullif(btrim(hc ->> 'hub_title'), ''), r.name, ''), 80),
-        descriptor   = left(nullif(btrim(rj ->> 'hub_category'), ''), 120),
+        descriptor   = left(coalesce(nullif(btrim(rj ->> 'short_description'), ''), nullif(btrim(rj ->> 'hub_category'), '')), 120),
         bio          = left(coalesce(nullif(btrim(rj ->> 'hub_about'), ''), nullif(btrim(rj ->> 'description'), '')), 1000),
         avatar_url   = nullif(rj ->> 'logo_url', ''),
         cover_url    = coalesce(nullif(rj ->> 'hub_cover_url', ''), nullif(rj ->> 'cover_image_url', '')),
-        default_locale = coalesce(nullif(rj ->> 'default_language', ''), 'es'),
+        default_locale = lower(coalesce(nullif(rj ->> 'default_language', ''), 'es')),
         theme = jsonb_build_object(
           'mode',       'dark',
           'accent',     coalesce(nullif(hc ->> 'accent_color', ''), '#F59E0B'),
@@ -131,14 +131,15 @@ begin
             jsonb_build_object('kind', 'custom', 'label', coalesce(v_cta_txt, 'Ver más'), 'url', v_cta_url)
           when v_plan = 'hub_free' then null
           when v_btype = 'retail' then
-            jsonb_build_object('kind', 'shop', 'label', coalesce(v_cta_txt, 'Ver catálogo'), 'url', '/catalogo/' || r.slug)
+            jsonb_build_object('kind', 'shop', 'label', 'Ver catálogo', 'url', '/catalogo/' || r.slug)
           when coalesce(v_btype, 'gastronomy') = 'gastronomy' then
-            jsonb_build_object('kind', 'menu', 'label', coalesce(v_cta_txt, 'Ver menú'), 'url', '/r/' || r.slug)
+            jsonb_build_object('kind', 'menu', 'label', 'Ver menú', 'url', '/r/' || r.slug)
           else null
         end,
         translations = jsonb_strip_nulls(jsonb_build_object('en', jsonb_strip_nulls(jsonb_build_object(
           'bio',          nullif(btrim(coalesce(rj ->> 'hub_about_en', rj ->> 'description_en')), ''),
           'display_name', nullif(btrim(rj ->> 'name_en'), ''),
+          'descriptor',   nullif(btrim(rj ->> 'short_description_en'), ''),
           '_source',      'manual')))),
         -- Tarjeta de contacto: precargada con datos ya públicos, pero APAGADA
         contact_card = jsonb_strip_nulls(jsonb_build_object(
@@ -161,9 +162,9 @@ begin
       -- Novedad (hub_stories) → text
       insert into profile_modules (profile_id, type, title, content, translations, position, visibility, config)
       select v_profile.id, 'text', left(s ->> 'title', 120),
-             jsonb_strip_nulls(jsonb_build_object('body', s ->> 'description', 'image_url', s ->> 'image_url')),
+             jsonb_strip_nulls(jsonb_build_object('body', coalesce(s ->> 'text', s ->> 'description'), 'image_url', s ->> 'image_url')),
              jsonb_strip_nulls(jsonb_build_object('en', jsonb_strip_nulls(jsonb_build_object(
-               'title', s ->> 'title_en', 'body', s ->> 'description_en')))),
+               'title', s ->> 'title_en', 'body', coalesce(s ->> 'text_en', s ->> 'description_en'))))),
              10, 'active',
              jsonb_build_object('legacy_source', 'hub_stories', 'legacy_id', s ->> 'id', 'variant', 'story')
       from (select to_jsonb(x) as s from hub_stories x
@@ -196,7 +197,8 @@ begin
 
       -- Galería → un módulo gallery
       select jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
-               'url', g.url, 'type', coalesce(g.type, 'image'), 'caption', g.caption))
+               'url', g.url, 'type', coalesce(g.type, 'image'), 'caption', g.caption,
+               'thumbnail_url', to_jsonb(g) ->> 'thumbnail_url'))
              order by g.sort_order, g.id)
         into v_items
       from hub_gallery g where g.restaurant_id = r.id and g.is_active;
@@ -207,12 +209,14 @@ begin
       end if;
 
       -- Reseñas + Google rating → testimonials
+      -- reviewer_name (esquema real) o author_name (migración del repo)
       select jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
-               'author_name', v.author_name, 'rating', v.rating, 'text', v.text,
-               'color', v.profile_color))
-             order by v.sort_order, v.id)
+               'author_name', coalesce(v.j ->> 'reviewer_name', v.j ->> 'author_name'),
+               'rating', (v.j ->> 'rating')::integer, 'text', v.j ->> 'text',
+               'color', v.j ->> 'profile_color'))
+             order by (v.j ->> 'sort_order')::integer nulls last, v.j ->> 'id')
         into v_items
-      from hub_reviews v where v.restaurant_id = r.id;
+      from (select to_jsonb(x) as j from hub_reviews x where x.restaurant_id = r.id) v;
       if v_items is not null or rj ->> 'google_rating' is not null then
         insert into profile_modules (profile_id, type, title, content, position, config)
         values (v_profile.id, 'testimonials', 'Reseñas',
@@ -230,6 +234,7 @@ begin
       v_pos := 500;
       for v_key, v_val in select key, btrim(value) from jsonb_each_text(v_social) order by key loop
         continue when coalesce(v_val, '') = '';
+        continue when v_key = 'google_maps';  -- va al módulo de ubicación
         v_url := case
           when v_val ~* '^https?://'  then v_val
           when v_key = 'instagram'    then 'https://instagram.com/' || ltrim(v_val, '@')
@@ -243,7 +248,7 @@ begin
         end;
         continue when v_url is null;
         insert into profile_modules (profile_id, type, title, content, position, config)
-        values (v_profile.id, 'social', initcap(v_key),
+        values (v_profile.id, 'social', initcap(replace(v_key, '_', ' ')),
                 jsonb_build_object('network', v_key, 'handle', v_val, 'url', v_url),
                 v_pos, jsonb_build_object('legacy_source', 'social_links', 'legacy_id', v_key));
         v_pos := v_pos + 1;
@@ -263,23 +268,26 @@ begin
       end if;
 
       -- Ubicación (respeta show_locations)
-      if nullif(rj ->> 'address', '') is not null then
+      if coalesce(nullif(rj ->> 'address', ''), nullif(v_social ->> 'google_maps', '')) is not null then
         insert into profile_modules (profile_id, type, title, content, position, visibility, config)
         values (v_profile.id, 'location', 'Ubicación',
                 jsonb_strip_nulls(jsonb_build_object(
-                  'address', rj ->> 'address', 'city', nullif(rj ->> 'city', ''),
-                  'directions', nullif(rj ->> 'directions', ''))),
+                  'address', rj ->> 'address', 'city', coalesce(nullif(rj ->> 'hub_city', ''), nullif(rj ->> 'city', '')),
+                  'directions', nullif(rj ->> 'directions', ''),
+                  'maps_url', nullif(v_social ->> 'google_maps', ''))),
                 700,
                 case when coalesce((hc ->> 'show_locations')::boolean, true) then 'active' else 'hidden' end,
                 jsonb_build_object('legacy_source', 'restaurants.address'));
       end if;
 
       -- Horarios (respeta show_schedule)
-      if jsonb_typeof(coalesce(rj -> 'business_hours', rj -> 'schedule')) = 'object'
-         and coalesce(rj -> 'business_hours', rj -> 'schedule') <> '{}'::jsonb then
+      -- El editor del Hub guarda en `schedule` ({open, close, closed}); business_hours es otro formato
+      -- Perfiles personales (hub_free) no tienen horario comercial
+      if coalesce(v_plan, '') <> 'hub_free'
+         and jsonb_typeof(rj -> 'schedule') = 'object' and rj -> 'schedule' <> '{}'::jsonb then
         insert into profile_modules (profile_id, type, title, content, position, visibility, config)
         values (v_profile.id, 'hours', 'Horarios',
-                jsonb_build_object('schedule', coalesce(rj -> 'business_hours', rj -> 'schedule'),
+                jsonb_build_object('schedule', rj -> 'schedule',
                                    'timezone', coalesce(rj ->> 'timezone', 'America/Argentina/Buenos_Aires')),
                 800,
                 case when coalesce((hc ->> 'show_schedule')::boolean, true) then 'active' else 'hidden' end,

@@ -35,7 +35,11 @@ interface HubStory {
   id: string; restaurant_id: string
   image_url: string | null; title: string | null; title_en: string | null
   description: string | null; description_en: string | null; is_active: boolean
+  text?: string | null; text_en?: string | null
 }
+
+// Fila real de hub_reviews (reviewer_*) o del esquema del repo (author_*)
+type LegacyReviewRow = HubReview & { reviewer_name?: string; reviewer_initial?: string | null }
 
 interface HubFeaturedProduct {
   id: string; restaurant_id: string
@@ -1104,9 +1108,10 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
           setForm({
             image_url: data.image_url ?? '',
             title: data.title ?? '',
-            title_en: (data as any).title_en ?? '',
-            description: data.description ?? '',
-            description_en: (data as any).description_en ?? '',
+            title_en: data.title_en ?? '',
+            // Columnas reales: text / text_en
+            description: data.text ?? data.description ?? '',
+            description_en: data.text_en ?? data.description_en ?? '',
             is_active: data.is_active,
           })
         }
@@ -1120,13 +1125,14 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
       const payload = {
         restaurant_id: restaurantId,
         image_url: form.image_url.trim() || null,
-        title: form.title.trim() || null,
+        title: form.title.trim(),
         title_en: form.title_en.trim() || null,
-        description: form.description.trim() || null,
-        description_en: form.description_en.trim() || null,
+        text: form.description.trim() || null,
+        text_en: form.description_en.trim() || null,
         is_active: form.is_active,
         updated_at: new Date().toISOString(),
       }
+      if (!payload.title) { toast.error('El título es requerido'); setSaving(false); return }
       let error: unknown
       if (story) {
         ;({ error } = await db.from('hub_stories').update(payload).eq('id', story.id))
@@ -1547,14 +1553,13 @@ function ReviewModal({ restaurantId, review, count, onClose, onSaved }: {
     try {
       const payload = {
         restaurant_id: restaurantId,
-        author_name: form.author_name.trim(),
-        author_initial: form.author_initial.trim() || form.author_name.trim()[0]?.toUpperCase() || null,
+        reviewer_name: form.author_name.trim(),
+        reviewer_initial: form.author_initial.trim() || form.author_name.trim()[0]?.toUpperCase() || null,
         profile_color: form.profile_color,
         rating: form.rating,
         text: form.text.trim(),
         relative_time: form.relative_time.trim() || 'Hace poco',
         sort_order: review?.sort_order ?? count,
-        updated_at: new Date().toISOString(),
       }
       let error: unknown
       if (review) {
@@ -1640,7 +1645,11 @@ function TabResenas({ restaurantId }: { restaurantId: string }) {
   const loadReviews = useCallback(async () => {
     const { data } = await db.from('hub_reviews').select('*')
       .eq('restaurant_id', restaurantId).order('sort_order')
-    setReviews(data ?? [])
+    setReviews(((data ?? []) as LegacyReviewRow[]).map(r => ({
+      ...r,
+      author_name: r.reviewer_name ?? r.author_name ?? '',
+      author_initial: r.reviewer_initial ?? r.author_initial ?? null,
+    })) as HubReview[])
     setLoaded(true)
   }, [restaurantId])
 
