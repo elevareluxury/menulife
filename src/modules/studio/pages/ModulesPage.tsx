@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  AlignLeft, ArrowDown, ArrowUp, Clock, Eye, EyeOff, Image, Images, Link2, MapPin, MessageSquareQuote,
+  AlignLeft, ArrowDown, GalleryHorizontal, ArrowUp, Clock, Eye, EyeOff, Image, Images, Link2, MapPin, MessageSquareQuote,
   Pencil, Phone, Plus, ShoppingBag, Sparkles, Trash2, UserPlus, Users,
 } from 'lucide-react'
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
@@ -15,10 +15,10 @@ import { ModuleEditor } from '../components/ModuleEditor'
 const ICONS: Record<ModuleType, typeof Link2> = {
   link: Link2, social: Users, contact: Phone, location: MapPin, image: Image, text: AlignLeft,
   featured_action: Sparkles, contact_card: UserPlus, gallery: Images, product: ShoppingBag,
-  testimonials: MessageSquareQuote, hours: Clock,
+  testimonials: MessageSquareQuote, hours: Clock, cards: GalleryHorizontal,
 }
 
-const EDITABLE: ModuleType[] = ['link', 'social', 'contact', 'location', 'image', 'text', 'featured_action', 'product', 'hours', 'gallery']
+const EDITABLE: ModuleType[] = ['link', 'social', 'contact', 'location', 'image', 'text', 'featured_action', 'product', 'hours', 'gallery', 'cards', 'testimonials']
 
 export function ModulesPage() {
   const { modules, setModules } = useStudio()

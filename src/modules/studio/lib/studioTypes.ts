@@ -15,6 +15,7 @@ export interface StudioProfile {
   cover_url: string | null
   purpose: string | null
   status: ProfileStatus
+  tags: string[]
   is_primary: boolean
   theme: ProfileTheme
   primary_action: PrimaryAction | null
@@ -61,7 +62,7 @@ export interface StudioBusiness {
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 export type ProfilePatch = Partial<Pick<StudioProfile,
-  'display_name' | 'descriptor' | 'bio' | 'avatar_url' | 'cover_url' | 'purpose' | 'status' |
+  'display_name' | 'descriptor' | 'bio' | 'avatar_url' | 'cover_url' | 'purpose' | 'status' | 'tags' |
   'theme' | 'primary_action' | 'contact_card' | 'default_locale' | 'translations'>>
 
 export interface DailyStat {

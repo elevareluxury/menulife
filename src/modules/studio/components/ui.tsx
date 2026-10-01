@@ -46,7 +46,7 @@ export function Field({ label, required, help, error, counter, children, htmlFor
   )
 }
 
-export function TextField({ label, value, onChange, required, help, error, maxLength, multiline, type = 'text', placeholder, inputMode, autoFocus }: {
+export function TextField({ label, value, onChange, required, help, error, maxLength, multiline, type = 'text', placeholder, inputMode, autoFocus, onEnter }: {
   label: ReactNode
   value: string
   onChange: (v: string) => void
@@ -59,6 +59,8 @@ export function TextField({ label, value, onChange, required, help, error, maxLe
   placeholder?: string
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']
   autoFocus?: boolean
+  /** Enter en un input de una línea */
+  onEnter?: () => void
 }) {
   const id = useId()
   const common = {
@@ -72,7 +74,8 @@ export function TextField({ label, value, onChange, required, help, error, maxLe
       counter={multiline && maxLength ? { value: value.length, max: maxLength } : undefined}>
       {multiline
         ? <textarea className="st-textarea" rows={4} {...common} />
-        : <input className="st-input" type={type} inputMode={inputMode} {...common} />}
+        : <input className="st-input" type={type} inputMode={inputMode} {...common}
+            onKeyDown={onEnter ? e => { if (e.key === 'Enter') { e.preventDefault(); onEnter() } } : undefined} />}
     </Field>
   )
 }

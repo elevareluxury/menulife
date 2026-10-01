@@ -23,7 +23,7 @@ export function LifeNav() {
     to === '/life' ? pathname === '/life' : pathname.startsWith(to)
 
   return (
-    <nav style={{
+    <nav aria-label="Life OS" style={{
       position: 'fixed',
       bottom: 'calc(16px + env(safe-area-inset-bottom))',
       left: '50%',
@@ -47,38 +47,31 @@ export function LifeNav() {
           <Link
             key={to}
             to={to}
+            aria-label={label}
+            aria-current={active ? 'page' : undefined}
+            title={label}
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: '2px',
-              padding: '7px 13px',
+              justifyContent: 'center',
+              padding: '11px 14px',
               borderRadius: '9999px',
               textDecoration: 'none',
               background: active ? 'rgba(244,112,90,0.13)' : 'transparent',
               transition: 'background 0.18s ease',
-              minWidth: '52px',
+              minWidth: '48px',
+              minHeight: '44px',
             }}
           >
             <Icon
-              size={18}
+              aria-hidden="true"
+              size={20}
               style={{
                 color: active ? '#F4705A' : 'rgba(255,255,255,0.32)',
                 transition: 'color 0.18s',
                 strokeWidth: active ? 2.2 : 1.8,
               }}
             />
-            <span style={{
-              fontSize: '10px',
-              fontWeight: active ? 700 : 500,
-              letterSpacing: '0.01em',
-              color: active ? '#F4705A' : 'rgba(255,255,255,0.28)',
-              transition: 'color 0.18s, font-weight 0.18s',
-              fontFamily: 'var(--font-jakarta)',
-              lineHeight: 1,
-            }}>
-              {label}
-            </span>
           </Link>
         )
       })}

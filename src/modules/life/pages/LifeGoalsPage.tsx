@@ -8,6 +8,7 @@ import {
 import { useGoals, type Goal } from '../hooks/useGoals'
 import { GoalSheet } from '../components/GoalSheet'
 import { GoalDetailSheet } from '../components/GoalDetailSheet'
+import { AgendaView } from '../components/AgendaView'
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function GoalSkeleton() {
@@ -171,6 +172,8 @@ export function LifeGoalsPage() {
   const [detailGoal, setDetailGoal]     = useState<Goal | null>(null)
   const [detailOpen, setDetailOpen]     = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Goal | null>(null)
+  const [view, setView] = useState<'goals' | 'agenda'>(() =>
+    (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('vista') === 'agenda') ? 'agenda' : 'goals')
 
   if (loading) return <GoalSkeleton />
 
@@ -194,7 +197,9 @@ export function LifeGoalsPage() {
             Goals
           </h1>
         </div>
-        <button
+        {view === 'goals' && <button
+          type="button"
+          aria-label="Nueva meta"
           onClick={() => { setEditGoal(null); setSheetOpen(true) }}
           style={{
             width: 36, height: 36, borderRadius: radius.full,
@@ -204,11 +209,31 @@ export function LifeGoalsPage() {
           }}
         >
           <Plus size={18} style={{ color: colors.accent.default }} strokeWidth={2.5} />
-        </button>
+        </button>}
       </div>
 
+      {/* Metas | Agenda */}
+      <div role="tablist" aria-label="Goals" style={{
+        display: 'flex', padding: 4, gap: 4, marginBottom: '16px', borderRadius: radius.full,
+        background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
+      }}>
+        {([['goals', 'Metas'], ['agenda', 'Agenda']] as const).map(([id, label]) => (
+          <button key={id} type="button" role="tab" aria-selected={view === id} onClick={() => setView(id)}
+            style={{
+              flex: 1, padding: '9px 12px', borderRadius: radius.full, border: 'none', cursor: 'pointer',
+              background: view === id ? colors.accent.soft : 'transparent',
+              color: view === id ? colors.accent.default : colors.text.tertiary,
+              fontFamily: font, fontSize: '13px', fontWeight: 700,
+            }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'agenda' && <AgendaView goals={goals} />}
+
       {/* Stats row (only when there are goals) */}
-      {goals.length > 0 && (
+      {view === 'goals' && goals.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
           {[
             { label: 'Activas',     value: String(activeCount),    color: colors.area.goals },
@@ -228,7 +253,7 @@ export function LifeGoalsPage() {
       )}
 
       {/* Goal list or empty state */}
-      {goals.length === 0 ? (
+      {view === 'agenda' ? null : goals.length === 0 ? (
         <LifeCard>
           <LifeEmptyState
             icon={Target}

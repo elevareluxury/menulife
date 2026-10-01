@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { X } from 'lucide-react'
 import type { PrimaryAction, Translations } from '@/modules/profile/lib/profileTypes'
 import { safeHref } from '@/modules/profile/lib/safeUrl'
 import { useStudio } from '../StudioContext'
@@ -63,6 +64,7 @@ export function IdentityPage() {
           onChange={v => patchProfile({ bio: v || null })} />
         <SelectField label="Propósito" value={profile.purpose ?? ''} options={PURPOSES}
           onChange={v => patchProfile({ purpose: v || null })} />
+        <TagsField tags={profile.tags ?? []} onChange={tags => patchProfile({ tags })} />
       </section>
 
       <PrimaryActionCard
@@ -154,5 +156,42 @@ function PrimaryActionCard({ value, onChange, businessSlug, businessType, enLabe
         </div>
       )}
     </section>
+  )
+}
+
+// ── Etiquetas ───────────────────────────────────────────────────────────────
+
+const MAX_TAGS = 8
+
+function TagsField({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+  const [draft, setDraft] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  function add() {
+    const value = draft.trim().replace(/\s+/g, ' ').slice(0, 30)
+    if (!value) return
+    if (tags.some(t => t.toLowerCase() === value.toLowerCase())) { setError('Esa etiqueta ya está.'); return }
+    if (tags.length >= MAX_TAGS) { setError(`Podés tener hasta ${MAX_TAGS} etiquetas.`); return }
+    onChange([...tags, value])
+    setDraft(''); setError(null)
+  }
+
+  return (
+    <div className="st-field">
+      <TextField label="Etiquetas (opcional)" value={draft} maxLength={30}
+        onChange={v => { setDraft(v); setError(null) }} onEnter={add}
+        placeholder="Ej. Pizza, Vinos, Diseño… · Enter para agregar"
+        help={`Se muestran debajo de tu nombre. Hasta ${MAX_TAGS}.`} error={error} />
+      <div className="st-row" style={{ flexWrap: 'wrap', gap: 6 }}>
+        {tags.map(t => (
+          <span key={t} className="st-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 4px 4px 10px', fontSize: 13 }}>
+            {t}
+            <button type="button" className="st-icon-btn" style={{ width: 24, height: 24 }}
+              aria-label={`Quitar etiqueta ${t}`} onClick={() => onChange(tags.filter(x => x !== t))}><X size={13} /></button>
+          </span>
+        ))}
+        <Button size="sm" variant="ghost" onClick={add} disabled={!draft.trim()}>Agregar etiqueta</Button>
+      </div>
+    </div>
   )
 }

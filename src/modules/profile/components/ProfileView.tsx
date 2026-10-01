@@ -112,6 +112,11 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
           </div>
           <h1 className="mp-name">{name}</h1>
           {descriptor && <p className="mp-descriptor">{descriptor}</p>}
+          {!!profile.tags?.length && (
+            <ul className="mp-tags" aria-label="Categorías">
+              {profile.tags.map(tag => <li key={tag}>{tag}</li>)}
+            </ul>
+          )}
           {bio && <p className="mp-bio">{bio}</p>}
           {open != null && (
             <div className={`mp-status${open ? ' is-open' : ''}`}>

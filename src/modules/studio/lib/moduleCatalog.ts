@@ -59,8 +59,16 @@ export const MODULE_CATALOG: ModuleDef[] = [
       { key: 'url', label: 'URL', kind: 'url', required: true, placeholder: 'https://…' },
       { key: 'subtitle', label: 'Subtítulo (opcional)', kind: 'text', translatable: true, maxLength: 120 },
       { key: 'image_url', label: 'Imagen (opcional)', kind: 'image' },
+      { key: 'style', label: 'Cómo se ve', kind: 'select', required: true, options: [
+        { value: 'button', label: 'Botón (ícono o miniatura a la izquierda)' },
+        { value: 'card', label: 'Tarjeta con foto grande' },
+      ] },
     ],
-    validate: v => (urlOk(v.url) ? null : 'La URL no es válida.'),
+    validate: v => {
+      if (!urlOk(v.url)) return 'La URL no es válida.'
+      if (v.style === 'card' && !v.image_url) return 'Para verse como tarjeta, subí una imagen.'
+      return null
+    },
   },
   {
     type: 'social', label: 'Red social', description: 'Instagram, TikTok, LinkedIn… se muestran como íconos.', addable: true,
@@ -143,8 +151,20 @@ export const MODULE_CATALOG: ModuleDef[] = [
     fields: [],
   },
   {
-    type: 'testimonials', label: 'Reseñas', description: 'Reseñas importadas del Hub.', addable: false,
-    fields: [],
+    type: 'cards', label: 'Tarjetas', description: 'Eventos, productos o novedades con foto: deslizables o una abajo de la otra.', addable: true,
+    fields: [
+      { key: 'title', label: 'Título de la sección (opcional)', kind: 'text', isTitle: true, translatable: true, maxLength: 80, placeholder: 'Próximos eventos' },
+      { key: 'layout', label: 'Cómo se muestran', kind: 'select', required: true, options: [
+        { value: 'carousel', label: 'Deslizables (carrusel)' },
+        { value: 'stack', label: 'Una abajo de la otra' },
+      ] },
+    ],
+  },
+  {
+    type: 'testimonials', label: 'Reseñas', description: 'Opiniones de clientes y tu puntaje de Google.', addable: true,
+    fields: [
+      { key: 'title', label: 'Título', kind: 'text', isTitle: true, translatable: true, placeholder: 'Reseñas' },
+    ],
   },
   {
     type: 'contact_card', label: 'Tarjeta de contacto', description: 'Se configura en Compartir.', addable: false,
@@ -171,6 +191,7 @@ export function moduleSummary(m: { type: ModuleType; title: string | null; conte
     case 'product':         return typeof c.price === 'number' ? `$ ${c.price}` : s(c.description).slice(0, 60)
     case 'gallery':         return `${Array.isArray(c.items) ? c.items.length : 0} fotos`
     case 'testimonials':    return `${Array.isArray(c.items) ? c.items.length : 0} reseñas`
+    case 'cards':           return `${Array.isArray(c.items) ? c.items.length : 0} tarjetas · ${c.layout === 'stack' ? 'apiladas' : 'deslizables'}`
     case 'hours':           return 'Horario semanal'
     default:                return ''
   }
