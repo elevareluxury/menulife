@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { generateSlug } from '@/lib/utils'
+import { avoidReservedSlug } from '@/lib/reservedUsernames'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ROUTES } from '@/lib/constants'
@@ -32,7 +33,7 @@ export function RegisterForm() {
         .from('restaurants')
         .insert({
           owner_id: authData.user.id,
-          slug: generateSlug(formData.restaurantName),
+          slug: avoidReservedSlug(generateSlug(formData.restaurantName)),
           name: formData.restaurantName,
           trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
         })

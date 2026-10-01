@@ -8,6 +8,7 @@ import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
 import { Spinner } from '@/components/ui/Spinner'
 import HubPage from '@/modules/hub/pages/HubPage'
 import { colors, font, radius } from '../design-system'
+import { avoidReservedSlug } from '@/lib/reservedUsernames'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -48,7 +49,7 @@ export function LifeHubPage() {
     return <HubPage />
   }
 
-  const slug = slugify(name)
+  const slug = avoidReservedSlug(slugify(name))
   const canCreate = name.trim().length >= 2 && !creating
 
   const handleCreate = async () => {

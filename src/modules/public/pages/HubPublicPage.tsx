@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import type { Restaurant } from '@/types'
+import { isReservedUsername } from '@/lib/reservedUsernames'
 
 const db = supabase as any
 
@@ -35,14 +36,6 @@ interface SocialLinks {
   whatsapp?: string | null; youtube?: string | null
   google_review?: string | null; google_maps?: string | null
 }
-
-/* ── Reserved slugs ─────────────────────────────────────────────────────────── */
-
-const RESERVED_SLUGS = new Set([
-  'dashboard','login','register','mozo','kitchen','delivery','r','waiter',
-  'super-admin','superadmin','onboarding','solicitar-acceso','auth',
-  'forgot-password','reset-password','catalogo',
-])
 
 /* ── Design tokens ──────────────────────────────────────────────────────────── */
 
@@ -575,14 +568,17 @@ export function HubPublicPage() {
   useEffect(()=>{
     if (!slug) { setNotFound(true); setLoading(false); return }
     const first=slug.split('/')[0].toLowerCase()
-    if (RESERVED_SLUGS.has(first)) { navigate('/',{replace:true}); return }
+    if (isReservedUsername(first)) { navigate('/',{replace:true}); return }
 
     async function load() {
       try {
-        console.log('HUB LOAD - slug:', slug)
         const {data:rest,error} = await db.from('restaurants').select('*').eq('slug',slug!).or('is_active.eq.true,is_active.is.null').single()
-        console.log('HUB LOAD - restaurant:', rest, 'error:', error)
         if (error||!rest) { setNotFound(true); return }
+        // Hub desactivado: sólo el dueño puede verlo (vista previa desde el editor)
+        if ((rest as {hub_enabled?:boolean}).hub_enabled === false) {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.user.id !== (rest as Restaurant).owner_id) { setNotFound(true); return }
+        }
         setRestaurant(rest as Restaurant)
         const id=(rest as Restaurant).id
 
@@ -615,7 +611,6 @@ export function HubPublicPage() {
     if (restaurant?.id) trackEvent(restaurant.id, 'profile_view')
   },[restaurant?.id])
 
-  console.log('HUB RENDER - loading:', loading, 'restaurant:', restaurant?.id ?? null, 'notFound:', notFound)
   if (loading) return <HubLoading/>
   if (notFound||!restaurant) return <HubNotFound/>
 

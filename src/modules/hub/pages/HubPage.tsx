@@ -390,8 +390,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         google_review_count: form.google_review_count ? parseInt(form.google_review_count) : null,
         google_review_url: form.google_review_url.trim() || null,
       }
-      console.log('Saving hub payload:', payload)
-      const { data, error } = await db
+      const { error } = await db
         .from('restaurants')
         .update(payload)
         .eq('id', restaurantId)
@@ -402,9 +401,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         toast.error(`Error al guardar: ${error.message}`)
         return
       }
-      console.log('Hub saved:', data)
-      toast.success('Configuración guardada')
-      await db.from('hub_config').upsert({
+      const { error: cfgError } = await db.from('hub_config').upsert({
         restaurant_id: restaurantId,
         accent_color: '#F4705A',
         show_open_status:    hubConfig.show_open_status    ?? true,
@@ -416,7 +413,10 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         title_font:          hubConfig.title_font          || 'syne',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'restaurant_id' })
-      await db.from('restaurants').update({ schedule: scheduleForm }).eq('id', restaurantId)
+      if (cfgError) throw cfgError
+      const { error: scheduleError } = await db.from('restaurants').update({ schedule: scheduleForm }).eq('id', restaurantId)
+      if (scheduleError) throw scheduleError
+      toast.success('Configuración guardada')
     } catch (err) {
       toast.error(`Error al guardar: ${(err as Error)?.message ?? err}`)
       console.error(err)
@@ -500,9 +500,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           url={form.hub_cover_url}
           onUpload={async f => {
             const r = await uploadImage(f, 'hub-assets')
-            console.log('Cover upload result:', r)
             if (r.success) {
-              console.log('Cover URL set:', r.url)
               setForm(p => ({ ...p, hub_cover_url: r.url }))
             }
           }}
