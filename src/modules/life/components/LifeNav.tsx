@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useLocation, Link } from 'react-router-dom'
 import { Sun, Wallet, Target, Flame, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -22,7 +23,8 @@ export function LifeNav() {
   const isActive = (to: string) =>
     to === '/life' ? pathname === '/life' : pathname.startsWith(to)
 
-  return (
+  // Portal a <body>: ningún contenedor puede alterar su position: fixed
+  return createPortal(
     <nav aria-label="Life OS" style={{
       // Fija al pie sin transform (con transform algunos navegadores la desplazan al hacer scroll)
       position: 'fixed',
@@ -78,6 +80,7 @@ export function LifeNav() {
           </Link>
         )
       })}
-    </nav>
+    </nav>,
+    document.body,
   )
 }

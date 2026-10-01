@@ -192,6 +192,8 @@ html {
   overflow-x: clip;
   width: 100%;
   -webkit-text-size-adjust: 100%;
+  /* Sin rebote elástico: en iOS el rebote arrastra las barras fijas (menú inferior, botón +) */
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -200,6 +202,7 @@ body {
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+  overscroll-behavior-y: none;
   width: 100%;
   @apply bg-gray-50 text-gray-900;
 }
