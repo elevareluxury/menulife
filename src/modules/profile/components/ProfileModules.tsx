@@ -30,6 +30,19 @@ export function LinkModule({ module, lang, onAction }: ModuleProps) {
   const image = safeHref(module.content.image_url)
   const linkType = str(module.content.link_type)
 
+  // Estilo "tarjeta": foto grande arriba, título abajo
+  if (module.content.style === 'card' && image) {
+    return (
+      <a className="mp-link-card" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>
+        <SafeImage className="mp-link-card-img" src={image} alt="" loading="lazy" />
+        <span className="mp-link-card-body">
+          <span className="mp-link-title">{title}</span>
+          {subtitle && <span className="mp-link-sub" style={{ whiteSpace: 'normal' }}>{subtitle}</span>}
+        </span>
+      </a>
+    )
+  }
+
   return (
     <a className="mp-link" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>
       <span className="mp-link-icon">
@@ -321,6 +334,61 @@ export function HoursModule({ module, lang }: ModuleProps) {
   )
 }
 
+// ── Cards: tarjetas con foto (eventos, productos…), deslizables o apiladas ──
+
+export interface CardItem {
+  image_url?: string
+  title?: string
+  subtitle?: string
+  date?: string
+  url?: string
+  /** Traducciones por tarjeta: { en: { title, subtitle } } */
+  en?: { title?: string; subtitle?: string }
+}
+
+function formatCardDate(date: string, lang: ProfileLang): string {
+  const d = new Date(`${date}T12:00:00`)
+  if (Number.isNaN(d.getTime())) return date
+  return d.toLocaleDateString(lang === 'en' ? 'en-US' : 'es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+export function CardsModule({ module, lang, onAction }: ModuleProps) {
+  const items = (Array.isArray(module.content.items) ? module.content.items : []) as CardItem[]
+  const visible = items.filter(i => i && (i.title || i.image_url))
+  if (!visible.length) return null
+  const layout = module.content.layout === 'stack' ? 'stack' : 'carousel'
+  const heading = tr(module.title, module.translations, 'title', lang)
+
+  return (
+    <section aria-label={heading || 'Tarjetas'}>
+      {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
+      <div className={layout === 'carousel' ? 'mp-cards-carousel' : 'mp-cards-stack'}
+        tabIndex={layout === 'carousel' ? 0 : undefined}
+        role={layout === 'carousel' ? 'region' : undefined}
+        aria-label={layout === 'carousel' ? `${heading || 'Tarjetas'} — deslizá para ver más` : undefined}>
+        {visible.map((item, i) => {
+          const href = safeHref(item.url)
+          const title = (lang === 'en' && item.en?.title) || item.title || ''
+          const subtitle = (lang === 'en' && item.en?.subtitle) || item.subtitle || ''
+          const body = (
+            <>
+              {safeHref(item.image_url) && <SafeImage className="mp-cards-img" src={safeHref(item.image_url)!} alt="" loading="lazy" />}
+              <div className="mp-cards-body">
+                {item.date && <span className="mp-cards-date">{formatCardDate(item.date, lang)}</span>}
+                {title && <span className="mp-cards-title">{title}</span>}
+                {subtitle && <span className="mp-cards-sub">{subtitle}</span>}
+              </div>
+            </>
+          )
+          return href
+            ? <a key={i} className="mp-cards-item" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>{body}</a>
+            : <article key={i} className="mp-cards-item">{body}</article>
+        })}
+      </div>
+    </section>
+  )
+}
+
 // ── Dispatcher ──────────────────────────────────────────────────────────────
 
 export function ModuleView(props: ModuleProps) {
@@ -335,6 +403,7 @@ export function ModuleView(props: ModuleProps) {
     case 'gallery':         return <GalleryModule {...props} />
     case 'testimonials':    return <TestimonialsModule {...props} />
     case 'hours':           return <HoursModule {...props} />
+    case 'cards':           return <CardsModule {...props} />
     // 'social' se agrupa en SocialRow; 'contact_card' se muestra como botón "Guardar contacto"
     default:                return null
   }

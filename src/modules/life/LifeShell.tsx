@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { LifeNav } from './components/LifeNav'
 import { CaptureButton } from './components/CaptureButton'
 import { AchievementToast } from './components/AchievementToast'
+import { useTaskReminders } from './hooks/useTaskReminders'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -15,6 +16,7 @@ export function LifeShell() {
   const { user, loading, initialized } = useAuthStore()
   const { setHasRestaurant, setRestaurantName, setRestaurantSlug, setRestaurantPlan } = useLifeStore()
   const [timedOut, setTimedOut] = useState(false)
+  useTaskReminders(user?.id)
 
   // Force body background dark so no white flash between Life OS pages
   useEffect(() => {

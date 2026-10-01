@@ -5,7 +5,7 @@ export type ProfileLang = 'es' | 'en'
 
 export type ModuleType =
   | 'link' | 'social' | 'contact' | 'location' | 'image' | 'text'
-  | 'featured_action' | 'contact_card' | 'gallery' | 'product' | 'testimonials' | 'hours'
+  | 'featured_action' | 'contact_card' | 'gallery' | 'product' | 'testimonials' | 'hours' | 'cards'
 
 /** Campos traducidos: { en: { campo: 'texto' } } */
 export type Translations = Partial<Record<ProfileLang, Record<string, unknown>>>
@@ -43,6 +43,8 @@ export interface PublicProfile {
   cover_url: string | null
   purpose: string | null
   status: 'draft' | 'published' | 'unpublished'
+  /** Etiquetas de categoría (ej. Pizza · Vinos) */
+  tags?: string[]
   theme: ProfileTheme
   primary_action: PrimaryAction | null
   default_locale: string
