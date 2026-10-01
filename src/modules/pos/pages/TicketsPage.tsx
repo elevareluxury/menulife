@@ -261,7 +261,7 @@ function TicketDetailModal({ ticket, userName, restaurantId, onClose, onCorrecte
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px 16px', borderBottom: BDR, position: 'sticky', top: 0, background: SURFACE, zIndex: 1 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
               Ticket #{ticket.ticket_number}
             </h2>
             <p style={{ fontSize: 12, color: MUTED, margin: '3px 0 0' }}>{fmtDate(ticket.created_at)}</p>
@@ -337,8 +337,8 @@ function TicketDetailModal({ ticket, userName, restaurantId, onClose, onCorrecte
               )
             })}
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-              <span style={{ fontSize: 16, fontWeight: 800, color: TEXT, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>TOTAL</span>
-              <span style={{ fontSize: 20, fontWeight: 800, color: ticket.status === 'voided' ? RED : ACCENT, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+              <span style={{ fontSize: 16, fontWeight: 800, color: TEXT, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>TOTAL</span>
+              <span style={{ fontSize: 20, fontWeight: 800, color: ticket.status === 'voided' ? RED : ACCENT, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
                 {ticket.total < 0 ? '-' : ''}{fmtARS(Math.abs(ticket.total))}
               </span>
             </div>
@@ -453,7 +453,7 @@ function KpiBar({ tickets }: { tickets: Ticket[] }) {
       {kpis.map(k => (
         <div key={k.label} style={{ background: CARD, border: BDR, borderRadius: 14, padding: '14px 16px' }}>
           <p style={{ fontSize: 10, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>{k.label}</p>
-          <p style={{ fontSize: 20, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>{k.value}</p>
+          <p style={{ fontSize: 20, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>{k.value}</p>
         </div>
       ))}
     </div>
@@ -533,7 +533,7 @@ export function TicketsPage() {
             <Receipt style={{ width: 22, height: 22, color: ACCENT }} />
           </div>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
               Tickets
             </h1>
             <p style={{ fontSize: 13, color: MUTED, margin: 0 }}>Historial inmutable de cobros</p>
@@ -619,7 +619,7 @@ export function TicketsPage() {
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                          <span style={{ fontSize: 15, fontWeight: 800, color: TEXT, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+                          <span style={{ fontSize: 15, fontWeight: 800, color: TEXT, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
                             #{ticket.ticket_number}
                           </span>
                           {ticket.status === 'voided' && (
@@ -643,7 +643,7 @@ export function TicketsPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                        <span style={{ fontSize: 18, fontWeight: 800, color: isVoided ? RED : ACCENT, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+                        <span style={{ fontSize: 18, fontWeight: 800, color: isVoided ? RED : ACCENT, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
                           {ticket.total < 0 ? '-' : ''}{fmtARS(Math.abs(ticket.total))}
                         </span>
                         <ChevronRight style={{ width: 16, height: 16, color: MUTED }} />

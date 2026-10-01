@@ -564,7 +564,7 @@ export function WaiterApp() {
 
   /* ════════════════════════════ RENDER ══════════════════════════════════ */
   return (
-    <div style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'var(--font-jakarta, Inter, sans-serif)', paddingBottom: 76 }}>
+    <div style={{ minHeight: '100vh', background: BG, color: TEXT, fontFamily: 'var(--font-jakarta, Geist, sans-serif)', paddingBottom: 76 }}>
 
       {/* ══ HOME ══════════════════════════════════════════════════════ */}
       {tab === 'home' && (

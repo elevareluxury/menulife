@@ -480,18 +480,7 @@ export function LifePage() {
           <motion.div variants={fadeInUp} style={{
             display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0 2px',
           }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-              background: 'linear-gradient(135deg, #F4705A 0%, #8B5CF6 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: font, fontSize: '15px', fontWeight: 800, color: '#fff',
-              boxShadow: '0 0 0 2px rgba(244,112,90,0.22)',
-              overflow: 'hidden',
-            }}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : initials}
-            </div>
+            {/* La foto de perfil se muestra una sola vez: en la tarjeta "Mi identidad" */}
             <div style={{ flex: 1 }}>
               <p style={{
                 fontFamily: font, fontSize: '11px', color: colors.text.tertiary,

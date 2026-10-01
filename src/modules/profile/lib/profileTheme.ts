@@ -10,14 +10,36 @@ export const QUIET = {
   ivory:    '#F1F0E9',
 } as const
 
+/** Tipografías del nombre del perfil (curadas). Las claves viejas se mantienen como alias. */
 const FONTS: Record<string, string> = {
-  syne:            "'Syne', 'Geist', sans-serif",
-  playfair:        "'Playfair Display', Georgia, serif",
+  geist:           "'Geist', -apple-system, BlinkMacSystemFont, sans-serif",
+  instrument:      "'Instrument Serif', Georgia, serif",
   'space-grotesk': "'Space Grotesk', 'Geist', sans-serif",
+  playfair:        "'Playfair Display', Georgia, serif",
   bebas:           "'Bebas Neue', 'Geist', sans-serif",
-  'dm-sans':       "'DM Sans', 'Geist', sans-serif",
-  inter:           "'Inter', 'Geist', sans-serif",
-  geist:           "'Geist', 'Inter', sans-serif",
+  // Alias de perfiles importados del Hub
+  syne:            "'Geist', sans-serif",
+  'dm-sans':       "'Geist', sans-serif",
+  inter:           "'Geist', sans-serif",
+}
+
+/** Fuentes que no vienen en la carga global: se piden a Google Fonts sólo si el perfil las usa. */
+const ON_DEMAND: Record<string, string> = {
+  'space-grotesk': 'Space+Grotesk:wght@600;700',
+  playfair: 'Playfair+Display:wght@700',
+  bebas: 'Bebas+Neue',
+}
+
+export function ensureProfileFont(titleFont: string | undefined) {
+  const family = titleFont ? ON_DEMAND[titleFont] : undefined
+  if (!family || typeof document === 'undefined') return
+  const id = `mp-font-${titleFont}`
+  if (document.getElementById(id)) return
+  const link = document.createElement('link')
+  link.id = id
+  link.rel = 'stylesheet'
+  link.href = `https://fonts.googleapis.com/css2?family=${family}&display=swap`
+  document.head.appendChild(link)
 }
 
 function hexToRgb(hex: string): [number, number, number] | null {
@@ -67,6 +89,6 @@ export function themeVars(theme: ProfileTheme | undefined): CSSProperties {
     '--p-accent': accent,
     '--p-on-accent': onAccent,
     '--p-title-font': FONTS[theme?.title_font ?? ''] ?? FONTS.geist,
-    '--p-body-font': "'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    '--p-body-font': "'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   } as CSSProperties
 }

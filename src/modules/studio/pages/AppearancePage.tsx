@@ -1,6 +1,6 @@
-import { useId } from 'react'
+import { useEffect, useId } from 'react'
 import { AlertTriangle } from 'lucide-react'
-import { QUIET } from '@/modules/profile/lib/profileTheme'
+import { ensureProfileFont, QUIET } from '@/modules/profile/lib/profileTheme'
 import type { ProfileTheme } from '@/modules/profile/lib/profileTypes'
 import { useStudio } from '../StudioContext'
 import { PageHeader, Toggle } from '../components/ui'
@@ -18,12 +18,11 @@ const ACCENTS = [
 ]
 
 const FONTS = [
-  { value: 'geist', label: 'Geist', family: "'Geist', sans-serif", note: 'Sistema' },
-  { value: 'syne', label: 'Syne', family: "'Syne', sans-serif", note: 'Moderno' },
-  { value: 'playfair', label: 'Playfair', family: "'Playfair Display', serif", note: 'Editorial' },
-  { value: 'space-grotesk', label: 'Space Grotesk', family: "'Space Grotesk', sans-serif", note: 'Técnico' },
-  { value: 'dm-sans', label: 'DM Sans', family: "'DM Sans', sans-serif", note: 'Limpio' },
-  { value: 'bebas', label: 'Bebas Neue', family: "'Bebas Neue', sans-serif", note: 'Impacto' },
+  { value: 'geist', label: 'Geist', family: "'Geist', sans-serif", note: 'Moderna · por defecto' },
+  { value: 'instrument', label: 'Instrument Serif', family: "'Instrument Serif', serif", note: 'Editorial' },
+  { value: 'space-grotesk', label: 'Space Grotesk', family: "'Space Grotesk', sans-serif", note: 'Técnica' },
+  { value: 'playfair', label: 'Playfair', family: "'Playfair Display', serif", note: 'Clásica' },
+  { value: 'bebas', label: 'Bebas Neue', family: "'Bebas Neue', sans-serif", note: 'Impacto · nombres cortos' },
 ]
 
 function luminance(hex: string): number | null {
@@ -53,6 +52,8 @@ export function AppearancePage() {
   const ratio = contrastRatio(accent, bg)
   const lowContrast = ratio != null && ratio < 3
   const customId = useId()
+  // Cargar las fuentes de las opciones para mostrarlas tal cual se verán
+  useEffect(() => { FONTS.forEach(f => ensureProfileFont(f.value)) }, [])
 
   const setTheme = (patch: Partial<ProfileTheme>) => patchProfile({ theme: { ...theme, ...patch } })
 
@@ -99,7 +100,8 @@ export function AppearancePage() {
         <h2 className="st-card-title" style={{ margin: 0 }}>Tipografía del nombre</h2>
         <div className="st-stack" style={{ gap: 8 }} role="radiogroup" aria-label="Tipografía">
           {FONTS.map(f => {
-            const selected = (theme.title_font ?? 'geist') === f.value
+            const current = FONTS.some(x => x.value === theme.title_font) ? theme.title_font : 'geist'
+            const selected = current === f.value
             return (
               <button key={f.value} type="button" role="radio" aria-checked={selected}
                 onClick={() => setTheme({ title_font: f.value })}

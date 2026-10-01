@@ -6,7 +6,7 @@ const UPDATED = 'octubre de 2026'
 
 export function LegalPage({ doc }: { doc: Doc }) {
   return (
-    <main style={{ minHeight: '100svh', background: '#111311', color: '#F1F0E9', fontFamily: "'Geist', 'Inter', sans-serif" }}>
+    <main style={{ minHeight: '100svh', background: '#111311', color: '#F1F0E9', fontFamily: "'Geist', sans-serif" }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 20px 64px', lineHeight: 1.65, fontSize: 15.5 }}>
         <Link to="/" style={{ color: '#F1F0E9', fontWeight: 700, textDecoration: 'none', fontSize: 18 }}>mycen.</Link>
         {doc === 'terms' ? <Terms /> : <Privacy />}

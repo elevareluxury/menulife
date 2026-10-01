@@ -29,7 +29,7 @@ class ErrorBoundary extends Component<
           justifyContent: 'center',
           padding: '24px',
           color: 'white',
-          fontFamily: 'DM Sans, sans-serif',
+          fontFamily: 'Geist, sans-serif',
         }}>
           <h1 style={{ fontSize: '24px', marginBottom: '12px' }}>
             Algo salió mal

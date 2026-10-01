@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Calendar, Share2, UserPlus } from 'lucide-react'
 import { fetchContactCard, trackProfileEvent } from '../lib/profileApi'
@@ -6,6 +6,7 @@ import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref } from '../lib/safeUrl'
 import { isOpenNow } from '../lib/schedule'
 import { downloadVCard } from '../lib/vcard'
+import { ensureProfileFont } from '../lib/profileTheme'
 import type { ProfileLang, ProfileModule, PublicProfile, WeekSchedule } from '../lib/profileTypes'
 import { ModuleView, SocialRow } from './ProfileModules'
 import { SafeImage } from './SafeImage'
@@ -46,6 +47,7 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
   const bio = tr(profile.bio, profile.translations, 'bio', lang)
   const blocks = useMemo(() => toBlocks(profile.modules), [profile.modules])
   const coverSrc = safeHref(profile.cover_url)
+  useEffect(() => { ensureProfileFont(profile.theme?.title_font) }, [profile.theme?.title_font])
 
   const hours = profile.modules.find(m => m.type === 'hours')
   const open = hours && profile.theme.show_open_status !== false

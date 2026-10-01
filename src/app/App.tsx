@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
+import { ScrollToTop } from '@/components/ScrollToTop'
 import { LandingPage } from '@/modules/landing/pages/LandingPage'
 import { LoginPage } from './routes/login'
 import { RegisterPage } from './routes/register'
@@ -99,6 +100,7 @@ function PublicSlugRoute() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthInit />
       <OfflineBanner />
       <Toaster position="top-right" />

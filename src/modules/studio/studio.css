@@ -17,7 +17,7 @@
   min-height: 100svh;
   background: var(--st-bg);
   color: var(--st-text);
-  font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -222,7 +222,7 @@
 .st-checklist li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
 .st-checklist li.is-done { color: var(--st-faint); text-decoration: line-through; }
 
-.st-url { font-family: 'DM Mono', ui-monospace, monospace; font-size: 13.5px; padding: 10px 12px; border-radius: 10px; background: var(--st-bg); border: 1px solid var(--st-border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.st-url { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13.5px; padding: 10px 12px; border-radius: 10px; background: var(--st-bg); border: 1px solid var(--st-border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 
 .st-phone {
   width: min(360px, 100%); height: calc(100svh - 120px); max-height: 760px; border-radius: 36px; overflow: hidden;
@@ -245,4 +245,138 @@
   .st-module-actions .st-icon-btn { width: 36px; height: 40px; }
   .st-module { padding-left: 10px; gap: 8px; }
   .st-module-icon { display: none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   MYCEN Studio · Glass
+   Fondo con luz ambiental + paneles translúcidos con desenfoque,
+   borde fino y brillo superior. Los textos mantienen contraste AA.
+   ════════════════════════════════════════════════════════════════════ */
+
+.st-root {
+  --st-glass: rgba(255, 255, 255, 0.045);
+  --st-glass-strong: rgba(255, 255, 255, 0.075);
+  --st-glass-border: rgba(255, 255, 255, 0.09);
+  --st-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --st-glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.32);
+  --st-blur: blur(22px) saturate(150%);
+  --st-surface: rgba(255, 255, 255, 0.05);
+  --st-surface-2: rgba(255, 255, 255, 0.08);
+  --st-border: var(--st-glass-border);
+  position: relative;
+  isolation: isolate;
+  background: #0E100E;
+}
+
+/* Luz ambiental fija detrás de todo (no se mueve al hacer scroll) */
+.st-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60vmax 50vmax at 8% -10%, rgba(241, 240, 233, 0.10), transparent 60%),
+    radial-gradient(50vmax 45vmax at 105% 15%, rgba(167, 139, 250, 0.10), transparent 60%),
+    radial-gradient(55vmax 50vmax at 70% 115%, rgba(244, 112, 90, 0.09), transparent 60%),
+    #0E100E;
+}
+
+/* Superficies de vidrio */
+.st-card,
+.st-preview-pane,
+.st-drawer,
+.st-dialog {
+  background: var(--st-glass);
+  border: 1px solid var(--st-glass-border);
+  box-shadow: var(--st-glass-highlight), var(--st-glass-shadow);
+  backdrop-filter: var(--st-blur);
+  -webkit-backdrop-filter: var(--st-blur);
+}
+.st-card { border-radius: 22px; }
+
+/* Menú lateral flotante */
+.st-sidebar {
+  margin: 12px 0 12px 12px;
+  height: calc(100svh - 24px);
+  top: 12px;
+  border-radius: 24px;
+  border: 1px solid var(--st-glass-border);
+  background: var(--st-glass);
+  box-shadow: var(--st-glass-highlight), var(--st-glass-shadow);
+  backdrop-filter: var(--st-blur);
+  -webkit-backdrop-filter: var(--st-blur);
+}
+.st-nav-item { border-radius: 12px; }
+.st-nav-item:hover { background: var(--st-glass); }
+.st-nav-item[aria-current='page'] {
+  background: var(--st-glass-strong);
+  box-shadow: var(--st-glass-highlight);
+}
+
+/* Vista previa flotante */
+.st-preview-pane {
+  margin: 12px 12px 12px 0;
+  height: calc(100svh - 24px);
+  top: 12px;
+  border-radius: 24px;
+}
+.st-phone { border-color: rgba(255, 255, 255, 0.10); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
+
+/* Barra móvil: píldora de vidrio flotante, sólo íconos */
+.st-bottom-nav {
+  left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom));
+  margin-inline: auto; width: fit-content;
+  gap: 2px; padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--st-glass-border);
+  background: rgba(20, 22, 20, 0.62);
+  box-shadow: var(--st-glass-highlight), 0 10px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: var(--st-blur);
+  -webkit-backdrop-filter: var(--st-blur);
+}
+.st-bottom-nav a {
+  flex: 0 0 auto; min-width: 52px; min-height: 44px; padding: 10px 14px;
+  border-radius: 999px; justify-content: center;
+}
+.st-bottom-nav a[aria-current='page'] { background: rgba(255, 255, 255, 0.12); color: var(--st-text); }
+.st-nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 899px) {
+  .st-main-inner { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
+}
+
+/* Controles */
+.st-input, .st-textarea, .st-select {
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+}
+.st-input:focus, .st-textarea:focus, .st-select:focus {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+}
+.st-btn { border-radius: 14px; }
+.st-btn-primary { box-shadow: 0 6px 20px rgba(241, 240, 233, 0.12); }
+.st-btn-secondary {
+  background: var(--st-glass-strong);
+  border-color: var(--st-glass-border);
+  box-shadow: var(--st-glass-highlight);
+}
+.st-segment, .st-module, .st-metric, .st-library button, .st-url {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--st-glass-border);
+  box-shadow: var(--st-glass-highlight);
+}
+.st-module { border-radius: 16px; }
+.st-metric { border-radius: 18px; }
+.st-overlay, .st-dialog-wrap { background: rgba(5, 6, 5, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.st-drawer { background: rgba(22, 24, 22, 0.78); border-radius: 24px 0 0 24px; }
+.st-dialog { background: rgba(26, 28, 26, 0.85); border-radius: 22px; }
+
+/* Títulos con el acento editorial */
+.st-title { font-size: 28px; letter-spacing: -0.025em; }
+
+/* Navegadores sin backdrop-filter: superficies sólidas legibles */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .st-card, .st-sidebar, .st-preview-pane, .st-bottom-nav, .st-drawer, .st-dialog { background: #1A1C1A; }
 }

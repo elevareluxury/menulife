@@ -219,7 +219,7 @@ export function DriverDashboard() {
   const preparingOrders = orders.filter(o => o.status === 'pending' || o.status === 'preparing')
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0F1115', color: '#fff', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#0F1115', color: '#fff', fontFamily: 'Geist, sans-serif' }}>
       {/* Header */}
       <div style={{
         background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -227,7 +227,7 @@ export function DriverDashboard() {
         position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(20px)',
       }}>
         <div>
-          <p style={{ fontSize: '16px', fontWeight: 700, margin: 0, fontFamily: 'Ruda, sans-serif' }}>
+          <p style={{ fontSize: '16px', fontWeight: 700, margin: 0, fontFamily: 'Geist, sans-serif' }}>
             🛵 {driver.first_name} {driver.last_name ?? ''}
           </p>
           <p style={{ fontSize: '12px', margin: '2px 0 0' }}>
@@ -354,7 +354,7 @@ export function DriverDashboard() {
               }}>
                 {driver.first_name?.[0]?.toUpperCase() ?? '?'}
               </div>
-              <p style={{ fontFamily: 'Ruda, sans-serif', fontWeight: 700, fontSize: '18px', margin: '0 0 4px' }}>
+              <p style={{ fontFamily: 'Geist, sans-serif', fontWeight: 700, fontSize: '18px', margin: '0 0 4px' }}>
                 {driver.first_name} {driver.last_name ?? ''}
               </p>
               {driver.phone && (
@@ -372,7 +372,7 @@ export function DriverDashboard() {
                 borderRadius: '16px',
                 color: isAvailable ? '#22c55e' : '#EF4444',
                 fontSize: '15px', fontWeight: 700, cursor: 'pointer',
-                fontFamily: 'Ruda, sans-serif',
+                fontFamily: 'Geist, sans-serif',
                 transition: 'all 0.2s',
               }}
             >
@@ -451,7 +451,7 @@ function EmptyCard({ text }: { text: string }) {
 function StatCard({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '16px', border: `1px solid ${color}20`, padding: '16px', textAlign: 'center' }}>
-      <p style={{ fontSize: '22px', fontWeight: 700, color, margin: '0 0 4px', fontFamily: 'Ruda, sans-serif' }}>{value}</p>
+      <p style={{ fontSize: '22px', fontWeight: 700, color, margin: '0 0 4px', fontFamily: 'Geist, sans-serif' }}>{value}</p>
       <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
     </div>
   )
@@ -501,7 +501,7 @@ function OrderCard({ order, type, onPickUp, onDeliver, onCall, onMaps }: {
     }}>
       <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-          <p style={{ fontFamily: 'Ruda, sans-serif', fontWeight: 700, fontSize: '15px', margin: 0 }}>
+          <p style={{ fontFamily: 'Geist, sans-serif', fontWeight: 700, fontSize: '15px', margin: 0 }}>
             {order.customer_name}
           </p>
           <span style={{ fontSize: '11px', color: accentColor, fontWeight: 600, background: `${accentColor}18`, padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
