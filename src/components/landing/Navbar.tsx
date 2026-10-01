@@ -35,7 +35,7 @@ export function Navbar() {
       }}>
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <img src="/Logo.png" alt="Mycen" style={{ height: '36px', width: 'auto' }} />
+          <img src="/logo.png" alt="Mycen" style={{ height: '36px', width: 'auto' }} />
         </Link>
 
         {/* Desktop links */}

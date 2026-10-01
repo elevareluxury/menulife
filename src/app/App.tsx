@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -24,6 +24,17 @@ import { RequirePlan } from '@/app/RequirePlan'
 
 // Heavy modules — lazy loaded
 const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
+const ProfilePublicPage = lazy(() => import('@/modules/profile/pages/ProfilePublicPage').then(m => ({ default: m.ProfilePublicPage })))
+const StudioShell     = lazy(() => import('@/modules/studio/StudioShell').then(m => ({ default: m.StudioShell })))
+const StudioOverview  = lazy(() => import('@/modules/studio/pages/OverviewPage').then(m => ({ default: m.OverviewPage })))
+const StudioIdentity  = lazy(() => import('@/modules/studio/pages/IdentityPage').then(m => ({ default: m.IdentityPage })))
+const StudioModules   = lazy(() => import('@/modules/studio/pages/ModulesPage').then(m => ({ default: m.ModulesPage })))
+const StudioAppearance = lazy(() => import('@/modules/studio/pages/AppearancePage').then(m => ({ default: m.AppearancePage })))
+const StudioExchange  = lazy(() => import('@/modules/studio/pages/ExchangePage').then(m => ({ default: m.ExchangePage })))
+const StudioAnalytics = lazy(() => import('@/modules/studio/pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })))
+const StudioSettings  = lazy(() => import('@/modules/studio/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const StudioPreview   = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.PreviewPage })))
+const StudioMore      = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.MorePage })))
 const SuperAdminPage   = lazy(() => import('./routes/super-admin').then(m => ({ default: m.SuperAdminPage })))
 const BusinessSettings = lazy(() => import('@/modules/settings/pages/BusinessSettings').then(m => ({ default: m.BusinessSettings })))
 const OrdersManagement = lazy(() => import('@/modules/orders/pages/OrdersManagement').then(m => ({ default: m.OrdersManagement })))
@@ -79,6 +90,13 @@ function WaiterLegacyRedirect() {
   return <Navigate to={`/mozo/${slug ?? ''}`} replace />
 }
 
+// Transición Hub → Mycen Profile: el perfil nuevo se ve con ?v=2 hasta que
+// Studio reemplace al editor viejo (ahí pasa a ser el default).
+function PublicSlugRoute() {
+  const [params] = useSearchParams()
+  return params.get('v') === '2' ? <ProfilePublicPage /> : <HubPublicPage />
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -128,6 +146,19 @@ function App() {
             <Route path="services/forms"              element={<RequirePlan feature="services_catalog"><ServicesFormsPage /></RequirePlan>} />
             <Route path="services/forms/:id/builder"  element={<RequirePlan feature="services_catalog"><FormBuilderPage /></RequirePlan>} />
           </Route>
+          {/* ── Mycen Studio — edición de la identidad (Profile) ── */}
+          <Route path="/studio" element={<ErrorBoundary label="studio"><StudioShell /></ErrorBoundary>}>
+            <Route index element={<StudioOverview />} />
+            <Route path="identity"   element={<StudioIdentity />} />
+            <Route path="modules"    element={<StudioModules />} />
+            <Route path="appearance" element={<StudioAppearance />} />
+            <Route path="exchange"   element={<StudioExchange />} />
+            <Route path="analytics"  element={<StudioAnalytics />} />
+            <Route path="settings"   element={<StudioSettings />} />
+            <Route path="preview"    element={<StudioPreview />} />
+            <Route path="more"       element={<StudioMore />} />
+            <Route path="*"          element={<Navigate to="/studio" replace />} />
+          </Route>
           {/* ── Life OS — capa personal, no requiere restaurant ── */}
           <Route path="/life" element={<ErrorBoundary label="life"><LifeShell /></ErrorBoundary>}>
             <Route index element={<LifePage />} />
@@ -162,7 +193,7 @@ function App() {
           {/* Catálogo retail público */}
           <Route path="/catalogo/:slug" element={<CatalogoPublic />} />
           {/* Hub Público — /:slug debe ir antes del catch-all */}
-          <Route path="/:slug" element={<ErrorBoundary><HubPublicPage /></ErrorBoundary>} />
+          <Route path="/:slug" element={<ErrorBoundary><PublicSlugRoute /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

@@ -58,7 +58,6 @@ export type Database = {
           trial_ends_at: string | null
           subscription_status: 'trial' | 'active' | 'past_due' | 'cancelled'
           mercadopago_enabled: boolean
-          mercadopago_access_token: string | null
           created_at: string
           updated_at: string
           website: string | null
@@ -118,7 +117,6 @@ export type Database = {
           trial_ends_at?: string | null
           subscription_status?: 'trial' | 'active' | 'past_due' | 'cancelled'
           mercadopago_enabled?: boolean
-          mercadopago_access_token?: string | null
           created_at?: string
           updated_at?: string
           website?: string | null
@@ -178,7 +176,6 @@ export type Database = {
           trial_ends_at?: string | null
           subscription_status?: 'trial' | 'active' | 'past_due' | 'cancelled'
           mercadopago_enabled?: boolean
-          mercadopago_access_token?: string | null
           created_at?: string
           updated_at?: string
           website?: string | null

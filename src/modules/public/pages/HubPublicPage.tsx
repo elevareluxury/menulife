@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import type { Restaurant } from '@/types'
+import { isReservedUsername } from '@/lib/reservedUsernames'
 
 const db = supabase as any
 
@@ -35,14 +36,6 @@ interface SocialLinks {
   whatsapp?: string | null; youtube?: string | null
   google_review?: string | null; google_maps?: string | null
 }
-
-/* ── Reserved slugs ─────────────────────────────────────────────────────────── */
-
-const RESERVED_SLUGS = new Set([
-  'dashboard','login','register','mozo','kitchen','delivery','r','waiter',
-  'super-admin','superadmin','onboarding','solicitar-acceso','auth',
-  'forgot-password','reset-password','catalogo',
-])
 
 /* ── Design tokens ──────────────────────────────────────────────────────────── */
 
@@ -575,14 +568,17 @@ export function HubPublicPage() {
   useEffect(()=>{
     if (!slug) { setNotFound(true); setLoading(false); return }
     const first=slug.split('/')[0].toLowerCase()
-    if (RESERVED_SLUGS.has(first)) { navigate('/',{replace:true}); return }
+    if (isReservedUsername(first)) { navigate('/',{replace:true}); return }
 
     async function load() {
       try {
-        console.log('HUB LOAD - slug:', slug)
         const {data:rest,error} = await db.from('restaurants').select('*').eq('slug',slug!).or('is_active.eq.true,is_active.is.null').single()
-        console.log('HUB LOAD - restaurant:', rest, 'error:', error)
         if (error||!rest) { setNotFound(true); return }
+        // Hub desactivado: sólo el dueño puede verlo (vista previa desde el editor)
+        if ((rest as {hub_enabled?:boolean}).hub_enabled === false) {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.user.id !== (rest as Restaurant).owner_id) { setNotFound(true); return }
+        }
         setRestaurant(rest as Restaurant)
         const id=(rest as Restaurant).id
 
@@ -594,10 +590,15 @@ export function HubPublicPage() {
           db.from('hub_links').select('*').eq('restaurant_id',id).eq('is_active',true).order('sort_order'),
         ])
 
-        setStory(storyRes.data??null)
+        // Columnas reales: hub_stories.text, hub_reviews.reviewer_name / reviewer_initial
+        setStory(storyRes.data ? { ...storyRes.data, description: storyRes.data.text ?? storyRes.data.description ?? null } : null)
         setGallery(gallRes.data??[])
         setFeaturedProduct(fpRes.data??null)
-        setReviews(revRes.data??[])
+        setReviews(((revRes.data??[]) as (HubReview & {reviewer_name?:string;reviewer_initial?:string|null})[]).map(rv=>({
+          ...rv,
+          author_name: rv.reviewer_name ?? rv.author_name ?? '',
+          author_initial: rv.reviewer_initial ?? rv.author_initial ?? null,
+        })) as HubReview[])
         setLinks(linksRes.data??[])
 
         const { data: hubCfg } = await db.from('hub_config').select('*').eq('restaurant_id', id).maybeSingle()
@@ -615,7 +616,6 @@ export function HubPublicPage() {
     if (restaurant?.id) trackEvent(restaurant.id, 'profile_view')
   },[restaurant?.id])
 
-  console.log('HUB RENDER - loading:', loading, 'restaurant:', restaurant?.id ?? null, 'notFound:', notFound)
   if (loading) return <HubLoading/>
   if (notFound||!restaurant) return <HubNotFound/>
 
@@ -626,9 +626,10 @@ export function HubPublicPage() {
   const waPhone           = social.whatsapp||r.phone||''
   const cleanWa           = waPhone.replace(/\D/g,'')
   const isRetail          = r.business_type==='retail'
-  const open              = isOpen(ra.business_hours??r.schedule)
-  const hoursText         = todayHours(ra.business_hours??r.schedule)
-  const schedule          = ra.business_hours??r.schedule
+  // Los editores (Hub y Configuración) guardan en `schedule`; business_hours sólo tiene el default de la DB
+  const open              = isOpen(r.schedule)
+  const hoursText         = todayHours(r.schedule)
+  const schedule          = r.schedule
   const categoryTags: string[] = ra.hub_category_tags??[]
   const hubCategory: string    = ra.hub_category??''
   const hubAbout: string       = ra.hub_about??''

@@ -35,7 +35,11 @@ interface HubStory {
   id: string; restaurant_id: string
   image_url: string | null; title: string | null; title_en: string | null
   description: string | null; description_en: string | null; is_active: boolean
+  text?: string | null; text_en?: string | null
 }
+
+// Fila real de hub_reviews (reviewer_*) o del esquema del repo (author_*)
+type LegacyReviewRow = HubReview & { reviewer_name?: string; reviewer_initial?: string | null }
 
 interface HubFeaturedProduct {
   id: string; restaurant_id: string
@@ -390,8 +394,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         google_review_count: form.google_review_count ? parseInt(form.google_review_count) : null,
         google_review_url: form.google_review_url.trim() || null,
       }
-      console.log('Saving hub payload:', payload)
-      const { data, error } = await db
+      const { error } = await db
         .from('restaurants')
         .update(payload)
         .eq('id', restaurantId)
@@ -402,9 +405,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         toast.error(`Error al guardar: ${error.message}`)
         return
       }
-      console.log('Hub saved:', data)
-      toast.success('Configuración guardada')
-      await db.from('hub_config').upsert({
+      const { error: cfgError } = await db.from('hub_config').upsert({
         restaurant_id: restaurantId,
         accent_color: '#F4705A',
         show_open_status:    hubConfig.show_open_status    ?? true,
@@ -416,7 +417,10 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         title_font:          hubConfig.title_font          || 'syne',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'restaurant_id' })
-      await db.from('restaurants').update({ schedule: scheduleForm }).eq('id', restaurantId)
+      if (cfgError) throw cfgError
+      const { error: scheduleError } = await db.from('restaurants').update({ schedule: scheduleForm }).eq('id', restaurantId)
+      if (scheduleError) throw scheduleError
+      toast.success('Configuración guardada')
     } catch (err) {
       toast.error(`Error al guardar: ${(err as Error)?.message ?? err}`)
       console.error(err)
@@ -500,9 +504,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           url={form.hub_cover_url}
           onUpload={async f => {
             const r = await uploadImage(f, 'hub-assets')
-            console.log('Cover upload result:', r)
             if (r.success) {
-              console.log('Cover URL set:', r.url)
               setForm(p => ({ ...p, hub_cover_url: r.url }))
             }
           }}
@@ -1106,9 +1108,10 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
           setForm({
             image_url: data.image_url ?? '',
             title: data.title ?? '',
-            title_en: (data as any).title_en ?? '',
-            description: data.description ?? '',
-            description_en: (data as any).description_en ?? '',
+            title_en: data.title_en ?? '',
+            // Columnas reales: text / text_en
+            description: data.text ?? data.description ?? '',
+            description_en: data.text_en ?? data.description_en ?? '',
             is_active: data.is_active,
           })
         }
@@ -1122,13 +1125,14 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
       const payload = {
         restaurant_id: restaurantId,
         image_url: form.image_url.trim() || null,
-        title: form.title.trim() || null,
+        title: form.title.trim(),
         title_en: form.title_en.trim() || null,
-        description: form.description.trim() || null,
-        description_en: form.description_en.trim() || null,
+        text: form.description.trim() || null,
+        text_en: form.description_en.trim() || null,
         is_active: form.is_active,
         updated_at: new Date().toISOString(),
       }
+      if (!payload.title) { toast.error('El título es requerido'); setSaving(false); return }
       let error: unknown
       if (story) {
         ;({ error } = await db.from('hub_stories').update(payload).eq('id', story.id))
@@ -1549,14 +1553,13 @@ function ReviewModal({ restaurantId, review, count, onClose, onSaved }: {
     try {
       const payload = {
         restaurant_id: restaurantId,
-        author_name: form.author_name.trim(),
-        author_initial: form.author_initial.trim() || form.author_name.trim()[0]?.toUpperCase() || null,
+        reviewer_name: form.author_name.trim(),
+        reviewer_initial: form.author_initial.trim() || form.author_name.trim()[0]?.toUpperCase() || null,
         profile_color: form.profile_color,
         rating: form.rating,
         text: form.text.trim(),
         relative_time: form.relative_time.trim() || 'Hace poco',
         sort_order: review?.sort_order ?? count,
-        updated_at: new Date().toISOString(),
       }
       let error: unknown
       if (review) {
@@ -1642,7 +1645,11 @@ function TabResenas({ restaurantId }: { restaurantId: string }) {
   const loadReviews = useCallback(async () => {
     const { data } = await db.from('hub_reviews').select('*')
       .eq('restaurant_id', restaurantId).order('sort_order')
-    setReviews(data ?? [])
+    setReviews(((data ?? []) as LegacyReviewRow[]).map(r => ({
+      ...r,
+      author_name: r.reviewer_name ?? r.author_name ?? '',
+      author_initial: r.reviewer_initial ?? r.author_initial ?? null,
+    })) as HubReview[])
     setLoaded(true)
   }, [restaurantId])
 
@@ -1890,6 +1897,14 @@ export default function HubPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
+      {/* Acceso al editor nuevo (Mycen Studio) */}
+      <a href="/studio"
+        className="mb-4 flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm transition-all hover:opacity-90"
+        style={{ background: '#F1F0E9', color: '#111311' }}>
+        <span><strong>Nuevo: Mycen Studio.</strong> Editá tu perfil con vista previa en vivo.</span>
+        <span aria-hidden="true">→</span>
+      </a>
+
       {/* Header */}
       <div className="mb-6 space-y-3">
         {/* Row 1: title/URL left — Life + toggle right */}
