@@ -24,10 +24,13 @@ export function LifeNav() {
 
   return (
     <nav aria-label="Life OS" style={{
+      // Fija al pie sin transform (con transform algunos navegadores la desplazan al hacer scroll)
       position: 'fixed',
       bottom: 'calc(16px + env(safe-area-inset-bottom))',
-      left: '50%',
-      transform: 'translateX(-50%)',
+      left: 0,
+      right: 0,
+      marginInline: 'auto',
+      width: 'fit-content',
       display: 'flex',
       alignItems: 'center',
       gap: '2px',

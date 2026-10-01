@@ -636,12 +636,12 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         </div>
         <div className="space-y-2">
           {[
-            { id: 'syne',          family: 'Syne',            weight: 800, preview: 'Moderno'   },
+            { id: 'syne',          family: 'Geist',            weight: 800, preview: 'Moderno'   },
             { id: 'playfair',      family: 'Playfair Display', weight: 700, preview: 'Elegante'  },
             { id: 'space-grotesk', family: 'Space Grotesk',   weight: 700, preview: 'Técnico'   },
             { id: 'bebas',         family: 'Bebas Neue',      weight: 400, preview: 'Impacto'   },
-            { id: 'dm-sans',       family: 'DM Sans',         weight: 700, preview: 'Limpio'    },
-            { id: 'inter',         family: 'Inter',           weight: 700, preview: 'Neutral'   },
+            { id: 'dm-sans',       family: 'Geist',         weight: 700, preview: 'Limpio'    },
+            { id: 'inter',         family: 'Geist',           weight: 700, preview: 'Neutral'   },
           ].map(font => (
             <button
               key={font.id}
@@ -664,7 +664,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
               </span>
               <span style={{
                 fontSize: 11, color: hubConfig.title_font === font.id ? 'white' : 'rgba(255,255,255,0.3)',
-                fontFamily: 'DM Sans',
+                fontFamily: 'Geist',
               }}>
                 {font.preview}
               </span>
@@ -714,7 +714,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
                 display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
               }}>
-                <span style={{ width: 82, fontSize: 13, color: 'white', fontFamily: 'DM Sans', flexShrink: 0 }}>
+                <span style={{ width: 82, fontSize: 13, color: 'white', fontFamily: 'Geist', flexShrink: 0 }}>
                   {day.label}
                 </span>
                 <Toggle
@@ -730,7 +730,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
                       style={{
                         background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: 8, padding: '5px 7px', color: 'white', fontSize: 12,
-                        fontFamily: 'DM Mono, monospace', width: 82, flexShrink: 0,
+                        fontFamily: 'Geist Mono, monospace', width: 82, flexShrink: 0,
                       }}
                     />
                     <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>—</span>
@@ -741,12 +741,12 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
                       style={{
                         background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: 8, padding: '5px 7px', color: 'white', fontSize: 12,
-                        fontFamily: 'DM Mono, monospace', width: 82, flexShrink: 0,
+                        fontFamily: 'Geist Mono, monospace', width: 82, flexShrink: 0,
                       }}
                     />
                   </>
                 ) : (
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans' }}>Cerrado</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'Geist' }}>Cerrado</span>
                 )}
               </div>
             )

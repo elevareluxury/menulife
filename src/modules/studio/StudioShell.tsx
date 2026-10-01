@@ -222,9 +222,9 @@ function StudioReady({ userId, initial }: {
 
         <nav className="st-bottom-nav" aria-label="Studio">
           {MOBILE_NAV.map(item => (
-            <NavLink key={item.to} to={item.to} end={item.end}>
-              <item.icon size={20} aria-hidden="true" />
-              {item.label}
+            <NavLink key={item.to} to={item.to} end={item.end} aria-label={item.label} title={item.label}>
+              <item.icon size={21} aria-hidden="true" />
+              <span className="st-nav-label">{item.label}</span>
             </NavLink>
           ))}
         </nav>

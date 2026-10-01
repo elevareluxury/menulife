@@ -161,7 +161,7 @@ function Reveal({children,delay=0}:{children:React.ReactNode;delay?:number}) {
 
 function SL({children}:{children:React.ReactNode}) {
   return (
-    <p style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,color:'#FFFFFF',
+    <p style={{fontFamily:"'Geist Mono',monospace",fontSize:10,fontWeight:500,color:'#FFFFFF',
       textTransform:'uppercase',letterSpacing:'0.14em',marginBottom:12,margin:'0 0 12px'}}>
       {children}
     </p>
@@ -222,7 +222,7 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
             background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:28,cursor:'pointer',
             display:'flex',alignItems:'center',justifyContent:'center'}}>›</button>
       </>}
-      <p style={{position:'absolute',bottom:16,fontFamily:"'DM Mono',monospace",fontSize:12,color:'rgba(255,255,255,.4)'}}>
+      <p style={{position:'absolute',bottom:16,fontFamily:"'Geist Mono',monospace",fontSize:12,color:'rgba(255,255,255,.4)'}}>
         {cur+1} / {items.length}
       </p>
     </motion.div>
@@ -364,7 +364,7 @@ function BottomNav({
           {item.icon}
           <span style={{
             fontSize: soloInicio ? 13 : 10,
-            fontFamily: "'DM Sans',sans-serif",
+            fontFamily: "'Geist',sans-serif",
             fontWeight: 500,
             whiteSpace: 'nowrap',
           }}>
@@ -402,7 +402,7 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
 
   return (
     <div style={{padding:'16px'}}>
-      <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,
+      <p style={{fontFamily:"'Geist',sans-serif",fontWeight:700,fontSize:14,
         color:'rgba(255,255,255,0.5)',textTransform:'uppercase',
         letterSpacing:'0.08em',marginBottom:12}}>
         Horarios
@@ -452,12 +452,12 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
                       border:'1px solid rgba(255,255,255,0.12)',
                       borderTop:'none',borderLeft:'none',
                     }}/>
-                    <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:11,
+                    <p style={{fontFamily:"'Geist',sans-serif",fontWeight:700,fontSize:11,
                       color:'#fff',marginBottom:2}}>{day.label}</p>
                     {isClosed ? (
-                      <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:C.red,margin:0}}>Cerrado</p>
+                      <p style={{fontFamily:"'Geist',sans-serif",fontSize:11,color:C.red,margin:0}}>Cerrado</p>
                     ) : (
-                      <p style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:'#FFFFFF',margin:0}}>
+                      <p style={{fontFamily:"'Geist Mono',monospace",fontSize:11,color:'#FFFFFF',margin:0}}>
                         {slot.open} — {slot.close}
                       </p>
                     )}
@@ -473,7 +473,7 @@ function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
                   border:isToday?`1.5px solid ${'#FFFFFF'}`:'1px solid rgba(255,255,255,0.1)',
                   background:isActive?'rgba(245,158,11,0.15)':isToday?'rgba(245,158,11,0.08)':'rgba(255,255,255,0.04)',
                   color:isClosed?'rgba(255,255,255,0.2)':isToday?'#FFFFFF':'rgba(255,255,255,0.7)',
-                  fontSize:12,fontFamily:"'DM Mono',monospace",fontWeight:500,
+                  fontSize:12,fontFamily:"'Geist Mono',monospace",fontWeight:500,
                   cursor:'pointer',
                   display:'flex',alignItems:'center',justifyContent:'center',
                   position:'relative',
@@ -514,11 +514,11 @@ function HubNotFound() {
   return (
     <div style={{minHeight:'100svh',background:C.bg,display:'flex',flexDirection:'column',
       alignItems:'center',justifyContent:'center',padding:'0 24px',textAlign:'center',
-      fontFamily:"'DM Sans',sans-serif"}}>
-      <p style={{fontFamily:"'Syne',sans-serif",fontSize:64,fontWeight:800,color:C.t3,marginBottom:8}}>404</p>
+      fontFamily:"'Geist',sans-serif"}}>
+      <p style={{fontFamily:"'Geist',sans-serif",fontSize:64,fontWeight:800,color:C.t3,marginBottom:8}}>404</p>
       <p style={{color:C.t2,marginBottom:24}}>Este Hub no fue encontrado.</p>
       <a href="/" style={{background:'#FFFFFF',color:'#000',padding:'10px 24px',borderRadius:100,
-        fontWeight:600,fontSize:14,fontFamily:"'DM Sans',sans-serif",textDecoration:'none'}}>
+        fontWeight:600,fontSize:14,fontFamily:"'Geist',sans-serif",textDecoration:'none'}}>
         Volver al inicio
       </a>
     </div>
@@ -689,12 +689,12 @@ export function HubPublicPage() {
 
   const displayTitle = hubConfig.hub_title || r.name
   const FONT_MAP: Record<string,{family:string;weight:number}> = {
-    syne:          {family:"'Syne',sans-serif",         weight:800},
+    syne:          {family:"'Geist',sans-serif",         weight:800},
     playfair:      {family:"'Playfair Display',serif",  weight:700},
     'space-grotesk':{family:"'Space Grotesk',sans-serif",weight:700},
     bebas:         {family:"'Bebas Neue',sans-serif",   weight:400},
-    'dm-sans':     {family:"'DM Sans',sans-serif",      weight:700},
-    inter:         {family:"'Inter',sans-serif",        weight:700},
+    'dm-sans':     {family:"'Geist',sans-serif",      weight:700},
+    inter:         {family:"'Geist',sans-serif",        weight:700},
   }
   const titleFont = FONT_MAP[hubConfig.title_font || 'syne'] || FONT_MAP.syne
 
@@ -731,7 +731,7 @@ export function HubPublicPage() {
       )}
 
       <div style={{
-        fontFamily:"'DM Sans',sans-serif",
+        fontFamily:"'Geist',sans-serif",
         maxWidth:430, margin:'0 auto', minHeight:'100svh', position:'relative',
       }}>
 
@@ -779,7 +779,7 @@ export function HubPublicPage() {
                 boxShadow:'0 0 40px rgba(245,158,11,.18)'}}>
                 {r.logo_url
                   ? <img src={r.logo_url} alt={r.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-                  : <span style={{fontFamily:"'Syne',sans-serif",fontSize:30,fontWeight:800,color:'#FFFFFF'}}>{r.name[0]?.toUpperCase()}</span>
+                  : <span style={{fontFamily:"'Geist',sans-serif",fontSize:30,fontWeight:800,color:'#FFFFFF'}}>{r.name[0]?.toUpperCase()}</span>
                 }
               </div>
             </motion.div>
@@ -792,7 +792,7 @@ export function HubPublicPage() {
                 border:`1px solid ${open?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'}`}}>
               <span style={{width:7,height:7,borderRadius:'50%',background:open?C.grn:C.red,
                 animation:'hubPulse 1.5s ease-in-out infinite',display:'inline-block'}}/>
-              <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:open?C.grn:C.red}}>
+              <span style={{fontFamily:"'Geist Mono',monospace",fontSize:11,fontWeight:500,color:open?C.grn:C.red}}>
                 {open?'Abierto ahora':'Cerrado'}
               </span>
             </motion.div>
@@ -809,7 +809,7 @@ export function HubPublicPage() {
             {/* Category tags / hub_category */}
             {(categoryTags.length>0||hubCategory) && (
               <motion.p initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.55,duration:.6}}
-                style={{fontFamily:"'DM Mono',monospace",fontSize:12.5,color:C.t3,margin:0}}>
+                style={{fontFamily:"'Geist Mono',monospace",fontSize:12.5,color:C.t3,margin:0}}>
                 {categoryTags.length>0 ? categoryTags.join(' · ') : hubCategory}
               </motion.p>
             )}
@@ -895,7 +895,7 @@ export function HubPublicPage() {
                       boxShadow:isPrimary?'0 0 20px rgba(245,158,11,.12)':'none'}}>
                       {btn.icon}
                     </div>
-                    <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:13.5,fontWeight:500,
+                    <span style={{fontFamily:"'Geist',sans-serif",fontSize:13.5,fontWeight:500,
                       color:isPrimary?C.acc2:C.t1,textAlign:'center',lineHeight:1.2}}>
                       {btn.label}
                     </span>
@@ -971,7 +971,7 @@ export function HubPublicPage() {
                       <span style={{fontSize:22,flexShrink:0,lineHeight:1}}>{link.icon??'🔗'}</span>
                     )}
                     <span style={{
-                      fontFamily:"'DM Sans',sans-serif",fontSize:15,fontWeight:700,
+                      fontFamily:"'Geist',sans-serif",fontSize:15,fontWeight:700,
                       color:C.t1,flex:1,textAlign:'left',
                     }}>
                       {link.label}
@@ -1007,14 +1007,14 @@ export function HubPublicPage() {
                     background:'radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%)'}}/>
                 </>}
                 <div style={{position:'absolute',top:14,left:14,background:'#FFFFFF',color:'#000',
-                  fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:600,padding:'4px 10px',
+                  fontFamily:"'Geist Mono',monospace",fontSize:10,fontWeight:600,padding:'4px 10px',
                   borderRadius:100,textTransform:'uppercase',letterSpacing:'0.08em',
                   animation:'hubPopIn .4s cubic-bezier(.34,1.56,.64,1) .8s both'}}>
                   ★ Nuevo
                 </div>
                 <div style={{position:'relative',padding:'52px 18px 20px'}}>
                   {story.title && (
-                    <h3 style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:C.t1,margin:'0 0 8px'}}>
+                    <h3 style={{fontFamily:"'Geist',sans-serif",fontSize:22,fontWeight:700,color:C.t1,margin:'0 0 8px'}}>
                       {story.title}
                     </h3>
                   )}
@@ -1052,11 +1052,11 @@ export function HubPublicPage() {
                 </div>
                 <div style={{padding:'14px 16px',flex:1,display:'flex',flexDirection:'column',gap:5}}>
                   {featuredProduct.tag && (
-                    <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,color:'#FFFFFF',textTransform:'uppercase',letterSpacing:'0.1em'}}>
+                    <span style={{fontFamily:"'Geist Mono',monospace",fontSize:10,color:'#FFFFFF',textTransform:'uppercase',letterSpacing:'0.1em'}}>
                       {featuredProduct.tag}
                     </span>
                   )}
-                  <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0,lineHeight:1.2}}>
+                  <p style={{fontFamily:"'Geist',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0,lineHeight:1.2}}>
                     {featuredProduct.name}
                   </p>
                   {featuredProduct.description && (
@@ -1066,7 +1066,7 @@ export function HubPublicPage() {
                     </p>
                   )}
                   {featuredProduct.price!=null && (
-                    <p style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:700,color:'#FFFFFF',margin:'2px 0 0'}}>
+                    <p style={{fontFamily:"'Geist',sans-serif",fontSize:20,fontWeight:700,color:'#FFFFFF',margin:'2px 0 0'}}>
                       ${featuredProduct.price.toLocaleString('es-AR')}
                     </p>
                   )}
@@ -1130,10 +1130,10 @@ export function HubPublicPage() {
                 background:'linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.06))',
                 border:'1px solid rgba(245,158,11,.25)',borderRadius:20,textDecoration:'none'}}>
               <div>
-                <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:'0 0 4px'}}>
+                <p style={{fontFamily:"'Geist',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:'0 0 4px'}}>
                   {isRetail?'Ver catálogo completo':'Ver el menú completo'}
                 </p>
-                <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,margin:0}}>
+                <p style={{fontFamily:"'Geist Mono',monospace",fontSize:12,color:C.t3,margin:0}}>
                   {isRetail?'Productos · Precios · Categorías':'Carta · Bebidas · Postres'}
                 </p>
               </div>
@@ -1170,8 +1170,8 @@ export function HubPublicPage() {
             <SL>Locales</SL>
             <div style={{...cardBase,padding:18}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-                <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0}}>{r.name}</p>
-                <span style={{padding:'4px 10px',borderRadius:100,fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,
+                <p style={{fontFamily:"'Geist',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0}}>{r.name}</p>
+                <span style={{padding:'4px 10px',borderRadius:100,fontFamily:"'Geist Mono',monospace",fontSize:10,fontWeight:500,
                   background:open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)',
                   border:`1px solid ${open?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'}`,
                   color:open?C.grn:C.red}}>
@@ -1184,7 +1184,7 @@ export function HubPublicPage() {
                 </p>
               )}
               {hoursText && (
-                <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,marginBottom:14,margin:'0 0 14px'}}>
+                <p style={{fontFamily:"'Geist Mono',monospace",fontSize:12,color:C.t3,marginBottom:14,margin:'0 0 14px'}}>
                   Hoy: {hoursText}
                 </p>
               )}
@@ -1242,19 +1242,19 @@ export function HubPublicPage() {
                 >
                   <div style={{width:40,height:40,borderRadius:'50%',flexShrink:0,
                     background:'#fff',display:'flex',alignItems:'center',justifyContent:'center',
-                    fontFamily:"'DM Mono',monospace",fontWeight:700,fontSize:16,color:'#4285F4'}}>
+                    fontFamily:"'Geist Mono',monospace",fontWeight:700,fontSize:16,color:'#4285F4'}}>
                     G
                   </div>
                   <div style={{flex:1}}>
                     <p style={{margin:'0 0 2px',fontSize:13.5,fontWeight:600,color:C.t1}}>Google Reviews</p>
                     {googleReviewCount && (
-                      <p style={{fontFamily:"'DM Mono',monospace",fontSize:11.5,color:C.t3,margin:0}}>
+                      <p style={{fontFamily:"'Geist Mono',monospace",fontSize:11.5,color:C.t3,margin:0}}>
                         {googleReviewCount} reseñas
                       </p>
                     )}
                   </div>
                   <div style={{display:'flex',alignItems:'center',gap:4}}>
-                    <span style={{fontFamily:"'Syne',sans-serif",fontSize:24,fontWeight:800,color:'#FFFFFF',lineHeight:1}}>
+                    <span style={{fontFamily:"'Geist',sans-serif",fontSize:24,fontWeight:800,color:'#FFFFFF',lineHeight:1}}>
                       {googleRating}
                     </span>
                     <span style={{color:'#FFFFFF',fontSize:20}}>★</span>
@@ -1269,12 +1269,12 @@ export function HubPublicPage() {
                         <div style={{width:36,height:36,borderRadius:'50%',flexShrink:0,
                           background:`linear-gradient(135deg,${rev.profile_color||'#FFFFFF'},rgba(139,92,246,.7))`,
                           display:'flex',alignItems:'center',justifyContent:'center',
-                          fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15,color:'#fff'}}>
+                          fontFamily:"'Geist',sans-serif",fontWeight:700,fontSize:15,color:'#fff'}}>
                           {rev.author_initial||rev.author_name[0]?.toUpperCase()}
                         </div>
                         <div style={{flex:1}}>
                           <p style={{margin:0,fontWeight:600,fontSize:13.5,color:C.t1}}>{rev.author_name}</p>
-                          <p style={{margin:0,fontFamily:"'DM Mono',monospace",fontSize:10.5,color:C.t3}}>
+                          <p style={{margin:0,fontFamily:"'Geist Mono',monospace",fontSize:10.5,color:C.t3}}>
                             {rev.relative_time||'Hace poco'} · {starStr(rev.rating)}
                           </p>
                         </div>
@@ -1288,7 +1288,7 @@ export function HubPublicPage() {
                 <a href={social.google_review} target="_blank" rel="noopener noreferrer"
                   onClick={()=>trackEvent(r.id,'link_click')}
                   style={{display:'block',textAlign:'center',marginTop:12,
-                    fontFamily:"'DM Mono',monospace",fontSize:12.5,color:'#FFFFFF',textDecoration:'none'}}>
+                    fontFamily:"'Geist Mono',monospace",fontSize:12.5,color:'#FFFFFF',textDecoration:'none'}}>
                   Ver en Google →
                 </a>
               )}
@@ -1318,7 +1318,7 @@ export function HubPublicPage() {
                       {c.icon}
                     </div>
                     <div style={{flex:1}}>
-                      <p style={{margin:0,fontFamily:"'DM Mono',monospace",fontSize:10,color:C.t3,
+                      <p style={{margin:0,fontFamily:"'Geist Mono',monospace",fontSize:10,color:C.t3,
                         textTransform:'uppercase',letterSpacing:'0.1em'}}>{c.label}</p>
                       <p style={{margin:'2px 0 0',fontSize:13.5,color:C.t1,fontWeight:500}}>{c.value}</p>
                     </div>
@@ -1336,14 +1336,14 @@ export function HubPublicPage() {
         ══════════════════════════════════════════════════════ */}
         <footer style={{margin:'40px 20px 0',padding:'24px 0',
           borderTop:`1px solid ${C.bdr}`,textAlign:'center'}}>
-          <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:C.t1,margin:'0 0 4px'}}>{r.name}</p>
-          {hoursText && <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,margin:'0 0 4px'}}>{hoursText}</p>}
+          <p style={{fontFamily:"'Geist',sans-serif",fontSize:16,fontWeight:800,color:C.t1,margin:'0 0 4px'}}>{r.name}</p>
+          {hoursText && <p style={{fontFamily:"'Geist Mono',monospace",fontSize:12,color:C.t3,margin:'0 0 4px'}}>{hoursText}</p>}
           {r.city && <p style={{fontSize:12,color:C.t4,margin:'0 0 16px'}}>{r.city}</p>}
           <a href="https://menulife.digital" target="_blank" rel="noopener noreferrer"
             style={{display:'inline-flex',alignItems:'center',gap:5,padding:'7px 14px',borderRadius:100,
               background:C.sur,border:`1px solid ${C.bdr}`,textDecoration:'none'}}>
-            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:C.t3}}>Powered by</span>
-            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:'#FFFFFF'}}>MenuLife</span>
+            <span style={{fontFamily:"'Geist Mono',monospace",fontSize:11,color:C.t3}}>Powered by</span>
+            <span style={{fontFamily:"'Geist Mono',monospace",fontSize:11,fontWeight:500,color:'#FFFFFF'}}>MenuLife</span>
           </a>
         </footer>
 
