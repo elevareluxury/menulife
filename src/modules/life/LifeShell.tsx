@@ -8,6 +8,7 @@ import { LifeNav } from './components/LifeNav'
 import { CaptureButton } from './components/CaptureButton'
 import { AchievementToast } from './components/AchievementToast'
 import { useTaskReminders } from './hooks/useTaskReminders'
+import { useAppBackground } from '@/lib/useAppBackground'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -18,12 +19,8 @@ export function LifeShell() {
   const [timedOut, setTimedOut] = useState(false)
   useTaskReminders(user?.id)
 
-  // Force body background dark so no white flash between Life OS pages
-  useEffect(() => {
-    const prev = document.body.style.background
-    document.body.style.background = '#0A0B0F'
-    return () => { document.body.style.background = prev }
-  }, [])
+  // Fondo oscuro en html y body: sin flashes blancos ni franjas al llegar a los bordes
+  useAppBackground('#0F1115')
 
   // Safety timeout — same pattern as DashboardPage
   useEffect(() => {
@@ -49,7 +46,7 @@ export function LifeShell() {
   if ((!initialized || loading) && !timedOut) {
     return (
       <div style={{
-        minHeight: '100vh', background: '#0F1115',
+        minHeight: '100dvh', background: '#0F1115',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <Spinner size="lg" />
@@ -61,7 +58,7 @@ export function LifeShell() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100dvh',
       background: '#0F1115',
       color: '#F5F7FA',
       paddingBottom: 'calc(88px + env(safe-area-inset-bottom))',

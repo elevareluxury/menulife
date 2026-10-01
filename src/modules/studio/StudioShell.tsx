@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   BarChart3, Eye, Home, LayoutGrid, LogOut, MoreHorizontal, Palette, PenLine, Settings, Share2, UserRound,
@@ -13,6 +14,7 @@ import type { ProfilePatch, SaveState, StudioBusiness, StudioModule, StudioProfi
 import { PreviewPane } from './components/PreviewPane'
 import { OnboardingWizard } from './components/OnboardingWizard'
 import { Button } from './components/ui'
+import { useAppBackground } from '@/lib/useAppBackground'
 import './studio.css'
 
 const NAV = [
@@ -63,11 +65,7 @@ export function StudioShell() {
   }, [userId, attempt])
 
   // Fondo oscuro sin flashes
-  useEffect(() => {
-    const prev = document.body.style.background
-    document.body.style.background = '#111311'
-    return () => { document.body.style.background = prev }
-  }, [])
+  useAppBackground('#0E100E')
 
   if (!initialized || loading) return <Centered><span className="st-spinner" aria-label="Cargando" /></Centered>
   if (!user) return <Navigate to="/login" replace />
@@ -220,14 +218,15 @@ function StudioReady({ userId, initial }: {
           {showPane && <PreviewPane />}
         </div>
 
-        <nav className="st-bottom-nav" aria-label="Studio">
+        {/* En un portal a <body>: ningún contenedor puede alterar su position: fixed */}
+        {createPortal(<nav className="st-bottom-nav" aria-label="Studio">
           {MOBILE_NAV.map(item => (
             <NavLink key={item.to} to={item.to} end={item.end} aria-label={item.label} title={item.label}>
               <item.icon size={21} aria-hidden="true" />
               <span className="st-nav-label">{item.label}</span>
             </NavLink>
           ))}
-        </nav>
+        </nav>, document.body)}
       </div>
     </StudioContext.Provider>
   )

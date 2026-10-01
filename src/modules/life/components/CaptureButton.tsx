@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Lightbulb, StickyNote, CheckSquare, Target, TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -88,7 +89,8 @@ export function CaptureButton() {
     if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
   }
 
-  return (
+  // Portal a <body>: el botón fijo no depende de ningún contenedor
+  return createPortal(
     <>
       {/* Backdrop */}
       <AnimatePresence>
@@ -208,6 +210,7 @@ export function CaptureButton() {
         onClose={() => setMoneyOpen(false)}
         onSave={handleMoneySave}
       />
-    </>
+    </>,
+    document.body,
   )
 }
