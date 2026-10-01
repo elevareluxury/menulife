@@ -1897,6 +1897,14 @@ export default function HubPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
+      {/* Acceso al editor nuevo (Mycen Studio) */}
+      <a href="/studio"
+        className="mb-4 flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm transition-all hover:opacity-90"
+        style={{ background: '#F1F0E9', color: '#111311' }}>
+        <span><strong>Nuevo: Mycen Studio.</strong> Editá tu perfil con vista previa en vivo.</span>
+        <span aria-hidden="true">→</span>
+      </a>
+
       {/* Header */}
       <div className="mb-6 space-y-3">
         {/* Row 1: title/URL left — Life + toggle right */}
