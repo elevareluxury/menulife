@@ -238,55 +238,47 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
           fontFamily: font, fontSize: '15px', fontWeight: 700,
           color: colors.text.primary, margin: '0 0 2px', letterSpacing: '-0.01em',
         }}>
-          Hub Digital
+          Mi identidad
         </p>
         <p style={{
           fontFamily: font, fontSize: '12px', color: colors.text.tertiary,
           margin: '0 0 13px', lineHeight: 1.4,
         }}>
-          {hasRestaurant && restaurantSlug ? `@${restaurantSlug}` : 'Tu presencia en la web'}
+          {hasRestaurant && restaurantSlug ? `Mycen Profile · @${restaurantSlug}` : 'Tu identidad digital, todo en un solo lugar'}
         </p>
 
-        {hasRestaurant ? (
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {/* Mycen Studio: editar la identidad (si no hay perfil, Studio ofrece crearlo) */}
+          <button
+            type="button"
+            onClick={() => navigate('/studio')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              padding: '8px 14px', borderRadius: radius.full,
+              background: '#F1F0E9', border: '1px solid #F1F0E9',
+              color: '#111311', fontFamily: font, fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            <Settings2 size={12} strokeWidth={2.5} />
+            Abrir Studio
+          </button>
+          {hasRestaurant && restaurantSlug && (
             <button
-              onClick={() => navigate(`/${restaurantSlug ?? ''}`)}
+              type="button"
+              // Durante la transición el perfil nuevo se ve con ?v=2
+              onClick={() => navigate(`/${restaurantSlug}?v=2`)}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '4px',
-                padding: '6px 12px', borderRadius: radius.full,
-                background: 'rgba(99,102,241,0.13)', border: '1px solid rgba(99,102,241,0.28)',
-                color: '#818CF8', fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-              }}
-            >
-              <Link2 size={11} strokeWidth={2.5} />
-              Ver hub
-            </button>
-            <button
-              onClick={() => navigate('/life/hub')}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                padding: '6px 12px', borderRadius: radius.full,
+                padding: '8px 12px', borderRadius: radius.full,
                 background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
                 color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
               }}
             >
-              <Settings2 size={11} strokeWidth={2.5} />
-              Configurar
+              <Link2 size={11} strokeWidth={2.5} />
+              Ver perfil
             </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => navigate('/life/hub')}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '6px',
-              padding: '8px 16px', borderRadius: radius.full,
-              background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.30)',
-              color: '#818CF8', fontFamily: font, fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-            }}
-          >
-            Crear mi hub
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
@@ -533,7 +525,7 @@ export function LifePage() {
             </button>
           </motion.div>
 
-          {/* ── Hub Digital ────────────────────────────────────────────────── */}
+          {/* ── Mi identidad (Mycen Profile → Studio) ──────────────────────── */}
           <motion.div variants={fadeInUp}>
             <HubSection
               hasRestaurant={hasRestaurant}
