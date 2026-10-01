@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
+import { authErrorMessage } from '@/lib/authErrors'
 
 const CORAL = '#F4705A'
 
@@ -53,14 +54,17 @@ export function RegisterPage() {
   const [password, setPassword] = useState('')
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
+  const [accepted, setAccepted] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
+    if (!name.trim()) { setError('Escribí tu nombre.'); return }
+    if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+      setError('La contraseña necesita al menos 8 caracteres, con letras y números.')
       return
     }
+    if (!accepted) { setError('Para crear tu cuenta, aceptá los Términos y la Política de privacidad.'); return }
 
     setLoading(true)
     try {
@@ -68,7 +72,7 @@ export function RegisterPage() {
         email,
         password,
         options: {
-          data: { name },
+          data: { name: name.trim(), terms_accepted_at: new Date().toISOString() },
           emailRedirectTo: window.location.origin + '/auth/callback',
         },
       })
@@ -82,11 +86,11 @@ export function RegisterPage() {
         return
       }
 
-      toast.success('¡Bienvenido a MenuLife!')
-      navigate('/life')
+      toast.success('¡Bienvenido a Mycen!')
+      // Onboarding guiado: Studio lo muestra a quien todavía no tiene identidad
+      navigate('/studio')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al crear la cuenta'
-      setError(msg)
+      setError(authErrorMessage(err, 'No pudimos crear tu cuenta. Intentá de nuevo.'))
     } finally {
       setLoading(false)
     }
@@ -117,10 +121,10 @@ export function RegisterPage() {
         {/* Logo + title */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', marginBottom: '16px' }}>
-            <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
+            <img src="/logo.png" alt="Mycen" className="h-8 w-auto" />
           </Link>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-            Creá tu perfil gratis
+            Tu identidad digital, todo en un solo lugar
           </p>
         </div>
 
@@ -159,13 +163,26 @@ export function RegisterPage() {
           <DarkInput
             label="Contraseña"
             type="password"
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Mínimo 8, con letras y números"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            minLength={6}
+            minLength={8}
             autoComplete="new-password"
           />
+
+          <label style={{
+            display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer',
+            fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.5,
+          }}>
+            <input type="checkbox" checked={accepted} onChange={e => { setAccepted(e.target.checked); setError('') }} required
+              style={{ marginTop: '3px', width: 16, height: 16, accentColor: CORAL, flexShrink: 0 }} />
+            <span>
+              Acepto los{' '}
+              <Link to="/terminos" target="_blank" style={{ color: '#fff' }}>Términos</Link> y la{' '}
+              <Link to="/privacidad" target="_blank" style={{ color: '#fff' }}>Política de privacidad</Link>.
+            </span>
+          </label>
 
           <button
             type="submit"
@@ -183,7 +200,7 @@ export function RegisterPage() {
             onMouseEnter={e => { if (!loading) { e.currentTarget.style.boxShadow = '0 0 24px rgba(244,112,90,0.45)'; e.currentTarget.style.transform = 'scale(1.01)' } }}
             onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = '' }}
           >
-            {loading ? 'Creando tu perfil...' : 'Crear mi perfil gratis'}
+            {loading ? 'Creando tu cuenta…' : 'Crear mi cuenta gratis'}
           </button>
         </form>
 

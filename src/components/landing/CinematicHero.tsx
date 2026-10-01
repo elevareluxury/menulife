@@ -147,12 +147,12 @@ export function CinematicHero() {
       {/* FASE 1: Intro */}
       <div ref={introRef} className="ch-intro">
         <h1>
-          <span className="ch-line1">Tu mundo digital</span>
-          <span className="ch-line2">en un solo lugar.</span>
+          <span className="ch-line1">Tu identidad digital,</span>
+          <span className="ch-line2">todo en un solo lugar.</span>
         </h1>
         <p className="ch-subtitle">
-          Construye tu identidad digital, organiza tu vida y potencia tu negocio
-          desde una única plataforma.
+          Una dirección que te representa: quién sos, lo que hacés y cómo contactarte,
+          lista para compartir con un link o un QR.
         </p>
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '8px' }}>
           <Link to="/register" style={{ textDecoration: 'none' }}>
@@ -161,7 +161,7 @@ export function CinematicHero() {
               color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
               borderRadius: '50px',
             }}>
-              <span>Crear Mi Espacio Gratis →</span>
+              <span>Creá tu Mycen →</span>
             </button>
           </Link>
           <a href="#soluciones" style={{ textDecoration: 'none' }}>
@@ -170,7 +170,7 @@ export function CinematicHero() {
               color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
               borderRadius: '50px',
             }}>
-              Ver Soluciones
+              Cómo funciona
             </button>
           </a>
         </div>
@@ -181,8 +181,8 @@ export function CinematicHero() {
         <div className="ch-card-content">
           <h2 className="ch-card-heading">Tu identidad digital, tu negocio y tu vida. Todo en uno.</h2>
           <p className="ch-card-description">
-            <strong>Mycen</strong> unifica tu Hub Digital, tu sistema personal y tu
-            plataforma de negocio — sin apps que instalar, sin silos.
+            <strong>Mycen</strong> reúne tu perfil público, tu sistema personal y tu
+            plataforma de negocio — sin apps que instalar, sin links dispersos.
           </p>
         </div>
 
@@ -197,7 +197,7 @@ export function CinematicHero() {
 
           {/* Floating badges */}
           <div ref={badgeLeftRef} className="floating-badge ch-badge-left">
-            <span className="ch-badge-title">✨ Hub creado</span>
+            <span className="ch-badge-title">✨ Perfil publicado</span>
             <span>mycen.digital/tu-perfil</span>
           </div>
           <div ref={badgeRightRef} className="floating-badge ch-badge-right">

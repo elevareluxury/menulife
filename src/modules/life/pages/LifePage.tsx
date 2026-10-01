@@ -265,8 +265,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
           {hasRestaurant && restaurantSlug && (
             <button
               type="button"
-              // Durante la transición el perfil nuevo se ve con ?v=2
-              onClick={() => navigate(`/${restaurantSlug}?v=2`)}
+              onClick={() => navigate(`/${restaurantSlug}`)}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '4px',
                 padding: '8px 12px', borderRadius: radius.full,

@@ -22,6 +22,8 @@ export interface StudioProfile {
   contact_card: ContactCardSettings
   default_locale: string
   translations: Translations
+  /** Paso del onboarding guiado (0 = perfil importado, 5 = terminado) */
+  onboarding_step: number
   published_at: string | null
   updated_at: string
 }
@@ -63,7 +65,7 @@ export type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 export type ProfilePatch = Partial<Pick<StudioProfile,
   'display_name' | 'descriptor' | 'bio' | 'avatar_url' | 'cover_url' | 'purpose' | 'status' | 'tags' |
-  'theme' | 'primary_action' | 'contact_card' | 'default_locale' | 'translations'>>
+  'theme' | 'primary_action' | 'contact_card' | 'default_locale' | 'translations' | 'onboarding_step'>>
 
 export interface DailyStat {
   day: string
