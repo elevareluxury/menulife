@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -24,6 +24,7 @@ import { RequirePlan } from '@/app/RequirePlan'
 
 // Heavy modules — lazy loaded
 const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
+const ProfilePublicPage = lazy(() => import('@/modules/profile/pages/ProfilePublicPage').then(m => ({ default: m.ProfilePublicPage })))
 const SuperAdminPage   = lazy(() => import('./routes/super-admin').then(m => ({ default: m.SuperAdminPage })))
 const BusinessSettings = lazy(() => import('@/modules/settings/pages/BusinessSettings').then(m => ({ default: m.BusinessSettings })))
 const OrdersManagement = lazy(() => import('@/modules/orders/pages/OrdersManagement').then(m => ({ default: m.OrdersManagement })))
@@ -77,6 +78,13 @@ function LoadingSpinner() {
 function WaiterLegacyRedirect() {
   const { slug } = useParams()
   return <Navigate to={`/mozo/${slug ?? ''}`} replace />
+}
+
+// Transición Hub → Mycen Profile: el perfil nuevo se ve con ?v=2 hasta que
+// Studio reemplace al editor viejo (ahí pasa a ser el default).
+function PublicSlugRoute() {
+  const [params] = useSearchParams()
+  return params.get('v') === '2' ? <ProfilePublicPage /> : <HubPublicPage />
 }
 
 function App() {
@@ -162,7 +170,7 @@ function App() {
           {/* Catálogo retail público */}
           <Route path="/catalogo/:slug" element={<CatalogoPublic />} />
           {/* Hub Público — /:slug debe ir antes del catch-all */}
-          <Route path="/:slug" element={<ErrorBoundary><HubPublicPage /></ErrorBoundary>} />
+          <Route path="/:slug" element={<ErrorBoundary><PublicSlugRoute /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
