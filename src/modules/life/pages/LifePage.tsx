@@ -424,7 +424,7 @@ function ModuleGrid() {
 function PageSkeleton() {
   return (
     <div style={{
-      minHeight: '100vh', background: '#0A0B0F',
+      minHeight: '60dvh', background: '#0A0B0F',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       <motion.div

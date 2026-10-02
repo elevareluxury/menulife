@@ -86,7 +86,7 @@ export function StudioShell() {
   if (load.kind === 'empty' || resuming) {
     const suggestedName = (user.user_metadata as { name?: string } | undefined)?.name
     return (
-      <div className="st-root">
+      <div className="st-root" data-scroll-root>
         <OnboardingWizard
           userId={user.id}
           initialProfile={load.kind === 'ready' ? load.profile : null}
@@ -105,7 +105,7 @@ export function StudioShell() {
 }
 
 function Centered({ children }: { children: React.ReactNode }) {
-  return <div className="st-root"><div className="st-center">{children}</div></div>
+  return <div className="st-root" data-scroll-root><div className="st-center">{children}</div></div>
 }
 
 function StudioReady({ userId, initial }: {
@@ -188,7 +188,7 @@ function StudioReady({ userId, initial }: {
 
   return (
     <StudioContext.Provider value={value}>
-      <div className="st-root">
+      <div className="st-root" data-scroll-root>
         <div className="st-layout">
           <nav className="st-sidebar" aria-label="Studio">
             <a className="st-logo" href="/studio">mycen.<small>Studio</small></a>
