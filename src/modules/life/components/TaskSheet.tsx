@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
-import type { Goal } from '../hooks/useGoals'
+import { Star } from 'lucide-react'
+import { useGoalOptions } from '../hooks/useGoalOptions'
 import type { LifeTask, TaskFormData } from '../hooks/useTasks'
 import { useLifeT } from '@/i18n/app/life'
 
@@ -25,16 +26,17 @@ interface Props {
   onSave: (data: TaskFormData) => Promise<void>
   initial?: LifeTask | null
   defaultDate?: string | null
-  goals: Goal[]
+  defaultGoalId?: string | null
 }
 
-export function TaskSheet({ open, onClose, onSave, initial, defaultDate, goals }: Props) {
+export function TaskSheet({ open, onClose, onSave, initial, defaultDate, defaultGoalId }: Props) {
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [remind, setRemind] = useState('')
   const [goalId, setGoalId] = useState('')
+  const [focus, setFocus] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const t = useLifeT()
@@ -49,10 +51,11 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, goals }
     setDate(initial?.due_date ?? defaultDate ?? '')
     setTime(initial?.due_time?.slice(0, 5) ?? '')
     setRemind(initial?.remind_minutes != null ? String(initial.remind_minutes) : '')
-    setGoalId(initial?.goal_id ?? '')
+    setGoalId(initial?.goal_id ?? defaultGoalId ?? '')
+    setFocus(initial?.is_focus ?? false)
     setError('')
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [open, initial, defaultDate])
+  }, [open, initial, defaultDate, defaultGoalId])
 
   async function save() {
     if (!title.trim()) { setError(s.titleRequired); return }
@@ -62,6 +65,7 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, goals }
       await onSave({
         title, notes, due_date: date || null, due_time: time || null,
         remind_minutes: remind === '' ? null : Number(remind), goal_id: goalId || null,
+        is_focus: focus,
       })
       onClose()
     } catch {
@@ -69,7 +73,8 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, goals }
     } finally { setSaving(false) }
   }
 
-  const activeGoals = goals.filter(g => g.status !== 'completed')
+  const goals = useGoalOptions(open)
+  const activeGoals = goals.filter(g => g.status !== 'completed' || g.id === goalId)
 
   return (
     <LifeSheet open={open} onClose={onClose} title={initial ? s.editTitle : s.newTitle}>
@@ -111,6 +116,19 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, goals }
             </select>
           </div>
         )}
+        <button type="button" role="switch" aria-checked={focus} onClick={() => setFocus(v => !v)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '10px 14px', borderRadius: radius.md, cursor: 'pointer',
+            background: focus ? colors.accent.soft : colors.surface.elevated,
+            border: `1px solid ${focus ? colors.accent.default : colors.border.medium}`, textAlign: 'start',
+          }}>
+          <Star size={18} aria-hidden="true" fill={focus ? colors.accent.default : 'none'}
+            style={{ color: focus ? colors.accent.default : colors.text.tertiary, flexShrink: 0 }} />
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', fontFamily: font, fontSize: '14px', fontWeight: 700, color: colors.text.primary }}>{t.tasks.sheetFocus}</span>
+            <span style={{ display: 'block', fontFamily: font, fontSize: '12px', color: colors.text.tertiary, marginTop: 2 }}>{t.tasks.sheetFocusHint}</span>
+          </span>
+        </button>
         <div>
           <label htmlFor="task-notes" style={labelStyle}>{s.notes}</label>
           <textarea id="task-notes" value={notes} maxLength={2000} rows={3} onChange={e => setNotes(e.target.value)}

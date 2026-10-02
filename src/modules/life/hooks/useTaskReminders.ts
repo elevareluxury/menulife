@@ -23,10 +23,12 @@ export function useTaskReminders(userId: string | undefined) {
       const today = new Date()
       const from = new Date(today); from.setDate(from.getDate() - 1)
       const to = new Date(today); to.setDate(to.getDate() + 8)
-      const { data } = await db.from('life_tasks')
-        .select('id, title, notes, due_date, due_time, remind_minutes, reminded_at, completed_at')
+      const { data } = await db.from('life_brain_items')
+        .select('id, title, due_date, due_time, remind_minutes, reminded_at')
         .eq('user_id', userId)
-        .is('completed_at', null)
+        .eq('type', 'task')
+        .eq('is_completed', false)
+        .eq('is_archived', false)
         .is('reminded_at', null)
         .not('remind_minutes', 'is', null)
         .gte('due_date', localDateKey(from))
@@ -34,7 +36,7 @@ export function useTaskReminders(userId: string | undefined) {
       if (cancelled || !data) return
 
       const now = Date.now()
-      for (const task of data as LifeTask[]) {
+      for (const task of data as Pick<LifeTask, 'id' | 'title' | 'due_date' | 'due_time' | 'remind_minutes'>[]) {
         const due = taskDueAt(task)
         if (!due) continue
         const remindAt = due.getTime() - (task.remind_minutes ?? 0) * 60_000
@@ -48,7 +50,7 @@ export function useTaskReminders(userId: string | undefined) {
         } else {
           toast(`⏰ ${task.title} · ${when}`, { duration: 8000 })
         }
-        await db.from('life_tasks').update({ reminded_at: new Date().toISOString() }).eq('id', task.id)
+        await db.from('life_brain_items').update({ reminded_at: new Date().toISOString() }).eq('id', task.id)
       }
     }
 

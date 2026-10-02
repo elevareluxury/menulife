@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { Target, Plus, Pencil, Trash2, Pause, Play, CheckCircle2, CalendarDays } from 'lucide-react'
@@ -12,7 +13,6 @@ import {
 import { useGoals, type Goal } from '../hooks/useGoals'
 import { GoalSheet } from '../components/GoalSheet'
 import { GoalDetailSheet } from '../components/GoalDetailSheet'
-import { AgendaView } from '../components/AgendaView'
 import { ActionMenu } from '../components/ActionMenu'
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
@@ -113,9 +113,10 @@ export function LifeGoalsPage() {
   const [editGoal, setEditGoal]         = useState<Goal | null>(null)
   const [detailId, setDetailId]         = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Goal | null>(null)
-  const [view, setView] = useState<'goals' | 'agenda'>(() =>
-    (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('vista') === 'agenda') ? 'agenda' : 'goals')
+  const [params] = useSearchParams()
 
+  // La agenda ahora vive en Brain → Tareas (los enlaces viejos siguen funcionando)
+  if (params.get('vista') === 'agenda') return <Navigate to="/life/brain?vista=tareas" replace />
   if (loading) return <GoalSkeleton />
 
   const fail = () => toast.error(t.common.saveError)
@@ -135,38 +136,17 @@ export function LifeGoalsPage() {
             {tNav.goals}
           </h1>
         </div>
-        {view === 'goals' && (
-          <button type="button" aria-label={t.goals.add} title={t.goals.add} onClick={openNew}
-            style={{
-              width: 40, height: 40, borderRadius: radius.full,
-              background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`,
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-            <Plus size={18} style={{ color: colors.accent.default }} strokeWidth={2.5} aria-hidden="true" />
-          </button>
-        )}
+        <button type="button" aria-label={t.goals.add} title={t.goals.add} onClick={openNew}
+          style={{
+            width: 40, height: 40, borderRadius: radius.full,
+            background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+          <Plus size={18} style={{ color: colors.accent.default }} strokeWidth={2.5} aria-hidden="true" />
+        </button>
       </div>
 
-      <div role="tablist" aria-label={t.goals.tabsLabel} style={{
-        display: 'flex', padding: 4, gap: 4, marginBottom: '16px', borderRadius: radius.full,
-        background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
-      }}>
-        {([['goals', t.goals.tabGoals], ['agenda', t.goals.tabAgenda]] as const).map(([id, label]) => (
-          <button key={id} type="button" role="tab" aria-selected={view === id} onClick={() => setView(id)}
-            style={{
-              flex: 1, minHeight: 40, padding: '9px 12px', borderRadius: radius.full, border: 'none', cursor: 'pointer',
-              background: view === id ? colors.accent.soft : 'transparent',
-              color: view === id ? colors.accent.default : colors.text.secondary,
-              fontFamily: font, fontSize: '13px', fontWeight: 700,
-            }}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {view === 'agenda' && <AgendaView goals={goals} />}
-
-      {view === 'goals' && goals.length > 0 && (
+      {goals.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
           {[
             { label: t.goals.active,    value: String(activeCount),    color: colors.area.goals },
@@ -183,7 +163,7 @@ export function LifeGoalsPage() {
         </div>
       )}
 
-      {view === 'agenda' ? null : goals.length === 0 ? (
+      {goals.length === 0 ? (
         <LifeCard>
           <LifeEmptyState icon={Target} iconColor={colors.area.goals}
             title={t.goals.emptyTitle} subtitle={t.goals.emptyText}

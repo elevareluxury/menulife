@@ -64,7 +64,7 @@ async function generateReplay(userId: string, year: number, month: number, mainC
     q('life_goals', 'id').eq('status', 'in_progress'),
     q('life_transactions', 'type,amount,currency').gte('occurred_at', fromIso).lt('occurred_at', toIso),
     q('life_brain_items', 'type').gte('created_at', fromIso).lt('created_at', toIso),
-    q('life_tasks', 'id').gte('completed_at', fromIso).lt('completed_at', toIso),
+    q('life_brain_items', 'id').eq('type', 'task').gte('completed_at', fromIso).lt('completed_at', toIso),
     q('life_achievements', 'id').gte('achieved_at', fromIso).lt('achieved_at', toIso),
   ])
   const failed = [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, achRes].find(r => r.error)

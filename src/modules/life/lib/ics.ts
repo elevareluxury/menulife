@@ -1,5 +1,7 @@
 import { taskDueAt, type LifeTask } from '../hooks/useTasks'
 
+type IcsTask = Pick<LifeTask, 'id' | 'title' | 'notes' | 'due_date' | 'due_time' | 'remind_minutes'>
+
 function esc(v: string): string {
   return v.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/([,;])/g, '\\$1')
 }
@@ -12,7 +14,7 @@ function utcStamp(d: Date): string {
  * Evento de calendario (.ics) con alarma: al abrirlo, el celular lo agrega a su
  * calendario y avisa aunque la app esté cerrada.
  */
-export function buildTaskIcs(task: LifeTask): string | null {
+export function buildTaskIcs(task: IcsTask): string | null {
   const start = taskDueAt(task)
   if (!start || !task.due_date) return null
   const lines = [
@@ -39,7 +41,7 @@ export function buildTaskIcs(task: LifeTask): string | null {
   return lines.join('\r\n')
 }
 
-export function downloadTaskIcs(task: LifeTask): boolean {
+export function downloadTaskIcs(task: IcsTask): boolean {
   const ics = buildTaskIcs(task)
   if (!ics) return false
   const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }))
