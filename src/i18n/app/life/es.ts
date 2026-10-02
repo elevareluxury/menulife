@@ -421,6 +421,14 @@ const es = {
       habitStrong: { title: 'Tu hábito más constante', text: (name: string, pct: number) => `${name}: cumpliste el ${pct}% de los días programados en los últimos 30 días.` },
     },
   },
+  connections: {
+    habits: 'Hábitos',
+    habitRate: (done: number, total: number) => `${done} de ${total} días · últimos 30`,
+    money: 'Dinero',
+    movements: (n: number) => `${n} ${n === 1 ? 'movimiento' : 'movimientos'}`,
+    notes: 'Notas e ideas',
+    hint: 'Conectá hábitos, movimientos de dinero y notas a esta meta eligiéndola al crearlos o editarlos.',
+  },
   categories: {
     Sueldo: 'Sueldo',
     Freelance: 'Freelance',

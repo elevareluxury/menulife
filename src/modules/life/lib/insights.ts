@@ -36,19 +36,21 @@ function daysBetween(from: string, to: string): string[] {
   return out
 }
 
-/** Días programados de cada hábito en una ventana (desde que existe el hábito; hoy no cuenta hasta hacerlo). */
+/** Días programados de un hábito en una ventana (desde que existe; hoy sólo cuenta si ya está hecho). */
+export function scheduledRows(
+  h: { days: number[]; created_at: string }, done: (date: string) => boolean, today: string, windowDays: number,
+): { date: string; done: boolean }[] {
+  const from = shiftDate(today, -(windowDays - 1))
+  const created = dayKey(new Date(h.created_at))
+  return daysBetween(created > from ? created : from, today)
+    .filter(d => h.days.includes(weekdayOf(d)))
+    .map(d => ({ date: d, done: done(d) }))
+    .filter(r => r.date !== today || r.done)
+}
+
 function scheduledDays(data: InsightData, windowDays: number) {
-  const from = shiftDate(data.today, -(windowDays - 1))
   const logs = new Set(data.habitLogs.map(l => `${l.habit_id}|${l.completed_date}`))
-  return data.habits.map(h => {
-    const start = dayKey(new Date(h.created_at)) > from ? dayKey(new Date(h.created_at)) : from
-    const rows = daysBetween(start, data.today)
-      .filter(d => h.days.includes(weekdayOf(d)))
-      .map(d => ({ date: d, done: logs.has(`${h.id}|${d}`) }))
-      // Hoy sólo cuenta si ya está hecho: el día no terminó
-      .filter(r => r.date !== data.today || r.done)
-    return { habit: h, rows }
-  })
+  return data.habits.map(h => ({ habit: h, rows: scheduledRows(h, d => logs.has(`${h.id}|${d}`), data.today, windowDays) }))
 }
 
 export function computeInsights(data: InsightData): Insight[] {

@@ -211,6 +211,14 @@ const de: LifeDict = {
       habitStrong: { title: 'Deine beständigste Gewohnheit', text: (name, pct) => `${name}: an ${pct} % der geplanten Tage erledigt in den letzten 30 Tagen.` },
     },
   },
+  connections: {
+    habits: 'Gewohnheiten',
+    habitRate: (done, total) => `${done} von ${total} Tagen · letzte 30`,
+    money: 'Geld',
+    movements: n => `${n} ${n === 1 ? 'Buchung' : 'Buchungen'}`,
+    notes: 'Notizen und Ideen',
+    hint: 'Verknüpfe Gewohnheiten, Buchungen und Notizen mit diesem Ziel, indem du es beim Erstellen oder Bearbeiten auswählst.',
+  },
   categories: {
     Sueldo: 'Gehalt', Freelance: 'Freelance', Comisiones: 'Provisionen', Ventas: 'Verkäufe', Inversiones: 'Investitionen',
     Vivienda: 'Wohnen', Transporte: 'Mobilität', Comida: 'Essen', Ocio: 'Freizeit', Salud: 'Gesundheit',

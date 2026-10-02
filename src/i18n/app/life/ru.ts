@@ -211,6 +211,14 @@ const ru: LifeDict = {
       habitStrong: { title: 'Самая стабильная привычка', text: (name, pct) => `${name}: ${pct}% запланированных дней за последние 30 дней.` },
     },
   },
+  connections: {
+    habits: 'Привычки',
+    habitRate: (done, total) => `${done} из ${total} дн. · последние 30`,
+    money: 'Деньги',
+    movements: n => `Операций: ${n}`,
+    notes: 'Заметки и идеи',
+    hint: 'Привяжите привычки, операции и заметки к этой цели, выбрав её при создании или редактировании.',
+  },
   categories: {
     Sueldo: 'Зарплата', Freelance: 'Фриланс', Comisiones: 'Комиссии', Ventas: 'Продажи', Inversiones: 'Инвестиции',
     Vivienda: 'Жильё', Transporte: 'Транспорт', Comida: 'Еда', Ocio: 'Досуг', Salud: 'Здоровье',

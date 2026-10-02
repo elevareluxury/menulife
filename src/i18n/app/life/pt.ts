@@ -211,6 +211,14 @@ const pt: LifeDict = {
       habitStrong: { title: 'Seu hábito mais constante', text: (name, pct) => `${name}: você cumpriu ${pct}% dos dias programados nos últimos 30 dias.` },
     },
   },
+  connections: {
+    habits: 'Hábitos',
+    habitRate: (done, total) => `${done} de ${total} dias · últimos 30`,
+    money: 'Dinheiro',
+    movements: n => `${n} ${n === 1 ? 'movimentação' : 'movimentações'}`,
+    notes: 'Notas e ideias',
+    hint: 'Conecte hábitos, movimentações e notas a esta meta escolhendo-a ao criá-los ou editá-los.',
+  },
   categories: {
     Sueldo: 'Salário', Freelance: 'Freelance', Comisiones: 'Comissões', Ventas: 'Vendas', Inversiones: 'Investimentos',
     Vivienda: 'Moradia', Transporte: 'Transporte', Comida: 'Alimentação', Ocio: 'Lazer', Salud: 'Saúde',

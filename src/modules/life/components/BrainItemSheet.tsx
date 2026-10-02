@@ -3,6 +3,7 @@ import { Lightbulb, StickyNote, CheckSquare } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
 import type { BrainItem, BrainFormData, BrainItemType } from '../hooks/useBrain'
+import { GoalSelect } from './GoalSelect'
 
 interface BrainItemSheetProps {
   open: boolean
@@ -36,7 +37,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
     if (!open) return
     /* eslint-disable react-hooks/set-state-in-effect */
     setForm(initial
-      ? { type: initial.type, title: initial.title, content: initial.content ?? '' }
+      ? { type: initial.type, title: initial.title, content: initial.content ?? '', goal_id: initial.goal_id ?? null }
       : { ...DEFAULT, type: initialType ?? 'idea' })
     setError('')
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -46,7 +47,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
     if (!form.title.trim()) { setError(s.titleRequired); return }
     setSaving(true)
     try {
-      await onSave({ type: form.type, title: form.title.trim(), content: form.content?.trim() || undefined })
+      await onSave({ type: form.type, title: form.title.trim(), content: form.content?.trim() || undefined, goal_id: form.goal_id ?? null })
       onClose()
     } catch { setError(t.common.saveError) }
     finally { setSaving(false) }
@@ -108,6 +109,8 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
       )}
 
       {form.type === 'task' && <div style={{ marginBottom: '24px' }} />}
+
+      <GoalSelect id="brain-goal" enabled={open} value={form.goal_id} onChange={goal_id => setForm(f => ({ ...f, goal_id }))} />
 
       {error && <p role="alert" style={{ fontFamily: font, fontSize: '13px', color: colors.semantic.error, marginBottom: '12px' }}>{error}</p>}
 

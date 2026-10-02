@@ -211,6 +211,14 @@ const ko: LifeDict = {
       habitStrong: { title: '가장 꾸준한 습관', text: (name, pct) => `${name}: 최근 30일 동안 예정된 날의 ${pct}%를 지켰어요.` },
     },
   },
+  connections: {
+    habits: '습관',
+    habitRate: (done, total) => `최근 30일: ${total}일 중 ${done}일`,
+    money: '돈',
+    movements: n => `거래 ${n}건`,
+    notes: '메모와 아이디어',
+    hint: '습관, 거래, 메모를 만들거나 수정할 때 이 목표를 선택하면 여기에 연결돼요.',
+  },
   categories: {
     Sueldo: '급여', Freelance: '프리랜스', Comisiones: '수수료', Ventas: '판매', Inversiones: '투자',
     Vivienda: '주거', Transporte: '교통', Comida: '식비', Ocio: '여가', Salud: '건강',

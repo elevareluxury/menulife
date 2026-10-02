@@ -211,6 +211,14 @@ const hi: LifeDict = {
       habitStrong: { title: 'आपकी सबसे नियमित आदत', text: (name, pct) => `${name}: पिछले 30 दिनों में तय दिनों का ${pct}% पूरा किया।` },
     },
   },
+  connections: {
+    habits: 'आदतें',
+    habitRate: (done, total) => `पिछले 30 दिनों में ${total} में से ${done} दिन`,
+    money: 'पैसा',
+    movements: n => `${n} लेन-देन`,
+    notes: 'नोट और विचार',
+    hint: 'आदतें, लेन-देन और नोट बनाते या बदलते समय यह लक्ष्य चुनें, वे यहाँ जुड़ जाएँगे।',
+  },
   categories: {
     Sueldo: 'वेतन', Freelance: 'फ्रीलांस', Comisiones: 'कमीशन', Ventas: 'बिक्री', Inversiones: 'निवेश',
     Vivienda: 'आवास', Transporte: 'यातायात', Comida: 'खाना', Ocio: 'मनोरंजन', Salud: 'स्वास्थ्य',

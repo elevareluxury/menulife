@@ -25,6 +25,7 @@ export interface BrainItem {
   due_date?: string | null
   due_time?: string | null
   is_focus?: boolean | null
+  goal_id?: string | null
   created_at: string
   updated_at: string
 }
@@ -33,6 +34,7 @@ export interface BrainFormData {
   type: BrainItemType
   title: string
   content?: string
+  goal_id?: string | null
 }
 
 /** Texto de búsqueda seguro para el filtro `or` de PostgREST. */

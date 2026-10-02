@@ -9,6 +9,7 @@ import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../lib/lifePalette'
 import type { Transaction, TransactionFormData } from '../hooks/useMoney'
+import { GoalSelect } from './GoalSelect'
 
 interface TransactionSheetProps {
   open: boolean
@@ -48,7 +49,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
       if (initial) {
         setForm({ type: initial.type, amount: initial.amount, category: initial.category,
           description: initial.description ?? '', currency: initial.currency,
-          occurred_at: initial.occurred_at.split('T')[0] })
+          occurred_at: initial.occurred_at.split('T')[0], goal_id: initial.goal_id ?? null })
         setAmountStr(String(initial.amount))
       } else {
         setForm({ ...DEFAULT, currency })
@@ -252,6 +253,8 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
           }}
         />
       </div>
+
+      <GoalSelect id="tx-goal" enabled={open} value={form.goal_id} onChange={goal_id => setForm(f => ({ ...f, goal_id }))} />
 
       {error && (
         <p style={{ fontFamily: font, fontSize: '12px', color: colors.semantic.error, marginBottom: '12px' }}>
