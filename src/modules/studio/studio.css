@@ -14,7 +14,12 @@
   --st-danger: #F87171;
   --st-ok: #4ADE80;
   --st-radius: 12px;
-  min-height: 100svh;
+  /* Marco de app: scrollea .st-root y no la página, así iOS no mueve la barra inferior
+     y una pantalla corta no scrollea. */
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   background: var(--st-bg);
   color: var(--st-text);
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -22,7 +27,7 @@
 }
 
 /* ── Layout ─────────────────────────────────────────────────────── */
-.st-layout { display: flex; min-height: 100svh; }
+.st-layout { display: flex; min-height: 100%; }
 
 .st-sidebar {
   display: none; width: 232px; flex-shrink: 0; padding: 20px 14px;
@@ -232,7 +237,7 @@
 .st-desktop-frame { width: 100%; border-radius: 14px; overflow: hidden; border: 1px solid var(--st-border); }
 .st-desktop-frame .st-phone-scroll { height: 70svh; }
 
-.st-center { min-height: 100svh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.st-center { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; }
 
 .st-root :focus-visible, .st-bottom-nav :focus-visible { outline: 2px solid var(--st-text); outline-offset: 2px; }
 .st-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

@@ -57,8 +57,13 @@ export function LifeShell() {
   if (!user) return <Navigate to="/login" replace />
 
   return (
-    <div style={{
-      minHeight: '100dvh',
+    // Marco de app: la página no scrollea, scrollea este contenedor. Así iOS no mueve
+    // el menú ni el botón + (rebote / barra de Safari) y si el contenido entra no hay scroll.
+    <div data-scroll-root style={{
+      height: '100dvh',
+      overflowY: 'auto',
+      overscrollBehaviorY: 'contain',
+      WebkitOverflowScrolling: 'touch',
       background: '#0F1115',
       color: '#F5F7FA',
       paddingBottom: 'calc(88px + env(safe-area-inset-bottom))',

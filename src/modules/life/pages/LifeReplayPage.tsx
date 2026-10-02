@@ -237,7 +237,7 @@ export function LifeReplayPage() {
   const hasData = summary.habitsDone > 0 || summary.goalsCompleted > 0 || summary.monthBalance !== 0 || summary.tasksCompleted > 0
 
   return (
-    <div style={{ background: colors.bg, minHeight: '100vh', paddingBottom: 'calc(32px + env(safe-area-inset-bottom))' }}>
+    <div style={{ background: colors.bg, paddingBottom: 'calc(32px + env(safe-area-inset-bottom))' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 16px' }}>
 
         {/* Back button */}
