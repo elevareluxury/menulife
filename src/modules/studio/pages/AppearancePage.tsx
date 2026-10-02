@@ -5,24 +5,25 @@ import type { ProfileTheme } from '@/modules/profile/lib/profileTypes'
 import { useStudio } from '../StudioContext'
 import { PageHeader, Toggle } from '../components/ui'
 import { EditTabs, ProfileSaveIndicator } from '../components/shared'
+import { useStudioT } from '@/i18n/app/studio'
 
 const ACCENTS = [
-  { value: QUIET.ivory, label: 'Marfil' },
-  { value: QUIET.obsidian, label: 'Obsidiana' },
-  { value: '#F4705A', label: 'Coral' },
-  { value: '#F59E0B', label: 'Ámbar' },
-  { value: '#22C55E', label: 'Verde' },
-  { value: '#3B82F6', label: 'Azul' },
-  { value: '#A78BFA', label: 'Lavanda' },
-  { value: '#EC4899', label: 'Rosa' },
-]
+  { value: QUIET.ivory, key: 'ivory' },
+  { value: QUIET.obsidian, key: 'obsidian' },
+  { value: '#F4705A', key: 'coral' },
+  { value: '#F59E0B', key: 'amber' },
+  { value: '#22C55E', key: 'green' },
+  { value: '#3B82F6', key: 'blue' },
+  { value: '#A78BFA', key: 'lavender' },
+  { value: '#EC4899', key: 'pink' },
+] as const
 
 const FONTS = [
-  { value: 'geist', label: 'Geist', family: "'Geist', sans-serif", note: 'Moderna · por defecto' },
-  { value: 'instrument', label: 'Instrument Serif', family: "'Instrument Serif', serif", note: 'Editorial' },
-  { value: 'space-grotesk', label: 'Space Grotesk', family: "'Space Grotesk', sans-serif", note: 'Técnica' },
-  { value: 'playfair', label: 'Playfair', family: "'Playfair Display', serif", note: 'Clásica' },
-  { value: 'bebas', label: 'Bebas Neue', family: "'Bebas Neue', sans-serif", note: 'Impacto · nombres cortos' },
+  { value: 'geist', label: 'Geist', family: "'Geist', sans-serif" },
+  { value: 'instrument', label: 'Instrument Serif', family: "'Instrument Serif', serif" },
+  { value: 'space-grotesk', label: 'Space Grotesk', family: "'Space Grotesk', sans-serif" },
+  { value: 'playfair', label: 'Playfair', family: "'Playfair Display', serif" },
+  { value: 'bebas', label: 'Bebas Neue', family: "'Bebas Neue', sans-serif" },
 ]
 
 function luminance(hex: string): number | null {
@@ -45,6 +46,7 @@ function contrastRatio(a: string, b: string): number | null {
 
 export function AppearancePage() {
   const { profile, patchProfile } = useStudio()
+  const a = useStudioT().appearance
   const theme: ProfileTheme = profile.theme ?? {}
   const mode = theme.mode === 'light' ? 'light' : 'dark'
   const accent = theme.accent ?? QUIET.ivory
@@ -60,28 +62,28 @@ export function AppearancePage() {
   return (
     <>
       <EditTabs />
-      <PageHeader title="Apariencia" subtitle="Libertad estética dentro de un sistema que siempre se lee bien." actions={<ProfileSaveIndicator />} />
+      <PageHeader title={a.title} subtitle={a.subtitle} actions={<ProfileSaveIndicator />} />
 
       <section className="st-card st-stack">
-        <h2 className="st-card-title" style={{ margin: 0 }}>Tema</h2>
-        <div className="st-segment" role="group" aria-label="Tema">
-          <button type="button" aria-pressed={mode === 'dark'} onClick={() => setTheme({ mode: 'dark' })}>Oscuro</button>
-          <button type="button" aria-pressed={mode === 'light'} onClick={() => setTheme({ mode: 'light' })}>Claro</button>
+        <h2 className="st-card-title" style={{ margin: 0 }}>{a.theme}</h2>
+        <div className="st-segment" role="group" aria-label={a.theme}>
+          <button type="button" aria-pressed={mode === 'dark'} onClick={() => setTheme({ mode: 'dark' })}>{a.dark}</button>
+          <button type="button" aria-pressed={mode === 'light'} onClick={() => setTheme({ mode: 'light' })}>{a.light}</button>
         </div>
       </section>
 
       <section className="st-card st-stack">
-        <h2 className="st-card-title" style={{ margin: 0 }}>Color de acento</h2>
-        <p className="st-help" style={{ margin: 0 }}>Se usa en el botón de tu acción principal.</p>
-        <div className="st-swatches" role="group" aria-label="Color de acento">
-          {ACCENTS.map(a => (
-            <button key={a.value} type="button" className="st-swatch" style={{ background: a.value }}
-              aria-pressed={accent.toLowerCase() === a.value.toLowerCase()} aria-label={a.label} title={a.label}
-              onClick={() => setTheme({ accent: a.value })} />
+        <h2 className="st-card-title" style={{ margin: 0 }}>{a.accent}</h2>
+        <p className="st-help" style={{ margin: 0 }}>{a.accentHelp}</p>
+        <div className="st-swatches" role="group" aria-label={a.accent}>
+          {ACCENTS.map(c => (
+            <button key={c.value} type="button" className="st-swatch" style={{ background: c.value }}
+              aria-pressed={accent.toLowerCase() === c.value.toLowerCase()} aria-label={a.accents[c.key]} title={a.accents[c.key]}
+              onClick={() => setTheme({ accent: c.value })} />
           ))}
-          <label htmlFor={customId} className="st-swatch" title="Otro color"
+          <label htmlFor={customId} className="st-swatch" title={a.otherColor}
             style={{ background: 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)', position: 'relative', overflow: 'hidden' }}>
-            <span className="st-sr-only">Elegir otro color</span>
+            <span className="st-sr-only">{a.chooseOther}</span>
             <input id={customId} type="color" value={/^#[0-9a-f]{6}$/i.test(accent) ? accent : '#ffffff'}
               onChange={e => setTheme({ accent: e.target.value })}
               style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
@@ -90,15 +92,14 @@ export function AppearancePage() {
         {lowContrast && (
           <p className="st-error" role="status" style={{ color: '#FBBF24' }}>
             <AlertTriangle size={14} aria-hidden="true" />
-            Este color no se lee bien sobre el tema {mode === 'light' ? 'claro' : 'oscuro'}: en tu perfil se va a usar
-            {mode === 'light' ? ' negro' : ' marfil'} para mantener la legibilidad.
+            {a.lowContrast(mode === 'light')}
           </p>
         )}
       </section>
 
       <section className="st-card st-stack">
-        <h2 className="st-card-title" style={{ margin: 0 }}>Tipografía del nombre</h2>
-        <div className="st-stack" style={{ gap: 8 }} role="radiogroup" aria-label="Tipografía">
+        <h2 className="st-card-title" style={{ margin: 0 }}>{a.font}</h2>
+        <div className="st-stack" style={{ gap: 8 }} role="radiogroup" aria-label={a.font}>
           {FONTS.map(f => {
             const current = FONTS.some(x => x.value === theme.title_font) ? theme.title_font : 'geist'
             const selected = current === f.value
@@ -106,8 +107,8 @@ export function AppearancePage() {
               <button key={f.value} type="button" role="radio" aria-checked={selected}
                 onClick={() => setTheme({ title_font: f.value })}
                 className="st-module" style={{ cursor: 'pointer', justifyContent: 'space-between', borderColor: selected ? 'var(--st-text)' : undefined, color: 'inherit' }}>
-                <span style={{ fontFamily: f.family, fontSize: 20, fontWeight: 700 }}>{profile.display_name || 'Tu nombre'}</span>
-                <span className="st-help">{f.note}</span>
+                <span style={{ fontFamily: f.family, fontSize: 20, fontWeight: 700 }}>{profile.display_name || a.yourName}</span>
+                <span className="st-help">{a.fonts[f.value]}</span>
               </button>
             )
           })}
@@ -115,7 +116,7 @@ export function AppearancePage() {
       </section>
 
       <section className="st-card">
-        <Toggle label='Mostrar "Abierto ahora"' description="Sólo aparece si tenés un módulo de Horarios."
+        <Toggle label={a.openStatus} description={a.openStatusHelp}
           checked={theme.show_open_status !== false} onChange={v => setTheme({ show_open_status: v })} />
       </section>
     </>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useLocaleStore } from '@/store/localeStore'
 import { computeLifeScore } from '../lib/lifeScoreEngine'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,12 +72,14 @@ const INITIAL: LifeData = {
 export function useLifeData(): LifeData {
   const { user } = useAuthStore()
   const [data, setData] = useState<LifeData>(INITIAL)
+  const currency = useLocaleStore(s => s.currency)
 
   useEffect(() => {
     if (!user) return
     let cancelled = false
 
-    const today = new Date().toISOString().split('T')[0]
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
 
     async function fetchAll() {
@@ -93,7 +96,7 @@ export function useLifeData(): LifeData {
         db.from('life_goals').select('id,name,progress,color').eq('user_id', user!.id).eq('status', 'in_progress').order('sort_order').limit(5),
         db.from('life_habits').select('id,name,color,icon').eq('user_id', user!.id).eq('is_active', true).order('sort_order').limit(8),
         db.from('life_habit_logs').select('habit_id').eq('user_id', user!.id).eq('completed_date', today),
-        db.from('life_transactions').select('type,amount').eq('user_id', user!.id).gte('occurred_at', monthStart),
+        db.from('life_transactions').select('type,amount,currency').eq('user_id', user!.id).gte('occurred_at', monthStart),
         db.from('life_brain_items').select('id').eq('user_id', user!.id).eq('type', 'task').eq('is_completed', false).eq('is_archived', false),
         db.from('life_achievements').select('id,type,title,achieved_at').eq('user_id', user!.id).order('achieved_at', { ascending: false }).limit(5),
       ])
@@ -104,7 +107,9 @@ export function useLifeData(): LifeData {
       const goals: ActiveGoal[] = goalsRes.data ?? []
       const habits: Array<{ id: string; name: string; color: string; icon: string }> = habitsRes.data ?? []
       const logs: Array<{ habit_id: string }> = logsRes.data ?? []
-      const txs: Array<{ type: string; amount: string }> = txRes.data ?? []
+      const allTxs: Array<{ type: string; amount: string; currency: string }> = txRes.data ?? []
+      // El balance del inicio es en la moneda principal; las otras se ven en Dinero
+      const txs = allTxs.filter(t => t.currency === currency)
       const tasks: Array<{ id: string }> = tasksRes.data ?? []
       const achievements: Achievement[] = achievementsRes.data ?? []
 
@@ -118,7 +123,7 @@ export function useLifeData(): LifeData {
       const monthExpense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
 
       const isNewUser = !storedScore && goals.length === 0 && habits.length === 0 &&
-        txs.length === 0 && tasks.length === 0 && achievements.length === 0
+        allTxs.length === 0 && tasks.length === 0 && achievements.length === 0
 
       // Compute + upsert score if missing and user has data
       let finalScore = storedScore
@@ -131,7 +136,7 @@ export function useLifeData(): LifeData {
           habitsTotalToday: habits.length,
           activeGoalsCount: goals.length,
           avgGoalProgress,
-          hasMoneyData: txs.length > 0,
+          hasMoneyData: allTxs.length > 0,
           hasAchievements: achievements.length > 0,
         })
         finalScore = computed
@@ -173,7 +178,7 @@ export function useLifeData(): LifeData {
 
     fetchAll()
     return () => { cancelled = true }
-  }, [user])
+  }, [user, currency])
 
   return data
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { isReservedUsername } from '@/lib/reservedUsernames'
 import { checkUsername, type UsernameCheck } from './studioApi'
+import type { StudioDict } from '@/i18n/app/studio'
 
 export type UsernameStatus = UsernameCheck | 'idle' | 'checking' | 'same' | 'error'
 
@@ -37,13 +38,7 @@ export function useUsernameCheck(value: string, current?: string): UsernameStatu
   return result?.value === value ? result.status : 'checking'
 }
 
-export const USERNAME_MESSAGES: Record<UsernameStatus, string> = {
-  idle: 'Entre 3 y 30 caracteres: letras minúsculas, números y guiones.',
-  checking: 'Verificando…',
-  same: 'Es tu username actual.',
-  available: '¡Disponible!',
-  taken: 'Ya está en uso.',
-  reserved: 'Está reservado por el sistema.',
-  invalid: 'Usá entre 3 y 30 letras minúsculas, números o guiones (sin guion al principio o al final).',
-  error: 'No pudimos verificarlo. Revisá tu conexión.',
+/** Mensaje del estado del username en el idioma activo. */
+export function usernameMessage(t: StudioDict, status: UsernameStatus): string {
+  return t.username[status]
 }

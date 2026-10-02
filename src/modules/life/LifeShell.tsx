@@ -9,6 +9,8 @@ import { CaptureButton } from './components/CaptureButton'
 import { AchievementToast } from './components/AchievementToast'
 import { useTaskReminders } from './hooks/useTaskReminders'
 import { useAppBackground } from '@/lib/useAppBackground'
+import { useAppLang } from '@/i18n/app/store'
+import { langDir } from '@/i18n/app/languages'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -18,6 +20,7 @@ export function LifeShell() {
   const { setHasRestaurant, setRestaurantName, setRestaurantSlug, setRestaurantPlan } = useLifeStore()
   const [timedOut, setTimedOut] = useState(false)
   useTaskReminders(user?.id)
+  const dir = langDir(useAppLang(s => s.lang))
 
   // Fondo oscuro en html y body: sin flashes blancos ni franjas al llegar a los bordes
   useAppBackground('#0F1115')
@@ -59,7 +62,7 @@ export function LifeShell() {
   return (
     // Marco de app: la página no scrollea, scrollea este contenedor. Así iOS no mueve
     // el menú ni el botón + (rebote / barra de Safari) y si el contenido entra no hay scroll.
-    <div data-scroll-root style={{
+    <div data-scroll-root dir={dir} style={{
       height: '100dvh',
       overflowY: 'auto',
       overscrollBehaviorY: 'contain',

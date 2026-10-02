@@ -6,6 +6,7 @@ import type { ContactCardSettings } from '../lib/studioTypes'
 import { useCopy } from '../lib/useCopy'
 import { Button, PageHeader, TextField, Toggle } from '../components/ui'
 import { ProfileSaveIndicator } from '../components/shared'
+import { useStudioT } from '@/i18n/app/studio'
 
 function svgToPng(svg: SVGSVGElement, size: number): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -39,6 +40,7 @@ export function ExchangePage() {
   const { profile, publicUrl, patchProfile } = useStudio()
   const qrRef = useRef<HTMLDivElement>(null)
   const { copied, copy } = useCopy()
+  const x = useStudioT().exchange
   // El QR lleva ?src=qr para medir cuántas visitas llegan por QR
   const qrUrl = `${publicUrl}?src=qr`
   const card = profile.contact_card ?? { enabled: false }
@@ -69,61 +71,61 @@ export function ExchangePage() {
 
   return (
     <>
-      <PageHeader title="Compartir" subtitle="Tu identidad, lista para que otros lleguen a vos." actions={<ProfileSaveIndicator />} />
+      <PageHeader title={x.title} subtitle={x.subtitle} actions={<ProfileSaveIndicator />} />
 
       {!isPublished && (
         <p className="st-card st-help" role="status" style={{ marginTop: 0 }}>
-          Tu perfil no está publicado: quien escanee el QR o abra el link va a ver que no está disponible.
+          {x.unpublished}
         </p>
       )}
 
       <section className="st-card st-stack">
-        <h2 className="st-card-title" style={{ margin: 0 }}>Tu link</h2>
+        <h2 className="st-card-title" style={{ margin: 0 }}>{x.yourLink}</h2>
         <div className="st-row">
           <span className="st-url" title={publicUrl}>{publicUrl.replace(/^https?:\/\//, '')}</span>
         </div>
         <div className="st-row" style={{ flexWrap: 'wrap' }}>
           <Button size="sm" onClick={() => copy(publicUrl)}>
-            {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />} {copied ? 'Copiado' : 'Copiar link'}
+            {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />} {copied ? x.copied : x.copyLink}
           </Button>
-          <Button size="sm" onClick={share}><Share2 size={15} aria-hidden="true" /> Compartir</Button>
+          <Button size="sm" onClick={share}><Share2 size={15} aria-hidden="true" /> {x.share}</Button>
           <a className="st-btn st-btn-ghost st-btn-sm" href={publicUrl} target="_blank" rel="noopener noreferrer">
-            <ExternalLink size={15} aria-hidden="true" /> Abrir perfil
+            <ExternalLink size={15} aria-hidden="true" /> {x.openProfile}
           </a>
         </div>
       </section>
 
       <section className="st-card st-stack" style={{ alignItems: 'center', textAlign: 'center' }}>
-        <h2 className="st-card-title" style={{ margin: 0, alignSelf: 'flex-start' }}>Código QR</h2>
+        <h2 className="st-card-title" style={{ margin: 0, alignSelf: 'flex-start' }}>{x.qr}</h2>
         <div ref={qrRef} style={{ background: '#fff', padding: 16, borderRadius: 16 }}>
-          <QRCodeSVG value={qrUrl} size={200} level="M" marginSize={0} title={`QR de ${profile.display_name}`} />
+          <QRCodeSVG value={qrUrl} size={200} level="M" marginSize={0} title={x.qrOf(profile.display_name)} />
         </div>
-        <p className="st-help" style={{ margin: 0 }}>Lleva a {publicUrl.replace(/^https?:\/\//, '')}</p>
+        <p className="st-help" style={{ margin: 0 }}>{x.leadsTo(publicUrl.replace(/^https?:\/\//, ''))}</p>
         <div className="st-row">
           <Button size="sm" onClick={downloadPng}><Download size={15} aria-hidden="true" /> PNG</Button>
-          <Button size="sm" onClick={downloadSvg}><Download size={15} aria-hidden="true" /> SVG (imprenta)</Button>
+          <Button size="sm" onClick={downloadSvg}><Download size={15} aria-hidden="true" /> {x.svgPrint}</Button>
         </div>
       </section>
 
       <section className="st-card st-stack">
-        <Toggle label="Botón “Guardar contacto”"
-          description="Permite descargar tu contacto al celular. Sólo incluye los datos que cargues acá."
+        <Toggle label={x.saveContact}
+          description={x.saveContactHelp}
           checked={!!card.enabled} onChange={v => setCard({ enabled: v })} />
         {card.enabled && (
           <div className="st-grid-2">
-            <TextField label="Nombre" required value={card.name ?? ''} onChange={v => setCard({ name: v })}
+            <TextField label={x.name} required value={card.name ?? ''} onChange={v => setCard({ name: v })}
               placeholder={profile.display_name} maxLength={80} />
-            <TextField label="Cargo" value={card.title ?? ''} onChange={v => setCard({ title: v })} maxLength={80} />
-            <TextField label="Empresa" value={card.organization ?? ''} onChange={v => setCard({ organization: v })} maxLength={80} />
-            <TextField label="Email" type="email" value={card.email ?? ''} onChange={v => setCard({ email: v })} />
-            <TextField label="Teléfono" type="tel" value={card.phone ?? ''} onChange={v => setCard({ phone: v })} />
-            <TextField label="WhatsApp" type="tel" value={card.whatsapp ?? ''} onChange={v => setCard({ whatsapp: v })} />
-            <TextField label="Web" type="url" value={card.website ?? ''} onChange={v => setCard({ website: v })} />
+            <TextField label={x.jobTitle} value={card.title ?? ''} onChange={v => setCard({ title: v })} maxLength={80} />
+            <TextField label={x.company} value={card.organization ?? ''} onChange={v => setCard({ organization: v })} maxLength={80} />
+            <TextField label={x.email} type="email" value={card.email ?? ''} onChange={v => setCard({ email: v })} />
+            <TextField label={x.phone} type="tel" value={card.phone ?? ''} onChange={v => setCard({ phone: v })} />
+            <TextField label={x.whatsapp} type="tel" value={card.whatsapp ?? ''} onChange={v => setCard({ whatsapp: v })} />
+            <TextField label={x.web} type="url" value={card.website ?? ''} onChange={v => setCard({ website: v })} />
           </div>
         )}
         {card.enabled && (
           <p className="st-help" style={{ margin: 0 }}>
-            No se agrega nada automáticamente: tu email o teléfono de la cuenta no se comparten si no los escribís acá.
+            {x.privacyNote}
           </p>
         )}
       </section>

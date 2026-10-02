@@ -59,13 +59,13 @@ export function LinkModule({ module, lang, onAction }: ModuleProps) {
 
 // ── Social (se agrupan las redes consecutivas en una fila) ───────────────────
 
-export function SocialRow({ modules, onAction }: { modules: ProfileModule[]; onAction: (id: string) => void }) {
+export function SocialRow({ modules, lang, onAction }: { modules: ProfileModule[]; lang: ProfileLang; onAction: (id: string) => void }) {
   const items = modules
     .map(m => ({ m, href: safeHref(m.content.url), network: str(m.content.network) }))
     .filter((x): x is { m: ProfileModule; href: string; network: string } => !!x.href)
   if (!items.length) return null
   return (
-    <nav className="mp-socials" aria-label="Redes sociales">
+    <nav className="mp-socials" aria-label={ui(lang).socials}>
       {items.map(({ m, href, network }) => (
         <a key={m.id} className="mp-social" href={href} {...linkProps(href)}
           aria-label={NETWORK_LABELS[network] ?? m.title ?? network}
@@ -251,7 +251,7 @@ export function GalleryModule({ module, lang }: ModuleProps) {
       </div>
       {current && (
         <div className="mp-lightbox" role="dialog" aria-modal="true" onClick={() => setOpen(null)}>
-          <button type="button" className="mp-icon-btn" aria-label="Cerrar" onClick={() => setOpen(null)}>
+          <button type="button" className="mp-icon-btn" aria-label={ui(lang).close} onClick={() => setOpen(null)}>
             <X size={20} />
           </button>
           {isVideo(current)
@@ -360,12 +360,12 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
   const heading = tr(module.title, module.translations, 'title', lang)
 
   return (
-    <section aria-label={heading || 'Tarjetas'}>
+    <section aria-label={heading || ui(lang).cards}>
       {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
       <div className={layout === 'carousel' ? 'mp-cards-carousel' : 'mp-cards-stack'}
         tabIndex={layout === 'carousel' ? 0 : undefined}
         role={layout === 'carousel' ? 'region' : undefined}
-        aria-label={layout === 'carousel' ? `${heading || 'Tarjetas'} — deslizá para ver más` : undefined}>
+        aria-label={layout === 'carousel' ? `${heading || ui(lang).cards} — ${ui(lang).swipeHint}` : undefined}>
         {visible.map((item, i) => {
           const href = safeHref(item.url)
           const title = (lang === 'en' && item.en?.title) || item.title || ''

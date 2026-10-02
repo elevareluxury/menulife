@@ -4,6 +4,7 @@ import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import type {
   DailyStat, ProfilePatch, StudioBusiness, StudioModule, StudioProfile,
 } from './studioTypes'
+import { studioT } from '@/i18n/app/studio'
 
 // profiles / profile_modules / profile_stats_daily todavía no están en database.types.ts
 const db = supabase as unknown as SupabaseClient
@@ -14,13 +15,14 @@ const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 /** Traduce errores de la base a mensajes para el usuario (sin detalles internos). */
 export function friendlyError(err: unknown): string {
   const msg = (err as { message?: string })?.message ?? ''
-  if (msg.includes('USERNAME_TAKEN') || msg.includes('profiles_username_key')) return 'Ese nombre de usuario ya está en uso.'
-  if (msg.includes('USERNAME_RESERVED')) return 'Ese nombre de usuario está reservado.'
-  if (msg.includes('USERNAME_INVALID') || msg.includes('profiles_username_format')) return 'Usá entre 3 y 30 letras minúsculas, números o guiones.'
-  if (msg.includes('MODULE_LIMIT_REACHED')) return 'Llegaste al máximo de 100 módulos.'
-  if (msg.includes('profiles_text_lengths') || msg.includes('profile_modules_sizes')) return 'Algún texto es demasiado largo.'
-  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) return 'Sin conexión. Revisá internet e intentá de nuevo.'
-  return 'No pudimos guardar. Intentá de nuevo.'
+  const e = studioT().errors
+  if (msg.includes('USERNAME_TAKEN') || msg.includes('profiles_username_key')) return e.usernameTaken
+  if (msg.includes('USERNAME_RESERVED')) return e.usernameReserved
+  if (msg.includes('USERNAME_INVALID') || msg.includes('profiles_username_format')) return e.usernameInvalid
+  if (msg.includes('MODULE_LIMIT_REACHED')) return e.moduleLimit
+  if (msg.includes('profiles_text_lengths') || msg.includes('profile_modules_sizes')) return e.tooLong
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) return e.offline
+  return e.generic
 }
 
 export async function loadMyProfile(userId: string): Promise<StudioProfile | null> {
@@ -53,9 +55,10 @@ export async function loadBusiness(restaurantId: string | null): Promise<StudioB
   return (data as StudioBusiness | null) ?? null
 }
 
-export async function createProfile(userId: string, username: string, displayName: string): Promise<StudioProfile> {
+export async function createProfile(userId: string, username: string, displayName: string, locale = 'es'): Promise<StudioProfile> {
   const { data, error } = await db.from('profiles').insert({
     user_id: userId,
+    default_locale: locale,
     username: username.trim().toLowerCase(),
     display_name: displayName.trim(),
     purpose: 'personal',
@@ -116,8 +119,8 @@ export async function saveOrder(modules: StudioModule[]): Promise<void> {
 }
 
 export async function uploadMedia(userId: string, file: File): Promise<string> {
-  if (!file.type.startsWith('image/')) throw new Error('Elegí una imagen (JPG, PNG o WebP).')
-  if (file.size > MAX_UPLOAD_BYTES) throw new Error('La imagen supera los 5 MB.')
+  if (!file.type.startsWith('image/')) throw new Error(studioT().errors.notImage)
+  if (file.size > MAX_UPLOAD_BYTES) throw new Error(studioT().errors.tooBig)
   const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
   const path = `${userId}/${crypto.randomUUID()}.${ext}`
   const { error } = await db.storage.from(MEDIA_BUCKET).upload(path, file, {

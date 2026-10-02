@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { AlertCircle, Check, ImagePlus, Trash2, X } from 'lucide-react'
 import type { SaveState } from '../lib/studioTypes'
+import { useStudioT } from '@/i18n/app/studio'
 
 // ── Botón ───────────────────────────────────────────────────────────────────
 
@@ -89,11 +90,12 @@ export function SelectField({ label, value, onChange, options, required, error }
   error?: string | null
 }) {
   const id = useId()
+  const t = useStudioT()
   return (
     <Field label={label} required={required} error={error} htmlFor={id}>
       <select id={id} className="st-select" value={value} onChange={e => onChange(e.target.value)}>
         {!required && <option value="">—</option>}
-        {required && !value && <option value="" disabled>Elegí una opción</option>}
+        {required && !value && <option value="" disabled>{t.common.chooseOption}</option>}
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
     </Field>
@@ -127,13 +129,14 @@ export function Toggle({ checked, onChange, label, description, disabled }: {
 // ── Indicador de guardado (Saving / Saved / Error) ──────────────────────────
 
 export function SaveIndicator({ state, error, onRetry }: { state: SaveState; error?: string | null; onRetry?: () => void }) {
+  const t = useStudioT().common
   if (state === 'idle') return null
-  if (state === 'saving') return <span className="st-save" role="status"><span className="st-spinner" aria-hidden="true" /> Guardando…</span>
-  if (state === 'saved') return <span className="st-save" role="status"><Check size={14} aria-hidden="true" /> Guardado</span>
+  if (state === 'saving') return <span className="st-save" role="status"><span className="st-spinner" aria-hidden="true" /> {t.saving}</span>
+  if (state === 'saved') return <span className="st-save" role="status"><Check size={14} aria-hidden="true" /> {t.saved}</span>
   return (
     <span className="st-save is-error" role="alert">
-      <AlertCircle size={14} aria-hidden="true" /> {error ?? 'Error al guardar'}
-      {onRetry && <> · <button type="button" onClick={onRetry}>Reintentar</button></>}
+      <AlertCircle size={14} aria-hidden="true" /> {error ?? t.saveError}
+      {onRetry && <> · <button type="button" onClick={onRetry}>{t.retry}</button></>}
     </span>
   )
 }
@@ -152,12 +155,13 @@ export function ImageField({ label, value, onUpload, onClear, shape = 'square', 
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const id = useId()
+  const t = useStudioT().common
 
   async function handle(file: File | undefined) {
     if (!file) return
     setBusy(true); setError(null)
     try { await onUpload(file) }
-    catch (e) { setError((e as Error).message || 'No se pudo subir la imagen.') }
+    catch (e) { setError((e as Error).message || t.uploadError) }
     finally { setBusy(false) }
   }
 
@@ -169,11 +173,11 @@ export function ImageField({ label, value, onUpload, onClear, shape = 'square', 
           : <div className={`st-image-thumb${shape === 'round' ? ' is-round' : shape === 'wide' ? ' is-wide' : ''}`} aria-hidden="true" />}
         <div className="st-row" style={{ flexWrap: 'wrap' }}>
           <Button size="sm" loading={busy} onClick={() => ref.current?.click()}>
-            <ImagePlus size={15} aria-hidden="true" /> {value ? 'Cambiar' : 'Subir imagen'}
+            <ImagePlus size={15} aria-hidden="true" /> {value ? t.change : t.upload}
           </Button>
           {value && !busy && (
-            <Button size="sm" variant="ghost" onClick={onClear} aria-label={`Quitar ${label.toLowerCase()}`}>
-              <Trash2 size={15} aria-hidden="true" /> Quitar
+            <Button size="sm" variant="ghost" onClick={onClear} aria-label={t.removeLabel(label.toLowerCase())}>
+              <Trash2 size={15} aria-hidden="true" /> {t.remove}
             </Button>
           )}
         </div>
@@ -193,13 +197,14 @@ export function Drawer({ title, onClose, children, footer }: {
   footer?: ReactNode
 }) {
   const titleId = useId()
+  const t = useStudioT().common
   useEscape(onClose)
   return (
     <div className="st-overlay" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="st-drawer" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="st-drawer-head">
           <h2 id={titleId}>{title}</h2>
-          <button type="button" className="st-icon-btn" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
+          <button type="button" className="st-icon-btn" onClick={onClose} aria-label={t.close}><X size={18} /></button>
         </div>
         <div className="st-drawer-body">{children}</div>
         {footer && <div className="st-drawer-foot">{footer}</div>}
@@ -220,6 +225,7 @@ export function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm,
   loading?: boolean
 }) {
   const titleId = useId()
+  const t = useStudioT().common
   useEscape(onCancel)
   return (
     <div className="st-dialog-wrap" onMouseDown={e => { if (e.target === e.currentTarget) onCancel() }}>
@@ -227,7 +233,7 @@ export function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm,
         <h2 id={titleId}>{title}</h2>
         <p>{message}</p>
         <div className="st-row" style={{ justifyContent: 'flex-end' }}>
-          <Button variant="ghost" onClick={onCancel} autoFocus>Cancelar</Button>
+          <Button variant="ghost" onClick={onCancel} autoFocus>{t.cancel}</Button>
           <Button variant={danger ? 'danger' : 'primary'} loading={loading} onClick={onConfirm}>{confirmLabel}</Button>
         </div>
       </div>

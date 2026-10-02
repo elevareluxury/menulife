@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Flame, Plus, Check, MoreHorizontal, Pencil, Trash2, Power } from 'lucide-react'
+import { useLifeT } from '@/i18n/app/life'
 import {
   LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
   colors, font, radius, stagger, fadeInUp, scaleIn,
@@ -204,6 +205,7 @@ function HabitCard({ habit, onToggle, onEdit, onDelete, onToggleActive }: {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export function LifeHabitsPage() {
+  const tNav = useLifeT().nav
   const {
     activeHabits, completedToday, totalToday,
     loading, toggleToday, createHabit, updateHabit, deleteHabit, toggleActive,
@@ -226,7 +228,7 @@ export function LifeHabitsPage() {
             <Flame size={20} style={{ color: colors.area.habits }} strokeWidth={2} />
           </div>
           <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>
-            Habits
+            {tNav.habits}
           </h1>
         </div>
         <button

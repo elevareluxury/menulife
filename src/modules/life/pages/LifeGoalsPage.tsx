@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Target, Plus, MoreHorizontal, Pencil, Trash2, Pause, Play, CheckCircle2 } from 'lucide-react'
+import { useLifeT } from '@/i18n/app/life'
 import {
   LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
   MiniProgressRing, colors, font, radius, stagger, fadeInUp, scaleIn,
@@ -160,6 +161,7 @@ function GoalCard({ goal, onOpen, onEdit, onDelete, onToggleStatus }: {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export function LifeGoalsPage() {
+  const tNav = useLifeT().nav
   const {
     goals, loading,
     activeCount, completedCount, avgProgress,
@@ -194,7 +196,7 @@ export function LifeGoalsPage() {
             <Target size={20} style={{ color: colors.area.goals }} strokeWidth={2} />
           </div>
           <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>
-            Goals
+            {tNav.goals}
           </h1>
         </div>
         {view === 'goals' && <button

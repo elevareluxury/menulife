@@ -10,6 +10,7 @@ import { GoalSheet } from './GoalSheet'
 import { TransactionSheet } from './TransactionSheet'
 import { colors, font, radius } from '../design-system'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
+import { useLifeT } from '@/i18n/app/life'
 import type { BrainItemType } from '../hooks/useBrain'
 import type { GoalFormData } from '../hooks/useGoals'
 import type { TransactionFormData } from '../hooks/useMoney'
@@ -19,17 +20,18 @@ const db = supabase as any
 
 // ── Actions config ────────────────────────────────────────────────────────────
 const ACTIONS = [
-  { id: 'idea',        label: 'Idea',        icon: Lightbulb,   color: '#8B5CF6' },
-  { id: 'note',        label: 'Nota',        icon: StickyNote,  color: '#3B82F6' },
-  { id: 'task',        label: 'Tarea',       icon: CheckSquare, color: '#22C55E' },
-  { id: 'goal',        label: 'Meta',        icon: Target,      color: colors.area.goals },
-  { id: 'transaction', label: 'Movimiento',  icon: TrendingUp,  color: colors.area.money },
+  { id: 'idea',        icon: Lightbulb,   color: '#8B5CF6' },
+  { id: 'note',        icon: StickyNote,  color: '#3B82F6' },
+  { id: 'task',        icon: CheckSquare, color: '#22C55E' },
+  { id: 'goal',        icon: Target,      color: colors.area.goals },
+  { id: 'transaction', icon: TrendingUp,  color: colors.area.money },
 ] as const
 
 type ActionId = typeof ACTIONS[number]['id']
 
 export function CaptureButton() {
   const { user } = useAuthStore()
+  const t = useLifeT()
 
 
   const [open, setOpen]             = useState(false)
@@ -154,7 +156,7 @@ export function CaptureButton() {
                 }}>
                   <action.icon size={14} style={{ color: action.color }} strokeWidth={2.5} />
                 </div>
-                {action.label}
+                {t.capture[action.id]}
               </motion.button>
             ))}
           </div>
@@ -182,7 +184,7 @@ export function CaptureButton() {
           zIndex: 49,
           transition: 'background 0.22s ease, box-shadow 0.22s ease',
         }}
-        aria-label={open ? 'Cerrar' : 'Capturar'}
+        aria-label={open ? t.capture.close : t.capture.open}
       >
         <motion.div
           animate={{ rotate: open ? 45 : 0 }}

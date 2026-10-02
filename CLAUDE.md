@@ -29,9 +29,18 @@ Referencia de producto: "MYCEN — Etapa 2" (UX/UI, arquitectura y criterios de 
 - Corte hecho: `/dashboard/hub` y `/life/hub` redirigen a `/studio`. Usuarios sin perfil ven el onboarding de 5 pasos (`OnboardingWizard`).
 - Life OS Goals tiene Agenda (`life_tasks`): recordatorios con la app abierta + `.ics` para el calendario del celular.
 
-## Idioma
-- Interfaz en español (rioplatense) primero, con i18n (`src/i18n`).
-- Profile con botón ES/EN: traducción automática cacheada en `translations` (jsonb) de `profiles` y `profile_modules`.
+## Idioma y región
+- 12 idiomas: es, en, pt, fr, de, it, zh, ja, ko, hi, ar (RTL), ru — lista en `src/i18n/app/languages.ts`
+  (sincronizada con los checks de `user_settings.language` y `profiles.default_locale`).
+- Life OS, Studio y Profile usan diccionarios tipados por módulo en `src/i18n/app/{life,studio}/<idioma>.ts`
+  (el español es la fuente; `tsc` obliga a que cada idioma tenga todas las claves). Mycen Business sigue con i18next (`src/i18n/*.ts`).
+- Textos del Profile público (botones del sistema) en `src/modules/profile/lib/profileI18n.ts`.
+- Preferencias de la cuenta en `user_settings` (idioma, moneda principal, monedas extra, zona horaria, inicio de semana):
+  `src/lib/prefs.ts` (`usePrefs`, `savePrefs`), se cargan en `PrefsInit`. Ajustes en `/life/settings` y Studio → Ajustes.
+- Dinero: nunca sumar monedas distintas; cada movimiento guarda su `currency`.
+- El contenido que escribe el dueño se muestra en su idioma original (`default_locale`) o en la traducción guardada en `translations`;
+  la traducción automática con Claude está pendiente (Fase 7).
+- Interfaz en español (rioplatense) primero.
 
 ## Reglas
 - No simular funcionalidades sin datos reales; no inventar métricas.

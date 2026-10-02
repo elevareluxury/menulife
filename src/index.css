@@ -1387,3 +1387,6 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 @media (max-width: 767px) {
   input, textarea, select { font-size: 16px !important; }
 }
+
+/* Íconos direccionales (flechas, chevrons) se espejan en idiomas de derecha a izquierda */
+[dir='rtl'] .flip-rtl { transform: scaleX(-1); }
