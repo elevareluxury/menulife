@@ -34,6 +34,9 @@ Referencia de producto: "MYCEN — Etapa 2" (UX/UI, arquitectura y criterios de 
 - Life OS: borrar con "Deshacer" (`src/modules/life/lib/undo.tsx`), "hoy" que cambia a medianoche (`useToday`),
   rachas según los días programados del hábito, progreso de metas = pasos hechos/total (sin pasos, manual),
   Replay calculado con fechas reales del mes (sin Life Score). Menús "⋯" con `ActionMenu` (táctil).
+- Inicio de Life OS (`/life`) = "Tu día": tareas de hoy (foco + vencen hoy + hechas hoy), hábitos programados para hoy,
+  metas en curso y el mes en la moneda principal (las otras monedas aparte). Cada tarjeta usa el hook de su módulo.
+  No hay Life Score (la tabla `life_score` es legado; no se escribe más).
 
 ## Idioma y región
 - 12 idiomas: es, en, pt, fr, de, it, zh, ja, ko, hi, ar (RTL), ru — lista en `src/i18n/app/languages.ts`
