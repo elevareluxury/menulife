@@ -9,7 +9,9 @@ import { BrainItemSheet } from './BrainItemSheet'
 import { GoalSheet } from './GoalSheet'
 import { TransactionSheet } from './TransactionSheet'
 import { TaskSheet } from './TaskSheet'
-import { insertTask, type TaskFormData } from '../hooks/useTasks'
+import { taskColumns, type TaskFormData } from '../hooks/useTasks'
+import { enqueue, isOfflineError, type OutboxItem } from '../lib/outbox'
+import toast from 'react-hot-toast'
 import { colors, font, radius } from '../design-system'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
 import { useLifeT } from '@/i18n/app/life'
@@ -57,59 +59,72 @@ export function CaptureButton() {
     }
   }
 
-  const handleBrainSave = async (data: { type: BrainItemType; title: string; content?: string }) => {
+  /**
+   * Inserta la fila; si no hay conexión la deja en la cola del dispositivo (se sube sola después).
+   * Devuelve true si se guardó en la base ahora.
+   */
+  const saveOrQueue = async (item: OutboxItem): Promise<boolean> => {
+    try {
+      const { error } = await db.from(item.table).insert(item.row)
+      if (error) throw error
+      window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: item.module } }))
+      return true
+    } catch (e) {
+      if (!isOfflineError(e)) throw e
+      enqueue(item)
+      toast(t.offline.queued, { icon: '☁️' })
+      return false
+    }
+  }
+
+  const awardFirstCapture = async (userId: string, type: BrainItemType) => {
+    const { count: total } = await db.from('life_brain_items')
+      .select('*', { count: 'exact', head: true }).eq('user_id', userId)
+    if (total === 1) void award(userId, 'first_brain_item', 'Primera captura')
+    if (type === 'idea') {
+      const { count: ic } = await db.from('life_brain_items')
+        .select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('type', 'idea')
+      if (ic === 10) void award(userId, 'ideas_10', '10 ideas guardadas')
+      if (ic === 50) void award(userId, 'ideas_50', '50 ideas guardadas')
+    }
+  }
+
+  const handleBrainSave = async (data: { type: BrainItemType; title: string; content?: string; goal_id?: string | null }) => {
     if (!user) return
-    const { error } = await db.from('life_brain_items').insert({
-      ...data, user_id: user.id, is_completed: false, is_archived: false,
-    })
-    if (error) throw error
-    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
-    ;(async () => {
-      const { count: total } = await db.from('life_brain_items')
-        .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-      if (total === 1) void award(user.id, 'first_brain_item', 'Primera captura')
-      if (data.type === 'idea') {
-        const { count: ic } = await db.from('life_brain_items')
-          .select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('type', 'idea')
-        if (ic === 10) void award(user.id, 'ideas_10', '10 ideas guardadas')
-        if (ic === 50) void award(user.id, 'ideas_50', '50 ideas guardadas')
-      }
-    })()
+    const row = { id: crypto.randomUUID(), ...data, user_id: user.id, is_completed: false, is_archived: false }
+    if (await saveOrQueue({ table: 'life_brain_items', row, module: 'brain' })) void awardFirstCapture(user.id, data.type)
   }
 
   const handleTaskSave = async (data: TaskFormData) => {
     if (!user) return
-    await insertTask(user.id, data)
-    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
-    void (async () => {
-      const { count: total } = await db.from('life_brain_items')
-        .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-      if (total === 1) void award(user.id, 'first_brain_item', 'Primera captura')
-    })()
+    const row = { id: crypto.randomUUID(), ...taskColumns(data), type: 'task', user_id: user.id, is_completed: false, is_archived: false }
+    if (await saveOrQueue({ table: 'life_brain_items', row, module: 'brain' })) void awardFirstCapture(user.id, 'task')
   }
 
   const handleGoalSave = async (data: GoalFormData) => {
     if (!user) return
-    const { count: existing } = await db.from('life_goals')
-      .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-    const { error } = await db.from('life_goals').insert({ ...data, user_id: user.id, sort_order: existing ?? 0 })
-    if (error) throw error
-    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'goals' } }))
-    void award(user.id, 'first_goal', 'Primera meta definida')
-    const newCount = (existing ?? 0) + 1
-    if (newCount >= 5) void award(user.id, 'goals_5', 'Cinco metas')
+    let existing = 0
+    try {
+      const { count } = await db.from('life_goals').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+      existing = count ?? 0
+    } catch { /* sin conexión: va al final igual */ }
+    const row = { id: crypto.randomUUID(), ...data, user_id: user.id, sort_order: existing }
+    if (await saveOrQueue({ table: 'life_goals', row, module: 'goals' })) {
+      void award(user.id, 'first_goal', 'Primera meta definida')
+      if (existing + 1 >= 5) void award(user.id, 'goals_5', 'Cinco metas')
+    }
   }
 
   const handleMoneySave = async (data: TransactionFormData) => {
     if (!user) return
-    const { error } = await db.from('life_transactions').insert({ ...data, user_id: user.id })
-    if (error) throw error
-    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'money' } }))
-    void (async () => {
-      const { count } = await db.from('life_transactions')
-        .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-      if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
-    })()
+    const row = { id: crypto.randomUUID(), ...data, user_id: user.id }
+    if (await saveOrQueue({ table: 'life_transactions', row, module: 'money' })) {
+      void (async () => {
+        const { count } = await db.from('life_transactions')
+          .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+        if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
+      })()
+    }
   }
 
   // Portal a <body>: el botón fijo no depende de ningún contenedor

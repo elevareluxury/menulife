@@ -75,7 +75,7 @@ export function taskDueAt(t: Pick<LifeTask, 'due_date' | 'due_time'>): Date | nu
   return Number.isNaN(d.getTime()) ? null : d
 }
 
-function toColumns(data: TaskFormData) {
+export function taskColumns(data: TaskFormData) {
   return {
     title: data.title.trim(),
     content: data.notes?.trim() || null,
@@ -90,7 +90,7 @@ function toColumns(data: TaskFormData) {
 /** Crea una tarea en Brain (lo usa también el botón +). */
 export async function insertTask(userId: string, data: TaskFormData): Promise<LifeTask> {
   const { data: row, error } = await db.from('life_brain_items')
-    .insert({ ...toColumns(data), type: 'task', user_id: userId, is_completed: false, is_archived: false })
+    .insert({ ...taskColumns(data), type: 'task', user_id: userId, is_completed: false, is_archived: false })
     .select(COLUMNS).single()
   if (error) throw error
   return fromRow(row as BrainTaskRow)
@@ -143,7 +143,7 @@ export function useTasks() {
   const updateTask = useCallback(async (id: string, data: TaskFormData) => {
     // Si cambia la fecha/hora/aviso, el recordatorio vuelve a quedar pendiente
     const { data: row, error: err } = await db.from('life_brain_items')
-      .update({ ...toColumns(data), reminded_at: null, updated_at: new Date().toISOString() })
+      .update({ ...taskColumns(data), reminded_at: null, updated_at: new Date().toISOString() })
       .eq('id', id).select(COLUMNS).single()
     if (err) throw err
     setTasks(prev => prev.map(t => (t.id === id ? fromRow(row as BrainTaskRow) : t)))

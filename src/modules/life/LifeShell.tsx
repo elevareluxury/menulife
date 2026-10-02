@@ -7,6 +7,8 @@ import { Spinner } from '@/components/ui/Spinner'
 import { LifeNav } from './components/LifeNav'
 import { CaptureButton } from './components/CaptureButton'
 import { AchievementToast } from './components/AchievementToast'
+import { OfflineBanner } from './components/OfflineBanner'
+import { flushOutbox } from './lib/outbox'
 import { useTaskReminders } from './hooks/useTaskReminders'
 import { useAppBackground } from '@/lib/useAppBackground'
 import { useAppLang } from '@/i18n/app/store'
@@ -30,6 +32,15 @@ export function LifeShell() {
     const t = setTimeout(() => setTimedOut(true), 5_000)
     return () => clearTimeout(t)
   }, [])
+
+  // Capturas guardadas sin conexión: se suben al entrar y cada vez que vuelve la red
+  useEffect(() => {
+    if (!user) return
+    const flush = () => { void flushOutbox() }
+    flush()
+    window.addEventListener('online', flush)
+    return () => window.removeEventListener('online', flush)
+  }, [user])
 
   // Detect if user has a business restaurant (for showing the "Mi negocio" link)
   useEffect(() => {
@@ -71,6 +82,7 @@ export function LifeShell() {
       color: '#F5F7FA',
       paddingBottom: 'calc(88px + env(safe-area-inset-bottom))',
     }}>
+      <OfflineBanner />
       <Outlet />
       <CaptureButton />
       <AchievementToast />
