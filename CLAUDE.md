@@ -27,7 +27,10 @@ Referencia de producto: "MYCEN — Etapa 2" (UX/UI, arquitectura y criterios de 
 - Studio: `src/modules/studio/` en `/studio/*` (Inicio, Mi identidad, Módulos, Apariencia, Compartir, Analítica, Ajustes).
   El perfil se guarda solo (autosave con estados Guardando/Guardado/Error); los módulos se guardan al confirmar el panel.
 - Corte hecho: `/dashboard/hub` y `/life/hub` redirigen a `/studio`. Usuarios sin perfil ven el onboarding de 5 pasos (`OnboardingWizard`).
-- Life OS Goals tiene Agenda (`life_tasks`): recordatorios con la app abierta + `.ics` para el calendario del celular.
+- Tareas: viven en Brain (`life_brain_items` con `type='task'`: fecha, hora, recordatorio, meta, "foco de hoy").
+  Brain tiene 3 vistas: Capturas (ideas y notas), Tareas (lista por vencimiento o calendario; `?vista=tareas`) y Archivo.
+  Recordatorios con la app abierta + `.ics` para el calendario del celular. `life_tasks` es legado (ya copiada a Brain).
+  Goals es sólo metas: cada meta muestra sus tareas vinculadas (`goal_id`).
 - Life OS: borrar con "Deshacer" (`src/modules/life/lib/undo.tsx`), "hoy" que cambia a medianoche (`useToday`),
   rachas según los días programados del hábito, progreso de metas = pasos hechos/total (sin pasos, manual),
   Replay calculado con fechas reales del mes (sin Life Score). Menús "⋯" con `ActionMenu` (táctil).

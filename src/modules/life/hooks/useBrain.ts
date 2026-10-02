@@ -21,6 +21,10 @@ export interface BrainItem {
   content: string | null
   is_completed: boolean
   is_archived: boolean
+  // Sólo en tareas
+  due_date?: string | null
+  due_time?: string | null
+  is_focus?: boolean | null
   created_at: string
   updated_at: string
 }
@@ -38,7 +42,7 @@ function searchPattern(q: string): string {
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useBrain({ archived = false, query = '', type = null }: { archived?: boolean; query?: string; type?: BrainItemType | null } = {}) {
+export function useBrain({ archived = false, query = '', types = null }: { archived?: boolean; query?: string; types?: BrainItemType[] | null } = {}) {
   const { user } = useAuthStore()
   const [items, setItems]     = useState<BrainItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -46,6 +50,7 @@ export function useBrain({ archived = false, query = '', type = null }: { archiv
   const [hasMore, setHasMore] = useState(false)
   const [counts, setCounts]   = useState({ idea: 0, note: 0, task: 0 })
   const q = query.trim()
+  const typeKey = types ? [...types].sort().join(',') : ''
 
   const fetchPage = useCallback(async (offset: number) => {
     if (!user) return { rows: [] as BrainItem[], err: null }
@@ -53,14 +58,14 @@ export function useBrain({ archived = false, query = '', type = null }: { archiv
       .eq('user_id', user.id).eq('is_archived', archived)
       .order('created_at', { ascending: false })
       .range(offset, offset + PAGE - 1)
-    if (type) req = req.eq('type', type)
+    if (typeKey) req = req.in('type', typeKey.split(','))
     if (q.length >= 2) {
       const p = searchPattern(q)
       req = req.or(`title.ilike.${p},content.ilike.${p}`)
     }
     const { data, error: err } = await req
     return { rows: (data ?? []) as BrainItem[], err }
-  }, [user, archived, q, type])
+  }, [user, archived, q, typeKey])
 
   const loadCounts = useCallback(async () => {
     if (!user || archived) return

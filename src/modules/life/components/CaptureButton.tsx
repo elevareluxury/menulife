@@ -8,6 +8,8 @@ import { award } from '../lib/checkMilestone'
 import { BrainItemSheet } from './BrainItemSheet'
 import { GoalSheet } from './GoalSheet'
 import { TransactionSheet } from './TransactionSheet'
+import { TaskSheet } from './TaskSheet'
+import { insertTask, type TaskFormData } from '../hooks/useTasks'
 import { colors, font, radius } from '../design-system'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
 import { useLifeT } from '@/i18n/app/life'
@@ -39,10 +41,13 @@ export function CaptureButton() {
   const [brainType, setBrainType]   = useState<BrainItemType>('idea')
   const [goalOpen, setGoalOpen]     = useState(false)
   const [moneyOpen, setMoneyOpen]   = useState(false)
+  const [taskOpen, setTaskOpen]     = useState(false)
 
   const handleAction = (id: ActionId) => {
     setOpen(false)
-    if (id === 'idea' || id === 'note' || id === 'task') {
+    if (id === 'task') {
+      setTaskOpen(true)
+    } else if (id === 'idea' || id === 'note') {
       setBrainType(id)
       setBrainOpen(true)
     } else if (id === 'goal') {
@@ -69,6 +74,17 @@ export function CaptureButton() {
         if (ic === 10) void award(user.id, 'ideas_10', '10 ideas guardadas')
         if (ic === 50) void award(user.id, 'ideas_50', '50 ideas guardadas')
       }
+    })()
+  }
+
+  const handleTaskSave = async (data: TaskFormData) => {
+    if (!user) return
+    await insertTask(user.id, data)
+    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
+    void (async () => {
+      const { count: total } = await db.from('life_brain_items')
+        .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+      if (total === 1) void award(user.id, 'first_brain_item', 'Primera captura')
     })()
   }
 
@@ -205,6 +221,11 @@ export function CaptureButton() {
         onClose={() => setBrainOpen(false)}
         initialType={brainType}
         onSave={handleBrainSave}
+      />
+      <TaskSheet
+        open={taskOpen}
+        onClose={() => setTaskOpen(false)}
+        onSave={handleTaskSave}
       />
       <GoalSheet
         open={goalOpen}

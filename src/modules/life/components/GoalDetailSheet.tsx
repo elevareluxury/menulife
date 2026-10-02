@@ -6,6 +6,8 @@ import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { LifeSheet, MiniProgressRing, colors, font, radius } from '../design-system'
 import type { Goal, Milestone } from '../hooks/useGoals'
+import { useTasks } from '../hooks/useTasks'
+import { TaskList } from './TasksView'
 
 interface GoalDetailSheetProps {
   goal: Goal | null
@@ -181,6 +183,8 @@ export function GoalDetailSheet({
           {addError && <p role="alert" style={{ fontFamily: font, fontSize: '12px', color: colors.semantic.error, margin: '6px 0 0' }}>{t.common.saveError}</p>}
         </div>
 
+        <GoalTasks goal={goal} />
+
         {/* Progreso manual (sólo sin pasos) */}
         {!hasMilestones && (
           <div style={{ marginBottom: '20px' }}>
@@ -228,5 +232,57 @@ export function GoalDetailSheet({
         </button>
       </div>
     </LifeSheet>
+  )
+}
+
+/** Tareas de Brain vinculadas a la meta (se completan desde acá; se crean ya vinculadas). */
+function GoalTasks({ goal }: { goal: Goal }) {
+  const t = useLifeT()
+  const { tasks, loading, createTask, toggleTask } = useTasks()
+  const [title, setTitle] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const mine = tasks
+    .filter(x => x.goal_id === goal.id)
+    .sort((a, b) => Number(!!a.completed_at) - Number(!!b.completed_at) || (a.due_date ?? '9999').localeCompare(b.due_date ?? '9999'))
+
+  const add = async () => {
+    if (!title.trim() || adding) return
+    setAdding(true); setFailed(false)
+    try {
+      await createTask({ title: title.trim(), goal_id: goal.id })
+      setTitle('')
+    } catch { setFailed(true) } finally { setAdding(false) }
+  }
+
+  return (
+    <div style={{ marginBottom: '20px' }}>
+      <p style={sectionLabel}>{t.tasks.goalTasks}</p>
+      {!loading && mine.length === 0 && (
+        <p style={{ fontFamily: font, fontSize: '12.5px', color: colors.text.tertiary, margin: '0 0 10px', lineHeight: 1.5 }}>{t.tasks.goalTasksEmpty}</p>
+      )}
+      {mine.length > 0 && (
+        <TaskList tasks={mine} showDate
+          onToggle={x => { toggleTask(x).catch(() => setFailed(true)) }} />
+      )}
+      <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+        <input value={title} onChange={e => setTitle(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') void add() }}
+          placeholder={t.tasks.goalTaskPlaceholder} aria-label={t.tasks.goalTaskPlaceholder} maxLength={200}
+          style={{
+            flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: radius.sm,
+            background: colors.surface.high, border: `1px solid ${failed ? colors.semantic.error : colors.border.subtle}`,
+            color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
+          }} />
+        <button type="button" onClick={() => void add()} disabled={adding || !title.trim()} aria-label={t.agenda.addTask}
+          style={{
+            width: 44, height: 44, borderRadius: radius.sm, background: goal.color, border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: !title.trim() ? 0.4 : 1, flexShrink: 0,
+          }}>
+          <Plus size={18} style={{ color: '#fff' }} strokeWidth={2.5} aria-hidden="true" />
+        </button>
+      </div>
+      {failed && <p role="alert" style={{ fontFamily: font, fontSize: '12px', color: colors.semantic.error, margin: '6px 0 0' }}>{t.common.saveError}</p>}
+    </div>
   )
 }

@@ -1,9 +1,10 @@
 import { useState, useMemo, useRef, type KeyboardEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
   Zap, Lightbulb, StickyNote, CheckSquare, Check, Pencil, Archive, ArchiveRestore, Trash2, Search, X,
-  AlertTriangle, ArrowLeft,
+  AlertTriangle, Star, CalendarDays,
 } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
@@ -18,6 +19,7 @@ import { ActionMenu } from '../components/ActionMenu'
 import { deleteWithUndo } from '../lib/undo'
 import { dayKey, useToday } from '../hooks/useToday'
 import { shiftDate } from '../hooks/useHabits'
+import { TasksView } from '../components/TasksView'
 
 const TYPE_META = {
   idea: { icon: Lightbulb,   color: '#8B5CF6' },
@@ -25,8 +27,13 @@ const TYPE_META = {
   task: { icon: CheckSquare, color: '#22C55E' },
 } as const
 
-const FILTERS = ['todo', 'idea', 'note', 'task'] as const
+const FILTERS = ['todo', 'idea', 'note'] as const
 type Filter = typeof FILTERS[number]
+
+const VIEWS = ['captures', 'tasks', 'archive'] as const
+type View = typeof VIEWS[number]
+// Valor de ?vista= en la URL (en español, como el resto de las rutas de Life OS)
+const VIEW_PARAM: Record<View, string> = { captures: 'capturas', tasks: 'tareas', archive: 'archivo' }
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function BrainSkeleton() {
@@ -52,6 +59,7 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
   onDelete: () => void
 }) {
   const t = useLifeT()
+  const locale = langLocale(useAppLang(s => s.lang))
   const [expanded, setExpanded] = useState(false)
   const meta = TYPE_META[item.type]
   const Icon = meta.icon
@@ -102,6 +110,22 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
                 : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
             }}>
               {item.content}
+            </p>
+          )}
+          {isTask && (item.due_date || item.is_focus) && (
+            <p style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary, margin: '2px 0 0' }}>
+              {item.is_focus && !item.is_completed && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: colors.accent.default }}>
+                  <Star size={11} fill="currentColor" aria-hidden="true" />{t.tasks.focus}
+                </span>
+              )}
+              {item.due_date && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                  <CalendarDays size={11} aria-hidden="true" />
+                  {new Date(`${item.due_date}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
+                  {item.due_time ? ` · ${item.due_time.slice(0, 5)}` : ''}
+                </span>
+              )}
             </p>
           )}
           {long && (
@@ -189,23 +213,21 @@ function QuickCapture({ onCapture }: { onCapture: (type: BrainItemType, title: s
   )
 }
 
-// ── Página ────────────────────────────────────────────────────────────────────
-export function LifeBrainPage() {
-  const tNav = useLifeT().nav
+
+// ── Capturas / Archivo ────────────────────────────────────────────────────────
+function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean; searchQ: string; onShowTasks: () => void }) {
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
-  const [filter, setFilter]         = useState<Filter>('todo')
-  const [archived, setArchivedView] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQ, setSearchQ]       = useState('')
-  const [editItem, setEditItem]     = useState<BrainItem | null>(null)
-  const [sheetOpen, setSheetOpen]   = useState(false)
+  const [filter, setFilter]     = useState<Filter>('todo')
+  const [editItem, setEditItem] = useState<BrainItem | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
+  const types: BrainItemType[] | null = archived ? null : filter === 'todo' ? ['idea', 'note'] : [filter]
   const {
     items, loading, error, hasMore, reload, loadMore,
     ideasCount, notesCount, tasksCount, totalCount,
     createItem, updateItem, deleteItem, setArchived, hideLocally, toggleComplete,
-  } = useBrain({ archived, query: searchQ, type: filter === 'todo' ? null : filter })
+  } = useBrain({ archived, query: searchQ, types })
 
   const today = useToday()
   const grouped = useMemo(() => {
@@ -236,6 +258,11 @@ export function LifeBrainPage() {
     // Archivar también se puede deshacer
     deleteWithUndo({ message: t.undo.archived(item.title), commit: () => setArchived(item.id, true), restore: () => void reload() })
   }
+  const capture = async (type: BrainItemType, title: string) => {
+    await createItem({ type, title })
+    // Las tareas no se listan en Capturas: avisamos dónde quedaron
+    if (type === 'task') toast.success(t.tasks.savedToTasks)
+  }
 
   const q = searchQ.trim()
   const emptyHint = archived
@@ -245,89 +272,42 @@ export function LifeBrainPage() {
       : t.brain.empty[filter]
 
   return (
-    <LifeScreenContainer>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: '24px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-          {archived ? (
-            <button type="button" onClick={() => setArchivedView(false)} aria-label={t.brain.hideArchived}
-              style={{ width: 40, height: 40, borderRadius: radius.full, border: `1px solid ${colors.border.subtle}`, background: 'transparent', color: colors.text.secondary, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
-              <ArrowLeft size={18} aria-hidden="true" className="flip-rtl" />
-            </button>
-          ) : (
-            <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.brain}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Zap size={20} style={{ color: colors.area.brain }} strokeWidth={2} aria-hidden="true" />
-            </div>
-          )}
-          <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {archived ? t.brain.archivedTitle : tNav.brain}
-          </h1>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          {!archived && (
-            <button type="button" onClick={() => setArchivedView(true)} aria-label={t.brain.showArchived} title={t.brain.showArchived}
-              style={{ width: 40, height: 40, borderRadius: radius.full, background: 'transparent', border: `1px solid ${colors.border.subtle}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.text.secondary }}>
-              <Archive size={16} aria-hidden="true" />
-            </button>
-          )}
-          <button type="button" onClick={() => { setSearchOpen(v => !v); if (searchOpen) setSearchQ('') }}
-            aria-label={searchOpen ? t.brain.closeSearch : t.brain.search} aria-expanded={searchOpen}
-            style={{
-              width: 40, height: 40, borderRadius: radius.full,
-              background: searchOpen ? colors.area.brain + '18' : 'transparent',
-              border: `1px solid ${searchOpen ? colors.area.brain + '40' : colors.border.subtle}`,
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: searchOpen ? colors.area.brain : colors.text.secondary,
-            }}>
-            {searchOpen ? <X size={16} strokeWidth={2.5} aria-hidden="true" /> : <Search size={16} strokeWidth={2} aria-hidden="true" />}
-          </button>
-        </div>
-      </div>
-
+    <>
       {!archived && totalCount > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '12px' }}>
           {([['idea', ideasCount], ['note', notesCount], ['task', tasksCount]] as const).map(([k, value]) => (
-            <LifeCard key={k} style={{ textAlign: 'center', padding: '10px 6px' }}>
-              <p style={{ fontFamily: font, fontSize: '20px', fontWeight: 800, color: TYPE_META[k].color, margin: '0 0 1px' }}>{value}</p>
-              <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.tertiary, margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            <button key={k} type="button" onClick={() => (k === 'task' ? onShowTasks() : setFilter(k))}
+              style={{
+                textAlign: 'center', padding: '10px 6px', cursor: 'pointer', borderRadius: radius.xl,
+                background: colors.surface.base, border: `1px solid ${filter === k ? TYPE_META[k].color + '50' : colors.border.subtle}`,
+              }}>
+              <span style={{ display: 'block', fontFamily: font, fontSize: '20px', fontWeight: 800, color: TYPE_META[k].color, margin: '0 0 1px' }}>{value}</span>
+              <span style={{ display: 'block', fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.tertiary, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                 {t.brain.counts[k]}
-              </p>
-            </LifeCard>
+              </span>
+            </button>
           ))}
         </div>
       )}
 
-      {!archived && <QuickCapture onCapture={(type, title) => createItem({ type, title })} />}
+      {!archived && <QuickCapture onCapture={capture} />}
 
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-            style={{ overflow: 'hidden', marginBottom: '10px' }}>
-            <input value={searchQ} onChange={e => setSearchQ(e.target.value)}
-              placeholder={t.brain.searchPlaceholder} aria-label={t.brain.searchPlaceholder} type="search"
-                  autoFocus
+      {!archived && (
+        <div role="radiogroup" aria-label={t.brain.captureType} style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '2px' }}>
+          {FILTERS.map(f => (
+            <button key={f} type="button" role="radio" aria-checked={filter === f} onClick={() => setFilter(f)}
               style={{
-                width: '100%', padding: '10px 14px', boxSizing: 'border-box', borderRadius: radius.md,
-                background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
-                color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
-              }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div role="tablist" aria-label={tNav.brain} style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '2px' }}>
-        {FILTERS.map(f => (
-          <button key={f} type="button" role="tab" aria-selected={filter === f} onClick={() => setFilter(f)}
-            style={{
-              minHeight: 36, padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
-              background: filter === f ? colors.area.brain : colors.surface.high,
-              border: `1px solid ${filter === f ? colors.area.brain : colors.border.subtle}`,
-              color: filter === f ? '#fff' : colors.text.secondary,
-              fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer',
-            }}>
-            {t.brain.filters[f]}
-          </button>
-        ))}
-      </div>
+                minHeight: 36, padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
+                background: filter === f ? colors.area.brain : colors.surface.high,
+                border: `1px solid ${filter === f ? colors.area.brain : colors.border.subtle}`,
+                color: filter === f ? '#fff' : colors.text.secondary,
+                fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+              }}>
+              {t.brain.filters[f]}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading ? <BrainSkeleton /> : error ? (
         <LifeCard>
@@ -373,6 +353,92 @@ export function LifeBrainPage() {
           else await createItem(data)
         }}
       />
+    </>
+  )
+}
+
+// ── Página ────────────────────────────────────────────────────────────────────
+export function LifeBrainPage() {
+  const t = useLifeT()
+  const [params, setParams] = useSearchParams()
+  const param = params.get('vista')
+  const view: View = VIEWS.find(v => VIEW_PARAM[v] === param) ?? 'captures'
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQ, setSearchQ]       = useState('')
+
+  const setView = (v: View) => {
+    setParams(prev => {
+      const next = new URLSearchParams(prev)
+      if (v === 'captures') next.delete('vista')
+      else next.set('vista', VIEW_PARAM[v])
+      return next
+    }, { replace: true })
+  }
+
+  const canSearch = view !== 'tasks'
+
+  return (
+    <LifeScreenContainer>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: '24px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+          <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.brain}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Zap size={20} style={{ color: colors.area.brain }} strokeWidth={2} aria-hidden="true" />
+          </div>
+          <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {t.nav.brain}
+          </h1>
+        </div>
+        {canSearch && (
+          <button type="button" onClick={() => { setSearchOpen(v => !v); if (searchOpen) setSearchQ('') }}
+            aria-label={searchOpen ? t.brain.closeSearch : t.brain.search} aria-expanded={searchOpen}
+            style={{
+              width: 40, height: 40, borderRadius: radius.full, flexShrink: 0,
+              background: searchOpen ? colors.area.brain + '18' : 'transparent',
+              border: `1px solid ${searchOpen ? colors.area.brain + '40' : colors.border.subtle}`,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: searchOpen ? colors.area.brain : colors.text.secondary,
+            }}>
+            {searchOpen ? <X size={16} strokeWidth={2.5} aria-hidden="true" /> : <Search size={16} strokeWidth={2} aria-hidden="true" />}
+          </button>
+        )}
+      </div>
+
+      <div role="tablist" aria-label={t.tasks.viewsLabel} style={{
+        display: 'flex', padding: 4, gap: 4, marginBottom: '14px', borderRadius: radius.full,
+        background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
+      }}>
+        {VIEWS.map(v => (
+          <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}
+            style={{
+              flex: 1, minHeight: 40, padding: '9px 8px', borderRadius: radius.full, border: 'none', cursor: 'pointer',
+              background: view === v ? `${colors.area.brain}22` : 'transparent',
+              color: view === v ? colors.area.brain : colors.text.secondary,
+              fontFamily: font, fontSize: '13px', fontWeight: 700,
+            }}>
+            {t.tasks.views[v]}
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {canSearch && searchOpen && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            style={{ overflow: 'hidden', marginBottom: '10px' }}>
+            <input value={searchQ} onChange={e => setSearchQ(e.target.value)}
+              placeholder={t.brain.searchPlaceholder} aria-label={t.brain.searchPlaceholder} type="search"
+              autoFocus
+              style={{
+                width: '100%', padding: '10px 14px', boxSizing: 'border-box', borderRadius: radius.md,
+                background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
+                color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
+              }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {view === 'tasks'
+        ? <TasksView />
+        : <BrainItemsView key={view} archived={view === 'archive'} searchQ={canSearch && searchOpen ? searchQ : ''} onShowTasks={() => setView('tasks')} />}
     </LifeScreenContainer>
   )
 }
