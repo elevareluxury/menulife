@@ -52,6 +52,7 @@ export interface Habit {
   frequency: HabitFrequency
   is_active: boolean
   sort_order: number
+  goal_id?: string | null
   // calculados
   completedToday: boolean
   streak: number
@@ -64,6 +65,7 @@ export interface HabitFormData {
   icon: string
   color: string
   frequency: HabitFrequency
+  goal_id?: string | null
 }
 
 type RawHabit = Omit<Habit, 'completedToday' | 'streak' | 'week' | 'scheduledToday'>

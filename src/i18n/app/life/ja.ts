@@ -211,6 +211,14 @@ const ja: LifeDict = {
       habitStrong: { title: 'いちばん続いている習慣', text: (name, pct) => `${name}：過去 30 日の予定日の ${pct}% を達成。` },
     },
   },
+  connections: {
+    habits: '習慣',
+    habitRate: (done, total) => `過去 30 日：${total} 日中 ${done} 日`,
+    money: 'お金',
+    movements: n => `${n} 件の取引`,
+    notes: 'メモとアイデア',
+    hint: '習慣・取引・メモを作成または編集するときにこの目標を選ぶと、ここにつながります。',
+  },
   categories: {
     Sueldo: '給与', Freelance: 'フリーランス', Comisiones: '手数料', Ventas: '売上', Inversiones: '投資',
     Vivienda: '住居', Transporte: '交通', Comida: '食費', Ocio: '娯楽', Salud: '健康',

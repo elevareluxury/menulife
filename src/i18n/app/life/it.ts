@@ -211,6 +211,14 @@ const it: LifeDict = {
       habitStrong: { title: 'La tua abitudine più costante', text: (name, pct) => `${name}: rispettata nel ${pct}% dei giorni programmati negli ultimi 30 giorni.` },
     },
   },
+  connections: {
+    habits: 'Abitudini',
+    habitRate: (done, total) => `${done} su ${total} giorni · ultimi 30`,
+    money: 'Denaro',
+    movements: n => `${n} ${n === 1 ? 'movimento' : 'movimenti'}`,
+    notes: 'Note e idee',
+    hint: 'Collega abitudini, movimenti e note a questo obiettivo scegliendolo quando li crei o modifichi.',
+  },
   categories: {
     Sueldo: 'Stipendio', Freelance: 'Freelance', Comisiones: 'Commissioni', Ventas: 'Vendite', Inversiones: 'Investimenti',
     Vivienda: 'Casa', Transporte: 'Trasporti', Comida: 'Cibo', Ocio: 'Tempo libero', Salud: 'Salute',

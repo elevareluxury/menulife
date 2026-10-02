@@ -211,6 +211,14 @@ const zh: LifeDict = {
       habitStrong: { title: '最稳定的习惯', text: (name, pct) => `${name}：最近 30 天完成了 ${pct}% 的计划天数。` },
     },
   },
+  connections: {
+    habits: '习惯',
+    habitRate: (done, total) => `最近 30 天：${total} 天中完成 ${done} 天`,
+    money: '资金',
+    movements: n => `${n} 笔记录`,
+    notes: '笔记和想法',
+    hint: '创建或编辑习惯、收支和笔记时选择此目标，即可将它们关联到这里。',
+  },
   categories: {
     Sueldo: '工资', Freelance: '自由职业', Comisiones: '佣金', Ventas: '销售', Inversiones: '投资',
     Vivienda: '住房', Transporte: '交通', Comida: '餐饮', Ocio: '休闲', Salud: '健康',

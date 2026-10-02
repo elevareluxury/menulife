@@ -18,6 +18,7 @@ export interface Transaction {
   description: string | null
   currency: string
   occurred_at: string
+  goal_id?: string | null
 }
 
 export interface TransactionFormData {
@@ -27,6 +28,7 @@ export interface TransactionFormData {
   description?: string
   currency: string
   occurred_at: string
+  goal_id?: string | null
 }
 
 export interface CurrencyTotals {

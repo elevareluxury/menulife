@@ -211,6 +211,14 @@ const en: LifeDict = {
       habitStrong: { title: 'Your most consistent habit', text: (name, pct) => `${name}: you did it on ${pct}% of scheduled days in the last 30 days.` },
     },
   },
+  connections: {
+    habits: 'Habits',
+    habitRate: (done, total) => `${done} of ${total} days · last 30`,
+    money: 'Money',
+    movements: n => `${n} ${n === 1 ? 'transaction' : 'transactions'}`,
+    notes: 'Notes and ideas',
+    hint: 'Connect habits, money transactions and notes to this goal by choosing it when you create or edit them.',
+  },
   categories: {
     Sueldo: 'Salary', Freelance: 'Freelance', Comisiones: 'Commissions', Ventas: 'Sales', Inversiones: 'Investments',
     Vivienda: 'Housing', Transporte: 'Transport', Comida: 'Food', Ocio: 'Leisure', Salud: 'Health',

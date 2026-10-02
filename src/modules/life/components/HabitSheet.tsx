@@ -6,6 +6,7 @@ import { usePrefs } from '@/lib/prefs'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
 import { LIFE_COLORS, HABIT_ICONS, getHabitIcon } from '../lib/lifePalette'
 import type { Habit, HabitFormData } from '../hooks/useHabits'
+import { GoalSelect } from './GoalSelect'
 
 interface HabitSheetProps {
   open: boolean
@@ -48,7 +49,7 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
     if (!open) return
     /* eslint-disable react-hooks/set-state-in-effect */
     setForm(initial
-      ? { name: initial.name, icon: initial.icon, color: initial.color, frequency: initial.frequency }
+      ? { name: initial.name, icon: initial.icon, color: initial.color, frequency: initial.frequency, goal_id: initial.goal_id ?? null }
       : DEFAULT)
     setError('')
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -152,6 +153,8 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
           })}
         </div>
       </div>
+
+      <GoalSelect id="habit-goal" enabled={open} value={form.goal_id} onChange={goal_id => setForm(f => ({ ...f, goal_id }))} />
 
       {error && <p role="alert" style={{ fontFamily: font, fontSize: '13px', color: colors.semantic.error, marginBottom: '12px' }}>{error}</p>}
 

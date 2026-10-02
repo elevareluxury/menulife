@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { createElement, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CalendarDays, Check, CheckCircle2, Plus, Trash2, Edit3, Pause, Play, RotateCcw } from 'lucide-react'
+import { CalendarDays, Check, CheckCircle2, Plus, Trash2, Edit3, Pause, Play, RotateCcw, Lightbulb, StickyNote, Link2 } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
@@ -8,6 +8,9 @@ import { LifeSheet, MiniProgressRing, colors, font, radius } from '../design-sys
 import type { Goal, Milestone } from '../hooks/useGoals'
 import { useTasks } from '../hooks/useTasks'
 import { TaskList } from './TasksView'
+import { useGoalLinks } from '../hooks/useGoalLinks'
+import { getHabitIcon } from '../lib/lifePalette'
+import { formatMoney } from '@/lib/currencies'
 
 interface GoalDetailSheetProps {
   goal: Goal | null
@@ -185,6 +188,8 @@ export function GoalDetailSheet({
 
         <GoalTasks goal={goal} />
 
+        <GoalLinks goal={goal} />
+
         {/* Progreso manual (sólo sin pasos) */}
         {!hasMilestones && (
           <div style={{ marginBottom: '20px' }}>
@@ -284,5 +289,71 @@ function GoalTasks({ goal }: { goal: Goal }) {
       </div>
       {failed && <p role="alert" style={{ fontFamily: font, fontSize: '12px', color: colors.semantic.error, margin: '6px 0 0' }}>{t.common.saveError}</p>}
     </div>
+  )
+}
+
+/** Hábitos, dinero y notas vinculados a la meta (se vinculan desde su propia edición). */
+function GoalLinks({ goal }: { goal: Goal }) {
+  const t = useLifeT()
+  const c = t.connections
+  const locale = langLocale(useAppLang(s => s.lang))
+  const { habits, money, notes, loaded } = useGoalLinks(goal.id)
+  if (!loaded) return null
+
+  const row: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }
+  const name: React.CSSProperties = { flex: 1, minWidth: 0, fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+  const meta: React.CSSProperties = { fontFamily: font, fontSize: '12px', color: colors.text.tertiary, flexShrink: 0 }
+
+  if (habits.length === 0 && money.length === 0 && notes.length === 0) {
+    return (
+      <p style={{ display: 'flex', gap: 8, fontFamily: font, fontSize: '12.5px', color: colors.text.tertiary, margin: '0 0 20px', lineHeight: 1.5 }}>
+        <Link2 size={14} aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />{c.hint}
+      </p>
+    )
+  }
+
+  return (
+    <>
+      {habits.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <p style={sectionLabel}>{c.habits}</p>
+          {habits.map(h => (
+            <div key={h.id} style={row}>
+              <span aria-hidden="true" style={{ width: 30, height: 30, borderRadius: 9, flexShrink: 0, background: `${h.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {createElement(getHabitIcon(h.icon), { size: 14, style: { color: h.color }, strokeWidth: 2.2 })}
+              </span>
+              <span style={name}>{h.name}</span>
+              {h.scheduled > 0 && <span style={meta}>{c.habitRate(h.done, h.scheduled)}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+      {money.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <p style={sectionLabel}>{c.money}</p>
+          {money.map(m => (
+            <div key={m.currency} style={{ ...row, flexWrap: 'wrap', fontFamily: font, fontSize: '13px', color: colors.text.secondary }}>
+              <span style={{ fontWeight: 700, color: colors.text.primary, minWidth: 40 }}>{m.currency}</span>
+              {m.income > 0 && <span>{t.money.income} <strong style={{ color: colors.semantic.success }}>{formatMoney(m.income, m.currency, locale)}</strong></span>}
+              {m.expense > 0 && <span>{t.money.expense} <strong style={{ color: colors.text.primary }}>{formatMoney(m.expense, m.currency, locale)}</strong></span>}
+              <span style={{ ...meta, marginInlineStart: 'auto' }}>{c.movements(m.count)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {notes.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <p style={sectionLabel}>{c.notes}</p>
+          {notes.map(n => (
+            <div key={n.id} style={row}>
+              {n.type === 'idea'
+                ? <Lightbulb size={15} aria-label={t.brain.types.idea} style={{ color: '#8B5CF6', flexShrink: 0 }} />
+                : <StickyNote size={15} aria-label={t.brain.types.note} style={{ color: '#3B82F6', flexShrink: 0 }} />}
+              <span style={name}>{n.title}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   )
 }

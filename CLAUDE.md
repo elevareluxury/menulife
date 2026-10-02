@@ -30,7 +30,8 @@ Referencia de producto: "MYCEN — Etapa 2" (UX/UI, arquitectura y criterios de 
 - Tareas: viven en Brain (`life_brain_items` con `type='task'`: fecha, hora, recordatorio, meta, "foco de hoy").
   Brain tiene 3 vistas: Capturas (ideas y notas), Tareas (lista por vencimiento o calendario; `?vista=tareas`) y Archivo.
   Recordatorios con la app abierta + `.ics` para el calendario del celular. `life_tasks` es legado (ya copiada a Brain).
-  Goals es sólo metas: cada meta muestra sus tareas vinculadas (`goal_id`).
+  Goals es sólo metas: cada meta muestra lo vinculado por `goal_id` — tareas, hábitos (constancia 30 días),
+  movimientos de dinero (por moneda, sin sumar) y notas/ideas. Se vincula con `GoalSelect` al crear o editar.
 - Life OS: borrar con "Deshacer" (`src/modules/life/lib/undo.tsx`), "hoy" que cambia a medianoche (`useToday`),
   rachas según los días programados del hábito, progreso de metas = pasos hechos/total (sin pasos, manual),
   Replay calculado con fechas reales del mes (sin Life Score). Menús "⋯" con `ActionMenu` (táctil).

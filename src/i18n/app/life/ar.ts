@@ -211,6 +211,14 @@ const ar: LifeDict = {
       habitStrong: { title: 'عادتك الأكثر انتظامًا', text: (name, pct) => `${name}: التزمت بها في ${pct}% من الأيام المجدولة خلال آخر 30 يومًا.` },
     },
   },
+  connections: {
+    habits: 'العادات',
+    habitRate: (done, total) => `${done} من ${total} يومًا · آخر 30`,
+    money: 'المال',
+    movements: n => `${n} معاملة`,
+    notes: 'ملاحظات وأفكار',
+    hint: 'اربط العادات والمعاملات والملاحظات بهذا الهدف باختياره عند إنشائها أو تعديلها.',
+  },
   categories: {
     Sueldo: 'الراتب', Freelance: 'عمل حر', Comisiones: 'عمولات', Ventas: 'مبيعات', Inversiones: 'استثمارات',
     Vivienda: 'السكن', Transporte: 'المواصلات', Comida: 'الطعام', Ocio: 'الترفيه', Salud: 'الصحة',
