@@ -77,6 +77,7 @@ const LifeGoalsPage  = lazy(() => import('@/modules/life/pages/LifeGoalsPage').t
 const LifeHabitsPage = lazy(() => import('@/modules/life/pages/LifeHabitsPage').then(m => ({ default: m.LifeHabitsPage })))
 const LifeBrainPage  = lazy(() => import('@/modules/life/pages/LifeBrainPage').then(m => ({ default: m.LifeBrainPage })))
 const LifeSettingsPage = lazy(() => import('@/modules/life/pages/LifeSettingsPage').then(m => ({ default: m.LifeSettingsPage })))
+const LifeInsightsPage = lazy(() => import('@/modules/life/pages/LifeInsightsPage').then(m => ({ default: m.LifeInsightsPage })))
 const LifeReplayPage = lazy(() => import('@/modules/life/pages/LifeReplayPage').then(m => ({ default: m.LifeReplayPage })))
 
 function LoadingSpinner() {
@@ -175,6 +176,7 @@ function App() {
             <Route path="brain"  element={<LifeBrainPage />}  />
             <Route path="hub"    element={<Navigate to="/studio" replace />} />
             <Route path="replay" element={<LifeReplayPage />} />
+            <Route path="insights" element={<LifeInsightsPage />} />
             <Route path="settings" element={<LifeSettingsPage />} />
           </Route>
           {/* Portal del cliente */}

@@ -37,6 +37,8 @@ Referencia de producto: "MYCEN — Etapa 2" (UX/UI, arquitectura y criterios de 
 - Inicio de Life OS (`/life`) = "Tu día": tareas de hoy (foco + vencen hoy + hechas hoy), hábitos programados para hoy,
   metas en curso y el mes en la moneda principal (las otras monedas aparte). Cada tarjeta usa el hook de su módulo.
   No hay Life Score (la tabla `life_score` es legado; no se escribe más).
+- Insights (`/life/insights`, `lib/insights.ts`): reglas sobre datos reales calculadas en el dispositivo; cada una exige
+  un mínimo de datos y si no alcanza no se muestra. El inicio destaca uno (no repite las vencidas).
 
 ## Idioma y región
 - 12 idiomas: es, en, pt, fr, de, it, zh, ja, ko, hi, ar (RTL), ru — lista en `src/i18n/app/languages.ts`

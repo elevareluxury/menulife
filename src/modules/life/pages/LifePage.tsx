@@ -18,6 +18,8 @@ import { useHabits } from '../hooks/useHabits'
 import { useMoney } from '../hooks/useMoney'
 import { useToday } from '../hooks/useToday'
 import { getHabitIcon } from '../lib/lifePalette'
+import { useInsights } from '../hooks/useInsights'
+import { InsightCard } from '../components/InsightCard'
 import { colors, font, radius, fadeInUp, stagger } from '../design-system'
 
 // ── Deterministic starfield ───────────────────────────────────────────────────
@@ -62,6 +64,25 @@ function getAvatarUrl(user: { user_metadata?: Record<string, unknown> } | null):
   if (!user) return null
   const m = user.user_metadata ?? {}
   return (m['avatar_url'] as string | undefined) ?? (m['picture'] as string | undefined) ?? null
+}
+
+// ── Insight destacado ────────────────────────────────────────────────────────
+
+function InsightTeaser() {
+  const t = useLifeT()
+  const { insights } = useInsights()
+  // Las vencidas ya se ven en la tarjeta de tareas: destacamos otro insight
+  const featured = insights.find(i => i.kind !== 'tasksOverdue')
+  if (!featured) return null
+  return (
+    <motion.section variants={fadeInUp} style={cardStyle} aria-label={t.insights.title}>
+      <CardHeader title={t.insights.title} color={colors.accent.default} />
+      <InsightCard insight={featured} compact />
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <SeeAllLink to="/life/insights" label={insights.length > 1 ? `${t.insights.seeAll} · ${insights.length}` : t.insights.seeAll} />
+      </div>
+    </motion.section>
+  )
 }
 
 // ── StarfieldBackground ───────────────────────────────────────────────────────
@@ -269,14 +290,17 @@ function CardHeader({ title, color, action }: { title: string; color: string; ac
   )
 }
 
-function SeeAll({ to }: { to: string }) {
+function SeeAllLink({ to, label }: { to: string; label: string }) {
   const navigate = useNavigate()
-  const t = useLifeT()
   return (
     <button type="button" onClick={() => navigate(to)} style={linkBtn}>
-      {t.day.seeAll}<ChevronRight size={13} className="flip-rtl" aria-hidden="true" />
+      {label}<ChevronRight size={13} className="flip-rtl" aria-hidden="true" />
     </button>
   )
+}
+
+function SeeAll({ to }: { to: string }) {
+  return <SeeAllLink to={to} label={useLifeT().day.seeAll} />
 }
 
 /** Tareas del día: foco, las que vencen hoy y las que ya completaste hoy. */
@@ -567,6 +591,7 @@ export function LifePage() {
           <motion.div variants={fadeInUp}><TodayHabitsCard /></motion.div>
           <motion.div variants={fadeInUp}><GoalsCard /></motion.div>
           <motion.div variants={fadeInUp}><MoneyCard /></motion.div>
+          <InsightTeaser />
 
           {/* ── Mi identidad (Mycen Profile → Studio) ──────────────────────── */}
           <motion.div variants={fadeInUp}>
