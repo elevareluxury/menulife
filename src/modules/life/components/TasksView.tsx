@@ -319,7 +319,7 @@ export function TasksView() {
   )
 }
 
-export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete, showDate }: {
+export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete, showDate, markFocus }: {
   tasks: LifeTask[]
   goalById?: Map<string, GoalOption>
   onToggle: (t: LifeTask) => void
@@ -327,6 +327,8 @@ export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete,
   onFocus?: (t: LifeTask) => void
   onDelete?: (t: LifeTask) => void
   showDate?: boolean
+  /** Marca con una estrella las tareas en foco (fuera de la sección "Foco de hoy"). */
+  markFocus?: boolean
 }) {
   const t0 = useLifeT()
   const a = t0.agenda
@@ -361,7 +363,13 @@ export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete,
                 display: 'block', fontFamily: font, fontSize: '14px', fontWeight: 600,
                 color: done ? colors.text.secondary : colors.text.primary, textDecoration: done ? 'line-through' : 'none',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>{t.title}</span>
+              }}>
+                {markFocus && t.is_focus && !done && (
+                  <Star size={12} fill="currentColor" aria-label={t0.tasks.focus}
+                    style={{ display: 'inline-block', color: colors.accent.default, marginInlineEnd: 6, verticalAlign: '-1px' }} />
+                )}
+                {t.title}
+              </span>
               {(showDate && t.due_date) || t.due_time || t.remind_minutes != null || goal ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary, marginTop: 2 }}>
                   {showDate && t.due_date && <span>{new Date(`${t.due_date}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}</span>}
