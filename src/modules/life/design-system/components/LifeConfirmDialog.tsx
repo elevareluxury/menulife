@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import { colors, font, radius, shadow } from '../tokens'
+import { useLifeT } from '@/i18n/app/life'
 
 interface LifeConfirmDialogProps {
   open: boolean
@@ -15,10 +16,13 @@ interface LifeConfirmDialogProps {
 
 export function LifeConfirmDialog({
   open, title, message,
-  confirmLabel = 'Confirmar',
-  cancelLabel = 'Cancelar',
+  confirmLabel,
+  cancelLabel,
   onConfirm, onCancel, danger = false,
 }: LifeConfirmDialogProps) {
+  const t = useLifeT()
+  confirmLabel ??= t.common.confirm
+  cancelLabel ??= t.common.cancel
   return (
     <AnimatePresence>
       {open && (

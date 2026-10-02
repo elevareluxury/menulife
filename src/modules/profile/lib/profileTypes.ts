@@ -1,7 +1,9 @@
 // Tipos de Mycen Profile. Coinciden con lo que devuelve la RPC get_public_profile
 // (supabase/migrations/20261001000001_mycen_profiles_foundation.sql).
 
-export type ProfileLang = 'es' | 'en'
+import type { AppLang } from '@/i18n/app/languages'
+
+export type ProfileLang = AppLang
 
 export type ModuleType =
   | 'link' | 'social' | 'contact' | 'location' | 'image' | 'text'

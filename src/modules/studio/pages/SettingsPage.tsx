@@ -5,9 +5,12 @@ import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
 import { deleteMyAccount, exportMyData, friendlyError, updateProfile } from '../lib/studioApi'
 import { publicBaseUrl } from '../lib/preview'
-import { normalizeUsername, USERNAME_MESSAGES, useUsernameCheck } from '../lib/useUsernameCheck'
+import { normalizeUsername, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
 import { Button, ConfirmDialog, PageHeader, SelectField, TextField } from '../components/ui'
 import { ProfileSaveIndicator, StatusPill } from '../components/shared'
+import { useStudioT } from '@/i18n/app/studio'
+import { APP_LANGS, LANG_INFO, isAppLang, type AppLang } from '@/i18n/app/languages'
+import { savePrefs, usePrefs } from '@/lib/prefs'
 
 export function SettingsPage() {
   const { profile, patchProfile, replaceProfile, userId, business } = useStudio()
@@ -19,6 +22,11 @@ export function SettingsPage() {
   const [confirmPause, setConfirmPause] = useState(false)
   const status = useUsernameCheck(username, profile.username)
   const host = publicBaseUrl().replace(/^https?:\/\//, '')
+  const t = useStudioT()
+  const st = t.settings
+  const appLang = usePrefs(p => p.language)
+  const [langError, setLangError] = useState<string | null>(null)
+  const langOptions = APP_LANGS.map(code => ({ value: code, label: LANG_INFO[code].native }))
 
   async function changeUsername() {
     setSaving(true); setError(null)
@@ -37,57 +45,65 @@ export function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Ajustes" actions={<ProfileSaveIndicator />} />
+      <PageHeader title={st.title} actions={<ProfileSaveIndicator />} />
 
       <section className="st-card st-stack">
-        <h2 className="st-card-title" style={{ margin: 0 }}>Publicación</h2>
+        <h2 className="st-card-title" style={{ margin: 0 }}>{st.publication}</h2>
         <div className="st-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
           <StatusPill status={profile.status} />
           {isPublished
-            ? <Button onClick={() => setConfirmPause(true)}>Pausar perfil</Button>
-            : <Button variant="primary" onClick={() => patchProfile({ status: 'published' })}>Publicar perfil</Button>}
+            ? <Button onClick={() => setConfirmPause(true)}>{st.pause}</Button>
+            : <Button variant="primary" onClick={() => patchProfile({ status: 'published' })}>{st.publish}</Button>}
         </div>
         <p className="st-help" style={{ margin: 0 }}>
           {isPublished
-            ? 'Cualquiera con tu link o QR puede ver tu perfil.'
-            : 'Mientras no esté publicado, sólo vos podés verlo (vista previa).'}
+            ? st.publishedHelp
+            : st.draftHelp}
         </p>
       </section>
 
       <section className="st-card st-stack">
-        <h2 className="st-card-title" style={{ margin: 0 }}>Username</h2>
-        <TextField label="Tu dirección" value={username}
+        <h2 className="st-card-title" style={{ margin: 0 }}>{st.username}</h2>
+        <TextField label={st.yourAddress} value={username}
           onChange={v => { setUsername(normalizeUsername(v)); setDone(false) }}
-          help={<>{host}/<strong>{username || '…'}</strong> · {USERNAME_MESSAGES[status]}</>}
-          error={['taken', 'reserved', 'invalid'].includes(status) ? USERNAME_MESSAGES[status] : error} />
-        {done && <p className="st-help" role="status" style={{ margin: 0 }}>Listo. Tu dirección anterior redirige automáticamente a la nueva.</p>}
+          help={<>{host}/<strong>{username || '…'}</strong> · {usernameMessage(t, status)}</>}
+          error={['taken', 'reserved', 'invalid'].includes(status) ? usernameMessage(t, status) : error} />
+        {done && <p className="st-help" role="status" style={{ margin: 0 }}>{st.usernameDone}</p>}
         <div>
-          <Button variant="primary" disabled={status !== 'available'} onClick={() => setConfirm(true)}>Cambiar username</Button>
+          <Button variant="primary" disabled={status !== 'available'} onClick={() => setConfirm(true)}>{st.changeUsername}</Button>
         </div>
       </section>
 
       <section className="st-card st-stack">
-        <h2 className="st-card-title" style={{ margin: 0 }}>Idioma</h2>
-        <SelectField label="Idioma principal de tu perfil" required value={profile.default_locale?.startsWith('en') ? 'en' : 'es'}
-          options={[{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }]}
+        <h2 className="st-card-title" style={{ margin: 0 }}>{st.language}</h2>
+        <SelectField label={st.appLanguage} required value={appLang} options={langOptions}
+          error={langError}
+          onChange={v => {
+            if (!isAppLang(v)) return
+            setLangError(null)
+            savePrefs(userId, { language: v as AppLang }).catch(() => setLangError(t.errors.generic))
+          }} />
+        <p className="st-help" style={{ margin: 0 }}>{st.appLanguageHelp}</p>
+        <SelectField label={st.profileLanguage} required
+          value={isAppLang(profile.default_locale) ? profile.default_locale : 'es'} options={langOptions}
           onChange={v => patchProfile({ default_locale: v })} />
-        <p className="st-help" style={{ margin: 0 }}>Los visitantes pueden cambiar entre ES y EN con el botón de tu perfil.</p>
+        <p className="st-help" style={{ margin: 0 }}>{st.profileLanguageHelp}</p>
       </section>
 
       <PrivacySection userId={userId} hasBusiness={!!business} />
 
       {confirm && (
         <ConfirmDialog
-          title="¿Cambiar tu username?"
-          message={`Tu perfil pasa a ${host}/${username}. Los links y QRs con /${profile.username} van a seguir funcionando: redirigen a la dirección nueva.`}
-          confirmLabel="Cambiar" loading={saving}
+          title={st.confirmUsernameTitle}
+          message={st.confirmUsernameText(`${host}/${username}`, profile.username)}
+          confirmLabel={st.change} loading={saving}
           onConfirm={changeUsername} onCancel={() => setConfirm(false)} />
       )}
       {confirmPause && (
         <ConfirmDialog
-          title="¿Pausar tu perfil?"
-          message="Quien abra tu link o escanee tu QR va a ver que el perfil no está disponible, hasta que lo vuelvas a publicar."
-          confirmLabel="Pausar" danger
+          title={st.confirmPauseTitle}
+          message={st.confirmPauseText}
+          confirmLabel={st.pauseShort} danger
           onConfirm={() => { patchProfile({ status: 'unpublished' }); setConfirmPause(false) }}
           onCancel={() => setConfirmPause(false)} />
       )}
@@ -105,6 +121,8 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
   const [word, setWord] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const t = useStudioT()
+  const st = t.settings
 
   async function download() {
     setExporting(true); setMessage(null)
@@ -113,11 +131,11 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `mycen-mis-datos-${new Date().toISOString().slice(0, 10)}.json`
+      a.download = `${st.fileName}-${new Date().toISOString().slice(0, 10)}.json`
       document.body.appendChild(a); a.click(); a.remove()
       setTimeout(() => URL.revokeObjectURL(url), 1000)
     } catch {
-      setMessage('No pudimos preparar la descarga. Intentá de nuevo.')
+      setMessage(st.downloadError)
     } finally { setExporting(false) }
   }
 
@@ -130,44 +148,40 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
       return
     }
     setDeleting(false)
-    setMessage(result === 'has_business'
-      ? 'Tu cuenta tiene un negocio en Mycen Business. Para darla de baja escribinos a soporte, así cuidamos los datos de tus clientes y ventas.'
-      : 'No pudimos eliminar la cuenta. Intentá de nuevo en unos minutos.')
+    setMessage(result === 'has_business' ? st.deleteHasBusiness : st.deleteError)
   }
 
   return (
     <section className="st-card st-stack">
-      <h2 className="st-card-title" style={{ margin: 0 }}>Privacidad</h2>
+      <h2 className="st-card-title" style={{ margin: 0 }}>{st.privacy}</h2>
       <div className="st-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <div>
-          <p style={{ margin: 0, fontWeight: 500 }}>Descargar mis datos</p>
-          <p className="st-help" style={{ margin: '2px 0 0' }}>Tu perfil, módulos y datos de Life OS en un archivo JSON.</p>
+          <p style={{ margin: 0, fontWeight: 500 }}>{st.download}</p>
+          <p className="st-help" style={{ margin: '2px 0 0' }}>{st.downloadHelp}</p>
         </div>
-        <Button onClick={download} loading={exporting}><Download size={15} aria-hidden="true" /> Descargar</Button>
+        <Button onClick={download} loading={exporting}><Download size={15} aria-hidden="true" /> {st.downloadBtn}</Button>
       </div>
       <div className="st-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap', borderTop: '1px solid var(--st-border)', paddingTop: 14 }}>
         <div>
-          <p style={{ margin: 0, fontWeight: 500 }}>Eliminar mi cuenta</p>
+          <p style={{ margin: 0, fontWeight: 500 }}>{st.deleteAccount}</p>
           <p className="st-help" style={{ margin: '2px 0 0' }}>
-            {hasBusiness
-              ? 'Como tenés un negocio en Mycen Business, la baja se gestiona con soporte.'
-              : 'Se borran tu perfil, tus módulos, tus imágenes y tus datos de Life OS. No se puede deshacer.'}
+            {hasBusiness ? st.deleteHelpBusiness : st.deleteHelp}
           </p>
         </div>
-        <Button variant="danger" onClick={() => { setOpen(true); setWord('') }}><Trash2 size={15} aria-hidden="true" /> Eliminar</Button>
+        <Button variant="danger" onClick={() => { setOpen(true); setWord('') }}><Trash2 size={15} aria-hidden="true" /> {t.common.delete}</Button>
       </div>
       {message && <p className="st-error" role="alert" style={{ margin: 0 }}>{message}</p>}
 
       {open && (
         <div className="st-dialog-wrap" onMouseDown={e => { if (e.target === e.currentTarget && !deleting) setOpen(false) }}>
           <div className="st-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
-            <h2 id="delete-title">¿Eliminar tu cuenta para siempre?</h2>
-            <p>Se borra todo y no se puede recuperar. Si querés, antes descargá tus datos. Para confirmar escribí <strong>ELIMINAR</strong>.</p>
-            <TextField label="Confirmación" value={word} onChange={setWord} autoFocus />
+            <h2 id="delete-title">{st.deleteTitle}</h2>
+            <p>{st.deleteText} <strong>{st.deleteWord}</strong>.</p>
+            <TextField label={st.confirmation} value={word} onChange={setWord} autoFocus />
             <div className="st-row" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
-              <Button variant="ghost" onClick={() => setOpen(false)} disabled={deleting}>Cancelar</Button>
-              <Button variant="danger" disabled={word.trim().toUpperCase() !== 'ELIMINAR'} loading={deleting} onClick={remove}>
-                Eliminar mi cuenta
+              <Button variant="ghost" onClick={() => setOpen(false)} disabled={deleting}>{t.common.cancel}</Button>
+              <Button variant="danger" disabled={word.trim().toUpperCase() !== st.deleteWord.toUpperCase()} loading={deleting} onClick={remove}>
+                {st.deleteAccount}
               </Button>
             </div>
           </div>

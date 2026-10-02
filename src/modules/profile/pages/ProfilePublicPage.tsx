@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { isReservedUsername } from '@/lib/reservedUsernames'
 import { fetchPublicProfile, trackProfileEvent } from '../lib/profileApi'
-import { initialLang, saveLang, tr, ui } from '../lib/profileI18n'
+import { tr, ui } from '../lib/profileI18n'
+import { useAppLang } from '@/i18n/app/store'
+import { setLocalLanguage } from '@/lib/prefs'
 import { QUIET, themeVars } from '../lib/profileTheme'
 import type { ProfileLang, ProfileLookup } from '../lib/profileTypes'
 import { ProfileView } from '../components/ProfileView'
@@ -25,7 +27,8 @@ export function ProfilePublicPage() {
   const navigate = useNavigate()
   // El resultado se guarda junto a la clave que lo pidió: si cambia el slug, vuelve a "loading" sin setState en el effect
   const [loaded, setLoaded] = useState<{ key: string; state: LoadState } | null>(null)
-  const [lang, setLang] = useState<ProfileLang>(() => initialLang('es'))
+  // Idioma del visitante: el elegido en este dispositivo o el del navegador
+  const lang = useAppLang(s => s.lang)
   const [toast, setToast] = useState<string | null>(null)
   const [attempt, setAttempt] = useState(0)
 
@@ -77,7 +80,7 @@ export function ProfilePublicPage() {
     window.setTimeout(() => setToast(null), 2200)
   }, [])
 
-  const changeLang = (next: ProfileLang) => { setLang(next); saveLang(next) }
+  const changeLang = (next: ProfileLang) => setLocalLanguage(next)
 
   const vars = themeVars(profile?.theme)
   const t = ui(lang)

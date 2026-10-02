@@ -2,30 +2,35 @@ import { createPortal } from 'react-dom'
 import { useLocation, Link } from 'react-router-dom'
 import { Sun, Wallet, Target, Flame, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useLifeT, type LifeDict } from '@/i18n/app/life'
+import { useAppLang } from '@/i18n/app/store'
+import { langDir } from '@/i18n/app/languages'
 
 interface Tab {
   to: string
-  label: string
+  label: keyof LifeDict['nav']
   icon: LucideIcon
 }
 
 const TABS: Tab[] = [
-  { to: '/life',         label: 'Life',   icon: Sun    },
-  { to: '/life/money',   label: 'Money',  icon: Wallet },
-  { to: '/life/goals',   label: 'Goals',  icon: Target },
-  { to: '/life/habits',  label: 'Habits', icon: Flame  },
-  { to: '/life/brain',   label: 'Brain',  icon: Zap    },
+  { to: '/life',         label: 'life',   icon: Sun    },
+  { to: '/life/money',   label: 'money',  icon: Wallet },
+  { to: '/life/goals',   label: 'goals',  icon: Target },
+  { to: '/life/habits',  label: 'habits', icon: Flame  },
+  { to: '/life/brain',   label: 'brain',  icon: Zap    },
 ]
 
 export function LifeNav() {
   const { pathname } = useLocation()
+  const t = useLifeT()
+  const dir = langDir(useAppLang(s => s.lang))
 
   const isActive = (to: string) =>
     to === '/life' ? pathname === '/life' : pathname.startsWith(to)
 
   // Portal a <body>: ningún contenedor puede alterar su position: fixed
   return createPortal(
-    <nav aria-label="Life OS" style={{
+    <nav aria-label="Life OS" dir={dir} style={{
       // Fija al pie sin transform (con transform algunos navegadores la desplazan al hacer scroll)
       position: 'fixed',
       bottom: 'calc(16px + env(safe-area-inset-bottom))',
@@ -46,8 +51,9 @@ export function LifeNav() {
       zIndex: 50,
       userSelect: 'none',
     }}>
-      {TABS.map(({ to, label, icon: Icon }) => {
+      {TABS.map(({ to, label: key, icon: Icon }) => {
         const active = isActive(to)
+        const label = t.nav[key]
         return (
           <Link
             key={to}

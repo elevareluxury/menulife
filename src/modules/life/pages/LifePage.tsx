@@ -2,8 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Target, TrendingUp, CheckSquare, Brain,
-  Link2, Settings2, ChevronRight,
+  Link2, Settings2, ChevronRight, Globe, Settings,
 } from 'lucide-react'
+import { useState } from 'react'
+import { useLifeT, type LifeDict } from '@/i18n/app/life'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
+import { formatMoney as fmtMoney } from '@/lib/currencies'
+import { LanguageSheet } from '../components/LanguageSheet'
 import { useAuthStore } from '@/store/authStore'
 import { useLifeStore } from '@/store/lifeStore'
 import { useLocaleStore } from '@/store/localeStore'
@@ -29,9 +35,9 @@ const STARS = (() => {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function greet() {
+function greet(t: LifeDict) {
   const h = new Date().getHours()
-  return h < 12 ? 'Buenos días' : h < 20 ? 'Buenas tardes' : 'Buenas noches'
+  return h < 12 ? t.home.greetMorning : h < 20 ? t.home.greetAfternoon : t.home.greetEvening
 }
 
 function getInitials(user: { user_metadata?: Record<string, unknown>; email?: string } | null) {
@@ -153,6 +159,7 @@ interface HubSectionProps {
 
 function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubSectionProps) {
   const navigate = useNavigate()
+  const t = useLifeT()
 
   return (
     <div style={{
@@ -238,13 +245,13 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
           fontFamily: font, fontSize: '15px', fontWeight: 700,
           color: colors.text.primary, margin: '0 0 2px', letterSpacing: '-0.01em',
         }}>
-          Mi identidad
+          {t.home.identityTitle}
         </p>
         <p style={{
           fontFamily: font, fontSize: '12px', color: colors.text.tertiary,
           margin: '0 0 13px', lineHeight: 1.4,
         }}>
-          {hasRestaurant && restaurantSlug ? `Mycen Profile · @${restaurantSlug}` : 'Tu identidad digital, todo en un solo lugar'}
+          {hasRestaurant && restaurantSlug ? `Mycen Profile · @${restaurantSlug}` : t.home.identitySubtitle}
         </p>
 
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -260,7 +267,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
             }}
           >
             <Settings2 size={12} strokeWidth={2.5} />
-            Abrir Studio
+            {t.home.openStudio}
           </button>
           {hasRestaurant && restaurantSlug && (
             <button
@@ -274,7 +281,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
               }}
             >
               <Link2 size={11} strokeWidth={2.5} />
-              Ver perfil
+              {t.home.viewProfile}
             </button>
           )}
         </div>
@@ -296,14 +303,14 @@ interface HoyProps {
 
 function HoySummaryCard({ goalsCount, habitsCompleted, habitsTotal, moneyBalance, pendingTasks, currency }: HoyProps) {
   const navigate = useNavigate()
-  const formatMoney = (n: number) =>
-    new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(n)
+  const t = useLifeT()
+  const locale = langLocale(useAppLang(s => s.lang))
 
   const rows = [
-    { icon: Target,      label: 'Metas',    value: `${goalsCount} en curso`,                    color: colors.area.goals,  route: '/life/goals'  },
-    { icon: TrendingUp,  label: 'Dinero',   value: formatMoney(moneyBalance),                   color: colors.area.money,  route: '/life/money'  },
-    { icon: CheckSquare, label: 'Hábitos',  value: `${habitsCompleted}/${habitsTotal} hoy`,     color: colors.area.habits, route: '/life/habits' },
-    { icon: Brain,       label: 'Brain',    value: `${pendingTasks} pendientes`,                 color: colors.area.brain,  route: '/life/brain'  },
+    { icon: Target,      label: t.nav.goals,  value: t.home.goalsValue(goalsCount),                        color: colors.area.goals,  route: '/life/goals'  },
+    { icon: TrendingUp,  label: t.nav.money,  value: fmtMoney(moneyBalance, currency, locale),             color: colors.area.money,  route: '/life/money'  },
+    { icon: CheckSquare, label: t.nav.habits, value: t.home.habitsValue(habitsCompleted, habitsTotal),     color: colors.area.habits, route: '/life/habits' },
+    { icon: Brain,       label: t.nav.brain,  value: t.home.tasksValue(pendingTasks),                      color: colors.area.brain,  route: '/life/brain'  },
   ]
 
   return (
@@ -328,7 +335,7 @@ function HoySummaryCard({ goalsCount, habitsCompleted, habitsTotal, moneyBalance
         fontFamily: font, fontSize: '10px', fontWeight: 700,
         color: colors.text.tertiary, letterSpacing: '0.09em', textTransform: 'uppercase',
       }}>
-        Hoy
+        {t.home.today}
       </div>
 
       {rows.map((row, i) => {
@@ -342,7 +349,7 @@ function HoySummaryCard({ goalsCount, habitsCompleted, habitsTotal, moneyBalance
               width: '100%', padding: '9px 16px',
               background: 'transparent', border: 'none', cursor: 'pointer',
               borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.04)',
-              textAlign: 'left',
+              textAlign: 'start',
             }}
           >
             <div style={{
@@ -358,7 +365,7 @@ function HoySummaryCard({ goalsCount, habitsCompleted, habitsTotal, moneyBalance
             <p style={{ fontFamily: font, fontSize: '12px', color: colors.text.secondary, margin: '0 4px 0 0' }}>
               {row.value}
             </p>
-            <ChevronRight size={13} style={{ color: colors.text.tertiary, flexShrink: 0 }} />
+            <ChevronRight size={13} className="flip-rtl" style={{ color: colors.text.tertiary, flexShrink: 0 }} />
           </button>
         )
       })}
@@ -369,14 +376,15 @@ function HoySummaryCard({ goalsCount, habitsCompleted, habitsTotal, moneyBalance
 // ── ModuleGrid ────────────────────────────────────────────────────────────────
 
 const MODULES = [
-  { id: 'money',  label: 'Dinero',  icon: TrendingUp,  color: '#22C55E', route: '/life/money',  Texture: WavesTexture  },
-  { id: 'goals',  label: 'Metas',   icon: Target,      color: '#3B82F6', route: '/life/goals',  Texture: OrbitsTexture },
-  { id: 'habits', label: 'Hábitos', icon: CheckSquare, color: '#F59E0B', route: '/life/habits', Texture: FlameTexture  },
-  { id: 'brain',  label: 'Brain',   icon: Brain,       color: '#8B5CF6', route: '/life/brain',  Texture: NeuralTexture },
-]
+  { id: 'money',  icon: TrendingUp,  color: '#22C55E', route: '/life/money',  Texture: WavesTexture  },
+  { id: 'goals',  icon: Target,      color: '#3B82F6', route: '/life/goals',  Texture: OrbitsTexture },
+  { id: 'habits', icon: CheckSquare, color: '#F59E0B', route: '/life/habits', Texture: FlameTexture  },
+  { id: 'brain',  icon: Brain,       color: '#8B5CF6', route: '/life/brain',  Texture: NeuralTexture },
+] as const
 
 function ModuleGrid() {
   const navigate = useNavigate()
+  const t = useLifeT()
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
       {MODULES.map(mod => {
@@ -391,7 +399,7 @@ function ModuleGrid() {
               padding: '18px 16px 16px', borderRadius: radius.xl,
               background: `linear-gradient(135deg, ${mod.color}13 0%, ${mod.color}07 100%)`,
               border: `1px solid ${mod.color}1E`,
-              cursor: 'pointer', textAlign: 'left',
+              cursor: 'pointer', textAlign: 'start',
               minHeight: '112px',
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
             }}
@@ -410,7 +418,7 @@ function ModuleGrid() {
               color: colors.text.primary, margin: 0,
               position: 'relative', zIndex: 1,
             }}>
-              {mod.label}
+              {t.nav[mod.id]}
             </p>
           </button>
         )
@@ -445,6 +453,13 @@ function PageSkeleton() {
   )
 }
 
+const iconBtn: React.CSSProperties = {
+  width: 36, height: 36, borderRadius: radius.full, flexShrink: 0,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+  color: colors.text.secondary, cursor: 'pointer',
+}
+
 // ── LifePage ──────────────────────────────────────────────────────────────────
 
 export function LifePage() {
@@ -453,6 +468,8 @@ export function LifePage() {
   const { hasRestaurant, restaurantSlug, restaurantPlan } = useLifeStore()
   const { currency } = useLocaleStore()
   const data = useLifeData()
+  const t = useLifeT()
+  const [langOpen, setLangOpen] = useState(false)
 
   if (data.loading) return <PageSkeleton />
 
@@ -486,7 +503,7 @@ export function LifePage() {
                 fontFamily: font, fontSize: '11px', color: colors.text.tertiary,
                 margin: '0 0 1px', letterSpacing: '0.02em',
               }}>
-                {greet()}
+                {greet(t)}
               </p>
               <p style={{
                 fontFamily: font, fontSize: '17px', fontWeight: 700,
@@ -509,7 +526,15 @@ export function LifePage() {
                 cursor: 'pointer',
               }}
             >
-              Mi negocio
+              {t.home.myBusiness}
+            </button>
+            <button type="button" onClick={() => setLangOpen(true)} aria-label={t.home.language} title={t.home.language}
+              style={iconBtn}>
+              <Globe size={16} aria-hidden="true" />
+            </button>
+            <button type="button" onClick={() => navigate('/life/settings')} aria-label={t.home.settings} title={t.home.settings}
+              style={iconBtn}>
+              <Settings size={16} aria-hidden="true" />
             </button>
           </motion.div>
 
@@ -553,13 +578,14 @@ export function LifePage() {
                   cursor: 'pointer', letterSpacing: '0.01em',
                 }}
               >
-                ✦ Ver recap del mes
+                {t.home.recap}
               </button>
             </motion.div>
           )}
 
         </motion.div>
       </div>
+      <LanguageSheet open={langOpen} onClose={() => setLangOpen(false)} />
     </>
   )
 }

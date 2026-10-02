@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, Share2, UserPlus } from 'lucide-react'
+import { Calendar, Globe, Share2, UserPlus } from 'lucide-react'
+import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
 import { fetchContactCard, trackProfileEvent } from '../lib/profileApi'
 import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref } from '../lib/safeUrl'
@@ -86,16 +87,19 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
   }
 
   return (
-    <main className="mp-root" style={style} lang={lang}>
+    <main className="mp-root" style={style} lang={lang} dir={langDir(lang)}>
       {profile.status !== 'published' && <div className="mp-banner" role="status">{t.draftBanner}</div>}
 
       <header className="mp-topbar">
         <Link to="/" className="mp-brand" aria-label="Mycen">mycen.</Link>
         <div className="mp-topbar-actions">
-          <div className="mp-lang" role="group" aria-label={t.languageLabel}>
-            <button type="button" aria-pressed={lang === 'es'} onClick={() => onLang('es')}>ES</button>
-            <button type="button" aria-pressed={lang === 'en'} onClick={() => onLang('en')}>EN</button>
-          </div>
+          <label className="mp-lang-select" title={t.languageLabel}>
+            <Globe size={15} aria-hidden="true" />
+            <span aria-hidden="true">{lang.toUpperCase()}</span>
+            <select value={lang} aria-label={t.languageLabel} onChange={e => onLang(e.target.value as ProfileLang)}>
+              {APP_LANGS.map(code => <option key={code} value={code} lang={code}>{LANG_INFO[code].native}</option>)}
+            </select>
+          </label>
           <button type="button" className="mp-icon-btn" onClick={share} aria-label={t.share}>
             <Share2 size={17} aria-hidden="true" />
           </button>
@@ -115,7 +119,7 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
           <h1 className="mp-name">{name}</h1>
           {descriptor && <p className="mp-descriptor">{descriptor}</p>}
           {!!profile.tags?.length && (
-            <ul className="mp-tags" aria-label="Categorías">
+            <ul className="mp-tags" aria-label={t.tags}>
               {profile.tags.map(tag => <li key={tag}>{tag}</li>)}
             </ul>
           )}
@@ -153,7 +157,7 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
 
         <div className="mp-modules">
           {blocks.map(b => b.kind === 'socials'
-            ? <SocialRow key={b.modules[0].id} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
+            ? <SocialRow lang={lang} key={b.modules[0].id} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
             : <ModuleView key={b.module.id} module={b.module} lang={lang} onAction={onModuleAction} />)}
         </div>
 

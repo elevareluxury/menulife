@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, Lightbulb, StickyNote, CheckSquare, Check, MoreHorizontal, Pencil, Archive, Trash2, Search, X, AlertTriangle } from 'lucide-react'
+import { useLifeT } from '@/i18n/app/life'
 import {
   LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
   colors, font, radius, stagger, fadeInUp, scaleIn,
@@ -263,6 +264,7 @@ function QuickCapture({ onCapture }: { onCapture: (type: BrainItemType, title: s
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export function LifeBrainPage() {
+  const tNav = useLifeT().nav
   const {
     items, loading, error, reload,
     ideasCount, notesCount, tasksCount,
@@ -344,7 +346,7 @@ export function LifeBrainPage() {
             <Zap size={20} style={{ color: colors.area.brain }} strokeWidth={2} />
           </div>
           <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>
-            Brain
+            {tNav.brain}
           </h1>
         </div>
         <button

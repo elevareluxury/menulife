@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
+import { PrefsInit } from '@/app/PrefsInit'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
 import { ScrollToTop } from '@/components/ScrollToTop'
@@ -75,6 +76,7 @@ const LifeMoneyPage  = lazy(() => import('@/modules/life/pages/LifeMoneyPage').t
 const LifeGoalsPage  = lazy(() => import('@/modules/life/pages/LifeGoalsPage').then(m => ({ default: m.LifeGoalsPage })))
 const LifeHabitsPage = lazy(() => import('@/modules/life/pages/LifeHabitsPage').then(m => ({ default: m.LifeHabitsPage })))
 const LifeBrainPage  = lazy(() => import('@/modules/life/pages/LifeBrainPage').then(m => ({ default: m.LifeBrainPage })))
+const LifeSettingsPage = lazy(() => import('@/modules/life/pages/LifeSettingsPage').then(m => ({ default: m.LifeSettingsPage })))
 const LifeReplayPage = lazy(() => import('@/modules/life/pages/LifeReplayPage').then(m => ({ default: m.LifeReplayPage })))
 
 function LoadingSpinner() {
@@ -102,6 +104,7 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AuthInit />
+      <PrefsInit />
       <OfflineBanner />
       <Toaster position="top-right" />
 
@@ -172,6 +175,7 @@ function App() {
             <Route path="brain"  element={<LifeBrainPage />}  />
             <Route path="hub"    element={<Navigate to="/studio" replace />} />
             <Route path="replay" element={<LifeReplayPage />} />
+            <Route path="settings" element={<LifeSettingsPage />} />
           </Route>
           {/* Portal del cliente */}
           <Route path="/portal/:restaurantId/*" element={<PortalApp />} />

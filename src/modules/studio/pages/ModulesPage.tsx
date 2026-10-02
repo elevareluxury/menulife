@@ -6,7 +6,8 @@ import {
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import { useStudio } from '../StudioContext'
 import { deleteModule, friendlyError, saveOrder, updateModule } from '../lib/studioApi'
-import { MODULE_CATALOG, moduleDef, moduleDisplayTitle, moduleSummary } from '../lib/moduleCatalog'
+import { buildCatalog, moduleDef, moduleDisplayTitle, moduleSummary } from '../lib/moduleCatalog'
+import { useStudioT } from '@/i18n/app/studio'
 import type { StudioModule } from '../lib/studioTypes'
 import { Button, ConfirmDialog, Drawer, PageHeader } from '../components/ui'
 import { EditTabs } from '../components/shared'
@@ -29,6 +30,9 @@ export function ModulesPage() {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [announce, setAnnounce] = useState('')
+  const t = useStudioT()
+  const mt = t.modules
+  const title = (m: StudioModule) => moduleDisplayTitle(m, t)
 
   async function toggleVisibility(m: StudioModule) {
     const visibility = m.visibility === 'active' ? 'hidden' : 'active'
@@ -36,7 +40,7 @@ export function ModulesPage() {
     setModules(prev => prev.map(x => (x.id === m.id ? { ...x, visibility } : x)))
     try {
       await updateModule(m.id, { visibility })
-      setAnnounce(`${moduleDisplayTitle(m)} ${visibility === 'active' ? 'visible' : 'oculto'}`)
+      setAnnounce(visibility === 'active' ? mt.nowVisible(title(m)) : mt.nowHidden(title(m)))
     } catch (e) {
       setModules(prev => prev.map(x => (x.id === m.id ? { ...x, visibility: m.visibility } : x)))
       setError(friendlyError(e))
@@ -52,7 +56,7 @@ export function ModulesPage() {
     const renumbered = next.map((m, i) => ({ ...m, position: (i + 1) * 10 }))
     setModules(() => renumbered)
     setError(null)
-    setAnnounce(`${moduleDisplayTitle(modules[index])} movido a la posición ${target + 1} de ${modules.length}`)
+    setAnnounce(mt.moved(title(modules[index]), target + 1, modules.length))
     try { await saveOrder(renumbered) }
     catch (e) { setModules(() => previous); setError(friendlyError(e)) }
   }
@@ -62,7 +66,7 @@ export function ModulesPage() {
     try {
       await deleteModule(m.id)
       setModules(prev => prev.filter(x => x.id !== m.id))
-      setAnnounce(`${moduleDisplayTitle(m)} eliminado`)
+      setAnnounce(mt.deleted(title(m)))
       setConfirmDelete(null)
     } catch (e) {
       setError(friendlyError(e))
@@ -72,54 +76,54 @@ export function ModulesPage() {
   return (
     <>
       <EditTabs />
-      <PageHeader title="Módulos" subtitle="Los bloques de tu perfil, en el orden en que se ven."
-        actions={<Button variant="primary" onClick={() => setLibrary(true)}><Plus size={16} aria-hidden="true" /> Agregar</Button>} />
+      <PageHeader title={mt.title} subtitle={mt.subtitle}
+        actions={<Button variant="primary" onClick={() => setLibrary(true)}><Plus size={16} aria-hidden="true" /> {mt.add}</Button>} />
 
       <p className="st-sr-only" role="status" aria-live="polite">{announce}</p>
       {error && <p className="st-error" role="alert" style={{ marginBottom: 12 }}>{error}</p>}
 
       {modules.length === 0 ? (
         <div className="st-card st-empty">
-          <strong>Tu perfil todavía no tiene módulos</strong>
-          Sumá tus links, redes y datos de contacto para que te encuentren.
+          <strong>{mt.emptyTitle}</strong>
+          {mt.emptyText}
           <div style={{ marginTop: 14 }}>
-            <Button variant="primary" onClick={() => setLibrary(true)}><Plus size={16} aria-hidden="true" /> Agregar el primero</Button>
+            <Button variant="primary" onClick={() => setLibrary(true)}><Plus size={16} aria-hidden="true" /> {mt.addFirst}</Button>
           </div>
         </div>
       ) : (
         <ol className="st-module-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {modules.map((m, i) => {
             const Icon = ICONS[m.type] ?? Link2
-            const title = moduleDisplayTitle(m)
+            const label = title(m)
             const canEdit = EDITABLE.includes(m.type)
             return (
               <li key={m.id} className={`st-module${m.visibility === 'hidden' ? ' is-hidden' : ''}`}>
                 <span className="st-module-icon" aria-hidden="true"><Icon size={17} /></span>
                 <button type="button" className="st-module-body" disabled={!canEdit}
                   onClick={() => canEdit && setEditing({ type: m.type, module: m })}
-                  aria-label={canEdit ? `Editar ${title}` : title}>
-                  <div className="st-module-title">{title}</div>
+                  aria-label={canEdit ? mt.editX(label) : label}>
+                  <div className="st-module-title">{label}</div>
                   <div className="st-module-sub">
-                    {m.visibility === 'hidden' && <span className="st-badge" style={{ marginRight: 6 }}>Oculto</span>}
-                    {moduleSummary(m) || moduleDef(m.type).label}
+                    {m.visibility === 'hidden' && <span className="st-badge" style={{ marginInlineEnd: 6 }}>{mt.hidden}</span>}
+                    {moduleSummary(m, t) || moduleDef(m.type, t).label}
                   </div>
                 </button>
                 <div className="st-module-actions">
                   <button type="button" className="st-icon-btn" onClick={() => move(i, -1)} disabled={i === 0}
-                    aria-label={`Subir ${title}`}><ArrowUp size={16} /></button>
+                    aria-label={mt.upX(label)}><ArrowUp size={16} /></button>
                   <button type="button" className="st-icon-btn" onClick={() => move(i, 1)} disabled={i === modules.length - 1}
-                    aria-label={`Bajar ${title}`}><ArrowDown size={16} /></button>
+                    aria-label={mt.downX(label)}><ArrowDown size={16} /></button>
                   <button type="button" className="st-icon-btn" onClick={() => toggleVisibility(m)} disabled={busyId === m.id}
-                    aria-label={m.visibility === 'active' ? `Ocultar ${title}` : `Mostrar ${title}`}
+                    aria-label={m.visibility === 'active' ? mt.hideX(label) : mt.showX(label)}
                     aria-pressed={m.visibility === 'hidden'}>
                     {m.visibility === 'active' ? <Eye size={16} /> : <EyeOff size={16} />}
                   </button>
                   {canEdit && (
                     <button type="button" className="st-icon-btn st-hide-on-mobile" onClick={() => setEditing({ type: m.type, module: m })}
-                      aria-label={`Editar ${title}`}><Pencil size={16} /></button>
+                      aria-label={mt.editX(label)}><Pencil size={16} /></button>
                   )}
                   <button type="button" className="st-icon-btn" onClick={() => setConfirmDelete(m)}
-                    aria-label={`Eliminar ${title}`}><Trash2 size={16} /></button>
+                    aria-label={mt.deleteX(label)}><Trash2 size={16} /></button>
                 </div>
               </li>
             )
@@ -128,9 +132,9 @@ export function ModulesPage() {
       )}
 
       {library && (
-        <Drawer title="Agregar un módulo" onClose={() => setLibrary(false)}>
+        <Drawer title={mt.library} onClose={() => setLibrary(false)}>
           <div className="st-library">
-            {MODULE_CATALOG.filter(d => d.addable).map(d => {
+            {buildCatalog(t).filter(d => d.addable).map(d => {
               const Icon = ICONS[d.type]
               return (
                 <button key={d.type} type="button" onClick={() => { setLibrary(false); setEditing({ type: d.type, module: null }) }}>
@@ -147,9 +151,9 @@ export function ModulesPage() {
 
       {confirmDelete && (
         <ConfirmDialog
-          title="¿Eliminar este módulo?"
-          message={`"${moduleDisplayTitle(confirmDelete)}" se va a quitar de tu perfil. Si solo querés que no se vea por un tiempo, podés ocultarlo.`}
-          confirmLabel="Eliminar" danger loading={deleting}
+          title={mt.deleteTitle}
+          message={mt.deleteText(title(confirmDelete))}
+          confirmLabel={t.common.delete} danger loading={deleting}
           onConfirm={() => remove(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
       )}
     </>

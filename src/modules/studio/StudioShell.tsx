@@ -15,24 +15,29 @@ import { PreviewPane } from './components/PreviewPane'
 import { OnboardingWizard } from './components/OnboardingWizard'
 import { Button } from './components/ui'
 import { useAppBackground } from '@/lib/useAppBackground'
+import { useStudioT, type StudioDict } from '@/i18n/app/studio'
+import { useAppLang } from '@/i18n/app/store'
+import { langDir } from '@/i18n/app/languages'
 import './studio.css'
 
-const NAV = [
-  { to: '/studio',            label: 'Inicio',      icon: Home, end: true },
-  { to: '/studio/identity',   label: 'Mi identidad', icon: UserRound },
-  { to: '/studio/modules',    label: 'Módulos',     icon: LayoutGrid },
-  { to: '/studio/appearance', label: 'Apariencia',  icon: Palette },
-  { to: '/studio/exchange',   label: 'Compartir',   icon: Share2 },
-  { to: '/studio/analytics',  label: 'Analítica',   icon: BarChart3 },
-  { to: '/studio/settings',   label: 'Ajustes',     icon: Settings },
+type NavKey = keyof StudioDict['nav']
+
+const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
+  { to: '/studio',            label: 'home',       icon: Home, end: true },
+  { to: '/studio/identity',   label: 'identity',   icon: UserRound },
+  { to: '/studio/modules',    label: 'modules',    icon: LayoutGrid },
+  { to: '/studio/appearance', label: 'appearance', icon: Palette },
+  { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
+  { to: '/studio/analytics',  label: 'analytics',  icon: BarChart3 },
+  { to: '/studio/settings',   label: 'settings',   icon: Settings },
 ]
 
-const MOBILE_NAV = [
-  { to: '/studio',          label: 'Inicio',       icon: Home, end: true },
-  { to: '/studio/identity', label: 'Editar',       icon: PenLine },
-  { to: '/studio/preview',  label: 'Vista previa', icon: Eye },
-  { to: '/studio/exchange', label: 'Compartir',    icon: Share2 },
-  { to: '/studio/more',     label: 'Más',          icon: MoreHorizontal },
+const MOBILE_NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
+  { to: '/studio',          label: 'home',     icon: Home, end: true },
+  { to: '/studio/identity', label: 'edit',     icon: PenLine },
+  { to: '/studio/preview',  label: 'preview',  icon: Eye },
+  { to: '/studio/exchange', label: 'exchange', icon: Share2 },
+  { to: '/studio/more',     label: 'more',     icon: MoreHorizontal },
 ]
 
 type Load =
@@ -46,6 +51,8 @@ export function StudioShell() {
   const [load, setLoad] = useState<Load>({ kind: 'loading' })
   const [attempt, setAttempt] = useState(0)
   const userId = user?.id
+  const t = useStudioT()
+  const dir = langDir(useAppLang(s => s.lang))
 
   useEffect(() => {
     if (!userId) return
@@ -67,16 +74,16 @@ export function StudioShell() {
   // Fondo oscuro sin flashes
   useAppBackground('#0E100E')
 
-  if (!initialized || loading) return <Centered><span className="st-spinner" aria-label="Cargando" /></Centered>
+  if (!initialized || loading) return <Centered><span className="st-spinner" aria-label={t.nav.loading} /></Centered>
   if (!user) return <Navigate to="/login" replace />
 
-  if (load.kind === 'loading') return <Centered><span className="st-spinner" aria-label="Cargando" /></Centered>
+  if (load.kind === 'loading') return <Centered><span className="st-spinner" aria-label={t.nav.loading} /></Centered>
   if (load.kind === 'error') {
     return (
       <Centered>
         <div className="st-stack" style={{ alignItems: 'center', textAlign: 'center' }}>
           <p>{load.message}</p>
-          <Button variant="primary" onClick={() => { setLoad({ kind: 'loading' }); setAttempt(a => a + 1) }}>Reintentar</Button>
+          <Button variant="primary" onClick={() => { setLoad({ kind: 'loading' }); setAttempt(a => a + 1) }}>{t.nav.retry}</Button>
         </div>
       </Centered>
     )
@@ -86,7 +93,7 @@ export function StudioShell() {
   if (load.kind === 'empty' || resuming) {
     const suggestedName = (user.user_metadata as { name?: string } | undefined)?.name
     return (
-      <div className="st-root" data-scroll-root>
+      <div className="st-root" data-scroll-root dir={dir}>
         <OnboardingWizard
           userId={user.id}
           initialProfile={load.kind === 'ready' ? load.profile : null}
@@ -105,7 +112,8 @@ export function StudioShell() {
 }
 
 function Centered({ children }: { children: React.ReactNode }) {
-  return <div className="st-root" data-scroll-root><div className="st-center">{children}</div></div>
+  const dir = langDir(useAppLang(s => s.lang))
+  return <div className="st-root" data-scroll-root dir={dir}><div className="st-center">{children}</div></div>
 }
 
 function StudioReady({ userId, initial }: {
@@ -122,6 +130,8 @@ function StudioReady({ userId, initial }: {
   const flushRef = useRef<() => Promise<void>>(async () => undefined)
   const location = useLocation()
   const signOut = useAuthStore(s => s.signOut)
+  const t = useStudioT()
+  const dir = langDir(useAppLang(s => s.lang))
 
   const flush = useCallback(async () => {
     if (timer.current) { window.clearTimeout(timer.current); timer.current = null }
@@ -188,23 +198,23 @@ function StudioReady({ userId, initial }: {
 
   return (
     <StudioContext.Provider value={value}>
-      <div className="st-root" data-scroll-root>
+      <div className="st-root" data-scroll-root dir={dir}>
         <div className="st-layout">
           <nav className="st-sidebar" aria-label="Studio">
             <a className="st-logo" href="/studio">mycen.<small>Studio</small></a>
             {NAV.map(item => (
               <NavLink key={item.to} to={item.to} end={item.end} className="st-nav-item">
-                <item.icon size={18} aria-hidden="true" /> {item.label}
+                <item.icon size={18} aria-hidden="true" /> {t.nav[item.label]}
               </NavLink>
             ))}
             <div className="st-sidebar-footer">
               {initial.business && (
-                <a className="st-nav-item" href="/dashboard"><LayoutGrid size={18} aria-hidden="true" /> Mycen Business</a>
+                <a className="st-nav-item" href="/dashboard"><LayoutGrid size={18} aria-hidden="true" /> {t.nav.business}</a>
               )}
-              <a className="st-nav-item" href="/life"><UserRound size={18} aria-hidden="true" /> Life OS</a>
+              <a className="st-nav-item" href="/life"><UserRound size={18} aria-hidden="true" /> {t.nav.life}</a>
               <button type="button" className="st-nav-item" style={{ border: 0, background: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
                 onClick={() => { void signOut() }}>
-                <LogOut size={18} aria-hidden="true" /> Cerrar sesión
+                <LogOut size={18} aria-hidden="true" className="flip-rtl" /> {t.nav.signOut}
               </button>
             </div>
           </nav>
@@ -219,11 +229,11 @@ function StudioReady({ userId, initial }: {
         </div>
 
         {/* En un portal a <body>: ningún contenedor puede alterar su position: fixed */}
-        {createPortal(<nav className="st-bottom-nav" aria-label="Studio">
+        {createPortal(<nav className="st-bottom-nav" aria-label="Studio" dir={dir}>
           {MOBILE_NAV.map(item => (
-            <NavLink key={item.to} to={item.to} end={item.end} aria-label={item.label} title={item.label}>
+            <NavLink key={item.to} to={item.to} end={item.end} aria-label={t.nav[item.label]} title={t.nav[item.label]}>
               <item.icon size={21} aria-hidden="true" />
-              <span className="st-nav-label">{item.label}</span>
+              <span className="st-nav-label">{t.nav[item.label]}</span>
             </NavLink>
           ))}
         </nav>, document.body)}

@@ -5,6 +5,9 @@ import { loadStats } from '../lib/studioApi'
 import { moduleDisplayTitle } from '../lib/moduleCatalog'
 import type { DailyStat } from '../lib/studioTypes'
 import { Button, PageHeader } from '../components/ui'
+import { useStudioT } from '@/i18n/app/studio'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
 
 const RANGES = [7, 30, 90] as const
 
@@ -13,6 +16,9 @@ export function AnalyticsPage() {
   const [days, setDays] = useState<(typeof RANGES)[number]>(30)
   const [result, setResult] = useState<{ key: string; data: DailyStat[] | 'error'; now: number } | null>(null)
   const [attempt, setAttempt] = useState(0)
+  const t = useStudioT()
+  const an = t.analytics
+  const locale = langLocale(useAppLang(st => st.lang))
   const key = `${profile.id}:${days}:${attempt}`
 
   useEffect(() => {
@@ -41,7 +47,7 @@ export function AnalyticsPage() {
       .forEach(d => byModule.set(d.module_id!, (byModule.get(d.module_id!) ?? 0) + d.events))
     const top = [...byModule.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id, n]) => {
       const m = modules.find(x => x.id === id)
-      return { label: m ? moduleDisplayTitle(m) : 'Módulo eliminado', n }
+      return { label: m ? moduleDisplayTitle(m, t) : t.catalog.summary.deleted, n }
     })
 
     const series: { day: string; label: string; visitas: number }[] = []
@@ -50,56 +56,54 @@ export function AnalyticsPage() {
       const iso = d.toISOString().slice(0, 10)
       series.push({
         day: iso,
-        label: d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
+        label: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
         visitas: data.filter(x => x.event_type === 'view' && x.day === iso).reduce((a, x) => a + x.events, 0),
       })
     }
     return { views, visitors, primary, moduleClicks, shares, vcards, top, series }
-  }, [data, modules, days, now])
+  }, [data, modules, days, now, t, locale])
 
   return (
     <>
-      <PageHeader title="Analítica" subtitle="Datos reales y anónimos de tu perfil."
+      <PageHeader title={an.title} subtitle={an.subtitle}
         actions={(
-          <div className="st-segment" role="group" aria-label="Período">
+          <div className="st-segment" role="group" aria-label={an.period}>
             {RANGES.map(r => (
-              <button key={r} type="button" aria-pressed={days === r} onClick={() => setDays(r)}>{r} días</button>
+              <button key={r} type="button" aria-pressed={days === r} onClick={() => setDays(r)}>{an.days(r)}</button>
             ))}
           </div>
         )} />
 
-      {data === null && <section className="st-card"><p className="st-help" role="status">Cargando…</p></section>}
+      {data === null && <section className="st-card"><p className="st-help" role="status">{t.common.loading}</p></section>}
       {data === 'error' && (
         <section className="st-card st-empty">
-          <strong>No pudimos cargar la analítica</strong>
-          <div style={{ marginTop: 12 }}><Button onClick={() => setAttempt(a => a + 1)}>Reintentar</Button></div>
+          <strong>{an.error}</strong>
+          <div style={{ marginTop: 12 }}><Button onClick={() => setAttempt(a => a + 1)}>{t.common.retry}</Button></div>
         </section>
       )}
 
       {summary && summary.views === 0 && summary.moduleClicks === 0 && summary.primary === 0 ? (
         <section className="st-card st-empty">
-          <strong>Todavía no hay datos en este período</strong>
-          {profile.status === 'published'
-            ? 'Cuando alguien visite tu perfil o toque un link, lo vas a ver acá.'
-            : 'Publicá tu perfil para empezar a medir visitas.'}
+          <strong>{an.emptyTitle}</strong>
+          {profile.status === 'published' ? an.emptyPublished : an.emptyDraft}
         </section>
       ) : summary && (
         <>
           <section className="st-card">
             <div className="st-metrics">
-              <div className="st-metric"><b>{summary.views}</b><span>Visitas</span></div>
-              <div className="st-metric"><b>{summary.visitors}</b><span>Visitantes únicos (por día)</span></div>
-              <div className="st-metric"><b>{summary.primary}</b><span>Clicks en acción principal</span></div>
-              <div className="st-metric"><b>{summary.moduleClicks}</b><span>Clicks en módulos</span></div>
-              {summary.shares > 0 && <div className="st-metric"><b>{summary.shares}</b><span>Veces compartido</span></div>}
-              {summary.vcards > 0 && <div className="st-metric"><b>{summary.vcards}</b><span>Descargas de contacto</span></div>}
+              <div className="st-metric"><b>{summary.views}</b><span>{an.visits}</span></div>
+              <div className="st-metric"><b>{summary.visitors}</b><span>{an.visitors}</span></div>
+              <div className="st-metric"><b>{summary.primary}</b><span>{an.primaryClicks}</span></div>
+              <div className="st-metric"><b>{summary.moduleClicks}</b><span>{an.moduleClicks}</span></div>
+              {summary.shares > 0 && <div className="st-metric"><b>{summary.shares}</b><span>{an.shares}</span></div>}
+              {summary.vcards > 0 && <div className="st-metric"><b>{summary.vcards}</b><span>{an.vcards}</span></div>}
             </div>
           </section>
 
           <section className="st-card">
-            <h2 className="st-card-title">Visitas por día</h2>
-            <div style={{ width: '100%', height: 200 }} role="img"
-              aria-label={`Gráfico de visitas de los últimos ${days} días. Total: ${summary.views}.`}>
+            <h2 className="st-card-title">{an.perDay}</h2>
+            <div style={{ width: '100%', height: 200 }} role="img" dir="ltr"
+              aria-label={an.chartLabel(days, summary.views)}>
               <ResponsiveContainer>
                 <AreaChart data={summary.series} margin={{ top: 6, right: 6, bottom: 0, left: -24 }}>
                   <CartesianGrid stroke="rgba(241,240,233,0.06)" vertical={false} />
@@ -108,21 +112,21 @@ export function AnalyticsPage() {
                   <YAxis allowDecimals={false} tick={{ fill: '#7D7F76', fontSize: 11 }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ background: '#20221F', border: '1px solid rgba(241,240,233,0.12)', borderRadius: 10, fontSize: 12 }}
                     labelStyle={{ color: '#B9B9AE' }} itemStyle={{ color: '#F1F0E9' }} />
-                  <Area type="monotone" dataKey="visitas" stroke="#F1F0E9" strokeWidth={2} fill="rgba(241,240,233,0.10)" />
+                  <Area type="monotone" dataKey="visitas" name={an.visits} stroke="#F1F0E9" strokeWidth={2} fill="rgba(241,240,233,0.10)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </section>
 
           <section className="st-card">
-            <h2 className="st-card-title">Módulos con más clicks</h2>
+            <h2 className="st-card-title">{an.topModules}</h2>
             {summary.top.length === 0
-              ? <p className="st-help" style={{ margin: 0 }}>Todavía nadie tocó un módulo en este período.</p>
+              ? <p className="st-help" style={{ margin: 0 }}>{an.noClicks}</p>
               : (
-                <ol className="st-checklist" style={{ listStyle: 'decimal', paddingLeft: 20 }}>
-                  {summary.top.map(t => (
-                    <li key={t.label} style={{ display: 'list-item' }}>
-                      {t.label} — <strong>{t.n}</strong>
+                <ol className="st-checklist" style={{ listStyle: 'decimal', paddingInlineStart: 20 }}>
+                  {summary.top.map(row => (
+                    <li key={row.label} style={{ display: 'list-item' }}>
+                      {row.label} — <strong>{row.n}</strong>
                     </li>
                   ))}
                 </ol>
@@ -130,8 +134,7 @@ export function AnalyticsPage() {
           </section>
 
           <p className="st-help">
-            Cómo medimos: una visita por persona cada 30 minutos; no contamos bots ni tus propias visitas.
-            No guardamos IP ni datos personales. "Guardar contacto" cuenta descargas, no confirma que se haya agendado.
+            {an.howWeMeasure}
           </p>
         </>
       )}

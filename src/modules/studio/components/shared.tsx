@@ -1,18 +1,14 @@
 import { NavLink } from 'react-router-dom'
 import type { ProfileStatus } from '../lib/studioTypes'
 import { useStudio } from '../StudioContext'
+import { useStudioT } from '@/i18n/app/studio'
 import { SaveIndicator } from './ui'
 
-const STATUS_LABEL: Record<ProfileStatus, string> = {
-  published: 'Publicado',
-  draft: 'Borrador',
-  unpublished: 'Pausado',
-}
-
 export function StatusPill({ status }: { status: ProfileStatus }) {
+  const t = useStudioT()
   return (
     <span className={`st-status-pill${status === 'published' ? ' is-published' : ''}`}>
-      <i aria-hidden="true" /> {STATUS_LABEL[status]}
+      <i aria-hidden="true" /> {t.status[status]}
     </span>
   )
 }
@@ -25,11 +21,12 @@ export function ProfileSaveIndicator() {
 
 /** En móvil, "Editar" agrupa Identidad y Módulos. */
 export function EditTabs() {
+  const t = useStudioT().editTabs
   return (
-    <div className="st-segment st-mobile-only" role="navigation" aria-label="Editar" style={{ marginBottom: 16 }}>
-      <NavLink to="/studio/identity">Identidad</NavLink>
-      <NavLink to="/studio/modules">Módulos</NavLink>
-      <NavLink to="/studio/appearance">Apariencia</NavLink>
+    <div className="st-segment st-mobile-only" role="navigation" aria-label={t.label} style={{ marginBottom: 16 }}>
+      <NavLink to="/studio/identity">{t.identity}</NavLink>
+      <NavLink to="/studio/modules">{t.modules}</NavLink>
+      <NavLink to="/studio/appearance">{t.appearance}</NavLink>
     </div>
   )
 }
