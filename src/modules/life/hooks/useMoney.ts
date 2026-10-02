@@ -116,7 +116,11 @@ export function useMoney() {
     setLoading(false)
   }, [user])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    let alive = true
+    const id = window.setTimeout(() => { if (alive) void load() }, 0)
+    return () => { alive = false; window.clearTimeout(id) }
+  }, [load])
 
   // Recargar cuando el botón + registra un movimiento
   useEffect(() => {
@@ -187,6 +191,9 @@ export function useMoney() {
     await load()
   }, [user, load])
 
+  /** Oculta el movimiento en pantalla (para borrar con "Deshacer"). */
+  const hideTransaction = useCallback((id: string) => setTransactions(prev => prev.filter(t => t.id !== id)), [])
+
   const deleteTransaction = useCallback(async (id: string) => {
     if (!user) return
     const { error } = await db.from('life_transactions').delete().eq('id', id).eq('user_id', user.id)
@@ -198,6 +205,6 @@ export function useMoney() {
     transactions, grouped, loading, reload: load,
     monthIncome, monthExpense, monthBalance, monthCurve, otherTotals, mainCurrency,
     hasData: transactions.length > 0,
-    createTransaction, updateTransaction, deleteTransaction,
+    createTransaction, updateTransaction, deleteTransaction, hideTransaction,
   }
 }

@@ -1,444 +1,343 @@
-import { useState, useMemo, useRef, KeyboardEvent } from 'react'
+import { useState, useMemo, useRef, type KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Lightbulb, StickyNote, CheckSquare, Check, MoreHorizontal, Pencil, Archive, Trash2, Search, X, AlertTriangle } from 'lucide-react'
-import { useLifeT } from '@/i18n/app/life'
+import toast from 'react-hot-toast'
 import {
-  LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
-  colors, font, radius, stagger, fadeInUp, scaleIn,
+  Zap, Lightbulb, StickyNote, CheckSquare, Check, Pencil, Archive, ArchiveRestore, Trash2, Search, X,
+  AlertTriangle, ArrowLeft,
+} from 'lucide-react'
+import { useLifeT } from '@/i18n/app/life'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
+import {
+  LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState,
+  colors, font, radius, stagger, fadeInUp,
 } from '../design-system'
 import { useBrain, type BrainItem, type BrainItemType } from '../hooks/useBrain'
 import { BrainItemSheet } from '../components/BrainItemSheet'
+import { ActionMenu } from '../components/ActionMenu'
+import { deleteWithUndo } from '../lib/undo'
+import { dayKey, useToday } from '../hooks/useToday'
+import { shiftDate } from '../hooks/useHabits'
 
-// ── Design constants ──────────────────────────────────────────────────────────
 const TYPE_META = {
-  idea: { icon: Lightbulb,   color: '#8B5CF6', label: 'Idea'  },
-  note: { icon: StickyNote,  color: '#3B82F6', label: 'Nota'  },
-  task: { icon: CheckSquare, color: '#22C55E', label: 'Tarea' },
+  idea: { icon: Lightbulb,   color: '#8B5CF6' },
+  note: { icon: StickyNote,  color: '#3B82F6' },
+  task: { icon: CheckSquare, color: '#22C55E' },
 } as const
 
 const FILTERS = ['todo', 'idea', 'note', 'task'] as const
 type Filter = typeof FILTERS[number]
-const FILTER_LABELS: Record<Filter, string> = { todo: 'Todo', idea: 'Ideas', note: 'Notas', task: 'Tareas' }
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function BrainSkeleton() {
   return (
-    <LifeScreenContainer>
-      <motion.div animate={{ opacity: [0.3, 0.55, 0.3] }} transition={{ duration: 1.8, repeat: Infinity }}>
-        {[56, 56, 56, 56, 56].map((h, i) => (
-          <div key={i} style={{
-            height: h, background: colors.surface.base, borderRadius: radius.xl,
-            marginBottom: '8px', border: `1px solid ${colors.border.subtle}`,
-          }} />
-        ))}
-      </motion.div>
-    </LifeScreenContainer>
+    <motion.div animate={{ opacity: [0.3, 0.55, 0.3] }} transition={{ duration: 1.8, repeat: Infinity }}>
+      {[56, 56, 56, 56].map((h, i) => (
+        <div key={i} style={{
+          height: h, background: colors.surface.base, borderRadius: radius.xl,
+          marginBottom: '8px', border: `1px solid ${colors.border.subtle}`,
+        }} />
+      ))}
+    </motion.div>
   )
 }
 
-// ── Item Card ─────────────────────────────────────────────────────────────────
-function BrainCard({ item, onToggle, onEdit, onArchive, onDelete }: {
+// ── Tarjeta ───────────────────────────────────────────────────────────────────
+function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
   item: BrainItem
+  archived: boolean
   onToggle: () => void
   onEdit: () => void
   onArchive: () => void
   onDelete: () => void
 }) {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const t = useLifeT()
+  const [expanded, setExpanded] = useState(false)
   const meta = TYPE_META[item.type]
   const Icon = meta.icon
   const isTask = item.type === 'task'
+  const long = (item.content?.length ?? 0) > 90 || (item.content ?? '').includes('\n')
 
   return (
-    <LifeCard style={{ padding: '12px 14px', position: 'relative' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-        {/* Checkbox (tasks) or type icon (ideas/notes) */}
+    <LifeCard style={{ padding: '10px 12px', position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
         {isTask ? (
-          <motion.button
-            key={`${item.id}-${item.is_completed}`}
-            initial={{ scale: item.is_completed ? 0.7 : 1 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 480, damping: 22 }}
-            whileTap={{ scale: 0.82 }}
+          <button type="button" role="checkbox" aria-checked={item.is_completed}
+            aria-label={item.is_completed ? t.brain.uncomplete(item.title) : t.brain.complete(item.title)}
             onClick={onToggle}
-            style={{
-              width: 22, height: 22, borderRadius: '50%', flexShrink: 0, marginTop: '1px',
+            style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+            <span aria-hidden="true" style={{
+              width: 22, height: 22, borderRadius: '50%',
               border: `2px solid ${item.is_completed ? meta.color : colors.border.medium}`,
               background: item.is_completed ? meta.color : 'transparent',
-              cursor: 'pointer', transition: 'all 0.18s',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <AnimatePresence mode="wait">
-              {item.is_completed && (
-                <motion.div
-                  key="chk"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  transition={{ type: 'spring', stiffness: 440, damping: 20 }}
-                >
-                  <Check size={12} strokeWidth={3} style={{ color: '#fff' }} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
+              display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s',
+            }}>
+              {item.is_completed && <Check size={12} strokeWidth={3} style={{ color: '#fff' }} />}
+            </span>
+          </button>
         ) : (
-          <div
-            onClick={onEdit}
-            style={{
-              width: 32, height: 32, borderRadius: radius.sm, flexShrink: 0,
-              background: `${meta.color}14`, border: `1px solid ${meta.color}25`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            <Icon size={15} style={{ color: meta.color }} strokeWidth={2} />
-          </div>
+          <span aria-label={t.brain.types[item.type]} style={{
+            width: 32, height: 32, margin: 4, borderRadius: radius.sm, flexShrink: 0,
+            background: `${meta.color}14`, border: `1px solid ${meta.color}25`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Icon size={15} style={{ color: meta.color }} strokeWidth={2} aria-hidden="true" />
+          </span>
         )}
 
-        {/* Content */}
-        <div
-          style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
-          onClick={isTask ? undefined : onEdit}
-        >
+        <div style={{ flex: 1, minWidth: 0, paddingTop: 9 }}>
           <p style={{
-            fontFamily: font, fontSize: '14px', fontWeight: isTask ? 500 : 600,
-            color: item.is_completed ? colors.text.quaternary : colors.text.primary,
-            margin: '0 0 2px',
-            textDecoration: item.is_completed ? 'line-through' : 'none',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            fontFamily: font, fontSize: '14px', fontWeight: 600,
+            color: item.is_completed ? colors.text.tertiary : colors.text.primary,
+            margin: '0 0 2px', textDecoration: item.is_completed ? 'line-through' : 'none',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: expanded ? 'normal' : 'nowrap', overflowWrap: 'anywhere',
           }}>
             {item.title}
           </p>
           {item.content && (
             <p style={{
-              fontFamily: font, fontSize: '12px', fontWeight: 400,
-              color: colors.text.tertiary, margin: 0,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: 0, lineHeight: 1.5,
+              ...(expanded
+                ? { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }
+                : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
             }}>
               {item.content}
             </p>
           )}
+          {long && (
+            <button type="button" onClick={() => setExpanded(v => !v)} aria-expanded={expanded}
+              style={{ marginTop: 4, padding: '4px 0', minHeight: 28, background: 'none', border: 'none', cursor: 'pointer', fontFamily: font, fontSize: 12, fontWeight: 700, color: meta.color }}>
+              {expanded ? t.brain.readLess : t.brain.readMore}
+            </button>
+          )}
         </div>
 
-        {/* Context menu */}
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          <button
-            onClick={e => { e.stopPropagation(); setMenuOpen(v => !v) }}
-            style={{
-              width: 26, height: 26, borderRadius: radius.full,
-              background: 'transparent', border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: colors.text.quaternary, transition: 'background 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = colors.border.subtle }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-          >
-            <MoreHorizontal size={14} strokeWidth={2} />
-          </button>
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                variants={scaleIn} initial="hidden" animate="visible" exit="hidden"
-                style={{
-                  position: 'absolute', right: 0, top: '30px', zIndex: 10,
-                  background: colors.surface.high,
-                  border: `1px solid ${colors.border.medium}`,
-                  borderRadius: radius.md,
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-                  minWidth: 140, overflow: 'hidden',
-                }}
-                onMouseLeave={() => setMenuOpen(false)}
-              >
-                {[
-                  { icon: Pencil,  label: 'Editar',    action: () => { setMenuOpen(false); onEdit() },    danger: false },
-                  { icon: Archive, label: 'Archivar',   action: () => { setMenuOpen(false); onArchive() }, danger: false },
-                  { icon: Trash2,  label: 'Eliminar',   action: () => { setMenuOpen(false); onDelete() },  danger: true  },
-                ].map(({ icon: BtnIcon, label, action, danger }) => (
-                  <button
-                    key={label}
-                    onClick={action}
-                    style={{
-                      width: '100%', padding: '10px 14px',
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', gap: '8px',
-                      fontFamily: font, fontSize: '13px', fontWeight: 600,
-                      color: danger ? colors.semantic.error : colors.text.secondary,
-                      textAlign: 'left', transition: 'background 0.12s',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = colors.border.subtle }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
-                  >
-                    <BtnIcon size={13} />
-                    {label}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <ActionMenu label={t.brain.options} actions={archived ? [
+          { icon: ArchiveRestore, label: t.brain.unarchive, onSelect: onArchive },
+          { icon: Trash2, label: t.common.delete, onSelect: onDelete, danger: true },
+        ] : [
+          { icon: Pencil, label: t.common.edit, onSelect: onEdit },
+          { icon: Archive, label: t.brain.archive, onSelect: onArchive },
+          { icon: Trash2, label: t.common.delete, onSelect: onDelete, danger: true },
+        ]} />
       </div>
     </LifeCard>
   )
 }
 
-// ── Quick Capture ─────────────────────────────────────────────────────────────
+// ── Captura rápida ────────────────────────────────────────────────────────────
 function QuickCapture({ onCapture }: { onCapture: (type: BrainItemType, title: string) => Promise<void> }) {
-  const [title, setTitle] = useState('')
-  const [type, setType]   = useState<BrainItemType>('idea')
+  const t = useLifeT()
+  const [title, setTitle]   = useState('')
+  const [type, setType]     = useState<BrainItemType>('idea')
   const [saving, setSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const submit = async () => {
     if (!title.trim() || saving) return
     setSaving(true)
-    await onCapture(type, title.trim())
-    setTitle('')
-    setSaving(false)
-    inputRef.current?.focus()
-  }
-
-  const handleKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') submit()
+    try {
+      await onCapture(type, title.trim())
+      setTitle('')
+      inputRef.current?.focus()
+    } catch {
+      toast.error(t.common.saveError)
+    } finally { setSaving(false) }
   }
 
   return (
     <LifeCard style={{ marginBottom: '12px', padding: '14px' }}>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
-        <input
-          ref={inputRef}
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          onKeyDown={handleKey}
-          placeholder="Capturá un pensamiento…"
-          maxLength={100}
+        <input ref={inputRef} value={title} onChange={e => setTitle(e.target.value)}
+          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') void submit() }}
+          placeholder={t.brain.capturePlaceholder} aria-label={t.brain.capturePlaceholder} maxLength={100}
           style={{
-            flex: 1, padding: '10px 12px',
-            borderRadius: radius.sm,
-            background: colors.surface.high,
-            border: `1px solid ${colors.border.subtle}`,
-            color: colors.text.primary,
-            fontFamily: font, fontSize: '14px', outline: 'none',
-          }}
-        />
-        <button
-          onClick={submit}
-          disabled={!title.trim() || saving}
+            flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: radius.sm,
+            background: colors.surface.high, border: `1px solid ${colors.border.subtle}`,
+            color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
+          }} />
+        <button type="button" onClick={() => void submit()} disabled={!title.trim() || saving} aria-label={t.brain.capture}
           style={{
-            width: 38, height: 38, borderRadius: radius.sm, flexShrink: 0,
-            background: title.trim() ? colors.area.brain : colors.surface.high,
-            border: 'none', cursor: title.trim() ? 'pointer' : 'default',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'background 0.18s', opacity: !title.trim() ? 0.4 : 1,
-          }}
-        >
-          <Check size={16} strokeWidth={3} style={{ color: title.trim() ? '#fff' : colors.text.quaternary }} />
+            width: 44, height: 44, borderRadius: radius.sm, flexShrink: 0,
+            background: title.trim() ? colors.area.brain : colors.surface.high, border: 'none',
+            cursor: title.trim() ? 'pointer' : 'default',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: !title.trim() ? 0.4 : 1,
+          }}>
+          <Check size={16} strokeWidth={3} style={{ color: title.trim() ? '#fff' : colors.text.tertiary }} aria-hidden="true" />
         </button>
       </div>
-
-      {/* Type pills */}
-      <div style={{ display: 'flex', gap: '6px' }}>
-        {(Object.entries(TYPE_META) as [BrainItemType, typeof TYPE_META['idea']][]).map(([t, meta]) => (
-          <button
-            key={t}
-            onClick={() => setType(t)}
-            style={{
-              padding: '4px 10px', borderRadius: radius.full,
-              background: type === t ? `${meta.color}18` : 'transparent',
-              border: `1px solid ${type === t ? meta.color + '40' : colors.border.subtle}`,
-              color: type === t ? meta.color : colors.text.quaternary,
-              fontFamily: font, fontSize: '11px', fontWeight: 700,
-              cursor: 'pointer', transition: 'all 0.15s',
-              display: 'flex', alignItems: 'center', gap: '4px',
-            }}
-          >
-            <meta.icon size={10} strokeWidth={2.5} />
-            {meta.label}
-          </button>
-        ))}
+      <div role="radiogroup" aria-label={t.brain.captureType} style={{ display: 'flex', gap: '6px' }}>
+        {(Object.keys(TYPE_META) as BrainItemType[]).map(k => {
+          const meta = TYPE_META[k]
+          return (
+            <button key={k} type="button" role="radio" aria-checked={type === k} onClick={() => setType(k)}
+              style={{
+                minHeight: 32, padding: '4px 12px', borderRadius: radius.full,
+                background: type === k ? `${meta.color}18` : 'transparent',
+                border: `1px solid ${type === k ? meta.color + '40' : colors.border.subtle}`,
+                color: type === k ? meta.color : colors.text.secondary,
+                fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '4px',
+              }}>
+              <meta.icon size={11} strokeWidth={2.5} aria-hidden="true" />
+              {t.brain.types[k]}
+            </button>
+          )
+        })}
       </div>
     </LifeCard>
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Página ────────────────────────────────────────────────────────────────────
 export function LifeBrainPage() {
   const tNav = useLifeT().nav
-  const {
-    items, loading, error, reload,
-    ideasCount, notesCount, tasksCount,
-    createItem, updateItem, deleteItem, toggleComplete, archiveItem,
-  } = useBrain()
-
+  const t = useLifeT()
+  const locale = langLocale(useAppLang(s => s.lang))
   const [filter, setFilter]         = useState<Filter>('todo')
+  const [archived, setArchivedView] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQ, setSearchQ]       = useState('')
   const [editItem, setEditItem]     = useState<BrainItem | null>(null)
   const [sheetOpen, setSheetOpen]   = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState<BrainItem | null>(null)
 
-  // Hooks ANTES de cualquier early return — Rules of Hooks
-  const visible = useMemo(() => {
-    let list = items
-    if (filter !== 'todo') list = list.filter(i => i.type === filter)
-    if (searchQ.trim()) {
-      const q = searchQ.toLowerCase()
-      list = list.filter(i =>
-        i.title.toLowerCase().includes(q) ||
-        (i.content ?? '').toLowerCase().includes(q)
-      )
-    }
-    return list
-  }, [items, filter, searchQ])
+  const {
+    items, loading, error, hasMore, reload, loadMore,
+    ideasCount, notesCount, tasksCount, totalCount,
+    createItem, updateItem, deleteItem, setArchived, hideLocally, toggleComplete,
+  } = useBrain({ archived, query: searchQ, type: filter === 'todo' ? null : filter })
 
+  const today = useToday()
   const grouped = useMemo(() => {
-    const today = new Date().toDateString()
-    const yesterday = new Date(Date.now() - 86400000).toDateString()
+    const yesterday = shiftDate(today, -1)
     const map = new Map<string, BrainItem[]>()
-
-    for (const item of visible) {
+    for (const item of items) {
       const d = new Date(item.created_at)
-      let label: string
-      if (d.toDateString() === today) label = 'Hoy'
-      else if (d.toDateString() === yesterday) label = 'Ayer'
-      else label = d.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })
+      const k = dayKey(d)
+      const label = k === today ? t.brain.today
+        : k === yesterday ? t.brain.yesterday
+          : d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })
       if (!map.has(label)) map.set(label, [])
       map.get(label)!.push(item)
     }
     return [...map.entries()]
-  }, [visible])
+  }, [items, t, locale, today])
 
-  if (loading) return <BrainSkeleton />
-
-  if (error) return (
-    <LifeScreenContainer>
-      <LifeCard style={{ marginTop: '24px' }}>
-        <LifeEmptyState
-          icon={AlertTriangle}
-          iconColor={colors.semantic.error}
-          title="Algo salió mal"
-          subtitle={error}
-          action={{ label: 'Reintentar', onClick: reload }}
-        />
-      </LifeCard>
-    </LifeScreenContainer>
-  )
-
-  const handleQuickCapture = async (type: BrainItemType, title: string) => {
-    await createItem({ type, title })
+  const remove = (item: BrainItem) => {
+    hideLocally(item.id)
+    deleteWithUndo({ message: t.undo.deleted(item.title), commit: () => deleteItem(item.id), restore: () => void reload() })
+  }
+  const toggleArchive = (item: BrainItem) => {
+    hideLocally(item.id)
+    if (archived) {
+      setArchived(item.id, false).catch(() => { void reload(); toast.error(t.common.saveError) })
+      return
+    }
+    // Archivar también se puede deshacer
+    deleteWithUndo({ message: t.undo.archived(item.title), commit: () => setArchived(item.id, true), restore: () => void reload() })
   }
 
-  const emptyHint = filter === 'todo'
-    ? { title: 'Tu mente, externalizada', subtitle: 'Capturá ideas, notas y tareas en un solo lugar. Soltá lo que tenés en la cabeza.' }
-    : filter === 'idea'
-    ? { title: 'Sin ideas aún', subtitle: 'Guardá todo lo que se te ocurra. Las mejores ideas viven aquí.' }
-    : filter === 'note'
-    ? { title: 'Sin notas', subtitle: 'Escribí notas para capturar lo que importa.' }
-    : { title: 'Sin tareas', subtitle: 'Agregá tareas para no olvidar nada.' }
+  const q = searchQ.trim()
+  const emptyHint = archived
+    ? { title: t.brain.archivedTitle, text: t.brain.archivedEmpty }
+    : q.length >= 2
+      ? { title: t.brain.noResults(q), text: '' }
+      : t.brain.empty[filter]
 
   return (
     <LifeScreenContainer>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '24px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.brain}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Zap size={20} style={{ color: colors.area.brain }} strokeWidth={2} />
-          </div>
-          <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>
-            {tNav.brain}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: '24px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+          {archived ? (
+            <button type="button" onClick={() => setArchivedView(false)} aria-label={t.brain.hideArchived}
+              style={{ width: 40, height: 40, borderRadius: radius.full, border: `1px solid ${colors.border.subtle}`, background: 'transparent', color: colors.text.secondary, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+              <ArrowLeft size={18} aria-hidden="true" className="flip-rtl" />
+            </button>
+          ) : (
+            <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.brain}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Zap size={20} style={{ color: colors.area.brain }} strokeWidth={2} aria-hidden="true" />
+            </div>
+          )}
+          <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {archived ? t.brain.archivedTitle : tNav.brain}
           </h1>
         </div>
-        <button
-          onClick={() => { setSearchOpen(v => !v); if (searchOpen) setSearchQ('') }}
-          style={{
-            width: 36, height: 36, borderRadius: radius.full,
-            background: searchOpen ? colors.area.brain + '18' : 'transparent',
-            border: `1px solid ${searchOpen ? colors.area.brain + '40' : colors.border.subtle}`,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: searchOpen ? colors.area.brain : colors.text.tertiary, transition: 'all 0.18s',
-          }}
-        >
-          {searchOpen ? <X size={16} strokeWidth={2.5} /> : <Search size={16} strokeWidth={2} />}
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          {!archived && (
+            <button type="button" onClick={() => setArchivedView(true)} aria-label={t.brain.showArchived} title={t.brain.showArchived}
+              style={{ width: 40, height: 40, borderRadius: radius.full, background: 'transparent', border: `1px solid ${colors.border.subtle}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.text.secondary }}>
+              <Archive size={16} aria-hidden="true" />
+            </button>
+          )}
+          <button type="button" onClick={() => { setSearchOpen(v => !v); if (searchOpen) setSearchQ('') }}
+            aria-label={searchOpen ? t.brain.closeSearch : t.brain.search} aria-expanded={searchOpen}
+            style={{
+              width: 40, height: 40, borderRadius: radius.full,
+              background: searchOpen ? colors.area.brain + '18' : 'transparent',
+              border: `1px solid ${searchOpen ? colors.area.brain + '40' : colors.border.subtle}`,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: searchOpen ? colors.area.brain : colors.text.secondary,
+            }}>
+            {searchOpen ? <X size={16} strokeWidth={2.5} aria-hidden="true" /> : <Search size={16} strokeWidth={2} aria-hidden="true" />}
+          </button>
+        </div>
       </div>
 
-      {/* Counts row */}
-      {items.length > 0 && (
+      {!archived && totalCount > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '12px' }}>
-          {[
-            { label: 'Ideas', value: ideasCount, color: '#8B5CF6' },
-            { label: 'Notas', value: notesCount, color: '#3B82F6' },
-            { label: 'Tareas', value: tasksCount, color: '#22C55E' },
-          ].map(({ label, value, color }) => (
-            <LifeCard key={label} style={{ textAlign: 'center', padding: '10px 6px' }}>
-              <p style={{ fontFamily: font, fontSize: '20px', fontWeight: 800, color, margin: '0 0 1px' }}>{value}</p>
-              <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.quaternary, margin: 0, letterSpacing: '0.04em' }}>{label.toUpperCase()}</p>
+          {([['idea', ideasCount], ['note', notesCount], ['task', tasksCount]] as const).map(([k, value]) => (
+            <LifeCard key={k} style={{ textAlign: 'center', padding: '10px 6px' }}>
+              <p style={{ fontFamily: font, fontSize: '20px', fontWeight: 800, color: TYPE_META[k].color, margin: '0 0 1px' }}>{value}</p>
+              <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.tertiary, margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                {t.brain.counts[k]}
+              </p>
             </LifeCard>
           ))}
         </div>
       )}
 
-      {/* Quick capture */}
-      <QuickCapture onCapture={handleQuickCapture} />
+      {!archived && <QuickCapture onCapture={(type, title) => createItem({ type, title })} />}
 
-      {/* Search input */}
       <AnimatePresence>
         {searchOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            style={{ overflow: 'hidden', marginBottom: '10px' }}
-          >
-            <input
-              value={searchQ}
-              onChange={e => setSearchQ(e.target.value)}
-              placeholder="Buscar en Brain…"
-              // eslint-disable-next-line jsx-a11y/no-autofocus
-              autoFocus
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            style={{ overflow: 'hidden', marginBottom: '10px' }}>
+            <input value={searchQ} onChange={e => setSearchQ(e.target.value)}
+              placeholder={t.brain.searchPlaceholder} aria-label={t.brain.searchPlaceholder} type="search"
+                  autoFocus
               style={{
-                width: '100%', padding: '10px 14px', boxSizing: 'border-box',
-                borderRadius: radius.md,
-                background: colors.surface.high,
-                border: `1px solid ${colors.border.medium}`,
-                color: colors.text.primary,
-                fontFamily: font, fontSize: '14px', outline: 'none',
-              }}
-            />
+                width: '100%', padding: '10px 14px', boxSizing: 'border-box', borderRadius: radius.md,
+                background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
+                color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
+              }} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Filter tabs */}
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '2px' }}>
+      <div role="tablist" aria-label={tNav.brain} style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '2px' }}>
         {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
+          <button key={f} type="button" role="tab" aria-selected={filter === f} onClick={() => setFilter(f)}
             style={{
-              padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
+              minHeight: 36, padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
               background: filter === f ? colors.area.brain : colors.surface.high,
               border: `1px solid ${filter === f ? colors.area.brain : colors.border.subtle}`,
               color: filter === f ? '#fff' : colors.text.secondary,
-              fontFamily: font, fontSize: '12px', fontWeight: 700,
-              cursor: 'pointer', transition: 'all 0.15s',
-            }}
-          >
-            {FILTER_LABELS[f]}
+              fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+            }}>
+            {t.brain.filters[f]}
           </button>
         ))}
       </div>
 
-      {/* Item list */}
-      {visible.length === 0 ? (
+      {loading ? <BrainSkeleton /> : error ? (
         <LifeCard>
-          <LifeEmptyState
-            icon={Zap}
-            iconColor={colors.area.brain}
-            title={emptyHint.title}
-            subtitle={emptyHint.subtitle}
-          />
+          <LifeEmptyState icon={AlertTriangle} iconColor={colors.semantic.error}
+            title={t.brain.errorTitle} subtitle={t.brain.loadError}
+            action={{ label: t.brain.retry, onClick: () => void reload() }} />
+        </LifeCard>
+      ) : items.length === 0 ? (
+        <LifeCard>
+          <LifeEmptyState icon={archived ? Archive : Zap} iconColor={colors.area.brain} title={emptyHint.title} subtitle={emptyHint.text} />
         </LifeCard>
       ) : (
         <motion.div variants={stagger} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -447,22 +346,24 @@ export function LifeBrainPage() {
               <LifeSectionHeader title={label} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px', marginBottom: '6px' }}>
                 {groupItems.map(item => (
-                  <BrainCard
-                    key={item.id}
-                    item={item}
-                    onToggle={() => toggleComplete(item)}
+                  <BrainCard key={item.id} item={item} archived={archived}
+                    onToggle={() => { toggleComplete(item).catch(() => toast.error(t.common.saveError)) }}
                     onEdit={() => { setEditItem(item); setSheetOpen(true) }}
-                    onArchive={() => archiveItem(item.id)}
-                    onDelete={() => setDeleteTarget(item)}
-                  />
+                    onArchive={() => toggleArchive(item)}
+                    onDelete={() => remove(item)} />
                 ))}
               </div>
             </motion.div>
           ))}
+          {hasMore && (
+            <button type="button" onClick={() => { loadMore().catch(() => toast.error(t.brain.loadError)) }}
+              style={{ alignSelf: 'center', minHeight: 44, padding: '10px 20px', marginTop: 4, borderRadius: radius.full, border: `1px solid ${colors.border.medium}`, background: 'transparent', color: colors.text.primary, fontFamily: font, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              {t.brain.loadMore}
+            </button>
+          )}
         </motion.div>
       )}
 
-      {/* Sheet */}
       <BrainItemSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
@@ -471,20 +372,6 @@ export function LifeBrainPage() {
           if (editItem) await updateItem(editItem.id, data)
           else await createItem(data)
         }}
-      />
-
-      {/* Delete confirm */}
-      <LifeConfirmDialog
-        open={!!deleteTarget}
-        title="¿Eliminar?"
-        message={`"${deleteTarget?.title}" será eliminado permanentemente.`}
-        confirmLabel="Eliminar"
-        onConfirm={async () => {
-          if (deleteTarget) await deleteItem(deleteTarget.id)
-          setDeleteTarget(null)
-        }}
-        onCancel={() => setDeleteTarget(null)}
-        danger
       />
     </LifeScreenContainer>
   )

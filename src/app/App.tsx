@@ -106,7 +106,7 @@ function App() {
       <AuthInit />
       <PrefsInit />
       <OfflineBanner />
-      <Toaster position="top-right" />
+      <Toaster position="top-right" containerStyle={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
 
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>

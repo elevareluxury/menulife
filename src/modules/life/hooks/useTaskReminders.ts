@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { taskDueAt, localDateKey, type LifeTask } from './useTasks'
+import { lifeT } from '@/i18n/app/life'
 
 const db = supabase as unknown as SupabaseClient
 const CHECK_EVERY_MS = 30_000
@@ -40,9 +41,10 @@ export function useTaskReminders(userId: string | undefined) {
         // Avisar si ya es la hora (y no pasó más de 12 h, para no avisar cosas viejas)
         if (remindAt > now || now - remindAt > 12 * 3_600_000) continue
 
-        const when = task.due_time ? `a las ${task.due_time.slice(0, 5)}` : 'hoy'
+        const ts = lifeT().taskSheet
+        const when = task.due_time ? ts.reminderAt(task.due_time.slice(0, 5)) : ts.reminderToday
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-          new Notification(task.title, { body: `Recordatorio · ${when}`, tag: `life-task-${task.id}` })
+          new Notification(task.title, { body: ts.reminderBody(when), tag: `life-task-${task.id}` })
         } else {
           toast(`⏰ ${task.title} · ${when}`, { duration: 8000 })
         }
