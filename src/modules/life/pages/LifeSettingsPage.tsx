@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, LogOut, Plus, Settings2, X } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Download, FileSpreadsheet, LogOut, Plus, Settings2, Trash2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { LifeScreenContainer, LifeCard, colors, font, radius } from '../design-system'
+import { LifeScreenContainer, LifeCard, LifeConfirmDialog, colors, font, radius } from '../design-system'
+import { deleteLifeData, downloadBlob, exportLifeJson, exportMoneyCsv } from '../lib/lifeData'
+import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
 import { LanguageList } from '../components/LanguageSheet'
 import { CurrencySheet } from '../components/CurrencySheet'
 import { useLifeT } from '@/i18n/app/life'
@@ -32,6 +34,8 @@ export function LifeSettingsPage() {
   const prefs = usePrefs()
   const locale = langLocale(prefs.language)
   const [picker, setPicker] = useState<'main' | 'extra' | null>(null)
+  const [busy, setBusy] = useState<'json' | 'csv' | 'delete' | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const zones = useMemo(() => {
     const all = timezones()
     return all.includes(prefs.timezone) ? all : [prefs.timezone, ...all]
@@ -40,6 +44,33 @@ export function LifeSettingsPage() {
   const save = (patch: Partial<Prefs>) => {
     if (!userId) return
     savePrefs(userId, patch).catch(() => toast.error(t.common.saveError))
+  }
+
+  const stamp = () => new Date().toISOString().slice(0, 10)
+  const download = async (kind: 'json' | 'csv') => {
+    if (!userId || busy) return
+    setBusy(kind)
+    try {
+      if (kind === 'json') downloadBlob(await exportLifeJson(userId), `mycen-life-os-${stamp()}.json`)
+      else downloadBlob(await exportMoneyCsv(userId), `mycen-dinero-${stamp()}.csv`)
+    } catch { toast.error(t.data.exportError) }
+    finally { setBusy(null) }
+  }
+  const removeAll = async () => {
+    setConfirmDelete(false)
+    if (!userId) return
+    setBusy('delete')
+    try {
+      await deleteLifeData(userId)
+      toast.success(t.data.deleted)
+      for (const module of ['brain', 'goals', 'money']) window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module } }))
+    } catch { toast.error(t.data.deleteError) }
+    finally { setBusy(null) }
+  }
+  const dataBtn: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 10, minHeight: 48, padding: '10px 14px', borderRadius: radius.md,
+    background: colors.surface.high, border: `1px solid ${colors.border.subtle}`, color: colors.text.primary,
+    fontFamily: font, fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'start',
   }
 
   return (
@@ -117,6 +148,23 @@ export function LifeSettingsPage() {
         </LifeCard>
 
         <LifeCard>
+          <h2 style={label}>{t.data.title}</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button type="button" style={dataBtn} disabled={!!busy} onClick={() => void download('json')}>
+              <Download size={16} aria-hidden="true" /> {busy === 'json' ? t.data.preparing : t.data.exportJson}
+            </button>
+            <button type="button" style={dataBtn} disabled={!!busy} onClick={() => void download('csv')}>
+              <FileSpreadsheet size={16} aria-hidden="true" /> {busy === 'csv' ? t.data.preparing : t.data.exportCsv}
+            </button>
+            <button type="button" disabled={!!busy} onClick={() => setConfirmDelete(true)}
+              style={{ ...dataBtn, background: 'transparent', color: colors.semantic.error }}>
+              <Trash2 size={16} aria-hidden="true" /> {busy === 'delete' ? t.data.preparing : t.data.delete}
+            </button>
+          </div>
+          <p style={help}>{t.data.help}</p>
+        </LifeCard>
+
+        <LifeCard>
           <h2 style={label}>{t.settings.account}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <button type="button" onClick={() => navigate('/studio')}
@@ -130,6 +178,16 @@ export function LifeSettingsPage() {
           </div>
         </LifeCard>
       </div>
+
+      <LifeConfirmDialog
+        open={confirmDelete}
+        title={t.data.deleteTitle}
+        message={t.data.deleteText}
+        confirmLabel={t.data.deleteConfirm}
+        onConfirm={() => void removeAll()}
+        onCancel={() => setConfirmDelete(false)}
+        danger
+      />
 
       <CurrencySheet
         open={picker !== null}

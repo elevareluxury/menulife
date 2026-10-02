@@ -40,6 +40,10 @@ Referencia de producto: "MYCEN — Etapa 2" (UX/UI, arquitectura y criterios de 
   No hay Life Score (la tabla `life_score` es legado; no se escribe más).
 - Insights (`/life/insights`, `lib/insights.ts`): reglas sobre datos reales calculadas en el dispositivo; cada una exige
   un mínimo de datos y si no alcanza no se muestra. El inicio destaca uno (no repite las vencidas).
+- Datos de Life OS (Ajustes → Tus datos, `lib/lifeData.ts`): exportar JSON completo y CSV de Dinero; borrar sólo Life OS
+  (cuenta, perfil y ajustes quedan). La cuenta entera se exporta/borra desde Studio → Ajustes.
+- Sin conexión: el + guarda en una cola local (`lib/outbox.ts`, id generado en el cliente, upsert sin duplicar) y se sube
+  al volver la red; el aviso general de "sin conexión" es `src/components/ui/OfflineBanner.tsx`.
 
 ## Idioma y región
 - 12 idiomas: es, en, pt, fr, de, it, zh, ja, ko, hi, ar (RTL), ru — lista en `src/i18n/app/languages.ts`
