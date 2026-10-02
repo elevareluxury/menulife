@@ -1,7 +1,8 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useId, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { colors, font, radius, shadow } from '../tokens'
+import { useLifeT } from '@/i18n/app/life'
 
 interface LifeSheetProps {
   open: boolean
@@ -12,6 +13,8 @@ interface LifeSheetProps {
 }
 
 export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }: LifeSheetProps) {
+  const titleId = useId()
+  const t = useLifeT()
   // Lock body scroll + handle Escape key
   useEffect(() => {
     if (!open) return
@@ -48,6 +51,9 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }
           {/* Sheet */}
           <motion.div
             key="sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -74,16 +80,18 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               padding: '12px 20px 0', flexShrink: 0,
             }}>
-              <h3 style={{
+              <h3 id={titleId} style={{
                 fontFamily: font, fontSize: '17px', fontWeight: 700,
                 color: colors.text.primary, margin: 0,
               }}>
                 {title}
               </h3>
               <button
+                type="button"
                 onClick={onClose}
+                aria-label={t.common.close}
                 style={{
-                  width: 32, height: 32, borderRadius: radius.full,
+                  width: 40, height: 40, borderRadius: radius.full, flexShrink: 0,
                   background: colors.border.subtle, border: 'none', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'background 0.15s',
@@ -91,7 +99,7 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }
                 onMouseEnter={e => { e.currentTarget.style.background = colors.border.medium }}
                 onMouseLeave={e => { e.currentTarget.style.background = colors.border.subtle }}
               >
-                <X size={16} style={{ color: colors.text.tertiary }} strokeWidth={2.5} />
+                <X size={16} style={{ color: colors.text.tertiary }} strokeWidth={2.5} aria-hidden="true" />
               </button>
             </div>
 

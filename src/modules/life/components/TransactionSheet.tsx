@@ -43,6 +43,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
   const [error, setError]         = useState('')
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
     if (open) {
       if (initial) {
         setForm({ type: initial.type, amount: initial.amount, category: initial.category,
@@ -55,6 +56,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
       }
       setError('')
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 

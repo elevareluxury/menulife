@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useLocaleStore } from '@/store/localeStore'
+import { LIFE_DATA_UPDATED } from './useBrain'
 import { computeLifeScore } from '../lib/lifeScoreEngine'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,6 +74,14 @@ export function useLifeData(): LifeData {
   const { user } = useAuthStore()
   const [data, setData] = useState<LifeData>(INITIAL)
   const currency = useLocaleStore(s => s.currency)
+  const [version, setVersion] = useState(0)
+
+  // Volver a leer cuando el botón + registra algo
+  useEffect(() => {
+    const bump = () => setVersion(v => v + 1)
+    window.addEventListener(LIFE_DATA_UPDATED, bump)
+    return () => window.removeEventListener(LIFE_DATA_UPDATED, bump)
+  }, [])
 
   useEffect(() => {
     if (!user) return
@@ -178,7 +187,7 @@ export function useLifeData(): LifeData {
 
     fetchAll()
     return () => { cancelled = true }
-  }, [user, currency])
+  }, [user, currency, version])
 
   return data
 }

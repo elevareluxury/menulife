@@ -54,9 +54,10 @@ export function CaptureButton() {
 
   const handleBrainSave = async (data: { type: BrainItemType; title: string; content?: string }) => {
     if (!user) return
-    await db.from('life_brain_items').insert({
+    const { error } = await db.from('life_brain_items').insert({
       ...data, user_id: user.id, is_completed: false, is_archived: false,
     })
+    if (error) throw error
     window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
     ;(async () => {
       const { count: total } = await db.from('life_brain_items')
@@ -75,7 +76,8 @@ export function CaptureButton() {
     if (!user) return
     const { count: existing } = await db.from('life_goals')
       .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-    await db.from('life_goals').insert({ ...data, user_id: user.id, sort_order: existing ?? 0 })
+    const { error } = await db.from('life_goals').insert({ ...data, user_id: user.id, sort_order: existing ?? 0 })
+    if (error) throw error
     window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'goals' } }))
     void award(user.id, 'first_goal', 'Primera meta definida')
     const newCount = (existing ?? 0) + 1
@@ -84,11 +86,14 @@ export function CaptureButton() {
 
   const handleMoneySave = async (data: TransactionFormData) => {
     if (!user) return
-    await db.from('life_transactions').insert({ ...data, user_id: user.id })
+    const { error } = await db.from('life_transactions').insert({ ...data, user_id: user.id })
+    if (error) throw error
     window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'money' } }))
-    const { count } = await db.from('life_transactions')
-      .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-    if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
+    void (async () => {
+      const { count } = await db.from('life_transactions')
+        .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+      if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
+    })()
   }
 
   // Portal a <body>: el botón fijo no depende de ningún contenedor

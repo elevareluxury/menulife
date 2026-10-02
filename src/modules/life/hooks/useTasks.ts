@@ -64,7 +64,7 @@ export function useTasks() {
       .order('created_at', { ascending: true })
       .then(({ data, error: err }) => {
         if (cancelled) return
-        if (err) setError('No pudimos cargar tus tareas.')
+        if (err) setError('load')
         else { setTasks((data ?? []) as LifeTask[]); setError(null) }
         setLoading(false)
       })
@@ -106,11 +106,14 @@ export function useTasks() {
     }
   }, [])
 
+  /** Oculta la tarea en pantalla (para borrar con "Deshacer"). */
+  const hideLocally = useCallback((id: string) => setTasks(prev => prev.filter(t => t.id !== id)), [])
+
   const deleteTask = useCallback(async (id: string) => {
     const { error: err } = await db.from('life_tasks').delete().eq('id', id)
     if (err) throw err
     setTasks(prev => prev.filter(t => t.id !== id))
   }, [])
 
-  return { tasks, loading, error, reload, createTask, updateTask, toggleTask, deleteTask }
+  return { tasks, loading, error, reload, createTask, updateTask, toggleTask, deleteTask, hideLocally }
 }

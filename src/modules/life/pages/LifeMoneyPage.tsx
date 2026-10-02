@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import toast from 'react-hot-toast'
 import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2 } from 'lucide-react'
 import {
-  LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
+  LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState,
   colors, font, radius, stagger, fadeInUp,
 } from '../design-system'
 import { useMoney, type Transaction } from '../hooks/useMoney'
 import { TransactionSheet } from '../components/TransactionSheet'
 import { ActionMenu } from '../components/ActionMenu'
+import { deleteWithUndo } from '../lib/undo'
 import { useLifeT, type LifeDict } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
@@ -129,18 +129,22 @@ export function LifeMoneyPage() {
   const {
     grouped, loading, mainCurrency,
     monthIncome, monthExpense, monthBalance, monthCurve, otherTotals,
-    hasData, createTransaction, updateTransaction, deleteTransaction,
+    hasData, reload, createTransaction, updateTransaction, deleteTransaction, hideTransaction,
   } = useMoney()
 
   const [sheetOpen, setSheetOpen]       = useState(false)
   const [editTx, setEditTx]             = useState<Transaction | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null)
 
   if (loading) return <MoneySkeleton />
 
   const balanceColor = monthBalance >= 0 ? colors.semantic.success : colors.semantic.error
   const monthName = new Date().toLocaleDateString(locale, { month: 'long' })
   const openNew = () => { setEditTx(null); setSheetOpen(true) }
+  const remove = (tx: Transaction) => {
+    hideTransaction(tx.id)
+    const what = `${tx.description || categoryLabel(t, tx.category)} · ${formatMoney(Number(tx.amount), tx.currency || mainCurrency, locale)}`
+    deleteWithUndo({ message: t.undo.deleted(what), commit: () => deleteTransaction(tx.id), restore: () => void reload() })
+  }
 
   return (
     <LifeScreenContainer>
@@ -232,7 +236,7 @@ export function LifeMoneyPage() {
                     {group.items.map(tx => (
                       <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale}
                         onEdit={() => { setEditTx(tx); setSheetOpen(true) }}
-                        onDelete={() => setDeleteTarget(tx)} />
+                        onDelete={() => remove(tx)} />
                     ))}
                   </div>
                   {group.items.length > 1 && single && (
@@ -259,24 +263,6 @@ export function LifeMoneyPage() {
         }}
       />
 
-      <LifeConfirmDialog
-        open={!!deleteTarget}
-        title={t.money.deleteTitle}
-        message={deleteTarget
-          ? t.money.deleteText(
-              deleteTarget.type === 'income' ? t.money.incomeOne : t.money.expenseOne,
-              formatMoney(Number(deleteTarget.amount), deleteTarget.currency || mainCurrency, locale),
-              categoryLabel(t, deleteTarget.category))
-          : ''}
-        confirmLabel={t.common.delete}
-        onConfirm={async () => {
-          const target = deleteTarget
-          setDeleteTarget(null)
-          if (target) await deleteTransaction(target.id).catch(() => toast.error(t.common.saveError))
-        }}
-        onCancel={() => setDeleteTarget(null)}
-        danger
-      />
     </LifeScreenContainer>
   )
 }
