@@ -38,3 +38,7 @@ Thumbs.db
 # Vite generated files
 vite.config.js
 vite.config.d.ts
+
+# Tests
+test-results/
+playwright-report/

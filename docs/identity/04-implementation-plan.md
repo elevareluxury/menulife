@@ -28,8 +28,8 @@ escritorio de 3 paneles (7), pantalla "Mis Spaces" (5, salvo demanda) y document
 
 | Fase | Entregable | Condición para avanzar |
 |---|---|---|
-| **0** | Esta auditoría (`docs/identity/00–04`) | Decisiones y preguntas abiertas aprobadas |
-| **0.5** | **Base de pruebas**: Vitest (unidades) + Playwright en el repo con base simulada; script `npm test`; tests de los flujos actuales (URL pública, redirección de username, QR, vCard, autosave) | Los flujos actuales cubiertos y en verde |
+| **0** ✅ | Esta auditoría (`docs/identity/00–04`) | Decisiones y preguntas abiertas aprobadas |
+| **0.5** ✅ | **Base de pruebas**: Vitest (unidades) + Playwright en el repo con base simulada; script `npm test`; tests de los flujos actuales (URL pública, redirección de username, QR, vCard, autosave) | Los flujos actuales cubiertos y en verde |
 | **1** | **Modelo**: tabla `identities` (1 por usuario); `profiles` = Space (`identity_id`, `space_type` con `artist/brand/project/custom`, `visibility` público/no listado/privado, estado `archived`); tablas de versiones y de contenido (`content_objects` + `content_blocks`, empezando por proyectos). Sólo diseño + SQL para revisar | Diseño aprobado |
 | **2** | **Migración** Expand → Migrate → Verify → Switch con bandera; trigger de negocios actualizado; exportar/borrar incluyen lo nuevo | Consultas de verificación OK, respuesta de `get_public_profile` idéntica para todos los publicados |
 | **3** | **Publicación con versiones**: Studio edita la versión de trabajo; "Publicar" crea una versión inmutable; la página pública lee la versión publicada; "cambios sin publicar"; restaurar = nueva versión; deshacer/rehacer local en la sesión; bloqueo optimista; **HTML para buscadores desde la versión publicada** | Flujo C (publicación segura) en verde |
@@ -53,6 +53,6 @@ escritorio de 3 paneles (7), pantalla "Mis Spaces" (5, salvo demanda) y document
 
 ## Lo que se necesita de vos antes de la Fase 1
 
-1. Aprobar o corregir las preguntas abiertas P1–P10 de `00-decisiones.md`.
+1. ~~Aprobar las preguntas P1–P10~~ (aprobadas el 3/10/2026).
 2. Correr las consultas de solo lectura de `02-data-model-current.md` y pegar los resultados.
 3. Confirmar que hay respaldo de la base (Supabase → Database → Backups) antes de cualquier migración.
