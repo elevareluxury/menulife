@@ -5,7 +5,9 @@ import { useAppLang } from '@/i18n/app/store'
 import { setLocalLanguage } from '@/lib/prefs'
 import { fetchPublicProject } from '../lib/profileApi'
 import { tr, ui } from '../lib/profileI18n'
-import { QUIET, themeVars } from '../lib/profileTheme'
+import { themeVars } from '../lib/profileTheme'
+import { usePrefersLight } from '../lib/usePrefersLight'
+import { useAllowZoom } from '../lib/useAllowZoom'
 import type { ProjectLookup } from '../lib/projectTypes'
 import { ProjectView } from '../components/ProjectView'
 import '../profile.css'
@@ -69,18 +71,22 @@ export function ProjectPublicPage() {
     return () => { document.querySelector('meta[name="robots"]')?.remove() }
   }, [noindex])
 
+  useAllowZoom()
+  const prefersLight = usePrefersLight()
+  const vars = themeVars(project?.space.theme, prefersLight)
+  const pageBg = String((vars as Record<string, string>)['--p-bg'])
+
   useEffect(() => {
     const prev = document.body.style.background
-    document.body.style.background = project?.space.theme?.mode === 'light' ? QUIET.ivory : QUIET.obsidian
+    document.body.style.background = pageBg
     return () => { document.body.style.background = prev }
-  }, [project?.space.theme?.mode])
+  }, [pageBg])
 
   const showToast = useCallback((msg: string) => {
     setToast(msg)
     window.setTimeout(() => setToast(null), 2200)
   }, [])
 
-  const vars = themeVars(project?.space.theme)
   const t = ui(lang)
 
   if (state.kind === 'loading') {

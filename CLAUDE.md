@@ -42,6 +42,11 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   dos registros `Record<ModuleType, …>`: el público (`profile/components/moduleRegistry.ts`, cómo se dibuja; lo usan la página y la
   vista previa) y el de Studio (`studio/lib/moduleCatalog.ts`: campos, validación, valores iniciales, qué se guarda, resumen y editor
   propio en `moduleExtraEditors.tsx`). Nada de `if (type === …)` sueltos: un tipo nuevo se agrega en esos dos lugares.
+- Apariencia (Fase 9): `profiles.theme` = modo (`dark`/`light`/`auto`, este sigue al dispositivo con `usePrefersLight`),
+  `corners`, `background` (liso/brillo/teñido con el acento), `card_style`, acento y tipografía. `profileTheme.ts` arma la paleta
+  (`themePalette`) y garantiza WCAG AA: el acento se usa sólo si llega a 3:1 y deja texto legible encima (si no, color de texto);
+  el texto secundario se ajusta si hace falta. `contrastReport` se muestra en Studio → Apariencia. Las páginas públicas permiten
+  zoom (`useAllowZoom`). Tests: barrida de contraste en `tests/unit/profileTheme.test.ts` y axe en `tests/e2e/appearance.spec.ts`.
 - Links (Fase 7): estilo "Destacado" (`content.style = 'highlight'`) y módulo `link_group` (varios links bajo un título).
 - Connect (decisión 1, sin CRM): Studio → Compartir tiene URL, QR (`?src=qr`), vCard, tarjeta de identidad PNG clara/oscura
   (`lib/identityCard.ts`, canvas en el navegador, QR con `?src=card`) y presentación corta para copiar o mandar por WhatsApp.
@@ -99,7 +104,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - `npm run test:db`: migraciones de Identity + `tests/db/*.test.sql` en un Postgres real (necesita PGHOST/PGUSER).
 - CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build, E2E y base de datos en cada PR.
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
-  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
+  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
   (`modules.spec.ts`: si un cambio de módulo es deliberado, regenerar con `--update-snapshots` y revisar el diff).
 
 ## Reglas

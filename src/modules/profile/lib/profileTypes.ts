@@ -40,7 +40,12 @@ export interface PrimaryAction {
 }
 
 export interface ProfileTheme {
-  mode?: 'dark' | 'light'
+  /** 'auto' = sigue al dispositivo del visitante (Fase 9) */
+  mode?: 'dark' | 'light' | 'auto'
+  /** Fase 9 — valores en profileTheme.ts (CORNERS, BACKGROUNDS, CARD_STYLES) */
+  corners?: 'sharp' | 'soft' | 'round'
+  background?: 'plain' | 'glow' | 'tint'
+  card_style?: 'filled' | 'outline' | 'flat'
   accent?: string
   surface?: string
   title_font?: string

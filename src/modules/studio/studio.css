@@ -478,3 +478,9 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 .st-suspended { border-color: rgba(242, 134, 122, 0.45); background: rgba(242, 134, 122, 0.08); margin-bottom: 16px; }
 .st-suspended p { margin: 6px 0 0; color: var(--st-muted); font-size: 14px; line-height: 1.5; }
 .st-suspended a { display: inline-block; margin-top: 8px; color: var(--st-text); font-size: 14px; }
+
+/* Apariencia → Contraste (Fase 9) */
+.st-contrast { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.st-contrast li { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 6px 0; border-top: 1px solid var(--st-border); }
+.st-contrast .is-ok { color: #6EE7A0; display: inline-flex; align-items: center; gap: 4px; }
+.st-contrast .is-bad { color: #F2867A; display: inline-flex; align-items: center; gap: 4px; }
