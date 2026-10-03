@@ -16,12 +16,8 @@ begin;
 
 -- ─── 1. Administradores ──────────────────────────────────────────────────────
 
--- Ya existe en producción (la usa el panel super-admin); se crea sólo si falta
-create table if not exists public.super_admins (
-  id      uuid primary key default gen_random_uuid(),
-  user_id uuid not null unique references auth.users(id) on delete cascade
-);
-
+-- Los administradores son las cuentas de la tabla super_admins (ya existe: la usa el panel super-admin).
+-- Esta migración no la toca.
 create or replace function public.mycen_is_admin()
 returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from super_admins where user_id = auth.uid());
