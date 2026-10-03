@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowDown, ArrowLeft, ArrowUp, ExternalLink, Plus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowUp, Copy, ExternalLink, Plus, Trash2 } from 'lucide-react'
 import type { BlockType } from '@/modules/profile/lib/projectTypes'
 import { useStudio } from '../StudioContext'
 import {
@@ -11,7 +11,8 @@ import { ADDABLE_BLOCKS, BLOCKS } from '../lib/blockCatalog'
 import { PROJECT_SLUG_RE } from '../lib/slug'
 import { publicBaseUrl } from '../lib/preview'
 import type { ProjectPatch, ProjectPublishState, SaveState, StudioBlock, StudioProject } from '../lib/studioTypes'
-import { Button, ConfirmDialog, Drawer, ImageField, SaveIndicator, SelectField, TextField } from '../components/ui'
+import { Button, ConfirmDialog, Drawer, ImageField, Menu, SaveIndicator, SelectField, TextField } from '../components/ui'
+import { DragHandle, SortableList } from '../components/SortableList'
 import { uploadMedia } from '../lib/studioApi'
 import { useStudioT } from '@/i18n/app/studio'
 
@@ -156,12 +157,24 @@ function ProjectEditor({ initial, initialBlocks }: { initial: StudioProject; ini
     changeBlocks([...blocks, { id: crypto.randomUUID(), type, data: BLOCKS[type].initial() }])
   }
 
-  function moveBlock(i: number, d: -1 | 1) {
-    const j = i + d
-    if (j < 0 || j >= blocks.length) return
+  function moveBlock(from: number, to: number) {
+    if (to < 0 || to >= blocks.length || from === to) return
     const next = [...blocks]
-    ;[next[i], next[j]] = [next[j], next[i]]
+    const [item] = next.splice(from, 1)
+    next.splice(to, 0, item)
     changeBlocks(next)
+  }
+
+  function duplicateBlock(i: number) {
+    const next = [...blocks]
+    next.splice(i + 1, 0, { ...blocks[i], id: crypto.randomUUID(), data: structuredClone(blocks[i].data) })
+    changeBlocks(next)
+  }
+
+  /** "Texto: Una marca para…" — para los anuncios al reordenar */
+  const blockLabel = (b: StudioBlock) => {
+    const text = typeof b.data.text === 'string' ? b.data.text.trim().slice(0, 40) : ''
+    return text ? `${pt.blockTypes[b.type]}: ${text}` : pt.blockTypes[b.type]
   }
 
   /** Espera a que no quede nada sin guardar. false si el guardado falló. */
@@ -295,28 +308,30 @@ function ProjectEditor({ initial, initialBlocks }: { initial: StudioProject; ini
           <Button size="sm" onClick={() => setAdding(true)}><Plus size={15} aria-hidden="true" /> {pt.addBlock}</Button>
         </div>
         {blocks.length === 0 && <p className="st-card st-empty">{pt.blocksEmpty}</p>}
-        <ol className="st-module-list" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {blocks.map((b, i) => {
+        <SortableList items={blocks} label={blockLabel} onMove={moveBlock} className="st-module-list">
+          {(b, i, handle, drag) => {
             const def = BLOCKS[b.type]
             const label = `${pt.blockTypes[b.type]} · ${pt.blockN(i + 1)}`
             return (
-              <li key={b.id} className="st-card" style={{ margin: 0 }} aria-label={label}>
+              <li ref={drag.ref} style={{ ...drag.style, margin: 0 }} className={`st-card ${drag.className}`} aria-label={label}>
                 <div className="st-row" style={{ justifyContent: 'space-between', marginBottom: 10 }}>
-                  <span className="st-row" style={{ fontWeight: 600, fontSize: 14 }}>
+                  <span className="st-row" style={{ fontWeight: 600, fontSize: 14, gap: 6 }}>
+                    <DragHandle {...handle} />
                     <def.icon size={16} aria-hidden="true" /> {pt.blockTypes[b.type]}
                   </span>
-                  <span className="st-row" style={{ gap: 0 }}>
-                    <button type="button" className="st-icon-btn" disabled={i === 0} onClick={() => moveBlock(i, -1)} aria-label={pt.blockUp(i + 1)}><ArrowUp size={15} /></button>
-                    <button type="button" className="st-icon-btn" disabled={i === blocks.length - 1} onClick={() => moveBlock(i, 1)} aria-label={pt.blockDown(i + 1)}><ArrowDown size={15} /></button>
-                    <button type="button" className="st-icon-btn" onClick={() => changeBlocks(blocks.filter(x => x.id !== b.id))} aria-label={pt.blockRemove(i + 1)}><Trash2 size={15} /></button>
-                  </span>
+                  <Menu label={t.sortable.options(label)} items={[
+                    { icon: ArrowUp, label: t.sortable.up, disabled: i === 0, onSelect: () => moveBlock(i, i - 1) },
+                    { icon: ArrowDown, label: t.sortable.down, disabled: i === blocks.length - 1, onSelect: () => moveBlock(i, i + 1) },
+                    { icon: Copy, label: t.sortable.duplicate, onSelect: () => duplicateBlock(i) },
+                    { icon: Trash2, label: pt.blockRemove(i + 1), danger: true, onSelect: () => changeBlocks(blocks.filter(x => x.id !== b.id)) },
+                  ]} />
                 </div>
                 <def.Editor data={b.data} userId={userId}
                   onChange={data => changeBlocks(blocks.map(x => (x.id === b.id ? { ...x, data } : x)))} />
               </li>
             )
-          })}
-        </ol>
+          }}
+        </SortableList>
       </section>
 
       <section className="st-card" style={{ marginTop: 16 }} aria-label={pt.moreActions}>

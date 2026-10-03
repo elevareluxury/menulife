@@ -354,7 +354,7 @@
 }
 .st-bottom-nav a[aria-current='page'] { background: rgba(255, 255, 255, 0.12); color: var(--st-text); }
 /* Con un panel o diálogo abierto la barra se esconde: está en un portal y si no taparía sus botones */
-body:has(.st-overlay, .st-dialog-wrap) .st-bottom-nav { display: none; }
+body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display: none; }
 .st-nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (max-width: 899px) {
   .st-main-inner { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
@@ -425,3 +425,39 @@ body:has(.st-overlay, .st-dialog-wrap) .st-bottom-nav { display: none; }
 .st-pick-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
 .st-pick-list label { display: flex; align-items: center; gap: 10px; font-size: 14.5px; cursor: pointer; flex: 1; min-width: 0; }
 .st-pick-list input { width: 18px; height: 18px; accent-color: var(--st-text); flex: none; }
+
+/* ── Menú ⋯ y listas que se reordenan (Fase 6) ──────────────────── */
+.st-menu { position: relative; flex-shrink: 0; }
+.st-menu-list {
+  position: absolute; inset-inline-end: 0; top: 42px; z-index: 40; min-width: 180px; padding: 4px;
+  background: var(--st-panel); border: 1px solid var(--st-border); border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.st-menu-list button {
+  width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 10px; background: none;
+  display: flex; align-items: center; gap: 10px; text-align: start; cursor: pointer;
+  font: 500 14px inherit; font-family: inherit; color: var(--st-text);
+}
+.st-menu-list button:hover:not(:disabled), .st-menu-list button:focus-visible { background: var(--st-surface-2); outline: none; }
+.st-menu-list button:disabled { opacity: 0.35; cursor: not-allowed; }
+.st-menu-list button.is-danger { color: #F2867A; }
+
+.st-drag-handle {
+  touch-action: none; cursor: grab; flex-shrink: 0; width: 32px; height: 44px; padding: 0; border: 0; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; background: none; color: var(--st-faint);
+}
+.st-drag-handle:hover { color: var(--st-text); background: var(--st-surface-2); }
+.st-drag-handle:active { cursor: grabbing; }
+.st-sortable-item.is-dragging { position: relative; z-index: 30; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5); opacity: 0.96; }
+@media (prefers-reduced-motion: reduce) { .st-sortable-item { transition: none !important; } }
+
+/* Vista previa a pantalla completa (portal a <body>: colores propios) */
+.st-fullscreen { position: fixed; inset: 0; z-index: 80; overflow-y: auto; overscroll-behavior: contain; background: #121412; }
+.st-fullscreen-close {
+  position: fixed; top: calc(12px + env(safe-area-inset-top)); inset-inline-end: 12px; z-index: 90;
+  width: 44px; height: 44px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  background: rgba(20, 22, 20, 0.82); color: #F1F0E9; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.st-fullscreen-close:focus-visible { outline: 2px solid #F1F0E9; outline-offset: 2px; }
+.st-fullscreen .mp-topbar { padding-inline-end: 68px; }

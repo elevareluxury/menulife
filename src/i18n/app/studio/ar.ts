@@ -31,7 +31,10 @@ const ar: StudioDict = {
     invalid: 'استخدم من 3 إلى 30 حرفًا صغيرًا أو رقمًا أو شرطة (من دون شرطة في البداية أو النهاية).',
     error: 'تعذّر التحقق. تحقّق من اتصالك.',
   },
-  preview: { title: 'معاينة', subtitle: 'هكذا يرى الآخرون ملفك. يتحدّث أثناء التعديل.', live: 'معاينة مباشرة', device: 'الجهاز', mobile: 'الجوال', desktop: 'الكمبيوتر' },
+  preview: {
+    fullscreen: 'ملء الشاشة',
+    exitFullscreen: 'الخروج من ملء الشاشة',
+    title: 'معاينة', subtitle: 'هكذا يرى الآخرون ملفك. يتحدّث أثناء التعديل.', live: 'معاينة مباشرة', device: 'الجهاز', mobile: 'الجوال', desktop: 'الكمبيوتر' },
   more: { title: 'المزيد', options: 'خيارات أخرى', others: 'تجارب أخرى' },
   overview: {
     title: 'هويتك', subtitle: 'كيف يتواصل العالم معك.', publish: 'نشر',
@@ -63,6 +66,8 @@ const ar: StudioDict = {
     tagExists: 'هذا الوسم موجود بالفعل.', tagsMax: m => `يمكنك إضافة ${m} وسوم كحد أقصى.`, removeTag: t => `إزالة الوسم ${t}`, addTag: 'إضافة وسم',
   },
   modules: {
+    duplicated: t => `تم تكرار ${t}`,
+    copyOf: t => `${t} (نسخة)`,
     title: 'الوحدات', subtitle: 'كتل ملفك بالترتيب الذي تظهر به.', add: 'إضافة',
     emptyTitle: 'لا يحتوي ملفك على وحدات بعد', emptyText: 'أضف روابطك وشبكاتك الاجتماعية ووسائل التواصل ليجدك الآخرون.',
     addFirst: 'أضف الأولى', hidden: 'مخفية', editX: t => `تعديل ${t}`, upX: t => `نقل ${t} للأعلى`, downX: t => `نقل ${t} للأسفل`,
@@ -311,6 +316,18 @@ const ar: StudioDict = {
       divider: 'فاصل',
       credits: 'الاعتمادات',
     },
+  },
+  sortable: {
+    handle: t => `نقل ${t}`,
+    instructions: 'للنقل: اضغط مسافة أو Enter، واستخدم الأسهم، ثم اضغط مسافة مرة أخرى للإفلات. Escape للإلغاء.',
+    picked: t => `تم التقاط ${t}.`,
+    over: (t, pos, total) => `${t} في الموضع ${pos} من ${total}.`,
+    dropped: (t, pos, total) => `تم وضع ${t} في الموضع ${pos} من ${total}.`,
+    cancelled: t => `أُلغي: بقي ${t} في مكانه.`,
+    options: t => `خيارات ${t}`,
+    up: 'لأعلى',
+    down: 'لأسفل',
+    duplicate: 'تكرار',
   },
 }
 export default ar

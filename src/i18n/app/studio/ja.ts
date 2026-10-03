@@ -31,7 +31,10 @@ const ja: StudioDict = {
     invalid: '小文字・数字・ハイフンを 3〜30 文字で入力してください（先頭と末尾にハイフンは使えません）。',
     error: '確認できませんでした。接続を確認してください。',
   },
-  preview: { title: 'プレビュー', subtitle: '他の人にはこう見えます。編集すると自動で更新されます。', live: 'ライブプレビュー', device: 'デバイス', mobile: 'モバイル', desktop: 'デスクトップ' },
+  preview: {
+    fullscreen: '全画面',
+    exitFullscreen: '全画面を終了',
+    title: 'プレビュー', subtitle: '他の人にはこう見えます。編集すると自動で更新されます。', live: 'ライブプレビュー', device: 'デバイス', mobile: 'モバイル', desktop: 'デスクトップ' },
   more: { title: 'その他', options: 'その他のオプション', others: 'ほかのサービス' },
   overview: {
     title: 'あなたのアイデンティティ', subtitle: '世界とあなたをつなぐ場所。', publish: '公開する',
@@ -63,6 +66,8 @@ const ja: StudioDict = {
     tagExists: 'そのタグはすでにあります。', tagsMax: m => `タグは最大 ${m} 個までです。`, removeTag: t => `タグ「${t}」を削除`, addTag: 'タグを追加',
   },
   modules: {
+    duplicated: t => `${t}を複製しました`,
+    copyOf: t => `${t}（コピー）`,
     title: 'モジュール', subtitle: 'プロフィールのブロック（表示順）。', add: '追加',
     emptyTitle: 'プロフィールにまだモジュールがありません', emptyText: 'リンク、SNS、連絡先を追加して見つけてもらいましょう。',
     addFirst: '最初のモジュールを追加', hidden: '非表示', editX: t => `${t}を編集`, upX: t => `${t}を上へ`, downX: t => `${t}を下へ`,
@@ -311,6 +316,18 @@ const ja: StudioDict = {
       divider: '区切り線',
       credits: 'クレジット',
     },
+  },
+  sortable: {
+    handle: t => `${t}を移動`,
+    instructions: '移動するには、スペースまたはEnterを押し、矢印キーで動かして、もう一度スペースで確定します。Escでキャンセル。',
+    picked: t => `${t}を持ち上げました。`,
+    over: (t, pos, total) => `${t}は ${total} 件中 ${pos} 番目です。`,
+    dropped: (t, pos, total) => `${t}を ${total} 件中 ${pos} 番目に置きました。`,
+    cancelled: t => `キャンセルしました：${t}は元の位置のままです。`,
+    options: t => `${t}のオプション`,
+    up: '上へ',
+    down: '下へ',
+    duplicate: '複製',
   },
 }
 export default ja

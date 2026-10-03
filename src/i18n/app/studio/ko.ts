@@ -31,7 +31,10 @@ const ko: StudioDict = {
     invalid: '소문자, 숫자, 하이픈을 사용해 3~30자로 입력하세요(처음과 끝에는 하이픈 불가).',
     error: '확인하지 못했습니다. 연결 상태를 확인하세요.',
   },
-  preview: { title: '미리보기', subtitle: '다른 사람에게 이렇게 보여요. 편집하는 동안 바로 반영됩니다.', live: '실시간 미리보기', device: '기기', mobile: '모바일', desktop: '데스크톱' },
+  preview: {
+    fullscreen: '전체 화면',
+    exitFullscreen: '전체 화면 종료',
+    title: '미리보기', subtitle: '다른 사람에게 이렇게 보여요. 편집하는 동안 바로 반영됩니다.', live: '실시간 미리보기', device: '기기', mobile: '모바일', desktop: '데스크톱' },
   more: { title: '더보기', options: '추가 옵션', others: '다른 서비스' },
   overview: {
     title: '나의 아이덴티티', subtitle: '세상이 나와 연결되는 방법.', publish: '공개하기',
@@ -63,6 +66,8 @@ const ko: StudioDict = {
     tagExists: '이미 있는 태그입니다.', tagsMax: m => `태그는 최대 ${m}개까지 가능합니다.`, removeTag: t => `태그 ${t} 삭제`, addTag: '태그 추가',
   },
   modules: {
+    duplicated: t => `${t} 복제됨`,
+    copyOf: t => `${t} (사본)`,
     title: '모듈', subtitle: '프로필을 구성하는 블록이 보이는 순서대로 나열됩니다.', add: '추가',
     emptyTitle: '프로필에 아직 모듈이 없어요', emptyText: '링크, SNS, 연락처를 추가해 사람들이 찾을 수 있게 하세요.',
     addFirst: '첫 모듈 추가', hidden: '숨김', editX: t => `${t} 편집`, upX: t => `${t} 위로 이동`, downX: t => `${t} 아래로 이동`,
@@ -311,6 +316,18 @@ const ko: StudioDict = {
       divider: '구분선',
       credits: '크레딧',
     },
+  },
+  sortable: {
+    handle: t => `${t} 이동`,
+    instructions: '이동하려면 스페이스나 Enter를 누르고 화살표 키로 옮긴 뒤 스페이스를 다시 눌러 놓으세요. Esc로 취소합니다.',
+    picked: t => `${t}을(를) 들었습니다.`,
+    over: (t, pos, total) => `${t}: ${total}개 중 ${pos}번째`,
+    dropped: (t, pos, total) => `${t}을(를) ${total}개 중 ${pos}번째에 놓았습니다.`,
+    cancelled: t => `취소됨: ${t}은(는) 원래 위치에 있습니다.`,
+    options: t => `${t} 옵션`,
+    up: '위로',
+    down: '아래로',
+    duplicate: '복제',
   },
 }
 export default ko

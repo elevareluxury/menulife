@@ -31,7 +31,10 @@ const en: StudioDict = {
     invalid: 'Use 3 to 30 lowercase letters, numbers or hyphens (no hyphen at the start or end).',
     error: 'We could not check it. Check your connection.',
   },
-  preview: { title: 'Preview', subtitle: 'This is how people see your profile. It updates as you edit.', live: 'Live preview', device: 'Device', mobile: 'Mobile', desktop: 'Desktop' },
+  preview: {
+    fullscreen: 'Full screen',
+    exitFullscreen: 'Exit full screen',
+    title: 'Preview', subtitle: 'This is how people see your profile. It updates as you edit.', live: 'Live preview', device: 'Device', mobile: 'Mobile', desktop: 'Desktop' },
   more: { title: 'More', options: 'More options', others: 'Other experiences' },
   overview: {
     title: 'Your identity', subtitle: 'How the world connects with you.', publish: 'Publish',
@@ -63,6 +66,8 @@ const en: StudioDict = {
     tagExists: 'That tag is already there.', tagsMax: m => `You can have up to ${m} tags.`, removeTag: t => `Remove tag ${t}`, addTag: 'Add tag',
   },
   modules: {
+    duplicated: t => `${t} duplicated`,
+    copyOf: t => `${t} (copy)`,
     title: 'Modules', subtitle: 'The blocks of your profile, in the order they appear.', add: 'Add',
     emptyTitle: 'Your profile has no modules yet', emptyText: 'Add your links, social networks and contact details so people can find you.',
     addFirst: 'Add the first one', hidden: 'Hidden', editX: t => `Edit ${t}`, upX: t => `Move ${t} up`, downX: t => `Move ${t} down`,
@@ -311,6 +316,18 @@ const en: StudioDict = {
       divider: 'Divider',
       credits: 'Credits',
     },
+  },
+  sortable: {
+    handle: t => `Move ${t}`,
+    instructions: 'To move: press space or Enter, use the arrow keys and press space again to drop. Escape cancels.',
+    picked: t => `Picked up ${t}.`,
+    over: (t, pos, total) => `${t} is at position ${pos} of ${total}.`,
+    dropped: (t, pos, total) => `${t} dropped at position ${pos} of ${total}.`,
+    cancelled: t => `Cancelled: ${t} stayed where it was.`,
+    options: t => `Options for ${t}`,
+    up: 'Move up',
+    down: 'Move down',
+    duplicate: 'Duplicate',
   },
 }
 export default en

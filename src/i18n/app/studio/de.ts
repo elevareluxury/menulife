@@ -31,7 +31,10 @@ const de: StudioDict = {
     invalid: 'Verwende 3 bis 30 Kleinbuchstaben, Zahlen oder Bindestriche (kein Bindestrich am Anfang oder Ende).',
     error: 'Prüfung nicht möglich. Kontrolliere deine Verbindung.',
   },
-  preview: { title: 'Vorschau', subtitle: 'So sehen andere dein Profil. Wird beim Bearbeiten aktualisiert.', live: 'Live-Vorschau', device: 'Gerät', mobile: 'Mobil', desktop: 'Desktop' },
+  preview: {
+    fullscreen: 'Vollbild',
+    exitFullscreen: 'Vollbild beenden',
+    title: 'Vorschau', subtitle: 'So sehen andere dein Profil. Wird beim Bearbeiten aktualisiert.', live: 'Live-Vorschau', device: 'Gerät', mobile: 'Mobil', desktop: 'Desktop' },
   more: { title: 'Mehr', options: 'Weitere Optionen', others: 'Weitere Bereiche' },
   overview: {
     title: 'Deine Identität', subtitle: 'Wie die Welt mit dir in Kontakt kommt.', publish: 'Veröffentlichen',
@@ -63,6 +66,8 @@ const de: StudioDict = {
     tagExists: 'Dieses Schlagwort gibt es schon.', tagsMax: m => `Du kannst bis zu ${m} Schlagwörter haben.`, removeTag: t => `Schlagwort ${t} entfernen`, addTag: 'Schlagwort hinzufügen',
   },
   modules: {
+    duplicated: t => `${t} dupliziert`,
+    copyOf: t => `${t} (Kopie)`,
     title: 'Module', subtitle: 'Die Bausteine deines Profils, in der angezeigten Reihenfolge.', add: 'Hinzufügen',
     emptyTitle: 'Dein Profil hat noch keine Module', emptyText: 'Füge Links, Netzwerke und Kontaktdaten hinzu, damit man dich findet.',
     addFirst: 'Erstes Modul hinzufügen', hidden: 'Ausgeblendet', editX: t => `${t} bearbeiten`, upX: t => `${t} nach oben`, downX: t => `${t} nach unten`,
@@ -311,6 +316,18 @@ const de: StudioDict = {
       divider: 'Trennlinie',
       credits: 'Credits',
     },
+  },
+  sortable: {
+    handle: t => `${t} verschieben`,
+    instructions: 'Zum Verschieben: Leertaste oder Enter drücken, mit den Pfeiltasten bewegen und zum Ablegen erneut die Leertaste drücken. Escape bricht ab.',
+    picked: t => `${t} aufgenommen.`,
+    over: (t, pos, total) => `${t} an Position ${pos} von ${total}.`,
+    dropped: (t, pos, total) => `${t} an Position ${pos} von ${total} abgelegt.`,
+    cancelled: t => `Abgebrochen: ${t} bleibt an seiner Stelle.`,
+    options: t => `Optionen für ${t}`,
+    up: 'Nach oben',
+    down: 'Nach unten',
+    duplicate: 'Duplizieren',
   },
 }
 export default de
