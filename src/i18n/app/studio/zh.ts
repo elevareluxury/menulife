@@ -31,7 +31,10 @@ const zh: StudioDict = {
     invalid: '请使用 3 到 30 个小写字母、数字或连字符（开头和结尾不能是连字符）。',
     error: '无法检查，请检查网络连接。',
   },
-  preview: { title: '预览', subtitle: '别人看到的就是这样，编辑时实时更新。', live: '实时预览', device: '设备', mobile: '手机', desktop: '电脑' },
+  preview: {
+    fullscreen: '全屏',
+    exitFullscreen: '退出全屏',
+    title: '预览', subtitle: '别人看到的就是这样，编辑时实时更新。', live: '实时预览', device: '设备', mobile: '手机', desktop: '电脑' },
   more: { title: '更多', options: '更多选项', others: '其他体验' },
   overview: {
     title: '你的身份', subtitle: '世界与你相连的方式。', publish: '发布',
@@ -63,6 +66,8 @@ const zh: StudioDict = {
     tagExists: '该标签已存在。', tagsMax: m => `最多可以有 ${m} 个标签。`, removeTag: t => `移除标签 ${t}`, addTag: '添加标签',
   },
   modules: {
+    duplicated: t => `已复制${t}`,
+    copyOf: t => `${t}（副本）`,
     title: '模块', subtitle: '主页上的内容块，按显示顺序排列。', add: '添加',
     emptyTitle: '你的主页还没有模块', emptyText: '添加链接、社交媒体和联系方式，让别人找到你。',
     addFirst: '添加第一个', hidden: '已隐藏', editX: t => `编辑 ${t}`, upX: t => `上移 ${t}`, downX: t => `下移 ${t}`,
@@ -311,6 +316,18 @@ const zh: StudioDict = {
       divider: '分隔线',
       credits: '鸣谢',
     },
+  },
+  sortable: {
+    handle: t => `移动${t}`,
+    instructions: '移动方法：按空格键或回车键，用方向键移动，再按空格键放下。按 Esc 取消。',
+    picked: t => `已拿起${t}。`,
+    over: (t, pos, total) => `${t}位于第 ${pos} 位，共 ${total} 位。`,
+    dropped: (t, pos, total) => `${t}已放到第 ${pos} 位，共 ${total} 位。`,
+    cancelled: t => `已取消：${t}保持原位。`,
+    options: t => `${t}的选项`,
+    up: '上移',
+    down: '下移',
+    duplicate: '复制',
   },
 }
 export default zh

@@ -31,7 +31,10 @@ const fr: StudioDict = {
     invalid: 'Utilisez de 3 à 30 lettres minuscules, chiffres ou tirets (sans tiret au début ni à la fin).',
     error: 'Vérification impossible. Contrôlez votre connexion.',
   },
-  preview: { title: 'Aperçu', subtitle: 'Voici comment on voit votre profil. Mis à jour pendant que vous modifiez.', live: 'Aperçu en direct', device: 'Appareil', mobile: 'Mobile', desktop: 'Ordinateur' },
+  preview: {
+    fullscreen: 'Plein écran',
+    exitFullscreen: 'Quitter le plein écran',
+    title: 'Aperçu', subtitle: 'Voici comment on voit votre profil. Mis à jour pendant que vous modifiez.', live: 'Aperçu en direct', device: 'Appareil', mobile: 'Mobile', desktop: 'Ordinateur' },
   more: { title: 'Plus', options: 'Plus d’options', others: 'Autres espaces' },
   overview: {
     title: 'Votre identité', subtitle: 'Comment le monde entre en contact avec vous.', publish: 'Publier',
@@ -63,6 +66,8 @@ const fr: StudioDict = {
     tagExists: 'Cette étiquette existe déjà.', tagsMax: m => `Vous pouvez avoir jusqu’à ${m} étiquettes.`, removeTag: t => `Retirer l’étiquette ${t}`, addTag: 'Ajouter une étiquette',
   },
   modules: {
+    duplicated: t => `${t} dupliqué`,
+    copyOf: t => `${t} (copie)`,
     title: 'Modules', subtitle: 'Les blocs de votre profil, dans leur ordre d’affichage.', add: 'Ajouter',
     emptyTitle: 'Votre profil n’a pas encore de modules', emptyText: 'Ajoutez vos liens, réseaux et coordonnées pour qu’on vous trouve.',
     addFirst: 'Ajouter le premier', hidden: 'Masqué', editX: t => `Modifier ${t}`, upX: t => `Monter ${t}`, downX: t => `Descendre ${t}`,
@@ -311,6 +316,18 @@ const fr: StudioDict = {
       divider: 'Séparateur',
       credits: 'Crédits',
     },
+  },
+  sortable: {
+    handle: t => `Déplacer ${t}`,
+    instructions: 'Pour déplacer : appuyez sur Espace ou Entrée, utilisez les flèches, puis appuyez de nouveau sur Espace pour déposer. Échap annule.',
+    picked: t => `${t} saisi.`,
+    over: (t, pos, total) => `${t} en position ${pos} sur ${total}.`,
+    dropped: (t, pos, total) => `${t} déposé en position ${pos} sur ${total}.`,
+    cancelled: t => `Annulé : ${t} est resté à sa place.`,
+    options: t => `Options de ${t}`,
+    up: 'Monter',
+    down: 'Descendre',
+    duplicate: 'Dupliquer',
   },
 }
 export default fr

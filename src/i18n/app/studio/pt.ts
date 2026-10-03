@@ -31,7 +31,10 @@ const pt: StudioDict = {
     invalid: 'Use de 3 a 30 letras minúsculas, números ou hifens (sem hífen no início ou no fim).',
     error: 'Não conseguimos verificar. Confira sua conexão.',
   },
-  preview: { title: 'Prévia', subtitle: 'É assim que veem seu perfil. Atualiza enquanto você edita.', live: 'Prévia ao vivo', device: 'Dispositivo', mobile: 'Celular', desktop: 'Computador' },
+  preview: {
+    fullscreen: 'Tela cheia',
+    exitFullscreen: 'Sair da tela cheia',
+    title: 'Prévia', subtitle: 'É assim que veem seu perfil. Atualiza enquanto você edita.', live: 'Prévia ao vivo', device: 'Dispositivo', mobile: 'Celular', desktop: 'Computador' },
   more: { title: 'Mais', options: 'Mais opções', others: 'Outras experiências' },
   overview: {
     title: 'Sua identidade', subtitle: 'Como o mundo se conecta com você.', publish: 'Publicar',
@@ -63,6 +66,8 @@ const pt: StudioDict = {
     tagExists: 'Essa etiqueta já existe.', tagsMax: m => `Você pode ter até ${m} etiquetas.`, removeTag: t => `Remover etiqueta ${t}`, addTag: 'Adicionar etiqueta',
   },
   modules: {
+    duplicated: t => `${t} duplicado`,
+    copyOf: t => `${t} (cópia)`,
     title: 'Módulos', subtitle: 'Os blocos do seu perfil, na ordem em que aparecem.', add: 'Adicionar',
     emptyTitle: 'Seu perfil ainda não tem módulos', emptyText: 'Adicione seus links, redes e contatos para que te encontrem.',
     addFirst: 'Adicionar o primeiro', hidden: 'Oculto', editX: t => `Editar ${t}`, upX: t => `Subir ${t}`, downX: t => `Descer ${t}`,
@@ -311,6 +316,18 @@ const pt: StudioDict = {
       divider: 'Separador',
       credits: 'Créditos',
     },
+  },
+  sortable: {
+    handle: t => `Mover ${t}`,
+    instructions: 'Para mover: pressione espaço ou Enter, use as setas e pressione espaço de novo para soltar. Esc cancela.',
+    picked: t => `${t} selecionado.`,
+    over: (t, pos, total) => `${t} na posição ${pos} de ${total}.`,
+    dropped: (t, pos, total) => `${t} ficou na posição ${pos} de ${total}.`,
+    cancelled: t => `Cancelado: ${t} ficou onde estava.`,
+    options: t => `Opções de ${t}`,
+    up: 'Subir',
+    down: 'Descer',
+    duplicate: 'Duplicar',
   },
 }
 export default pt

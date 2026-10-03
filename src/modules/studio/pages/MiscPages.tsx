@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { BarChart3, ChevronRight, FolderOpen, LayoutGrid, LogOut, Palette, Settings, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
-import { PreviewSwitcher } from '../components/PreviewPane'
+import { FullscreenPreviewButton, PreviewSwitcher } from '../components/PreviewPane'
 import { PageHeader } from '../components/ui'
 import { useStudioT } from '@/i18n/app/studio'
 
@@ -12,7 +12,10 @@ export function PreviewPage() {
   return (
     <>
       <PageHeader title={t.preview.title} subtitle={t.preview.subtitle}
-        actions={<a className="st-btn st-btn-secondary st-btn-sm" href={publicUrl} target="_blank" rel="noopener noreferrer">{t.common.open}</a>} />
+        actions={<>
+          <FullscreenPreviewButton />
+          <a className="st-btn st-btn-secondary st-btn-sm" href={publicUrl} target="_blank" rel="noopener noreferrer">{t.common.open}</a>
+        </>} />
       <PreviewSwitcher />
     </>
   )

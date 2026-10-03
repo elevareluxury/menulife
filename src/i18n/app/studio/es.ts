@@ -81,6 +81,8 @@ const es = {
     error: 'No pudimos verificarlo. Revisá tu conexión.',
   },
   preview: {
+    fullscreen: 'Pantalla completa',
+    exitFullscreen: 'Salir de pantalla completa',
     title: 'Vista previa',
     subtitle: 'Así ven tu perfil. Se actualiza mientras editás.',
     live: 'Vista previa en vivo',
@@ -161,6 +163,8 @@ const es = {
     addTag: 'Agregar etiqueta',
   },
   modules: {
+    duplicated: (t: string) => `${t} duplicado`,
+    copyOf: (t: string) => `${t} (copia)`,
     title: 'Módulos',
     subtitle: 'Los bloques de tu perfil, en el orden en que se ven.',
     add: 'Agregar',
@@ -586,6 +590,18 @@ const es = {
       divider: 'Separador',
       credits: 'Créditos',
     },
+  },
+  sortable: {
+    handle: (t: string) => `Mover ${t}`,
+    instructions: 'Para mover: presioná espacio o Enter, usá las flechas y presioná espacio otra vez para soltar. Escape cancela.',
+    picked: (t: string) => `${t} tomado.`,
+    over: (t: string, pos: number, total: number) => `${t} en la posición ${pos} de ${total}.`,
+    dropped: (t: string, pos: number, total: number) => `${t} quedó en la posición ${pos} de ${total}.`,
+    cancelled: (t: string) => `Se canceló: ${t} quedó donde estaba.`,
+    options: (t: string) => `Opciones de ${t}`,
+    up: 'Subir',
+    down: 'Bajar',
+    duplicate: 'Duplicar',
   },
 }
 

@@ -141,6 +141,8 @@ export async function createModule(input: {
   content: Record<string, unknown>
   translations: Record<string, unknown>
   position: number
+  visibility?: StudioModule['visibility']
+  config?: Record<string, unknown>
 }): Promise<StudioModule> {
   const { data, error } = await db.from('profile_modules').insert(input).select('*').single()
   if (error) throw error

@@ -44,6 +44,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Proyectos (`/studio/projects`, `/studio/projects/:id`): se guardan solos (bloques con id generado en el cliente, upsert) y tienen
   su propio "Publicar"/"Despublicar".
   El perfil se guarda solo (autosave con estados Guardando/Guardado/Error); los módulos se guardan al confirmar el panel.
+  Editor móvil (Fase 6): módulos y bloques se reordenan con `SortableList` (dnd-kit: manija para mouse/dedo, teclado con
+  espacio/flechas/Escape y anuncios para lectores de pantalla en `sortable`); las demás acciones van en el menú `Menu` "⋯"
+  (Editar, Subir, Bajar, Duplicar, Eliminar; se usa con flechas y Escape). Vista previa a pantalla completa (`FullscreenPreviewButton`).
   **Guardar ≠ publicar** (Identity Fase 3): Studio edita la versión de trabajo; `publish_space` congela una versión en
   `profile_versions` y la página pública (`get_public_profile`) lee esa versión. Barra `PublishBar` (estado, "Publicar
   cambios", deshacer/rehacer de la sesión), versiones y "Restaurar" en Ajustes. `profiles.revision` = control de
@@ -86,7 +89,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - `npm run test:db`: migraciones de Identity + `tests/db/*.test.sql` en un Postgres real (necesita PGHOST/PGUSER).
 - CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build, E2E y base de datos en cada PR.
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
-  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
+  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
   (`modules.spec.ts`: si un cambio de módulo es deliberado, regenerar con `--update-snapshots` y revisar el diff).
 
 ## Reglas

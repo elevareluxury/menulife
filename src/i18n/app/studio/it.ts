@@ -31,7 +31,10 @@ const it: StudioDict = {
     invalid: 'Usa da 3 a 30 lettere minuscole, numeri o trattini (senza trattino all’inizio o alla fine).',
     error: 'Impossibile verificarlo. Controlla la connessione.',
   },
-  preview: { title: 'Anteprima', subtitle: 'Così vedono il tuo profilo. Si aggiorna mentre modifichi.', live: 'Anteprima dal vivo', device: 'Dispositivo', mobile: 'Mobile', desktop: 'Desktop' },
+  preview: {
+    fullscreen: 'Schermo intero',
+    exitFullscreen: 'Esci da schermo intero',
+    title: 'Anteprima', subtitle: 'Così vedono il tuo profilo. Si aggiorna mentre modifichi.', live: 'Anteprima dal vivo', device: 'Dispositivo', mobile: 'Mobile', desktop: 'Desktop' },
   more: { title: 'Altro', options: 'Altre opzioni', others: 'Altre esperienze' },
   overview: {
     title: 'La tua identità', subtitle: 'Come il mondo si connette con te.', publish: 'Pubblica',
@@ -63,6 +66,8 @@ const it: StudioDict = {
     tagExists: 'Questa etichetta c’è già.', tagsMax: m => `Puoi avere fino a ${m} etichette.`, removeTag: t => `Rimuovi etichetta ${t}`, addTag: 'Aggiungi etichetta',
   },
   modules: {
+    duplicated: t => `${t} duplicato`,
+    copyOf: t => `${t} (copia)`,
     title: 'Moduli', subtitle: 'I blocchi del tuo profilo, nell’ordine in cui appaiono.', add: 'Aggiungi',
     emptyTitle: 'Il tuo profilo non ha ancora moduli', emptyText: 'Aggiungi link, social e contatti perché ti trovino.',
     addFirst: 'Aggiungi il primo', hidden: 'Nascosto', editX: t => `Modifica ${t}`, upX: t => `Sposta su ${t}`, downX: t => `Sposta giù ${t}`,
@@ -311,6 +316,18 @@ const it: StudioDict = {
       divider: 'Separatore',
       credits: 'Crediti',
     },
+  },
+  sortable: {
+    handle: t => `Sposta ${t}`,
+    instructions: 'Per spostare: premi spazio o Invio, usa le frecce e premi di nuovo spazio per rilasciare. Esc annulla.',
+    picked: t => `${t} preso.`,
+    over: (t, pos, total) => `${t} in posizione ${pos} di ${total}.`,
+    dropped: (t, pos, total) => `${t} rilasciato in posizione ${pos} di ${total}.`,
+    cancelled: t => `Annullato: ${t} è rimasto dov’era.`,
+    options: t => `Opzioni di ${t}`,
+    up: 'Sposta su',
+    down: 'Sposta giù',
+    duplicate: 'Duplica',
   },
 }
 export default it

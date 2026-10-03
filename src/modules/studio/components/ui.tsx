@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { AlertCircle, Check, ImagePlus, Trash2, X } from 'lucide-react'
+import { AlertCircle, Check, ImagePlus, MoreHorizontal, Trash2, X, type LucideIcon } from 'lucide-react'
 import type { SaveState } from '../lib/studioTypes'
 import { useStudioT } from '@/i18n/app/studio'
 
@@ -259,6 +259,76 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
         {subtitle && <p className="st-subtitle">{subtitle}</p>}
       </div>
       {actions && <div className="st-row">{actions}</div>}
+    </div>
+  )
+}
+
+// ── Menú "⋯" (táctil y con teclado) ─────────────────────────────────────────
+
+export interface MenuItem {
+  icon: LucideIcon
+  label: string
+  onSelect: () => void
+  disabled?: boolean
+  danger?: boolean
+}
+
+/**
+ * Menú de acciones: botón de 40px; con el teclado se abre con Enter/espacio/flecha abajo, se recorre con
+ * las flechas, Escape lo cierra y el foco vuelve al botón.
+ */
+export function Menu({ label, items }: { label: string; items: MenuItem[] }) {
+  const [open, setOpen] = useState(false)
+  const root = useRef<HTMLDivElement>(null)
+  const trigger = useRef<HTMLButtonElement>(null)
+  const list = useRef<HTMLDivElement>(null)
+  const menuId = useId()
+
+  const focusItem = (i: number) => {
+    const buttons = [...(list.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ?? [])]
+    if (!buttons.length) return
+    buttons[(i + buttons.length) % buttons.length].focus()
+  }
+
+  useEffect(() => {
+    if (!open) return
+    focusItem(0)
+    const onDown = (e: PointerEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('pointerdown', onDown)
+    return () => document.removeEventListener('pointerdown', onDown)
+  }, [open])
+
+  const close = () => { setOpen(false); trigger.current?.focus() }
+
+  function onMenuKey(e: React.KeyboardEvent) {
+    const buttons = [...(list.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ?? [])]
+    const current = buttons.indexOf(document.activeElement as HTMLButtonElement)
+    if (e.key === 'ArrowDown') { e.preventDefault(); focusItem(current + 1) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); focusItem(current - 1) }
+    else if (e.key === 'Home') { e.preventDefault(); focusItem(0) }
+    else if (e.key === 'End') { e.preventDefault(); focusItem(buttons.length - 1) }
+    else if (e.key === 'Escape' || e.key === 'Tab') { if (e.key === 'Escape') e.preventDefault(); close() }
+  }
+
+  return (
+    <div ref={root} className="st-menu">
+      <button ref={trigger} type="button" className="st-icon-btn" aria-label={label} aria-haspopup="menu"
+        aria-expanded={open} aria-controls={open ? menuId : undefined}
+        onClick={() => setOpen(v => !v)}
+        onKeyDown={e => { if (e.key === 'ArrowDown') { e.preventDefault(); setOpen(true) } }}>
+        <MoreHorizontal size={17} aria-hidden="true" />
+      </button>
+      {open && (
+        <div ref={list} id={menuId} role="menu" aria-label={label} className="st-menu-list" onKeyDown={onMenuKey}>
+          {items.map(item => (
+            <button key={item.label} type="button" role="menuitem" tabIndex={-1} disabled={item.disabled}
+              className={item.danger ? 'is-danger' : undefined}
+              onClick={() => { close(); item.onSelect() }}>
+              <item.icon size={15} aria-hidden="true" /> {item.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
