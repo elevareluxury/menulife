@@ -22,6 +22,8 @@ export function friendlyError(err: unknown): string {
   if (msg.includes('REVISION_CONFLICT')) return e.conflict
   if (msg.includes('NAME_REQUIRED')) return e.nameRequired
   if (msg.includes('MODULE_LIMIT_REACHED')) return e.moduleLimit
+  if (msg.includes('content_objects_identity_id_type_slug_key')) return e.projectSlugTaken
+  if (msg.includes('content_objects_slug_check')) return e.projectSlugInvalid
   if (msg.includes('profiles_text_lengths') || msg.includes('profile_modules_sizes')) return e.tooLong
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) return e.offline
   return e.generic

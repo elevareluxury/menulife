@@ -1,4 +1,5 @@
 import type { ModuleType, PrimaryAction, ProfileTheme, Translations } from '@/modules/profile/lib/profileTypes'
+import type { BlockType } from '@/modules/profile/lib/projectTypes'
 
 export type ProfileStatus = 'draft' | 'published' | 'unpublished' | 'archived'
 export type SpaceVisibility = 'public' | 'unlisted' | 'private'
@@ -7,6 +8,8 @@ export type SpaceVisibility = 'public' | 'unlisted' | 'private'
 export interface StudioProfile {
   id: string
   user_id: string
+  /** Identidad dueña (Fase 1): los proyectos son de la identidad, no del Space */
+  identity_id: string | null
   restaurant_id: string | null
   username: string
   display_name: string
@@ -99,4 +102,41 @@ export interface DailyStat {
   module_id: string | null
   events: number
   visitors: number
+}
+
+// ── Proyectos (Identity Fase 5) ──────────────────────────────────────────────
+
+export type ProjectStatus = 'draft' | 'published' | 'archived'
+
+/** Fila de `content_objects` con type='project' (sólo la ve su dueño). */
+export interface StudioProject {
+  id: string
+  identity_id: string
+  title: string
+  slug: string
+  summary: string | null
+  cover_url: string | null
+  data: Record<string, unknown>
+  translations: Translations
+  status: ProjectStatus
+  visibility: SpaceVisibility
+  /** Lo que ven los visitantes (lo escribe sólo publish_project) */
+  published_snapshot: { title?: string; summary?: string | null; cover_url?: string | null; translations?: Translations } | null
+  published_at: string | null
+  updated_at: string
+}
+
+export type ProjectPatch = Partial<Pick<StudioProject, 'title' | 'slug' | 'summary' | 'cover_url' | 'visibility' | 'status'>>
+
+/** Fila de `content_blocks` (los ids los genera Studio: guardar = upsert sin duplicar). */
+export interface StudioBlock {
+  id: string
+  type: BlockType
+  data: Record<string, unknown>
+}
+
+export interface ProjectPublishState {
+  status: ProjectStatus
+  published_at: string | null
+  dirty: boolean
 }

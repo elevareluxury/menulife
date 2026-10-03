@@ -44,6 +44,16 @@ export interface UiStrings {
   cards: string
   swipeHint: string
   tags: string
+  projects: string
+  viewProject: string
+  credits: string
+  backToProfile: string
+  projectNotFoundTitle: string
+  projectNotFoundText: string
+  projectUnavailableTitle: string
+  projectUnavailableText: string
+  projectDraftBanner: string
+  video: string
 }
 
 const UI: Record<ProfileLang, UiStrings> = {
@@ -60,6 +70,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mié', thursday: 'Jue', friday: 'Vie', saturday: 'Sáb', sunday: 'Dom' },
     languageLabel: 'Idioma', socials: 'Redes sociales', close: 'Cerrar', cards: 'Tarjetas',
     swipeHint: 'deslizá para ver más', tags: 'Categorías',
+    projects: "Proyectos", viewProject: "Ver proyecto", credits: "Créditos", backToProfile: "Volver al perfil", projectNotFoundTitle: "Este proyecto no existe", projectNotFoundText: "Revisá el link o mirá el perfil completo.", projectUnavailableTitle: "Este proyecto no está disponible", projectUnavailableText: "Su dueño todavía no lo publicó o lo despublicó.", projectDraftBanner: "Vista previa: este proyecto todavía no es público.", video: "Video",
   },
   en: {
     openNow: 'Open now', closedNow: 'Closed now', share: 'Share', linkCopied: 'Link copied',
@@ -74,6 +85,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu', friday: 'Fri', saturday: 'Sat', sunday: 'Sun' },
     languageLabel: 'Language', socials: 'Social networks', close: 'Close', cards: 'Cards',
     swipeHint: 'swipe to see more', tags: 'Categories',
+    projects: "Projects", viewProject: "View project", credits: "Credits", backToProfile: "Back to profile", projectNotFoundTitle: "This project does not exist", projectNotFoundText: "Check the link or see the full profile.", projectUnavailableTitle: "This project is not available", projectUnavailableText: "Its owner hasn’t published it yet or unpublished it.", projectDraftBanner: "Preview: this project is not public yet.", video: "Video",
   },
   pt: {
     openNow: 'Aberto agora', closedNow: 'Fechado agora', share: 'Compartilhar', linkCopied: 'Link copiado',
@@ -88,6 +100,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'Seg', tuesday: 'Ter', wednesday: 'Qua', thursday: 'Qui', friday: 'Sex', saturday: 'Sáb', sunday: 'Dom' },
     languageLabel: 'Idioma', socials: 'Redes sociais', close: 'Fechar', cards: 'Cartões',
     swipeHint: 'deslize para ver mais', tags: 'Categorias',
+    projects: "Projetos", viewProject: "Ver projeto", credits: "Créditos", backToProfile: "Voltar ao perfil", projectNotFoundTitle: "Este projeto não existe", projectNotFoundText: "Confira o link ou veja o perfil completo.", projectUnavailableTitle: "Este projeto não está disponível", projectUnavailableText: "O dono ainda não o publicou ou o despublicou.", projectDraftBanner: "Prévia: este projeto ainda não é público.", video: "Vídeo",
   },
   fr: {
     openNow: 'Ouvert', closedNow: 'Fermé', share: 'Partager', linkCopied: 'Lien copié',
@@ -102,6 +115,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mer', thursday: 'Jeu', friday: 'Ven', saturday: 'Sam', sunday: 'Dim' },
     languageLabel: 'Langue', socials: 'Réseaux sociaux', close: 'Fermer', cards: 'Cartes',
     swipeHint: 'faites glisser pour voir plus', tags: 'Catégories',
+    projects: "Projets", viewProject: "Voir le projet", credits: "Crédits", backToProfile: "Retour au profil", projectNotFoundTitle: "Ce projet n’existe pas", projectNotFoundText: "Vérifiez le lien ou consultez le profil complet.", projectUnavailableTitle: "Ce projet n’est pas disponible", projectUnavailableText: "Son propriétaire ne l’a pas encore publié ou l’a dépublié.", projectDraftBanner: "Aperçu : ce projet n’est pas encore public.", video: "Vidéo",
   },
   de: {
     openNow: 'Jetzt geöffnet', closedNow: 'Jetzt geschlossen', share: 'Teilen', linkCopied: 'Link kopiert',
@@ -116,6 +130,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'Mo', tuesday: 'Di', wednesday: 'Mi', thursday: 'Do', friday: 'Fr', saturday: 'Sa', sunday: 'So' },
     languageLabel: 'Sprache', socials: 'Soziale Netzwerke', close: 'Schließen', cards: 'Karten',
     swipeHint: 'wischen für mehr', tags: 'Kategorien',
+    projects: "Projekte", viewProject: "Projekt ansehen", credits: "Credits", backToProfile: "Zurück zum Profil", projectNotFoundTitle: "Dieses Projekt gibt es nicht", projectNotFoundText: "Prüfe den Link oder sieh dir das ganze Profil an.", projectUnavailableTitle: "Dieses Projekt ist nicht verfügbar", projectUnavailableText: "Der Inhaber hat es noch nicht veröffentlicht oder wieder zurückgezogen.", projectDraftBanner: "Vorschau: Dieses Projekt ist noch nicht öffentlich.", video: "Video",
   },
   it: {
     openNow: 'Aperto ora', closedNow: 'Chiuso ora', share: 'Condividi', linkCopied: 'Link copiato',
@@ -130,6 +145,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mer', thursday: 'Gio', friday: 'Ven', saturday: 'Sab', sunday: 'Dom' },
     languageLabel: 'Lingua', socials: 'Social network', close: 'Chiudi', cards: 'Schede',
     swipeHint: 'scorri per vedere altro', tags: 'Categorie',
+    projects: "Progetti", viewProject: "Vedi progetto", credits: "Crediti", backToProfile: "Torna al profilo", projectNotFoundTitle: "Questo progetto non esiste", projectNotFoundText: "Controlla il link o guarda il profilo completo.", projectUnavailableTitle: "Questo progetto non è disponibile", projectUnavailableText: "Il proprietario non l’ha ancora pubblicato o l’ha ritirato.", projectDraftBanner: "Anteprima: questo progetto non è ancora pubblico.", video: "Video",
   },
   zh: {
     openNow: '营业中', closedNow: '已打烊', share: '分享', linkCopied: '链接已复制',
@@ -144,6 +160,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: '周一', tuesday: '周二', wednesday: '周三', thursday: '周四', friday: '周五', saturday: '周六', sunday: '周日' },
     languageLabel: '语言', socials: '社交媒体', close: '关闭', cards: '卡片',
     swipeHint: '滑动查看更多', tags: '分类',
+    projects: "项目", viewProject: "查看项目", credits: "鸣谢", backToProfile: "返回主页", projectNotFoundTitle: "该项目不存在", projectNotFoundText: "请检查链接或查看完整主页。", projectUnavailableTitle: "该项目暂不可用", projectUnavailableText: "所有者尚未发布或已取消发布。", projectDraftBanner: "预览：该项目尚未公开。", video: "视频",
   },
   ja: {
     openNow: '営業中', closedNow: '営業時間外', share: '共有', linkCopied: 'リンクをコピーしました',
@@ -158,6 +175,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: '月', tuesday: '火', wednesday: '水', thursday: '木', friday: '金', saturday: '土', sunday: '日' },
     languageLabel: '言語', socials: 'SNS', close: '閉じる', cards: 'カード',
     swipeHint: 'スワイプしてもっと見る', tags: 'カテゴリー',
+    projects: "プロジェクト", viewProject: "プロジェクトを見る", credits: "クレジット", backToProfile: "プロフィールに戻る", projectNotFoundTitle: "このプロジェクトは存在しません", projectNotFoundText: "リンクを確認するか、プロフィール全体をご覧ください。", projectUnavailableTitle: "このプロジェクトは公開されていません", projectUnavailableText: "所有者がまだ公開していないか、公開を停止しました。", projectDraftBanner: "プレビュー：このプロジェクトはまだ公開されていません。", video: "動画",
   },
   ko: {
     openNow: '영업 중', closedNow: '영업 종료', share: '공유', linkCopied: '링크가 복사되었습니다',
@@ -172,6 +190,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: '월', tuesday: '화', wednesday: '수', thursday: '목', friday: '금', saturday: '토', sunday: '일' },
     languageLabel: '언어', socials: '소셜 미디어', close: '닫기', cards: '카드',
     swipeHint: '밀어서 더 보기', tags: '카테고리',
+    projects: "프로젝트", viewProject: "프로젝트 보기", credits: "크레딧", backToProfile: "프로필로 돌아가기", projectNotFoundTitle: "존재하지 않는 프로젝트입니다", projectNotFoundText: "링크를 확인하거나 전체 프로필을 보세요.", projectUnavailableTitle: "이 프로젝트는 볼 수 없습니다", projectUnavailableText: "소유자가 아직 게시하지 않았거나 게시를 취소했습니다.", projectDraftBanner: "미리보기: 이 프로젝트는 아직 공개되지 않았습니다.", video: "동영상",
   },
   hi: {
     openNow: 'अभी खुला है', closedNow: 'अभी बंद है', share: 'शेयर करें', linkCopied: 'लिंक कॉपी हो गया',
@@ -186,6 +205,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'सोम', tuesday: 'मंगल', wednesday: 'बुध', thursday: 'गुरु', friday: 'शुक्र', saturday: 'शनि', sunday: 'रवि' },
     languageLabel: 'भाषा', socials: 'सोशल मीडिया', close: 'बंद करें', cards: 'कार्ड',
     swipeHint: 'और देखने के लिए स्वाइप करें', tags: 'श्रेणियाँ',
+    projects: "प्रोजेक्ट", viewProject: "प्रोजेक्ट देखें", credits: "श्रेय", backToProfile: "प्रोफ़ाइल पर वापस", projectNotFoundTitle: "यह प्रोजेक्ट मौजूद नहीं है", projectNotFoundText: "लिंक जाँचें या पूरी प्रोफ़ाइल देखें।", projectUnavailableTitle: "यह प्रोजेक्ट उपलब्ध नहीं है", projectUnavailableText: "इसके मालिक ने इसे अभी प्रकाशित नहीं किया है या हटा दिया है।", projectDraftBanner: "पूर्वावलोकन: यह प्रोजेक्ट अभी सार्वजनिक नहीं है।", video: "वीडियो",
   },
   ar: {
     openNow: 'مفتوح الآن', closedNow: 'مغلق الآن', share: 'مشاركة', linkCopied: 'تم نسخ الرابط',
@@ -200,6 +220,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد' },
     languageLabel: 'اللغة', socials: 'وسائل التواصل', close: 'إغلاق', cards: 'بطاقات',
     swipeHint: 'اسحب لرؤية المزيد', tags: 'الفئات',
+    projects: "المشاريع", viewProject: "عرض المشروع", credits: "الاعتمادات", backToProfile: "العودة إلى الملف", projectNotFoundTitle: "هذا المشروع غير موجود", projectNotFoundText: "تحقق من الرابط أو اطّلع على الملف الكامل.", projectUnavailableTitle: "هذا المشروع غير متاح", projectUnavailableText: "لم ينشره صاحبه بعد أو ألغى نشره.", projectDraftBanner: "معاينة: هذا المشروع ليس عامًا بعد.", video: "فيديو",
   },
   ru: {
     openNow: 'Открыто', closedNow: 'Закрыто', share: 'Поделиться', linkCopied: 'Ссылка скопирована',
@@ -214,6 +235,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     days: { monday: 'Пн', tuesday: 'Вт', wednesday: 'Ср', thursday: 'Чт', friday: 'Пт', saturday: 'Сб', sunday: 'Вс' },
     languageLabel: 'Язык', socials: 'Соцсети', close: 'Закрыть', cards: 'Карточки',
     swipeHint: 'листайте, чтобы увидеть больше', tags: 'Категории',
+    projects: "Проекты", viewProject: "Открыть проект", credits: "Авторы", backToProfile: "Назад к профилю", projectNotFoundTitle: "Такого проекта нет", projectNotFoundText: "Проверьте ссылку или откройте весь профиль.", projectUnavailableTitle: "Этот проект недоступен", projectUnavailableText: "Владелец ещё не опубликовал его или снял с публикации.", projectDraftBanner: "Предпросмотр: этот проект ещё не опубликован.", video: "Видео",
   },
 }
 

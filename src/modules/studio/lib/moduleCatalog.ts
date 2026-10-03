@@ -6,7 +6,7 @@ import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import type { StudioDict } from '@/i18n/app/studio'
 import type { StudioModule } from './studioTypes'
 import {
-  CardsEditor, GalleryEditor, HoursEditor, ReviewsEditor,
+  CardsEditor, GalleryEditor, HoursEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
   type ExtraEditorProps, type GalleryItem, type ReviewsValue,
 } from '../components/moduleExtraEditors'
 
@@ -311,6 +311,35 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         Editor: ReviewsEditor,
       }),
       summary: x => sm.reviews(count(x.items)),
+    },
+    // Fase 5: guardan sólo ids; la página pública recibe las tarjetas de los proyectos publicados
+    project: {
+      addable: true,
+      fields: [],
+      extra: extra<string>({
+        init: m => text(m?.content.project_id),
+        validate: id => (id ? null : e.projectRequired),
+        apply: (id, content) => { content.project_id = id },
+        Editor: ProjectPicker,
+      }),
+      summary: () => sm.project,
+    },
+    portfolio: {
+      addable: true,
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80, placeholder: p.portfolioTitle },
+      ],
+      extra: extra<string[] | null>({
+        init: m => (Array.isArray(m?.content.project_ids) && m.content.project_ids.length
+          ? (m.content.project_ids as unknown[]).filter((x): x is string => typeof x === 'string') : null),
+        validate: ids => (ids && !ids.length ? e.portfolioPickEmpty : null),
+        apply: (ids, content) => {
+          if (ids) content.project_ids = ids
+          else delete content.project_ids
+        },
+        Editor: PortfolioPicker,
+      }),
+      summary: x => (Array.isArray(x.project_ids) && x.project_ids.length ? sm.portfolioSome(x.project_ids.length) : sm.portfolioAll),
     },
     // Se edita en Mi identidad → tarjeta de contacto; en la página es el botón "Guardar contacto"
     contact_card: { addable: false, fields: [], summary: () => '' },

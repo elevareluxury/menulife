@@ -28,6 +28,7 @@ import { RequirePlan } from '@/app/RequirePlan'
 const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
 const ProfilePublicPage = lazy(() => import('@/modules/profile/pages/ProfilePublicPage').then(m => ({ default: m.ProfilePublicPage })))
 const LegalPage       = lazy(() => import('@/modules/legal/LegalPage').then(m => ({ default: m.LegalPage })))
+const ProjectPublicPage = lazy(() => import('@/modules/profile/pages/ProjectPublicPage').then(m => ({ default: m.ProjectPublicPage })))
 const StudioShell     = lazy(() => import('@/modules/studio/StudioShell').then(m => ({ default: m.StudioShell })))
 const StudioOverview  = lazy(() => import('@/modules/studio/pages/OverviewPage').then(m => ({ default: m.OverviewPage })))
 const StudioIdentity  = lazy(() => import('@/modules/studio/pages/IdentityPage').then(m => ({ default: m.IdentityPage })))
@@ -36,6 +37,8 @@ const StudioAppearance = lazy(() => import('@/modules/studio/pages/AppearancePag
 const StudioExchange  = lazy(() => import('@/modules/studio/pages/ExchangePage').then(m => ({ default: m.ExchangePage })))
 const StudioAnalytics = lazy(() => import('@/modules/studio/pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })))
 const StudioSettings  = lazy(() => import('@/modules/studio/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const StudioProjects  = lazy(() => import('@/modules/studio/pages/ProjectsPage').then(m => ({ default: m.ProjectsPage })))
+const StudioProject   = lazy(() => import('@/modules/studio/pages/ProjectEditorPage').then(m => ({ default: m.ProjectEditorPage })))
 const StudioPreview   = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.PreviewPage })))
 const StudioMore      = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.MorePage })))
 const SuperAdminPage   = lazy(() => import('./routes/super-admin').then(m => ({ default: m.SuperAdminPage })))
@@ -159,6 +162,8 @@ function App() {
             <Route index element={<StudioOverview />} />
             <Route path="identity"   element={<StudioIdentity />} />
             <Route path="modules"    element={<StudioModules />} />
+            <Route path="projects"   element={<StudioProjects />} />
+            <Route path="projects/:id" element={<StudioProject />} />
             <Route path="appearance" element={<StudioAppearance />} />
             <Route path="exchange"   element={<StudioExchange />} />
             <Route path="analytics"  element={<StudioAnalytics />} />
@@ -204,6 +209,7 @@ function App() {
           <Route path="/catalogo/:slug" element={<CatalogoPublic />} />
           {/* Hub Público — /:slug debe ir antes del catch-all */}
           <Route path="/:slug" element={<ErrorBoundary><PublicSlugRoute /></ErrorBoundary>} />
+          <Route path="/:slug/projects/:projectSlug" element={<ErrorBoundary><ProjectPublicPage /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

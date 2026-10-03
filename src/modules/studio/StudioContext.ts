@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 import type { PublicProfile } from '@/modules/profile/lib/profileTypes'
 import type {
-  ProfilePatch, PublishState, SaveState, StudioBusiness, StudioModule, StudioProfile,
+  ProfilePatch, PublishState, SaveState, StudioBusiness, StudioModule, StudioProfile, StudioProject,
 } from './lib/studioTypes'
 
 export interface StudioContextValue {
@@ -33,6 +33,9 @@ export interface StudioContextValue {
   /** Reemplaza el perfil con lo que devolvió la base (ej. tras cambiar username) */
   replaceProfile: (profile: StudioProfile) => void
   setModules: (updater: (prev: StudioModule[]) => StudioModule[]) => void
+  /** Proyectos de la identidad (Fase 5), para los módulos project/portfolio y la vista previa */
+  projects: StudioProject[]
+  setProjects: (updater: (prev: StudioProject[]) => StudioProject[]) => void
   /** URL pública real del perfil */
   publicUrl: string
   /** El perfil tal como lo vería un visitante (para la vista previa en vivo) */

@@ -1,4 +1,4 @@
-import { moduleRow } from './mockSupabase'
+import { moduleRow, projectRow } from './mockSupabase'
 
 // Un módulo de cada tipo con contenido realista. Sirve para fijar cómo se ven en público y que
 // abrir y guardar cada uno en Studio no cambie su contenido (Fase 4: registro de módulos).
@@ -28,4 +28,12 @@ export const MODULE_FIXTURES = [
     content: { layout: 'stack', items: [{ title: 'Marca Café Luna', subtitle: 'Identidad 2025', url: 'https://ana.design/cafe' }] } }) },
   { label: 'Reseñas', row: moduleRow({ id: 'm-reviews', type: 'testimonials', title: 'Reseñas', position: 120,
     content: { items: [{ author_name: 'Juan', rating: 5, text: 'Excelente trabajo.' }], google: { rating: 4.8, count: 120, url: 'https://g.page/r/ana' } } }) },
+  // Fase 5: muestran proyectos publicados (ver PROJECT_FIXTURE)
+  { label: 'Proyecto destacado', row: moduleRow({ id: 'm-project', type: 'project', title: null, position: 130,
+    content: { project_id: 'pr-luna' } }) },
+  { label: 'Trabajos', row: moduleRow({ id: 'm-portfolio', type: 'portfolio', title: 'Trabajos', position: 140,
+    content: {} }) },
 ]
+
+/** Proyecto que muestran los módulos project/portfolio de arriba (hay que publicarlo con publishProjectRow) */
+export const PROJECT_FIXTURE = projectRow({ id: 'pr-luna', title: 'Marca Café Luna', slug: 'cafe-luna', summary: 'Identidad 2025' })

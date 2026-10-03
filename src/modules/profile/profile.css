@@ -263,3 +263,64 @@
 .mp-cards-date { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--p-accent); }
 .mp-cards-title { font-weight: 700; font-size: 15.5px; line-height: 1.3; }
 .mp-cards-sub { font-size: 13px; color: var(--p-muted); line-height: 1.45; }
+
+/* ── Proyectos (Fase 5) ─────────────────────────────────────────── */
+.mp-project {
+  display: flex; flex-direction: column; border-radius: 20px; overflow: hidden;
+  background: var(--p-surface); border: 1px solid var(--p-border); color: var(--p-text); text-decoration: none;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.mp-project:active { transform: scale(0.99); }
+.mp-project-cover { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: var(--p-surface-2); }
+.mp-project-body { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px; }
+.mp-project-title { font-weight: 700; font-size: 17px; line-height: 1.3; }
+.mp-project-summary { font-size: 14px; color: var(--p-muted); line-height: 1.45; }
+.mp-project-cta { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 13.5px; font-weight: 600; color: var(--p-accent); }
+
+.mp-portfolio { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mp-portfolio-item {
+  display: flex; flex-direction: column; gap: 3px; min-width: 0; padding-bottom: 12px;
+  border-radius: 16px; overflow: hidden; background: var(--p-surface); border: 1px solid var(--p-border);
+  color: var(--p-text); text-decoration: none; transition: transform 0.15s;
+}
+.mp-portfolio-item:active { transform: scale(0.99); }
+.mp-portfolio-img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--p-surface-2); margin-bottom: 8px; }
+.mp-portfolio-title { padding: 0 12px; font-weight: 650; font-size: 14.5px; line-height: 1.3; }
+.mp-portfolio-summary {
+  padding: 0 12px; font-size: 12.5px; color: var(--p-muted); line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Página de proyecto */
+.mp-project-back {
+  display: inline-flex; align-items: center; gap: 10px; margin: 8px 0 18px; padding: 6px 12px 6px 6px;
+  border-radius: 999px; background: var(--p-surface-2); border: 1px solid var(--p-border);
+  color: var(--p-text); text-decoration: none; font-size: 13.5px; font-weight: 600;
+}
+.mp-project-back .mp-avatar { width: 28px; height: 28px; margin: 0; font-size: 13px; border-width: 0; }
+.mp-project-hero { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; border-radius: 20px; background: var(--p-surface-2); }
+.mp-project-head { margin: 22px 0 8px; }
+.mp-project-head h1 { font-family: var(--p-title-font); font-size: clamp(28px, 7vw, 38px); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 10px; }
+.mp-project-head p { font-size: 16.5px; line-height: 1.55; color: var(--p-muted); margin: 0; }
+
+.mp-blocks { display: flex; flex-direction: column; gap: 18px; margin-top: 24px; }
+.mp-block-heading { font-family: var(--p-title-font); font-size: 22px; line-height: 1.25; margin: 10px 0 0; }
+.mp-block-text { font-size: 16px; line-height: 1.7; margin: 0; white-space: pre-line; }
+.mp-block-figure { margin: 0; }
+.mp-block-figure img { width: 100%; display: block; border-radius: 16px; }
+.mp-block-figure figcaption { margin-top: 8px; font-size: 13.5px; color: var(--p-muted); }
+.mp-block-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mp-block-gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; border-radius: 12px; }
+.mp-block-gallery.is-single { grid-template-columns: 1fr; }
+.mp-block-gallery.is-single img { aspect-ratio: auto; }
+.mp-block-video { position: relative; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #000; }
+.mp-block-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.mp-block-quote { margin: 4px 0; padding: 4px 0 4px 18px; border-inline-start: 3px solid var(--p-accent); }
+.mp-block-quote blockquote { margin: 0; font-family: var(--p-title-font); font-size: 20px; line-height: 1.45; }
+.mp-block-quote figcaption { margin-top: 8px; font-size: 14px; color: var(--p-muted); }
+.mp-block-divider { width: 100%; border: 0; border-top: 1px solid var(--p-border); margin: 8px 0; }
+.mp-block-credits { background: var(--p-surface); border: 1px solid var(--p-border); border-radius: 20px; padding: 18px; }
+.mp-block-credits dl { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.mp-block-credits dl > div { display: flex; justify-content: space-between; gap: 16px; font-size: 14.5px; }
+.mp-block-credits dt { color: var(--p-muted); }
+.mp-block-credits dd { margin: 0; font-weight: 600; text-align: end; }
