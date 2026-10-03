@@ -390,5 +390,11 @@ const hi: StudioDict = {
     down: 'नीचे',
     duplicate: 'डुप्लिकेट करें',
   },
+  moderation: {
+    suspendedTitle: 'आपकी प्रोफ़ाइल निलंबित है',
+    suspendedText: 'सामग्री नियमों का पालन न करने के कारण Mycen टीम ने इसे निलंबित किया है। तब तक कोई इसे नहीं देख सकता: न पेज, न आपके प्रोजेक्ट, न संपर्क कार्ड। आप संपादन जारी रख सकते हैं।',
+    suspendedReason: r => `कारण: ${r}`,
+    rules: 'सामग्री के नियम देखें',
+  },
 }
 export default hi

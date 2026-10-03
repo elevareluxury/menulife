@@ -390,5 +390,11 @@ const en: StudioDict = {
     down: 'Move down',
     duplicate: 'Duplicate',
   },
+  moderation: {
+    suspendedTitle: 'Your profile is suspended',
+    suspendedText: 'The Mycen team suspended it because it doesn’t follow the content rules. Meanwhile nobody can see it: not the page, your projects or your contact card. You can keep editing.',
+    suspendedReason: r => `Reason: ${r}`,
+    rules: 'See the content rules',
+  },
 }
 export default en

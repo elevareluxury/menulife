@@ -37,7 +37,7 @@ escritorio de 3 paneles (7), pantalla "Mis Spaces" (5, salvo demanda) y document
 | **5** ✅ | **Proyectos y Portfolio**: proyecto con bloques básicos (título, párrafo, imagen, galería, video embebido, cita, separador, créditos), URL `/{username}/projects/{slug}`, portfolio en grilla, se crean desde el editor (6) y quedan en la biblioteca "Mi contenido" | Flujo B (portfolio) en verde |
 | **6** ✅ | **Editor móvil por capas** (7): arrastrar para reordenar (`@dnd-kit` ya está instalado) con alternativa de flechas y teclado; duplicar módulo; vista previa a pantalla completa | Todas las acciones posibles sin mouse |
 | **7** ✅ | **Links avanzados y Connect** (1): grupos de links, link destacado, programación de visibilidad; tarjeta de identidad descargable (clara/oscura) y "presentación corta" para copiar; mostrar fuentes de tráfico en Analítica | Flujo A completo |
-| **8** | **Moderación** (12): botón "Denunciar" en la página pública, tabla de denuncias, revisión en super-admin, suspensión que oculta la página, reglas en `/terminos` | Una denuncia llega y se puede resolver |
+| **8** ✅ | **Moderación** (12): botón "Denunciar" en la página pública, tabla de denuncias, revisión en super-admin, suspensión que oculta la página, reglas en `/terminos` | Una denuncia llega y se puede resolver |
 | **9** | **Apariencia**: modo automático, radios, fondos, estilo de tarjetas (siempre dentro del sistema de diseño) | Contraste y accesibilidad verificados |
 | **10** | **Mis Spaces** (5), cuando haya demanda: crear, duplicar, archivar, Space de marca con username propio | Flujo D (privacidad) en verde |
 | **11** | **Editor de escritorio de 3 paneles** (7) | — |

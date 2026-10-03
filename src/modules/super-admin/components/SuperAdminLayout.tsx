@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, Zap, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, Zap, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote, Menu, X, Flag } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 
 const BG         = '#0F1115'
@@ -13,6 +13,7 @@ const ACCENT     = '#FF6B7A'
 const navItems = [
   { label: 'Overview',      icon: LayoutDashboard, to: '/super-admin',                    end: true  },
   { label: 'Solicitudes',   icon: ClipboardList,   to: '/super-admin/solicitudes',         end: false },
+  { label: 'Denuncias',     icon: Flag,            to: '/super-admin/denuncias',           end: false },
   { label: 'Negocios',      icon: Store,           to: '/super-admin/negocios',            end: false },
   { label: 'Métricas',      icon: BarChart3,       to: '/super-admin/metricas',            end: false },
   { label: 'Planes',        icon: DollarSign,      to: '/super-admin/planes',              end: false },

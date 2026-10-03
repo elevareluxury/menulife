@@ -39,7 +39,21 @@ function Terms() {
 
       <h2 style={h2}>Tu contenido</h2>
       <p>Lo que publicás en tu perfil sigue siendo tuyo. Nos das permiso para mostrarlo en tu dirección pública mientras tu perfil esté publicado. Podés editarlo, ocultarlo, despublicarlo o eliminarlo cuando quieras.</p>
-      <p>No está permitido publicar contenido ilegal, engañoso, que infrinja derechos de terceros, links maliciosos ni reseñas falsas. Podemos ocultar contenido o suspender cuentas que no cumplan estas reglas.</p>
+      <p>Lo que publiques tiene que cumplir las reglas de contenido de abajo. Podemos suspender perfiles que no las cumplan.</p>
+
+      <h2 id="reglas" style={h2}>Reglas de contenido</h2>
+      <p>En Mycen no se permite publicar:</p>
+      <ul>
+        <li><strong>Spam o publicidad engañosa:</strong> promesas falsas, links que no llevan a donde dicen o reseñas inventadas.</li>
+        <li><strong>Estafas o fraude:</strong> pedir dinero o datos con engaños, vender lo que no existe.</li>
+        <li><strong>Suplantación:</strong> hacerse pasar por otra persona, empresa o marca.</li>
+        <li><strong>Odio o acoso:</strong> atacar a personas o grupos por lo que son, o acosar a alguien.</li>
+        <li><strong>Violencia o amenazas:</strong> amenazar, incitar a la violencia o mostrarla de forma gratuita.</li>
+        <li><strong>Contenido sexual explícito</strong> o cualquier contenido sexual que involucre a menores (se denuncia a las autoridades).</li>
+        <li><strong>Algo ilegal:</strong> venta de productos o servicios prohibidos, o contenido que infrinja derechos de terceros (marcas, fotos, textos).</li>
+        <li><strong>Links maliciosos:</strong> virus, phishing o sitios que engañan.</li>
+      </ul>
+      <p>Cualquier persona puede denunciar un perfil o un proyecto con el link "Denunciar" al pie de la página, sin cuenta y de forma anónima. El equipo de Mycen revisa cada denuncia. Si un perfil no cumple las reglas, lo suspendemos: deja de verse (página, proyectos y tarjeta de contacto) y su dueño ve el motivo en Studio. Si creés que tu perfil se suspendió por error, escribinos desde la cuenta con la que lo creaste.</p>
 
       <h2 style={h2}>Nombres de usuario</h2>
       <p>Algunos nombres están reservados por el sistema. Si cambiás tu username, la dirección anterior redirige a la nueva para que tus links y QR sigan funcionando.</p>

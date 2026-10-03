@@ -390,5 +390,11 @@ const ko: StudioDict = {
     down: '아래로',
     duplicate: '복제',
   },
+  moderation: {
+    suspendedTitle: '프로필이 정지되었습니다',
+    suspendedText: '콘텐츠 규칙을 따르지 않아 Mycen 팀이 정지했습니다. 그동안 페이지, 프로젝트, 연락처 카드를 아무도 볼 수 없습니다. 편집은 계속할 수 있습니다.',
+    suspendedReason: r => `사유: ${r}`,
+    rules: '콘텐츠 규칙 보기',
+  },
 }
 export default ko

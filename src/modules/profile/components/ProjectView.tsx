@@ -9,6 +9,7 @@ import type { ProfileLang } from '../lib/profileTypes'
 import type { PublicProject } from '../lib/projectTypes'
 import { ProjectBlocks } from './ProjectBlocks'
 import { SafeImage } from './SafeImage'
+import { ReportButton } from './ReportDialog'
 import '../profile.css'
 
 /** Página de un proyecto: /{username}/projects/{slug}. */
@@ -79,6 +80,9 @@ export function ProjectView({ project, lang, onLang, style, onToast, toast }: {
 
         <footer className="mp-footer">
           {t.footer} · <Link to="/register">{t.createYours}</Link>
+          {!project.is_owner && project.status === 'published' && (
+            <div><ReportButton username={space.username} projectSlug={project.slug} lang={lang} /></div>
+          )}
         </footer>
       </article>
 
