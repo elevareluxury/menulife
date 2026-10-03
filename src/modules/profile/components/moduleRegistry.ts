@@ -4,6 +4,7 @@ import {
   CardsModule, ContactModule, FeaturedActionModule, GalleryModule, HoursModule, ImageModule, LinkModule,
   LocationModule, ProductModule, SocialRow, TestimonialsModule, TextModule, type ModuleProps,
 } from './ProfileModules'
+import { PortfolioModule, ProjectModule } from './ProjectModules'
 
 export interface GroupProps {
   modules: ProfileModule[]
@@ -37,6 +38,8 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   testimonials:    { View: TestimonialsModule },
   hours:           { View: HoursModule },
   cards:           { View: CardsModule },
+  project:         { View: ProjectModule },
+  portfolio:       { View: PortfolioModule },
 }
 
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */

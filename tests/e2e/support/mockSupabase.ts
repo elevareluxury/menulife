@@ -1,7 +1,7 @@
 import type { BrowserContext, Route } from '@playwright/test'
 
 // Supabase simulado para los E2E: PostgREST en memoria (filtros básicos) + las RPC públicas de
-// Identity con la misma lógica que la base (supabase/migrations/20261001000001… y 20261002000001…).
+// Identity con la misma lógica que la base (supabase/migrations/20261001000001… a 20261009000001…).
 // Si cambia una RPC en la base, este archivo tiene que acompañarla.
 
 type Row = Record<string, unknown>
@@ -21,7 +21,7 @@ export interface MockState {
 export function profileRow(overrides: Row = {}): Row {
   const now = new Date().toISOString()
   return {
-    id: 'p-ana', user_id: OWNER_ID, restaurant_id: null, username: 'ana',
+    id: 'p-ana', user_id: OWNER_ID, identity_id: 'id-ana', restaurant_id: null, username: 'ana',
     display_name: 'Ana Pérez', descriptor: 'Diseñadora', bio: 'Hago marcas.',
     avatar_url: null, cover_url: null, purpose: 'professional', status: 'published', is_primary: true,
     theme: {}, primary_action: null, contact_card: { enabled: false }, default_locale: 'es', translations: {},
@@ -41,9 +41,30 @@ export function moduleRow(overrides: Row = {}): Row {
   }
 }
 
+export function projectRow(overrides: Row = {}): Row {
+  const now = new Date().toISOString()
+  return {
+    id: `pr-${Math.random().toString(36).slice(2, 8)}`, identity_id: 'id-ana', type: 'project', title: 'Café Luna',
+    slug: 'cafe-luna', summary: 'Identidad 2025', cover_url: null, data: {}, translations: {}, status: 'draft',
+    visibility: 'public', published_snapshot: null, published_at: null, created_at: now, updated_at: now,
+    ...overrides,
+  }
+}
+
+/** Como publish_project: congela el proyecto (con sus bloques) en published_snapshot. */
+export function publishProjectRow(state: MockState, project: Row): Row {
+  project.published_snapshot = projectSnapshot(state, project)
+  project.published_at = new Date().toISOString()
+  project.status = 'published'
+  return project
+}
+
 export function createState(seed: Partial<MockState['tables']> = {}, usernameHistory: Record<string, string> = {}): MockState {
   const state: MockState = {
-    tables: { profiles: [], profile_modules: [], profile_stats_daily: [], profile_versions: [], ...seed },
+    tables: {
+      profiles: [], profile_modules: [], profile_stats_daily: [], profile_versions: [], content_objects: [], content_blocks: [],
+      ...seed,
+    },
     usernameHistory,
     rpcCalls: [],
     writes: [],
@@ -87,6 +108,75 @@ function insertVersion(state: MockState, p: Row, restoredFrom: string | null): R
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
+// ── Proyectos (misma lógica que supabase/migrations/20261009000001…) ─────────
+
+/** = mycen_project_snapshot */
+function projectSnapshot(state: MockState, o: Row): Row {
+  const blocks = state.tables.content_blocks
+    .filter(b => b.content_object_id === o.id)
+    .sort((a, b) => Number(a.position) - Number(b.position))
+    .map(b => ({ id: b.id, type: b.type, data: b.data, translations: b.translations ?? {} }))
+  return JSON.parse(JSON.stringify({
+    id: o.id, type: o.type, title: o.title, summary: o.summary, cover_url: o.cover_url,
+    data: o.data ?? {}, translations: o.translations ?? {}, blocks,
+  }))
+}
+
+/** = mycen_project_cards */
+function projectCards(state: MockState, identityId: unknown, username: string, ids: unknown[] | null): Row[] {
+  const live = state.tables.content_objects.filter(o =>
+    o.identity_id === identityId && o.type === 'project' && o.status === 'published' && o.published_snapshot)
+  const chosen = ids
+    ? [...new Set(ids.filter((x): x is string => typeof x === 'string'))]
+      .map(id => live.find(o => o.id === id && o.visibility !== 'private')).filter((o): o is Row => !!o)
+    : live.filter(o => o.visibility === 'public').sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)))
+  return chosen.map(o => {
+    const snap = o.published_snapshot as Row
+    return {
+      id: o.id, slug: o.slug, path: `/${username}/projects/${o.slug}`,
+      title: snap.title, summary: snap.summary ?? null, cover_url: snap.cover_url ?? null, translations: snap.translations ?? {},
+    }
+  })
+}
+
+/** = mycen_resolve_modules */
+function resolveModules(state: MockState, p: Row, modules: Row[]): Row[] {
+  return modules.map(m => {
+    const c = (m.content ?? {}) as Row
+    if (m.type === 'project') return { ...m, projects: projectCards(state, p.identity_id, String(p.username), [c.project_id]) }
+    if (m.type === 'portfolio') {
+      const ids = Array.isArray(c.project_ids) && c.project_ids.length ? c.project_ids : null
+      return { ...m, projects: projectCards(state, p.identity_id, String(p.username), ids) }
+    }
+    return m
+  })
+}
+
+function publicProject(state: MockState, username: string, slug: string, isOwner: boolean): unknown {
+  const u = username.trim().toLowerCase()
+  const p = state.tables.profiles.find(x => x.username === u)
+  if (!p) {
+    const id = state.usernameHistory[u]
+    const target = state.tables.profiles.find(x => x.id === id && x.status === 'published' && x.visibility !== 'private')
+    return target ? { redirect: target.username } : null
+  }
+  if ((p.status !== 'published' || p.visibility === 'private') && !isOwner) return { status: 'unavailable' }
+  const o = state.tables.content_objects.find(x => x.identity_id === p.identity_id && x.type === 'project' && x.slug === slug.trim().toLowerCase())
+  if (!o) return null
+  let project: Row
+  if (o.status === 'published' && o.visibility !== 'private') project = o.published_snapshot as Row
+  else if (isOwner && o.status !== 'archived') project = projectSnapshot(state, o)
+  else return { status: 'unavailable' }
+  const space = publishedSnapshot(state, p) ?? snapshotOf(state, p)
+  return {
+    ...project, slug: o.slug, status: o.status, visibility: o.visibility, is_owner: isOwner,
+    space: {
+      id: p.id, username: p.username, display_name: space.display_name, avatar_url: space.avatar_url,
+      theme: space.theme ?? {}, default_locale: space.default_locale, translations: space.translations ?? {}, visibility: p.visibility,
+    },
+  }
+}
+
 // ── PostgREST mínimo ─────────────────────────────────────────────────────────
 
 function matches(row: Row, key: string, raw: string): boolean {
@@ -105,6 +195,12 @@ function matches(row: Row, key: string, raw: string): boolean {
     case 'in': return value.replace(/^\(|\)$/g, '').split(',').map(v => v.replace(/^"|"$/g, '')).includes(str ?? '')
     default: return true
   }
+}
+
+/** Valores por defecto de las columnas (como en la base) al insertar */
+const DEFAULTS: Record<string, Row> = {
+  content_objects: { status: 'draft', visibility: 'public', summary: null, cover_url: null, data: {}, translations: {}, published_snapshot: null, published_at: null },
+  content_blocks: { data: {}, translations: {}, position: 0 },
 }
 
 const NON_FILTERS = new Set(['select', 'order', 'limit', 'offset', 'on_conflict', 'columns', 'or'])
@@ -145,7 +241,10 @@ function publicProfile(state: MockState, username: string, isOwner: boolean): un
   // El visitante ve la versión publicada; el dueño, si no publicó, su borrador
   const base = { ...(publishedSnapshot(state, p) ?? snapshotOf(state, p)) }
   delete base.contact_card
-  return { ...base, id: p.id, username: p.username, status: p.status, visibility: p.visibility, is_owner: isOwner, business: null }
+  return {
+    ...base, id: p.id, username: p.username, status: p.status, visibility: p.visibility, is_owner: isOwner, business: null,
+    modules: resolveModules(state, p, base.modules as Row[]),
+  }
 }
 
 function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown {
@@ -201,6 +300,18 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
         version_id: v?.id ?? null, version_number: v?.version_number ?? null, published_at: v?.created_at ?? null,
         dirty: !v || !same(v.snapshot, snapshotOf(state, p)),
       }
+    }
+    case 'get_public_project': return publicProject(state, String(args.p_username ?? ''), String(args.p_slug ?? ''), isOwner)
+    case 'publish_project': {
+      const o = state.tables.content_objects.find(x => x.id === args.p_id)
+      if (!o || !isOwner) throw new Error('NOT_OWNER')
+      publishProjectRow(state, o)
+      return { status: o.status, published_at: o.published_at }
+    }
+    case 'project_publish_state': {
+      const o = state.tables.content_objects.find(x => x.id === args.p_id)
+      if (!o || !isOwner) throw new Error('NOT_OWNER')
+      return { status: o.status, published_at: o.published_at, dirty: !o.published_snapshot || !same(o.published_snapshot, projectSnapshot(state, o)) }
     }
     case 'check_username': {
       const u = String(args.p_username ?? '')
@@ -268,8 +379,15 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
       const body = req.postDataJSON()
       const list = (Array.isArray(body) ? body : [body]) as Row[]
       const now = new Date().toISOString()
-      const created = list.map(r => ({ id: `${table}-${Math.random().toString(36).slice(2, 8)}`, created_at: now, updated_at: now, ...r }))
-      rows.push(...created)
+      // upsert (Prefer: resolution=merge-duplicates): actualiza la fila con el mismo id en vez de duplicarla
+      const merge = (headers['prefer'] ?? '').includes('merge-duplicates')
+      const created = list.map(r => {
+        const existing = merge && r.id != null ? rows.find(x => x.id === r.id) : undefined
+        if (existing) return Object.assign(existing, r, { updated_at: now })
+        const row = { id: `${table}-${Math.random().toString(36).slice(2, 8)}`, created_at: now, updated_at: now, ...DEFAULTS[table], ...r }
+        rows.push(row)
+        return row
+      })
       state.writes.push({ method: 'POST', table, body })
       return json(single ? created[0] : created, 201)
     }

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import type { ProfileEventType, ProfileLookup, PublicProfile } from './profileTypes'
+import type { ProjectLookup, PublicProject } from './projectTypes'
 
 // Las RPCs de Profile todavía no están en database.types.ts (generado antes de la Fase 0)
 type RpcClient = {
@@ -50,4 +51,15 @@ export async function fetchContactCard(profileId: string): Promise<ContactCard |
   const { data, error } = await rpc('get_profile_contact_card', { p_profile_id: profileId })
   if (error || !data) return null
   return data as ContactCard
+}
+
+export async function fetchPublicProject(username: string, slug: string): Promise<ProjectLookup> {
+  const { data, error } = await rpc('get_public_project', { p_username: username, p_slug: slug })
+  if (error) throw new Error(error.message)
+  if (!data) return { kind: 'not_found' }
+
+  const result = data as Record<string, unknown>
+  if (typeof result.redirect === 'string') return { kind: 'redirect', username: result.redirect }
+  if (result.status === 'unavailable') return { kind: 'unavailable' }
+  return { kind: 'found', project: result as unknown as PublicProject }
 }

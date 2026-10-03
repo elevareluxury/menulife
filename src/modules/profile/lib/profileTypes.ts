@@ -2,6 +2,7 @@
 // (supabase/migrations/20261001000001_mycen_profiles_foundation.sql).
 
 import type { AppLang } from '@/i18n/app/languages'
+import type { ProjectCard } from './projectTypes'
 
 export type ProfileLang = AppLang
 
@@ -13,6 +14,7 @@ export type ProfileLang = AppLang
 export const MODULE_TYPES = [
   'link', 'social', 'contact', 'location', 'image', 'text',
   'featured_action', 'contact_card', 'gallery', 'product', 'testimonials', 'hours', 'cards',
+  'project', 'portfolio',
 ] as const
 
 export type ModuleType = typeof MODULE_TYPES[number]
@@ -27,6 +29,8 @@ export interface ProfileModule {
   content: Record<string, unknown>
   config: Record<string, unknown>
   translations: Translations
+  /** Sólo project/portfolio: tarjetas de los proyectos publicados (las agrega la RPC al responder) */
+  projects?: ProjectCard[]
 }
 
 export interface PrimaryAction {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  BarChart3, Eye, Home, LayoutGrid, LogOut, MoreHorizontal, Palette, PenLine, Settings, Share2, UserRound,
+  BarChart3, Eye, FolderOpen, Home, LayoutGrid, LogOut, MoreHorizontal, Palette, PenLine, Settings, Share2, UserRound,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { StudioContext, type StudioContextValue } from './StudioContext'
@@ -11,7 +11,8 @@ import {
   restoreSpaceVersion, updateProfile,
 } from './lib/studioApi'
 import { publicBaseUrl, toPublicProfile } from './lib/preview'
-import type { ProfilePatch, PublishState, SaveState, StudioBusiness, StudioModule, StudioProfile } from './lib/studioTypes'
+import type { ProfilePatch, PublishState, SaveState, StudioBusiness, StudioModule, StudioProfile, StudioProject } from './lib/studioTypes'
+import { listProjects } from './lib/projectsApi'
 import { PreviewPane } from './components/PreviewPane'
 import { OnboardingWizard } from './components/OnboardingWizard'
 import { Button } from './components/ui'
@@ -32,6 +33,7 @@ const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
   { to: '/studio',            label: 'home',       icon: Home, end: true },
   { to: '/studio/identity',   label: 'identity',   icon: UserRound },
   { to: '/studio/modules',    label: 'modules',    icon: LayoutGrid },
+  { to: '/studio/projects',   label: 'projects',   icon: FolderOpen },
   { to: '/studio/appearance', label: 'appearance', icon: Palette },
   { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
   { to: '/studio/analytics',  label: 'analytics',  icon: BarChart3 },
@@ -128,6 +130,7 @@ function StudioReady({ userId, initial }: {
 }) {
   const [profile, setProfile] = useState(initial.profile)
   const [modules, setModulesState] = useState(initial.modules)
+  const [projects, setProjectsState] = useState<StudioProject[]>([])
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
   const [conflict, setConflict] = useState(false)
@@ -289,6 +292,16 @@ function StudioReady({ userId, initial }: {
   }, [flush])
 
   const setModules = useCallback((updater: (prev: StudioModule[]) => StudioModule[]) => setModulesState(updater), [])
+  const setProjects = useCallback((updater: (prev: StudioProject[]) => StudioProject[]) => setProjectsState(updater), [])
+
+  // Proyectos de la identidad (Fase 5): para elegirlos en los módulos y mostrarlos en la vista previa
+  useEffect(() => {
+    const identityId = initial.profile.identity_id
+    if (!identityId) return
+    let cancelled = false
+    listProjects(identityId).then(list => { if (!cancelled) setProjectsState(list) }, () => undefined)
+    return () => { cancelled = true }
+  }, [initial.profile.identity_id])
 
   const value = useMemo<StudioContextValue>(() => ({
     userId,
@@ -311,12 +324,16 @@ function StudioReady({ userId, initial }: {
     canRedo: historyCounts.future > 0,
     replaceProfile: setProfile,
     setModules,
+    projects,
+    setProjects,
     publicUrl: `${publicBaseUrl()}/${profile.username}`,
-    previewProfile: toPublicProfile(profile, modules, initial.business),
-  }), [userId, profile, modules, initial.business, saveState, saveError, patchProfile, flush, setModules,
+    previewProfile: toPublicProfile(profile, modules, initial.business, projects),
+  }), [userId, profile, modules, projects, setProjects, initial.business, saveState, saveError, patchProfile, flush, setModules,
       conflict, publishState, publishing, publishError, publish, restoreVersion, undo, redo, historyCounts])
 
   const showPane = location.pathname !== '/studio/preview'
+  // En el editor de un proyecto manda su propio estado de publicación (el del perfil confundiría)
+  const inProjectEditor = /^\/studio\/projects\/[^/]+/.test(location.pathname)
 
   return (
     <StudioContext.Provider value={value}>
@@ -343,7 +360,7 @@ function StudioReady({ userId, initial }: {
 
           <main className="st-main">
             <div className="st-main-inner">
-              <PublishBar />
+              {!inProjectEditor && <PublishBar />}
               <Outlet />
             </div>
           </main>

@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Plus, Star, Trash2 } from 'lucide-react'
 import type { WeekSchedule } from '@/modules/profile/lib/profileTypes'
 import { WEEK_DAYS } from '@/modules/profile/lib/schedule'
 import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import { uploadMedia } from '../lib/studioApi'
-import { Button, ImageField, TextField } from './ui'
+import { useStudio } from '../StudioContext'
+import { Button, ImageField, SelectField, TextField, Toggle } from './ui'
 import { useStudioT } from '@/i18n/app/studio'
 
 // Editores propios de los tipos que no se arman sólo con campos simples. Cada uno se registra en
@@ -177,6 +179,77 @@ export function ReviewsEditor({ value, onChange: onValue }: ExtraEditorProps<Rev
       ))}
       {items.length < 10 && (
         <Button size="sm" onClick={() => onChange([...items, { rating: 5 }])}><Plus size={15} aria-hidden="true" /> {e.addReview}</Button>
+      )}
+    </div>
+  )
+}
+
+// ── Proyectos (Fase 5) ──────────────────────────────────────────────────────
+
+function NoProjects() {
+  const e = useStudioT().editor
+  return (
+    <div className="st-card" style={{ background: 'var(--st-bg)', margin: 0 }}>
+      <p className="st-help" style={{ margin: '0 0 10px' }}>{e.projectsEmpty}</p>
+      <Link className="st-btn st-btn-secondary st-btn-sm" to="/studio/projects">{e.goToProjects}</Link>
+    </div>
+  )
+}
+
+export function ProjectPicker({ value, onChange }: ExtraEditorProps<string>) {
+  const { projects } = useStudio()
+  const e = useStudioT().editor
+  const available = projects.filter(p => p.status !== 'archived')
+  if (!available.length) return <NoProjects />
+  return (
+    <div className="st-stack" style={{ gap: 6 }}>
+      <SelectField label={e.projectPick} required value={value} onChange={onChange}
+        options={available.map(p => ({ value: p.id, label: p.status === 'published' ? p.title : `${p.title} (${e.notPublished})` }))} />
+      <p className="st-help" style={{ margin: 0 }}>{e.projectsHelp}</p>
+    </div>
+  )
+}
+
+/** ids null = todos los proyectos públicos; si no, esos y en ese orden */
+export function PortfolioPicker({ value: ids, onChange }: ExtraEditorProps<string[] | null>) {
+  const { projects } = useStudio()
+  const e = useStudioT().editor
+  const available = projects.filter(p => p.status !== 'archived')
+  if (!available.length) return <NoProjects />
+  const selected = (ids ?? []).map(id => available.find(p => p.id === id)).filter(p => !!p)
+  const others = available.filter(p => !ids?.includes(p.id))
+  const label = (p: typeof available[number]) => (p.status === 'published' ? p.title : `${p.title} (${e.notPublished})`)
+  const move = (i: number, d: -1 | 1) => {
+    const next = selected.map(p => p.id)
+    const t = i + d
+    if (t < 0 || t >= next.length) return
+    ;[next[i], next[t]] = [next[t], next[i]]
+    onChange(next)
+  }
+  return (
+    <div className="st-stack" style={{ gap: 10 }}>
+      <Toggle checked={ids === null} label={e.portfolioAll} description={e.projectsHelp}
+        onChange={all => onChange(all ? null : available.filter(p => p.status === 'published').map(p => p.id))} />
+      {ids !== null && (
+        <fieldset className="st-card" style={{ background: 'var(--st-bg)', margin: 0 }}>
+          <legend className="st-label">{e.portfolioPick}</legend>
+          <ul className="st-pick-list">
+            {selected.map((p, i) => (
+              <li key={p.id}>
+                <label><input type="checkbox" checked onChange={() => onChange(ids.filter(x => x !== p.id))} /> {label(p)}</label>
+                <span className="st-row" style={{ gap: 0 }}>
+                  <button type="button" className="st-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label={`↑ ${p.title}`}><ArrowUp size={15} /></button>
+                  <button type="button" className="st-icon-btn" disabled={i === selected.length - 1} onClick={() => move(i, 1)} aria-label={`↓ ${p.title}`}><ArrowDown size={15} /></button>
+                </span>
+              </li>
+            ))}
+            {others.map(p => (
+              <li key={p.id}>
+                <label><input type="checkbox" checked={false} onChange={() => onChange([...ids, p.id])} /> {label(p)}</label>
+              </li>
+            ))}
+          </ul>
+        </fieldset>
       )}
     </div>
   )

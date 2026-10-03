@@ -68,4 +68,64 @@ describe('api/og', () => {
     mockRpc({ username: 'ana', display_name: 'Ana', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published', visibility: 'unlisted', modules: [] })
     expect(await (await handler(req('ana'))).text()).toContain('<meta name="robots" content="noindex">')
   })
+
+  it('lista los proyectos del portfolio con su URL (sólo rutas internas)', async () => {
+    mockRpc({
+      username: 'ana', display_name: 'Ana', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published',
+      modules: [{ type: 'portfolio', title: 'Trabajos', content: {}, projects: [
+        { title: 'Café Luna', summary: 'Identidad', path: '/ana/projects/cafe-luna' },
+        { title: 'Trampa', path: 'https://evil.com' },
+      ] }],
+    })
+    const html = await (await handler(req('ana'))).text()
+    expect(html).toContain('<a href="https://mycen.id/ana/projects/cafe-luna">Café Luna</a> — Identidad')
+    expect(html).not.toContain('evil.com')
+  })
+})
+
+describe('api/og · proyectos', () => {
+  const projectReq = (slug: string, project: string) =>
+    new Request(`https://mycen.id/api/og?slug=${encodeURIComponent(slug)}&project=${encodeURIComponent(project)}`)
+  const project = {
+    title: 'Café <Luna>', summary: 'Identidad & marca', cover_url: 'https://cdn/luna.jpg', slug: 'cafe-luna',
+    status: 'published', visibility: 'public',
+    space: { username: 'ana', display_name: 'Ana', avatar_url: null, visibility: 'public' },
+    blocks: [
+      { type: 'heading', data: { text: 'El desafío' } },
+      { type: 'paragraph', data: { text: '</script>texto' } },
+      { type: 'image', data: { url: 'javascript:alert(1)' } },
+      { type: 'credits', data: { items: [{ role: 'Foto', name: 'Juan' }] } },
+    ],
+  }
+
+  it('sirve el proyecto publicado con su contenido y JSON-LD', async () => {
+    const fetchMock = mockRpc(project)
+    const html = await (await handler(projectReq('ana', 'cafe-luna'))).text()
+    expect(String((fetchMock.mock.calls[0] as unknown[])[0])).toContain('/rpc/get_public_project')
+    expect(html).toContain('<title>Café &lt;Luna&gt; · Ana</title>')
+    expect(html).toContain('<meta property="og:type" content="article">')
+    expect(html).toContain('<link rel="canonical" href="https://mycen.id/ana/projects/cafe-luna">')
+    expect(html).toContain('<h2>El desafío</h2>')
+    expect(html).toContain('<dt>Foto</dt><dd>Juan</dd>')
+    expect(html).not.toContain('javascript:')
+    expect(html).not.toContain('</script>texto')
+    expect(html).toContain('"@type":"CreativeWork"')
+  })
+
+  it('no expone proyectos sin publicar y redirige usernames viejos', async () => {
+    mockRpc({ status: 'unavailable' })
+    expect(await (await handler(projectReq('ana', 'cafe-luna'))).text()).toContain('<title>Mycen</title>')
+
+    mockRpc({ redirect: 'ana-studio' })
+    const res = await handler(projectReq('ana', 'cafe-luna'))
+    expect(res.status).toBe(301)
+    expect(res.headers.get('location')).toBe('https://mycen.id/ana-studio/projects/cafe-luna')
+  })
+
+  it('marca noindex un proyecto no listado o de un Space no listado', async () => {
+    mockRpc({ ...project, visibility: 'unlisted' })
+    expect(await (await handler(projectReq('ana', 'cafe-luna'))).text()).toContain('content="noindex"')
+    mockRpc({ ...project, space: { ...project.space, visibility: 'unlisted' } })
+    expect(await (await handler(projectReq('ana', 'cafe-luna'))).text()).toContain('content="noindex"')
+  })
 })

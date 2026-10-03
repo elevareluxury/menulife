@@ -84,6 +84,12 @@
       - /url: https://g.page/r/ana
     - text: Juan ★★★★★
     - paragraph: Excelente trabajo.
+  - link /Marca Café Luna Identidad \d+ Ver proyecto/:
+    - /url: /ana/projects/cafe-luna
+  - region "Trabajos":
+    - heading "Trabajos" [level=2]
+    - link /Marca Café Luna Identidad \d+/:
+      - /url: /ana/projects/cafe-luna
   - text: Una identidad Mycen ·
   - link "Creá tu Mycen":
     - /url: /register
