@@ -8,7 +8,7 @@ import { NETWORK_LABELS } from '../lib/networks'
 import { SocialIcon } from './SocialIcon'
 import { SafeImage } from './SafeImage'
 
-interface ModuleProps {
+export interface ModuleProps {
   module: ProfileModule
   lang: ProfileLang
   onAction: (moduleId: string) => void
@@ -387,24 +387,4 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
       </div>
     </section>
   )
-}
-
-// ── Dispatcher ──────────────────────────────────────────────────────────────
-
-export function ModuleView(props: ModuleProps) {
-  switch (props.module.type) {
-    case 'link':            return <LinkModule {...props} />
-    case 'contact':         return <ContactModule {...props} />
-    case 'location':        return <LocationModule {...props} />
-    case 'text':            return <TextModule {...props} />
-    case 'image':           return <ImageModule {...props} />
-    case 'featured_action': return <FeaturedActionModule {...props} />
-    case 'product':         return <ProductModule {...props} />
-    case 'gallery':         return <GalleryModule {...props} />
-    case 'testimonials':    return <TestimonialsModule {...props} />
-    case 'hours':           return <HoursModule {...props} />
-    case 'cards':           return <CardsModule {...props} />
-    // 'social' se agrupa en SocialRow; 'contact_card' se muestra como botón "Guardar contacto"
-    default:                return null
-  }
 }

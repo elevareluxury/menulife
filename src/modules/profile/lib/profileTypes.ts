@@ -5,9 +5,17 @@ import type { AppLang } from '@/i18n/app/languages'
 
 export type ProfileLang = AppLang
 
-export type ModuleType =
-  | 'link' | 'social' | 'contact' | 'location' | 'image' | 'text'
-  | 'featured_action' | 'contact_card' | 'gallery' | 'product' | 'testimonials' | 'hours' | 'cards'
+/**
+ * Tipos de módulo (mismo orden que el check `profile_modules_type_check`). Cada tipo se define en dos
+ * registros: el público (`profile/components/moduleRegistry.ts`) y el de Studio (`studio/lib/moduleCatalog.ts`).
+ * Ambos son `Record<ModuleType, …>`: si se agrega un tipo acá, `tsc` obliga a completarlos.
+ */
+export const MODULE_TYPES = [
+  'link', 'social', 'contact', 'location', 'image', 'text',
+  'featured_action', 'contact_card', 'gallery', 'product', 'testimonials', 'hours', 'cards',
+] as const
+
+export type ModuleType = typeof MODULE_TYPES[number]
 
 /** Campos traducidos: { en: { campo: 'texto' } } */
 export type Translations = Partial<Record<ProfileLang, Record<string, unknown>>>
