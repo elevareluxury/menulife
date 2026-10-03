@@ -14,7 +14,7 @@ export type ProfileLang = AppLang
 export const MODULE_TYPES = [
   'link', 'social', 'contact', 'location', 'image', 'text',
   'featured_action', 'contact_card', 'gallery', 'product', 'testimonials', 'hours', 'cards',
-  'project', 'portfolio',
+  'project', 'portfolio', 'link_group',
 ] as const
 
 export type ModuleType = typeof MODULE_TYPES[number]

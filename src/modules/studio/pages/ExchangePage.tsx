@@ -6,6 +6,7 @@ import type { ContactCardSettings } from '../lib/studioTypes'
 import { useCopy } from '../lib/useCopy'
 import { Button, PageHeader, TextField, Toggle } from '../components/ui'
 import { ProfileSaveIndicator } from '../components/shared'
+import { IdentityCardSection, IntroSection } from '../components/ConnectSections'
 import { useStudioT } from '@/i18n/app/studio'
 
 function svgToPng(svg: SVGSVGElement, size: number): Promise<string> {
@@ -106,6 +107,9 @@ export function ExchangePage() {
           <Button size="sm" onClick={downloadSvg}><Download size={15} aria-hidden="true" /> {x.svgPrint}</Button>
         </div>
       </section>
+
+      <IdentityCardSection />
+      <IntroSection />
 
       <section className="st-card st-stack">
         <Toggle label={x.saveContact}

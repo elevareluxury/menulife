@@ -1,5 +1,6 @@
 import type { ProfileModule, PublicProfile } from '@/modules/profile/lib/profileTypes'
 import type { ProjectCard } from '@/modules/profile/lib/projectTypes'
+import { isModuleLive } from '@/modules/profile/lib/moduleSchedule'
 import type { StudioBusiness, StudioModule, StudioProfile, StudioProject } from './studioTypes'
 
 /**
@@ -65,7 +66,8 @@ export function toPublicProfile(p: StudioProfile, modules: StudioModule[], busin
     is_owner: true,
     business,
     modules: modules
-      .filter(m => m.visibility === 'active' && !m.deleted_at)
+      // Igual que la página pública: sin los módulos que no están en su horario
+      .filter(m => m.visibility === 'active' && !m.deleted_at && isModuleLive(m.config))
       .map(m => withProjects({ id: m.id, type: m.type, title: m.title, content: m.content, config: m.config, translations: m.translations ?? {} }, projects, p.username)),
   }
 }

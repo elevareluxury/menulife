@@ -254,3 +254,44 @@ export function PortfolioPicker({ value: ids, onChange }: ExtraEditorProps<strin
     </div>
   )
 }
+
+// ── Grupo de links (Fase 7) ─────────────────────────────────────────────────
+
+export interface LinkItemInput { title?: string; url?: string; subtitle?: string }
+
+export function LinkItemsEditor({ value: items, onChange }: ExtraEditorProps<LinkItemInput[]>) {
+  const e = useStudioT().editor
+  const update = (i: number, patch: Partial<LinkItemInput>) => onChange(items.map((x, j) => (j === i ? { ...x, ...patch } : x)))
+  const move = (i: number, d: -1 | 1) => {
+    const t = i + d
+    if (t < 0 || t >= items.length) return
+    const next = [...items]
+    ;[next[i], next[t]] = [next[t], next[i]]
+    onChange(next)
+  }
+  return (
+    <div className="st-stack" style={{ gap: 10 }}>
+      <span className="st-label">{e.groupLinks(items.length)}</span>
+      {items.map((item, i) => (
+        <div key={i} className="st-card" style={{ background: 'var(--st-bg)', margin: 0 }}>
+          <div className="st-row" style={{ justifyContent: 'space-between', marginBottom: 10 }}>
+            <strong style={{ fontSize: 14 }}>{e.linkN(i + 1)}</strong>
+            <div className="st-row" style={{ gap: 0 }}>
+              <button type="button" className="st-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label={e.upLink(i + 1)}><ArrowUp size={15} /></button>
+              <button type="button" className="st-icon-btn" disabled={i === items.length - 1} onClick={() => move(i, 1)} aria-label={e.downLink(i + 1)}><ArrowDown size={15} /></button>
+              <button type="button" className="st-icon-btn" onClick={() => onChange(items.filter((_, j) => j !== i))} aria-label={e.removeLink(i + 1)}><Trash2 size={15} /></button>
+            </div>
+          </div>
+          <div className="st-stack" style={{ gap: 12 }}>
+            <TextField label={e.linkTitle} value={item.title ?? ''} maxLength={120} onChange={v => update(i, { title: v })} />
+            <TextField label="URL" type="url" value={item.url ?? ''} placeholder="https://…" onChange={v => update(i, { url: v })} />
+            <TextField label={e.linkSubtitle} value={item.subtitle ?? ''} maxLength={120} onChange={v => update(i, { subtitle: v })} />
+          </div>
+        </div>
+      ))}
+      {items.length < 20 && (
+        <Button size="sm" onClick={() => onChange([...items, {}])}><Plus size={15} aria-hidden="true" /> {e.addLink}</Button>
+      )}
+    </div>
+  )
+}

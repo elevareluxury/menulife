@@ -44,9 +44,19 @@ export function LinkModule({ module, lang, onAction }: ModuleProps) {
   }
 
   return (
-    <a className="mp-link" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>
+    <LinkRow href={href} title={title} subtitle={subtitle} image={image} linkType={linkType}
+      highlight={module.content.style === 'highlight'} onClick={() => onAction(module.id)} />
+  )
+}
+
+/** Fila de link: ícono o miniatura, título, detalle y flecha. `highlight` = link destacado (color de acento). */
+function LinkRow({ href, title, subtitle, image, linkType, highlight, onClick }: {
+  href: string; title: string; subtitle?: string; image?: string | null; linkType?: string; highlight?: boolean; onClick: () => void
+}) {
+  return (
+    <a className={`mp-link${highlight ? ' is-highlight' : ''}`} href={href} {...linkProps(href)} onClick={onClick}>
       <span className="mp-link-icon">
-        {image ? <SafeImage src={image} alt="" loading="lazy" fallback={<SocialIcon network={linkType} />} /> : <SocialIcon network={linkType} />}
+        {image ? <SafeImage src={image} alt="" loading="lazy" fallback={<SocialIcon network={linkType ?? ''} />} /> : <SocialIcon network={linkType ?? ''} />}
       </span>
       <span className="mp-link-body">
         <span className="mp-link-title">{title}</span>
@@ -54,6 +64,26 @@ export function LinkModule({ module, lang, onAction }: ModuleProps) {
       </span>
       <ArrowUpRight className="mp-link-arrow" size={18} aria-hidden="true" />
     </a>
+  )
+}
+
+// ── Grupo de links (Fase 7) ─────────────────────────────────────────────────
+
+interface LinkItem { title?: string; url?: string; subtitle?: string }
+
+export function LinkGroupModule({ module, lang, onAction }: ModuleProps) {
+  const items = (Array.isArray(module.content.items) ? module.content.items as LinkItem[] : [])
+    .map(i => ({ ...i, href: safeHref(i?.url) }))
+    .filter((i): i is LinkItem & { href: string } => !!i.href && !!str(i.title))
+  if (!items.length) return null
+  const heading = tr(module.title, module.translations, 'title', lang)
+  return (
+    <section className="mp-link-group" aria-label={heading || ui(lang).links}>
+      {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
+      {items.map((i, n) => (
+        <LinkRow key={i.href + n} href={i.href} title={str(i.title)} subtitle={str(i.subtitle)} onClick={() => onAction(module.id)} />
+      ))}
+    </section>
   )
 }
 

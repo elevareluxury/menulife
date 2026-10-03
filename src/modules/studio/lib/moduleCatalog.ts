@@ -6,8 +6,8 @@ import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import type { StudioDict } from '@/i18n/app/studio'
 import type { StudioModule } from './studioTypes'
 import {
-  CardsEditor, GalleryEditor, HoursEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
-  type ExtraEditorProps, type GalleryItem, type ReviewsValue,
+  CardsEditor, GalleryEditor, HoursEditor, LinkItemsEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
+  type ExtraEditorProps, type GalleryItem, type LinkItemInput, type ReviewsValue,
 } from '../components/moduleExtraEditors'
 
 export type FieldKind = 'text' | 'textarea' | 'url' | 'email' | 'tel' | 'number' | 'select' | 'image'
@@ -125,6 +125,7 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         { key: 'style', label: f.style, kind: 'select', required: true, options: [
           { value: 'button', label: c.styleButton },
           { value: 'card', label: c.styleCard },
+          { value: 'highlight', label: c.styleHighlight },
         ] },
       ],
       validate: x => {
@@ -340,6 +341,30 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         Editor: PortfolioPicker,
       }),
       summary: x => (Array.isArray(x.project_ids) && x.project_ids.length ? sm.portfolioSome(x.project_ids.length) : sm.portfolioAll),
+    },
+    link_group: {
+      addable: true,
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
+      ],
+      extra: extra<LinkItemInput[]>({
+        init: m => (Array.isArray(m?.content.items) ? m.content.items as LinkItemInput[] : [{}]),
+        validate: items => {
+          const filled = items.filter(i => i.title?.trim() || i.url?.trim())
+          if (!filled.some(i => i.title?.trim() && i.url?.trim())) return e.linksEmpty
+          if (filled.some(i => !i.title?.trim() || !safeHref(i.url))) return e.linksBadUrl
+          return null
+        },
+        apply: (items, content) => {
+          content.items = items
+            .filter(i => i.title?.trim() && safeHref(i.url))
+            .map(i => Object.fromEntries(Object.entries({
+              title: i.title!.trim(), url: safeHref(i.url), subtitle: i.subtitle?.trim() || undefined,
+            }).filter(([, val]) => val)))
+        },
+        Editor: LinkItemsEditor,
+      }),
+      summary: x => sm.links(count(x.items)),
     },
     // Se edita en Mi identidad → tarjeta de contacto; en la página es el botón "Guardar contacto"
     contact_card: { addable: false, fields: [], summary: () => '' },
