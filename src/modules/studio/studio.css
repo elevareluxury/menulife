@@ -353,6 +353,8 @@
   border-radius: 999px; justify-content: center;
 }
 .st-bottom-nav a[aria-current='page'] { background: rgba(255, 255, 255, 0.12); color: var(--st-text); }
+/* Con un panel o diálogo abierto la barra se esconde: está en un portal y si no taparía sus botones */
+body:has(.st-overlay, .st-dialog-wrap) .st-bottom-nav { display: none; }
 .st-nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (max-width: 899px) {
   .st-main-inner { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }

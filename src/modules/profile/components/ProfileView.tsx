@@ -9,22 +9,26 @@ import { isOpenNow } from '../lib/schedule'
 import { downloadVCard } from '../lib/vcard'
 import { ensureProfileFont } from '../lib/profileTheme'
 import type { ProfileLang, ProfileModule, PublicProfile, WeekSchedule } from '../lib/profileTypes'
-import { ModuleView, SocialRow } from './ProfileModules'
+import { publicModuleDef, type GroupProps } from './moduleRegistry'
+import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
 import '../profile.css'
 
-/** Agrupa redes consecutivas en una sola fila de íconos. */
-type Block = { kind: 'module'; module: ProfileModule } | { kind: 'socials'; modules: ProfileModule[] }
+/** Bloques a dibujar: los tipos con `Group` (ej.: redes) se juntan si son consecutivos. */
+type Block =
+  | { kind: 'module'; module: ProfileModule; View: React.ComponentType<ModuleProps> }
+  | { kind: 'group'; modules: ProfileModule[]; Group: React.ComponentType<GroupProps> }
 
 function toBlocks(modules: ProfileModule[]): Block[] {
   const blocks: Block[] = []
   for (const m of modules) {
+    const def = publicModuleDef(m.type)
     const last = blocks[blocks.length - 1]
-    if (m.type === 'social') {
-      if (last?.kind === 'socials') last.modules.push(m)
-      else blocks.push({ kind: 'socials', modules: [m] })
-    } else {
-      blocks.push({ kind: 'module', module: m })
+    if (def?.Group) {
+      if (last?.kind === 'group' && last.Group === def.Group) last.modules.push(m)
+      else blocks.push({ kind: 'group', modules: [m], Group: def.Group })
+    } else if (def?.View) {
+      blocks.push({ kind: 'module', module: m, View: def.View })
     }
   }
   return blocks
@@ -156,9 +160,9 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
         )}
 
         <div className="mp-modules">
-          {blocks.map(b => b.kind === 'socials'
-            ? <SocialRow lang={lang} key={b.modules[0].id} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
-            : <ModuleView key={b.module.id} module={b.module} lang={lang} onAction={onModuleAction} />)}
+          {blocks.map(b => b.kind === 'group'
+            ? <b.Group lang={lang} key={b.modules[0].id} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
+            : <b.View key={b.module.id} module={b.module} lang={lang} onAction={onModuleAction} />)}
         </div>
 
         <footer className="mp-footer">

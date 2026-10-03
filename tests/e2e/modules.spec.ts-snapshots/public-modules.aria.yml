@@ -1,0 +1,89 @@
+- main:
+  - link "Mycen":
+    - /url: /
+    - text: mycen.
+  - combobox "Idioma":
+    - option "Español" [selected]
+    - option "English"
+    - option "Português"
+    - option "Français"
+    - option "Deutsch"
+    - option "Italiano"
+    - option "中文"
+    - option "日本語"
+    - option "한국어"
+    - option "हिन्दी"
+    - option "العربية"
+    - option "Русский"
+  - button "Compartir"
+  - heading "Ana Pérez" [level=1]
+  - paragraph: Diseñadora
+  - paragraph: Hago marcas.
+  - text: Cerrado ahora
+  - button "Guardar contacto"
+  - link /Mi portfolioTrabajos \d+/:
+    - /url: https://ana.design
+  - navigation "Redes sociales":
+    - link "Instagram":
+      - /url: https://instagram.com/ana
+  - region "Contacto":
+    - heading "Escribime" [level=2]
+    - link "WhatsApp":
+      - /url: https://wa.me/5493415550000
+    - link "hola@ana.com":
+      - /url: mailto:hola@ana.com
+  - region "Ubicación":
+    - heading "Estudio" [level=2]
+    - text: /Córdoba \d+, Rosario/
+    - link "Cómo llegar":
+      - /url: https://maps.app.goo.gl/ana
+  - article:
+    - heading "Sobre mí" [level=2]
+    - paragraph: /Diseño marcas desde \d+\./
+  - figure "Mi taller":
+    - img "Taller de Ana"
+    - text: ""
+  - link "Reservá una llamada":
+    - /url: https://cal.com/ana
+  - article:
+    - text: Nuevo
+    - heading "Logo express" [level=2]
+    - paragraph: Identidad en 5 días
+    - text: /\$ \d+\.\d+/
+    - link "Pedir":
+      - /url: https://wa.me/5493415550000
+  - region "Horarios":
+    - heading "Horarios" [level=2]
+    - term: Lun
+    - definition: /\d+:\d+ – \d+:\d+/
+    - term: Mar
+    - definition: Cerrado
+    - term: Mié
+    - definition: Cerrado
+    - term: Jue
+    - definition: Cerrado
+    - term: Vie
+    - definition: Cerrado
+    - term: Sáb
+    - definition: Cerrado
+    - term: Dom
+    - definition: Cerrado
+  - region "Galería":
+    - heading "Galería" [level=2]
+    - button "Galería 1"
+    - button "Galería 2"
+  - region "Proyectos":
+    - heading "Proyectos" [level=2]
+    - link /Marca Café Luna Identidad \d+/:
+      - /url: https://ana.design/cafe
+  - region "Reseñas":
+    - heading "Reseñas" [level=2]
+    - strong: "4.8"
+    - text: /★★★★★ \d+ reseñas/
+    - link "Ver en Google":
+      - /url: https://g.page/r/ana
+    - text: Juan ★★★★★
+    - paragraph: Excelente trabajo.
+  - text: Una identidad Mycen ·
+  - link "Creá tu Mycen":
+    - /url: /register

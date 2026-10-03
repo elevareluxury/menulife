@@ -1,6 +1,14 @@
-import type { ModuleType } from '@/modules/profile/lib/profileTypes'
+import type { ComponentType } from 'react'
+import type { ModuleType, WeekSchedule } from '@/modules/profile/lib/profileTypes'
+import { WEEK_DAYS } from '@/modules/profile/lib/schedule'
 import { safeHref } from '@/modules/profile/lib/safeUrl'
+import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import type { StudioDict } from '@/i18n/app/studio'
+import type { StudioModule } from './studioTypes'
+import {
+  CardsEditor, GalleryEditor, HoursEditor, ReviewsEditor,
+  type ExtraEditorProps, type GalleryItem, type ReviewsValue,
+} from '../components/moduleExtraEditors'
 
 export type FieldKind = 'text' | 'textarea' | 'url' | 'email' | 'tel' | 'number' | 'select' | 'image'
 
@@ -18,6 +26,31 @@ export interface FieldDef {
   isTitle?: boolean
 }
 
+type Content = Record<string, unknown>
+
+/** Contexto que algunos tipos necesitan al guardar */
+export interface SaveContext {
+  /** Zona horaria del negocio vinculado, si hay */
+  businessTimezone?: string | null
+}
+
+/**
+ * Parte del editor que no son campos simples (horarios, fotos, tarjetas, reseñas): su propio estado,
+ * cómo se carga del módulo, cómo se valida y cómo se escribe en `content`.
+ */
+export interface ModuleExtra<S> {
+  init: (module: StudioModule | null) => S
+  /** Mensaje de error o null */
+  validate: (value: S) => string | null
+  apply: (value: S, content: Content, ctx: SaveContext) => void
+  Editor: ComponentType<ExtraEditorProps<S>>
+}
+
+/**
+ * Definición de un tipo de módulo en Studio. Registro único (`Record<ModuleType, …>`): el editor, la
+ * lista de módulos, la biblioteca y la analítica leen de acá; no hay `if (type === …)` sueltos.
+ * El dibujo público está en `profile/components/moduleRegistry.ts`.
+ */
 export interface ModuleDef {
   type: ModuleType
   label: string
@@ -27,7 +60,23 @@ export interface ModuleDef {
   fields: FieldDef[]
   /** Validación extra además de los requeridos. Devuelve el mensaje de error o null. */
   validate?: (values: Record<string, string>) => string | null
+  /** Completa valores iniciales (por defecto o derivados del contenido guardado) */
+  prefill?: (values: Record<string, string>, content: Content | null) => void
+  /** Ajusta `content` al guardar, con datos derivados de los campos */
+  finalize?: (content: Content, values: Record<string, string>) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cada tipo tiene su propio estado
+  extra?: ModuleExtra<any>
+  /** Texto corto para listar el módulo */
+  summary: (content: Content) => string
+  /** Nombre cuando el módulo no tiene título (por defecto, el nombre del tipo) */
+  fallbackTitle?: (content: Content) => string | null
 }
+
+type ModuleSpec = Omit<ModuleDef, 'type' | 'label' | 'description'>
+
+const extra = <S,>(def: ModuleExtra<S>) => def
+const text = (v: unknown) => (typeof v === 'string' ? v : '')
+const count = (v: unknown) => (Array.isArray(v) ? v.length : 0)
 
 export const SOCIAL_NETWORKS = [
   { value: 'instagram', label: 'Instagram', base: 'https://instagram.com/' },
@@ -54,7 +103,7 @@ const urlOk = (v: string | undefined) => !v || !!safeHref(v)
 
 const catalogCache = new WeakMap<StudioDict, ModuleDef[]>()
 
-/** Catálogo de módulos con los textos en el idioma activo. */
+/** Catálogo de módulos con los textos en el idioma activo (en el orden de la biblioteca). */
 export function buildCatalog(t: StudioDict): ModuleDef[] {
   const hit = catalogCache.get(t)
   if (hit) return hit
@@ -62,10 +111,12 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
   const f = c.fields
   const p = c.placeholders
   const v = c.validation
-  const meta = (type: ModuleType) => c.types[type] ?? { label: type, description: '' }
-  const list: ModuleDef[] = [
-    {
-      type: 'link', ...meta('link'), addable: true,
+  const e = t.editor
+  const sm = c.summary
+
+  const specs: Record<ModuleType, ModuleSpec> = {
+    link: {
+      addable: true,
       fields: [
         { key: 'title', label: f.title, kind: 'text', required: true, translatable: true, isTitle: true, maxLength: 120, placeholder: p.linkTitle },
         { key: 'url', label: f.url, kind: 'url', required: true, placeholder: 'https://…' },
@@ -81,17 +132,25 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         if (x.style === 'card' && !x.image_url) return v.cardNeedsImage
         return null
       },
+      prefill: x => { if (!x.style) x.style = 'button' },
+      finalize: content => { if (!content.link_type) content.link_type = 'custom' },
+      summary: x => text(x.url),
     },
-    {
-      type: 'social', ...meta('social'), addable: true,
+    social: {
+      addable: true,
       fields: [
         { key: 'network', label: f.network, kind: 'select', required: true, options: SOCIAL_NETWORKS.map(n => ({ value: n.value, label: n.label })) },
         { key: 'handle', label: f.handle, kind: 'text', required: true, placeholder: p.handle },
       ],
       validate: x => (socialUrl(x.network, x.handle ?? '') ? null : v.badHandle),
+      // Módulos viejos sin handle: se edita a partir de la URL
+      prefill: (x, content) => { if (content && !x.handle) x.handle = text(content.url) },
+      finalize: (content, x) => { content.url = socialUrl(x.network, x.handle ?? '') },
+      summary: x => text(x.handle) || text(x.url),
+      fallbackTitle: x => SOCIAL_NETWORKS.find(n => n.value === text(x.network))?.label ?? sm.social,
     },
-    {
-      type: 'contact', ...meta('contact'), addable: true,
+    contact: {
+      addable: true,
       fields: [
         { key: 'title', label: f.title, kind: 'text', isTitle: true, translatable: true, placeholder: p.contactTitle },
         { key: 'whatsapp', label: f.whatsapp, kind: 'tel', placeholder: '+54 9 341 000 0000' },
@@ -103,9 +162,10 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         if (x.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.email)) return v.badEmail
         return null
       },
+      summary: x => [text(x.whatsapp), text(x.phone), text(x.email)].filter(Boolean).join(' · '),
     },
-    {
-      type: 'location', ...meta('location'), addable: true,
+    location: {
+      addable: true,
       fields: [
         { key: 'title', label: f.title, kind: 'text', isTitle: true, translatable: true, placeholder: p.locationTitle },
         { key: 'address', label: f.address, kind: 'text', placeholder: p.address },
@@ -116,33 +176,38 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         if (!x.address && !x.maps_url) return v.locationEmpty
         return urlOk(x.maps_url) ? null : v.badMaps
       },
+      summary: x => [text(x.address), text(x.city)].filter(Boolean).join(', ') || text(x.maps_url),
     },
-    {
-      type: 'text', ...meta('text'), addable: true,
+    text: {
+      addable: true,
       fields: [
         { key: 'title', label: f.title, kind: 'text', isTitle: true, translatable: true, maxLength: 120 },
         { key: 'body', label: f.text, kind: 'textarea', required: true, translatable: true, maxLength: 2000 },
         { key: 'image_url', label: f.imageOptional, kind: 'image' },
       ],
+      summary: x => text(x.body).slice(0, 80),
     },
-    {
-      type: 'image', ...meta('image'), addable: true,
+    image: {
+      addable: true,
       fields: [
         { key: 'url', label: f.image, kind: 'image', required: true },
         { key: 'caption', label: f.caption, kind: 'text', translatable: true, maxLength: 200 },
         { key: 'alt', label: f.alt, kind: 'text', maxLength: 200 },
       ],
+      summary: x => text(x.caption) || sm.image,
     },
-    {
-      type: 'featured_action', ...meta('featured_action'), addable: true,
+    featured_action: {
+      addable: true,
       fields: [
         { key: 'label', label: f.buttonText, kind: 'text', required: true, translatable: true, maxLength: 60, placeholder: p.featuredLabel },
         { key: 'url', label: f.url, kind: 'url', required: true },
       ],
       validate: x => (urlOk(x.url) ? null : v.badUrl),
+      summary: x => text(x.url),
+      fallbackTitle: x => text(x.label) || sm.button,
     },
-    {
-      type: 'product', ...meta('product'), addable: true,
+    product: {
+      addable: true,
       fields: [
         { key: 'name', label: f.name, kind: 'text', required: true, translatable: true, maxLength: 120 },
         { key: 'description', label: f.description, kind: 'textarea', translatable: true, maxLength: 500 },
@@ -153,11 +218,36 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         { key: 'cta_url', label: f.ctaUrl, kind: 'url' },
       ],
       validate: x => (urlOk(x.cta_url) ? null : v.badCta),
+      summary: x => (typeof x.price === 'number' ? `$ ${x.price}` : text(x.description).slice(0, 60)),
+      fallbackTitle: x => text(x.name) || sm.product,
     },
-    { type: 'hours', ...meta('hours'), addable: true, fields: [] },
-    { type: 'gallery', ...meta('gallery'), addable: true, fields: [] },
-    {
-      type: 'cards', ...meta('cards'), addable: true,
+    hours: {
+      addable: true,
+      fields: [],
+      extra: extra<WeekSchedule>({
+        init: m => (m?.content.schedule as WeekSchedule) ?? {},
+        validate: schedule => (WEEK_DAYS.some(d => schedule[d]) ? null : e.hoursEmpty),
+        apply: (schedule, content, ctx) => {
+          content.schedule = schedule
+          content.timezone = text(content.timezone) || ctx.businessTimezone || 'America/Argentina/Buenos_Aires'
+        },
+        Editor: HoursEditor,
+      }),
+      summary: () => sm.hours,
+    },
+    gallery: {
+      addable: true,
+      fields: [],
+      extra: extra<GalleryItem[]>({
+        init: m => (Array.isArray(m?.content.items) ? m.content.items as GalleryItem[] : []),
+        validate: items => (items.length ? null : e.galleryEmpty),
+        apply: (items, content) => { content.items = items },
+        Editor: GalleryEditor,
+      }),
+      summary: x => sm.photos(count(x.items)),
+    },
+    cards: {
+      addable: true,
       fields: [
         { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80, placeholder: p.cardsTitle },
         { key: 'layout', label: f.layout, kind: 'select', required: true, options: [
@@ -165,15 +255,70 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
           { value: 'stack', label: c.layoutStack },
         ] },
       ],
+      prefill: x => { if (!x.layout) x.layout = 'carousel' },
+      extra: extra<CardItem[]>({
+        init: m => (Array.isArray(m?.content.items) ? m.content.items as CardItem[] : [{}]),
+        validate: items => {
+          const filled = items.filter(i => i.title?.trim() || i.image_url)
+          if (!filled.length) return e.cardsEmpty
+          if (filled.some(i => i.url?.trim() && !safeHref(i.url))) return e.cardsBadLink
+          return null
+        },
+        apply: (items, content) => {
+          content.items = items
+            .filter(i => i.title?.trim() || i.image_url)
+            .map(i => Object.fromEntries(Object.entries({
+              image_url: i.image_url, title: i.title?.trim(), subtitle: i.subtitle?.trim(), date: i.date,
+              url: i.url?.trim() ? safeHref(i.url) : undefined,
+              en: i.en?.title?.trim() || i.en?.subtitle?.trim() ? { title: i.en?.title?.trim() || undefined, subtitle: i.en?.subtitle?.trim() || undefined } : undefined,
+            }).filter(([, val]) => val)))
+        },
+        Editor: CardsEditor,
+      }),
+      summary: x => sm.cards(count(x.items), x.layout === 'stack'),
     },
-    {
-      type: 'testimonials', ...meta('testimonials'), addable: true,
+    testimonials: {
+      addable: true,
       fields: [
         { key: 'title', label: f.title, kind: 'text', isTitle: true, translatable: true, placeholder: p.reviewsTitle },
       ],
+      extra: extra<ReviewsValue>({
+        init: m => {
+          const g = (m?.content.google ?? {}) as { rating?: number; count?: number; url?: string }
+          return {
+            items: Array.isArray(m?.content.items) ? m.content.items as ReviewsValue['items'] : [],
+            google: { rating: g.rating != null ? String(g.rating) : '', count: g.count != null ? String(g.count) : '', url: g.url ?? '' },
+          }
+        },
+        validate: ({ items, google }) => {
+          if (!items.some(r => r.author_name?.trim() && r.text?.trim()) && !google.rating) return e.reviewsEmpty
+          const rating = Number(google.rating.replace(',', '.'))
+          if (google.rating && (Number.isNaN(rating) || rating < 1 || rating > 5)) return e.googleRange
+          if (google.url && !safeHref(google.url)) return e.googleBadLink
+          return null
+        },
+        apply: ({ items, google }, content) => {
+          content.items = items
+            .filter(r => r.author_name?.trim() && r.text?.trim())
+            .map(r => ({ author_name: r.author_name!.trim(), rating: r.rating ?? 5, text: r.text!.trim() }))
+          const g: Content = {}
+          if (google.rating) g.rating = Number(google.rating.replace(',', '.'))
+          if (google.count) g.count = Number(google.count)
+          if (google.url) g.url = safeHref(google.url)
+          if (Object.keys(g).length) content.google = g
+          else delete content.google
+        },
+        Editor: ReviewsEditor,
+      }),
+      summary: x => sm.reviews(count(x.items)),
     },
-    { type: 'contact_card', ...meta('contact_card'), addable: false, fields: [] },
-  ]
+    // Se edita en Mi identidad → tarjeta de contacto; en la página es el botón "Guardar contacto"
+    contact_card: { addable: false, fields: [], summary: () => '' },
+  }
+
+  const list = (Object.keys(specs) as ModuleType[]).map(type => ({
+    type, ...(c.types[type] ?? { label: type, description: '' }), ...specs[type],
+  }))
   catalogCache.set(t, list)
   return list
 }
@@ -183,35 +328,15 @@ export function moduleDef(type: ModuleType, t: StudioDict): ModuleDef {
   return catalog.find(d => d.type === type) ?? catalog[0]
 }
 
+type ModuleLike = { type: ModuleType; title: string | null; content: Record<string, unknown> }
+
 /** Texto corto para listar un módulo en Studio. */
-export function moduleSummary(m: { type: ModuleType; title: string | null; content: Record<string, unknown> }, t: StudioDict): string {
-  const c = m.content
-  const sm = t.catalog.summary
-  const count = (v: unknown) => (Array.isArray(v) ? v.length : 0)
-  const s = (v: unknown) => (typeof v === 'string' ? v : '')
-  switch (m.type) {
-    case 'link':            return s(c.url)
-    case 'social':          return s(c.handle) || s(c.url)
-    case 'contact':         return [s(c.whatsapp), s(c.phone), s(c.email)].filter(Boolean).join(' · ')
-    case 'location':        return [s(c.address), s(c.city)].filter(Boolean).join(', ') || s(c.maps_url)
-    case 'text':            return s(c.body).slice(0, 80)
-    case 'image':           return s(c.caption) || sm.image
-    case 'featured_action': return s(c.url)
-    case 'product':         return typeof c.price === 'number' ? `$ ${c.price}` : s(c.description).slice(0, 60)
-    case 'gallery':         return sm.photos(count(c.items))
-    case 'testimonials':    return sm.reviews(count(c.items))
-    case 'cards':           return sm.cards(count(c.items), c.layout === 'stack')
-    case 'hours':           return sm.hours
-    default:                return ''
-  }
+export function moduleSummary(m: ModuleLike, t: StudioDict): string {
+  return buildCatalog(t).find(d => d.type === m.type)?.summary(m.content) ?? ''
 }
 
-export function moduleDisplayTitle(m: { type: ModuleType; title: string | null; content: Record<string, unknown> }, t: StudioDict): string {
+export function moduleDisplayTitle(m: ModuleLike, t: StudioDict): string {
   if (m.title) return m.title
-  const s = (v: unknown) => (typeof v === 'string' ? v : '')
-  const sm = t.catalog.summary
-  if (m.type === 'social') return SOCIAL_NETWORKS.find(n => n.value === s(m.content.network))?.label ?? sm.social
-  if (m.type === 'product') return s(m.content.name) || sm.product
-  if (m.type === 'featured_action') return s(m.content.label) || sm.button
-  return moduleDef(m.type, t).label
+  const def = moduleDef(m.type, t)
+  return def.fallbackTitle?.(m.content) || def.label
 }
