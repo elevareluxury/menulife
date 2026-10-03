@@ -63,3 +63,14 @@ export async function fetchPublicProject(username: string, slug: string): Promis
   if (result.status === 'unavailable') return { kind: 'unavailable' }
   return { kind: 'found', project: result as unknown as PublicProject }
 }
+
+export type ReportResult = 'ok' | 'duplicate' | 'rate_limited' | 'own_profile' | 'not_found' | 'invalid'
+
+/** Denuncia anónima (Fase 8). La base aplica los límites y descarta bots. */
+export async function reportProfile(username: string, reason: string, details: string, projectSlug?: string): Promise<ReportResult> {
+  const { data, error } = await rpc('report_profile', {
+    p_username: username, p_reason: reason, p_details: details || null, p_project_slug: projectSlug ?? null,
+  })
+  if (error) throw new Error(error.message)
+  return data as ReportResult
+}

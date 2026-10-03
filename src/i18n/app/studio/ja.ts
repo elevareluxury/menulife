@@ -390,5 +390,11 @@ const ja: StudioDict = {
     down: '下へ',
     duplicate: '複製',
   },
+  moderation: {
+    suspendedTitle: 'プロフィールは停止されています',
+    suspendedText: 'コンテンツのルールに反しているため、Mycenチームが停止しました。その間、ページ・プロジェクト・連絡先カードは誰にも表示されません。編集は続けられます。',
+    suspendedReason: r => `理由：${r}`,
+    rules: 'コンテンツのルールを見る',
+  },
 }
 export default ja

@@ -360,6 +360,14 @@ function StudioReady({ userId, initial }: {
 
           <main className="st-main">
             <div className="st-main-inner">
+              {profile.suspended_at && (
+                <div className="st-card st-suspended" role="alert">
+                  <strong>{t.moderation.suspendedTitle}</strong>
+                  <p>{t.moderation.suspendedText}</p>
+                  {profile.suspension_reason && <p>{t.moderation.suspendedReason(profile.suspension_reason)}</p>}
+                  <a href="/terminos#reglas" target="_blank" rel="noopener noreferrer">{t.moderation.rules}</a>
+                </div>
+              )}
               {!inProjectEditor && <PublishBar />}
               <Outlet />
             </div>

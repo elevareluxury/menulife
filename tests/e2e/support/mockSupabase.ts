@@ -29,7 +29,7 @@ export function profileRow(overrides: Row = {}): Row {
     avatar_url: null, cover_url: null, purpose: 'professional', status: 'published', is_primary: true,
     theme: {}, primary_action: null, contact_card: { enabled: false }, default_locale: 'es', translations: {},
     tags: [], onboarding_step: 5, username_changed_at: null, published_at: now, created_at: now, updated_at: now,
-    visibility: 'public', revision: 0, published_version_id: null,
+    visibility: 'public', revision: 0, published_version_id: null, suspended_at: null, suspension_reason: null,
     ...overrides,
   }
 }
@@ -66,6 +66,7 @@ export function createState(seed: Partial<MockState['tables']> = {}, usernameHis
   const state: MockState = {
     tables: {
       profiles: [], profile_modules: [], profile_stats_daily: [], profile_versions: [], content_objects: [], content_blocks: [],
+      profile_reports: [], super_admins: [],
       ...seed,
     },
     usernameHistory,
@@ -160,9 +161,10 @@ function publicProject(state: MockState, username: string, slug: string, isOwner
   const p = state.tables.profiles.find(x => x.username === u)
   if (!p) {
     const id = state.usernameHistory[u]
-    const target = state.tables.profiles.find(x => x.id === id && x.status === 'published' && x.visibility !== 'private')
+    const target = state.tables.profiles.find(x => x.id === id && x.status === 'published' && x.visibility !== 'private' && !x.suspended_at)
     return target ? { redirect: target.username } : null
   }
+  if (p.suspended_at) return { status: 'unavailable' }
   if ((p.status !== 'published' || p.visibility === 'private') && !isOwner) return { status: 'unavailable' }
   const o = state.tables.content_objects.find(x => x.identity_id === p.identity_id && x.type === 'project' && x.slug === slug.trim().toLowerCase())
   if (!o) return null
@@ -237,9 +239,11 @@ function publicProfile(state: MockState, username: string, isOwner: boolean): un
   const p = state.tables.profiles.find(x => x.username === u)
   if (!p) {
     const id = state.usernameHistory[u]
-    const target = state.tables.profiles.find(x => x.id === id && x.status === 'published' && x.visibility !== 'private')
+    const target = state.tables.profiles.find(x => x.id === id && x.status === 'published' && x.visibility !== 'private' && !x.suspended_at)
     return target ? { redirect: target.username } : null
   }
+  // Fase 8: suspendido = no lo ve nadie
+  if (p.suspended_at) return { status: 'unavailable' }
   if ((p.status !== 'published' || p.visibility === 'private') && !isOwner) return { status: 'unavailable' }
   // El visitante ve la versión publicada; el dueño, si no publicó, su borrador
   const base = { ...(publishedSnapshot(state, p) ?? snapshotOf(state, p)) }
@@ -256,7 +260,7 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
     case 'get_public_profile': return publicProfile(state, String(args.p_username ?? ''), isOwner)
     case 'get_profile_contact_card': {
       const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
-      if (!p) return null
+      if (!p || p.suspended_at) return null
       const published = publishedSnapshot(state, p)
       const card = (isOwner && !published ? p.contact_card : published?.contact_card) as Row | undefined
       if (!card?.enabled) return null
@@ -320,6 +324,65 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
       if (!p || !isOwner) throw new Error('NOT_OWNER')
       return state.trafficSources ?? []
+    }
+    // ── Moderación (Fase 8) ──
+    case 'report_profile': {
+      const reasons = ['spam', 'scam', 'impersonation', 'hate', 'violence', 'sexual', 'illegal', 'other']
+      if (!reasons.includes(String(args.p_reason))) return 'invalid'
+      const p = state.tables.profiles.find(x => x.username === String(args.p_username ?? '').toLowerCase())
+      if (!p || p.status !== 'published' || p.visibility === 'private' || p.suspended_at) return 'not_found'
+      if (isOwner) return 'own_profile'
+      // En el mock todos los visitantes son "la misma persona" (mismo hash del día)
+      if (state.tables.profile_reports.some(r => r.profile_id === p.id && r.reporter_hash === 'mock-visitor')) return 'duplicate'
+      state.tables.profile_reports.push({
+        id: `rep-${Math.random().toString(36).slice(2, 8)}`, profile_id: p.id, content_object_id: null,
+        reason: args.p_reason, details: args.p_details ?? null, reporter_hash: 'mock-visitor', status: 'open',
+        resolution_note: null, resolved_at: null, created_at: new Date().toISOString(),
+      })
+      return 'ok'
+    }
+    case 'admin_list_reports': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const open = args.p_status !== 'resolved'
+      return state.tables.profile_reports.filter(r => (r.status === 'open') === open).map(r => {
+        const p = state.tables.profiles.find(x => x.id === r.profile_id)!
+        return {
+          ...r, project: null,
+          profile: {
+            id: p.id, username: p.username, display_name: p.display_name, status: p.status,
+            suspended_at: p.suspended_at, suspension_reason: p.suspension_reason,
+            open_reports: state.tables.profile_reports.filter(x => x.profile_id === p.id && x.status === 'open').length,
+          },
+        }
+      })
+    }
+    case 'admin_list_suspended': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      return state.tables.profiles.filter(p => p.suspended_at)
+        .map(p => ({ id: p.id, username: p.username, display_name: p.display_name, suspended_at: p.suspended_at, suspension_reason: p.suspension_reason }))
+    }
+    case 'admin_set_suspension': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
+      if (!p) throw new Error('NOT_FOUND')
+      p.suspended_at = args.p_suspended ? (p.suspended_at ?? new Date().toISOString()) : null
+      p.suspension_reason = args.p_suspended ? (args.p_reason ?? null) : null
+      return null
+    }
+    case 'admin_resolve_report': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const r = state.tables.profile_reports.find(x => x.id === args.p_report_id)
+      if (!r) throw new Error('NOT_FOUND')
+      const now = new Date().toISOString()
+      if (args.p_action === 'dismiss') Object.assign(r, { status: 'dismissed', resolution_note: args.p_note ?? null, resolved_at: now })
+      else {
+        const p = state.tables.profiles.find(x => x.id === r.profile_id)!
+        p.suspended_at = p.suspended_at ?? now
+        p.suspension_reason = args.p_note ?? r.reason
+        state.tables.profile_reports.filter(x => x.profile_id === r.profile_id && x.status === 'open')
+          .forEach(x => Object.assign(x, { status: 'actioned', resolution_note: args.p_note ?? null, resolved_at: now }))
+      }
+      return null
     }
     case 'check_username': {
       const u = String(args.p_username ?? '')

@@ -12,6 +12,7 @@ import type { ProfileLang, ProfileModule, PublicProfile, WeekSchedule } from '..
 import { publicModuleDef, type GroupProps } from './moduleRegistry'
 import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
+import { ReportButton } from './ReportDialog'
 import '../profile.css'
 
 /** Bloques a dibujar: los tipos con `Group` (ej.: redes) se juntan si son consecutivos. */
@@ -167,6 +168,9 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
 
         <footer className="mp-footer">
           {t.footer} · <Link to="/register">{t.createYours}</Link>
+          {!preview && !profile.is_owner && profile.status === 'published' && (
+            <div><ReportButton username={profile.username} lang={lang} /></div>
+          )}
         </footer>
       </div>
 

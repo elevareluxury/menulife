@@ -390,5 +390,11 @@ const de: StudioDict = {
     down: 'Nach unten',
     duplicate: 'Duplizieren',
   },
+  moderation: {
+    suspendedTitle: 'Dein Profil ist gesperrt',
+    suspendedText: 'Das Mycen-Team hat es gesperrt, weil es gegen die Inhaltsregeln verstößt. Bis dahin kann es niemand sehen: weder die Seite noch deine Projekte oder deine Kontaktkarte. Du kannst weiter bearbeiten.',
+    suspendedReason: r => `Grund: ${r}`,
+    rules: 'Inhaltsregeln ansehen',
+  },
 }
 export default de

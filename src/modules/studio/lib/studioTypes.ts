@@ -35,6 +35,9 @@ export interface StudioProfile {
   onboarding_step: number
   published_at: string | null
   updated_at: string
+  /** Moderación (Fase 8): sólo lo cambia un administrador */
+  suspended_at?: string | null
+  suspension_reason?: string | null
 }
 
 export interface ContactCardSettings {

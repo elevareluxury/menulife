@@ -24,3 +24,7 @@ create table public.life_goals (id uuid primary key default gen_random_uuid(), u
 grant usage on schema public to anon, authenticated;
 alter default privileges in schema public grant all on tables to anon, authenticated;
 grant all on all tables in schema public to anon, authenticated;
+-- Panel super-admin (existe en producción)
+create table public.super_admins (
+  id uuid primary key default gen_random_uuid(), user_id uuid not null unique references auth.users(id) on delete cascade,
+  email text, created_at timestamptz default now(), updated_at timestamptz default now());

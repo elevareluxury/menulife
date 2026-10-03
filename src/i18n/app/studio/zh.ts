@@ -390,5 +390,11 @@ const zh: StudioDict = {
     down: '下移',
     duplicate: '复制',
   },
+  moderation: {
+    suspendedTitle: '你的主页已被暂停',
+    suspendedText: 'Mycen 团队因其不符合内容规则而将其暂停。在此期间，任何人都无法查看你的页面、项目或联系人卡片。你仍可继续编辑。',
+    suspendedReason: r => `原因：${r}`,
+    rules: '查看内容规则',
+  },
 }
 export default zh

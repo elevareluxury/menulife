@@ -390,5 +390,11 @@ const ar: StudioDict = {
     down: 'لأسفل',
     duplicate: 'تكرار',
   },
+  moderation: {
+    suspendedTitle: 'تم تعليق ملفك',
+    suspendedText: 'علّقه فريق Mycen لأنه لا يلتزم بقواعد المحتوى. خلال ذلك لا يمكن لأحد رؤية صفحتك أو مشاريعك أو بطاقة الاتصال. يمكنك متابعة التعديل.',
+    suspendedReason: r => `السبب: ${r}`,
+    rules: 'عرض قواعد المحتوى',
+  },
 }
 export default ar

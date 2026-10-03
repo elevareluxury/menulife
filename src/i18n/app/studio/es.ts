@@ -664,6 +664,12 @@ const es = {
     down: 'Bajar',
     duplicate: 'Duplicar',
   },
+  moderation: {
+    suspendedTitle: 'Tu perfil está suspendido',
+    suspendedText: 'El equipo de Mycen lo suspendió porque no cumple las reglas de contenido. Mientras tanto nadie puede verlo: ni la página, ni tus proyectos, ni tu tarjeta de contacto. Podés seguir editando.',
+    suspendedReason: (r: string) => `Motivo: ${r}`,
+    rules: 'Ver las reglas de contenido',
+  },
 }
 
 export type StudioDict = typeof es
