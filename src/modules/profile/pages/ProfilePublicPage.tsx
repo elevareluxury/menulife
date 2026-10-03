@@ -5,7 +5,9 @@ import { fetchPublicProfile, trackProfileEvent } from '../lib/profileApi'
 import { tr, ui } from '../lib/profileI18n'
 import { useAppLang } from '@/i18n/app/store'
 import { setLocalLanguage } from '@/lib/prefs'
-import { QUIET, themeVars } from '../lib/profileTheme'
+import { themeVars } from '../lib/profileTheme'
+import { usePrefersLight } from '../lib/usePrefersLight'
+import { useAllowZoom } from '../lib/useAllowZoom'
 import type { ProfileLang, ProfileLookup } from '../lib/profileTypes'
 import { ProfileView } from '../components/ProfileView'
 import '../profile.css'
@@ -75,12 +77,18 @@ export function ProfilePublicPage() {
     return () => { document.querySelector('meta[name="robots"]')?.remove() }
   }, [profile?.visibility])
 
+  // Tema: "automático" sigue al dispositivo del visitante (Fase 9)
+  useAllowZoom()
+  const prefersLight = usePrefersLight()
+  const vars = themeVars(profile?.theme, prefersLight)
+  const pageBg = String((vars as Record<string, string>)['--p-bg'])
+
   // Fondo del body acorde al tema (evita bordes blancos al hacer scroll)
   useEffect(() => {
     const prev = document.body.style.background
-    document.body.style.background = profile?.theme.mode === 'light' ? QUIET.ivory : QUIET.obsidian
+    document.body.style.background = pageBg
     return () => { document.body.style.background = prev }
-  }, [profile?.theme.mode])
+  }, [pageBg])
 
   const showToast = useCallback((msg: string) => {
     setToast(msg)
@@ -89,7 +97,6 @@ export function ProfilePublicPage() {
 
   const changeLang = (next: ProfileLang) => setLocalLanguage(next)
 
-  const vars = themeVars(profile?.theme)
   const t = ui(lang)
 
   if (state.kind === 'loading') return <ProfileSkeleton style={vars} />
