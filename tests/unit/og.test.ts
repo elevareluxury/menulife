@@ -42,4 +42,30 @@ describe('api/og', () => {
     expect(await (await handler(req('studio'))).text()).toContain('<title>Mycen</title>')
     expect(fetchMock).not.toHaveBeenCalled()
   })
+
+  it('sirve a los buscadores el contenido publicado, sin links peligrosos', async () => {
+    mockRpc({
+      username: 'ana', display_name: 'Ana', descriptor: 'Diseño', bio: 'Hago marcas', avatar_url: null, cover_url: null,
+      purpose: 'professional', status: 'published', visibility: 'public',
+      modules: [
+        { type: 'link', title: 'Portfolio', content: { url: 'https://ana.design' } },
+        { type: 'link', title: 'Malo', content: { url: 'javascript:alert(1)' } },
+        { type: 'social', title: null, content: { url: 'https://instagram.com/ana', network: 'instagram' } },
+        { type: 'text', title: 'Sobre mí', content: { body: '</script><b>hola</b>' } },
+      ],
+    })
+    const html = await (await handler(req('ana'))).text()
+    expect(html).toContain('<h1>Ana</h1>')
+    expect(html).toContain('<a href="https://ana.design" rel="me noopener">Portfolio</a>')
+    expect(html).not.toContain('javascript:')
+    expect(html).toContain('&lt;/script&gt;&lt;b&gt;hola&lt;/b&gt;')
+    const ld = /<script type="application\/ld\+json">(.*?)<\/script>/.exec(html)?.[1] ?? ''
+    expect(JSON.parse(ld)).toMatchObject({ '@type': 'Person', name: 'Ana', sameAs: ['https://instagram.com/ana'] })
+    expect(html).not.toContain('noindex')
+  })
+
+  it('marca noindex un Space no listado', async () => {
+    mockRpc({ username: 'ana', display_name: 'Ana', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published', visibility: 'unlisted', modules: [] })
+    expect(await (await handler(req('ana'))).text()).toContain('<meta name="robots" content="noindex">')
+  })
 })

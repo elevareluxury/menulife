@@ -1,19 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Download, Trash2 } from 'lucide-react'
+import { Download, History, Trash2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
-import { deleteMyAccount, exportMyData, friendlyError, updateProfile } from '../lib/studioApi'
+import { deleteMyAccount, exportMyData, friendlyError, loadVersions, updateProfile } from '../lib/studioApi'
+import type { SpaceVersion } from '../lib/studioTypes'
 import { publicBaseUrl } from '../lib/preview'
 import { normalizeUsername, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
 import { Button, ConfirmDialog, PageHeader, SelectField, TextField } from '../components/ui'
 import { ProfileSaveIndicator, StatusPill } from '../components/shared'
 import { useStudioT } from '@/i18n/app/studio'
-import { APP_LANGS, LANG_INFO, isAppLang, type AppLang } from '@/i18n/app/languages'
+import { APP_LANGS, LANG_INFO, isAppLang, langLocale, type AppLang } from '@/i18n/app/languages'
+import { useAppLang } from '@/i18n/app/store'
 import { savePrefs, usePrefs } from '@/lib/prefs'
 
 export function SettingsPage() {
-  const { profile, patchProfile, replaceProfile, userId, business } = useStudio()
+  const { profile, patchProfile, replaceProfile, userId, business, publish, publishing } = useStudio()
   const [username, setUsername] = useState(profile.username)
   const [confirm, setConfirm] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -53,7 +55,7 @@ export function SettingsPage() {
           <StatusPill status={profile.status} />
           {isPublished
             ? <Button onClick={() => setConfirmPause(true)}>{st.pause}</Button>
-            : <Button variant="primary" onClick={() => patchProfile({ status: 'published' })}>{st.publish}</Button>}
+            : <Button variant="primary" loading={publishing} onClick={() => { void publish() }}>{st.publish}</Button>}
         </div>
         <p className="st-help" style={{ margin: 0 }}>
           {isPublished
@@ -61,6 +63,8 @@ export function SettingsPage() {
             : st.draftHelp}
         </p>
       </section>
+
+      <VersionsSection />
 
       <section className="st-card st-stack">
         <h2 className="st-card-title" style={{ margin: 0 }}>{st.username}</h2>
@@ -108,6 +112,86 @@ export function SettingsPage() {
           onCancel={() => setConfirmPause(false)} />
       )}
     </>
+  )
+}
+
+// ── Versiones publicadas (Fase 3) ─────────────────────────────────────────
+
+function VersionsSection() {
+  const { profile, publishState, restoreVersion } = useStudio()
+  const t = useStudioT()
+  const p = t.publishing
+  const [versions, setVersions] = useState<SpaceVersion[] | null | 'error'>(null)
+  const [confirm, setConfirm] = useState<SpaceVersion | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const currentId = publishState?.version_id ?? profile.published_version_id
+
+  useEffect(() => {
+    let cancelled = false
+    loadVersions(profile.id)
+      .then(v => { if (!cancelled) setVersions(v) })
+      .catch(() => { if (!cancelled) setVersions('error') })
+    return () => { cancelled = true }
+  }, [profile.id, currentId])
+
+  const numberOf = (id: string | null) => (Array.isArray(versions) ? versions.find(v => v.id === id)?.version_number : undefined)
+  const locale = langLocale(useAppLang(s => s.lang))
+
+  async function restore(v: SpaceVersion) {
+    setBusy(true); setError(null); setMessage(null)
+    try {
+      const n = await restoreVersion(v.id)
+      setMessage(p.restored(n))
+      setConfirm(null)
+    } catch (e) {
+      setError(friendlyError(e))
+      setConfirm(null)
+    } finally { setBusy(false) }
+  }
+
+  return (
+    <section className="st-card st-stack" aria-labelledby="st-versions-title">
+      <h2 id="st-versions-title" className="st-card-title" style={{ margin: 0 }}>{p.versionsTitle}</h2>
+      <p className="st-help" style={{ margin: 0 }}>{p.versionsHelp}</p>
+      {versions === null && <p className="st-help">{t.common.loading}</p>}
+      {versions === 'error' && <p className="st-error">{p.loadError}</p>}
+      {Array.isArray(versions) && versions.length === 0 && <p className="st-help" style={{ margin: 0 }}>{p.versionsEmpty}</p>}
+      {Array.isArray(versions) && versions.length > 0 && (
+        <ul className="st-version-list">
+          {versions.map(v => {
+            const restoredFrom = numberOf(v.restored_from)
+            const isCurrent = v.id === currentId
+            return (
+              <li key={v.id}>
+                <span>
+                  <strong>{p.version(v.version_number)}</strong>
+                  {isCurrent && <span className="st-status-pill is-published" style={{ marginInlineStart: 8 }}><i aria-hidden="true" /> {p.current}</span>}
+                  <span className="st-help" style={{ display: 'block' }}>
+                    {new Date(v.created_at).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })}
+                    {restoredFrom ? ` · ${p.restoredFrom(restoredFrom)}` : v.note && !v.restored_from ? ` · ${v.note}` : ''}
+                  </span>
+                </span>
+                {!isCurrent && (
+                  <Button size="sm" onClick={() => setConfirm(v)}><History size={14} aria-hidden="true" /> {p.restore}</Button>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      {message && <p className="st-help" role="status" style={{ margin: 0 }}>{message}</p>}
+      {error && <p className="st-error" role="alert" style={{ margin: 0 }}>{error}</p>}
+      {confirm && (
+        <ConfirmDialog
+          title={p.restoreTitle(confirm.version_number)}
+          message={p.restoreText}
+          confirmLabel={p.restore} loading={busy}
+          onConfirm={() => { void restore(confirm) }}
+          onCancel={() => setConfirm(null)} />
+      )}
+    </section>
   )
 }
 

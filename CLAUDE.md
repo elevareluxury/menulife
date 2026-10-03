@@ -12,6 +12,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - No usar "Hub" para nada nuevo: hay un solo sistema de identidad.
 
 ## Modelo de datos
+- Identity (Fase 1–2): `identities` (1 por cuenta) → `profiles` (= Space; `identity_id`, `visibility`, `archived`)
+  → `profile_versions` (snapshots inmutables) · `content_objects`/`content_blocks` (proyectos, Fase 5). Ver `docs/identity/05`.
 - La identidad vive en `profiles` + `profile_modules`, **no** en `restaurants`.
   Un negocio *tiene* un perfil (`profiles.restaurant_id`, opcional).
 - Username = slug histórico del negocio (las URLs y QRs impresos no cambian).
@@ -28,6 +30,10 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Vista previa al compartir: `api/og.ts` (Vercel Edge) + regla en `vercel.json` sólo para previsualizadores (WhatsApp, Facebook, X…).
 - Studio: `src/modules/studio/` en `/studio/*` (Inicio, Mi identidad, Módulos, Apariencia, Compartir, Analítica, Ajustes).
   El perfil se guarda solo (autosave con estados Guardando/Guardado/Error); los módulos se guardan al confirmar el panel.
+  **Guardar ≠ publicar** (Identity Fase 3): Studio edita la versión de trabajo; `publish_space` congela una versión en
+  `profile_versions` y la página pública (`get_public_profile`) lee esa versión. Barra `PublishBar` (estado, "Publicar
+  cambios", deshacer/rehacer de la sesión), versiones y "Restaurar" en Ajustes. `profiles.revision` = control de
+  concurrencia (el autosave manda la revisión que conoce; si otra pestaña guardó antes, se rechaza).
 - Corte hecho: `/dashboard/hub` y `/life/hub` redirigen a `/studio`. Usuarios sin perfil ven el onboarding de 5 pasos (`OnboardingWizard`).
 - Tareas: viven en Brain (`life_brain_items` con `type='task'`: fecha, hora, recordatorio, meta, "foco de hoy").
   Brain tiene 3 vistas: Capturas (ideas y notas), Tareas (lista por vencimiento o calendario; `?vista=tareas`) y Archivo.
@@ -63,7 +69,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 ## Tests
 - `npm test`: tipos de los tests + unitarios (Vitest, `tests/unit/`). `npm run test:e2e`: Playwright (`tests/e2e/`) contra la app
   con Supabase simulado (`tests/e2e/support/mockSupabase.ts`, replica las RPC públicas: si cambia una RPC, actualizar el mock).
-- CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build y E2E en cada PR.
+- `npm run test:db`: migraciones de Identity + `tests/db/*.test.sql` en un Postgres real (necesita PGHOST/PGUSER).
+- CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build, E2E y base de datos en cada PR.
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
   no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`.
 

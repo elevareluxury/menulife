@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import type {
-  DailyStat, ProfilePatch, StudioBusiness, StudioModule, StudioProfile,
+  DailyStat, ProfilePatch, PublishState, SpaceVersion, StudioBusiness, StudioModule, StudioProfile,
 } from './studioTypes'
 import { studioT } from '@/i18n/app/studio'
 
@@ -19,6 +19,8 @@ export function friendlyError(err: unknown): string {
   if (msg.includes('USERNAME_TAKEN') || msg.includes('profiles_username_key')) return e.usernameTaken
   if (msg.includes('USERNAME_RESERVED')) return e.usernameReserved
   if (msg.includes('USERNAME_INVALID') || msg.includes('profiles_username_format')) return e.usernameInvalid
+  if (msg.includes('REVISION_CONFLICT')) return e.conflict
+  if (msg.includes('NAME_REQUIRED')) return e.nameRequired
   if (msg.includes('MODULE_LIMIT_REACHED')) return e.moduleLimit
   if (msg.includes('profiles_text_lengths') || msg.includes('profile_modules_sizes')) return e.tooLong
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) return e.offline
@@ -70,10 +72,56 @@ export async function createProfile(userId: string, username: string, displayNam
   return data as StudioProfile
 }
 
-export async function updateProfile(id: string, patch: ProfilePatch | { username: string }): Promise<StudioProfile> {
-  const { data, error } = await db.from('profiles').update(patch).eq('id', id).select('*').single()
+/**
+ * Guarda cambios en la versión de trabajo. Con `expectedRevision`, sólo guarda si nadie más guardó
+ * antes (otra pestaña o dispositivo): si la revisión cambió, falla con REVISION_CONFLICT.
+ */
+export async function updateProfile(id: string, patch: ProfilePatch | { username: string }, expectedRevision?: number): Promise<StudioProfile> {
+  let req = db.from('profiles').update(patch).eq('id', id)
+  if (expectedRevision !== undefined) req = req.eq('revision', expectedRevision)
+  const { data, error } = await req.select('*')
+  if (error) throw error
+  const row = (data as StudioProfile[] | null)?.[0]
+  if (!row) throw new Error('REVISION_CONFLICT')
+  return row
+}
+
+export async function loadProfile(id: string): Promise<StudioProfile> {
+  const { data, error } = await db.from('profiles').select('*').eq('id', id).single()
   if (error) throw error
   return data as StudioProfile
+}
+
+// ── Publicación con versiones (Fase 3) ──────────────────────────────────────
+
+/** Congela la versión de trabajo como nueva versión pública. */
+export async function publishSpace(profileId: string, note?: string): Promise<{ version_id: string; version_number: number }> {
+  const { data, error } = await db.rpc('publish_space', { p_profile_id: profileId, p_note: note ?? null })
+  if (error) throw error
+  return data as { version_id: string; version_number: number }
+}
+
+/** Publica una versión anterior como versión nueva y la trae a Studio. */
+export async function restoreSpaceVersion(versionId: string): Promise<{ version_id: string; version_number: number }> {
+  const { data, error } = await db.rpc('restore_space_version', { p_version_id: versionId })
+  if (error) throw error
+  return data as { version_id: string; version_number: number }
+}
+
+export async function loadPublishState(profileId: string): Promise<PublishState> {
+  const { data, error } = await db.rpc('space_publish_state', { p_profile_id: profileId })
+  if (error) throw error
+  return data as PublishState
+}
+
+export async function loadVersions(profileId: string, limit = 20): Promise<SpaceVersion[]> {
+  const { data, error } = await db.from('profile_versions')
+    .select('id, version_number, created_at, note, restored_from')
+    .eq('profile_id', profileId)
+    .order('version_number', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return (data ?? []) as SpaceVersion[]
 }
 
 export type UsernameCheck = 'available' | 'taken' | 'reserved' | 'invalid'
@@ -159,11 +207,30 @@ export async function exportMyData(userId: string, email: string | undefined): P
     const { data, error } = await db.from(table).select('*').eq('user_id', userId)
     if (!error) life[table] = data ?? []
   }
+  // Identity: raíz, versiones publicadas y contenido reutilizable
+  const identity: Record<string, unknown[]> = {}
+  const { data: identities } = await db.from('identities').select('*').eq('user_id', userId)
+  identity.identities = identities ?? []
+  const identityIds = (identities ?? []).map((i: { id: string }) => i.id)
+  if (profileIds.length) {
+    const { data } = await db.from('profile_versions').select('*').in('profile_id', profileIds)
+    identity.profile_versions = data ?? []
+  }
+  if (identityIds.length) {
+    const { data: objects } = await db.from('content_objects').select('*').in('identity_id', identityIds)
+    identity.content_objects = objects ?? []
+    const objectIds = (objects ?? []).map((o: { id: string }) => o.id)
+    if (objectIds.length) {
+      const { data } = await db.from('content_blocks').select('*').in('content_object_id', objectIds)
+      identity.content_blocks = data ?? []
+    }
+  }
   const payload = {
     exported_at: new Date().toISOString(),
     account: { id: userId, email },
     profiles: profiles ?? [],
     profile_modules: modules ?? [],
+    identity,
     life_os: life,
   }
   return new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })

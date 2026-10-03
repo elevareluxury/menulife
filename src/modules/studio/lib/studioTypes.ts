@@ -1,6 +1,7 @@
 import type { ModuleType, PrimaryAction, ProfileTheme, Translations } from '@/modules/profile/lib/profileTypes'
 
-export type ProfileStatus = 'draft' | 'published' | 'unpublished'
+export type ProfileStatus = 'draft' | 'published' | 'unpublished' | 'archived'
+export type SpaceVisibility = 'public' | 'unlisted' | 'private'
 
 /** Fila completa de `profiles` (sólo la ve su dueño). */
 export interface StudioProfile {
@@ -15,6 +16,11 @@ export interface StudioProfile {
   cover_url: string | null
   purpose: string | null
   status: ProfileStatus
+  visibility: SpaceVisibility
+  /** Sube con cada cambio de contenido: control de concurrencia (Fase 3) */
+  revision: number
+  /** Versión que ve el visitante */
+  published_version_id: string | null
   tags: string[]
   is_primary: boolean
   theme: ProfileTheme
@@ -63,9 +69,29 @@ export interface StudioBusiness {
 
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
+/** Qué está publicado y si la versión de trabajo tiene cambios sin publicar (RPC space_publish_state). */
+export interface PublishState {
+  status: ProfileStatus
+  visibility: SpaceVisibility
+  revision: number
+  version_id: string | null
+  version_number: number | null
+  published_at: string | null
+  dirty: boolean
+}
+
+/** Fila de `profile_versions` (sin el snapshot, que sólo hace falta para restaurar). */
+export interface SpaceVersion {
+  id: string
+  version_number: number
+  created_at: string
+  note: string | null
+  restored_from: string | null
+}
+
 export type ProfilePatch = Partial<Pick<StudioProfile,
   'display_name' | 'descriptor' | 'bio' | 'avatar_url' | 'cover_url' | 'purpose' | 'status' | 'tags' |
-  'theme' | 'primary_action' | 'contact_card' | 'default_locale' | 'translations' | 'onboarding_step'>>
+  'theme' | 'primary_action' | 'contact_card' | 'default_locale' | 'translations' | 'onboarding_step' | 'visibility'>>
 
 export interface DailyStat {
   day: string

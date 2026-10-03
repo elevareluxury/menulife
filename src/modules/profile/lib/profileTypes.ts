@@ -44,7 +44,9 @@ export interface PublicProfile {
   avatar_url: string | null
   cover_url: string | null
   purpose: string | null
-  status: 'draft' | 'published' | 'unpublished'
+  status: 'draft' | 'published' | 'unpublished' | 'archived'
+  /** unlisted: se ve con el link pero no se indexa (noindex) */
+  visibility?: 'public' | 'unlisted' | 'private'
   /** Etiquetas de categoría (ej. Pizza · Vinos) */
   tags?: string[]
   theme: ProfileTheme

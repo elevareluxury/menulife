@@ -68,6 +68,13 @@ export function ProfilePublicPage() {
     return () => { document.title = prevTitle }
   }, [profile, lang])
 
+  // Un Space "no listado" se ve con el link, pero los buscadores no lo indexan
+  useEffect(() => {
+    if (profile?.visibility !== 'unlisted') return
+    setMeta('robots', 'noindex')
+    return () => { document.querySelector('meta[name="robots"]')?.remove() }
+  }, [profile?.visibility])
+
   // Fondo del body acorde al tema (evita bordes blancos al hacer scroll)
   useEffect(() => {
     const prev = document.body.style.background
