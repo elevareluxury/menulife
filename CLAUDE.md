@@ -60,7 +60,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   la traducción automática con Claude está pendiente (Fase 7).
 - Interfaz en español (rioplatense) primero.
 
+## Tests
+- `npm test`: tipos de los tests + unitarios (Vitest, `tests/unit/`). `npm run test:e2e`: Playwright (`tests/e2e/`) contra la app
+  con Supabase simulado (`tests/e2e/support/mockSupabase.ts`, replica las RPC públicas: si cambia una RPC, actualizar el mock).
+- CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build y E2E en cada PR.
+- Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
+  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`.
+
 ## Reglas
 - No simular funcionalidades sin datos reales; no inventar métricas.
-- Validar con `npx tsc -b` y `npm run build` antes de commitear; no sumar errores de lint nuevos.
+- Validar con `npx tsc -b`, `npm test`, `npm run build` (y `npm run test:e2e` si se toca Identity/Studio) antes de commitear; no sumar errores de lint nuevos.
 - Sin `console.log` de debug en código público.

@@ -31,11 +31,11 @@ ajustado con 13 decisiones aprobadas el 3/10/2026. Donde este archivo y el docum
 | 12 | **Moderación desde el inicio.** "Denunciar perfil" público, tabla de denuncias, revisión en super-admin, baja/suspensión y reglas de contenido en los términos. | Se agrega como trabajo transversal antes de crecer. |
 | 13 | **Identity es la puerta de entrada; Life OS se descubre después.** La landing y el onboarding hablan de Identity; Life OS aparece como espacio personal dentro de la cuenta. | Afecta landing, onboarding y textos. |
 
-## Preguntas abiertas para confirmar (antes de la Fase 1)
+## Preguntas P1–P10 — aprobadas (3/10/2026)
 
-Cada una tiene una recomendación; si no hay objeción, se toma la recomendada.
+Se aprobaron todas con la recomendación de la tabla.
 
-| # | Pregunta | Recomendación |
+| # | Pregunta | Decisión |
 |---|---|---|
 | P1 | ¿Dónde vive el username? | En el **Space**. El Space principal conserva el username actual. Un Space de tipo marca/proyecto/evento puede reservar su **propio username raíz** (mismo espacio de nombres); los demás usan `/username/slug`. |
 | P2 | Proyecto compartido entre Spaces: ¿cuándo se actualiza? | Los proyectos tienen **su propio borrador/publicado**. La versión publicada de un Space guarda la composición y referencia la versión publicada de cada proyecto: publicar el proyecto lo actualiza en todos los Spaces. |
