@@ -461,3 +461,15 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 }
 .st-fullscreen-close:focus-visible { outline: 2px solid #F1F0E9; outline-offset: 2px; }
 .st-fullscreen .mp-topbar { padding-inline-end: 68px; }
+
+/* Tarjeta de identidad (Fase 7) */
+.st-card-preview {
+  width: min(100%, 320px); aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; align-self: center;
+  display: flex; align-items: center; justify-content: center; background: var(--st-bg); border: 1px solid var(--st-border);
+}
+.st-card-preview img { width: 100%; height: 100%; display: block; }
+
+/* Fuentes de tráfico (Fase 7) */
+.st-sources { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
+.st-source-bar { height: 6px; margin-top: 6px; border-radius: 999px; background: var(--st-surface-2); overflow: hidden; }
+.st-source-bar span { display: block; height: 100%; border-radius: inherit; background: var(--st-text); }

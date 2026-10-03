@@ -5,6 +5,7 @@ import type {
   DailyStat, ProfilePatch, PublishState, SpaceVersion, StudioBusiness, StudioModule, StudioProfile,
 } from './studioTypes'
 import { studioT } from '@/i18n/app/studio'
+import type { SourceRow } from './trafficSources'
 
 // profiles / profile_modules / profile_stats_daily todavía no están en database.types.ts
 const db = supabase as unknown as SupabaseClient
@@ -251,4 +252,11 @@ export async function deleteMyAccount(userId: string): Promise<DeleteResult> {
   const { error } = await db.rpc('delete_my_account')
   if (!error) return 'deleted'
   return (error.message ?? '').includes('HAS_BUSINESS') ? 'has_business' : 'error'
+}
+
+/** Visitas agrupadas por fuente y sitio de origen (Identity Fase 7). */
+export async function loadTrafficSources(profileId: string, days: number): Promise<SourceRow[]> {
+  const { data, error } = await db.rpc('profile_traffic_sources', { p_profile_id: profileId, p_days: days })
+  if (error) throw error
+  return ((data ?? []) as SourceRow[]).map(r => ({ ...r, visits: Number(r.visits), visitors: Number(r.visitors) }))
 }

@@ -69,6 +69,19 @@ describe('api/og', () => {
     expect(await (await handler(req('ana'))).text()).toContain('<meta name="robots" content="noindex">')
   })
 
+  it('incluye los links de un grupo de links', async () => {
+    mockRpc({
+      username: 'ana', display_name: 'Ana', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published',
+      modules: [{ type: 'link_group', title: 'Tiendas', content: { items: [
+        { title: 'Etsy', url: 'https://etsy.com/ana' }, { title: 'Malo', url: 'javascript:alert(1)' },
+      ] } }],
+    })
+    const html = await (await handler(req('ana'))).text()
+    expect(html).toContain('<h2>Tiendas</h2>')
+    expect(html).toContain('<a href="https://etsy.com/ana" rel="noopener">Etsy</a>')
+    expect(html).not.toContain('javascript:')
+  })
+
   it('lista los proyectos del portfolio con su URL (sólo rutas internas)', async () => {
     mockRpc({
       username: 'ana', display_name: 'Ana', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published',

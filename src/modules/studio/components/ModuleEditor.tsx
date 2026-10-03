@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CalendarClock } from 'lucide-react'
 import type { ModuleType, Translations } from '@/modules/profile/lib/profileTypes'
 import { useStudio } from '../StudioContext'
 import { createModule, friendlyError, updateModule, uploadMedia } from '../lib/studioApi'
@@ -8,6 +9,22 @@ import { Button, Drawer, ImageField, SelectField, TextField } from './ui'
 import { useStudioT, type StudioDict } from '@/i18n/app/studio'
 
 const str = (v: unknown) => (v == null ? '' : String(v))
+
+/** ISO → valor de <input type="datetime-local"> en la zona horaria del navegador */
+function toLocalInput(iso: unknown): string {
+  if (typeof iso !== 'string' || !iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+/** datetime-local (hora local) → ISO con zona; vacío → null */
+function fromLocalInput(v: string): string | null {
+  if (!v) return null
+  const d = new Date(v)
+  return Number.isNaN(d.getTime()) ? null : d.toISOString()
+}
 
 function initialValues(type: ModuleType, module: StudioModule | null, t: StudioDict): Record<string, string> {
   const def = moduleDef(type, t)
@@ -34,6 +51,10 @@ export function ModuleEditor({ type, module, onClose }: { type: ModuleType; modu
   const [en, setEn] = useState(() => initialEn(module))
   const [showEn, setShowEn] = useState(() => Object.keys(initialEn(module)).length > 0)
   const [extra, setExtra] = useState<unknown>(() => def.extra?.init(module))
+  // Programación (Fase 7): se guarda en config.show_from / show_until
+  const [showFrom, setShowFrom] = useState(() => toLocalInput(module?.config?.show_from))
+  const [showUntil, setShowUntil] = useState(() => toLocalInput(module?.config?.show_until))
+  const [showSchedule, setShowSchedule] = useState(() => !!(module?.config?.show_from || module?.config?.show_until))
   const [submitted, setSubmitted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,10 +75,13 @@ export function ModuleEditor({ type, module, onClose }: { type: ModuleType; modu
     }
     const extraProblem = def.extra?.validate(extra)
     if (extraProblem) return extraProblem
+    const from = fromLocalInput(showFrom)
+    const until = fromLocalInput(showUntil)
+    if (from && until && until <= from) return e.scheduleOrder
     return def.validate?.(values) ?? null
   }
 
-  function buildPayload(): { title: string | null; content: Record<string, unknown>; translations: Translations } {
+  function buildPayload(): { title: string | null; content: Record<string, unknown>; translations: Translations; config: Record<string, unknown> } {
     let title: string | null = module?.title ?? null
     const content: Record<string, unknown> = { ...(module?.content ?? {}) }
     for (const f of def.fields) {
@@ -78,7 +102,12 @@ export function ModuleEditor({ type, module, onClose }: { type: ModuleType; modu
     const translations: Translations = { ...(module?.translations ?? {}) }
     if (Object.keys(enClean).length) translations.en = { ...enClean, _source: 'manual' }
     else delete translations.en
-    return { title, content, translations }
+    const config: Record<string, unknown> = { ...(module?.config ?? {}) }
+    const from = fromLocalInput(showFrom)
+    const until = fromLocalInput(showUntil)
+    if (from) config.show_from = from; else delete config.show_from
+    if (until) config.show_until = until; else delete config.show_until
+    return { title, content, translations, config }
   }
 
   async function save() {
@@ -158,6 +187,24 @@ export function ModuleEditor({ type, module, onClose }: { type: ModuleType; modu
             )}
           </div>
         )}
+
+        <div className="st-card" style={{ background: 'var(--st-bg)' }}>
+          <div className="st-row" style={{ justifyContent: 'space-between' }}>
+            <span className="st-label"><CalendarClock size={15} aria-hidden="true" style={{ marginInlineEnd: 6, verticalAlign: '-2px' }} />{e.schedule}</span>
+            <Button size="sm" variant="ghost" onClick={() => setShowSchedule(v => !v)} aria-expanded={showSchedule}>
+              {showSchedule ? t.common.hide : t.common.add}
+            </Button>
+          </div>
+          {showSchedule && (
+            <div className="st-stack" style={{ marginTop: 12 }}>
+              <p className="st-help" style={{ margin: 0 }}>{e.scheduleHelp}</p>
+              <div className="st-grid-2">
+                <TextField label={e.showFrom} type="datetime-local" value={showFrom} onChange={v => { setShowFrom(v); setError(null) }} />
+                <TextField label={e.showUntil} type="datetime-local" value={showUntil} onChange={v => { setShowUntil(v); setError(null) }} />
+              </div>
+            </div>
+          )}
+        </div>
 
         {error && <p className="st-error" role="alert">{error}</p>}
       </div>

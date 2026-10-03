@@ -88,6 +88,12 @@ function profileBody(p: PublicProfile, url: string): { html: string; jsonLd: str
       const name = str(c.name) || title
       if (name) parts.push(`<h2>${esc(name)}</h2>`)
       if (str(c.description)) parts.push(`<p>${esc(str(c.description))}</p>`)
+    } else if (m.type === 'link_group' && Array.isArray(c.items)) {
+      if (title) parts.push(`<h2>${esc(title)}</h2>`)
+      for (const item of c.items as Record<string, unknown>[]) {
+        const href = safeLink(item?.url)
+        if (href && str(item.title)) links.push(`<li><a href="${esc(href)}" rel="noopener">${esc(str(item.title))}</a></li>`)
+      }
     } else if (m.type === 'project' || m.type === 'portfolio') {
       for (const card of m.projects ?? []) {
         if (!card.path || !PROJECT_PATH.test(card.path)) continue

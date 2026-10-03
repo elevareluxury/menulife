@@ -5,6 +5,7 @@ import { loadStats } from '../lib/studioApi'
 import { moduleDisplayTitle } from '../lib/moduleCatalog'
 import type { DailyStat } from '../lib/studioTypes'
 import { Button, PageHeader } from '../components/ui'
+import { TrafficSources } from '../components/TrafficSources'
 import { useStudioT } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
@@ -117,6 +118,8 @@ export function AnalyticsPage() {
               </ResponsiveContainer>
             </div>
           </section>
+
+          <TrafficSources profileId={profile.id} days={days} />
 
           <section className="st-card">
             <h2 className="st-card-title">{an.topModules}</h2>

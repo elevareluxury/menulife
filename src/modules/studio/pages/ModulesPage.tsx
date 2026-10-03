@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import {
-  AlignLeft, ArrowDown, FolderOpen, LayoutGrid, GalleryHorizontal, ArrowUp, Clock, Copy, Eye, EyeOff, Image, Images, Link2, MapPin,
+  AlignLeft, ArrowDown, List, FolderOpen, LayoutGrid, GalleryHorizontal, ArrowUp, Clock, Copy, Eye, EyeOff, Image, Images, Link2, MapPin,
   MessageSquareQuote, Pencil, Phone, Plus, ShoppingBag, Sparkles, Trash2, UserPlus, Users,
 } from 'lucide-react'
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
+import { moduleSchedule, scheduleState } from '@/modules/profile/lib/moduleSchedule'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
 import { useStudio } from '../StudioContext'
 import { createModule, deleteModule, friendlyError, saveOrder, updateModule } from '../lib/studioApi'
 import { buildCatalog, moduleDef, moduleDisplayTitle, moduleSummary } from '../lib/moduleCatalog'
@@ -17,10 +20,10 @@ import { ModuleEditor } from '../components/ModuleEditor'
 const ICONS: Record<ModuleType, typeof Link2> = {
   link: Link2, social: Users, contact: Phone, location: MapPin, image: Image, text: AlignLeft,
   featured_action: Sparkles, contact_card: UserPlus, gallery: Images, product: ShoppingBag,
-  testimonials: MessageSquareQuote, hours: Clock, cards: GalleryHorizontal, project: FolderOpen, portfolio: LayoutGrid,
+  testimonials: MessageSquareQuote, hours: Clock, cards: GalleryHorizontal, project: FolderOpen, portfolio: LayoutGrid, link_group: List,
 }
 
-const EDITABLE: ModuleType[] = ['link', 'social', 'contact', 'location', 'image', 'text', 'featured_action', 'product', 'hours', 'gallery', 'cards', 'testimonials', 'project', 'portfolio']
+const EDITABLE: ModuleType[] = ['link', 'social', 'contact', 'location', 'image', 'text', 'featured_action', 'product', 'hours', 'gallery', 'cards', 'testimonials', 'project', 'portfolio', 'link_group']
 
 export function ModulesPage() {
   const { profile, modules, setModules } = useStudio()
@@ -34,6 +37,17 @@ export function ModulesPage() {
   const t = useStudioT()
   const mt = t.modules
   const title = (m: StudioModule) => moduleDisplayTitle(m, t)
+  const locale = langLocale(useAppLang(st => st.lang))
+  const fmt = (d: Date) => d.toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  /** "Desde 12 oct 18:00" · "Hasta 20 oct 10:00" · "Terminó" — o nada si no está programado */
+  const scheduleBadge = (m: StudioModule): string | null => {
+    const state = scheduleState(m.config)
+    const { from, until } = moduleSchedule(m.config)
+    if (state === 'upcoming' && from) return mt.scheduledFrom(fmt(from))
+    if (state === 'ended') return mt.scheduleEnded
+    if (state === 'live' && until) return mt.scheduledUntil(fmt(until))
+    return null
+  }
 
   async function toggleVisibility(m: StudioModule) {
     const visibility = m.visibility === 'active' ? 'hidden' : 'active'
@@ -131,6 +145,7 @@ export function ModulesPage() {
                   <div className="st-module-title">{label}</div>
                   <div className="st-module-sub">
                     {m.visibility === 'hidden' && <span className="st-badge" style={{ marginInlineEnd: 6 }}>{mt.hidden}</span>}
+                    {scheduleBadge(m) && <span className="st-badge" style={{ marginInlineEnd: 6 }}>{scheduleBadge(m)}</span>}
                     {moduleSummary(m, t) || moduleDef(m.type, t).label}
                   </div>
                 </button>

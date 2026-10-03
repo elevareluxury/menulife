@@ -33,6 +33,9 @@ export const MODULE_FIXTURES = [
     content: { project_id: 'pr-luna' } }) },
   { label: 'Trabajos', row: moduleRow({ id: 'm-portfolio', type: 'portfolio', title: 'Trabajos', position: 140,
     content: {} }) },
+  // Fase 7
+  { label: 'Tiendas', row: moduleRow({ id: 'm-link-group', type: 'link_group', title: 'Tiendas', position: 150,
+    content: { items: [{ title: 'Etsy', url: 'https://etsy.com/ana' }, { title: 'Behance', url: 'https://behance.net/ana', subtitle: 'Portfolio' }] } }) },
 ]
 
 /** Proyecto que muestran los módulos project/portfolio de arriba (hay que publicarlo con publishProjectRow) */

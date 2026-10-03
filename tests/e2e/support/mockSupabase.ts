@@ -1,4 +1,5 @@
 import type { BrowserContext, Route } from '@playwright/test'
+import { isModuleLive } from '../../../src/modules/profile/lib/moduleSchedule'
 
 // Supabase simulado para los E2E: PostgREST en memoria (filtros básicos) + las RPC públicas de
 // Identity con la misma lógica que la base (supabase/migrations/20261001000001… a 20261009000001…).
@@ -14,6 +15,8 @@ export interface MockState {
   usernameHistory: Record<string, string>
   /** Llamadas a RPC, en orden */
   rpcCalls: { fn: string; args: Row }[]
+  /** Respuesta de profile_traffic_sources (Fase 7) */
+  trafficSources?: { source: string | null; referrer_host: string | null; visits: number; visitors: number }[]
   /** Escrituras por PostgREST, en orden */
   writes: { method: 'POST' | 'PATCH' | 'DELETE'; table: string; body: unknown }[]
 }
@@ -139,9 +142,9 @@ function projectCards(state: MockState, identityId: unknown, username: string, i
   })
 }
 
-/** = mycen_resolve_modules */
+/** = mycen_resolve_modules (Fase 7: sin los módulos que no están en su horario) */
 function resolveModules(state: MockState, p: Row, modules: Row[]): Row[] {
-  return modules.map(m => {
+  return modules.filter(m => isModuleLive(m.config as Row)).map(m => {
     const c = (m.content ?? {}) as Row
     if (m.type === 'project') return { ...m, projects: projectCards(state, p.identity_id, String(p.username), [c.project_id]) }
     if (m.type === 'portfolio') {
@@ -312,6 +315,11 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       const o = state.tables.content_objects.find(x => x.id === args.p_id)
       if (!o || !isOwner) throw new Error('NOT_OWNER')
       return { status: o.status, published_at: o.published_at, dirty: !o.published_snapshot || !same(o.published_snapshot, projectSnapshot(state, o)) }
+    }
+    case 'profile_traffic_sources': {
+      const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
+      if (!p || !isOwner) throw new Error('NOT_OWNER')
+      return state.trafficSources ?? []
     }
     case 'check_username': {
       const u = String(args.p_username ?? '')

@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react'
 import type { ModuleType, ProfileLang, ProfileModule } from '../lib/profileTypes'
 import {
-  CardsModule, ContactModule, FeaturedActionModule, GalleryModule, HoursModule, ImageModule, LinkModule,
+  CardsModule, ContactModule, LinkGroupModule, FeaturedActionModule, GalleryModule, HoursModule, ImageModule, LinkModule,
   LocationModule, ProductModule, SocialRow, TestimonialsModule, TextModule, type ModuleProps,
 } from './ProfileModules'
 import { PortfolioModule, ProjectModule } from './ProjectModules'
@@ -40,6 +40,7 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   cards:           { View: CardsModule },
   project:         { View: ProjectModule },
   portfolio:       { View: PortfolioModule },
+  link_group:      { View: LinkGroupModule },
 }
 
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */

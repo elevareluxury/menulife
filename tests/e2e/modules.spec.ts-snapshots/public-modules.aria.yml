@@ -21,7 +21,7 @@
   - paragraph: Hago marcas.
   - text: Cerrado ahora
   - button "Guardar contacto"
-  - link /Mi portfolioTrabajos \d+/:
+  - link /Mi portfolio Trabajos \d+/:
     - /url: https://ana.design
   - navigation "Redes sociales":
     - link "Instagram":
@@ -90,6 +90,12 @@
     - heading "Trabajos" [level=2]
     - link /Marca Café Luna Identidad \d+/:
       - /url: /ana/projects/cafe-luna
+  - region "Tiendas":
+    - heading "Tiendas" [level=2]
+    - link "Etsy":
+      - /url: https://etsy.com/ana
+    - link "Behance Portfolio":
+      - /url: https://behance.net/ana
   - text: Una identidad Mycen ·
   - link "Creá tu Mycen":
     - /url: /register

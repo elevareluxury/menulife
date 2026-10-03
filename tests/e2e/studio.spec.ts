@@ -100,7 +100,7 @@ test('el QR apunta a la URL pública con ?src=qr y se descarga en PNG', async ({
 
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByRole('button', { name: 'PNG' }).click(),
+    page.getByRole('button', { name: 'PNG', exact: true }).click(),
   ])
   expect(download.suggestedFilename()).toBe('mycen-ana-qr.png')
 })

@@ -25,7 +25,10 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   (`publish_project` → `published_snapshot`; Studio no puede escribir el snapshot ni pasar a "publicado" directo).
   Los módulos `project`/`portfolio` guardan sólo ids en `content`; `get_public_profile` les agrega `projects` (tarjetas de lo
   publicado) al responder, así que publicar un proyecto actualiza el portfolio sin volver a publicar el Space.
-- Analítica: `profile_events` con hash diario anónimo; no guardar IP ni user-agent.
+- Analítica: `profile_events` con hash diario anónimo; no guardar IP ni user-agent. Fuentes de tráfico (Fase 7):
+  `profile_traffic_sources` (sólo el dueño) agrupa visitas por `?src=` y sitio de origen; Studio las nombra en `lib/trafficSources.ts`.
+- Módulos programados (Fase 7): `config.show_from` / `config.show_until` (ISO). La RPC pública los filtra al responder
+  (`mycen_module_live`), sin volver a publicar; la misma regla en el cliente está en `profile/lib/moduleSchedule.ts`.
 - Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()` y se retiran cuando Studio reemplace al editor viejo.
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
@@ -35,6 +38,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   dos registros `Record<ModuleType, …>`: el público (`profile/components/moduleRegistry.ts`, cómo se dibuja; lo usan la página y la
   vista previa) y el de Studio (`studio/lib/moduleCatalog.ts`: campos, validación, valores iniciales, qué se guarda, resumen y editor
   propio en `moduleExtraEditors.tsx`). Nada de `if (type === …)` sueltos: un tipo nuevo se agrega en esos dos lugares.
+- Links (Fase 7): estilo "Destacado" (`content.style = 'highlight'`) y módulo `link_group` (varios links bajo un título).
+- Connect (decisión 1, sin CRM): Studio → Compartir tiene URL, QR (`?src=qr`), vCard, tarjeta de identidad PNG clara/oscura
+  (`lib/identityCard.ts`, canvas en el navegador, QR con `?src=card`) y presentación corta para copiar o mandar por WhatsApp.
 - Página de proyecto: `/{username}/projects/{slug}` (`ProjectPublicPage` → `ProjectView`). Bloques: registro `Record<BlockType, …>`
   público en `profile/components/ProjectBlocks.tsx` y de Studio en `studio/lib/blockCatalog.ts`. Video sólo YouTube/Vimeo
   (`profile/lib/video.ts`: el iframe se arma con el id validado, YouTube sin cookies).
@@ -89,7 +95,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - `npm run test:db`: migraciones de Identity + `tests/db/*.test.sql` en un Postgres real (necesita PGHOST/PGUSER).
 - CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build, E2E y base de datos en cada PR.
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
-  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
+  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
   (`modules.spec.ts`: si un cambio de módulo es deliberado, regenerar con `--update-snapshots` y revisar el diff).
 
 ## Reglas
