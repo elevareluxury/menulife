@@ -1,6 +1,8 @@
 # Mycen — guía para Claude Code
 
 Referencia de producto: "MYCEN — Etapa 2" (UX/UI, arquitectura y criterios de aceptación).
+Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas y plan por fases). Ante dudas, manda
+`docs/identity/00-decisiones.md`; no implementar una fase sin aprobar la anterior.
 
 ## Nombres (decididos)
 - **Mycen Profile** — identidad pública en `/{username}`. Es lo que antes se llamaba "Hub digital".
