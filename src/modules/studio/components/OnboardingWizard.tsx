@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, Briefcase, CalendarHeart, Check, Sparkles, Store, UserRound } from 'lucide-react'
 import { ProfileView } from '@/modules/profile/components/ProfileView'
 import { QUIET, themeVars } from '@/modules/profile/lib/profileTheme'
-import { createModule, createProfile, friendlyError, updateProfile, uploadMedia } from '../lib/studioApi'
+import { createModule, createProfile, friendlyError, loadProfile, publishSpace, updateProfile, uploadMedia } from '../lib/studioApi'
 import { socialUrl } from '../lib/moduleCatalog'
 import { toPublicProfile, publicBaseUrl } from '../lib/preview'
 import { normalizeUsername, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
@@ -156,10 +156,14 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
     if (!profile) return
     setBusy(true); setError(null)
     try {
-      const saved = await updateProfile(profile.id, {
-        theme: profile.theme, avatar_url: profile.avatar_url,
-        status: publish ? 'published' : 'draft', onboarding_step: TOTAL,
+      let saved = await updateProfile(profile.id, {
+        theme: profile.theme, avatar_url: profile.avatar_url, onboarding_step: TOTAL,
       })
+      // Publicar = crear la primera versión pública (Fase 3)
+      if (publish) {
+        await publishSpace(profile.id)
+        saved = await loadProfile(profile.id)
+      }
       onDone(saved, modules)
     } catch (e) { setError(friendlyError(e)); setBusy(false) }
   }

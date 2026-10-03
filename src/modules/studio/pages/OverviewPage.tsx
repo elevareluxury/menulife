@@ -10,7 +10,7 @@ import { useCopy } from '../lib/useCopy'
 import { useStudioT } from '@/i18n/app/studio'
 
 export function OverviewPage() {
-  const { profile, modules, publicUrl, patchProfile } = useStudio()
+  const { profile, modules, publicUrl, publish, publishing } = useStudio()
   const [stats, setStats] = useState<DailyStat[] | null | 'error'>(null)
   const { copied, copy } = useCopy()
   const t = useStudioT()
@@ -47,7 +47,7 @@ export function OverviewPage() {
         <div className="st-row" style={{ justifyContent: 'space-between', marginBottom: 14 }}>
           <StatusPill status={profile.status} />
           {!isPublished && (
-            <Button size="sm" variant="primary" onClick={() => patchProfile({ status: 'published' })}>{o.publish}</Button>
+            <Button size="sm" variant="primary" loading={publishing} onClick={() => { void publish() }}>{o.publish}</Button>
           )}
         </div>
         {!isPublished && (

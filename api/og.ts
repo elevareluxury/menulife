@@ -5,6 +5,12 @@
 
 export const config = { runtime: 'edge' }
 
+interface PublicModule {
+  type: string
+  title: string | null
+  content: Record<string, unknown> | null
+}
+
 interface PublicProfile {
   username: string
   display_name: string
@@ -12,8 +18,13 @@ interface PublicProfile {
   bio: string | null
   avatar_url: string | null
   cover_url: string | null
+  purpose?: string | null
   status?: string
+  visibility?: string
+  modules?: PublicModule[]
 }
+
+const PERSON_PURPOSES = new Set(['personal', 'professional', 'creator', 'artist'])
 
 const RESERVED = new Set([
   'dashboard', 'login', 'logout', 'register', 'signup', 'auth', 'forgot-password', 'reset-password',
@@ -26,7 +37,62 @@ function esc(v: string): string {
   return v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-function page(origin: string, path: string, title: string, description: string, image: string | null): Response {
+const str = (v: unknown): string => (typeof v === 'string' ? v.trim() : '')
+
+/** Sólo links http(s), mailto y tel (nunca javascript: ni data:). */
+function safeLink(v: unknown): string | null {
+  const s = str(v)
+  return /^(https?:\/\/|mailto:|tel:)/i.test(s) ? s : null
+}
+
+/**
+ * Contenido real de la versión publicada para buscadores (Fase 3, P9): nombre, descripción, links,
+ * textos y productos/servicios. Los previsualizadores (WhatsApp, Facebook…) sólo leen las metas.
+ */
+function profileBody(p: PublicProfile, url: string): { html: string; jsonLd: string } {
+  const parts: string[] = [`<h1>${esc(p.display_name)}</h1>`]
+  if (p.descriptor) parts.push(`<p>${esc(p.descriptor)}</p>`)
+  if (p.bio) parts.push(`<p>${esc(p.bio)}</p>`)
+  const links: string[] = []
+  const sameAs: string[] = []
+  for (const m of p.modules ?? []) {
+    const c = m.content ?? {}
+    const title = str(m.title)
+    if (m.type === 'link' || m.type === 'featured_action' || m.type === 'social') {
+      const href = safeLink(c.url)
+      if (!href) continue
+      links.push(`<li><a href="${esc(href)}" rel="me noopener">${esc(title || str(c.label) || str(c.network) || href)}</a></li>`)
+      if (m.type === 'social' && /^https?:/i.test(href)) sameAs.push(href)
+    } else if (m.type === 'text') {
+      const body = str(c.body)
+      if (title) parts.push(`<h2>${esc(title)}</h2>`)
+      if (body) parts.push(`<p>${esc(body)}</p>`)
+    } else if (m.type === 'product') {
+      const name = str(c.name) || title
+      if (name) parts.push(`<h2>${esc(name)}</h2>`)
+      if (str(c.description)) parts.push(`<p>${esc(str(c.description))}</p>`)
+    } else if (m.type === 'location') {
+      const address = [str(c.address), str(c.city)].filter(Boolean).join(', ')
+      if (address) parts.push(`<address>${esc(address)}</address>`)
+    }
+  }
+  if (links.length) parts.push(`<ul>${links.join('')}</ul>`)
+  parts.push(`<p><a href="${esc(url)}">${esc(url)}</a></p>`)
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': PERSON_PURPOSES.has(p.purpose ?? '') ? 'Person' : 'Organization',
+    name: p.display_name,
+    description: p.descriptor ?? p.bio ?? undefined,
+    url,
+    image: p.avatar_url ?? p.cover_url ?? undefined,
+    sameAs: sameAs.length ? sameAs : undefined,
+  }
+  // JSON dentro de <script>: escapar "<" evita cerrar la etiqueta desde el contenido
+  return { html: parts.join('\n'), jsonLd: JSON.stringify(ld).replace(/</g, '\\u003c') }
+}
+
+function page(origin: string, path: string, title: string, description: string, image: string | null,
+  extra: { body?: string; jsonLd?: string; noindex?: boolean } = {}): Response {
   const url = `${origin}${path}`
   const img = image ?? `${origin}/web-app-manifest-512x512.png`
   const html = `<!doctype html>
@@ -44,8 +110,8 @@ function page(origin: string, path: string, title: string, description: string, 
 <meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
-<meta name="twitter:image" content="${esc(img)}">
-</head><body><a href="${esc(url)}">${esc(title)}</a></body></html>`
+<meta name="twitter:image" content="${esc(img)}">${extra.noindex ? '\n<meta name="robots" content="noindex">' : ''}${extra.jsonLd ? `\n<script type="application/ld+json">${extra.jsonLd}</script>` : ''}
+</head><body>${extra.body ?? `<a href="${esc(url)}">${esc(title)}</a>`}</body></html>`
   return new Response(html, {
     status: 200,
     headers: {
@@ -78,11 +144,14 @@ export default async function handler(req: Request): Promise<Response> {
     const data = (await res.json()) as (PublicProfile & { redirect?: string }) | null
     if (!data) return generic()
     if (data.redirect) return Response.redirect(`${origin}/${data.redirect}`, 301)
-    if (!data.display_name || data.status === 'unavailable') return generic()
+    if (!data.display_name || data.status === 'unavailable' || data.status !== 'published') return generic()
 
     const title = data.descriptor ? `${data.display_name} · ${data.descriptor}` : data.display_name
     const description = (data.bio ?? data.descriptor ?? 'Mi identidad en Mycen.').slice(0, 200)
-    return page(origin, `/${data.username}`, title, description, data.cover_url ?? data.avatar_url)
+    const path = `/${data.username}`
+    const { html, jsonLd } = profileBody(data, `${origin}${path}`)
+    return page(origin, path, title, description, data.cover_url ?? data.avatar_url,
+      { body: html, jsonLd, noindex: data.visibility === 'unlisted' })
   } catch {
     return generic()
   }

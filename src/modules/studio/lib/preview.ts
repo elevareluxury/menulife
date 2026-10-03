@@ -22,6 +22,7 @@ export function toPublicProfile(p: StudioProfile, modules: StudioModule[], busin
     cover_url: p.cover_url,
     purpose: p.purpose,
     status: p.status,
+    visibility: p.visibility,
     tags: p.tags ?? [],
     theme: p.theme ?? {},
     primary_action: p.primary_action,
