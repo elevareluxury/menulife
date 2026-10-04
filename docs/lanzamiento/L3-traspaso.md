@@ -14,11 +14,10 @@ muestra una identidad de ejemplo. E2E en `tests/e2e/landing.spec.ts` (inglés, �
 Pendiente del dueño: mail de contacto (el viejo `contacto@menulife.digital` se sacó del pie) y moneda de los precios
 ("$70 / $150").
 
-## L3b — registro, login y contraseñas
+## L3b — registro, login y contraseñas ✅
 
-`src/app/routes/{login,register}.tsx`, `src/modules/auth/components/{LoginForm,RegisterForm}.tsx`,
-`src/pages/{ForgotPassword,ResetPassword,AuthCallback}.tsx` tienen el español escrito en el código. Crear namespace
-`src/i18n/app/auth/` (12 idiomas) y guardar el idioma en `options.data.locale` al registrarse (lo usan los mails).
+Namespace `src/i18n/app/auth/` (12 idiomas), selector de idioma y RTL en login, registro y recuperar contraseña; errores de
+Supabase traducidos; `user_metadata.locale` al registrarse y al cambiar el idioma en Ajustes. E2E en `tests/e2e/auth.spec.ts`.
 
 ## L3c — mails con Resend
 

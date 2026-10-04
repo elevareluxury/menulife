@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuthT } from '@/i18n/app/auth'
+import { authErrorMessage } from '@/lib/authErrors'
+import { useLangDir } from '@/i18n/app/useLangDir'
 
 const S = {
   page: {
@@ -111,6 +114,9 @@ const S = {
 }
 
 export function ResetPassword() {
+  const t = useAuthT()
+  const r = t.reset
+  useLangDir()
   const navigate = useNavigate()
 
   const [password, setPassword]       = useState('')
@@ -156,8 +162,8 @@ export function ResetPassword() {
   }, [navigate])
 
   const validate = (): string => {
-    if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres.'
-    if (password !== confirm)  return 'Las contraseñas no coinciden.'
+    if (password.length < 8) return r.tooShort
+    if (password !== confirm)  return r.mismatch
     return ''
   }
 
@@ -170,12 +176,12 @@ export function ResetPassword() {
     try {
       const { error: authError } = await supabase.auth.updateUser({ password })
       if (authError) throw authError
-      toast.success('Contraseña actualizada')
+      toast.success(r.saved)
       // Sign out then redirect — avoids session-state race when landing on dashboard
       await supabase.auth.signOut()
-      navigate('/login?message=Contraseña+actualizada+correctamente', { replace: true })
+      navigate('/login?message=password_updated', { replace: true })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar. Intentá de nuevo.')
+      setError(authErrorMessage(err, t.errors, r.failed))
       setLoading(false)
     }
   }
@@ -183,7 +189,7 @@ export function ResetPassword() {
   if (checking) {
     return (
       <div style={{ ...S.page }}>
-        <p style={{ color: '#98A2B3' }}>Verificando acceso...</p>
+        <p role="status" style={{ color: '#98A2B3' }}>{t.common.checking}</p>
       </div>
     )
   }
@@ -194,23 +200,23 @@ export function ResetPassword() {
     <div style={S.page}>
       <div style={S.card}>
         <div style={S.logo}>
-          <span style={S.logoText}>menulife</span>
+          <img src="/logo.png" alt="Mycen" style={{ height: '32px', width: 'auto' }} />
         </div>
 
-        <h2 style={S.title}>Nueva contraseña</h2>
+        <h1 style={S.title}>{r.title}</h1>
 
         <form onSubmit={handleSubmit} noValidate>
           {/* Nueva contraseña */}
           <div style={S.fieldWrap}>
             <label style={S.label} htmlFor="rp-password">
-              Nueva contraseña
+              {r.password}
             </label>
             <div style={S.inputWrap}>
               <input
                 id="rp-password"
                 type={showPwd ? 'text' : 'password'}
                 autoComplete="new-password"
-                placeholder="Mínimo 8 caracteres"
+                placeholder={r.passwordPlaceholder}
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError('') }}
                 style={{
@@ -228,25 +234,25 @@ export function ResetPassword() {
                 style={S.eyeBtn}
                 onClick={() => setShowPwd(v => !v)}
                 tabIndex={-1}
-                aria-label={showPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showPwd ? t.common.hide : t.common.show}
               >
                 {showPwd ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
-            <p style={S.hint}>Mínimo 8 caracteres</p>
+            <p style={S.hint}>{r.hint}</p>
           </div>
 
           {/* Confirmar contraseña */}
           <div style={S.fieldWrap}>
             <label style={S.label} htmlFor="rp-confirm">
-              Confirmar contraseña
+              {r.confirm}
             </label>
             <div style={S.inputWrap}>
               <input
                 id="rp-confirm"
                 type={showConf ? 'text' : 'password'}
                 autoComplete="new-password"
-                placeholder="Repetí la contraseña"
+                placeholder={r.confirmPlaceholder}
                 value={confirm}
                 onChange={(e) => { setConfirm(e.target.value); setError('') }}
                 style={{
@@ -264,14 +270,14 @@ export function ResetPassword() {
                 style={S.eyeBtn}
                 onClick={() => setShowConf(v => !v)}
                 tabIndex={-1}
-                aria-label={showConf ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showConf ? t.common.hide : t.common.show}
               >
                 {showConf ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
           </div>
 
-          {error && <p style={{ ...S.errorMsg, marginBottom: '0.75rem' }}>{error}</p>}
+          {error && <p role="alert" style={{ ...S.errorMsg, marginBottom: '0.75rem' }}>{error}</p>}
 
           <button
             type="submit"
@@ -282,7 +288,7 @@ export function ResetPassword() {
             }}
           >
             {loading && <Spinner />}
-            Guardar nueva contraseña
+            {r.submit}
           </button>
         </form>
       </div>
