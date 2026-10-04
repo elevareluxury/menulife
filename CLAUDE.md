@@ -5,8 +5,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 `docs/identity/00-decisiones.md`; no implementar una fase sin aprobar la anterior.
 
 ## Nombres (decididos)
-- **Mycen Profile** — identidad pública en `/{username}`. Es lo que antes se llamaba "Hub digital".
-- **Mycen Studio** — panel privado donde el dueño edita, personaliza, comparte y mide su Profile.
+- **Mycen Identity** — identidad pública en `/{username}` (decisión P4; antes "Mycen Profile" y, antes, "Hub digital").
+  Para la persona es "tu Mycen" / "tu identidad". En el código sigue el módulo `src/modules/profile/`.
+- **Mycen Studio** — panel privado donde el dueño edita, personaliza, comparte y mide su identidad (Mycen Identity).
 - **Mycen Business** — el sistema de negocios existente (menú, pedidos, POS, inventario, servicios). Queda tal cual.
 - **Life OS** — espacio personal (`/life`). No es parte del MVP de Profile.
 - No usar "Hub" para nada nuevo: hay un solo sistema de identidad.
@@ -42,7 +43,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
 ## Código
-- Profile público: `src/modules/profile/` en `/:slug` (el Hub viejo queda con `?v=1` como respaldo temporal). `ProfileView` se reutiliza en la vista previa de Studio y en el onboarding.
+- Página pública (Identity): `src/modules/profile/` en `/:slug` (el Hub viejo queda con `?v=1` como respaldo temporal). `ProfileView` se reutiliza en la vista previa de Studio y en el onboarding.
 - Módulos: la lista de tipos es `MODULE_TYPES` (`profileTypes.ts`, igual al check `profile_modules_type_check`). Cada tipo se define en
   dos registros `Record<ModuleType, …>`: el público (`profile/components/moduleRegistry.ts`, cómo se dibuja; lo usan la página y la
   vista previa) y el de Studio (`studio/lib/moduleCatalog.ts`: campos, validación, valores iniciales, qué se guarda, resumen y editor
@@ -103,7 +104,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   (sincronizada con los checks de `user_settings.language` y `profiles.default_locale`).
 - Life OS, Studio y Profile usan diccionarios tipados por módulo en `src/i18n/app/{life,studio}/<idioma>.ts`
   (el español es la fuente; `tsc` obliga a que cada idioma tenga todas las claves). Mycen Business sigue con i18next (`src/i18n/*.ts`).
-- Textos del Profile público (botones del sistema) en `src/modules/profile/lib/profileI18n.ts`.
+- Textos de la página pública (botones del sistema) en `src/modules/profile/lib/profileI18n.ts`.
 - Preferencias de la cuenta en `user_settings` (idioma, moneda principal, monedas extra, zona horaria, inicio de semana):
   `src/lib/prefs.ts` (`usePrefs`, `savePrefs`), se cargan en `PrefsInit`. Ajustes en `/life/settings` y Studio → Ajustes.
 - Dinero: nunca sumar monedas distintas; cada movimiento guarda su `currency`.

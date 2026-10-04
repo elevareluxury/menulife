@@ -98,7 +98,7 @@ function WaiterLegacyRedirect() {
   return <Navigate to={`/mozo/${slug ?? ''}`} replace />
 }
 
-// Mycen Profile es la página pública. El Hub viejo queda accesible con ?v=1
+// Mycen Identity: la página pública. El Hub viejo queda accesible con ?v=1
 // como respaldo temporal durante la transición.
 function PublicSlugRoute() {
   const [params] = useSearchParams()

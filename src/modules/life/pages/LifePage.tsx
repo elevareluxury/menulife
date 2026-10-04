@@ -215,7 +215,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
           fontFamily: font, fontSize: '12px', color: colors.text.tertiary,
           margin: '0 0 13px', lineHeight: 1.4,
         }}>
-          {hasRestaurant && restaurantSlug ? `Mycen Profile · @${restaurantSlug}` : t.home.identitySubtitle}
+          {hasRestaurant && restaurantSlug ? `Mycen Identity · @${restaurantSlug}` : t.home.identitySubtitle}
         </p>
 
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -593,7 +593,7 @@ export function LifePage() {
           <motion.div variants={fadeInUp}><MoneyCard /></motion.div>
           <InsightTeaser />
 
-          {/* ── Mi identidad (Mycen Profile → Studio) ──────────────────────── */}
+          {/* ── Mi identidad (Mycen Identity → Studio) ──────────────────────── */}
           <motion.div variants={fadeInUp}>
             <HubSection
               hasRestaurant={hasRestaurant}
