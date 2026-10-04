@@ -11,7 +11,9 @@ export interface StudioProfile {
   /** Identidad dueña (Fase 1): los proyectos son de la identidad, no del Space */
   identity_id: string | null
   restaurant_id: string | null
-  username: string
+  /** Username propio (Space raíz). null en un Space secundario, que vive en /{principal}/{space_slug} (Fase 10) */
+  username: string | null
+  space_slug: string | null
   display_name: string
   descriptor: string | null
   bio: string | null

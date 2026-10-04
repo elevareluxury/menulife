@@ -17,12 +17,13 @@ interface Report {
   resolved_at: string | null
   project: { slug: string; title: string } | null
   profile: {
-    id: string; username: string; display_name: string; status: string
+    /** handle: "ana" o "ana/estudio" (Space secundario) */
+    id: string; username: string; handle?: string; display_name: string; status: string
     suspended_at: string | null; suspension_reason: string | null; open_reports: number
   }
 }
 
-interface Suspended { id: string; username: string; display_name: string; suspended_at: string; suspension_reason: string | null }
+interface Suspended { id: string; username: string; handle?: string; display_name: string; suspended_at: string; suspension_reason: string | null }
 
 const REASONS: Record<string, string> = {
   spam: 'Spam o publicidad engañosa', scam: 'Estafa o fraude', impersonation: 'Suplantación de identidad',
@@ -109,7 +110,7 @@ export function ReportsTab() {
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
               <div>
                 <strong style={{ fontSize: 16 }}>{r.profile.display_name}</strong>{' '}
-                <a href={`/${r.profile.username}`} target="_blank" rel="noopener noreferrer" style={{ color: MUTED }}>@{r.profile.username}</a>
+                <a href={`/${r.profile.handle ?? r.profile.username}`} target="_blank" rel="noopener noreferrer" style={{ color: MUTED }}>@{r.profile.handle ?? r.profile.username}</a>
                 {r.project && (
                   <> · <a href={`/${r.profile.username}/projects/${r.project.slug}`} target="_blank" rel="noopener noreferrer" style={{ color: MUTED }}>
                     Proyecto: {r.project.title}</a></>
@@ -157,7 +158,7 @@ export function ReportsTab() {
             {suspended.map(p => (
               <li key={p.id} style={{ ...CARD, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <div>
-                  <strong>{p.display_name}</strong> <span style={{ color: MUTED }}>@{p.username}</span>
+                  <strong>{p.display_name}</strong> <span style={{ color: MUTED }}>@{p.handle ?? p.username}</span>
                   <p style={{ margin: '4px 0 0', color: MUTED, fontSize: 13 }}>
                     Desde {fmt(p.suspended_at)}{p.suspension_reason ? ` · ${p.suspension_reason}` : ''}
                   </p>

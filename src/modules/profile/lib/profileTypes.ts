@@ -54,7 +54,12 @@ export interface ProfileTheme {
 
 export interface PublicProfile {
   id: string
+  /** Username del Space raíz (en un Space secundario, el del principal) */
   username: string
+  /** Dirección del Space sin barra inicial: "ana" o "ana/estudio" (Fase 10) */
+  handle?: string
+  /** Slug del Space secundario dentro del principal (null en el principal) */
+  space_slug?: string | null
   display_name: string
   descriptor: string | null
   bio: string | null
@@ -81,6 +86,9 @@ export interface PublicProfile {
   } | null
   modules: ProfileModule[]
 }
+
+/** Dirección pública del Space ("ana" o "ana/estudio") */
+export const profileHandle = (p: Pick<PublicProfile, 'username' | 'handle'>): string => p.handle ?? p.username
 
 export type ProfileLookup =
   | { kind: 'found'; profile: PublicProfile }

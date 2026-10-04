@@ -26,7 +26,7 @@ export function downloadVCard(card: ContactCard, profileUrl: string) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${card.username}.vcf`
+  a.download = `${(card.handle ?? card.username).replace('/', '-')}.vcf`
   document.body.appendChild(a)
   a.click()
   a.remove()

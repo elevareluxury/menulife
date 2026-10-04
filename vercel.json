@@ -17,6 +17,17 @@
       "destination": "/api/og?slug=:slug&project=:project"
     },
     {
+      "source": "/:slug([a-zA-Z0-9][a-zA-Z0-9_-]*)/:space([a-zA-Z0-9][a-zA-Z0-9-]*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(WhatsApp|facebookexternalhit|Facebot|meta-externalagent|Twitterbot|TelegramBot|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|Googlebot|bingbot|Applebot|redditbot|Embedly|iframely|vkShare).*"
+        }
+      ],
+      "destination": "/api/og?slug=:slug&space=:space"
+    },
+    {
       "source": "/:slug([a-zA-Z0-9][a-zA-Z0-9_-]*)",
       "has": [
         {

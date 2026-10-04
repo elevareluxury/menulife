@@ -2,7 +2,7 @@ import type { BrowserContext, Route } from '@playwright/test'
 import { isModuleLive } from '../../../src/modules/profile/lib/moduleSchedule'
 
 // Supabase simulado para los E2E: PostgREST en memoria (filtros básicos) + las RPC públicas de
-// Identity con la misma lógica que la base (supabase/migrations/20261001000001… a 20261009000001…).
+// Identity con la misma lógica que la base (supabase/migrations/20261001000001… a 20261012000001…).
 // Si cambia una RPC en la base, este archivo tiene que acompañarla.
 
 type Row = Record<string, unknown>
@@ -24,7 +24,7 @@ export interface MockState {
 export function profileRow(overrides: Row = {}): Row {
   const now = new Date().toISOString()
   return {
-    id: 'p-ana', user_id: OWNER_ID, identity_id: 'id-ana', restaurant_id: null, username: 'ana',
+    id: 'p-ana', user_id: OWNER_ID, identity_id: 'id-ana', restaurant_id: null, username: 'ana', space_slug: null,
     display_name: 'Ana Pérez', descriptor: 'Diseñadora', bio: 'Hago marcas.',
     avatar_url: null, cover_url: null, purpose: 'professional', status: 'published', is_primary: true,
     theme: {}, primary_action: null, contact_card: { enabled: false }, default_locale: 'es', translations: {},
@@ -32,6 +32,11 @@ export function profileRow(overrides: Row = {}): Row {
     visibility: 'public', revision: 0, published_version_id: null, suspended_at: null, suspension_reason: null,
     ...overrides,
   }
+}
+
+/** Space secundario de Ana: /ana/{slug} (Fase 10) */
+export function spaceRow(slug: string, overrides: Row = {}): Row {
+  return profileRow({ id: `p-${slug}`, username: null, space_slug: slug, is_primary: false, display_name: `Ana ${slug}`, ...overrides })
 }
 
 export function moduleRow(overrides: Row = {}): Row {
@@ -204,6 +209,12 @@ function matches(row: Row, key: string, raw: string): boolean {
 
 /** Valores por defecto de las columnas (como en la base) al insertar */
 const DEFAULTS: Record<string, Row> = {
+  profiles: {
+    restaurant_id: null, username: null, space_slug: null, descriptor: null, bio: null, avatar_url: null, cover_url: null,
+    purpose: null, status: 'draft', is_primary: true, theme: {}, primary_action: null, contact_card: { enabled: false },
+    default_locale: 'es', translations: {}, tags: [], onboarding_step: 0, published_at: null, visibility: 'public',
+    revision: 0, published_version_id: null, suspended_at: null, suspension_reason: null,
+  },
   content_objects: { status: 'draft', visibility: 'public', summary: null, cover_url: null, data: {}, translations: {}, published_snapshot: null, published_at: null },
   content_blocks: { data: {}, translations: {}, position: 0 },
 }
@@ -234,23 +245,73 @@ function publishedSnapshot(state: MockState, p: Row): Row | null {
   return (state.tables.profile_versions.find(v => v.id === p.published_version_id)?.snapshot as Row) ?? null
 }
 
-function publicProfile(state: MockState, username: string, isOwner: boolean): unknown {
-  const u = username.trim().toLowerCase()
-  const p = state.tables.profiles.find(x => x.username === u)
-  if (!p) {
-    const id = state.usernameHistory[u]
-    const target = state.tables.profiles.find(x => x.id === id && x.status === 'published' && x.visibility !== 'private' && !x.suspended_at)
-    return target ? { redirect: target.username } : null
+// ── Spaces (misma lógica que supabase/migrations/20261012000001…) ───────────
+
+const primaryOf = (state: MockState, p: Row) => state.tables.profiles.find(x => x.identity_id === p.identity_id && x.is_primary && x.username)
+
+/** = mycen_space_handle: "ana" o "ana/estudio" */
+function handleOf(state: MockState, p: Row): string {
+  return p.username ? String(p.username) : `${primaryOf(state, p)?.username ?? ''}/${p.space_slug}`
+}
+
+/** = mycen_space_suspended: él o el principal que lo contiene */
+const spaceSuspended = (state: MockState, p: Row) => !!p.suspended_at || (!!p.space_slug && !!primaryOf(state, p)?.suspended_at)
+
+/** = mycen_find_space */
+function findSpace(state: MockState, raw: string): { p?: Row; redirect?: string } {
+  const handle = raw.trim().toLowerCase()
+  if (!/^[a-z0-9][a-z0-9_-]{0,62}(\/[a-z0-9][a-z0-9-]{0,39})?$/.test(handle)) return {}
+  const [user, slug] = handle.split('/')
+  const root = state.tables.profiles.find(x => x.username === user)
+  if (!root) {
+    const r = state.tables.profiles.find(x => x.id === state.usernameHistory[user])
+    if (!r || r.suspended_at) return {}
+    if (!slug) return r.status === 'published' && r.visibility !== 'private' ? { redirect: String(r.username) } : {}
+    const n = r.is_primary && state.tables.profiles.find(x => x.identity_id === r.identity_id && x.space_slug === slug
+      && x.status === 'published' && x.visibility !== 'private' && !x.suspended_at)
+    return n ? { redirect: `${r.username}/${slug}` } : {}
   }
-  // Fase 8: suspendido = no lo ve nadie
-  if (p.suspended_at) return { status: 'unavailable' }
+  if (!slug) return { p: root }
+  if (!root.is_primary) return {}
+  return { p: state.tables.profiles.find(x => x.identity_id === root.identity_id && x.space_slug === slug) }
+}
+
+/** = mycen_space_rules (al insertar o cambiar un Space por PostgREST). Devuelve el error, si hay. */
+function spaceRules(state: MockState, row: Row, old: Row | null): string | null {
+  if (old && (old.space_slug == null) !== (row.space_slug == null)) return 'SPACE_ADDRESS_LOCKED'
+  if (row.space_slug != null) {
+    row.space_slug = String(row.space_slug).trim().toLowerCase()
+    if (!old) row.is_primary = false
+    const slug = String(row.space_slug)
+    if (!/^[a-z0-9][a-z0-9-]{0,38}[a-z0-9]$/.test(slug) || slug.includes('--')) return 'SPACE_SLUG_INVALID'
+    if (['projects', 'project', 'proyectos', 'proyecto', 'spaces', 'space', 'edit', 'editar', 'settings', 'studio', 'admin',
+      'api', 'og', 'vcard', 'qr', 'p', 'about', 'contact', 'links'].includes(slug)) return 'SPACE_SLUG_RESERVED'
+    if (state.tables.profiles.some(x => x !== old && x.identity_id === row.identity_id && x.space_slug === slug)) return 'SPACE_SLUG_TAKEN'
+  }
+  if (row.status === 'archived' && row.is_primary) return 'PRIMARY_NOT_ARCHIVABLE'
+  if (!row.restaurant_id && row.status !== 'archived' && (!old || old.status === 'archived')
+    && state.tables.profiles.filter(x => x !== old && x.user_id === row.user_id && x.status !== 'archived').length >= 5) {
+    return 'SPACE_LIMIT_REACHED'
+  }
+  return null
+}
+
+function publicProfile(state: MockState, handle: string, isOwner: boolean): unknown {
+  const { p, redirect } = findSpace(state, handle)
+  if (redirect) return { redirect }
+  if (!p) return null
+  // Fase 8: suspendido (él o su principal) = no lo ve nadie
+  if (spaceSuspended(state, p)) return { status: 'unavailable' }
   if ((p.status !== 'published' || p.visibility === 'private') && !isOwner) return { status: 'unavailable' }
   // El visitante ve la versión publicada; el dueño, si no publicó, su borrador
   const base = { ...(publishedSnapshot(state, p) ?? snapshotOf(state, p)) }
   delete base.contact_card
+  const h = handleOf(state, p)
+  const username = h.split('/')[0]
   return {
-    ...base, id: p.id, username: p.username, status: p.status, visibility: p.visibility, is_owner: isOwner, business: null,
-    modules: resolveModules(state, p, base.modules as Row[]),
+    ...base, id: p.id, username, handle: h, space_slug: p.space_slug ?? null, status: p.status, visibility: p.visibility,
+    is_owner: isOwner, business: null,
+    modules: resolveModules(state, { ...p, username }, base.modules as Row[]),
   }
 }
 
@@ -260,13 +321,14 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
     case 'get_public_profile': return publicProfile(state, String(args.p_username ?? ''), isOwner)
     case 'get_profile_contact_card': {
       const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
-      if (!p || p.suspended_at) return null
+      if (!p || spaceSuspended(state, p)) return null
       const published = publishedSnapshot(state, p)
       const card = (isOwner && !published ? p.contact_card : published?.contact_card) as Row | undefined
       if (!card?.enabled) return null
       const rest = { ...card }
       delete rest.enabled
-      return { ...rest, username: p.username }
+      const h = handleOf(state, p)
+      return { ...rest, username: h.split('/')[0], handle: h }
     }
     case 'publish_space': {
       const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
@@ -329,8 +391,8 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
     case 'report_profile': {
       const reasons = ['spam', 'scam', 'impersonation', 'hate', 'violence', 'sexual', 'illegal', 'other']
       if (!reasons.includes(String(args.p_reason))) return 'invalid'
-      const p = state.tables.profiles.find(x => x.username === String(args.p_username ?? '').toLowerCase())
-      if (!p || p.status !== 'published' || p.visibility === 'private' || p.suspended_at) return 'not_found'
+      const { p } = findSpace(state, String(args.p_username ?? ''))
+      if (!p || p.status !== 'published' || p.visibility === 'private' || spaceSuspended(state, p)) return 'not_found'
       if (isOwner) return 'own_profile'
       // En el mock todos los visitantes son "la misma persona" (mismo hash del día)
       if (state.tables.profile_reports.some(r => r.profile_id === p.id && r.reporter_hash === 'mock-visitor')) return 'duplicate'
@@ -349,7 +411,7 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
         return {
           ...r, project: null,
           profile: {
-            id: p.id, username: p.username, display_name: p.display_name, status: p.status,
+            id: p.id, username: handleOf(state, p).split('/')[0], handle: handleOf(state, p), display_name: p.display_name, status: p.status,
             suspended_at: p.suspended_at, suspension_reason: p.suspension_reason,
             open_reports: state.tables.profile_reports.filter(x => x.profile_id === p.id && x.status === 'open').length,
           },
@@ -359,7 +421,7 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
     case 'admin_list_suspended': {
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
       return state.tables.profiles.filter(p => p.suspended_at)
-        .map(p => ({ id: p.id, username: p.username, display_name: p.display_name, suspended_at: p.suspended_at, suspension_reason: p.suspension_reason }))
+        .map(p => ({ id: p.id, username: handleOf(state, p).split('/')[0], handle: handleOf(state, p), display_name: p.display_name, suspended_at: p.suspended_at, suspension_reason: p.suspension_reason }))
     }
     case 'admin_set_suspension': {
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
@@ -383,6 +445,25 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
           .forEach(x => Object.assign(x, { status: 'actioned', resolution_note: args.p_note ?? null, resolved_at: now }))
       }
       return null
+    }
+    // ── Spaces (Fase 10) ──
+    case 'duplicate_space': {
+      const src = state.tables.profiles.find(x => x.id === args.p_profile_id)
+      if (!src || !isOwner) throw new Error('NOT_OWNER')
+      const now = new Date().toISOString()
+      const row: Row = {
+        ...JSON.parse(JSON.stringify(src)), id: `p-${Math.random().toString(36).slice(2, 8)}`, username: null,
+        space_slug: args.p_slug, is_primary: false, restaurant_id: null, status: 'draft', published_version_id: null,
+        published_at: null, revision: 0, onboarding_step: 5, suspended_at: null, suspension_reason: null,
+        display_name: String(args.p_display_name ?? '').trim() || src.display_name, created_at: now, updated_at: now,
+      }
+      const err = spaceRules(state, row, null)
+      if (err) throw new Error(err)
+      state.tables.profiles.push(row)
+      for (const m of state.tables.profile_modules.filter(x => x.profile_id === src.id && x.deleted_at == null)) {
+        state.tables.profile_modules.push({ ...JSON.parse(JSON.stringify(m)), id: `m-${Math.random().toString(36).slice(2, 8)}`, profile_id: row.id })
+      }
+      return row.id
     }
     case 'check_username': {
       const u = String(args.p_username ?? '')
@@ -455,10 +536,18 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
       const created = list.map(r => {
         const existing = merge && r.id != null ? rows.find(x => x.id === r.id) : undefined
         if (existing) return Object.assign(existing, r, { updated_at: now })
-        const row = { id: `${table}-${Math.random().toString(36).slice(2, 8)}`, created_at: now, updated_at: now, ...DEFAULTS[table], ...r }
+        const row: Row = { id: `${table}-${Math.random().toString(36).slice(2, 8)}`, created_at: now, updated_at: now, ...DEFAULTS[table], ...r }
+        if (table === 'profiles') {
+          // Como el trigger profiles_identity: la identidad de la cuenta
+          row.identity_id ??= rows.find(x => x.user_id === row.user_id)?.identity_id ?? `id-${row.user_id}`
+          const err = spaceRules(state, row, null)
+          if (err) return err
+        }
         rows.push(row)
         return row
       })
+      const failed = created.find((c): c is string => typeof c === 'string')
+      if (failed) return json({ code: '22023', message: failed }, 400)
       state.writes.push({ method: 'POST', table, body })
       return json(single ? created[0] : created, 201)
     }
@@ -468,6 +557,12 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
       const now = new Date().toISOString()
       // Como el trigger profiles_revision: sólo los cambios de contenido suben la revisión
       const bumps = table === 'profiles' && Object.keys(body).some(k => !['status', 'onboarding_step', 'published_version_id', 'published_at'].includes(k))
+      if (table === 'profiles') {
+        for (const r of hit) {
+          const err = spaceRules(state, { ...r, ...body }, r)
+          if (err) return json({ code: '22023', message: err }, 400)
+        }
+      }
       hit.forEach(r => Object.assign(r, body, { updated_at: now }, bumps ? { revision: Number(r.revision ?? 0) + 1 } : {}))
       state.writes.push({ method: 'PATCH', table, body })
       return json(single ? hit[0] ?? null : hit)

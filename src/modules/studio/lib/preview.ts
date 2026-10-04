@@ -45,10 +45,14 @@ function withProjects(m: ProfileModule, projects: StudioProject[], username: str
 
 /** El perfil tal como lo devolvería get_public_profile, armado con el estado local de Studio. */
 export function toPublicProfile(p: StudioProfile, modules: StudioModule[], business: StudioBusiness | null,
-  projects: StudioProject[] = []): PublicProfile {
+  projects: StudioProject[] = [], handle: string = p.username ?? ''): PublicProfile {
+  // Los proyectos viven en /{principal}/projects/… (en un Space secundario, el username del principal)
+  const username = handle.split('/')[0]
   return {
     id: p.id,
-    username: p.username,
+    username,
+    handle,
+    space_slug: p.space_slug ?? null,
     display_name: p.display_name,
     descriptor: p.descriptor,
     bio: p.bio,
@@ -68,6 +72,6 @@ export function toPublicProfile(p: StudioProfile, modules: StudioModule[], busin
     modules: modules
       // Igual que la página pública: sin los módulos que no están en su horario
       .filter(m => m.visibility === 'active' && !m.deleted_at && isModuleLive(m.config))
-      .map(m => withProjects({ id: m.id, type: m.type, title: m.title, content: m.content, config: m.config, translations: m.translations ?? {} }, projects, p.username)),
+      .map(m => withProjects({ id: m.id, type: m.type, title: m.title, content: m.content, config: m.config, translations: m.translations ?? {} }, projects, username)),
   }
 }

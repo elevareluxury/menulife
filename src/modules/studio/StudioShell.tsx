@@ -2,14 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  BarChart3, Eye, FolderOpen, Home, LayoutGrid, LogOut, MoreHorizontal, Palette, PenLine, Settings, Share2, UserRound,
+  BarChart3, Eye, FolderOpen, Home, Layers, LayoutGrid, LogOut, MoreHorizontal, Palette, PenLine, Settings, Share2, UserRound,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { StudioContext, type StudioContextValue } from './StudioContext'
 import {
-  friendlyError, loadBusiness, loadModules, loadMyProfile, loadProfile, loadPublishState, publishSpace,
+  friendlyError, loadBusiness, loadModules, loadMySpaces, loadProfile, loadPublishState, publishSpace,
   restoreSpaceVersion, updateProfile,
 } from './lib/studioApi'
+import { pickSpace, primarySpace, readActiveSpace, spaceHandle, writeActiveSpace, type SpaceSummary } from './lib/spaces'
+import { SpaceSwitcher } from './components/SpaceSwitcher'
 import { publicBaseUrl, toPublicProfile } from './lib/preview'
 import type { ProfilePatch, PublishState, SaveState, StudioBusiness, StudioModule, StudioProfile, StudioProject } from './lib/studioTypes'
 import { listProjects } from './lib/projectsApi'
@@ -38,6 +40,7 @@ const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
   { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
   { to: '/studio/analytics',  label: 'analytics',  icon: BarChart3 },
   { to: '/studio/settings',   label: 'settings',   icon: Settings },
+  { to: '/studio/spaces',     label: 'spaces',     icon: Layers },
 ]
 
 const MOBILE_NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
@@ -52,12 +55,14 @@ type Load =
   | { kind: 'loading' }
   | { kind: 'error'; message: string }
   | { kind: 'empty' }
-  | { kind: 'ready'; profile: StudioProfile; modules: StudioModule[]; business: StudioBusiness | null }
+  | { kind: 'ready'; profile: StudioProfile; modules: StudioModule[]; business: StudioBusiness | null; spaces: SpaceSummary[] }
 
 export function StudioShell() {
   const { user, initialized, loading } = useAuthStore()
   const [load, setLoad] = useState<Load>({ kind: 'loading' })
   const [attempt, setAttempt] = useState(0)
+  // Space elegido en esta sesión (Fase 10); si no, el recordado en este dispositivo o el principal
+  const [chosen, setChosen] = useState<string | null>(null)
   const userId = user?.id
   const t = useStudioT()
   const dir = langDir(useAppLang(s => s.lang))
@@ -67,17 +72,28 @@ export function StudioShell() {
     let cancelled = false
     ;(async () => {
       try {
-        const profile = await loadMyProfile(userId)
+        const spaces = await loadMySpaces(userId)
         if (cancelled) return
-        if (!profile) { setLoad({ kind: 'empty' }); return }
-        const [modules, business] = await Promise.all([loadModules(profile.id), loadBusiness(profile.restaurant_id)])
-        if (!cancelled) setLoad({ kind: 'ready', profile, modules, business })
+        const active = pickSpace(spaces, chosen ?? readActiveSpace(userId))
+        if (!active) { setLoad({ kind: 'empty' }); return }
+        const [profile, modules] = await Promise.all([loadProfile(active.id), loadModules(active.id)])
+        const business = await loadBusiness(profile.restaurant_id)
+        if (!cancelled) setLoad({ kind: 'ready', profile, modules, business, spaces })
       } catch (e) {
         if (!cancelled) setLoad({ kind: 'error', message: friendlyError(e) })
       }
     })()
     return () => { cancelled = true }
-  }, [userId, attempt])
+  }, [userId, attempt, chosen])
+
+  // Cambiar de Space: lo pendiente se guarda al desmontar el editor (StudioReady) y se abre el otro
+  const switchSpace = useCallback((id: string) => {
+    if (!userId) return
+    writeActiveSpace(userId, id)
+    setLoad({ kind: 'loading' })
+    setChosen(id)
+    setAttempt(a => a + 1)
+  }, [userId])
 
   // Fondo oscuro sin flashes
   useAppBackground('#0E100E')
@@ -110,13 +126,14 @@ export function StudioShell() {
           onDone={(profile, modules) => setLoad({
             kind: 'ready', profile, modules,
             business: load.kind === 'ready' ? load.business : null,
+            spaces: load.kind === 'ready' ? load.spaces.map(s => (s.id === profile.id ? profile : s)) : [profile],
           })}
         />
       </div>
     )
   }
 
-  return <StudioReady key={load.profile.id} userId={user.id} initial={load} />
+  return <StudioReady key={load.profile.id} userId={user.id} initial={load} switchSpace={switchSpace} />
 }
 
 function Centered({ children }: { children: React.ReactNode }) {
@@ -124,11 +141,13 @@ function Centered({ children }: { children: React.ReactNode }) {
   return <div className="st-root" data-scroll-root dir={dir}><div className="st-center">{children}</div></div>
 }
 
-function StudioReady({ userId, initial }: {
+function StudioReady({ userId, initial, switchSpace }: {
   userId: string
-  initial: { profile: StudioProfile; modules: StudioModule[]; business: StudioBusiness | null }
+  initial: { profile: StudioProfile; modules: StudioModule[]; business: StudioBusiness | null; spaces: SpaceSummary[] }
+  switchSpace: (id: string) => void
 }) {
   const [profile, setProfile] = useState(initial.profile)
+  const [spaceList, setSpaceList] = useState(initial.spaces)
   const [modules, setModulesState] = useState(initial.modules)
   const [projects, setProjectsState] = useState<StudioProject[]>([])
   const [saveState, setSaveState] = useState<SaveState>('idle')
@@ -303,6 +322,16 @@ function StudioReady({ userId, initial }: {
     return () => { cancelled = true }
   }, [initial.profile.identity_id])
 
+  // Mis Spaces (Fase 10): la lista refleja al instante lo que se edita del Space abierto
+  const spaces = useMemo(() => spaceList.map(s => (s.id === profile.id
+    ? { ...s, display_name: profile.display_name, avatar_url: profile.avatar_url, status: profile.status,
+        visibility: profile.visibility, username: profile.username, space_slug: profile.space_slug }
+    : s)), [spaceList, profile.id, profile.display_name, profile.avatar_url, profile.status, profile.visibility,
+    profile.username, profile.space_slug])
+  const primaryUsername = primarySpace(spaces)?.username ?? profile.username ?? ''
+  const handle = spaceHandle(profile, primaryUsername)
+  const reloadSpaces = useCallback(async () => { setSpaceList(await loadMySpaces(userId)) }, [userId])
+
   const value = useMemo<StudioContextValue>(() => ({
     userId,
     profile,
@@ -326,10 +355,16 @@ function StudioReady({ userId, initial }: {
     setModules,
     projects,
     setProjects,
-    publicUrl: `${publicBaseUrl()}/${profile.username}`,
-    previewProfile: toPublicProfile(profile, modules, initial.business, projects),
+    publicUrl: `${publicBaseUrl()}/${handle}`,
+    previewProfile: toPublicProfile(profile, modules, initial.business, projects, handle),
+    spaces,
+    handle,
+    primaryUsername,
+    switchSpace,
+    reloadSpaces,
   }), [userId, profile, modules, projects, setProjects, initial.business, saveState, saveError, patchProfile, flush, setModules,
-      conflict, publishState, publishing, publishError, publish, restoreVersion, undo, redo, historyCounts])
+      conflict, publishState, publishing, publishError, publish, restoreVersion, undo, redo, historyCounts,
+      spaces, handle, primaryUsername, switchSpace, reloadSpaces])
 
   const showPane = location.pathname !== '/studio/preview'
   // En el editor de un proyecto manda su propio estado de publicación (el del perfil confundiría)
@@ -368,6 +403,8 @@ function StudioReady({ userId, initial }: {
                   <a href="/terminos#reglas" target="_blank" rel="noopener noreferrer">{t.moderation.rules}</a>
                 </div>
               )}
+              {/* Los proyectos son de la identidad: en su editor no hay Space activo */}
+              {!inProjectEditor && <SpaceSwitcher />}
               {!inProjectEditor && <PublishBar />}
               <Outlet />
             </div>

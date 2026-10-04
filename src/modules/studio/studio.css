@@ -433,6 +433,7 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
   background: var(--st-panel); border: 1px solid var(--st-border); border-radius: 14px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
+.st-menu-list.is-up { top: auto; bottom: calc(100% + 6px); }
 .st-menu-list button {
   width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 10px; background: none;
   display: flex; align-items: center; gap: 10px; text-align: start; cursor: pointer;
@@ -484,3 +485,15 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 .st-contrast li { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 6px 0; border-top: 1px solid var(--st-border); }
 .st-contrast .is-ok { color: #6EE7A0; display: inline-flex; align-items: center; gap: 4px; }
 .st-contrast .is-bad { color: #F2867A; display: inline-flex; align-items: center; gap: 4px; }
+
+/* Mis Spaces (Fase 10): qué Space se está editando */
+.st-space-switcher { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.st-space-switcher label { font-size: 12.5px; color: var(--st-muted); }
+.st-space-switcher .st-select { flex: 1 1 220px; min-width: 0; max-width: 420px; }
+.st-space-item .st-module-body { cursor: default; }
+.st-space-item .st-module-title { white-space: normal; }
+@media (max-width: 599px) {
+  /* En el celular el nombre y la dirección van arriba, a todo el ancho; el estado y las acciones, debajo */
+  .st-space-item { flex-wrap: wrap; }
+  .st-space-item .st-module-body { flex: 1 1 100%; }
+}

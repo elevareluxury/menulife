@@ -38,7 +38,7 @@ function download(href: string, filename: string) {
 }
 
 export function ExchangePage() {
-  const { profile, publicUrl, patchProfile } = useStudio()
+  const { profile, publicUrl, patchProfile, handle } = useStudio()
   const qrRef = useRef<HTMLDivElement>(null)
   const { copied, copy } = useCopy()
   const x = useStudioT().exchange
@@ -58,7 +58,7 @@ export function ExchangePage() {
 
   async function downloadPng() {
     const svg = qrRef.current?.querySelector('svg')
-    if (svg) download(await svgToPng(svg, 1024), `mycen-${profile.username}-qr.png`)
+    if (svg) download(await svgToPng(svg, 1024), `mycen-${handle.replace('/', '-')}-qr.png`)
   }
 
   function downloadSvg() {
@@ -66,7 +66,7 @@ export function ExchangePage() {
     if (!svg) return
     const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(blob)
-    download(url, `mycen-${profile.username}-qr.svg`)
+    download(url, `mycen-${handle.replace('/', '-')}-qr.svg`)
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 

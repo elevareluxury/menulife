@@ -14,6 +14,11 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 ## Modelo de datos
 - Identity (Fase 1–2): `identities` (1 por cuenta) → `profiles` (= Space; `identity_id`, `visibility`, `archived`)
   → `profile_versions` (snapshots inmutables) · `content_objects`/`content_blocks` (proyectos, Fase 5). Ver `docs/identity/05`.
+- Mis Spaces (Fase 10): hasta 5 Spaces sin archivar por cuenta (trigger `mycen_space_rules`; el alta de negocios no se frena).
+  El principal (`is_primary`) tiene la URL raíz `/{username}`; los demás no tienen username y viven en `/{username}/{space_slug}`
+  (slugs reservados: `mycen_reserved_space_slug` = `RESERVED_SPACE_SLUGS` en `studio/lib/spaces.ts`). Las RPC públicas aceptan
+  "ana" o "ana/estudio" (`mycen_find_space`) y devuelven `handle`; un principal suspendido oculta sus Spaces. Archivar = `status
+  'archived'` (el principal no se archiva); `duplicate_space` copia un Space como borrador. Cada Space tiene su analítica.
 - La identidad vive en `profiles` + `profile_modules`, **no** en `restaurants`.
   Un negocio *tiene* un perfil (`profiles.restaurant_id`, opcional).
 - Username = slug histórico del negocio (las URLs y QRs impresos no cambian).
@@ -66,6 +71,10 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `profile_versions` y la página pública (`get_public_profile`) lee esa versión. Barra `PublishBar` (estado, "Publicar
   cambios", deshacer/rehacer de la sesión), versiones y "Restaurar" en Ajustes. `profiles.revision` = control de
   concurrencia (el autosave manda la revisión que conoce; si otra pestaña guardó antes, se rechaza).
+- Studio multi-Space (Fase 10): `StudioShell` carga todos los Spaces y abre el activo (recordado en el dispositivo, si no el
+  principal); `switchSpace` remonta el editor. Contexto: `spaces`, `handle`, `primaryUsername` (los proyectos son de la identidad
+  y viven en `/{primaryUsername}/projects/…`). Selector `SpaceSwitcher` arriba y pantalla `/studio/spaces` (crear, duplicar,
+  archivar, restaurar). En Ajustes, un Space secundario cambia su dirección (el link viejo deja de funcionar; no hay redirección).
 - Corte hecho: `/dashboard/hub` y `/life/hub` redirigen a `/studio`. Usuarios sin perfil ven el onboarding de 5 pasos (`OnboardingWizard`).
 - Tareas: viven en Brain (`life_brain_items` con `type='task'`: fecha, hora, recordatorio, meta, "foco de hoy").
   Brain tiene 3 vistas: Capturas (ideas y notas), Tareas (lista por vencimiento o calendario; `?vista=tareas`) y Archivo.
@@ -104,7 +113,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - `npm run test:db`: migraciones de Identity + `tests/db/*.test.sql` en un Postgres real (necesita PGHOST/PGUSER).
 - CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build, E2E y base de datos en cada PR.
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
-  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
+  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), Mis Spaces (`spaces.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
   (`modules.spec.ts`: si un cambio de módulo es deliberado, regenerar con `--update-snapshots` y revisar el diff).
 
 ## Reglas

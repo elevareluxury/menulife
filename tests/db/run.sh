@@ -18,7 +18,8 @@ for m in \
   20261008000001_identity_versioned_publishing \
   20261009000001_identity_projects \
   20261010000001_identity_links_connect \
-  20261011000001_identity_moderation; do
+  20261011000001_identity_moderation \
+  20261012000001_identity_spaces; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 
