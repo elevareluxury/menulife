@@ -75,7 +75,7 @@ const es = {
     offline: 'Sin conexión. Revisá internet e intentá de nuevo.',
     generic: 'No pudimos guardar. Intentá de nuevo.',
     notImage: 'Elegí una imagen (JPG, PNG o WebP).',
-    tooBig: 'La imagen supera los 5 MB.',
+    tooBig: 'La imagen es demasiado pesada. Probá con una de menos de 30 MB.',
   },
   username: {
     idle: 'Entre 3 y 30 caracteres: letras minúsculas, números y guiones.',
@@ -132,7 +132,7 @@ const es = {
     subtitle: 'Lo primero que ve quien abre tu perfil.',
     image: 'Imagen',
     avatar: 'Foto de perfil',
-    avatarHelp: 'Cuadrada, mínimo 400 × 400 px. JPG, PNG o WebP hasta 5 MB.',
+    avatarHelp: 'Cuadrada, mínimo 400 × 400 px. JPG, PNG o WebP: la achicamos sola para que cargue rápido.',
     cover: 'Portada (opcional)',
     coverHelp: 'Horizontal, recomendado 1200 × 400 px.',
     who: 'Quién sos',

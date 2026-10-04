@@ -59,8 +59,8 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Google Fonts — Cache First (1 year)
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+  // Fuentes (servidas por Mycen) — Cache First
+  if (request.destination === 'font') {
     event.respondWith(cacheFirst(request, FONT_CACHE))
     return
   }

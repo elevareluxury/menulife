@@ -30,7 +30,7 @@ export function IdentityPage({ embedded = false }: { embedded?: boolean }) {
   }
 
   async function upload(field: 'avatar_url' | 'cover_url', file: File) {
-    const url = await uploadMedia(userId, file)
+    const url = await uploadMedia(userId, file, field === 'avatar_url' ? 'avatar' : 'image')
     patchProfile({ [field]: url })
   }
 

@@ -127,8 +127,10 @@
 .st-input, .st-textarea, .st-select {
   width: 100%; box-sizing: border-box; padding: 11px 13px; border-radius: 10px;
   border: 1px solid var(--st-border); background: var(--st-bg); color: var(--st-text);
-  font: 15px inherit; font-family: inherit; outline: none; transition: border-color 0.15s;
+  font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.15s;
 }
+/* En pantallas táctiles, 16px: con menos, el iPhone hace zoom solo al tocar el campo */
+@media (pointer: coarse) { .st-input, .st-textarea, .st-select { font-size: 16px; } }
 .st-input:focus, .st-textarea:focus, .st-select:focus { border-color: var(--st-border-strong); }
 .st-input[aria-invalid='true'], .st-textarea[aria-invalid='true'] { border-color: var(--st-danger); }
 .st-textarea { resize: vertical; min-height: 96px; line-height: 1.5; }

@@ -158,7 +158,8 @@ function projectBody(p: PublicProject, url: string, profileUrl: string, owner: s
 function page(origin: string, path: string, title: string, description: string, image: string | null,
   extra: { body?: string; jsonLd?: string; noindex?: boolean; type?: 'profile' | 'article' } = {}): Response {
   const url = `${origin}${path}`
-  const img = image ?? `${origin}/web-app-manifest-512x512.png`
+  // Sin foto ni portada: la imagen de marca (1200×630)
+  const img = image ?? `${origin}/og-image.png`
   const html = `<!doctype html>
 <html lang="es"><head>
 <meta charset="utf-8">
@@ -171,7 +172,7 @@ function page(origin: string, path: string, title: string, description: string, 
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(url)}">
 <meta property="og:image" content="${esc(img)}">
-<meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(img)}">${extra.noindex ? '\n<meta name="robots" content="noindex">' : ''}${extra.jsonLd ? `\n<script type="application/ld+json">${extra.jsonLd}</script>` : ''}

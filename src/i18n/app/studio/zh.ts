@@ -30,7 +30,7 @@ const zh: StudioDict = {
     usernameTaken: '该用户名已被使用。', usernameReserved: '该用户名为系统保留。',
     usernameInvalid: '请使用 3 到 30 个小写字母、数字或连字符。', moduleLimit: '已达到 100 个模块的上限。',
     tooLong: '有文字过长。', offline: '网络未连接。请检查网络后重试。',
-    generic: '保存失败，请重试。', notImage: '请选择图片（JPG、PNG 或 WebP）。', tooBig: '图片超过 5 MB。',
+    generic: '保存失败，请重试。', notImage: '请选择图片（JPG、PNG 或 WebP）。', tooBig: '图片太大，请换一张小于 30 MB 的图片。',
   },
   username: {
     idle: '3 到 30 个字符：小写字母、数字和连字符。', checking: '正在检查…', same: '这是你当前的用户名。',
@@ -56,7 +56,7 @@ const zh: StudioDict = {
   },
   identity: {
     title: '我的身份', subtitle: '别人打开你的主页时首先看到的内容。', image: '图片',
-    avatar: '头像', avatarHelp: '正方形，至少 400 × 400 px。JPG、PNG 或 WebP，最大 5 MB。',
+    avatar: '头像', avatarHelp: '正方形，至少 400 × 400 px。JPG、PNG 或 WebP：我们会自动缩小以便快速加载。',
     cover: '封面（可选）', coverHelp: '横向，建议 1200 × 400 px。', who: '你是谁',
     name: '名称', nameEmpty: '名称不能为空。', descriptor: '简介',
     descriptorPlaceholder: '创意总监 · 创始人', descriptorHelp: '一句话：你做什么，或你的商家是什么。',

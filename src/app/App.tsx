@@ -6,25 +6,26 @@ import { PrefsInit } from '@/app/PrefsInit'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
 import { ScrollToTop } from '@/components/ScrollToTop'
-import { LandingPage } from '@/modules/landing/pages/LandingPage'
-import { LoginPage } from './routes/login'
-import { RegisterPage } from './routes/register'
-import { DashboardPage, DashboardHome } from './routes/dashboard'
-import { MenuManagement } from '@/modules/menu/pages/MenuManagement'
-import { QRGenerator } from '@/modules/menu/pages/QRGenerator'
-import { PublicMenu } from '@/modules/public/pages/PublicMenu'
-import { WaiterLogin } from '@/modules/waiter/pages/WaiterLogin'
-import { WaiterApp } from '@/modules/waiter/pages/WaiterApp'
-import { TableBill } from '@/modules/waiter/pages/TableBill'
-import { OnboardingFlow } from '@/modules/onboarding/pages/OnboardingFlow'
-import { OrderTracking } from '@/modules/public/pages/OrderTracking'
-import { AuthCallback } from '@/pages/AuthCallback'
-import { ForgotPassword } from '@/pages/ForgotPassword'
-import { ResetPassword } from '@/pages/ResetPassword'
-import { ReservationFormPage } from '@/modules/public/pages/ReservationFormPage'
 import { RequirePlan } from '@/app/RequirePlan'
 
-// Heavy modules — lazy loaded
+// Todo se carga al entrar a su ruta: quien abre un perfil público no descarga la landing ni Mycen Business (Lanzamiento L1)
+const LandingPage = lazy(() => import('@/modules/landing/pages/LandingPage').then(m => ({ default: m.LandingPage })))
+const LoginPage = lazy(() => import('./routes/login').then(m => ({ default: m.LoginPage })))
+const RegisterPage = lazy(() => import('./routes/register').then(m => ({ default: m.RegisterPage })))
+const MenuManagement = lazy(() => import('@/modules/menu/pages/MenuManagement').then(m => ({ default: m.MenuManagement })))
+const QRGenerator = lazy(() => import('@/modules/menu/pages/QRGenerator').then(m => ({ default: m.QRGenerator })))
+const PublicMenu = lazy(() => import('@/modules/public/pages/PublicMenu').then(m => ({ default: m.PublicMenu })))
+const WaiterLogin = lazy(() => import('@/modules/waiter/pages/WaiterLogin').then(m => ({ default: m.WaiterLogin })))
+const WaiterApp = lazy(() => import('@/modules/waiter/pages/WaiterApp').then(m => ({ default: m.WaiterApp })))
+const TableBill = lazy(() => import('@/modules/waiter/pages/TableBill').then(m => ({ default: m.TableBill })))
+const OnboardingFlow = lazy(() => import('@/modules/onboarding/pages/OnboardingFlow').then(m => ({ default: m.OnboardingFlow })))
+const OrderTracking = lazy(() => import('@/modules/public/pages/OrderTracking').then(m => ({ default: m.OrderTracking })))
+const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(m => ({ default: m.AuthCallback })))
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })))
+const ResetPassword = lazy(() => import('@/pages/ResetPassword').then(m => ({ default: m.ResetPassword })))
+const ReservationFormPage = lazy(() => import('@/modules/public/pages/ReservationFormPage').then(m => ({ default: m.ReservationFormPage })))
+const DashboardPage = lazy(() => import('./routes/dashboard').then(m => ({ default: m.DashboardPage })))
+const DashboardHome = lazy(() => import('./routes/dashboard').then(m => ({ default: m.DashboardHome })))
 const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
 const ProfilePublicPage = lazy(() => import('@/modules/profile/pages/ProfilePublicPage').then(m => ({ default: m.ProfilePublicPage })))
 const LegalPage       = lazy(() => import('@/modules/legal/LegalPage').then(m => ({ default: m.LegalPage })))

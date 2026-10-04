@@ -7,7 +7,6 @@ import { useAppLang } from '@/i18n/app/store'
 import { setLocalLanguage } from '@/lib/prefs'
 import { themeVars } from '../lib/profileTheme'
 import { usePrefersLight } from '../lib/usePrefersLight'
-import { useAllowZoom } from '../lib/useAllowZoom'
 import type { ProfileLang, ProfileLookup } from '../lib/profileTypes'
 import { ProfileView } from '../components/ProfileView'
 import '../profile.css'
@@ -80,7 +79,6 @@ export function ProfilePublicPage() {
   }, [profile?.visibility])
 
   // Tema: "automático" sigue al dispositivo del visitante (Fase 9)
-  useAllowZoom()
   const prefersLight = usePrefersLight()
   const vars = themeVars(profile?.theme, prefersLight)
   const pageBg = String((vars as Record<string, string>)['--p-bg'])

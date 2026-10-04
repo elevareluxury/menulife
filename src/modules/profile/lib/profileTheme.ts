@@ -35,23 +35,19 @@ const FONTS: Record<string, string> = {
   inter:           "'Geist', sans-serif",
 }
 
-/** Fuentes que no vienen en la carga global: se piden a Google Fonts sólo si el perfil las usa. */
-const ON_DEMAND: Record<string, string> = {
-  'space-grotesk': 'Space+Grotesk:wght@600;700',
-  playfair: 'Playfair+Display:wght@700',
-  bebas: 'Bebas+Neue',
+/** Fuentes que no vienen en la carga global: se cargan (desde Mycen, no Google) sólo si el perfil las usa. */
+const ON_DEMAND: Record<string, () => Promise<unknown>> = {
+  'space-grotesk': () => Promise.all([import('@fontsource/space-grotesk/600.css'), import('@fontsource/space-grotesk/700.css')]),
+  playfair: () => import('@fontsource/playfair-display/700.css'),
+  bebas: () => import('@fontsource/bebas-neue/400.css'),
 }
+const requested = new Set<string>()
 
 export function ensureProfileFont(titleFont: string | undefined) {
-  const family = titleFont ? ON_DEMAND[titleFont] : undefined
-  if (!family || typeof document === 'undefined') return
-  const id = `mp-font-${titleFont}`
-  if (document.getElementById(id)) return
-  const link = document.createElement('link')
-  link.id = id
-  link.rel = 'stylesheet'
-  link.href = `https://fonts.googleapis.com/css2?family=${family}&display=swap`
-  document.head.appendChild(link)
+  const load = titleFont ? ON_DEMAND[titleFont] : undefined
+  if (!load || requested.has(titleFont!)) return
+  requested.add(titleFont!)
+  load().catch(() => requested.delete(titleFont!))
 }
 
 // ── Color ───────────────────────────────────────────────────────────────────

@@ -7,7 +7,6 @@ import { fetchPublicProject } from '../lib/profileApi'
 import { tr, ui } from '../lib/profileI18n'
 import { themeVars } from '../lib/profileTheme'
 import { usePrefersLight } from '../lib/usePrefersLight'
-import { useAllowZoom } from '../lib/useAllowZoom'
 import type { ProjectLookup } from '../lib/projectTypes'
 import { ProjectView } from '../components/ProjectView'
 import '../profile.css'
@@ -71,7 +70,6 @@ export function ProjectPublicPage() {
     return () => { document.querySelector('meta[name="robots"]')?.remove() }
   }, [noindex])
 
-  useAllowZoom()
   const prefersLight = usePrefersLight()
   const vars = themeVars(project?.space.theme, prefersLight)
   const pageBg = String((vars as Record<string, string>)['--p-bg'])

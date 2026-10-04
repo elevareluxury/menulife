@@ -1,4 +1,6 @@
 import { useEffect } from 'react'
+// Primero: deja gsap, ScrollTrigger y Splitting disponibles para las secciones
+import '@/components/landing/landingLibs'
 import { Navbar }               from '@/components/landing/Navbar'
 import { CinematicHero }        from '@/components/landing/CinematicHero'
 import { TrustBand }            from '@/components/landing/TrustBand'
@@ -16,9 +18,6 @@ import { Footer }               from '@/components/landing/Footer'
 export function LandingPage() {
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth'
-    const g = (window as any).gsap
-    const ST = (window as any).ScrollTrigger
-    if (g && ST) g.registerPlugin(ST)
     return () => { document.documentElement.style.scrollBehavior = 'auto' }
   }, [])
 

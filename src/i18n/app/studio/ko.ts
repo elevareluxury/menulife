@@ -30,7 +30,7 @@ const ko: StudioDict = {
     usernameTaken: '이미 사용 중인 사용자 이름입니다.', usernameReserved: '예약된 사용자 이름입니다.',
     usernameInvalid: '소문자, 숫자, 하이픈을 사용해 3~30자로 입력하세요.', moduleLimit: '모듈 최대 개수(100개)에 도달했습니다.',
     tooLong: '너무 긴 텍스트가 있습니다.', offline: '오프라인 상태입니다. 인터넷 연결을 확인하고 다시 시도하세요.',
-    generic: '저장하지 못했습니다. 다시 시도해 주세요.', notImage: '이미지(JPG, PNG 또는 WebP)를 선택하세요.', tooBig: '이미지가 5MB를 넘습니다.',
+    generic: '저장하지 못했습니다. 다시 시도해 주세요.', notImage: '이미지(JPG, PNG 또는 WebP)를 선택하세요.', tooBig: '이미지가 너무 큽니다. 30MB 미만의 이미지를 사용해 주세요.',
   },
   username: {
     idle: '3~30자: 소문자, 숫자, 하이픈.', checking: '확인 중…', same: '현재 사용자 이름입니다.',
@@ -56,7 +56,7 @@ const ko: StudioDict = {
   },
   identity: {
     title: '내 아이덴티티', subtitle: '프로필을 연 사람이 가장 먼저 보는 부분입니다.', image: '이미지',
-    avatar: '프로필 사진', avatarHelp: '정사각형, 최소 400 × 400px. JPG, PNG 또는 WebP, 최대 5MB.',
+    avatar: '프로필 사진', avatarHelp: '정사각형, 최소 400 × 400px. JPG, PNG 또는 WebP: 빠르게 열리도록 자동으로 줄여 드립니다.',
     cover: '커버 이미지(선택)', coverHelp: '가로형, 1200 × 400px 권장.', who: '나는 누구인가요',
     name: '이름', nameEmpty: '이름은 비워 둘 수 없습니다.', descriptor: '한 줄 소개',
     descriptorPlaceholder: '크리에이티브 디렉터 · 창업자', descriptorHelp: '한 줄로: 하는 일 또는 비즈니스 소개.',
