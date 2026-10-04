@@ -1,22 +1,23 @@
 import { useEffect, useRef } from 'react'
 import { Globe, Target, Rocket } from 'lucide-react'
+import { useLandingT } from '@/i18n/app/landing'
 
 declare const gsap: any
 
 const SATELLITES = [
   {
-    Icon: Globe,   label: 'Identidad',    sub: 'Tu presencia digital unificada',
+    Icon: Globe,   key: 'identity',
     color: '#3B82F6', angle: 270, // top
   },
   {
-    Icon: Target,  label: 'Organización', sub: 'Tu vida personal en orden',
+    Icon: Target,  key: 'organization',
     color: '#8B5CF6', angle: 30, // bottom-right
   },
   {
-    Icon: Rocket,  label: 'Negocios',    sub: 'Tu operación potenciada',
+    Icon: Rocket,  key: 'business',
     color: '#F4705A', angle: 150, // bottom-left
   },
-]
+] as const
 
 function polarToPercent(angle: number, rx: number, ry: number) {
   const rad = (angle - 90) * (Math.PI / 180)
@@ -27,6 +28,8 @@ function polarToPercent(angle: number, rx: number, ry: number) {
 }
 
 export function SolutionSection() {
+  const t = useLandingT().solution
+  const sats = SATELLITES.map(s => ({ ...s, label: t[s.key], sub: t[`${s.key}Sub`] }))
   const sectionRef = useRef<HTMLElement>(null)
   const titleRef   = useRef<HTMLDivElement>(null)
   const vizRef     = useRef<HTMLDivElement>(null)
@@ -81,18 +84,18 @@ export function SolutionSection() {
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',
             fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
-          }}>LA SOLUCIÓN</p>
+          }}>{t.label}</p>
           <h2 style={{
             fontFamily: 'var(--font-syne)', fontWeight: 800,
             fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
             lineHeight: 1.1, margin: '0 0 16px',
-          }}>Todo conectado dentro de{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>Mycen.</em>
+          }}>{t.title}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
           </h2>
           <p style={{
             fontFamily: 'var(--font-jakarta)', fontSize: '17px',
             color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
-          }}>Una cuenta. Una plataforma. Un ecosistema.</p>
+          }}>{t.subtitle}</p>
         </div>
 
         {/* Orbital visualization */}
@@ -117,7 +120,7 @@ export function SolutionSection() {
               strokeDasharray="2 3"
             />
             {/* Connection lines */}
-            {SATELLITES.map(({ label, color, angle }) => {
+            {sats.map(({ label, color, angle }) => {
               const pos = polarToPercent(angle, RX, RY)
               return (
                 <line
@@ -156,7 +159,7 @@ export function SolutionSection() {
           </div>
 
           {/* Satellite nodes */}
-          {SATELLITES.map(({ Icon, label, color, angle }) => {
+          {sats.map(({ Icon, label, color, angle }) => {
             const pos = polarToPercent(angle, RX, RY)
             return (
               <div
@@ -201,7 +204,7 @@ export function SolutionSection() {
           maxWidth: '900px',
           margin: '0 auto',
         }}>
-          {SATELLITES.map(({ Icon, label, sub, color }) => (
+          {sats.map(({ Icon, label, sub, color }) => (
             <div
               key={label}
               data-sol-cards

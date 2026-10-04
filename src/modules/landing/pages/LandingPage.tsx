@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 import '@/components/landing/landingLibs'
 import { Navbar }               from '@/components/landing/Navbar'
 import { CinematicHero }        from '@/components/landing/CinematicHero'
-import { TrustBand }            from '@/components/landing/TrustBand'
 import { FragmentationSection } from '@/components/landing/FragmentationSection'
 import { SolutionSection }      from '@/components/landing/SolutionSection'
 import { LifeOSSection }        from '@/components/landing/LifeOSSection'
@@ -14,8 +13,10 @@ import { VisionSection }        from '@/components/landing/VisionSection'
 import { FinalCTA }             from '@/components/landing/FinalCTA'
 import { FAQSection }           from '@/components/landing/FAQSection'
 import { Footer }               from '@/components/landing/Footer'
+import { useLandingLocale }     from '../lib/useLandingLocale'
 
 export function LandingPage() {
+  useLandingLocale()
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth'
     return () => { document.documentElement.style.scrollBehavior = 'auto' }
@@ -28,9 +29,6 @@ export function LandingPage() {
       <main>
         {/* Section 1 — Hero */}
         <CinematicHero />
-
-        {/* Trust band */}
-        <TrustBand />
 
         {/* Section 2 — Problema / Fragmentación */}
         <FragmentationSection />
@@ -46,7 +44,7 @@ export function LandingPage() {
         {/* Section 5 — Mycen Business */}
         <BusinessSection />
 
-        {/* Social proof */}
+        {/* Testimonios reales (si no hay, no se muestra) */}
         <TestimonialsSection />
 
         {/* Section 6 — Pricing */}

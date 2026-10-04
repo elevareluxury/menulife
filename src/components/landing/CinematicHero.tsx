@@ -2,10 +2,12 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import FlowFieldBackground from '@/components/ui/flow-field-background'
 import { HubPhonePreview } from './HubPhonePreview'
+import { useLandingT } from '@/i18n/app/landing'
 
 declare const gsap: any
 
 export function CinematicHero() {
+  const l = useLandingT()
   const sectionRef    = useRef<HTMLElement>(null)
   const introRef      = useRef<HTMLDivElement>(null)
   const cardRef       = useRef<HTMLDivElement>(null)
@@ -147,13 +149,10 @@ export function CinematicHero() {
       {/* FASE 1: Intro */}
       <div ref={introRef} className="ch-intro">
         <h1>
-          <span className="ch-line1">Tu identidad digital,</span>
-          <span className="ch-line2">todo en un solo lugar.</span>
+          <span className="ch-line1">{l.hero.line1}</span>
+          <span className="ch-line2">{l.hero.line2}</span>
         </h1>
-        <p className="ch-subtitle">
-          Una dirección que te representa: quién sos, lo que hacés y cómo contactarte,
-          lista para compartir con un link o un QR.
-        </p>
+        <p className="ch-subtitle">{l.hero.subtitle}</p>
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '8px' }}>
           <Link to="/register" style={{ textDecoration: 'none' }}>
             <button className="liquid-glass-btn" style={{
@@ -161,7 +160,7 @@ export function CinematicHero() {
               color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
               borderRadius: '50px',
             }}>
-              <span>Creá tu Mycen →</span>
+              <span>{l.hero.cta}</span>
             </button>
           </Link>
           <a href="#soluciones" style={{ textDecoration: 'none' }}>
@@ -170,7 +169,7 @@ export function CinematicHero() {
               color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
               borderRadius: '50px',
             }}>
-              Cómo funciona
+              {l.hero.how}
             </button>
           </a>
         </div>
@@ -179,10 +178,9 @@ export function CinematicHero() {
       {/* FASE 2: Card que sube con scroll */}
       <div ref={cardRef} className="ch-card">
         <div className="ch-card-content">
-          <h2 className="ch-card-heading">Tu identidad digital, tu negocio y tu vida. Todo en uno.</h2>
+          <h2 className="ch-card-heading">{l.hero.cardTitle}</h2>
           <p className="ch-card-description">
-            <strong>Mycen</strong> reúne tu perfil público, tu sistema personal y tu
-            plataforma de negocio — sin apps que instalar, sin links dispersos.
+            <strong>Mycen</strong> {l.hero.cardText}
           </p>
         </div>
 
@@ -197,12 +195,12 @@ export function CinematicHero() {
 
           {/* Floating badges */}
           <div ref={badgeLeftRef} className="floating-badge ch-badge-left">
-            <span className="ch-badge-title">✨ Perfil publicado</span>
-            <span>mycen.digital/tu-perfil</span>
+            <span className="ch-badge-title">{l.hero.badgePublished}</span>
+            <span>{l.hero.badgeUrl}</span>
           </div>
           <div ref={badgeRightRef} className="floating-badge ch-badge-right">
-            <span className="ch-badge-title">🎯 Meta alcanzada</span>
-            <span>6/10 hábitos este mes</span>
+            <span className="ch-badge-title">{l.hero.badgeGoal}</span>
+            <span>{l.hero.badgeGoalSub}</span>
           </div>
         </div>
       </div>

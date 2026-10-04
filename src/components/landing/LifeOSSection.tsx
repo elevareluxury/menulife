@@ -2,38 +2,20 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Globe, TrendingUp, Target, Flame, Zap } from 'lucide-react'
 import { ShimmerButton } from './Navbar'
+import { useLandingT } from '@/i18n/app/landing'
 
 declare const gsap: any
 
 const MODULES = [
-  {
-    Icon: Globe,      name: 'Mycen Identity',
-    copy: 'Comparte todo lo importante desde un único perfil.',
-    color: '#3B82F6',
-  },
-  {
-    Icon: TrendingUp, name: 'Money',
-    copy: 'Ten claridad total sobre tus ingresos y gastos.',
-    color: '#10B981',
-  },
-  {
-    Icon: Target,     name: 'Goals',
-    copy: 'Transforma metas en resultados reales.',
-    color: '#8B5CF6',
-  },
-  {
-    Icon: Flame,      name: 'Habits',
-    copy: 'Construye consistencia día tras día.',
-    color: '#F59E0B',
-  },
-  {
-    Icon: Zap,        name: 'Brain',
-    copy: 'Nunca vuelvas a perder una idea importante.',
-    color: '#F4705A',
-  },
-]
+  { Icon: Globe,      key: 'identity', color: '#3B82F6' },
+  { Icon: TrendingUp, key: 'money',    color: '#10B981' },
+  { Icon: Target,     key: 'goals',    color: '#8B5CF6' },
+  { Icon: Flame,      key: 'habits',   color: '#F59E0B' },
+  { Icon: Zap,        key: 'brain',    color: '#F4705A' },
+] as const
 
 export function LifeOSSection() {
+  const t = useLandingT().life
   useEffect(() => {
     if (typeof gsap === 'undefined') return
     const ST = (window as any).ScrollTrigger
@@ -72,21 +54,19 @@ export function LifeOSSection() {
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',
             fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
-          }}>MYCEN PERSONAL</p>
+          }}>{t.label}</p>
           <h2 style={{
             fontFamily: 'var(--font-syne)', fontWeight: 800,
             fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
             lineHeight: 1.1, margin: '0 0 16px',
-          }}>Tu sistema operativo{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>personal.</em>
+          }}>{t.title}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
           </h2>
           <p style={{
             fontFamily: 'var(--font-jakarta)', fontSize: '17px',
             color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
             maxWidth: '520px', margin: '0 auto',
-          }}>
-            Organiza y visualiza tu progreso desde un único lugar.
-          </p>
+          }}>{t.subtitle}</p>
         </div>
 
         {/* Module cards */}
@@ -96,9 +76,9 @@ export function LifeOSSection() {
           gap: '20px',
           marginBottom: '56px',
         }}>
-          {MODULES.map(({ Icon, name, copy, color }) => (
+          {MODULES.map(({ Icon, key, color }) => (
             <div
-              key={name}
+              key={key}
               data-life-card
               className="liquid-glass"
               style={{
@@ -130,11 +110,11 @@ export function LifeOSSection() {
               <h3 style={{
                 fontFamily: 'var(--font-syne)', fontWeight: 800,
                 fontSize: '17px', color: '#fff', marginBottom: '8px',
-              }}>{name}</h3>
+              }}>{t[key]}</h3>
               <p style={{
                 fontFamily: 'var(--font-jakarta)', fontSize: '13px',
                 color: 'rgba(255,255,255,0.42)', lineHeight: 1.6, margin: 0,
-              }}>{copy}</p>
+              }}>{t[`${key}Copy`]}</p>
             </div>
           ))}
         </div>
@@ -143,7 +123,7 @@ export function LifeOSSection() {
         <div data-life-cta style={{ textAlign: 'center' }}>
           <Link to="/register" style={{ textDecoration: 'none' }}>
             <ShimmerButton style={{ padding: '14px 36px', fontSize: '15px', borderRadius: '50px' }}>
-              Crear Mi Espacio Gratis →
+              {t.cta}
             </ShimmerButton>
           </Link>
         </div>

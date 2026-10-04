@@ -1,13 +1,18 @@
-/* Static hub preview — replicates the look of a Mycen Hub Digital page
-   inside the 260×520px phone mockup. No network requests, no iframe. */
+import { useLandingT } from '@/i18n/app/landing'
+
+/* Vista estática de una página de Mycen Identity dentro del teléfono del hero (260×520px).
+   Es un ejemplo ilustrativo (los textos salen del diccionario); sin pedidos de red ni iframe. */
+const LINK_EMOJIS = ['🎨', '💬', '📇', '📅']
+
 export function HubPhonePreview() {
+  const p = useLandingT().phone
+  const initials = p.name.split(/\s+/).map(w => w[0]).slice(0, 2).join('')
   return (
     <div style={{
       width: '100%',
       height: '100%',
       background: '#080B10',
-      overflowY: 'auto',
-      overflowX: 'hidden',
+      overflow: 'hidden',
       fontFamily: 'var(--font-jakarta)',
       scrollbarWidth: 'none',
     }}>
@@ -52,26 +57,26 @@ export function HubPhonePreview() {
           background: 'linear-gradient(135deg, #F4705A 0%, #c4503d 100%)',
           border: '3px solid #080B10',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '22px',
+          fontSize: '19px',
           boxShadow: '0 4px 20px rgba(244,112,90,0.35)',
-          flexShrink: 0,
-        }}>🍽️</div>
+          flexShrink: 0, color: '#fff', fontWeight: 800,
+        }} aria-hidden>{initials}</div>
       </div>
 
       {/* Name, location, status */}
       <div style={{ textAlign: 'center', padding: '0 14px 14px' }}>
-        <h1 style={{
+        <p style={{
           color: '#fff', fontSize: '15px', fontWeight: 800,
           margin: '0 0 3px', fontFamily: 'var(--font-syne)',
           letterSpacing: '-0.01em',
         }}>
-          Test Restaurant
-        </h1>
+          {p.name}
+        </p>
         <p style={{
           color: 'rgba(255,255,255,0.38)', fontSize: '10px',
           margin: '0 0 10px', lineHeight: 1.4,
         }}>
-          Gastronomía · Buenos Aires
+          {p.descriptor}
         </p>
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: '5px',
@@ -85,18 +90,13 @@ export function HubPhonePreview() {
             background: '#10B981', display: 'inline-block',
             boxShadow: '0 0 6px #10B981',
           }} />
-          Abierto ahora
+          {p.status}
         </span>
       </div>
 
       {/* Smart links */}
       <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '7px' }}>
-        {[
-          { emoji: '🍽️', label: 'Ver Menú Digital',      sub: 'Sin descarga · Pedir ahora'   },
-          { emoji: '📅', label: 'Reservar Mesa',          sub: 'Disponibilidad en tiempo real' },
-          { emoji: '💬', label: 'Escribir por WhatsApp',  sub: 'Respuesta en minutos'           },
-          { emoji: '📍', label: 'Cómo llegar',            sub: 'Av. Corrientes 1234'            },
-        ].map(link => (
+        {p.links.map((link, i) => ({ ...link, emoji: LINK_EMOJIS[i] ?? '🔗' })).map(link => (
           <div key={link.label} style={{
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.07)',
@@ -147,7 +147,7 @@ export function HubPhonePreview() {
           fontSize: '8px', color: 'rgba(255,255,255,0.18)',
           fontWeight: 500, letterSpacing: '0.04em',
         }}>
-          Powered by Mycen ✦
+          {p.powered}
         </span>
       </div>
 

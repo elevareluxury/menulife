@@ -1,18 +1,20 @@
 import { useEffect, useRef } from 'react'
 import { Share2, Target, FileText, Users, Building2, Wallet } from 'lucide-react'
+import { useLandingT } from '@/i18n/app/landing'
 
 declare const gsap: any
 
 const FRAGS = [
-  { Icon: Share2,    label: 'Redes',     color: '#3B82F6', top: '18%', left: '10%',  dur: 6.2, delay: 0   },
-  { Icon: Target,    label: 'Objetivos', color: '#8B5CF6', top: '12%', left: '60%',  dur: 7.5, delay: 1.2 },
-  { Icon: FileText,  label: 'Notas',     color: '#F59E0B', top: '62%', left: '7%',   dur: 8.1, delay: 0.7 },
-  { Icon: Users,     label: 'Clientes',  color: '#10B981', top: '68%', left: '52%',  dur: 6.8, delay: 1.8 },
-  { Icon: Building2, label: 'Negocio',   color: '#F4705A', top: '25%', left: '78%',  dur: 7.2, delay: 0.4 },
-  { Icon: Wallet,    label: 'Finanzas',  color: '#EC4899', top: '74%', left: '80%',  dur: 8.6, delay: 2.1 },
-]
+  { Icon: Share2,    key: 'social',    color: '#3B82F6', top: '18%', left: '10%',  dur: 6.2, delay: 0   },
+  { Icon: Target,    key: 'goals',     color: '#8B5CF6', top: '12%', left: '60%',  dur: 7.5, delay: 1.2 },
+  { Icon: FileText,  key: 'notes',     color: '#F59E0B', top: '62%', left: '7%',   dur: 8.1, delay: 0.7 },
+  { Icon: Users,     key: 'clients',   color: '#10B981', top: '68%', left: '52%',  dur: 6.8, delay: 1.8 },
+  { Icon: Building2, key: 'business',  color: '#F4705A', top: '25%', left: '78%',  dur: 7.2, delay: 0.4 },
+  { Icon: Wallet,    key: 'money',     color: '#EC4899', top: '74%', left: '80%',  dur: 8.6, delay: 2.1 },
+] as const
 
 export function FragmentationSection() {
+  const t = useLandingT().problem
   const sectionRef = useRef<HTMLElement>(null)
   const titleRef   = useRef<HTMLDivElement>(null)
   const vizRef     = useRef<HTMLDivElement>(null)
@@ -50,19 +52,19 @@ export function FragmentationSection() {
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',
             fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
-          }}>EL PROBLEMA</p>
+          }}>{t.label}</p>
           <h2 style={{
             fontFamily: 'var(--font-syne)', fontWeight: 800,
             fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
             lineHeight: 1.1, margin: '0 0 16px',
-          }}>Hoy tu vida digital está{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>fragmentada.</em>
+          }}>{t.title}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
           </h2>
           <p style={{
             fontFamily: 'var(--font-jakarta)', fontSize: '17px',
             color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
             maxWidth: '520px', margin: '0 auto',
-          }}>Demasiadas herramientas. Demasiado desorden.</p>
+          }}>{t.subtitle}</p>
         </div>
 
         {/* Visualization */}
@@ -92,9 +94,9 @@ export function FragmentationSection() {
           </svg>
 
           {/* Floating icons */}
-          {FRAGS.map(({ Icon, label, color, top, left, dur, delay }) => (
+          {FRAGS.map(({ Icon, key, color, top, left, dur, delay }) => (
             <div
-              key={label}
+              key={key}
               data-frag-icon
               style={{
                 position: 'absolute',
@@ -123,7 +125,7 @@ export function FragmentationSection() {
                 fontSize: '11px', fontWeight: 500,
                 color: 'rgba(255,255,255,0.3)',
                 whiteSpace: 'nowrap',
-              }}>{label}</span>
+              }}>{t.items[key]}</span>
             </div>
           ))}
 
@@ -146,7 +148,7 @@ export function FragmentationSection() {
             <p style={{
               fontFamily: 'var(--font-jakarta)', fontSize: '12px',
               color: 'rgba(255,255,255,0.2)',
-            }}>Sin conexión</p>
+            }}>{t.disconnected}</p>
           </div>
         </div>
 
