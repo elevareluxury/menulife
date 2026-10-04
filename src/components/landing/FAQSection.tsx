@@ -1,16 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useLandingT } from '@/i18n/app/landing'
 
 declare const gsap: any
 
 export function FAQSection() {
-  const { t } = useTranslation()
+  const t = useLandingT().faq
   const [open, setOpen] = useState<number | null>(null)
-
-  const FAQS = [1,2,3,4,5].map(n => ({
-    q: t(`faq.q${n}`),
-    a: t(`faq.a${n}`),
-  }))
 
   useEffect(() => {
     if (typeof gsap === 'undefined') return
@@ -29,24 +24,25 @@ export function FAQSection() {
   }, [])
 
   return (
-    <section style={{ background: `radial-gradient(ellipse 50% 60% at 50% 100%, rgba(244,112,90,0.04) 0%, transparent 55%), var(--ml-off-white)`, padding: '48px 24px 96px' }}>
+    <section id="faq" style={{ background: `radial-gradient(ellipse 50% 60% at 50% 100%, rgba(244,112,90,0.04) 0%, transparent 55%), var(--ml-off-white)`, padding: '48px 24px 96px' }}>
       <div style={{ maxWidth: '760px', margin: '0 auto' }}>
         {/* Header */}
         <div data-faq-title style={{ textAlign: 'center', marginBottom: '64px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px' }}>
-            {t('faq.label')}
+            {t.label}
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(32px,4.5vw,48px)', color: '#1a1a1a', lineHeight: 1.1, margin: 0 }}>
-            {t('faq.title')}{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('faq.title_accent')}</em>
+            {t.title}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
           </h2>
         </div>
 
         {/* Accordion */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {FAQS.map((faq, i) => (
+          {t.items.map((faq, i) => (
             <FAQItem
               key={i}
+              id={`faq-${i}`}
               faq={faq}
               isOpen={open === i}
               onToggle={() => setOpen(open === i ? null : i)}
@@ -59,7 +55,8 @@ export function FAQSection() {
   )
 }
 
-function FAQItem({ faq, isOpen, onToggle }: {
+function FAQItem({ id, faq, isOpen, onToggle }: {
+  id: string
   faq: { q: string; a: string }
   isOpen: boolean
   onToggle: () => void
@@ -77,9 +74,11 @@ function FAQItem({ faq, isOpen, onToggle }: {
     >
       <button
         onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={id}
         style={{
-          width:      '100%', textAlign: 'left',
-          padding:    '20px 16px 20px 20px',
+          width:      '100%', textAlign: 'start',
+          paddingBlock: '20px', paddingInline: '20px 16px',
           background: 'transparent', border: 'none',
           cursor:     'pointer',
           display:    'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px',
@@ -104,7 +103,7 @@ function FAQItem({ faq, isOpen, onToggle }: {
       </button>
 
       {/* Answer — smooth height animation */}
-      <div style={{
+      <div id={id} hidden={!isOpen} style={{
         maxHeight:  isOpen ? '400px' : '0',
         overflow:   'hidden',
         transition: 'max-height 0.4s cubic-bezier(0.4,0,0.2,1)',

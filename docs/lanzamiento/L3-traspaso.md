@@ -4,29 +4,15 @@ Estado al 4/10/2026. L0–L2 están en producción (PRs #28, #29, #30). L3 = la 
 Decisiones tomadas por el dueño: **12 idiomas desde el día uno** y **Resend** para los mails (tiene un plan pago en otra
 web; se agrega el dominio `mycen.id` a esa misma cuenta).
 
-## L3a — landing en 12 idiomas (en curso en esta rama)
+## L3a — landing en 12 idiomas ✅
 
-Hecho:
-- `src/i18n/app/landing/es.ts`: diccionario fuente completo (meta, nav, hero, teléfono de ejemplo, problema, solución,
-  Life OS, Business, testimonios, precios, visión, CTA, FAQ, pie). Ya corrige textos viejos ("Hub Digital",
-  `mycen.digital`, "Ver demo" que iba al registro, FAQ desactualizada).
-- `src/i18n/app/landing/index.ts`: namespace `useLandingT` (todavía sin loaders de otros idiomas).
-- `src/components/landing/Navbar.tsx`: usa el diccionario, selector de los 12 idiomas (`setLocalLanguage`) y anclas
-  arregladas (`#soluciones`, `#pricing`; antes apuntaban a ids que no existen).
+Todas las secciones salen de `src/i18n/app/landing/` (12 idiomas), con selector, `?lang=xx`, título y descripción por
+idioma, RTL en árabe, `hreflang` + canónica (se agregan desde `useLandingLocale`, sólo en la landing: en `index.html`
+aparecerían también en los perfiles). Se sacaron la banda de marcas y los testimonios de ejemplo; el teléfono del hero
+muestra una identidad de ejemplo. E2E en `tests/e2e/landing.spec.ts` (inglés, árabe, selector, axe).
 
-Falta:
-1. Pasar al diccionario el resto de las secciones que usa `LandingPage`: CinematicHero (+ HubPhonePreview, que debe
-   mostrar el ejemplo de persona del diccionario en vez de un restaurante), Fragmentation, Solution, LifeOS, Business,
-   Testimonials, Pricing, Vision, FinalCTA (el secundario va a `/login`), FAQ (agregar `id="faq"`) y Footer (links a
-   `/terminos` y `/privacidad`; el mail `contacto@menulife.digital` es de la marca vieja: preguntar cuál usar).
-2. **Prueba social inventada** (regla de CLAUDE.md): sacar `TrustBand` (lista fija de negocios) de la landing y quitar los
-   3 testimonios de respaldo de `TestimonialsSection` (mostrar sólo los reales de la tabla `testimonials`; si no hay,
-   ocultar la sección). El pie viejo de i18next dice "Más de 1.200 negocios": no usarlo.
-3. Escribir `en, pt, fr, de, it, zh, ja, ko, hi, ar, ru` (`const xx: LandingDict = …`) y sumar sus loaders en `index.ts`.
-4. `?lang=xx` en la landing (fija el idioma) + `<link rel="alternate" hreflang>` en `index.html` (12 + `x-default`),
-   título y descripción por idioma (`meta`), `dir="rtl"` para árabe.
-5. Precios: dicen "$70 / $150" sin moneda; preguntar si son USD.
-6. Tests: E2E de la landing en otro idioma (ej. `/?lang=en`), axe de la landing, presupuesto de peso.
+Pendiente del dueño: mail de contacto (el viejo `contacto@menulife.digital` se sacó del pie) y moneda de los precios
+("$70 / $150").
 
 ## L3b — registro, login y contraseñas
 

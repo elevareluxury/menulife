@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { useLandingT } from '@/i18n/app/landing'
 import { ShimmerButton } from './Navbar'
 
 declare const gsap: any
 declare const Splitting: any
 
 export function FinalCTA() {
-  const { t } = useTranslation()
+  const t = useLandingT().cta
   const titleRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -60,9 +60,10 @@ export function FinalCTA() {
           fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
           textTransform: 'uppercase', color: 'var(--ml-salmon)',
           fontFamily: 'var(--font-jakarta)', marginBottom: '20px',
-        }}>{t('cta_final.label')}</p>
+        }}>{t.label}</p>
 
-        <h2 ref={titleRef} style={{
+        {/* key: Splitting reescribe el título; al cambiar de idioma se monta de nuevo */}
+        <h2 key={t.title} ref={titleRef} style={{
           fontFamily:    'var(--font-syne)',
           fontWeight:    800,
           fontSize:      'clamp(44px, 7vw, 80px)',
@@ -71,10 +72,7 @@ export function FinalCTA() {
           marginBottom:  '20px',
           letterSpacing: '-0.03em',
         }}>
-          {t('cta_final.title')}
-          {t('cta_final.title_accent') && (
-            <>{' '}<em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('cta_final.title_accent')}</em></>
-          )}
+          {t.title}
         </h2>
 
         <p data-cta-sub style={{
@@ -88,23 +86,23 @@ export function FinalCTA() {
           margin:        '0 auto 48px',
           whiteSpace:    'pre-line',
         }}>
-          {t('cta_final.subtitle')}
+          {t.subtitle}
         </p>
 
         <div data-cta-btns style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
           <Link to="/register" style={{ textDecoration: 'none' }}>
             <ShimmerButton style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '50px' }}>
-              {t('cta_final.cta_primary')}
+              {t.primary}
             </ShimmerButton>
           </Link>
-          <Link to="/register" className="liquid-glass-btn-ghost" style={{
+          <Link to="/login" className="liquid-glass-btn-ghost" style={{
             padding: '16px 36px',
             color: 'rgba(255,255,255,0.7)',
             fontSize: '16px', fontWeight: 500,
             cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
             textDecoration: 'none',
           }}>
-            <span>{t('cta_final.cta_secondary')}</span>
+            <span>{t.secondary}</span>
           </Link>
         </div>
       </div>

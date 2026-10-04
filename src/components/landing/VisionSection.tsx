@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react'
 
+import { useLandingT } from '@/i18n/app/landing'
+
 declare const gsap: any
 declare const Splitting: any
 
 export function VisionSection() {
+  const t = useLandingT().vision
   const titleRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -47,16 +50,17 @@ export function VisionSection() {
           fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
           textTransform: 'uppercase', color: 'var(--ml-salmon)',
           fontFamily: 'var(--font-jakarta)', marginBottom: '24px',
-        }}>VISIÓN</p>
+        }}>{t.label}</p>
 
-        <h2 ref={titleRef} style={{
+        {/* key: Splitting reescribe el título; al cambiar de idioma se monta de nuevo en vez de parchar ese DOM */}
+        <h2 key={t.title} ref={titleRef} style={{
           fontFamily: 'var(--font-syne)', fontWeight: 800,
           fontSize: 'clamp(32px,5vw,60px)',
           color: '#fff', lineHeight: 1.08,
           marginBottom: '28px', letterSpacing: '-0.02em',
         }}>
-          Estamos construyendo el futuro de la{' '}
-          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>vida digital.</em>
+          {t.title}{' '}
+          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
         </h2>
 
         <p data-vision-body style={{
@@ -68,8 +72,7 @@ export function VisionSection() {
           maxWidth: '640px',
           margin: '0 auto',
         }}>
-          Creemos que las personas y los negocios merecen una forma más simple,
-          conectada y humana de gestionar todo lo que importa.
+          {t.body}
         </p>
 
       </div>

@@ -1,40 +1,29 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { useLandingT } from '@/i18n/app/landing'
 
 declare const gsap: any
 
 type Billing = 'monthly' | '6months' | 'annual'
 
 export function PricingSection() {
-  const { t } = useTranslation()
+  const t = useLandingT().pricing
   const [billing, setBilling] = useState<Billing>('monthly')
 
   const PLANS = [
     {
-      tag:      t('pricing.plan1_tag'),
-      name:     t('pricing.plan1_name'),
-      desc:     t('pricing.plan1_desc'),
+      ...t.plan1,
       monthly:  70,
-      badge:    t('pricing.plan1_badge'),
-      badgeNote: t('pricing.plan1_badge_note'),
-      features: [t('pricing.plan1_f1'), t('pricing.plan1_f2'), t('pricing.plan1_f3'), t('pricing.plan1_f4')],
-      cta:      t('pricing.plan1_cta'),
       featured: false,
       href:     '/register',
     },
     {
-      tag:      t('pricing.plan2_tag'),
-      name:     t('pricing.plan2_name'),
-      desc:     t('pricing.plan2_desc'),
+      ...t.plan2,
       monthly:  150,
       badge:    null,
       badgeNote: null,
-      features: [t('pricing.plan2_f1'), t('pricing.plan2_f2'), t('pricing.plan2_f3'), t('pricing.plan2_f4')],
-      cta:      t('pricing.plan2_cta'),
       featured: true,
       href:     '/register',
-      note:     t('pricing.plan2_note'),
     },
   ]
 
@@ -61,9 +50,9 @@ export function PricingSection() {
   }
 
   const TOGGLE_OPTIONS: { key: Billing; label: string; badge?: string }[] = [
-    { key: 'monthly',  label: t('pricing.toggle_monthly') },
-    { key: '6months',  label: t('pricing.toggle_6months'), badge: '−10%' },
-    { key: 'annual',   label: t('pricing.toggle_annual'),  badge: '−20%' },
+    { key: 'monthly',  label: t.monthly },
+    { key: '6months',  label: t.sixMonths, badge: '−10%' },
+    { key: 'annual',   label: t.annual,  badge: '−20%' },
   ]
 
   return (
@@ -72,12 +61,15 @@ export function PricingSection() {
         {/* Header */}
         <div data-price-title style={{ textAlign: 'center', marginBottom: '56px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px' }}>
-            {t('pricing.label')}
+            {t.label}
           </p>
-          <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#1a1a1a', lineHeight: 1.1, margin: '0 0 32px' }}>
-            {t('pricing.title')}{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t('pricing.title_accent')}</em>
+          <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#1a1a1a', lineHeight: 1.1, margin: '0 0 12px' }}>
+            {t.title}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
           </h2>
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '15px', color: 'var(--ml-gray-500)', margin: '0 0 28px' }}>
+            {t.freeNote}
+          </p>
 
           {/* 3-way Toggle */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(0,0,0,0.06)', padding: '4px', borderRadius: '50px' }}>
@@ -85,6 +77,7 @@ export function PricingSection() {
               <button
                 key={opt.key}
                 onClick={() => setBilling(opt.key)}
+                aria-pressed={billing === opt.key}
                 style={{
                   padding: '8px 18px', borderRadius: '50px', border: 'none',
                   background: billing === opt.key ? '#fff' : 'transparent',
@@ -122,8 +115,8 @@ export function PricingSection() {
               key={plan.name}
               plan={plan}
               price={getPrice(plan.monthly)}
-              perMonth={t('pricing.per_month')}
-              billingNote={billing === '6months' ? t('pricing.note_6months') : billing === 'annual' ? t('pricing.annual_note') : ''}
+              perMonth={t.perMonth}
+              billingNote={billing === '6months' ? t.noteSixMonths : billing === 'annual' ? t.noteAnnual : ''}
             />
           ))}
         </div>
@@ -138,10 +131,10 @@ export function PricingSection() {
           }}>
             <div>
               <h3 style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: '18px', color: '#1a1a1a', marginBottom: '4px' }}>
-                {t('pricing.custom_name')}
+                {t.custom.name}
               </h3>
               <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-500)', margin: 0 }}>
-                {t('pricing.custom_desc')}
+                {t.custom.desc}
               </p>
             </div>
             <a
@@ -161,7 +154,7 @@ export function PricingSection() {
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--ml-salmon)'; e.currentTarget.style.color = 'var(--ml-salmon)' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'; e.currentTarget.style.color = '#3d3c39' }}
             >
-              {t('pricing.custom_cta')}
+              {t.custom.cta}
             </a>
           </div>
         </div>
@@ -171,7 +164,7 @@ export function PricingSection() {
           textAlign: 'center', marginTop: '40px',
           fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'var(--ml-gray-500)',
         }}>
-          {t('pricing.trust_line')}
+          {t.trustLine}
         </p>
       </div>
     </section>
@@ -181,7 +174,7 @@ export function PricingSection() {
 function PricingCard({
   plan, price, perMonth, billingNote,
 }: {
-  plan: { tag: string; name: string; desc: string; monthly: number; badge: string | null; badgeNote: string | null; features: string[]; cta: string; featured: boolean; href: string; note?: string }
+  plan: { tag: string; name: string; desc: string; monthly: number; badge: string | null; badgeNote: string | null; features: readonly string[]; cta: string; featured: boolean; href: string; note?: string }
   price: number
   perMonth: string
   billingNote: string

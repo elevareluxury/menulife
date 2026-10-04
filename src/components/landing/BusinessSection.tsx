@@ -1,16 +1,14 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { UtensilsCrossed, ShoppingBag, CalendarDays } from 'lucide-react'
+import { useLandingT } from '@/i18n/app/landing'
 
 declare const gsap: any
 
 const VERTICALS = [
   {
     Icon: UtensilsCrossed,
-    tag: 'Gastronomía',
-    title: 'Digitaliza la experiencia de tus clientes.',
-    features: ['Menú digital QR sin app', 'Gestión de pedidos y mesas', 'Pantalla de cocina (KDS)', 'Delivery y takeaway'],
-    cta: 'Explorar Gastronomía',
+    key: 'food',
     href: '/register',
     color: '#F4705A',
     bg: 'rgba(244,112,90,0.05)',
@@ -18,10 +16,7 @@ const VERTICALS = [
   },
   {
     Icon: ShoppingBag,
-    tag: 'Retail',
-    title: 'Muestra tus productos y genera más ventas.',
-    features: ['Catálogo digital con fotos', 'Gestión de inventario', 'Punto de venta integrado', 'Analytics de ventas'],
-    cta: 'Explorar Retail',
+    key: 'retail',
     href: '/register',
     color: '#3B82F6',
     bg: 'rgba(59,130,246,0.05)',
@@ -29,18 +24,16 @@ const VERTICALS = [
   },
   {
     Icon: CalendarDays,
-    tag: 'Servicios',
-    title: 'Convierte visitas en clientes.',
-    features: ['Agenda y gestión de turnos', 'CRM de clientes', 'Membresías y paquetes', 'Presupuestos y cotizaciones'],
-    cta: 'Explorar Servicios',
+    key: 'services',
     href: '/register',
     color: '#8B5CF6',
     bg: 'rgba(139,92,246,0.05)',
     border: 'rgba(139,92,246,0.18)',
   },
-]
+] as const
 
 export function BusinessSection() {
+  const t = useLandingT().business
   useEffect(() => {
     if (typeof gsap === 'undefined') return
     const ST = (window as any).ScrollTrigger
@@ -73,13 +66,13 @@ export function BusinessSection() {
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',
             fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
-          }}>MYCEN BUSINESS</p>
+          }}>{t.label}</p>
           <h2 style={{
             fontFamily: 'var(--font-syne)', fontWeight: 800,
             fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
             lineHeight: 1.1, margin: '0 0 16px',
-          }}>Una plataforma adaptada{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>a tu industria.</em>
+          }}>{t.title}{' '}
+            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
           </h2>
         </div>
 
@@ -89,9 +82,9 @@ export function BusinessSection() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '24px',
         }}>
-          {VERTICALS.map(({ Icon, tag, title, features, cta, href, color, bg, border }) => (
+          {VERTICALS.map(({ Icon, key, href, color, bg, border }) => ({ ...t[key], Icon, key, href, color, bg, border })).map(({ Icon, key, tag, title, features, cta, href, color, bg, border }) => (
             <div
-              key={tag}
+              key={key}
               data-biz-card
               className="liquid-glass"
               style={{
