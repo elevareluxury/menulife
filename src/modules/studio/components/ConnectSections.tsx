@@ -11,7 +11,7 @@ import { useStudioT } from '@/i18n/app/studio'
 
 /** Tarjeta de identidad en PNG (clara u oscura) con QR al perfil (?src=card para medirla). */
 export function IdentityCardSection() {
-  const { profile, publicUrl } = useStudio()
+  const { profile, publicUrl, handle } = useStudio()
   const x = useStudioT().exchange
   const [mode, setMode] = useState<CardMode>(profile.theme?.mode === 'light' ? 'light' : 'dark')
   const [preview, setPreview] = useState<{ key: string; url: string } | null>(null)
@@ -28,7 +28,7 @@ export function IdentityCardSection() {
     let objectUrl: string | null = null
     const timer = window.setTimeout(() => {
       renderIdentityCard({
-        name: profile.display_name || profile.username, descriptor: profile.descriptor, urlLabel,
+        name: profile.display_name || handle, descriptor: profile.descriptor, urlLabel,
         qrSvg: svg, avatarUrl: profile.avatar_url, mode,
       }).then(b => {
         if (cancelled) return
@@ -43,14 +43,14 @@ export function IdentityCardSection() {
       window.clearTimeout(timer)
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
-  }, [key, mode, profile.display_name, profile.username, profile.descriptor, profile.avatar_url, urlLabel])
+  }, [key, mode, profile.display_name, handle, profile.descriptor, profile.avatar_url, urlLabel])
 
   function download() {
     if (!blob.current) return
     const url = URL.createObjectURL(blob.current)
     const a = document.createElement('a')
     a.href = url
-    a.download = `mycen-${profile.username}-${mode === 'light' ? 'clara' : 'oscura'}.png`
+    a.download = `mycen-${handle.replace('/', '-')}-${mode === 'light' ? 'clara' : 'oscura'}.png`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -87,12 +87,12 @@ export function IdentityCardSection() {
 
 /** Presentación corta para copiar o mandar por WhatsApp. Se puede editar antes (no se guarda). */
 export function IntroSection() {
-  const { profile, publicUrl } = useStudio()
+  const { profile, publicUrl, handle } = useStudio()
   const x = useStudioT().exchange
   const { copied, copy } = useCopy()
   const hasBio = !!profile.bio?.trim()
   const [long, setLong] = useState(false)
-  const generated = buildIntro(x, profile.display_name || profile.username, profile.descriptor, long && hasBio ? profile.bio : null, publicUrl)
+  const generated = buildIntro(x, profile.display_name || handle, profile.descriptor, long && hasBio ? profile.bio : null, publicUrl)
   // Lo editado vale mientras no cambie el texto generado (ej. al cambiar entre corta/con bio)
   const [edit, setEdit] = useState<{ base: string; text: string } | null>(null)
   const text = edit?.base === generated ? edit.text : generated

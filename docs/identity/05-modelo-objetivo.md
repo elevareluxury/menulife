@@ -68,5 +68,5 @@ Se mantienen `user_id` (lo usan las políticas RLS), `username` (P1: el username
 |---|---|
 | 3 | RPC `publish_space`, `restore_space_version`; `get_public_profile` lee `published_version_id`; `visibility`; HTML para buscadores desde el snapshot; Studio con "Publicar" y "cambios sin publicar" |
 | 5 ✅ | CRUD de proyectos (`content_objects` + `content_blocks`), RPC pública de proyecto, módulos `project`/`portfolio` (`20261009000001_identity_projects.sql`) |
-| 10 | Spaces secundarios (`/username/slug`) y Spaces de marca con username propio |
+| 10 ✅ | Spaces secundarios (`/username/slug`: `space_slug`, sin username), tope de 5, `duplicate_space`, archivar (`20261012000001_identity_spaces.sql`). Username propio para Spaces de marca: pendiente |
 | — | Exportar y borrar la cuenta deben incluir `identities`, `profile_versions` y contenido (Fase 3, junto con el Switch) |

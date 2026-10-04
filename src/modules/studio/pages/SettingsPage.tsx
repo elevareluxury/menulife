@@ -6,6 +6,7 @@ import { useStudio } from '../StudioContext'
 import { deleteMyAccount, exportMyData, friendlyError, loadVersions, updateProfile } from '../lib/studioApi'
 import type { SpaceVersion } from '../lib/studioTypes'
 import { publicBaseUrl } from '../lib/preview'
+import { normalizeSpaceSlug, spaceSlugIssue } from '../lib/spaces'
 import { normalizeUsername, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
 import { Button, ConfirmDialog, PageHeader, SelectField, TextField } from '../components/ui'
 import { ProfileSaveIndicator, StatusPill } from '../components/shared'
@@ -15,33 +16,13 @@ import { useAppLang } from '@/i18n/app/store'
 import { savePrefs, usePrefs } from '@/lib/prefs'
 
 export function SettingsPage() {
-  const { profile, patchProfile, replaceProfile, userId, business, publish, publishing } = useStudio()
-  const [username, setUsername] = useState(profile.username)
-  const [confirm, setConfirm] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
+  const { profile, patchProfile, userId, business, publish, publishing } = useStudio()
   const [confirmPause, setConfirmPause] = useState(false)
-  const status = useUsernameCheck(username, profile.username)
-  const host = publicBaseUrl().replace(/^https?:\/\//, '')
   const t = useStudioT()
   const st = t.settings
   const appLang = usePrefs(p => p.language)
   const [langError, setLangError] = useState<string | null>(null)
   const langOptions = APP_LANGS.map(code => ({ value: code, label: LANG_INFO[code].native }))
-
-  async function changeUsername() {
-    setSaving(true); setError(null)
-    try {
-      const saved = await updateProfile(profile.id, { username })
-      replaceProfile({ ...profile, username: saved.username })
-      setDone(true)
-      setConfirm(false)
-    } catch (e) {
-      setError(friendlyError(e))
-      setConfirm(false)
-    } finally { setSaving(false) }
-  }
 
   const isPublished = profile.status === 'published'
 
@@ -66,17 +47,9 @@ export function SettingsPage() {
 
       <VersionsSection />
 
-      <section className="st-card st-stack">
-        <h2 className="st-card-title" style={{ margin: 0 }}>{st.username}</h2>
-        <TextField label={st.yourAddress} value={username}
-          onChange={v => { setUsername(normalizeUsername(v)); setDone(false) }}
-          help={<>{host}/<strong>{username || '…'}</strong> · {usernameMessage(t, status)}</>}
-          error={['taken', 'reserved', 'invalid'].includes(status) ? usernameMessage(t, status) : error} />
-        {done && <p className="st-help" role="status" style={{ margin: 0 }}>{st.usernameDone}</p>}
-        <div>
-          <Button variant="primary" disabled={status !== 'available'} onClick={() => setConfirm(true)}>{st.changeUsername}</Button>
-        </div>
-      </section>
+      {profile.username !== null
+        ? <UsernameSection key={profile.id} current={profile.username} />
+        : <SpaceAddressSection key={profile.id} current={profile.space_slug ?? ''} />}
 
       <section className="st-card st-stack">
         <h2 className="st-card-title" style={{ margin: 0 }}>{st.language}</h2>
@@ -96,13 +69,6 @@ export function SettingsPage() {
 
       <PrivacySection userId={userId} hasBusiness={!!business} />
 
-      {confirm && (
-        <ConfirmDialog
-          title={st.confirmUsernameTitle}
-          message={st.confirmUsernameText(`${host}/${username}`, profile.username)}
-          confirmLabel={st.change} loading={saving}
-          onConfirm={changeUsername} onCancel={() => setConfirm(false)} />
-      )}
       {confirmPause && (
         <ConfirmDialog
           title={st.confirmPauseTitle}
@@ -112,6 +78,104 @@ export function SettingsPage() {
           onCancel={() => setConfirmPause(false)} />
       )}
     </>
+  )
+}
+
+// ── Dirección ─────────────────────────────────────────────────────────────
+
+/** Username de un Space raíz (el principal o un negocio). Los usernames viejos redirigen. */
+function UsernameSection({ current }: { current: string }) {
+  const { profile, replaceProfile, reloadSpaces } = useStudio()
+  const [username, setUsername] = useState(current)
+  const [confirm, setConfirm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
+  const status = useUsernameCheck(username, current)
+  const host = publicBaseUrl().replace(/^https?:\/\//, '')
+  const t = useStudioT()
+  const st = t.settings
+
+  async function changeUsername() {
+    setSaving(true); setError(null)
+    try {
+      const saved = await updateProfile(profile.id, { username })
+      replaceProfile({ ...profile, username: saved.username })
+      void reloadSpaces()
+      setDone(true)
+      setConfirm(false)
+    } catch (e) {
+      setError(friendlyError(e))
+      setConfirm(false)
+    } finally { setSaving(false) }
+  }
+
+  return (
+    <section className="st-card st-stack">
+      <h2 className="st-card-title" style={{ margin: 0 }}>{st.username}</h2>
+      <TextField label={st.yourAddress} value={username}
+        onChange={v => { setUsername(normalizeUsername(v)); setDone(false) }}
+        help={<>{host}/<strong>{username || '…'}</strong> · {usernameMessage(t, status)}</>}
+        error={['taken', 'reserved', 'invalid'].includes(status) ? usernameMessage(t, status) : error} />
+      {done && <p className="st-help" role="status" style={{ margin: 0 }}>{st.usernameDone}</p>}
+      <div>
+        <Button variant="primary" disabled={status !== 'available'} onClick={() => setConfirm(true)}>{st.changeUsername}</Button>
+      </div>
+      {confirm && (
+        <ConfirmDialog
+          title={st.confirmUsernameTitle}
+          message={st.confirmUsernameText(`${host}/${username}`, current)}
+          confirmLabel={st.change} loading={saving}
+          onConfirm={changeUsername} onCancel={() => setConfirm(false)} />
+      )}
+    </section>
+  )
+}
+
+/** Dirección de un Space secundario: /{principal}/{slug} (Fase 10). El link viejo deja de funcionar. */
+function SpaceAddressSection({ current }: { current: string }) {
+  const { profile, replaceProfile, reloadSpaces, spaces, primaryUsername } = useStudio()
+  const [slug, setSlug] = useState(current)
+  const [confirm, setConfirm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
+  const host = publicBaseUrl().replace(/^https?:\/\//, '')
+  const t = useStudioT()
+  const s = t.spaces
+  const issue = slug === current ? null : spaceSlugIssue(slug, spaces, profile.id)
+
+  async function changeSlug() {
+    setSaving(true); setError(null)
+    try {
+      const saved = await updateProfile(profile.id, { space_slug: slug })
+      replaceProfile({ ...profile, space_slug: saved.space_slug })
+      void reloadSpaces()
+      setDone(true)
+    } catch (e) {
+      setError(friendlyError(e))
+    } finally { setSaving(false); setConfirm(false) }
+  }
+
+  return (
+    <section className="st-card st-stack">
+      <h2 className="st-card-title" style={{ margin: 0 }}>{s.address}</h2>
+      <TextField label={s.addressLabel} value={slug}
+        onChange={v => { setSlug(normalizeSpaceSlug(v)); setDone(false) }}
+        help={<span dir="ltr">{host}/{primaryUsername}/<strong>{slug || '…'}</strong></span>}
+        error={issue ? s.slugIssue[issue] : error} />
+      {done && <p className="st-help" role="status" style={{ margin: 0 }}>{s.addressDone}</p>}
+      <div>
+        <Button variant="primary" disabled={slug === current || !!issue} onClick={() => setConfirm(true)}>{s.changeAddress}</Button>
+      </div>
+      {confirm && (
+        <ConfirmDialog
+          title={s.confirmAddressTitle}
+          message={s.confirmAddressText(`${host}/${primaryUsername}/${slug}`, `${host}/${primaryUsername}/${current}`)}
+          confirmLabel={t.settings.change} loading={saving}
+          onConfirm={changeSlug} onCancel={() => setConfirm(false)} />
+      )}
+    </section>
   )
 }
 

@@ -26,6 +26,8 @@ interface PublicProject {
 
 interface PublicProfile {
   username: string
+  /** "ana" o "ana/estudio" (Space secundario, Fase 10) */
+  handle?: string
   display_name: string
   descriptor: string | null
   bio: string | null
@@ -183,13 +185,32 @@ function page(origin: string, path: string, title: string, description: string, 
   })
 }
 
+/** La app tal cual (index.html), para rutas que no son perfiles. */
+async function spa(origin: string): Promise<Response> {
+  try {
+    const res = await fetch(`${origin}/index.html`)
+    if (res.ok) {
+      return new Response(await res.text(), { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } })
+    }
+  } catch { /* abajo */ }
+  return Response.redirect(`${origin}/`, 302)
+}
+
 export default async function handler(req: Request): Promise<Response> {
   const reqUrl = new URL(req.url)
   const origin = `${reqUrl.protocol}//${reqUrl.host}`
   const slug = (reqUrl.searchParams.get('slug') ?? '').toLowerCase().trim()
   const projectSlug = reqUrl.searchParams.get('project')?.toLowerCase().trim() ?? null
-  const generic = () => page(origin, `/${slug}`, 'Mycen', 'Tu identidad digital, todo en un solo lugar.', null)
+  // Space secundario: /{username}/{space} (Fase 10)
+  const space = reqUrl.searchParams.get('space')?.toLowerCase().trim() ?? null
+  const handle = space ? `${slug}/${space}` : slug
+  const generic = () => page(origin, `/${handle}`, 'Mycen', 'Tu identidad digital, todo en un solo lugar.', null)
 
+  if (space !== null) {
+    // Las rutas de la app con dos segmentos (/r/{menú}, /dashboard/…, /life/…) siguen siendo la app
+    if (RESERVED.has(slug) || !/^[a-z0-9][a-z0-9_-]{0,62}$/.test(slug)) return spa(origin)
+    if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(space)) return generic()
+  }
   if (!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(slug) || RESERVED.has(slug)) return generic()
 
   const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {}
@@ -206,7 +227,7 @@ export default async function handler(req: Request): Promise<Response> {
     const res = await fetch(`${supabaseUrl}/rest/v1/rpc/get_public_profile`, {
       method: 'POST',
       headers: { apikey: anonKey, authorization: `Bearer ${anonKey}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ p_username: slug }),
+      body: JSON.stringify({ p_username: handle }),
     })
     if (!res.ok) return generic()
     const data = (await res.json()) as (PublicProfile & { redirect?: string }) | null
@@ -216,7 +237,7 @@ export default async function handler(req: Request): Promise<Response> {
 
     const title = data.descriptor ? `${data.display_name} · ${data.descriptor}` : data.display_name
     const description = (data.bio ?? data.descriptor ?? 'Mi identidad en Mycen.').slice(0, 200)
-    const path = `/${data.username}`
+    const path = `/${data.handle ?? data.username}`
     const { html, jsonLd } = profileBody(data, `${origin}${path}`)
     return page(origin, path, title, description, data.cover_url ?? data.avatar_url,
       { body: html, jsonLd, noindex: data.visibility === 'unlisted' })

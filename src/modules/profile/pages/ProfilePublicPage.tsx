@@ -25,7 +25,9 @@ function setMeta(name: string, content: string) {
 }
 
 export function ProfilePublicPage() {
-  const { slug = '' } = useParams<{ slug: string }>()
+  const { slug = '', space } = useParams<{ slug: string; space?: string }>()
+  // "ana" o "ana/estudio" (Space secundario, Fase 10)
+  const handle = space ? `${slug}/${space}` : slug
   const navigate = useNavigate()
   // El resultado se guarda junto a la clave que lo pidió: si cambia el slug, vuelve a "loading" sin setState en el effect
   const [loaded, setLoaded] = useState<{ key: string; state: LoadState } | null>(null)
@@ -37,8 +39,8 @@ export function ProfilePublicPage() {
   useEffect(() => {
     if (isReservedUsername(slug)) { navigate('/', { replace: true }); return }
     let cancelled = false
-    const key = `${slug}#${attempt}`
-    fetchPublicProfile(slug)
+    const key = `${handle}#${attempt}`
+    fetchPublicProfile(handle)
       .then(result => {
         if (cancelled) return
         if (result.kind === 'redirect') {
@@ -49,9 +51,9 @@ export function ProfilePublicPage() {
       })
       .catch(() => { if (!cancelled) setLoaded({ key, state: { kind: 'error' } }) })
     return () => { cancelled = true }
-  }, [slug, attempt, navigate])
+  }, [slug, handle, attempt, navigate])
 
-  const state: LoadState = loaded?.key === `${slug}#${attempt}` ? loaded.state : { kind: 'loading' }
+  const state: LoadState = loaded?.key === `${handle}#${attempt}` ? loaded.state : { kind: 'loading' }
 
   const profile = state.kind === 'found' ? state.profile : null
 

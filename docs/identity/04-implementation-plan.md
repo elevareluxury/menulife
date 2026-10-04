@@ -39,7 +39,7 @@ escritorio de 3 paneles (7), pantalla "Mis Spaces" (5, salvo demanda) y document
 | **7** ✅ | **Links avanzados y Connect** (1): grupos de links, link destacado, programación de visibilidad; tarjeta de identidad descargable (clara/oscura) y "presentación corta" para copiar; mostrar fuentes de tráfico en Analítica | Flujo A completo |
 | **8** ✅ | **Moderación** (12): botón "Denunciar" en la página pública, tabla de denuncias, revisión en super-admin, suspensión que oculta la página, reglas en `/terminos` | Una denuncia llega y se puede resolver |
 | **9** ✅ | **Apariencia**: modo automático, radios, fondos, estilo de tarjetas (siempre dentro del sistema de diseño) | Contraste y accesibilidad verificados |
-| **10** | **Mis Spaces** (5), cuando haya demanda: crear, duplicar, archivar, Space de marca con username propio | Flujo D (privacidad) en verde |
+| **10** ✅ | **Mis Spaces** (5): crear, duplicar, archivar. Hasta 5 Spaces; los secundarios viven dentro del principal (`/ana/estudio`), cada uno con su analítica. El username propio para Spaces de marca queda para más adelante (los negocios ya lo tienen) | Flujo D (privacidad) en verde |
 | **11** | **Editor de escritorio de 3 paneles** (7) | — |
 | — | **Plan Pro** (11): definir alcance y precio después de la Fase 3 | Decisión de negocio |
 

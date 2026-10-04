@@ -299,6 +299,13 @@ export function Menu({ label, items }: { label: string; items: MenuItem[] }) {
   }, [open])
 
   const close = () => { setOpen(false); trigger.current?.focus() }
+  // Si abajo no hay lugar (fin de la pantalla o la barra inferior del celular), se abre hacia arriba
+  const [up, setUp] = useState(false)
+  const show = () => {
+    const rect = trigger.current?.getBoundingClientRect()
+    setUp(!!rect && window.innerHeight - rect.bottom < 64 + items.length * 44 + 96)
+    setOpen(true)
+  }
 
   function onMenuKey(e: React.KeyboardEvent) {
     const buttons = [...(list.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ?? [])]
@@ -314,12 +321,12 @@ export function Menu({ label, items }: { label: string; items: MenuItem[] }) {
     <div ref={root} className="st-menu">
       <button ref={trigger} type="button" className="st-icon-btn" aria-label={label} aria-haspopup="menu"
         aria-expanded={open} aria-controls={open ? menuId : undefined}
-        onClick={() => setOpen(v => !v)}
-        onKeyDown={e => { if (e.key === 'ArrowDown') { e.preventDefault(); setOpen(true) } }}>
+        onClick={() => { if (open) setOpen(false); else show() }}
+        onKeyDown={e => { if (e.key === 'ArrowDown') { e.preventDefault(); show() } }}>
         <MoreHorizontal size={17} aria-hidden="true" />
       </button>
       {open && (
-        <div ref={list} id={menuId} role="menu" aria-label={label} className="st-menu-list" onKeyDown={onMenuKey}>
+        <div ref={list} id={menuId} role="menu" aria-label={label} className={`st-menu-list${up ? ' is-up' : ''}`} onKeyDown={onMenuKey}>
           {items.map(item => (
             <button key={item.label} type="button" role="menuitem" tabIndex={-1} disabled={item.disabled}
               className={item.danger ? 'is-danger' : undefined}

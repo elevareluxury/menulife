@@ -8,8 +8,9 @@ type RpcClient = {
 }
 const rpc = (fn: string, args: Record<string, unknown>) => (supabase as unknown as RpcClient).rpc(fn, args)
 
-export async function fetchPublicProfile(username: string): Promise<ProfileLookup> {
-  const { data, error } = await rpc('get_public_profile', { p_username: username })
+/** `handle`: "ana" o "ana/estudio" (Space secundario, Fase 10) */
+export async function fetchPublicProfile(handle: string): Promise<ProfileLookup> {
+  const { data, error } = await rpc('get_public_profile', { p_username: handle })
   if (error) throw new Error(error.message)
   if (!data) return { kind: 'not_found' }
 
@@ -38,6 +39,8 @@ export function trackProfileEvent(profileId: string, eventType: ProfileEventType
 
 export interface ContactCard {
   username: string
+  /** "ana" o "ana/estudio" (Fase 10) */
+  handle?: string
   name?: string
   title?: string
   organization?: string

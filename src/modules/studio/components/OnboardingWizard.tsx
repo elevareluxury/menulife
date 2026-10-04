@@ -83,7 +83,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
     ?? (key === 'email' ? ob.quick.email : key === 'website' ? ob.quick.website : key === 'address' ? ob.quick.address : ob.quick.tickets)
   const quickPlaceholder = (key: QuickKey) => (key === 'address' ? ob.addressPlaceholder : QUICK[key].placeholder)
 
-  const effectiveUsername = profile ? profile.username : touchedUsername ? username : normalizeUsername(name)
+  const effectiveUsername = profile ? profile.username ?? '' : touchedUsername ? username : normalizeUsername(name)
   const status = useUsernameCheck(profile ? '' : effectiveUsername)
 
   const save = (d: Draft) => writeDraft({ purpose, name, descriptor, username: touchedUsername ? username : undefined, ...d })
@@ -218,7 +218,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
         {step === 3 && (
           <div className="st-stack" style={{ marginTop: 18 }}>
             {profile ? (
-              <p className="st-subtitle">{ob.addressIs} <strong dir="ltr">{host}/{profile.username}</strong>. {ob.changeInSettings}</p>
+              <p className="st-subtitle">{ob.addressIs} <strong dir="ltr">{host}/{effectiveUsername}</strong>. {ob.changeInSettings}</p>
             ) : (
               <TextField label={t.settings.username} required value={effectiveUsername}
                 onChange={v => { setTouchedUsername(true); setUsername(normalizeUsername(v)); setError(null) }}

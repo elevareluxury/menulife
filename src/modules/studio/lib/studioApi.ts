@@ -4,6 +4,7 @@ import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import type {
   DailyStat, ProfilePatch, PublishState, SpaceVersion, StudioBusiness, StudioModule, StudioProfile,
 } from './studioTypes'
+import type { SpaceSummary } from './spaces'
 import { studioT } from '@/i18n/app/studio'
 import type { SourceRow } from './trafficSources'
 
@@ -23,6 +24,11 @@ export function friendlyError(err: unknown): string {
   if (msg.includes('REVISION_CONFLICT')) return e.conflict
   if (msg.includes('NAME_REQUIRED')) return e.nameRequired
   if (msg.includes('MODULE_LIMIT_REACHED')) return e.moduleLimit
+  if (msg.includes('SPACE_LIMIT_REACHED')) return e.spaceLimit
+  if (msg.includes('SPACE_SLUG_TAKEN') || msg.includes('profiles_space_slug_key')) return e.spaceSlugTaken
+  if (msg.includes('SPACE_SLUG_RESERVED')) return e.spaceSlugReserved
+  if (msg.includes('SPACE_SLUG_INVALID') || msg.includes('profiles_space_slug_format')) return e.spaceSlugInvalid
+  if (msg.includes('PRIMARY_NOT_ARCHIVABLE')) return e.primaryNotArchivable
   if (msg.includes('content_objects_identity_id_type_slug_key')) return e.projectSlugTaken
   if (msg.includes('content_objects_slug_check')) return e.projectSlugInvalid
   if (msg.includes('profiles_text_lengths') || msg.includes('profile_modules_sizes')) return e.tooLong
@@ -30,15 +36,48 @@ export function friendlyError(err: unknown): string {
   return e.generic
 }
 
-export async function loadMyProfile(userId: string): Promise<StudioProfile | null> {
-  const { data, error } = await db.from('profiles').select('*')
+const SPACE_FIELDS = 'id, username, space_slug, display_name, avatar_url, status, visibility, is_primary, restaurant_id, purpose, suspended_at, updated_at, published_version_id'
+
+/** Todos los Spaces de la cuenta (Fase 10): el principal primero. */
+export async function loadMySpaces(userId: string): Promise<SpaceSummary[]> {
+  const { data, error } = await db.from('profiles').select(SPACE_FIELDS)
     .eq('user_id', userId)
     .order('is_primary', { ascending: false })
     .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
   if (error) throw error
-  return data as StudioProfile | null
+  return (data ?? []) as SpaceSummary[]
+}
+
+/** Space nuevo dentro del principal: /{username}/{slug}. La base aplica el tope y las reglas del slug. */
+export async function createSpace(userId: string, input: { slug: string; name: string; purpose: string; locale: string }): Promise<StudioProfile> {
+  const { data, error } = await db.from('profiles').insert({
+    user_id: userId,
+    space_slug: input.slug,
+    username: null,
+    is_primary: false,
+    display_name: input.name.trim(),
+    purpose: input.purpose,
+    default_locale: input.locale,
+    status: 'draft',
+    onboarding_step: 5,
+    theme: { mode: 'dark', accent: '#F1F0E9', title_font: 'geist' },
+  }).select('*').single()
+  if (error) throw error
+  return data as StudioProfile
+}
+
+/** Copia un Space (datos, apariencia y módulos) como borrador nuevo. Devuelve el id. */
+export async function duplicateSpace(id: string, slug: string, name: string): Promise<string> {
+  const { data, error } = await db.rpc('duplicate_space', { p_profile_id: id, p_slug: slug, p_display_name: name })
+  if (error) throw error
+  return data as string
+}
+
+/** Archivar oculta el Space y libera un lugar; al restaurarlo vuelve sin publicar (hay que publicarlo de nuevo). */
+export async function setSpaceArchived(space: Pick<StudioProfile, 'id' | 'published_version_id'>, archived: boolean): Promise<void> {
+  const status = archived ? 'archived' : space.published_version_id ? 'unpublished' : 'draft'
+  const { error } = await db.from('profiles').update({ status }).eq('id', space.id)
+  if (error) throw error
 }
 
 export async function loadModules(profileId: string): Promise<StudioModule[]> {
@@ -79,7 +118,7 @@ export async function createProfile(userId: string, username: string, displayNam
  * Guarda cambios en la versión de trabajo. Con `expectedRevision`, sólo guarda si nadie más guardó
  * antes (otra pestaña o dispositivo): si la revisión cambió, falla con REVISION_CONFLICT.
  */
-export async function updateProfile(id: string, patch: ProfilePatch | { username: string }, expectedRevision?: number): Promise<StudioProfile> {
+export async function updateProfile(id: string, patch: ProfilePatch | { username: string } | { space_slug: string }, expectedRevision?: number): Promise<StudioProfile> {
   let req = db.from('profiles').update(patch).eq('id', id)
   if (expectedRevision !== undefined) req = req.eq('revision', expectedRevision)
   const { data, error } = await req.select('*')

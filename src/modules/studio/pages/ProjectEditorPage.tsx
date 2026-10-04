@@ -51,7 +51,7 @@ export function ProjectEditorPage() {
 }
 
 function ProjectEditor({ initial, initialBlocks }: { initial: StudioProject; initialBlocks: StudioBlock[] }) {
-  const { userId, profile, setProjects } = useStudio()
+  const { userId, profile, setProjects, primaryUsername } = useStudio()
   const t = useStudioT()
   const pt = t.projects
   const navigate = useNavigate()
@@ -239,7 +239,7 @@ function ProjectEditor({ initial, initialBlocks }: { initial: StudioProject; ini
     }
   }
 
-  const url = `${publicBaseUrl()}/${profile.username}/projects/${project.slug}`
+  const url = `${publicBaseUrl()}/${primaryUsername}/projects/${project.slug}`
   const slugValid = PROJECT_SLUG_RE.test(slugDraft)
   const titleMissing = !project.title.trim()
   const status = publishState?.status ?? project.status

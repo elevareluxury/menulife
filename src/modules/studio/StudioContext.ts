@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { PublicProfile } from '@/modules/profile/lib/profileTypes'
+import type { SpaceSummary } from './lib/spaces'
 import type {
   ProfilePatch, PublishState, SaveState, StudioBusiness, StudioModule, StudioProfile, StudioProject,
 } from './lib/studioTypes'
@@ -40,6 +41,16 @@ export interface StudioContextValue {
   publicUrl: string
   /** El perfil tal como lo vería un visitante (para la vista previa en vivo) */
   previewProfile: PublicProfile
+  /** Mis Spaces (Fase 10): todos los Spaces de la cuenta (el principal primero), incluidos los archivados */
+  spaces: SpaceSummary[]
+  /** Dirección del Space abierto sin barra: "ana" o "ana/estudio" */
+  handle: string
+  /** Username del Space principal (los proyectos viven en /{primaryUsername}/projects/…) */
+  primaryUsername: string
+  /** Abre otro Space en Studio (guarda lo pendiente antes) */
+  switchSpace: (id: string) => void
+  /** Vuelve a leer la lista de Spaces (después de crear, duplicar o archivar) */
+  reloadSpaces: () => Promise<void>
 }
 
 export const StudioContext = createContext<StudioContextValue | null>(null)

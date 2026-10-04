@@ -141,4 +141,22 @@ describe('api/og · proyectos', () => {
     mockRpc({ ...project, space: { ...project.space, visibility: 'unlisted' } })
     expect(await (await handler(projectReq('ana', 'cafe-luna'))).text()).toContain('content="noindex"')
   })
+  it('Space secundario (/ana/estudio): consulta su dirección y la usa como canónica (Fase 10)', async () => {
+    const fetchMock = mockRpc({ username: 'ana', handle: 'ana/estudio', display_name: 'Estudio Ana', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published' })
+    const html = await (await handler(new Request('https://mycen.id/api/og?slug=ana&space=estudio'))).text()
+    expect(JSON.parse(String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body))).toEqual({ p_username: 'ana/estudio' })
+    expect(html).toContain('<link rel="canonical" href="https://mycen.id/ana/estudio">')
+
+    mockRpc({ redirect: 'anita/estudio' })
+    const res = await handler(new Request('https://mycen.id/api/og?slug=ana&space=estudio'))
+    expect(res.headers.get('location')).toBe('https://mycen.id/anita/estudio')
+  })
+
+  it('las rutas de la app con dos segmentos (/r/{menú}) siguen siendo la app', async () => {
+    const fetchMock = vi.fn(async () => new Response('<!doctype html><div id="root"></div>', { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const html = await (await handler(new Request('https://mycen.id/api/og?slug=r&space=pizzeria'))).text()
+    expect(html).toContain('<div id="root"></div>')
+    expect(fetchMock).toHaveBeenCalledWith('https://mycen.id/index.html')
+  })
 })

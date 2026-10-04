@@ -8,7 +8,7 @@ import { isExternal, safeHref } from '../lib/safeUrl'
 import { isOpenNow } from '../lib/schedule'
 import { downloadVCard } from '../lib/vcard'
 import { ensureProfileFont } from '../lib/profileTheme'
-import type { ProfileLang, ProfileModule, PublicProfile, WeekSchedule } from '../lib/profileTypes'
+import { profileHandle, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
 import { publicModuleDef, type GroupProps } from './moduleRegistry'
 import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
@@ -47,7 +47,7 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
 }) {
   const t = ui(lang)
   const track: typeof trackProfileEvent = (...args) => { if (!preview) trackProfileEvent(...args) }
-  const profileUrl = `${window.location.origin}/${profile.username}`
+  const profileUrl = `${window.location.origin}/${profileHandle(profile)}`
   const name = tr(profile.display_name, profile.translations, 'display_name', lang)
   const descriptor = tr(profile.descriptor, profile.translations, 'descriptor', lang)
   const bio = tr(profile.bio, profile.translations, 'bio', lang)
@@ -169,7 +169,7 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
         <footer className="mp-footer">
           {t.footer} · <Link to="/register">{t.createYours}</Link>
           {!preview && !profile.is_owner && profile.status === 'published' && (
-            <div><ReportButton username={profile.username} lang={lang} /></div>
+            <div><ReportButton username={profileHandle(profile)} lang={lang} /></div>
           )}
         </footer>
       </div>

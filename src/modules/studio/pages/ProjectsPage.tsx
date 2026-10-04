@@ -15,7 +15,7 @@ function projectStatusLabel(p: Pick<StudioProject, 'status'>, t: ReturnType<type
 
 /** Studio → Proyectos: la biblioteca de proyectos de la identidad (Fase 5). */
 export function ProjectsPage() {
-  const { profile, projects, setProjects } = useStudio()
+  const { profile, primaryUsername, projects, setProjects } = useStudio()
   const t = useStudioT()
   const pt = t.projects
   const navigate = useNavigate()
@@ -59,7 +59,7 @@ export function ProjectsPage() {
                 : <span className="st-module-icon" aria-hidden="true"><FolderOpen size={17} /></span>}
               <Link to={`/studio/projects/${p.id}`} className="st-module-body" style={{ textDecoration: 'none' }}>
                 <div className="st-module-title">{p.title}</div>
-                <div className="st-module-sub">{projectStatusLabel(p, pt)} · /{profile.username}/projects/{p.slug}</div>
+                <div className="st-module-sub">{projectStatusLabel(p, pt)} · /{primaryUsername}/projects/{p.slug}</div>
               </Link>
             </li>
           ))}

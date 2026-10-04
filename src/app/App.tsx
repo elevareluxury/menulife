@@ -40,6 +40,7 @@ const StudioSettings  = lazy(() => import('@/modules/studio/pages/SettingsPage')
 const StudioProjects  = lazy(() => import('@/modules/studio/pages/ProjectsPage').then(m => ({ default: m.ProjectsPage })))
 const StudioProject   = lazy(() => import('@/modules/studio/pages/ProjectEditorPage').then(m => ({ default: m.ProjectEditorPage })))
 const StudioPreview   = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.PreviewPage })))
+const StudioSpaces    = lazy(() => import('@/modules/studio/pages/SpacesPage').then(m => ({ default: m.SpacesPage })))
 const StudioMore      = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.MorePage })))
 const SuperAdminPage   = lazy(() => import('./routes/super-admin').then(m => ({ default: m.SuperAdminPage })))
 const BusinessSettings = lazy(() => import('@/modules/settings/pages/BusinessSettings').then(m => ({ default: m.BusinessSettings })))
@@ -169,6 +170,7 @@ function App() {
             <Route path="analytics"  element={<StudioAnalytics />} />
             <Route path="settings"   element={<StudioSettings />} />
             <Route path="preview"    element={<StudioPreview />} />
+            <Route path="spaces"     element={<StudioSpaces />} />
             <Route path="more"       element={<StudioMore />} />
             <Route path="*"          element={<Navigate to="/studio" replace />} />
           </Route>
@@ -210,6 +212,8 @@ function App() {
           {/* Hub Público — /:slug debe ir antes del catch-all */}
           <Route path="/:slug" element={<ErrorBoundary><PublicSlugRoute /></ErrorBoundary>} />
           <Route path="/:slug/projects/:projectSlug" element={<ErrorBoundary><ProjectPublicPage /></ErrorBoundary>} />
+          {/* Space secundario dentro del principal: /ana/estudio (Identity Fase 10) */}
+          <Route path="/:slug/:space" element={<ErrorBoundary><ProfilePublicPage /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { BarChart3, ChevronRight, FolderOpen, LayoutGrid, LogOut, Palette, Settings, UserRound } from 'lucide-react'
+import { BarChart3, ChevronRight, FolderOpen, Layers, LayoutGrid, LogOut, Palette, Settings, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
 import { FullscreenPreviewButton, PreviewSwitcher } from '../components/PreviewPane'
@@ -31,6 +31,7 @@ export function MorePage() {
     { to: '/studio/appearance', label: t.nav.appearance, icon: Palette },
     { to: '/studio/analytics', label: t.nav.analytics, icon: BarChart3 },
     { to: '/studio/settings', label: t.nav.settings, icon: Settings },
+    { to: '/studio/spaces', label: t.nav.spaces, icon: Layers },
   ]
   return (
     <>
