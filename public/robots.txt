@@ -1,0 +1,23 @@
+# Mycen — perfiles, Spaces y proyectos públicos se pueden indexar; lo privado de cada cuenta, no.
+# Las rutas privadas van con "/" o "$" para no bloquear usernames que empiezan igual (ej. /lifestyle).
+User-agent: *
+Allow: /
+Disallow: /studio/
+Disallow: /studio$
+Disallow: /life/
+Disallow: /life$
+Disallow: /dashboard/
+Disallow: /dashboard$
+Disallow: /super-admin/
+Disallow: /super-admin$
+Disallow: /onboarding$
+Disallow: /portal/
+Disallow: /kitchen/
+Disallow: /mozo/
+Disallow: /waiter/
+Disallow: /delivery/
+Disallow: /q/
+Disallow: /api/
+Disallow: /auth/
+
+Sitemap: https://mycen.id/sitemap.xml

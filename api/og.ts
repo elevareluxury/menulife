@@ -21,10 +21,12 @@ interface PublicProject {
   status?: string
   visibility?: string
   blocks?: { type: string; data: Record<string, unknown> | null }[]
-  space?: { username: string; display_name: string | null; avatar_url: string | null; visibility?: string }
+  space?: { username: string; display_name: string | null; avatar_url: string | null; visibility?: string; default_locale?: string | null }
 }
 
 interface PublicProfile {
+  /** Idioma en que el dueño escribe (va al <html lang>, Lanzamiento L2) */
+  default_locale?: string | null
   username: string
   /** "ana" o "ana/estudio" (Space secundario, Fase 10) */
   handle?: string
@@ -155,13 +157,18 @@ function projectBody(p: PublicProject, url: string, profileUrl: string, owner: s
   return { html: parts.join('\n'), jsonLd: JSON.stringify(ld).replace(/</g, '\\u003c') }
 }
 
+/** Código de idioma seguro para <html lang> (ej. "es", "pt", "zh"); si no hay o no es válido, español */
+function htmlLang(v: string | null | undefined): string {
+  return v && /^[a-z]{2}(-[A-Za-z]{2})?$/.test(v) ? v : 'es'
+}
+
 function page(origin: string, path: string, title: string, description: string, image: string | null,
-  extra: { body?: string; jsonLd?: string; noindex?: boolean; type?: 'profile' | 'article' } = {}): Response {
+  extra: { body?: string; jsonLd?: string; noindex?: boolean; type?: 'profile' | 'article'; lang?: string | null } = {}): Response {
   const url = `${origin}${path}`
   // Sin foto ni portada: la imagen de marca (1200×630)
   const img = image ?? `${origin}/og-image.png`
   const html = `<!doctype html>
-<html lang="es"><head>
+<html lang="${htmlLang(extra.lang)}"><head>
 <meta charset="utf-8">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
@@ -241,7 +248,7 @@ export default async function handler(req: Request): Promise<Response> {
     const path = `/${data.handle ?? data.username}`
     const { html, jsonLd } = profileBody(data, `${origin}${path}`)
     return page(origin, path, title, description, data.cover_url ?? data.avatar_url,
-      { body: html, jsonLd, noindex: data.visibility === 'unlisted' })
+      { body: html, jsonLd, noindex: data.visibility === 'unlisted', lang: data.default_locale })
   } catch {
     return generic()
   }
@@ -267,7 +274,7 @@ async function projectPage(origin: string, supabaseUrl: string, anonKey: string,
     const { html, jsonLd } = projectBody(data, `${origin}${path}`, `${origin}/${data.space.username}`, owner)
     const description = (data.summary ?? `${data.title} · ${owner}`).slice(0, 200)
     return page(origin, path, `${data.title} · ${owner}`, description, data.cover_url, {
-      body: html, jsonLd, type: 'article',
+      body: html, jsonLd, type: 'article', lang: data.space.default_locale,
       noindex: data.visibility === 'unlisted' || data.space.visibility === 'unlisted',
     })
   } catch {
