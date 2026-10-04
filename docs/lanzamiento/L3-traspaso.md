@@ -14,18 +14,13 @@ muestra una identidad de ejemplo. E2E en `tests/e2e/landing.spec.ts` (inglés, �
 Pendiente del dueño: mail de contacto (el viejo `contacto@menulife.digital` se sacó del pie) y moneda de los precios
 ("$70 / $150").
 
-## L3b — registro, login y contraseñas
+## L3b — registro, login y contraseñas ✅
 
-`src/app/routes/{login,register}.tsx`, `src/modules/auth/components/{LoginForm,RegisterForm}.tsx`,
-`src/pages/{ForgotPassword,ResetPassword,AuthCallback}.tsx` tienen el español escrito en el código. Crear namespace
-`src/i18n/app/auth/` (12 idiomas) y guardar el idioma en `options.data.locale` al registrarse (lo usan los mails).
+Namespace `src/i18n/app/auth/` (12 idiomas), selector de idioma y RTL en login, registro y recuperar contraseña; errores de
+Supabase traducidos; `user_metadata.locale` al registrarse y al cambiar el idioma en Ajustes. E2E en `tests/e2e/auth.spec.ts`.
 
-## L3c — mails con Resend
+## L3c — mails con Resend ✅ (código) · pasos del dueño pendientes
 
-1. Resend → Domains → Add `mycen.id` → cargar los registros DNS (SPF, DKIM y el MX de rebote) → Verify.
-2. Resend → API Keys → crear una con permiso "Sending access" limitada a `mycen.id`.
-3. Supabase → Authentication → Emails → SMTP Settings: host `smtp.resend.com`, puerto `465`, usuario `resend`,
-   contraseña = la API key, remitente `hola@mycen.id` (o el que elija el dueño), nombre "Mycen".
-4. Plantillas (confirmar cuenta, recuperar contraseña, cambio de mail, magic link) en los 12 idiomas con
-   `{{ if eq .Data.locale "en" }}…{{ end }}` sobre el idioma guardado en L3b; dejarlas en `supabase/templates/` para pegar.
-5. Subir el límite de mails por hora en Supabase → Authentication → Rate Limits.
+Plantillas (confirmar cuenta, recuperar contraseña, enlace mágico, cambio de email, reautenticación) en los 12 idiomas
+en `supabase/templates/`, generadas por `scripts/build-email-templates.mjs` y probadas con el motor de plantillas de Go
+(con y sin `locale`). Pasos para Resend y Supabase (dominio, API key, SMTP, plantillas, límites): `supabase/templates/LEEME.md`.

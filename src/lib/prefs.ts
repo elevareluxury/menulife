@@ -86,6 +86,10 @@ export async function savePrefs(userId: string, patch: Partial<Prefs>): Promise<
     propagate(back)
     throw error
   }
+  // Los mails de Supabase (confirmar cuenta, recuperar contraseña) eligen idioma con user_metadata.locale
+  if (patch.language && patch.language !== prev.language) {
+    void supabase.auth.updateUser({ data: { locale: patch.language } }).catch(() => { /* sin red: queda el anterior */ })
+  }
 }
 
 /** Para visitantes o antes de iniciar sesión: sólo cambia el idioma en este dispositivo. */

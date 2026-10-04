@@ -1,0 +1,98 @@
+{{/* Mycen — Change Email Address (cambio_de_email). Generado por scripts/build-email-templates.mjs: editar allá, no acá. */}}
+{{ $l := "es" }}{{ with .Data }}{{ with .locale }}{{ $l = . }}{{ end }}{{ end }}<!doctype html>
+<html lang="{{ $l }}" dir="{{ if eq $l "ar" }}rtl{{ else }}ltr{{ end }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"></head>
+<body style="margin:0;padding:0;background:#f4f3ef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f3ef;padding:32px 16px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;padding:36px 32px;text-align:start">
+<tr><td style="padding-bottom:24px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:#0F1115">Mycen</td></tr>
+<tr><td>{{ if eq $l "en" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Confirm your email change</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">You asked to change your account email from {{ .Email }} to {{ .NewEmail }}. Confirm it with the button.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Confirm new email</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">If the button doesn’t work, copy this link into your browser:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">If this wasn’t you, you can ignore this email.</p>
+{{ else if eq $l "pt" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Confirme a troca de e-mail</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Você pediu para trocar o e-mail da sua conta de {{ .Email }} para {{ .NewEmail }}. Confirme pelo botão.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Confirmar novo e-mail</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Se o botão não funcionar, copie este link no seu navegador:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Se não foi você, pode ignorar este e-mail.</p>
+{{ else if eq $l "fr" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Confirmez le changement d’e-mail</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Vous avez demandé à changer l’e-mail de votre compte de {{ .Email }} à {{ .NewEmail }}. Confirmez avec le bouton.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Confirmer le nouvel e-mail</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Si ce n’était pas vous, vous pouvez ignorer cet e-mail.</p>
+{{ else if eq $l "de" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">E-Mail-Änderung bestätigen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Du möchtest die E-Mail deines Kontos von {{ .Email }} auf {{ .NewEmail }} ändern. Bestätige es mit dem Button.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Neue E-Mail bestätigen</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Wenn du das nicht warst, kannst du diese E-Mail ignorieren.</p>
+{{ else if eq $l "it" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Conferma il cambio di email</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Hai chiesto di cambiare l’email del tuo account da {{ .Email }} a {{ .NewEmail }}. Confermalo con il pulsante.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Conferma nuova email</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Se il pulsante non funziona, copia questo link nel browser:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Se non sei stato tu, puoi ignorare questa email.</p>
+{{ else if eq $l "zh" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">确认更换邮箱</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">你申请将账户邮箱从 {{ .Email }} 更换为 {{ .NewEmail }}。请点击按钮确认。</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">确认新邮箱</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">如果按钮无法使用，请将此链接复制到浏览器中：</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">如果这不是你本人的操作，请忽略这封邮件。</p>
+{{ else if eq $l "ja" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">メールアドレス変更の確認</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">アカウントのメールアドレスを {{ .Email }} から {{ .NewEmail }} に変更するリクエストを受け付けました。ボタンから確認してください。</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">新しいメールアドレスを確認する</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">ボタンが使えない場合は、このリンクをブラウザに貼り付けてください：</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">お心当たりがない場合は、このメールを無視してください。</p>
+{{ else if eq $l "ko" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">이메일 변경 확인</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">계정 이메일을 {{ .Email }}에서 {{ .NewEmail }}(으)로 변경하도록 요청하셨습니다. 버튼을 눌러 확인하세요.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">새 이메일 인증하기</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">버튼이 작동하지 않으면 이 링크를 브라우저에 붙여 넣으세요:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">본인이 요청하지 않았다면 이 메일을 무시하셔도 됩니다.</p>
+{{ else if eq $l "hi" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">ईमेल बदलने की पुष्टि करें</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">आपने अपने अकाउंट का ईमेल {{ .Email }} से {{ .NewEmail }} में बदलने का अनुरोध किया है। बटन से पुष्टि करें।</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">नए ईमेल की पुष्टि करें</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">अगर बटन काम न करे, तो यह लिंक अपने ब्राउज़र में कॉपी करें:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">अगर यह आपने नहीं किया, तो इस ईमेल को अनदेखा कर दें।</p>
+{{ else if eq $l "ar" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">أكّد تغيير البريد الإلكتروني</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">طلبت تغيير بريد حسابك من {{ .Email }} إلى {{ .NewEmail }}. أكّد ذلك بالزر.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">تأكيد البريد الجديد</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">إذا لم يعمل الزر، انسخ هذا الرابط في متصفحك:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">إذا لم تكن أنت، يمكنك تجاهل هذه الرسالة.</p>
+{{ else if eq $l "ru" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Подтвердите смену почты</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Вы запросили смену почты аккаунта с {{ .Email }} на {{ .NewEmail }}. Подтвердите кнопкой.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Подтвердить новую почту</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Если кнопка не работает, скопируйте эту ссылку в браузер:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Если это были не вы, просто проигнорируйте это письмо.</p>
+{{ else }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Confirmá el cambio de email</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Pediste cambiar el email de tu cuenta de {{ .Email }} a {{ .NewEmail }}. Confirmalo con el botón.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Confirmar nuevo email</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Si el botón no funciona, copiá este link en tu navegador:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Si no fuiste vos, podés ignorar este mail.</p>
+{{ end }}</td></tr>
+</table>
+<p style="margin:16px 0 0;font-size:12px;color:#80868b">Mycen · <a href="https://mycen.id" style="color:#80868b">mycen.id</a></p>
+</td></tr></table>
+</body>
+</html>

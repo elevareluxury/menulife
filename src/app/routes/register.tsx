@@ -1,8 +1,12 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import { authErrorMessage } from '@/lib/authErrors'
+import { LanguageSelect } from '@/components/ui/LanguageSelect'
+import { useAuthT } from '@/i18n/app/auth'
+import { useAppLang } from '@/i18n/app/store'
+import { useLangDir } from '@/i18n/app/useLangDir'
 
 const CORAL = '#F4705A'
 
@@ -24,16 +28,18 @@ function DarkInput({
   ...props
 }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   const [focused, setFocused] = useState(false)
+  const id = useId()
   return (
     <div>
-      <label style={{
+      <label htmlFor={id} style={{
         display: 'block', fontFamily: 'var(--font-jakarta)', fontSize: '11px',
-        fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: '6px',
+        fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: '6px',
         letterSpacing: '0.06em', textTransform: 'uppercase',
       }}>
         {label}
       </label>
       <input
+        id={id}
         {...props}
         onFocus={e => { setFocused(true); props.onFocus?.(e) }}
         onBlur={e => { setFocused(false); props.onBlur?.(e) }}
@@ -48,6 +54,9 @@ function DarkInput({
 }
 
 export function RegisterPage() {
+  const t = useAuthT()
+  const r = t.register
+  useLangDir()
   const navigate = useNavigate()
   const [name,     setName]     = useState('')
   const [email,    setEmail]    = useState('')
@@ -59,12 +68,12 @@ export function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!name.trim()) { setError('Escribí tu nombre.'); return }
+    if (!name.trim()) { setError(r.needName); return }
     if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
-      setError('La contraseña necesita al menos 8 caracteres, con letras y números.')
+      setError(r.weakPassword)
       return
     }
-    if (!accepted) { setError('Para crear tu cuenta, aceptá los Términos y la Política de privacidad.'); return }
+    if (!accepted) { setError(r.needTerms); return }
 
     setLoading(true)
     try {
@@ -72,25 +81,26 @@ export function RegisterPage() {
         email,
         password,
         options: {
-          data: { name: name.trim(), terms_accepted_at: new Date().toISOString() },
+          // locale: el idioma de los mails de Supabase (plantillas en supabase/templates)
+          data: { name: name.trim(), terms_accepted_at: new Date().toISOString(), locale: useAppLang.getState().lang },
           emailRedirectTo: window.location.origin + '/auth/callback',
         },
       })
       if (authError) throw authError
-      if (!authData.user) throw new Error('No se pudo crear el usuario')
+      if (!authData.user) throw new Error('signup without user')
 
       // Email confirmation required — no session yet
       if (!authData.session) {
-        toast.success('¡Cuenta creada! Revisá tu email para confirmar.')
+        toast.success(r.checkEmail)
         navigate('/login')
         return
       }
 
-      toast.success('¡Bienvenido a Mycen!')
+      toast.success(r.welcome)
       // Onboarding guiado: Studio lo muestra a quien todavía no tiene identidad
       navigate('/studio')
     } catch (err: unknown) {
-      setError(authErrorMessage(err, 'No pudimos crear tu cuenta. Intentá de nuevo.'))
+      setError(authErrorMessage(err, t.errors, r.failed))
     } finally {
       setLoading(false)
     }
@@ -118,18 +128,22 @@ export function RegisterPage() {
         position: 'relative', zIndex: 1,
         animation: 'ml-fade-up 0.45s ease-out both',
       }}>
+        <div style={{ position: 'absolute', top: '16px', insetInlineEnd: '16px' }}>
+          <LanguageSelect label={t.common.language} />
+        </div>
+
         {/* Logo + title */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', marginBottom: '16px' }}>
             <img src="/logo.png" alt="Mycen" className="h-8 w-auto" />
           </Link>
-          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-            Tu identidad digital, todo en un solo lugar
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.7)', margin: 0 }}>
+            {r.subtitle}
           </p>
         </div>
 
         {error && (
-          <div style={{
+          <div role="alert" style={{
             padding: '10px 14px', borderRadius: '10px',
             background: 'rgba(244,112,90,0.1)', border: '1px solid rgba(244,112,90,0.3)',
             fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: CORAL,
@@ -141,9 +155,9 @@ export function RegisterPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <DarkInput
-            label="Tu nombre"
+            label={r.name}
             type="text"
-            placeholder="Juan García"
+            placeholder={r.namePlaceholder}
             value={name}
             onChange={e => setName(e.target.value)}
             required
@@ -151,9 +165,9 @@ export function RegisterPage() {
           />
 
           <DarkInput
-            label="Email"
+            label={t.common.email}
             type="email"
-            placeholder="tu@email.com"
+            placeholder={t.common.emailPlaceholder}
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -161,9 +175,9 @@ export function RegisterPage() {
           />
 
           <DarkInput
-            label="Contraseña"
+            label={t.common.password}
             type="password"
-            placeholder="Mínimo 8, con letras y números"
+            placeholder={r.passwordPlaceholder}
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -173,14 +187,14 @@ export function RegisterPage() {
 
           <label style={{
             display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer',
-            fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.5,
+            fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5,
           }}>
             <input type="checkbox" checked={accepted} onChange={e => { setAccepted(e.target.checked); setError('') }} required
               style={{ marginTop: '3px', width: 16, height: 16, accentColor: CORAL, flexShrink: 0 }} />
             <span>
-              Acepto los{' '}
-              <Link to="/terminos" target="_blank" style={{ color: '#fff' }}>Términos</Link> y la{' '}
-              <Link to="/privacidad" target="_blank" style={{ color: '#fff' }}>Política de privacidad</Link>.
+              {r.accept && <>{r.accept}{' '}</>}
+              <Link to="/terminos" target="_blank" style={{ color: '#fff' }}>{r.terms}</Link> {r.and}{' '}
+              <Link to="/privacidad" target="_blank" style={{ color: '#fff' }}>{r.privacy}</Link>{r.acceptEnd}
             </span>
           </label>
 
@@ -191,7 +205,7 @@ export function RegisterPage() {
               marginTop: '4px',
               width: '100%', padding: '13px',
               borderRadius: '50px', border: 'none',
-              background: loading ? 'rgba(244,112,90,0.45)' : CORAL,
+              background: loading ? 'rgba(200,68,47,0.6)' : '#C8442F', // coral oscuro: texto blanco a 4.8:1 (WCAG AA)
               color: '#fff', fontSize: '14px', fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
               fontFamily: 'var(--font-jakarta)',
@@ -200,14 +214,14 @@ export function RegisterPage() {
             onMouseEnter={e => { if (!loading) { e.currentTarget.style.boxShadow = '0 0 24px rgba(244,112,90,0.45)'; e.currentTarget.style.transform = 'scale(1.01)' } }}
             onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = '' }}
           >
-            {loading ? 'Creando tu cuenta…' : 'Crear mi cuenta gratis'}
+            {loading ? r.submitting : r.submit}
           </button>
         </form>
 
-        <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)' }}>
-          ¿Ya tenés cuenta?{' '}
+        <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.65)' }}>
+          {r.haveAccount}{' '}
           <Link to="/login" style={{ color: CORAL, fontWeight: 600, textDecoration: 'none' }}>
-            Iniciar sesión →
+            {r.login}
           </Link>
         </p>
       </div>
