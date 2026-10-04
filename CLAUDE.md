@@ -129,6 +129,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `components/ui/LanguageSelect.tsx` y `useLangDir` (RTL). Los errores de Supabase pasan por `authErrorMessage(err, t.errors, …)`
   y entre pantallas viajan códigos (`?message=password_updated`, `?error=expired|invalid`), nunca texto.
   El registro guarda `user_metadata.locale` (y `savePrefs` lo actualiza al cambiar de idioma): lo usan los mails.
+- Mails (L3c): plantillas de Supabase Auth en `supabase/templates/` (12 idiomas por `.Data.locale`, español por defecto),
+  generadas con `node scripts/build-email-templates.mjs` (no editar los `.html` a mano; un test lo verifica). SMTP: Resend
+  (pasos en `supabase/templates/LEEME.md`).
 - Preferencias de la cuenta en `user_settings` (idioma, moneda principal, monedas extra, zona horaria, inicio de semana):
   `src/lib/prefs.ts` (`usePrefs`, `savePrefs`), se cargan en `PrefsInit`. Ajustes en `/life/settings` y Studio → Ajustes.
 - Dinero: nunca sumar monedas distintas; cada movimiento guarda su `currency`.
