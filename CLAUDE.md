@@ -26,7 +26,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Cambios de username quedan en `profile_username_history` (redirección).
 - Usernames reservados: tabla `reserved_usernames` y `src/lib/reservedUsernames.ts` (mantener sincronizados).
 - El visitante anónimo **nunca** lee tablas: usa las RPC `get_public_profile`, `get_public_project`, `get_profile_contact_card`,
-  `track_profile_event`, `check_username`, `report_profile`.
+  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`.
 - Proyectos (Fase 5): `content_objects` (type='project') + `content_blocks`. Son de la identidad y se publican por su cuenta
   (`publish_project` → `published_snapshot`; Studio no puede escribir el snapshot ni pasar a "publicado" directo).
   Los módulos `project`/`portfolio` guardan sólo ids en `content`; `get_public_profile` les agrega `projects` (tarjetas de lo
@@ -109,6 +109,12 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Fuentes desde `@fontsource` (`src/lib/fonts.ts`; las de títulos de perfil, a pedido en `ensureProfileFont`): nada de Google Fonts.
 - Imágenes: `uploadMedia` las achica (avatar 640 px, resto 1920 px) y las pasa a WebP en el dispositivo (`lib/imageOptimize.ts`).
 - Zoom permitido en toda la app (sin `user-scalable=no`); los campos táctiles usan 16px para que iOS no haga zoom al tocarlos.
+
+## Buscadores (Lanzamiento L2)
+- `/sitemap.xml` → `api/sitemap.ts` (regla en `vercel.json`) con la RPC `public_sitemap`: sólo Spaces publicados con
+  visibilidad "public" (sin suspensión propia ni del principal) y proyectos publicados y públicos. `public/robots.txt`:
+  las rutas privadas terminan en `/` o `$` para no bloquear usernames que empiezan igual (lo verifica `tests/unit/sitemap.test.ts`).
+- El HTML para buscadores (`api/og.ts`) declara `<html lang>` con el `default_locale` del perfil.
 
 ## Idioma y región
 - 12 idiomas: es, en, pt, fr, de, it, zh, ja, ko, hi, ar (RTL), ru — lista en `src/i18n/app/languages.ts`

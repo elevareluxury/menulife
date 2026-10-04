@@ -159,4 +159,10 @@ describe('api/og · proyectos', () => {
     expect(html).toContain('<div id="root"></div>')
     expect(fetchMock).toHaveBeenCalledWith('https://mycen.id/index.html')
   })
+  it('declara el idioma del perfil para los buscadores (L2)', async () => {
+    mockRpc({ username: 'ana', default_locale: 'pt', display_name: 'Ana', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published' })
+    expect(await (await handler(req('ana'))).text()).toContain('<html lang="pt">')
+    mockRpc({ username: 'ana', default_locale: '"><script>', display_name: 'Ana', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published' })
+    expect(await (await handler(req('ana'))).text()).toContain('<html lang="es">')
+  })
 })
