@@ -2,6 +2,7 @@ import type { StudioDict } from './es'
 
 const zh: StudioDict = {
   nav: {
+    editor: '编辑器',
     spaces: '我的 Spaces',
     projects: '项目',
     home: '首页', identity: '我的身份', modules: '模块', appearance: '外观', exchange: '分享',
@@ -451,6 +452,19 @@ const zh: StudioDict = {
     slugIssue: { invalid: '请使用 2 到 40 个小写字母、数字或连字符。', reserved: '该地址已被保留。', taken: '你已有使用该地址的 Space。' },
     manage: '我的 Spaces',
     switcher: '正在编辑的 Space',
+  },
+  editor3: {
+    open: '桌面编辑器',
+    layers: '图层',
+    canvas: '编辑器预览',
+    inspector: '属性',
+    identity: '身份',
+    identityHint: '头像、名称、简介和主要操作',
+    add: '添加模块',
+    noModules: '还没有模块。',
+    canvasHelp: '点击一个区块即可编辑。这里的链接不会打开。',
+    empty: '在预览或图层中选择一个区块进行编辑。',
+    contactCardHint: '联系人卡片的设置位置：',
   },
   moderation: {
     suspendedTitle: '你的主页已被暂停',

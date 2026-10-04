@@ -215,6 +215,7 @@ const DEFAULTS: Record<string, Row> = {
     default_locale: 'es', translations: {}, tags: [], onboarding_step: 0, published_at: null, visibility: 'public',
     revision: 0, published_version_id: null, suspended_at: null, suspension_reason: null,
   },
+  profile_modules: { config: {}, translations: {}, visibility: 'active', deleted_at: null },
   content_objects: { status: 'draft', visibility: 'public', summary: null, cover_url: null, data: {}, translations: {}, published_snapshot: null, published_at: null },
   content_blocks: { data: {}, translations: {}, position: 0 },
 }

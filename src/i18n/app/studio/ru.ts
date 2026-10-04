@@ -2,6 +2,7 @@ import type { StudioDict } from './es'
 
 const ru: StudioDict = {
   nav: {
+    editor: 'Редактор',
     spaces: 'Мои Spaces',
     projects: 'Проекты',
     home: 'Главная', identity: 'Мой профиль', modules: 'Модули', appearance: 'Оформление', exchange: 'Поделиться',
@@ -451,6 +452,19 @@ const ru: StudioDict = {
     slugIssue: { invalid: 'Используйте от 2 до 40 строчных латинских букв, цифр или дефисов.', reserved: 'Этот адрес зарезервирован.', taken: 'У вас уже есть Space с таким адресом.' },
     manage: 'Мои Spaces',
     switcher: 'Space, который вы редактируете',
+  },
+  editor3: {
+    open: 'Редактор для компьютера',
+    layers: 'Слои',
+    canvas: 'Предпросмотр редактора',
+    inspector: 'Свойства',
+    identity: 'Идентичность',
+    identityHint: 'Фото, имя, описание и главное действие',
+    add: 'Добавить модуль',
+    noModules: 'Модулей пока нет.',
+    canvasHelp: 'Нажмите на блок, чтобы отредактировать его. Ссылки здесь не открываются.',
+    empty: 'Выберите блок в предпросмотре или в слоях, чтобы отредактировать его.',
+    contactCardHint: 'Карточка контакта настраивается в разделе',
   },
   moderation: {
     suspendedTitle: 'Ваш профиль приостановлен',

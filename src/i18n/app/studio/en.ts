@@ -2,6 +2,7 @@ import type { StudioDict } from './es'
 
 const en: StudioDict = {
   nav: {
+    editor: 'Editor',
     spaces: 'My Spaces',
     projects: 'Projects',
     home: 'Home', identity: 'My identity', modules: 'Modules', appearance: 'Appearance', exchange: 'Share',
@@ -451,6 +452,19 @@ const en: StudioDict = {
     slugIssue: { invalid: 'Use 2 to 40 lowercase letters, numbers or hyphens.', reserved: 'That address is reserved.', taken: 'You already have a Space with that address.' },
     manage: 'My Spaces',
     switcher: 'Space you are editing',
+  },
+  editor3: {
+    open: 'Desktop editor',
+    layers: 'Layers',
+    canvas: 'Editor preview',
+    inspector: 'Properties',
+    identity: 'Identity',
+    identityHint: 'Photo, name, bio and main action',
+    add: 'Add module',
+    noModules: 'No modules yet.',
+    canvasHelp: 'Click a block to edit it. Links don’t open here.',
+    empty: 'Pick a block in the preview or in Layers to edit it.',
+    contactCardHint: 'The contact card is set up in',
   },
   moderation: {
     suspendedTitle: 'Your profile is suspended',

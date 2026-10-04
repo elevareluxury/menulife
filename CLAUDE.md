@@ -75,6 +75,10 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   principal); `switchSpace` remonta el editor. Contexto: `spaces`, `handle`, `primaryUsername` (los proyectos son de la identidad
   y viven en `/{primaryUsername}/projects/…`). Selector `SpaceSwitcher` arriba y pantalla `/studio/spaces` (crear, duplicar,
   archivar, restaurar). En Ajustes, un Space secundario cambia su dirección (el link viejo deja de funcionar; no hay redirección).
+- Editor de escritorio (Fase 11): `/studio/editor` (`EditorPage`) con 3 paneles: Capas (identidad, apariencia y módulos con
+  `SortableList`), vista previa con selección directa (`ProfileView` con `select`: un clic elige el bloque sin abrir links;
+  `IDENTITY_TARGET` = encabezado) y Propiedades (`ModuleEditor inline`, `IdentityPage embedded`, `AppearancePage embedded`).
+  Las acciones de módulos son `useModuleActions` (las comparten Módulos y el editor); íconos y badges en `lib/moduleUi.ts`.
 - Corte hecho: `/dashboard/hub` y `/life/hub` redirigen a `/studio`. Usuarios sin perfil ven el onboarding de 5 pasos (`OnboardingWizard`).
 - Tareas: viven en Brain (`life_brain_items` con `type='task'`: fecha, hora, recordatorio, meta, "foco de hoy").
   Brain tiene 3 vistas: Capturas (ideas y notas), Tareas (lista por vencimiento o calendario; `?vista=tareas`) y Archivo.
@@ -113,7 +117,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - `npm run test:db`: migraciones de Identity + `tests/db/*.test.sql` en un Postgres real (necesita PGHOST/PGUSER).
 - CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build, E2E y base de datos en cada PR.
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
-  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), Mis Spaces (`spaces.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
+  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), Mis Spaces (`spaces.spec.ts`), editor de escritorio (`desktop-editor.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
   (`modules.spec.ts`: si un cambio de módulo es deliberado, regenerar con `--update-snapshots` y revisar el diff).
 
 ## Reglas

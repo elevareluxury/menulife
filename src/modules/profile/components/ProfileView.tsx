@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Calendar, Globe, Share2, UserPlus } from 'lucide-react'
 import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
@@ -35,7 +35,43 @@ function toBlocks(modules: ProfileModule[]): Block[] {
   return blocks
 }
 
-export function ProfileView({ profile, lang, onLang, style, onToast, toast, preview = false }: {
+/** Id del encabezado (foto, nombre, bio y acción principal) para la selección del editor de escritorio */
+export const IDENTITY_TARGET = 'identity'
+
+/** Editor de escritorio (Fase 11): elegir un bloque haciendo clic en la vista previa, sin navegar sus links. */
+export interface PreviewSelect {
+  selected: string | null
+  onSelect: (id: string) => void
+  /** Nombre de cada bloque (módulo o IDENTITY_TARGET) para mostrar al pasar el mouse */
+  labels: Record<string, string>
+}
+
+/**
+ * Envoltorio seleccionable. En un grupo (ej. la fila de redes) el ítem tocado elige su propio módulo
+ * (`pickedRef` lo marca el onAction del grupo); un clic en el resto del grupo elige el primero.
+ */
+function Selectable({ id, select, pickedRef, children }: {
+  id: string
+  select: PreviewSelect
+  pickedRef?: React.MutableRefObject<boolean>
+  children: React.ReactNode
+}) {
+  return (
+    <div className={`mp-sel${select.selected === id ? ' is-selected' : ''}`} data-sel-id={id} data-sel-label={select.labels[id] ?? ''}
+      onClickCapture={e => {
+        // Los links y botones de la vista previa no navegan ni abren nada: el clic elige el bloque
+        e.preventDefault()
+        if (pickedRef) { pickedRef.current = false; return }
+        e.stopPropagation()
+        select.onSelect(id)
+      }}
+      onClick={pickedRef ? () => { if (!pickedRef.current) select.onSelect(id); pickedRef.current = false } : undefined}>
+      {children}
+    </div>
+  )
+}
+
+export function ProfileView({ profile, lang, onLang, style, onToast, toast, preview = false, select }: {
   profile: PublicProfile
   lang: ProfileLang
   onLang: (l: ProfileLang) => void
@@ -44,8 +80,10 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
   toast: string | null
   /** Vista previa en Studio: no registra eventos */
   preview?: boolean
+  select?: PreviewSelect
 }) {
   const t = ui(lang)
+  const groupPickedRef = useRef(false)
   const track: typeof trackProfileEvent = (...args) => { if (!preview) trackProfileEvent(...args) }
   const profileUrl = `${window.location.origin}/${profileHandle(profile)}`
   const name = tr(profile.display_name, profile.translations, 'display_name', lang)
@@ -91,6 +129,53 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
     track(profile.id, 'vcard_download')
   }
 
+  // Encabezado: foto, nombre, bio y acciones (en el editor de escritorio se elige como un solo bloque)
+  const identityBlock = (<>
+    <section className={`mp-header${coverSrc ? ' has-cover' : ''}`}>
+      <div className="mp-avatar">
+        <SafeImage src={safeHref(profile.avatar_url) ?? undefined} alt={name}
+          fallback={<span aria-hidden="true">{name.trim()[0]?.toUpperCase() ?? '·'}</span>} />
+      </div>
+      <h1 className="mp-name">{name}</h1>
+      {descriptor && <p className="mp-descriptor">{descriptor}</p>}
+      {!!profile.tags?.length && (
+        <ul className="mp-tags" aria-label={t.tags}>
+          {profile.tags.map(tag => <li key={tag}>{tag}</li>)}
+        </ul>
+      )}
+      {bio && <p className="mp-bio">{bio}</p>}
+      {open != null && (
+        <div className={`mp-status${open ? ' is-open' : ''}`}>
+          <span className="mp-status-dot" aria-hidden="true" />
+          {open ? t.openNow : t.closedNow}
+        </div>
+      )}
+    </section>
+
+    {primary && primaryHref && (
+      <a className="mp-primary" href={primaryHref}
+        {...(isExternal(primaryHref) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        onClick={() => track(profile.id, 'primary_action_click')}>
+        {tr(null, profile.translations, 'primary_action_label', lang) || trLabel(primary.label, lang)}
+      </a>
+    )}
+
+    {(reserveHref || profile.has_contact_card) && (
+      <div className="mp-secondary-row">
+        {reserveHref && (
+          <a className="mp-btn-ghost" href={reserveHref} onClick={() => track(profile.id, 'primary_action_click')}>
+            <Calendar size={17} aria-hidden="true" /> {trLabel('Reservar', lang)}
+          </a>
+        )}
+        {profile.has_contact_card && (
+          <button type="button" className="mp-btn-ghost" onClick={saveContact}>
+            <UserPlus size={17} aria-hidden="true" /> {t.saveContact}
+          </button>
+        )}
+      </div>
+    )}
+  </>)
+
   return (
     <main className="mp-root" style={style} lang={lang} dir={langDir(lang)}>
       {profile.status !== 'published' && <div className="mp-banner" role="status">{t.draftBanner}</div>}
@@ -116,54 +201,23 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
       )}
 
       <div className="mp-container">
-        <section className={`mp-header${coverSrc ? ' has-cover' : ''}`}>
-          <div className="mp-avatar">
-            <SafeImage src={safeHref(profile.avatar_url) ?? undefined} alt={name}
-              fallback={<span aria-hidden="true">{name.trim()[0]?.toUpperCase() ?? '·'}</span>} />
-          </div>
-          <h1 className="mp-name">{name}</h1>
-          {descriptor && <p className="mp-descriptor">{descriptor}</p>}
-          {!!profile.tags?.length && (
-            <ul className="mp-tags" aria-label={t.tags}>
-              {profile.tags.map(tag => <li key={tag}>{tag}</li>)}
-            </ul>
-          )}
-          {bio && <p className="mp-bio">{bio}</p>}
-          {open != null && (
-            <div className={`mp-status${open ? ' is-open' : ''}`}>
-              <span className="mp-status-dot" aria-hidden="true" />
-              {open ? t.openNow : t.closedNow}
-            </div>
-          )}
-        </section>
-
-        {primary && primaryHref && (
-          <a className="mp-primary" href={primaryHref}
-            {...(isExternal(primaryHref) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-            onClick={() => track(profile.id, 'primary_action_click')}>
-            {tr(null, profile.translations, 'primary_action_label', lang) || trLabel(primary.label, lang)}
-          </a>
-        )}
-
-        {(reserveHref || profile.has_contact_card) && (
-          <div className="mp-secondary-row">
-            {reserveHref && (
-              <a className="mp-btn-ghost" href={reserveHref} onClick={() => track(profile.id, 'primary_action_click')}>
-                <Calendar size={17} aria-hidden="true" /> {trLabel('Reservar', lang)}
-              </a>
-            )}
-            {profile.has_contact_card && (
-              <button type="button" className="mp-btn-ghost" onClick={saveContact}>
-                <UserPlus size={17} aria-hidden="true" /> {t.saveContact}
-              </button>
-            )}
-          </div>
-        )}
+        {select ? <Selectable id={IDENTITY_TARGET} select={select}>{identityBlock}</Selectable> : identityBlock}
 
         <div className="mp-modules">
-          {blocks.map(b => b.kind === 'group'
-            ? <b.Group lang={lang} key={b.modules[0].id} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
-            : <b.View key={b.module.id} module={b.module} lang={lang} onAction={onModuleAction} />)}
+          {blocks.map(b => {
+            if (!select) {
+              return b.kind === 'group'
+                ? <b.Group lang={lang} key={b.modules[0].id} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
+                : <b.View key={b.module.id} module={b.module} lang={lang} onAction={onModuleAction} />
+            }
+            return b.kind === 'group'
+              ? <Selectable key={b.modules[0].id} id={b.modules[0].id} select={select} pickedRef={groupPickedRef}>
+                  <b.Group lang={lang} modules={b.modules} onAction={id => { groupPickedRef.current = true; select.onSelect(id) }} />
+                </Selectable>
+              : <Selectable key={b.module.id} id={b.module.id} select={select}>
+                  <b.View module={b.module} lang={lang} onAction={() => undefined} />
+                </Selectable>
+          })}
         </div>
 
         <footer className="mp-footer">

@@ -2,6 +2,7 @@ import type { StudioDict } from './es'
 
 const ko: StudioDict = {
   nav: {
+    editor: '에디터',
     spaces: '내 Spaces',
     projects: '프로젝트',
     home: '홈', identity: '내 아이덴티티', modules: '모듈', appearance: '디자인', exchange: '공유',
@@ -451,6 +452,19 @@ const ko: StudioDict = {
     slugIssue: { invalid: '소문자, 숫자, 하이픈을 사용해 2~40자로 입력하세요.', reserved: '예약된 주소입니다.', taken: '이미 그 주소의 Space가 있습니다.' },
     manage: '내 Spaces',
     switcher: '편집 중인 Space',
+  },
+  editor3: {
+    open: '데스크톱 에디터',
+    layers: '레이어',
+    canvas: '에디터 미리보기',
+    inspector: '속성',
+    identity: '아이덴티티',
+    identityHint: '사진, 이름, 소개, 주요 동작',
+    add: '모듈 추가',
+    noModules: '아직 모듈이 없습니다.',
+    canvasHelp: '블록을 클릭하면 편집할 수 있습니다. 여기서는 링크가 열리지 않습니다.',
+    empty: '미리보기나 레이어에서 블록을 선택해 편집하세요.',
+    contactCardHint: '연락처 카드 설정 위치:',
   },
   moderation: {
     suspendedTitle: '프로필이 정지되었습니다',
