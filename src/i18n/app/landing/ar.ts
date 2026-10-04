@@ -144,7 +144,7 @@ const ar: LandingDict = {
       { q: 'هل يمكنني أخذ بياناتي معي؟', a: 'نعم. من الإعدادات تصدّر كل ما يخصك متى شئت، ويمكنك حذف حسابك وبياناتك في أي وقت.' },
     ],
   },
-  footer: { product: 'المنتج', pricing: 'الأسعار', faq: 'الأسئلة', terms: 'الشروط', privacy: 'الخصوصية', madeBy: 'من صنع Resilio' },
+  footer: { product: 'المنتج', pricing: 'الأسعار', faq: 'الأسئلة', contact: 'تواصل معنا', terms: 'الشروط', privacy: 'الخصوصية', madeBy: 'من صنع Resilio' },
 }
 
 export default ar

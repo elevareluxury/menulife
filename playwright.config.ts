@@ -27,6 +27,8 @@ export default defineConfig({
       VITE_SUPABASE_URL: 'https://mock.supabase.co',
       VITE_SUPABASE_ANON_KEY: 'test-anon-key',
       VITE_PUBLIC_PROFILE_BASE: `http://localhost:${PORT}`,
+      // El registro de errores (L5) sólo manda en producción; en los E2E se prende para probarlo
+      VITE_REPORT_ERRORS: '1',
     },
   },
 })

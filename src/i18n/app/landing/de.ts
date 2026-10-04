@@ -144,7 +144,7 @@ const de: LandingDict = {
       { q: 'Kann ich meine Daten mitnehmen?', a: 'Ja. In den Einstellungen exportierst du jederzeit alles, was dir gehört, und kannst dein Konto und deine Daten jederzeit löschen.' },
     ],
   },
-  footer: { product: 'Produkt', pricing: 'Preise', faq: 'Fragen', terms: 'AGB', privacy: 'Datenschutz', madeBy: 'Gemacht von Resilio' },
+  footer: { product: 'Produkt', pricing: 'Preise', faq: 'Fragen', contact: 'Kontakt', terms: 'AGB', privacy: 'Datenschutz', madeBy: 'Gemacht von Resilio' },
 }
 
 export default de

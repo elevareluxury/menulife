@@ -144,7 +144,7 @@ const en: LandingDict = {
       { q: 'Can I take my data with me?', a: 'Yes. From Settings you can export everything that’s yours at any time, and you can delete your account and your data whenever you want.' },
     ],
   },
-  footer: { product: 'Product', pricing: 'Pricing', faq: 'FAQ', terms: 'Terms', privacy: 'Privacy', madeBy: 'Made by Resilio' },
+  footer: { product: 'Product', pricing: 'Pricing', faq: 'FAQ', contact: 'Contact', terms: 'Terms', privacy: 'Privacy', madeBy: 'Made by Resilio' },
 }
 
 export default en

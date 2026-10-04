@@ -447,6 +447,46 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       }
       return null
     }
+    // ── Errores (Lanzamiento L5): agrupa por zona + mensaje (la huella real también usa el stack) ──
+    case 'report_client_error': {
+      const errors = (state.tables.app_errors ??= [])
+      const message = String(args.p_message ?? '').trim().slice(0, 500)
+      if (!message) return 'invalid'
+      const now = new Date().toISOString()
+      const area = String(args.p_area ?? 'other')
+      const e = errors.find(x => x.area === area && x.message === message)
+      if (e) {
+        Object.assign(e, { count: Number(e.count) + 1, last_seen: now, affected: Number(e.affected) + 1 })
+        if (e.status === 'resolved') Object.assign(e, { status: 'open', reopened: true, resolved_at: null })
+      } else {
+        errors.push({
+          id: `err-${Math.random().toString(36).slice(2, 8)}`, area, message, stack: args.p_stack ?? null, path: args.p_path ?? null,
+          release: args.p_release ?? null, browser: args.p_browser ?? null, count: 1, first_seen: now, last_seen: now,
+          status: 'open', note: null, resolved_at: null, reopened: false, affected: 1, affected_today: 1,
+        })
+      }
+      return 'ok'
+    }
+    case 'admin_list_errors': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const status = args.p_status ?? 'open'
+      return (state.tables.app_errors ?? []).filter(e => status === 'all' || e.status === status)
+    }
+    case 'admin_set_error_status': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const e = (state.tables.app_errors ?? []).find(x => x.id === args.p_error_id)
+      if (!e) throw new Error('NOT_FOUND')
+      Object.assign(e, {
+        status: args.p_status, note: (args.p_note as string | null)?.trim() || e.note,
+        resolved_at: args.p_status === 'open' ? null : new Date().toISOString(), reopened: args.p_status === 'open' ? e.reopened : false,
+      })
+      return null
+    }
+    case 'admin_error_summary': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const errors = state.tables.app_errors ?? []
+      return { open: errors.filter(e => e.status === 'open').length, new_today: errors.length, affected_today: errors.reduce((n, e) => n + Number(e.affected_today ?? 0), 0) }
+    }
     // ── Spaces (Fase 10) ──
     case 'duplicate_space': {
       const src = state.tables.profiles.find(x => x.id === args.p_profile_id)

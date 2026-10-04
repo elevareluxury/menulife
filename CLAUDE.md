@@ -26,7 +26,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Cambios de username quedan en `profile_username_history` (redirección).
 - Usernames reservados: tabla `reserved_usernames` y `src/lib/reservedUsernames.ts` (mantener sincronizados).
 - El visitante anónimo **nunca** lee tablas: usa las RPC `get_public_profile`, `get_public_project`, `get_profile_contact_card`,
-  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`.
+  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`.
 - Proyectos (Fase 5): `content_objects` (type='project') + `content_blocks`. Son de la identidad y se publican por su cuenta
   (`publish_project` → `published_snapshot`; Studio no puede escribir el snapshot ni pasar a "publicado" directo).
   Los módulos `project`/`portfolio` guardan sólo ids en `content`; `get_public_profile` les agrega `projects` (tarjetas de lo
@@ -39,6 +39,11 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   que nadie lee directo: los super-admins (tabla `super_admins`) usan `admin_list_reports` / `admin_resolve_report` /
   `admin_set_suspension` desde `/super-admin/denuncias`. `profiles.suspended_at` lo cambia sólo esa RPC (trigger) y oculta
   página, proyectos, vCard y redirecciones; Studio muestra el aviso con el motivo. Reglas en `/terminos#reglas`.
+- Errores (Lanzamiento L5, sin proveedores externos): `app_errors` (agrupados por huella: zona + mensaje + primer frame del
+  stack) y `app_error_hits` (personas afectadas con hash diario anónimo, 90 días). La app reporta con `report_client_error`
+  (`src/lib/errorReporter.ts`: errores sin atrapar + `ErrorBoundary`; sólo en producción o con `VITE_REPORT_ERRORS=1`,
+  sin bots, con topes) y el super-admin los ve y resuelve en `/super-admin/errores` (`admin_list_errors`,
+  `admin_set_error_status`, `admin_error_summary`). Un error resuelto que vuelve a pasar se reabre solo.
 - Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()` y se retiran cuando Studio reemplace al editor viejo.
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
@@ -149,7 +154,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - `npm run test:db`: migraciones de Identity + `tests/db/*.test.sql` en un Postgres real (necesita PGHOST/PGUSER).
 - CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build, E2E y base de datos en cada PR.
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
-  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), landing en 12 idiomas con axe (`landing.spec.ts`), acceso en otros idiomas con axe (`auth.spec.ts`), Mis Spaces (`spaces.spec.ts`), editor de escritorio (`desktop-editor.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
+  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), registro de errores (`errors.spec.ts`), landing en 12 idiomas con axe (`landing.spec.ts`), acceso en otros idiomas con axe (`auth.spec.ts`), Mis Spaces (`spaces.spec.ts`), editor de escritorio (`desktop-editor.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
   (`modules.spec.ts`: si un cambio de módulo es deliberado, regenerar con `--update-snapshots` y revisar el diff).
 
 ## Reglas

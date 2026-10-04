@@ -79,10 +79,10 @@ test.describe('animaciones', () => {
     await page.locator('#pricing').scrollIntoViewIfNeeded()
     await expect.poll(progress).toBeGreaterThan(0.3)
 
-    const price = page.locator('#pricing').getByText(/^\$\d+$/).first()
-    await expect(price).toHaveText('$70')
+    const price = page.locator('#pricing').getByText(/^US\$\d+$/).first()
+    await expect(price).toHaveText('US$70')
     await page.getByRole('button', { name: /6 meses/ }).click()
-    await expect(price).toHaveText('$63')
+    await expect(price).toHaveText('US$63')
   })
 
   test('con "reducir movimiento" no se mueve nada y todo se ve', async ({ browser }) => {
@@ -97,7 +97,7 @@ test.describe('animaciones', () => {
     expect(hidden).toBe(0)
     await page.locator('#pricing').scrollIntoViewIfNeeded()
     await page.getByRole('button', { name: /Anual/ }).click()
-    await expect(page.locator('#pricing').getByText(/^\$\d+$/).first()).toHaveText('$56')
+    await expect(page.locator('#pricing').getByText(/^US\$\d+$/).first()).toHaveText('US$56')
     await context.close()
   })
 })

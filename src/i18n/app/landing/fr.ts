@@ -144,7 +144,7 @@ const fr: LandingDict = {
       { q: 'Puis-je récupérer mes données ?', a: 'Oui. Depuis Réglages, vous exportez tout ce qui vous appartient quand vous voulez, et vous pouvez supprimer votre compte et vos données à tout moment.' },
     ],
   },
-  footer: { product: 'Produit', pricing: 'Tarifs', faq: 'Questions', terms: 'Conditions', privacy: 'Confidentialité', madeBy: 'Réalisé par Resilio' },
+  footer: { product: 'Produit', pricing: 'Tarifs', faq: 'Questions', contact: 'Contact', terms: 'Conditions', privacy: 'Confidentialité', madeBy: 'Réalisé par Resilio' },
 }
 
 export default fr

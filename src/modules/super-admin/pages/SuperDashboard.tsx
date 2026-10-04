@@ -243,8 +243,10 @@ export function SuperDashboard() {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-1" style={{ color: TEXT }}>Panel de control</h1>
-        <p className="text-sm" style={{ color: TEXT_MUTED }}>Vista global de MenuLife</p>
+        <p className="text-sm" style={{ color: TEXT_MUTED }}>Vista global de Mycen</p>
       </div>
+
+      <OpenErrorsBanner />
 
       {/* Row 1: KPIs principales */}
       {loading ? (
@@ -392,5 +394,24 @@ export function SuperDashboard() {
         </div>
       </div>
     </div>
+  )
+}
+
+/** Aviso con los errores abiertos (registro propio, L5). No aparece si no hay o si la migración no está. */
+function OpenErrorsBanner() {
+  const navigate = useNavigate()
+  const [summary, setSummary] = useState<{ open: number; affected_today: number } | null>(null)
+  useEffect(() => {
+    void Promise.resolve((supabase as unknown as { rpc: (fn: string) => PromiseLike<{ data: unknown; error: unknown }> })
+      .rpc('admin_error_summary')).then(({ data, error }) => { if (!error) setSummary(data as { open: number; affected_today: number }) })
+  }, [])
+  if (!summary || summary.open === 0) return null
+  return (
+    <button type="button" onClick={() => navigate('/super-admin/errores')}
+      className="w-full text-left rounded-2xl mb-6 px-5 py-4"
+      style={{ backgroundColor: 'rgba(255,107,122,0.08)', border: '1px solid rgba(255,107,122,0.3)', color: TEXT, cursor: 'pointer' }}>
+      <strong>{summary.open} {summary.open === 1 ? 'error abierto' : 'errores abiertos'}</strong>
+      <span style={{ color: TEXT_MUTED }}> · {summary.affected_today} {summary.affected_today === 1 ? 'persona afectada' : 'personas afectadas'} hoy · Ver errores →</span>
+    </button>
   )
 }
