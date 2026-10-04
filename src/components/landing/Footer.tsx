@@ -31,14 +31,14 @@ export function Footer() {
         alignItems: 'center', justifyContent: 'space-between',
         gap: '16px',
       }}>
-        <Link to="/" style={{ display: 'flex', flexDirection: 'column', gap: '6px', textDecoration: 'none' }}>
+        <Link to="/" data-rise style={{ display: 'flex', flexDirection: 'column', gap: '6px', textDecoration: 'none' }}>
           <img src="/logo.png" alt="Mycen" style={{ height: '28px', width: 'auto', opacity: 0.7 }} />
           <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-jakarta)' }}>
             © Mycen 2026
           </span>
         </Link>
 
-        <nav style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' }}>
+        <nav data-rise style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' }}>
           {anchors.map(link => (
             <a key={link.href} href={link.href} style={linkStyle} {...hover}>{link.label}</a>
           ))}
@@ -47,7 +47,7 @@ export function Footer() {
           ))}
         </nav>
 
-        <span style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)' }}>
+        <span data-rise style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)' }}>
           {t.madeBy}
         </span>
       </div>

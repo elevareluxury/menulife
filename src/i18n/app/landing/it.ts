@@ -31,6 +31,7 @@ const it: LandingDict = {
     ],
     powered: 'Fatto con Mycen ✦',
   },
+  marquee: { label: 'Mycen parla 12 lingue' },
   problem: {
     label: 'IL PROBLEMA',
     title: 'Oggi la tua vita digitale è',

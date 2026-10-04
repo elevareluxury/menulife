@@ -59,7 +59,7 @@ export function Navbar() {
             >{l.nav.login}</button>
           </Link>
           <Link to="/register" style={{ textDecoration: 'none' }}>
-            <ShimmerButton>{l.nav.cta}</ShimmerButton>
+            <ShimmerButton magnetic>{l.nav.cta}</ShimmerButton>
           </Link>
         </div>
 
@@ -117,13 +117,15 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   )
 }
 
-export function ShimmerButton({ children, style, onClick }: {
+export function ShimmerButton({ children, style, onClick, magnetic }: {
   children: React.ReactNode
   style?: React.CSSProperties
   onClick?: () => void
+  /** se acerca al puntero (ver landing/motion.ts) */
+  magnetic?: boolean
 }) {
   return (
-    <button onClick={onClick} className="liquid-glass-btn" style={{
+    <button onClick={onClick} data-magnetic={magnetic ? '' : undefined} className="liquid-glass-btn" style={{
       padding: '9px 22px',
       color: '#fff',
       fontSize: '13px', fontWeight: 600, cursor: 'pointer',

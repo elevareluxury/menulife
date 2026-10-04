@@ -101,8 +101,12 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 
 ## Rendimiento (Lanzamiento L1)
 - Plan de lanzamiento mundial: `docs/lanzamiento/00-plan.md` (fases L0–L8).
-- Todas las rutas son `lazy` en `App.tsx`: quien abre un perfil no descarga la landing ni Business. GSAP, ScrollTrigger y
-  Splitting vienen de npm y sólo en la landing (`components/landing/landingLibs.ts`); no agregar `<script>` de CDN a `index.html`.
+- Todas las rutas son `lazy` en `App.tsx`: quien abre un perfil no descarga la landing ni Business. GSAP y ScrollTrigger
+  vienen de npm y sólo en la landing (`components/landing/landingLibs.ts`); no agregar `<script>` de CDN a `index.html`.
+- Movimiento de la landing: `components/landing/motion.ts` (`useLandingMotion`) engancha efectos por atributo — `data-split`
+  (títulos palabra por palabra con `SplitText`, que dibuja React), `data-tilt` (+ `.ml-spot`), `data-magnetic`, `data-parallax`,
+  `data-rise` — y CSS en `landing-motion.css`. Todo respeta "reducir movimiento" (`reducedMotion()` en cada efecto de GSAP y
+  keyframes sólo dentro de `prefers-reduced-motion: no-preference`); lo verifica `landing.spec.ts`.
 - `manualChunks` sólo agrupa supabase y react: agrupar recharts/framer a mano arrastraba dependencias a todas las páginas.
 - Presupuesto de peso: `npm run check:budget` (después de `npm run build`, también en CI) mide JS+CSS gzip de perfil,
   proyecto y landing con `dist/.vite/manifest.json`. Si un cambio lo supera, achicarlo antes de subir el límite.

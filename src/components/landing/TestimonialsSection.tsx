@@ -4,6 +4,9 @@ import { useAppLang } from '@/i18n/app/store'
 import { supabase } from '@/lib/supabase'
 import { StaggerTestimonials, type Testimonial } from '@/components/ui/stagger-testimonials'
 
+import { reducedMotion } from './motion'
+import { SplitText } from './SplitText'
+
 declare const gsap: any
 
 // Sólo testimonios reales (tabla `testimonials`); si no hay, la sección no se muestra (CLAUDE.md: nada inventado).
@@ -26,7 +29,7 @@ export function TestimonialsSection() {
 
   const hasAny = testimonials.length > 0
   useEffect(() => {
-    if (!hasAny || typeof gsap === 'undefined') return
+    if (!hasAny || typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
     gsap.fromTo('[data-test-title]',
@@ -58,9 +61,9 @@ export function TestimonialsSection() {
         <h2 style={{
           fontFamily: 'var(--font-syne)', fontWeight: 800,
           fontSize: 'clamp(36px,5vw,56px)', color: '#fff', lineHeight: 1.1, margin: 0,
-        }}>
-          {t.title}{' '}
-          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>
+        }} data-split>
+          <SplitText text={t.title} />{' '}
+          <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>
             {t.titleAccent}
           </em>
         </h2>

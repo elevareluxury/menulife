@@ -31,6 +31,7 @@ const ko: LandingDict = {
     ],
     powered: 'Mycen으로 만들었어요 ✦',
   },
+  marquee: { label: 'Mycen은 12개 언어를 지원합니다' },
   problem: {
     label: '문제',
     title: '지금 당신의 디지털 생활은',

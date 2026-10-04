@@ -31,6 +31,7 @@ const hi: LandingDict = {
     ],
     powered: 'Mycen से बना ✦',
   },
+  marquee: { label: 'Mycen 12 भाषाओं में है' },
   problem: {
     label: 'समस्या',
     title: 'आज आपकी डिजिटल ज़िंदगी',

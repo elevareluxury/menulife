@@ -31,6 +31,7 @@ const ru: LandingDict = {
     ],
     powered: 'Сделано в Mycen ✦',
   },
+  marquee: { label: 'Mycen говорит на 12 языках' },
   problem: {
     label: 'ПРОБЛЕМА',
     title: 'Сегодня ваша цифровая жизнь',

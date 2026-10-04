@@ -1,6 +1,11 @@
-import { useEffect } from 'react'
-// Primero: deja gsap, ScrollTrigger y Splitting disponibles para las secciones
+import { useEffect, useRef } from 'react'
+// Primero: deja gsap y ScrollTrigger disponibles para las secciones
 import '@/components/landing/landingLibs'
+import '@/components/landing/landing-motion.css'
+import { useLandingMotion } from '@/components/landing/motion'
+import { ScrollProgress }       from '@/components/landing/ScrollProgress'
+import { LanguageMarquee }      from '@/components/landing/LanguageMarquee'
+import { useAppLang }           from '@/i18n/app/store'
 import { Navbar }               from '@/components/landing/Navbar'
 import { CinematicHero }        from '@/components/landing/CinematicHero'
 import { FragmentationSection } from '@/components/landing/FragmentationSection'
@@ -17,18 +22,25 @@ import { useLandingLocale }     from '../lib/useLandingLocale'
 
 export function LandingPage() {
   useLandingLocale()
+  const rootRef = useRef<HTMLDivElement>(null)
+  const lang = useAppLang(s => s.lang)
+  useLandingMotion(rootRef, lang)
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth'
     return () => { document.documentElement.style.scrollBehavior = 'auto' }
   }, [])
 
   return (
-    <div style={{ background: 'var(--ml-dark)', overflowX: 'hidden', minHeight: '100vh' }}>
+    <div ref={rootRef} style={{ background: 'var(--ml-dark)', overflowX: 'hidden', minHeight: '100vh' }}>
+      <ScrollProgress />
       <Navbar />
 
       <main>
         {/* Section 1 — Hero */}
         <CinematicHero />
+
+        {/* Cinta con los 12 idiomas */}
+        <LanguageMarquee />
 
         {/* Section 2 — Problema / Fragmentación */}
         <FragmentationSection />
