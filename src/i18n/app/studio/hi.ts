@@ -2,6 +2,7 @@ import type { StudioDict } from './es'
 
 const hi: StudioDict = {
   nav: {
+    editor: 'एडिटर',
     spaces: 'मेरे Spaces',
     projects: 'प्रोजेक्ट',
     home: 'होम', identity: 'मेरी पहचान', modules: 'मॉड्यूल', appearance: 'रूप-रंग', exchange: 'शेयर करें',
@@ -451,6 +452,19 @@ const hi: StudioDict = {
     slugIssue: { invalid: '2 से 40 छोटे अक्षर, अंक या हाइफ़न इस्तेमाल करें।', reserved: 'यह पता आरक्षित है।', taken: 'इस पते वाला Space आपके पास पहले से है।' },
     manage: 'मेरे Spaces',
     switcher: 'जिस Space को आप संपादित कर रहे हैं',
+  },
+  editor3: {
+    open: 'डेस्कटॉप एडिटर',
+    layers: 'लेयर',
+    canvas: 'एडिटर प्रीव्यू',
+    inspector: 'गुण',
+    identity: 'पहचान',
+    identityHint: 'फ़ोटो, नाम, परिचय और मुख्य एक्शन',
+    add: 'मॉड्यूल जोड़ें',
+    noModules: 'अभी कोई मॉड्यूल नहीं है।',
+    canvasHelp: 'किसी ब्लॉक को संपादित करने के लिए उस पर क्लिक करें। यहाँ लिंक नहीं खुलते।',
+    empty: 'संपादित करने के लिए प्रीव्यू या लेयर में कोई ब्लॉक चुनें।',
+    contactCardHint: 'संपर्क कार्ड यहाँ सेट होता है:',
   },
   moderation: {
     suspendedTitle: 'आपकी प्रोफ़ाइल निलंबित है',

@@ -2,6 +2,7 @@ import type { StudioDict } from './es'
 
 const pt: StudioDict = {
   nav: {
+    editor: 'Editor',
     spaces: 'Meus Spaces',
     projects: 'Projetos',
     home: 'Início', identity: 'Minha identidade', modules: 'Módulos', appearance: 'Aparência', exchange: 'Compartilhar',
@@ -451,6 +452,19 @@ const pt: StudioDict = {
     slugIssue: { invalid: 'Use de 2 a 40 letras minúsculas, números ou hifens.', reserved: 'Esse endereço está reservado.', taken: 'Você já tem um Space com esse endereço.' },
     manage: 'Meus Spaces',
     switcher: 'Space que você está editando',
+  },
+  editor3: {
+    open: 'Editor de computador',
+    layers: 'Camadas',
+    canvas: 'Prévia do editor',
+    inspector: 'Propriedades',
+    identity: 'Identidade',
+    identityHint: 'Foto, nome, bio e ação principal',
+    add: 'Adicionar módulo',
+    noModules: 'Ainda não há módulos.',
+    canvasHelp: 'Clique em um bloco para editá-lo. Aqui os links não abrem.',
+    empty: 'Escolha um bloco na prévia ou em Camadas para editá-lo.',
+    contactCardHint: 'O cartão de contato é configurado em',
   },
   moderation: {
     suspendedTitle: 'Seu perfil está suspenso',

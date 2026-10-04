@@ -28,7 +28,8 @@ const FONTS = [
   { value: 'bebas', label: 'Bebas Neue', family: "'Bebas Neue', sans-serif" },
 ]
 
-export function AppearancePage() {
+/** `embedded`: dentro del inspector del editor de escritorio (sin encabezado de página) */
+export function AppearancePage({ embedded = false }: { embedded?: boolean }) {
   const { profile, patchProfile } = useStudio()
   const a = useStudioT().appearance
   const theme: ProfileTheme = profile.theme ?? {}
@@ -46,8 +47,10 @@ export function AppearancePage() {
 
   return (
     <>
-      <EditTabs />
-      <PageHeader title={a.title} subtitle={a.subtitle} actions={<ProfileSaveIndicator />} />
+      {!embedded && <>
+        <EditTabs />
+        <PageHeader title={a.title} subtitle={a.subtitle} actions={<ProfileSaveIndicator />} />
+      </>}
 
       <section className="st-card st-stack">
         <h2 className="st-card-title" style={{ margin: 0 }}>{a.theme}</h2>

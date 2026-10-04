@@ -41,8 +41,17 @@ function initialEn(module: StudioModule | null): Record<string, string> {
   return Object.fromEntries(Object.entries(en).filter(([k, v]) => !k.startsWith('_') && typeof v === 'string')) as Record<string, string>
 }
 
-/** Crear o editar un módulo. `module` null = nuevo. Todo lo propio de cada tipo sale de su definición en el catálogo. */
-export function ModuleEditor({ type, module, onClose }: { type: ModuleType; module: StudioModule | null; onClose: () => void }) {
+/**
+ * Crear o editar un módulo. `module` null = nuevo. Todo lo propio de cada tipo sale de su definición en el catálogo.
+ * `inline`: dentro del inspector del editor de escritorio (Fase 11) en vez de un panel lateral; al guardar sigue abierto.
+ */
+export function ModuleEditor({ type, module, onClose, inline = false, onSaved }: {
+  type: ModuleType
+  module: StudioModule | null
+  onClose: () => void
+  inline?: boolean
+  onSaved?: (saved: StudioModule) => void
+}) {
   const { profile, modules, setModules, userId, business } = useStudio()
   const t = useStudioT()
   const e = t.editor
@@ -58,8 +67,9 @@ export function ModuleEditor({ type, module, onClose }: { type: ModuleType; modu
   const [submitted, setSubmitted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
 
-  const set = (k: string, v: string) => { setValues(prev => ({ ...prev, [k]: v })); setError(null) }
+  const set = (k: string, v: string) => { setValues(prev => ({ ...prev, [k]: v })); setError(null); setSaved(false) }
   const translatable = def.fields.filter(f => f.translatable)
 
   function fieldError(f: FieldDef): string | null {
@@ -117,30 +127,30 @@ export function ModuleEditor({ type, module, onClose }: { type: ModuleType; modu
     setSaving(true); setError(null)
     try {
       const payload = buildPayload()
+      let row: StudioModule
       if (module) {
-        const saved = await updateModule(module.id, payload)
-        setModules(prev => prev.map(m => (m.id === saved.id ? saved : m)))
+        row = await updateModule(module.id, payload)
+        setModules(prev => prev.map(m => (m.id === row.id ? row : m)))
       } else {
         const position = (modules.reduce((max, m) => Math.max(max, m.position), 0) || 0) + 10
-        const saved = await createModule({ profile_id: profile.id, type, position, ...payload })
-        setModules(prev => [...prev, saved])
+        row = await createModule({ profile_id: profile.id, type, position, ...payload })
+        setModules(prev => [...prev, row])
       }
-      onClose()
+      onSaved?.(row)
+      if (inline) { setSaving(false); setSubmitted(false); setSaved(true) }
+      else onClose()
     } catch (err) {
       setError(friendlyError(err))
       setSaving(false)
     }
   }
 
-  return (
-    <Drawer
-      title={module ? e.titleEdit(def.label) : e.titleNew(def.label)}
-      onClose={onClose}
-      footer={<>
-        <Button variant="ghost" onClick={onClose}>{t.common.cancel}</Button>
-        <Button variant="primary" loading={saving} onClick={save}>{module ? e.saveChanges : t.common.add}</Button>
-      </>}
-    >
+  const heading = module ? e.titleEdit(def.label) : e.titleNew(def.label)
+  const actions = <>
+    <Button variant="ghost" onClick={onClose}>{inline ? t.common.close : t.common.cancel}</Button>
+    <Button variant="primary" loading={saving} onClick={save}>{module ? e.saveChanges : t.common.add}</Button>
+  </>
+  const form = (
       <div className="st-stack">
         {def.fields.map(f => {
           if (f.kind === 'image') {
@@ -208,6 +218,19 @@ export function ModuleEditor({ type, module, onClose }: { type: ModuleType; modu
 
         {error && <p className="st-error" role="alert">{error}</p>}
       </div>
-    </Drawer>
   )
+
+  if (inline) {
+    return (
+      <section className="st-inspector-section" aria-label={heading}>
+        <h2 className="st-inspector-title">{heading}</h2>
+        {form}
+        <div className="st-inspector-foot">
+          {saved && <span className="st-help" role="status">{t.common.saved}</span>}
+          {actions}
+        </div>
+      </section>
+    )
+  }
+  return <Drawer title={heading} onClose={onClose} footer={actions}>{form}</Drawer>
 }

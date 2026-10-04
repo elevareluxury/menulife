@@ -1,122 +1,45 @@
 import { useState } from 'react'
-import {
-  AlignLeft, ArrowDown, List, FolderOpen, LayoutGrid, GalleryHorizontal, ArrowUp, Clock, Copy, Eye, EyeOff, Image, Images, Link2, MapPin,
-  MessageSquareQuote, Pencil, Phone, Plus, ShoppingBag, Sparkles, Trash2, UserPlus, Users,
-} from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Link2, Monitor, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
-import { moduleSchedule, scheduleState } from '@/modules/profile/lib/moduleSchedule'
-import { useAppLang } from '@/i18n/app/store'
-import { langLocale } from '@/i18n/app/languages'
 import { useStudio } from '../StudioContext'
-import { createModule, deleteModule, friendlyError, saveOrder, updateModule } from '../lib/studioApi'
-import { buildCatalog, moduleDef, moduleDisplayTitle, moduleSummary } from '../lib/moduleCatalog'
+import { moduleDef, moduleSummary } from '../lib/moduleCatalog'
+import { useModuleActions } from '../lib/useModuleActions'
 import { useStudioT } from '@/i18n/app/studio'
 import type { StudioModule } from '../lib/studioTypes'
-import { Button, ConfirmDialog, Drawer, Menu, PageHeader } from '../components/ui'
+import { Button, ConfirmDialog, Menu, PageHeader } from '../components/ui'
 import { DragHandle, SortableList } from '../components/SortableList'
 import { EditTabs } from '../components/shared'
 import { ModuleEditor } from '../components/ModuleEditor'
-
-const ICONS: Record<ModuleType, typeof Link2> = {
-  link: Link2, social: Users, contact: Phone, location: MapPin, image: Image, text: AlignLeft,
-  featured_action: Sparkles, contact_card: UserPlus, gallery: Images, product: ShoppingBag,
-  testimonials: MessageSquareQuote, hours: Clock, cards: GalleryHorizontal, project: FolderOpen, portfolio: LayoutGrid, link_group: List,
-}
-
-const EDITABLE: ModuleType[] = ['link', 'social', 'contact', 'location', 'image', 'text', 'featured_action', 'product', 'hours', 'gallery', 'cards', 'testimonials', 'project', 'portfolio', 'link_group']
+import { ModuleLibrary } from '../components/ModuleLibrary'
+import { EDITABLE_MODULES, MODULE_ICONS, useScheduleBadge } from '../lib/moduleUi'
 
 export function ModulesPage() {
-  const { profile, modules, setModules } = useStudio()
+  const { modules } = useStudio()
   const [library, setLibrary] = useState(false)
   const [editing, setEditing] = useState<{ type: ModuleType; module: StudioModule | null } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<StudioModule | null>(null)
   const [deleting, setDeleting] = useState(false)
-  const [busyId, setBusyId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [announce, setAnnounce] = useState('')
+  const { toggleVisibility, moveTo, duplicate, remove, busyId, error, announce, title } = useModuleActions()
+  const scheduleBadge = useScheduleBadge()
   const t = useStudioT()
   const mt = t.modules
-  const title = (m: StudioModule) => moduleDisplayTitle(m, t)
-  const locale = langLocale(useAppLang(st => st.lang))
-  const fmt = (d: Date) => d.toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-  /** "Desde 12 oct 18:00" · "Hasta 20 oct 10:00" · "Terminó" — o nada si no está programado */
-  const scheduleBadge = (m: StudioModule): string | null => {
-    const state = scheduleState(m.config)
-    const { from, until } = moduleSchedule(m.config)
-    if (state === 'upcoming' && from) return mt.scheduledFrom(fmt(from))
-    if (state === 'ended') return mt.scheduleEnded
-    if (state === 'live' && until) return mt.scheduledUntil(fmt(until))
-    return null
-  }
 
-  async function toggleVisibility(m: StudioModule) {
-    const visibility = m.visibility === 'active' ? 'hidden' : 'active'
-    setBusyId(m.id); setError(null)
-    setModules(prev => prev.map(x => (x.id === m.id ? { ...x, visibility } : x)))
-    try {
-      await updateModule(m.id, { visibility })
-      setAnnounce(visibility === 'active' ? mt.nowVisible(title(m)) : mt.nowHidden(title(m)))
-    } catch (e) {
-      setModules(prev => prev.map(x => (x.id === m.id ? { ...x, visibility: m.visibility } : x)))
-      setError(friendlyError(e))
-    } finally { setBusyId(null) }
-  }
-
-  /** Mueve un módulo de la posición `from` a `to` (arrastrando, con el teclado o desde el menú). */
-  async function moveTo(from: number, to: number, announce = true) {
-    if (to < 0 || to >= modules.length || from === to) return
-    const previous = modules
-    const next = [...modules]
-    const [item] = next.splice(from, 1)
-    next.splice(to, 0, item)
-    const renumbered = next.map((m, i) => ({ ...m, position: (i + 1) * 10 }))
-    setModules(() => renumbered)
-    setError(null)
-    if (announce) setAnnounce(mt.moved(title(item), to + 1, modules.length))
-    try { await saveOrder(renumbered) }
-    catch (e) { setModules(() => previous); setError(friendlyError(e)) }
-  }
-
-  /** Copia el módulo justo debajo del original. */
-  async function duplicate(index: number) {
-    const m = modules[index]
-    setBusyId(m.id); setError(null)
-    try {
-      const config = Object.fromEntries(Object.entries(m.config ?? {}).filter(([k]) => !k.startsWith('legacy_')))
-      const copy = await createModule({
-        profile_id: profile.id, type: m.type, position: m.position + 1,
-        title: m.title ? mt.copyOf(m.title).slice(0, 120) : null,
-        content: structuredClone(m.content), translations: structuredClone(m.translations ?? {}),
-        config, visibility: m.visibility,
-      })
-      const next = [...modules]
-      next.splice(index + 1, 0, copy)
-      const renumbered = next.map((x, i) => ({ ...x, position: (i + 1) * 10 }))
-      setModules(() => renumbered)
-      setAnnounce(mt.duplicated(title(m)))
-      await saveOrder(renumbered)
-    } catch (e) {
-      setError(friendlyError(e))
-    } finally { setBusyId(null) }
-  }
-
-  async function remove(m: StudioModule) {
-    setDeleting(true); setError(null)
-    try {
-      await deleteModule(m.id)
-      setModules(prev => prev.filter(x => x.id !== m.id))
-      setAnnounce(mt.deleted(title(m)))
-      setConfirmDelete(null)
-    } catch (e) {
-      setError(friendlyError(e))
-    } finally { setDeleting(false) }
+  async function confirmRemove(m: StudioModule) {
+    setDeleting(true)
+    if (await remove(m)) setConfirmDelete(null)
+    setDeleting(false)
   }
 
   return (
     <>
       <EditTabs />
       <PageHeader title={mt.title} subtitle={mt.subtitle}
-        actions={<Button variant="primary" onClick={() => setLibrary(true)}><Plus size={16} aria-hidden="true" /> {mt.add}</Button>} />
+        actions={<>
+          {/* Editor de escritorio de 3 paneles (Fase 11) */}
+          <Link to="/studio/editor" className="st-btn st-btn-secondary st-desktop-only"><Monitor size={16} aria-hidden="true" /> {t.editor3.open}</Link>
+          <Button variant="primary" onClick={() => setLibrary(true)}><Plus size={16} aria-hidden="true" /> {mt.add}</Button>
+        </>} />
 
       <p className="st-sr-only" role="status" aria-live="polite">{announce}</p>
       {error && <p className="st-error" role="alert" style={{ marginBottom: 12 }}>{error}</p>}
@@ -132,9 +55,9 @@ export function ModulesPage() {
       ) : (
         <SortableList items={modules} label={title} onMove={(from, to) => void moveTo(from, to, false)} className="st-module-list">
           {(m, i, handle, drag) => {
-            const Icon = ICONS[m.type] ?? Link2
+            const Icon = MODULE_ICONS[m.type] ?? Link2
             const label = title(m)
-            const canEdit = EDITABLE.includes(m.type)
+            const canEdit = EDITABLE_MODULES.includes(m.type)
             return (
               <li ref={drag.ref} style={drag.style} className={`st-module ${drag.className}${m.visibility === 'hidden' ? ' is-hidden' : ''}`}>
                 <DragHandle {...handle} />
@@ -169,21 +92,8 @@ export function ModulesPage() {
         </SortableList>
       )}
 
-      {library && (
-        <Drawer title={mt.library} onClose={() => setLibrary(false)}>
-          <div className="st-library">
-            {buildCatalog(t).filter(d => d.addable).map(d => {
-              const Icon = ICONS[d.type]
-              return (
-                <button key={d.type} type="button" onClick={() => { setLibrary(false); setEditing({ type: d.type, module: null }) }}>
-                  <span className="st-module-icon" aria-hidden="true"><Icon size={17} /></span>
-                  <span><strong>{d.label}</strong><span>{d.description}</span></span>
-                </button>
-              )
-            })}
-          </div>
-        </Drawer>
-      )}
+      {library && <ModuleLibrary onClose={() => setLibrary(false)}
+        onPick={type => { setLibrary(false); setEditing({ type, module: null }) }} />}
 
       {editing && <ModuleEditor type={editing.type} module={editing.module} onClose={() => setEditing(null)} />}
 
@@ -192,7 +102,7 @@ export function ModulesPage() {
           title={mt.deleteTitle}
           message={mt.deleteText(title(confirmDelete))}
           confirmLabel={t.common.delete} danger loading={deleting}
-          onConfirm={() => remove(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
+          onConfirm={() => { void confirmRemove(confirmDelete) }} onCancel={() => setConfirmDelete(null)} />
       )}
     </>
   )

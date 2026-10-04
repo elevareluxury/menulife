@@ -5,23 +5,33 @@ import { ProfileView } from '@/modules/profile/components/ProfileView'
 import { themeVars } from '@/modules/profile/lib/profileTheme'
 import { usePrefersLight } from '@/modules/profile/lib/usePrefersLight'
 import type { ProfileLang } from '@/modules/profile/lib/profileTypes'
+import type { PreviewSelect } from '@/modules/profile/components/ProfileView'
 import { useStudio } from '../StudioContext'
 import { useStudioT } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
 
-/** Vista previa en vivo: se actualiza mientras se edita (no registra visitas). */
-export function LivePreview({ device = 'mobile' }: { device?: 'mobile' | 'desktop' }) {
+/**
+ * Vista previa en vivo: se actualiza mientras se edita (no registra visitas).
+ * Con `select` (editor de escritorio) un clic elige el bloque, y lo elegido desde Capas se lleva a la vista.
+ */
+export function LivePreview({ device = 'mobile', select }: { device?: 'mobile' | 'desktop'; select?: PreviewSelect }) {
   const { previewProfile } = useStudio()
   const prefersLight = usePrefersLight()
   const appLang = useAppLang(s => s.lang)
   // La vista previa arranca en el idioma de Studio y se puede cambiar sin afectar la cuenta
   const [picked, setLang] = useState<ProfileLang | null>(null)
   const lang = picked ?? appLang
+  const frame = useRef<HTMLDivElement>(null)
+  const selected = select?.selected ?? null
+  useEffect(() => {
+    if (!selected) return
+    frame.current?.querySelector(`[data-sel-id="${CSS.escape(selected)}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [selected])
   return (
     <div className={device === 'mobile' ? 'st-phone' : 'st-desktop-frame'}>
-      <div className="st-phone-scroll">
+      <div className="st-phone-scroll" ref={frame}>
         <ProfileView profile={previewProfile} lang={lang} onLang={setLang}
-          style={themeVars(previewProfile.theme, prefersLight)} onToast={() => undefined} toast={null} preview />
+          style={themeVars(previewProfile.theme, prefersLight)} onToast={() => undefined} toast={null} preview select={select} />
       </div>
     </div>
   )

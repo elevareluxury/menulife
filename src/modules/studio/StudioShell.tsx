@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  BarChart3, Eye, FolderOpen, Home, Layers, LayoutGrid, LogOut, MoreHorizontal, Palette, PenLine, Settings, Share2, UserRound,
+  BarChart3, Eye, FolderOpen, Home, Layers, LayoutGrid, LogOut, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { StudioContext, type StudioContextValue } from './StudioContext'
@@ -31,10 +31,11 @@ interface HistoryEntry { keys: string[]; before: ProfilePatch; after: ProfilePat
 /** Cambios que no se deshacen con Ctrl+Z (se manejan con su propia confirmación). */
 const UNDOABLE_SKIP = new Set<keyof ProfilePatch>(['status', 'onboarding_step', 'visibility'])
 
-const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
+const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean; desktopOnly?: boolean }[] = [
   { to: '/studio',            label: 'home',       icon: Home, end: true },
   { to: '/studio/identity',   label: 'identity',   icon: UserRound },
   { to: '/studio/modules',    label: 'modules',    icon: LayoutGrid },
+  { to: '/studio/editor',     label: 'editor',     icon: PanelsLeftRight, desktopOnly: true },
   { to: '/studio/projects',   label: 'projects',   icon: FolderOpen },
   { to: '/studio/appearance', label: 'appearance', icon: Palette },
   { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
@@ -366,7 +367,9 @@ function StudioReady({ userId, initial, switchSpace }: {
       conflict, publishState, publishing, publishError, publish, restoreVersion, undo, redo, historyCounts,
       spaces, handle, primaryUsername, switchSpace, reloadSpaces])
 
-  const showPane = location.pathname !== '/studio/preview'
+  // El editor de escritorio (Fase 11) tiene su propia vista previa y usa todo el ancho
+  const inDesktopEditor = location.pathname === '/studio/editor'
+  const showPane = location.pathname !== '/studio/preview' && !inDesktopEditor
   // En el editor de un proyecto manda su propio estado de publicación (el del perfil confundiría)
   const inProjectEditor = /^\/studio\/projects\/[^/]+/.test(location.pathname)
 
@@ -377,7 +380,7 @@ function StudioReady({ userId, initial, switchSpace }: {
           <nav className="st-sidebar" aria-label="Studio">
             <a className="st-logo" href="/studio">mycen.<small>Studio</small></a>
             {NAV.map(item => (
-              <NavLink key={item.to} to={item.to} end={item.end} className="st-nav-item">
+              <NavLink key={item.to} to={item.to} end={item.end} className={`st-nav-item${item.desktopOnly ? ' st-desktop-only' : ''}`}>
                 <item.icon size={18} aria-hidden="true" /> {t.nav[item.label]}
               </NavLink>
             ))}
@@ -394,7 +397,7 @@ function StudioReady({ userId, initial, switchSpace }: {
           </nav>
 
           <main className="st-main">
-            <div className="st-main-inner">
+            <div className={`st-main-inner${inDesktopEditor ? ' is-wide' : ''}`}>
               {profile.suspended_at && (
                 <div className="st-card st-suspended" role="alert">
                   <strong>{t.moderation.suspendedTitle}</strong>

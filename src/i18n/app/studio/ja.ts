@@ -2,6 +2,7 @@ import type { StudioDict } from './es'
 
 const ja: StudioDict = {
   nav: {
+    editor: 'エディター',
     spaces: 'マイ Spaces',
     projects: 'プロジェクト',
     home: 'ホーム', identity: 'マイ アイデンティティ', modules: 'モジュール', appearance: 'デザイン', exchange: '共有',
@@ -451,6 +452,19 @@ const ja: StudioDict = {
     slugIssue: { invalid: '小文字・数字・ハイフンを 2〜40 文字で入力してください。', reserved: 'そのアドレスは予約されています。', taken: 'そのアドレスの Space はすでにあります。' },
     manage: 'マイ Spaces',
     switcher: '編集中の Space',
+  },
+  editor3: {
+    open: 'デスクトップエディター',
+    layers: 'レイヤー',
+    canvas: 'エディターのプレビュー',
+    inspector: 'プロパティ',
+    identity: 'アイデンティティ',
+    identityHint: '写真、名前、自己紹介、メインアクション',
+    add: 'モジュールを追加',
+    noModules: 'まだモジュールはありません。',
+    canvasHelp: 'ブロックをクリックすると編集できます。ここではリンクは開きません。',
+    empty: 'プレビューかレイヤーでブロックを選ぶと編集できます。',
+    contactCardHint: '連絡先カードの設定はこちら：',
   },
   moderation: {
     suspendedTitle: 'プロフィールは停止されています',

@@ -366,3 +366,22 @@
 .mp-dialog-actions > * { flex: 1; }
 .mp-dialog .mp-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 .mp-dialog-intro a { color: var(--p-text); }
+
+/* Editor de escritorio (Studio, Fase 11): elegir un bloque desde la vista previa */
+.mp-sel { position: relative; cursor: pointer; border-radius: calc(14px * var(--p-rs, 1)); }
+.mp-sel::before {
+  content: ''; position: absolute; inset: -6px; border-radius: inherit; pointer-events: none;
+  outline: 2px dashed transparent; outline-offset: 0; transition: outline-color 120ms;
+}
+.mp-sel:hover::before { outline-color: rgba(125, 184, 255, 0.7); }
+.mp-sel.is-selected::before { outline: 2px solid #7DB8FF; }
+.mp-sel::after {
+  content: attr(data-sel-label); position: absolute; top: -18px; inset-inline-start: -4px; z-index: 2;
+  padding: 2px 8px; border-radius: 6px; background: #1E5FAF; color: #FFFFFF; font: 600 11px/1.4 'Geist', sans-serif;
+  white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 120ms;
+}
+.mp-sel:hover::after, .mp-sel.is-selected::after { opacity: 1; }
+.mp-sel[data-sel-label='']::after { display: none; }
+/* El encabezado está pegado a la barra superior: su etiqueta va adentro */
+.mp-sel[data-sel-id='identity']::after { top: 8px; inset-inline-start: 8px; }
+@media (prefers-reduced-motion: reduce) { .mp-sel::before, .mp-sel::after { transition: none; } }

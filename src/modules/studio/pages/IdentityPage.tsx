@@ -12,7 +12,8 @@ const PURPOSES = ['personal', 'professional', 'creator', 'business', 'event']
 
 type EnField = 'display_name' | 'descriptor' | 'bio' | 'primary_action_label'
 
-export function IdentityPage() {
+/** `embedded`: dentro del inspector del editor de escritorio (sin encabezado de página) */
+export function IdentityPage({ embedded = false }: { embedded?: boolean }) {
   const { profile, patchProfile, userId, business } = useStudio()
   const t = useStudioT()
   const id = t.identity
@@ -35,8 +36,10 @@ export function IdentityPage() {
 
   return (
     <>
-      <EditTabs />
-      <PageHeader title={id.title} subtitle={id.subtitle} actions={<ProfileSaveIndicator />} />
+      {!embedded && <>
+        <EditTabs />
+        <PageHeader title={id.title} subtitle={id.subtitle} actions={<ProfileSaveIndicator />} />
+      </>}
 
       <section className="st-card st-stack">
         <h2 className="st-card-title" style={{ margin: 0 }}>{id.image}</h2>

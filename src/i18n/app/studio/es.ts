@@ -2,6 +2,7 @@
 
 const es = {
   nav: {
+    editor: 'Editor',
     spaces: 'Mis Spaces',
     projects: 'Proyectos',
     home: 'Inicio',
@@ -725,6 +726,19 @@ const es = {
     slugIssue: { invalid: 'Usá entre 2 y 40 letras minúsculas, números o guiones.', reserved: 'Esa dirección está reservada.', taken: 'Ya tenés un Space con esa dirección.' },
     manage: 'Mis Spaces',
     switcher: 'Space que estás editando',
+  },
+  editor3: {
+    open: 'Editor de escritorio',
+    layers: 'Capas',
+    canvas: 'Vista previa del editor',
+    inspector: 'Propiedades',
+    identity: 'Identidad',
+    identityHint: 'Foto, nombre, bio y acción principal',
+    add: 'Agregar módulo',
+    noModules: 'Todavía no hay módulos.',
+    canvasHelp: 'Hacé clic en un bloque para editarlo. Acá los links no se abren.',
+    empty: 'Elegí un bloque en la vista previa o en Capas para editarlo.',
+    contactCardHint: 'La tarjeta de contacto se configura en',
   },
   moderation: {
     suspendedTitle: 'Tu perfil está suspendido',

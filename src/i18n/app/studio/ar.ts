@@ -2,6 +2,7 @@ import type { StudioDict } from './es'
 
 const ar: StudioDict = {
   nav: {
+    editor: 'المحرر',
     spaces: 'مساحاتي',
     projects: 'المشاريع',
     home: 'الرئيسية', identity: 'هويتي', modules: 'الوحدات', appearance: 'المظهر', exchange: 'مشاركة',
@@ -451,6 +452,19 @@ const ar: StudioDict = {
     slugIssue: { invalid: 'استخدم من 2 إلى 40 حرفًا صغيرًا أو رقمًا أو شرطة.', reserved: 'هذا العنوان محجوز.', taken: 'لديك بالفعل مساحة بهذا العنوان.' },
     manage: 'مساحاتي',
     switcher: 'المساحة التي تعدّلها',
+  },
+  editor3: {
+    open: 'محرر سطح المكتب',
+    layers: 'الطبقات',
+    canvas: 'معاينة المحرر',
+    inspector: 'الخصائص',
+    identity: 'الهوية',
+    identityHint: 'الصورة والاسم والنبذة والإجراء الرئيسي',
+    add: 'إضافة وحدة',
+    noModules: 'لا توجد وحدات بعد.',
+    canvasHelp: 'انقر على كتلة لتعديلها. الروابط لا تُفتح هنا.',
+    empty: 'اختر كتلة في المعاينة أو في الطبقات لتعديلها.',
+    contactCardHint: 'تُضبط بطاقة الاتصال في',
   },
   moderation: {
     suspendedTitle: 'تم تعليق ملفك',
