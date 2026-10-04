@@ -4,6 +4,9 @@ import { Globe, TrendingUp, Target, Flame, Zap } from 'lucide-react'
 import { ShimmerButton } from './Navbar'
 import { useLandingT } from '@/i18n/app/landing'
 
+import { reducedMotion } from './motion'
+import { SplitText } from './SplitText'
+
 declare const gsap: any
 
 const MODULES = [
@@ -17,7 +20,7 @@ const MODULES = [
 export function LifeOSSection() {
   const t = useLandingT().life
   useEffect(() => {
-    if (typeof gsap === 'undefined') return
+    if (typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
 
@@ -59,8 +62,8 @@ export function LifeOSSection() {
             fontFamily: 'var(--font-syne)', fontWeight: 800,
             fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
             lineHeight: 1.1, margin: '0 0 16px',
-          }}>{t.title}{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
+          }} data-split><SplitText text={t.title} />{' '}
+            <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>{t.titleAccent}</em>
           </h2>
           <p style={{
             fontFamily: 'var(--font-jakarta)', fontSize: '17px',
@@ -80,22 +83,18 @@ export function LifeOSSection() {
             <div
               key={key}
               data-life-card
+              data-tilt
               className="liquid-glass"
               style={{
                 padding: '28px 22px',
                 background: 'rgba(15,17,21,0.97)',
                 border: `1px solid rgba(255,255,255,0.07)`,
-                transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), border-color 0.3s',
+                transition: 'border-color 0.3s',
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'
-                e.currentTarget.style.borderColor = `${color}40`
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = ''
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}40` }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)' }}
             >
+              <span className="ml-spot" aria-hidden="true" />
               <div style={{
                 width: '48px', height: '48px',
                 borderRadius: '14px',
@@ -122,7 +121,7 @@ export function LifeOSSection() {
         {/* CTA */}
         <div data-life-cta style={{ textAlign: 'center' }}>
           <Link to="/register" style={{ textDecoration: 'none' }}>
-            <ShimmerButton style={{ padding: '14px 36px', fontSize: '15px', borderRadius: '50px' }}>
+            <ShimmerButton magnetic style={{ padding: '14px 36px', fontSize: '15px', borderRadius: '50px' }}>
               {t.cta}
             </ShimmerButton>
           </Link>

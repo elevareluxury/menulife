@@ -31,6 +31,7 @@ const ar: LandingDict = {
     ],
     powered: 'صُنع باستخدام Mycen ✦',
   },
+  marquee: { label: 'يتحدث Mycen ‏12 لغة' },
   problem: {
     label: 'المشكلة',
     title: 'حياتك الرقمية اليوم',

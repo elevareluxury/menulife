@@ -3,27 +3,20 @@ import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
 import { ShimmerButton } from './Navbar'
 
+import { reducedMotion } from './motion'
+import { SplitText } from './SplitText'
+
 declare const gsap: any
-declare const Splitting: any
 
 export function FinalCTA() {
   const t = useLandingT().cta
   const titleRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
-    if (typeof gsap === 'undefined') return
+    if (typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
 
-    if (typeof Splitting !== 'undefined' && titleRef.current) {
-      const res = Splitting({ target: titleRef.current, by: 'words' })
-      if (res?.[0]?.words?.length) {
-        gsap.fromTo(res[0].words,
-          { opacity: 0, y: -30, filter: 'blur(6px)' },
-          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.7, stagger: 0.07, ease: 'power3.out',
-            scrollTrigger: { trigger: titleRef.current, start: 'top 80%' } })
-      }
-    }
 
     gsap.fromTo('[data-cta-sub]',
       { opacity: 0, y: 24 },
@@ -48,7 +41,7 @@ export function FinalCTA() {
       overflow:  'hidden',
     }}>
       {/* Ambient glow decorations */}
-      <div style={{
+      <div data-parallax="0.6" style={{
         position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '600px', height: '300px',
         background: 'radial-gradient(ellipse, rgba(244,112,90,0.15) 0%, transparent 70%)',
@@ -62,8 +55,7 @@ export function FinalCTA() {
           fontFamily: 'var(--font-jakarta)', marginBottom: '20px',
         }}>{t.label}</p>
 
-        {/* key: Splitting reescribe el título; al cambiar de idioma se monta de nuevo */}
-        <h2 key={t.title} ref={titleRef} style={{
+        <h2 ref={titleRef} data-split style={{
           fontFamily:    'var(--font-syne)',
           fontWeight:    800,
           fontSize:      'clamp(44px, 7vw, 80px)',
@@ -72,7 +64,7 @@ export function FinalCTA() {
           marginBottom:  '20px',
           letterSpacing: '-0.03em',
         }}>
-          {t.title}
+          <SplitText text={t.title} />
         </h2>
 
         <p data-cta-sub style={{
@@ -91,11 +83,12 @@ export function FinalCTA() {
 
         <div data-cta-btns style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
           <Link to="/register" style={{ textDecoration: 'none' }}>
-            <ShimmerButton style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '50px' }}>
+            <ShimmerButton magnetic style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '50px' }}>
               {t.primary}
             </ShimmerButton>
           </Link>
-          <Link to="/login" className="liquid-glass-btn-ghost" style={{
+          <Link to="/login" data-magnetic className="liquid-glass-btn-ghost" style={{
+            display: 'inline-block',
             padding: '16px 36px',
             color: 'rgba(255,255,255,0.7)',
             fontSize: '16px', fontWeight: 500,

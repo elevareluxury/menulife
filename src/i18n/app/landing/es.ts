@@ -40,6 +40,7 @@ const es = {
     ],
     powered: 'Hecho con Mycen ✦',
   },
+  marquee: { label: 'Mycen habla 12 idiomas' },
   problem: {
     label: 'EL PROBLEMA',
     title: 'Hoy tu vida digital está',

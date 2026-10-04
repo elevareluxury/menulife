@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
+
+import { reducedMotion } from './motion'
+import { SplitText } from './SplitText'
 
 declare const gsap: any
 
@@ -28,7 +31,7 @@ export function PricingSection() {
   ]
 
   useEffect(() => {
-    if (typeof gsap === 'undefined') return
+    if (typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
 
@@ -63,9 +66,9 @@ export function PricingSection() {
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px' }}>
             {t.label}
           </p>
-          <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#1a1a1a', lineHeight: 1.1, margin: '0 0 12px' }}>
-            {t.title}{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>{t.titleAccent}</em>
+          <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#1a1a1a', lineHeight: 1.1, margin: '0 0 12px' }} data-split>
+            <SplitText text={t.title} />{' '}
+            <em data-word style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>{t.titleAccent}</em>
           </h2>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '15px', color: 'var(--ml-gray-500)', margin: '0 0 28px' }}>
             {t.freeNote}
@@ -190,11 +193,10 @@ function PricingCard({
           animation: 'ml-pulse-glow 3s ease-in-out infinite',
           overflow: 'visible',
         } : {}),
-        transition: 'transform 0.3s ease',
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = '' }}
+      data-tilt
     >
+      <span className="ml-spot" aria-hidden="true" />
       {/* Featured badge */}
       {plan.featured && (
         <div style={{
@@ -240,7 +242,7 @@ function PricingCard({
       <div style={{ paddingBottom: '24px', marginBottom: '24px', borderBottom: `1px solid ${plan.featured ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}` }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px' }}>
           <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: '52px', lineHeight: 1, color: plan.featured ? '#fff' : '#1a1a1a', transition: 'all 0.3s' }}>
-            ${price}
+            $<AnimatedNumber value={price} />
           </span>
           <span style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.4)' : 'var(--ml-gray-500)', paddingBottom: '8px' }}>
             {perMonth}{' '}
@@ -256,7 +258,7 @@ function PricingCard({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
         {plan.features.map(f => (
-          <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.7)' : '#3d3c39' }}>
+          <div key={f} data-rise style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.7)' : '#3d3c39' }}>
             <span style={{ color: '#22c55e', fontWeight: 700, flexShrink: 0, fontSize: '12px' }}>✓</span>
             {f}
           </div>
@@ -299,4 +301,25 @@ function PricingCard({
       )}
     </div>
   )
+}
+
+/** Número que cuenta hasta el valor nuevo al cambiar la facturación (quieto con "reducir movimiento"). */
+function AnimatedNumber({ value }: { value: number }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const shown = useRef(value)
+  // El texto lo maneja este componente (no React): así la animación no pisa un nodo de React
+  useLayoutEffect(() => { if (ref.current) ref.current.textContent = String(shown.current) }, [])
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (typeof gsap === 'undefined' || reducedMotion()) { shown.current = value; el.textContent = String(value); return }
+    const obj = { n: shown.current }
+    const tween = gsap.to(obj, {
+      n: value, duration: 0.6, ease: 'power3.out',
+      onUpdate: () => { el.textContent = String(Math.round(obj.n)) },
+      onComplete: () => { shown.current = value },
+    })
+    return () => { tween.kill(); shown.current = Math.round(obj.n) }
+  }, [value])
+  return <span ref={ref} />
 }

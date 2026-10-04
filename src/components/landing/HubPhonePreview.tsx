@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { useLandingT } from '@/i18n/app/landing'
 
 /* Vista estática de una página de Mycen Identity dentro del teléfono del hero (260×520px).
@@ -6,9 +7,19 @@ const LINK_EMOJIS = ['🎨', '💬', '📇', '📅']
 
 export function HubPhonePreview() {
   const p = useLandingT().phone
+  // Los links entran en cascada cada vez que el teléfono aparece en pantalla
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [live, setLive] = useState(false)
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(([e]) => setLive(e.isIntersecting && e.intersectionRatio > 0.35), { threshold: [0, 0.35, 0.6] })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
   const initials = p.name.split(/\s+/).map(w => w[0]).slice(0, 2).join('')
   return (
-    <div style={{
+    <div ref={rootRef} className={live ? 'ml-phone-live' : undefined} style={{
       width: '100%',
       height: '100%',
       background: '#080B10',
@@ -60,7 +71,7 @@ export function HubPhonePreview() {
           fontSize: '19px',
           boxShadow: '0 4px 20px rgba(244,112,90,0.35)',
           flexShrink: 0, color: '#fff', fontWeight: 800,
-        }} aria-hidden>{initials}</div>
+        }} className="ml-phone-avatar" aria-hidden>{initials}</div>
       </div>
 
       {/* Name, location, status */}
@@ -85,7 +96,7 @@ export function HubPhonePreview() {
           borderRadius: '20px', padding: '3px 9px',
           fontSize: '9px', fontWeight: 700, color: '#10B981',
         }}>
-          <span style={{
+          <span className="ml-phone-dot" style={{
             width: '5px', height: '5px', borderRadius: '50%',
             background: '#10B981', display: 'inline-block',
             boxShadow: '0 0 6px #10B981',
@@ -96,8 +107,9 @@ export function HubPhonePreview() {
 
       {/* Smart links */}
       <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '7px' }}>
-        {p.links.map((link, i) => ({ ...link, emoji: LINK_EMOJIS[i] ?? '🔗' })).map(link => (
-          <div key={link.label} style={{
+        {p.links.map((link, i) => ({ ...link, i, emoji: LINK_EMOJIS[i] ?? '🔗' })).map(link => (
+          <div key={link.label} className="ml-phone-link" style={{
+            animationDelay: `${0.5 + link.i * 0.15}s`,
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: '10px',

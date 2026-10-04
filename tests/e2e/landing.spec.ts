@@ -63,3 +63,41 @@ test('la landing pasa axe (WCAG AA)', async ({ page }) => {
     .analyze()
   expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
 })
+
+test.describe('animaciones', () => {
+  test('la barra de progreso avanza, la cinta de idiomas corre y el precio cuenta hasta el valor nuevo', async ({ page }) => {
+    await page.goto('/?lang=es')
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Tu identidad digital')
+    // Cinta: los 12 idiomas para lectores de pantalla, y la pista visual animada
+    await expect(page.getByRole('region', { name: 'Mycen habla 12 idiomas' })).toContainText('العربية')
+    await expect.poll(() => page.locator('.ml-marquee-track').evaluate(el => getComputedStyle(el).animationName)).toBe('ml-marquee')
+    // Títulos por palabra: el lector de pantalla recibe la frase entera
+    await expect(page.getByRole('heading', { name: 'Hoy tu vida digital está fragmentada.' })).toBeAttached()
+
+    const progress = () => page.locator('.ml-progress').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)
+    expect(await progress()).toBeLessThan(0.05)
+    await page.locator('#pricing').scrollIntoViewIfNeeded()
+    await expect.poll(progress).toBeGreaterThan(0.3)
+
+    const price = page.locator('#pricing').getByText(/^\$\d+$/).first()
+    await expect(price).toHaveText('$70')
+    await page.getByRole('button', { name: /6 meses/ }).click()
+    await expect(price).toHaveText('$63')
+  })
+
+  test('con "reducir movimiento" no se mueve nada y todo se ve', async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' })
+    await installSupabaseMock(context, createState({}))
+    const page = await context.newPage()
+    await page.goto('/?lang=es')
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Tu identidad digital')
+    expect(await page.locator('.ml-marquee-track').evaluate(el => getComputedStyle(el).animationName)).toBe('none')
+    // Las palabras de los títulos quedan en su lugar, sin esperar el scroll
+    const hidden = await page.locator('[data-word]').evaluateAll(els => els.filter(el => getComputedStyle(el).opacity !== '1' || getComputedStyle(el).transform !== 'none').length)
+    expect(hidden).toBe(0)
+    await page.locator('#pricing').scrollIntoViewIfNeeded()
+    await page.getByRole('button', { name: /Anual/ }).click()
+    await expect(page.locator('#pricing').getByText(/^\$\d+$/).first()).toHaveText('$56')
+    await context.close()
+  })
+})

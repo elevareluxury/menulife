@@ -31,6 +31,7 @@ const zh: LandingDict = {
     ],
     powered: '由 Mycen 制作 ✦',
   },
+  marquee: { label: 'Mycen 支持 12 种语言' },
   problem: {
     label: '问题',
     title: '如今你的数字生活',

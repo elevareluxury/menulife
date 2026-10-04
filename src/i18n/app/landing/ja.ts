@@ -31,6 +31,7 @@ const ja: LandingDict = {
     ],
     powered: 'Mycen でつくりました ✦',
   },
+  marquee: { label: 'Mycen は 12 言語に対応' },
   problem: {
     label: '課題',
     title: 'いま、あなたのデジタルライフは',
