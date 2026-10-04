@@ -187,7 +187,7 @@ export function RegisterPage() {
 
           <label style={{
             display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer',
-            fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.5,
+            fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5,
           }}>
             <input type="checkbox" checked={accepted} onChange={e => { setAccepted(e.target.checked); setError('') }} required
               style={{ marginTop: '3px', width: 16, height: 16, accentColor: CORAL, flexShrink: 0 }} />

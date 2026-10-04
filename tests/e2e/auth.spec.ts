@@ -75,6 +75,8 @@ for (const path of ['/login', '/register', '/forgot-password']) {
     await installSupabaseMock(context, createState({}))
     await page.goto(path)
     await expect(page.getByRole('combobox', { name: 'Idioma' })).toBeVisible()
+    // La tarjeta entra con un fundido (opacity): medir el contraste recién cuando terminó
+    await page.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect?.getTiming().iterations !== Infinity).map(a => a.finished)))
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
     expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
   })
