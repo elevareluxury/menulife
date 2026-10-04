@@ -48,8 +48,8 @@ escritorio de 3 paneles (7), pantalla "Mis Spaces" (5, salvo demanda) y document
 - **Interfaz en español primero** (9): todo texto nuevo entra a los diccionarios tipados, en los 12 idiomas.
 - **Identidad visual Mycen** (10): tokens actuales; blur sólo en navegación flotante, con alternativa sin blur.
 - **Comercio** (2): el módulo de producto/servicio termina siempre en WhatsApp o un link externo.
-- **Posicionamiento** (13): al terminar la Fase 5, revisar landing y onboarding para que Identity sea la entrada.
-- **Nombre** (P4): renombrar "Mycen Profile" → "Mycen Identity" en `CLAUDE.md` y en la interfaz al cerrar la Fase 1.
+- **Posicionamiento** (13) ✅: la landing abre con "Tu identidad digital" y el onboarding crea la identidad; Life OS aparece después.
+- **Nombre** (P4) ✅: "Mycen Identity" reemplaza a "Mycen Profile" en `CLAUDE.md` y en la interfaz.
 
 ## Lo que se necesita de vos antes de la Fase 1
 

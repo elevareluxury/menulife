@@ -7,7 +7,7 @@ declare const gsap: any
 
 const MODULES = [
   {
-    Icon: Globe,      name: 'Mycen Profile',
+    Icon: Globe,      name: 'Mycen Identity',
     copy: 'Comparte todo lo importante desde un único perfil.',
     color: '#3B82F6',
   },

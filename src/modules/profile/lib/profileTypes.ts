@@ -1,4 +1,4 @@
-// Tipos de Mycen Profile. Coinciden con lo que devuelve la RPC get_public_profile
+// Tipos de la página pública de Mycen Identity. Coinciden con lo que devuelve la RPC get_public_profile
 // (supabase/migrations/20261001000001_mycen_profiles_foundation.sql).
 
 import type { AppLang } from '@/i18n/app/languages'

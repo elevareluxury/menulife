@@ -32,7 +32,7 @@ function Terms() {
       <p style={muted}>Al crear una cuenta en Mycen aceptás estas condiciones.</p>
 
       <h2 style={h2}>Qué es Mycen</h2>
-      <p>Mycen te permite crear una identidad digital pública (Mycen Profile), administrarla desde Mycen Studio, organizar tu vida personal en Life OS y, si tenés un negocio, gestionarlo con Mycen Business.</p>
+      <p>Mycen te permite crear una identidad digital pública (Mycen Identity), administrarla desde Mycen Studio, organizar tu vida personal en Life OS y, si tenés un negocio, gestionarlo con Mycen Business.</p>
 
       <h2 style={h2}>Tu cuenta</h2>
       <p>Sos responsable de mantener segura tu contraseña y de la actividad de tu cuenta. Los datos que cargues tienen que ser verdaderos y te tienen que pertenecer o tenés que tener permiso para usarlos.</p>
