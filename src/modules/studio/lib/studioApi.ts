@@ -6,6 +6,7 @@ import type {
 } from './studioTypes'
 import type { SpaceSummary } from './spaces'
 import { studioT } from '@/i18n/app/studio'
+import { optimizeImage } from '@/lib/imageOptimize'
 import type { SourceRow } from './trafficSources'
 
 // profiles / profile_modules / profile_stats_daily todavía no están en database.types.ts
@@ -13,6 +14,8 @@ const db = supabase as unknown as SupabaseClient
 
 const MEDIA_BUCKET = 'profile-media'
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+/** Lo que se acepta elegir: después de optimizar tiene que quedar por debajo de MAX_UPLOAD_BYTES (límite del bucket) */
+const MAX_SOURCE_BYTES = 30 * 1024 * 1024
 
 /** Traduce errores de la base a mensajes para el usuario (sin detalles internos). */
 export function friendlyError(err: unknown): string {
@@ -210,8 +213,15 @@ export async function saveOrder(modules: StudioModule[]): Promise<void> {
   if (failed?.error) throw failed.error
 }
 
-export async function uploadMedia(userId: string, file: File): Promise<string> {
-  if (!file.type.startsWith('image/')) throw new Error(studioT().errors.notImage)
+/**
+ * Sube una imagen a profile-media. Antes la achica y la pasa a WebP en el dispositivo (Lanzamiento L1): así una foto
+ * grande del celular entra aunque pese más de 5 MB, y la página pública carga rápido.
+ * `kind`: 'avatar' (foto de perfil, chica) o 'image' (portadas, galerías, bloques).
+ */
+export async function uploadMedia(userId: string, original: File, kind: 'avatar' | 'image' = 'image'): Promise<string> {
+  if (!original.type.startsWith('image/')) throw new Error(studioT().errors.notImage)
+  if (original.size > MAX_SOURCE_BYTES) throw new Error(studioT().errors.tooBig)
+  const file = await optimizeImage(original, { maxSide: kind === 'avatar' ? 640 : 1920 })
   if (file.size > MAX_UPLOAD_BYTES) throw new Error(studioT().errors.tooBig)
   const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
   const path = `${userId}/${crypto.randomUUID()}.${ext}`

@@ -51,8 +51,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Apariencia (Fase 9): `profiles.theme` = modo (`dark`/`light`/`auto`, este sigue al dispositivo con `usePrefersLight`),
   `corners`, `background` (liso/brillo/teñido con el acento), `card_style`, acento y tipografía. `profileTheme.ts` arma la paleta
   (`themePalette`) y garantiza WCAG AA: el acento se usa sólo si llega a 3:1 y deja texto legible encima (si no, color de texto);
-  el texto secundario se ajusta si hace falta. `contrastReport` se muestra en Studio → Apariencia. Las páginas públicas permiten
-  zoom (`useAllowZoom`). Tests: barrida de contraste en `tests/unit/profileTheme.test.ts` y axe en `tests/e2e/appearance.spec.ts`.
+  el texto secundario se ajusta si hace falta. `contrastReport` se muestra en Studio → Apariencia. Toda la app permite
+  zoom (viewport sin `user-scalable=no`). Tests: barrida de contraste en `tests/unit/profileTheme.test.ts` y axe en `tests/e2e/appearance.spec.ts`.
 - Links (Fase 7): estilo "Destacado" (`content.style = 'highlight'`) y módulo `link_group` (varios links bajo un título).
 - Connect (decisión 1, sin CRM): Studio → Compartir tiene URL, QR (`?src=qr`), vCard, tarjeta de identidad PNG clara/oscura
   (`lib/identityCard.ts`, canvas en el navegador, QR con `?src=card`) y presentación corta para copiar o mandar por WhatsApp.
@@ -98,6 +98,17 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   (cuenta, perfil y ajustes quedan). La cuenta entera se exporta/borra desde Studio → Ajustes.
 - Sin conexión: el + guarda en una cola local (`lib/outbox.ts`, id generado en el cliente, upsert sin duplicar) y se sube
   al volver la red; el aviso general de "sin conexión" es `src/components/ui/OfflineBanner.tsx`.
+
+## Rendimiento (Lanzamiento L1)
+- Plan de lanzamiento mundial: `docs/lanzamiento/00-plan.md` (fases L0–L8).
+- Todas las rutas son `lazy` en `App.tsx`: quien abre un perfil no descarga la landing ni Business. GSAP, ScrollTrigger y
+  Splitting vienen de npm y sólo en la landing (`components/landing/landingLibs.ts`); no agregar `<script>` de CDN a `index.html`.
+- `manualChunks` sólo agrupa supabase y react: agrupar recharts/framer a mano arrastraba dependencias a todas las páginas.
+- Presupuesto de peso: `npm run check:budget` (después de `npm run build`, también en CI) mide JS+CSS gzip de perfil,
+  proyecto y landing con `dist/.vite/manifest.json`. Si un cambio lo supera, achicarlo antes de subir el límite.
+- Fuentes desde `@fontsource` (`src/lib/fonts.ts`; las de títulos de perfil, a pedido en `ensureProfileFont`): nada de Google Fonts.
+- Imágenes: `uploadMedia` las achica (avatar 640 px, resto 1920 px) y las pasa a WebP en el dispositivo (`lib/imageOptimize.ts`).
+- Zoom permitido en toda la app (sin `user-scalable=no`); los campos táctiles usan 16px para que iOS no haga zoom al tocarlos.
 
 ## Idioma y región
 - 12 idiomas: es, en, pt, fr, de, it, zh, ja, ko, hi, ar (RTL), ru — lista en `src/i18n/app/languages.ts`

@@ -30,7 +30,7 @@ const en: StudioDict = {
     usernameTaken: 'That username is already taken.', usernameReserved: 'That username is reserved.',
     usernameInvalid: 'Use 3 to 30 lowercase letters, numbers or hyphens.', moduleLimit: 'You reached the limit of 100 modules.',
     tooLong: 'Some text is too long.', offline: 'You are offline. Check your internet and try again.',
-    generic: 'We could not save. Please try again.', notImage: 'Choose an image (JPG, PNG or WebP).', tooBig: 'The image is larger than 5 MB.',
+    generic: 'We could not save. Please try again.', notImage: 'Choose an image (JPG, PNG or WebP).', tooBig: 'The image is too large. Try one under 30 MB.',
   },
   username: {
     idle: '3 to 30 characters: lowercase letters, numbers and hyphens.', checking: 'Checking…', same: 'This is your current username.',
@@ -56,7 +56,7 @@ const en: StudioDict = {
   },
   identity: {
     title: 'My identity', subtitle: 'The first thing people see when they open your profile.', image: 'Image',
-    avatar: 'Profile photo', avatarHelp: 'Square, at least 400 × 400 px. JPG, PNG or WebP up to 5 MB.',
+    avatar: 'Profile photo', avatarHelp: 'Square, at least 400 × 400 px. JPG, PNG or WebP: we resize it so it loads fast.',
     cover: 'Cover (optional)', coverHelp: 'Horizontal, 1200 × 400 px recommended.', who: 'Who you are',
     name: 'Name', nameEmpty: 'The name cannot be empty.', descriptor: 'Descriptor',
     descriptorPlaceholder: 'Creative director · Founder', descriptorHelp: 'One line: what you do or what your business is.',

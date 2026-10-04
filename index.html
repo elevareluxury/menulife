@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Mycen — Tu mundo digital en un solo lugar</title>
     <meta name="description" content="Construye tu identidad digital, organiza tu vida y potencia tu negocio desde una única plataforma premium." />
 
@@ -29,24 +29,13 @@
     <meta property="og:type"        content="website" />
     <meta property="og:title"       content="Mycen — Identidad, organización y negocio en una plataforma" />
     <meta property="og:description" content="Construye tu identidad digital, organiza tu vida y potencia tu negocio desde una única plataforma premium." />
-    <meta property="og:image"       content="/icon-512.png" />
+    <meta property="og:image"       content="https://mycen.id/og-image.png" />
+    <meta property="og:image:width"  content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card"        content="summary_large_image" />
 
-    <!-- Tipografía Mycen: Geist (interfaz), Instrument Serif (acento editorial), Geist Mono (datos).
-         Las fuentes de títulos de los perfiles se cargan sólo cuando un perfil las usa. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+    <!-- Tipografía Mycen (Geist, Instrument Serif, Geist Mono): servida por Mycen, ver src/lib/fonts.ts -->
 
-    <!-- GSAP + ScrollTrigger (sync — small, needed before React paint) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-
-    <!-- Splitting.js — text char/word animation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/splitting/1.0.6/splitting.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/splitting/1.0.6/splitting.min.css" />
-
-    <!-- Three.js — deferred (large, only needed for hero particles) -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   </head>
   <body>
     <div id="root"></div>

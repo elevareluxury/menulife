@@ -242,7 +242,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
           <div className="st-grid-2" style={{ marginTop: 18, alignItems: 'start', gap: 24 }}>
             <div className="st-stack">
               <ImageField label={ob.avatar} shape="round" value={profile.avatar_url}
-                onUpload={async f => { const url = await uploadMedia(userId, f); setProfile(p => p && ({ ...p, avatar_url: url })) }}
+                onUpload={async f => { const url = await uploadMedia(userId, f, 'avatar'); setProfile(p => p && ({ ...p, avatar_url: url })) }}
                 onClear={() => setProfile(p => p && ({ ...p, avatar_url: null }))} />
               <div className="st-field">
                 <span className="st-label">{ob.theme}</span>

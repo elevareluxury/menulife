@@ -30,7 +30,7 @@ const de: StudioDict = {
     usernameTaken: 'Dieser Benutzername ist bereits vergeben.', usernameReserved: 'Dieser Benutzername ist reserviert.',
     usernameInvalid: 'Verwende 3 bis 30 Kleinbuchstaben, Zahlen oder Bindestriche.', moduleLimit: 'Du hast das Maximum von 100 Modulen erreicht.',
     tooLong: 'Ein Text ist zu lang.', offline: 'Keine Verbindung. Prüfe dein Internet und versuche es erneut.',
-    generic: 'Speichern fehlgeschlagen. Bitte erneut versuchen.', notImage: 'Wähle ein Bild (JPG, PNG oder WebP).', tooBig: 'Das Bild ist größer als 5 MB.',
+    generic: 'Speichern fehlgeschlagen. Bitte erneut versuchen.', notImage: 'Wähle ein Bild (JPG, PNG oder WebP).', tooBig: 'Das Bild ist zu groß. Versuche eines unter 30 MB.',
   },
   username: {
     idle: '3 bis 30 Zeichen: Kleinbuchstaben, Zahlen und Bindestriche.', checking: 'Wird geprüft…', same: 'Das ist dein aktueller Benutzername.',
@@ -56,7 +56,7 @@ const de: StudioDict = {
   },
   identity: {
     title: 'Meine Identität', subtitle: 'Das Erste, was man beim Öffnen deines Profils sieht.', image: 'Bild',
-    avatar: 'Profilfoto', avatarHelp: 'Quadratisch, mindestens 400 × 400 px. JPG, PNG oder WebP bis 5 MB.',
+    avatar: 'Profilfoto', avatarHelp: 'Quadratisch, mindestens 400 × 400 px. JPG, PNG oder WebP: Wir verkleinern es, damit es schnell lädt.',
     cover: 'Titelbild (optional)', coverHelp: 'Querformat, empfohlen 1200 × 400 px.', who: 'Wer du bist',
     name: 'Name', nameEmpty: 'Der Name darf nicht leer sein.', descriptor: 'Kurzbeschreibung',
     descriptorPlaceholder: 'Kreativdirektorin · Gründerin', descriptorHelp: 'Eine Zeile: was du machst oder was dein Unternehmen ist.',

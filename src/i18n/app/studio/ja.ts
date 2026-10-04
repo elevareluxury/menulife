@@ -30,7 +30,7 @@ const ja: StudioDict = {
     usernameTaken: 'このユーザー名はすでに使われています。', usernameReserved: 'このユーザー名は予約されています。',
     usernameInvalid: '小文字・数字・ハイフンを 3〜30 文字で入力してください。', moduleLimit: 'モジュールの上限（100 個）に達しました。',
     tooLong: '長すぎるテキストがあります。', offline: 'オフラインです。接続を確認して、もう一度お試しください。',
-    generic: '保存できませんでした。もう一度お試しください。', notImage: '画像（JPG、PNG、WebP）を選んでください。', tooBig: '画像が 5 MB を超えています。',
+    generic: '保存できませんでした。もう一度お試しください。', notImage: '画像（JPG、PNG、WebP）を選んでください。', tooBig: '画像が大きすぎます。30 MB 未満の画像をお試しください。',
   },
   username: {
     idle: '3〜30 文字：小文字、数字、ハイフン。', checking: '確認中…', same: '現在のユーザー名です。',
@@ -56,7 +56,7 @@ const ja: StudioDict = {
   },
   identity: {
     title: 'マイ アイデンティティ', subtitle: 'プロフィールを開いた人が最初に目にする部分です。', image: '画像',
-    avatar: 'プロフィール写真', avatarHelp: '正方形、400 × 400 px 以上。JPG、PNG、WebP（5 MB まで）。',
+    avatar: 'プロフィール写真', avatarHelp: '正方形、400 × 400 px 以上。JPG、PNG、WebP：すばやく表示されるよう自動で縮小します。',
     cover: 'カバー画像（任意）', coverHelp: '横長、推奨 1200 × 400 px。', who: 'あなたについて',
     name: '名前', nameEmpty: '名前は空欄にできません。', descriptor: 'ひとこと紹介',
     descriptorPlaceholder: 'クリエイティブディレクター · 創業者', descriptorHelp: '1 行で：あなたの仕事、またはビジネスの内容。',
