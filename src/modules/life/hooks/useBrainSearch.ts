@@ -17,9 +17,9 @@ export function useBrainSearch(
 ) {
   const { types, includeArchived = false } = options
   const { user } = useAuthStore()
-  const [items, setItems] = useState<BrainItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [result, setResult] = useState<{ items: BrainItem[]; key: string } | null>(null)
   const [debouncedTerm, setDebouncedTerm] = useState('')
+  const [trigger, setTrigger] = useState(0)
 
   // Debounce 300ms
   useEffect(() => {
@@ -29,14 +29,11 @@ export function useBrainSearch(
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  const fetchItems = useCallback(async () => {
-    if (!user) {
-      setItems([])
-      setLoading(false)
-      return
-    }
+  const typesKey = types?.join(',')
+  const fetchKey = `${user?.id ?? ''}|${debouncedTerm}|${typesKey ?? ''}|${String(includeArchived)}|${trigger}`
 
-    setLoading(true)
+  useEffect(() => {
+    if (!user) return
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query: any = db
@@ -45,13 +42,8 @@ export function useBrainSearch(
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
-    if (!includeArchived) {
-      query = query.eq('is_archived', false)
-    }
-
-    if (types && types.length > 0) {
-      query = query.in('type', types)
-    }
+    if (!includeArchived) query = query.eq('is_archived', false)
+    if (types && types.length > 0) query = query.in('type', types)
 
     if (debouncedTerm.length > 0) {
       // websearch_to_tsquery soporta operadores naturales: OR, -, "frases exactas"
@@ -61,11 +53,14 @@ export function useBrainSearch(
       })
     }
 
-    const { data, error } = await query.limit(200)
+    const key = fetchKey
+    let cancelled = false
 
-    if (error) {
-      // Fallback a ILIKE si FTS falla (config no disponible, query inválida, etc.)
-      if (debouncedTerm.length > 0) {
+    query.limit(200).then(async ({ data, error }: { data: BrainItem[] | null; error: unknown }) => {
+      if (cancelled) return
+
+      if (error && debouncedTerm.length > 0) {
+        // Fallback a ILIKE si FTS falla (config no disponible, query inválida, etc.)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let fallback: any = db
           .from('life_brain_items')
@@ -75,26 +70,24 @@ export function useBrainSearch(
 
         if (!includeArchived) fallback = fallback.eq('is_archived', false)
         if (types && types.length > 0) fallback = fallback.in('type', types)
-
-        fallback = fallback.or(
-          `title.ilike.%${debouncedTerm}%,content.ilike.%${debouncedTerm}%`
-        )
+        fallback = fallback.or(`title.ilike.%${debouncedTerm}%,content.ilike.%${debouncedTerm}%`)
 
         const { data: fallbackData } = await fallback.limit(200)
-        setItems((fallbackData ?? []) as BrainItem[])
+        if (!cancelled) setResult({ items: (fallbackData ?? []) as BrainItem[], key })
       } else {
-        setItems([])
+        setResult({ items: (error ? [] : (data ?? [])) as BrainItem[], key })
       }
-    } else {
-      setItems((data ?? []) as BrainItem[])
-    }
+    })
 
-    setLoading(false)
-  }, [user, debouncedTerm, types?.join(','), includeArchived]) // eslint-disable-line react-hooks/exhaustive-deps
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, debouncedTerm, typesKey, includeArchived, trigger])
 
-  useEffect(() => {
-    fetchItems()
-  }, [fetchItems])
+  // Derive during render: loading when result is absent or stale
+  const items = user ? (result?.items ?? []) : []
+  const loading = !!user && (result === null || result.key !== fetchKey)
 
-  return { items, loading, term: debouncedTerm, refetch: fetchItems }
+  const refetch = useCallback(() => setTrigger(n => n + 1), [])
+
+  return { items, loading, term: debouncedTerm, refetch }
 }

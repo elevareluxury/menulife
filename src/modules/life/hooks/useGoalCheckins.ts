@@ -54,18 +54,14 @@ export function useGoalCheckins(options: UseGoalCheckinsOptions = {}) {
   const { goalId, limit = 8, onlyCurrentWeek = false } = options
   const { user } = useAuthStore()
 
-  const [checkins, setCheckins] = useState<GoalCheckin[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useState<{ checkins: GoalCheckin[]; error: string | null; key: string } | null>(null)
+  const [trigger, setTrigger] = useState(0)
 
-  const fetchCheckins = useCallback(async () => {
-    if (!user) {
-      setCheckins([])
-      setLoading(false)
-      return
-    }
+  const fetchKey = `${user?.id ?? ''}|${goalId ?? ''}|${limit}|${String(onlyCurrentWeek)}|${trigger}`
 
-    setLoading(true)
+  useEffect(() => {
+    if (!user) return
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query: any = db
       .from('life_goal_checkins')
@@ -74,26 +70,25 @@ export function useGoalCheckins(options: UseGoalCheckinsOptions = {}) {
       .order('week_start_date', { ascending: false })
 
     if (goalId) query = query.eq('goal_id', goalId)
-
-    if (onlyCurrentWeek) {
-      query = query.eq('week_start_date', getWeekStartDate())
-    }
-
+    if (onlyCurrentWeek) query = query.eq('week_start_date', getWeekStartDate())
     query = query.limit(limit)
 
-    const { data, error: err } = await query
-    if (err) {
-      setError(err.message)
-    } else {
-      setCheckins((data ?? []) as GoalCheckin[])
-      setError(null)
-    }
-    setLoading(false)
-  }, [user, goalId, limit, onlyCurrentWeek])
+    const key = fetchKey
+    let cancelled = false
 
-  useEffect(() => {
-    fetchCheckins()
-  }, [fetchCheckins])
+    query.then(({ data, error: err }: { data: GoalCheckin[] | null; error: { message: string } | null }) => {
+      if (cancelled) return
+      setResult({
+        checkins: (data ?? []) as GoalCheckin[],
+        error: err ? err.message : null,
+        key,
+      })
+    })
+
+    return () => { cancelled = true }
+  }, [user, goalId, limit, onlyCurrentWeek, trigger]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const refetch = useCallback(() => setTrigger(n => n + 1), [])
 
   const createCheckin = useCallback(async (input: CheckinInput): Promise<GoalCheckin> => {
     if (!user) throw new Error('No user')
@@ -117,11 +112,16 @@ export function useGoalCheckins(options: UseGoalCheckinsOptions = {}) {
       throw err
     }
 
-    await fetchCheckins()
+    setTrigger(n => n + 1)
     return data as GoalCheckin
-  }, [user, fetchCheckins])
+  }, [user])
 
-  return { checkins, loading, error, createCheckin, refetch: fetchCheckins }
+  // Derive during render
+  const checkins = user ? (result?.checkins ?? []) : []
+  const loading = !!user && (result === null || result.key !== fetchKey)
+  const error = user ? (result?.error ?? null) : null
+
+  return { checkins, loading, error, createCheckin, refetch }
 }
 
 /**
@@ -130,13 +130,12 @@ export function useGoalCheckins(options: UseGoalCheckinsOptions = {}) {
  */
 export function useGoalsNeedingCheckin(activeGoals: { id: string }[]) {
   const { user } = useAuthStore()
-  const [pending, setPending] = useState<string[]>([])
+  const [pendingIds, setPendingIds] = useState<string[]>([])
+  // Serialize to avoid re-running on every render
+  const goalIds = activeGoals.map(g => g.id).join(',')
 
   useEffect(() => {
-    if (!user || activeGoals.length === 0) {
-      setPending([])
-      return
-    }
+    if (!user || activeGoals.length === 0) return
 
     const weekStart = getWeekStartDate()
     db.from('life_goal_checkins')
@@ -146,11 +145,11 @@ export function useGoalsNeedingCheckin(activeGoals: { id: string }[]) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then(({ data }: any) => {
         const doneIds = new Set((data ?? []).map((c: { goal_id: string }) => c.goal_id))
-        setPending(activeGoals.filter(g => !doneIds.has(g.id)).map(g => g.id))
+        setPendingIds(activeGoals.filter(g => !doneIds.has(g.id)).map(g => g.id))
       })
-  // Serialize activeGoals to avoid re-running on every render
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, activeGoals.map(g => g.id).join(',')])
+  }, [user, goalIds])
 
-  return pending
+  // Derive during render: if no user or no active goals, always empty
+  return (!user || activeGoals.length === 0) ? [] : pendingIds
 }
