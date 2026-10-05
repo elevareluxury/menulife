@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import FlowFieldBackground from '@/components/ui/flow-field-background'
-import { HubPhonePreview } from './HubPhonePreview'
 import { useLandingT } from '@/i18n/app/landing'
 import { SplitText } from './SplitText'
 
@@ -11,14 +10,10 @@ declare const gsap: any
 
 export function CinematicHero() {
   const l = useLandingT()
-  const sectionRef    = useRef<HTMLElement>(null)
-  const introRef      = useRef<HTMLDivElement>(null)
-  const cardRef       = useRef<HTMLDivElement>(null)
-  const phoneContRef  = useRef<HTMLDivElement>(null)
-  const badgeLeftRef  = useRef<HTMLDivElement>(null)
-  const badgeRightRef = useRef<HTMLDivElement>(null)
-  const phoneRef      = useRef<HTMLDivElement>(null)
-  const tlRef         = useRef<any>(null)
+  const sectionRef = useRef<HTMLElement>(null)
+  const introRef   = useRef<HTMLDivElement>(null)
+  const cardRef    = useRef<HTMLDivElement>(null)
+  const tlRef      = useRef<any>(null)
 
   /* ── ScrollTrigger pinned timeline ── */
   useEffect(() => {
@@ -61,62 +56,9 @@ export function CinematicHero() {
         '-=0.1'
       )
 
-    // Phone aparece dentro de la card
-    tl.fromTo(phoneContRef.current,
-      { opacity: 0, y: 100, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.4 },
-      '-=0.2'
-    )
-
-    // Badges flotan
-    tl.fromTo(badgeLeftRef.current,
-      { opacity: 0, x: -60, y: 20 },
-      { opacity: 1, x: 0, y: 0, duration: 0.3 },
-      '-=0.2'
-    )
-    tl.fromTo(badgeRightRef.current,
-      { opacity: 0, x: 60, y: -20 },
-      { opacity: 1, x: 0, y: 0, duration: 0.3 },
-      '-=0.2'
-    )
-
     return () => {
       tl.scrollTrigger?.kill()
       tl.kill()
-    }
-  }, [])
-
-  /* ── Parallax del phone con mouse ── */
-  useEffect(() => {
-    const phone = phoneRef.current
-    if (!phone || reducedMotion()) return
-
-    function onMouseMove(e: MouseEvent) {
-      if (window.innerWidth < 768 || !phone) return
-      const rect = phone.getBoundingClientRect()
-      const cx = rect.left + rect.width / 2
-      const cy = rect.top + rect.height / 2
-      const rotY = ((e.clientX - cx) / window.innerWidth) * 12
-      const rotX = ((e.clientY - cy) / window.innerHeight) * -8
-      gsap.to(phone, {
-        rotateX: rotX, rotateY: rotY, transformPerspective: 1200,
-        duration: 0.1, ease: 'none', overwrite: true,
-      })
-    }
-
-    function onMouseLeave() {
-      if (typeof gsap === 'undefined' || !phone) return
-      gsap.to(phone, {
-        rotateX: 0, rotateY: 0,
-        duration: 0.6, ease: 'power2.out', overwrite: true,
-      })
-    }
-
-    window.addEventListener('mousemove', onMouseMove, { passive: true })
-    phone.addEventListener('mouseleave', onMouseLeave)
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove)
-      phone?.removeEventListener('mouseleave', onMouseLeave)
     }
   }, [])
 
@@ -187,25 +129,6 @@ export function CinematicHero() {
           </p>
         </div>
 
-        {/* iPhone mockup */}
-        <div ref={phoneContRef} className="ch-phone-container">
-          <div ref={phoneRef} className="liquid-glass-phone ch-phone-frame">
-            <div className="ch-phone-notch" />
-            <div className="ch-phone-screen">
-              <HubPhonePreview />
-            </div>
-          </div>
-
-          {/* Floating badges */}
-          <div ref={badgeLeftRef} className="floating-badge ch-badge-left">
-            <span className="ch-badge-title">{l.hero.badgePublished}</span>
-            <span>{l.hero.badgeUrl}</span>
-          </div>
-          <div ref={badgeRightRef} className="floating-badge ch-badge-right">
-            <span className="ch-badge-title">{l.hero.badgeGoal}</span>
-            <span>{l.hero.badgeGoalSub}</span>
-          </div>
-        </div>
       </div>
 
     </section>
