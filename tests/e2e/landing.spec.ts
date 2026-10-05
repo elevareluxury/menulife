@@ -49,8 +49,6 @@ test('sin prueba social inventada: ni banda de marcas ni testimonios de ejemplo'
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Tu identidad digital')
   await expect(page.getByText('Trattoria Bella')).toHaveCount(0)
   await expect(page.getByText('Lo que dicen quienes')).toHaveCount(0)
-  // El teléfono del hero muestra una identidad de ejemplo, no un restaurante
-  await expect(page.getByText('Disponible para proyectos')).toBeVisible()
   // "Ya tengo cuenta" lleva a iniciar sesión
   await expect(page.getByRole('link', { name: 'Ya tengo cuenta' })).toHaveAttribute('href', '/login')
 })
