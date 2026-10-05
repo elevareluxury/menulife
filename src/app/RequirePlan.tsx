@@ -10,6 +10,6 @@ interface RequirePlanProps {
 
 export function RequirePlan({ feature, children }: RequirePlanProps) {
   const { hasFeature } = usePlanGuard()
-  if (!hasFeature(feature)) return <Navigate to="/dashboard/hub" replace />
+  if (!hasFeature(feature)) return <Navigate to="/studio" replace />
   return <>{children}</>
 }

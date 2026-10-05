@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { ArrowLeft, Mail } from 'lucide-react'
+import { LanguageSelect } from '@/components/ui/LanguageSelect'
+import { useAuthT } from '@/i18n/app/auth'
+import { useLangDir } from '@/i18n/app/useLangDir'
 
 const S = {
   page: {
@@ -13,6 +16,7 @@ const S = {
     padding: '1rem',
   } as React.CSSProperties,
   card: {
+    position: 'relative',
     background: '#171A21',
     border: '1px solid rgba(255,255,255,0.06)',
     borderRadius: '16px',
@@ -103,31 +107,24 @@ const S = {
 }
 
 export function ForgotPassword() {
+  const t = useAuthT()
+  const f = t.forgot
+  useLangDir()
   const location = useLocation()
   const [email, setEmail]         = useState('')
   const [loading, setLoading]     = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [error, setError]         = useState('')
-  const [urlError, setUrlError]   = useState('')
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const err = params.get('error')
-    if (err) {
-      const known: Record<string, string> = {
-        expired: 'El link expiró. Pedí uno nuevo.',
-        invalid: 'El link es inválido.',
-      }
-      setUrlError(known[err] ?? decodeURIComponent(err))
-    }
-  }, [location.search])
+  // ?error=expired | invalid (códigos que manda AuthCallback; cualquier otro valor se trata como inválido)
+  const urlErrorCode = new URLSearchParams(location.search).get('error')
+  const urlError = !urlErrorCode ? '' : urlErrorCode === 'expired' ? f.expired : f.invalid
 
   const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isValidEmail(email)) {
-      setError('Ingresá un email válido.')
+      setError(f.invalidEmail)
       return
     }
     setError('')
@@ -136,8 +133,8 @@ export function ForgotPassword() {
       const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback`,
       })
-      // Siempre mostramos éxito aunque el email no exista (seguridad)
-      if (authError) console.error('resetPasswordForEmail:', authError.message)
+      // Siempre mostramos éxito aunque el email no exista (no revela qué emails tienen cuenta)
+      void authError
       setEmailSent(true)
     } catch {
       // Mostrar éxito de todas formas
@@ -165,17 +162,17 @@ export function ForgotPassword() {
         <div style={S.card}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>📧</div>
-            <h2 style={{ ...S.title, textAlign: 'center' }}>¡Email enviado!</h2>
+            <h1 style={{ ...S.title, textAlign: 'center' }}>{f.sentTitle}</h1>
           </div>
 
           <p style={{ ...S.subtitle, textAlign: 'center' }}>
-            Revisá tu casilla{' '}
+            {f.sentTo}{' '}
             <span style={{ color: '#F5F7FA', fontWeight: 500 }}>{email}</span>
-            <br />El link expira en 1 hora.
+            <br />{f.expires}
           </p>
 
           <p style={{ ...S.subtitle, textAlign: 'center', marginBottom: '0.75rem' }}>
-            ¿No llegó? Revisá spam o{' '}
+            {f.notArrived}
           </p>
 
           <button
@@ -188,12 +185,12 @@ export function ForgotPassword() {
             }}
           >
             {loading && <Spinner />}
-            Reenviar email
+            {f.resend}
           </button>
 
           <Link to="/login" style={S.backLink}>
             <ArrowLeft size={15} />
-            Volver al login
+            {t.common.backToLogin}
           </Link>
         </div>
       </div>
@@ -204,14 +201,17 @@ export function ForgotPassword() {
   return (
     <div style={S.page}>
       <div style={S.card}>
+        <div style={{ position: 'absolute', top: '16px', insetInlineEnd: '16px' }}>
+          <LanguageSelect label={t.common.language} />
+        </div>
         <div style={S.logo}>
-          <span style={S.logoText}>menulife</span>
+          <img src="/logo.png" alt="Mycen" style={{ height: '32px', width: 'auto' }} />
         </div>
 
-        <h2 style={S.title}>Recuperar contraseña</h2>
+        <h1 style={S.title}>{f.title}</h1>
 
         {urlError && (
-          <div style={{
+          <div role="alert" style={{
             background: 'rgba(255,107,122,0.1)',
             border: '1px solid rgba(255,107,122,0.3)',
             borderRadius: '10px',
@@ -226,19 +226,19 @@ export function ForgotPassword() {
         )}
 
         <p style={S.subtitle}>
-          Ingresá tu email y te enviamos un link para crear una nueva contraseña.
+          {f.intro}
         </p>
 
         <form onSubmit={handleSubmit} noValidate>
           <div>
             <label style={S.label} htmlFor="fp-email">
-              Email
+              {t.common.email}
             </label>
             <input
               id="fp-email"
               type="email"
               autoComplete="email"
-              placeholder="tu@email.com"
+              placeholder={t.common.emailPlaceholder}
               value={email}
               onChange={(e) => { setEmail(e.target.value); setError('') }}
               required
@@ -246,7 +246,7 @@ export function ForgotPassword() {
               onFocus={(e) => { e.currentTarget.style.borderColor = '#FF6B7A' }}
               onBlur={(e)  => { e.currentTarget.style.borderColor = error ? '#FF6B7A' : 'rgba(255,255,255,0.1)' }}
             />
-            {error && <p style={S.errorMsg}>{error}</p>}
+            {error && <p role="alert" style={S.errorMsg}>{error}</p>}
           </div>
 
           <button
@@ -259,13 +259,13 @@ export function ForgotPassword() {
           >
             {loading && <Spinner />}
             <Mail size={16} />
-            Enviar link de recuperación
+            {f.submit}
           </button>
         </form>
 
         <Link to="/login" style={S.backLink}>
           <ArrowLeft size={15} />
-          Volver al login
+          {t.common.backToLogin}
         </Link>
       </div>
     </div>

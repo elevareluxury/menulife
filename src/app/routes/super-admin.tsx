@@ -13,6 +13,7 @@ import { FeatureFlagsTab }   from '@/modules/super-admin/pages/FeatureFlagsTab'
 import { LandingConfigTab }  from '@/modules/super-admin/pages/LandingConfigTab'
 import { TestimonialsTab }   from '@/modules/super-admin/pages/TestimonialsTab'
 import { TesterTab }         from '@/modules/super-admin/pages/TesterTab'
+import { ReportsTab }        from '@/modules/super-admin/pages/ReportsTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
@@ -40,6 +41,7 @@ export function SuperAdminPage() {
       <Routes>
         <Route index                    element={<SuperDashboard />} />
         <Route path="solicitudes"       element={<AccessRequestsTab />} />
+        <Route path="denuncias"         element={<ReportsTab />} />
         <Route path="negocios"          element={<RestaurantsTab />} />
         <Route path="metricas"          element={<MetricasTab />} />
         <Route path="planes"            element={<PlanesTab />} />

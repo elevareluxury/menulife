@@ -1,426 +1,355 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Flame, Target, Wallet, Zap, Trophy, Star } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Flame, Target, Wallet, Zap, Trophy, Star } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useLocaleStore } from '@/store/localeStore'
+import { useLifeT } from '@/i18n/app/life'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
 import { colors, font, radius } from '../design-system'
+import { dayKey } from '../hooks/useToday'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// ── Datos del mes (todo con fechas reales del período) ───────────────────────
+
+interface HabitRow { id: string; name: string; frequency: { days?: number[] } | null; created_at: string }
+
 interface ReplaySummary {
-  monthLabel: string
+  habitsScheduled: number
   habitsDone: number
-  habitsTotal: number
-  habitsBestStreak: number
   topHabitName: string | null
-  goalsCompleted: number
-  goalsActive: number
-  avgGoalProgress: number
-  monthIncome: number
-  monthExpense: number
-  monthBalance: number
+  longestStreak: number
+  stepsDone: number
+  activeGoals: number
+  currency: string
+  income: number
+  expense: number
+  otherCurrencies: string[]
   ideasCount: number
   notesCount: number
   tasksCompleted: number
   achievementsCount: number
-  lifeScore: number | null
 }
 
-// ── Data generation ───────────────────────────────────────────────────────────
-async function generateReplay(userId: string, year: number, month: number): Promise<ReplaySummary> {
+function daysOfMonth(year: number, month: number, until: string): string[] {
+  const out: string[] = []
+  for (let d = new Date(year, month - 1, 1); d.getMonth() === month - 1; d.setDate(d.getDate() + 1)) {
+    const k = dayKey(d)
+    if (k > until) break
+    out.push(k)
+  }
+  return out
+}
+
+const weekday = (k: string) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d).getDay() }
+
+async function generateReplay(userId: string, year: number, month: number, mainCurrency: string): Promise<ReplaySummary> {
   const pad = (n: number) => String(n).padStart(2, '0')
-  const monthStart = `${year}-${pad(month)}-01`
-  const lastDay = new Date(year, month, 0).getDate()
-  const monthEnd = `${year}-${pad(month)}-${pad(lastDay)}`
+  const firstDay = `${year}-${pad(month)}-01`
+  const nextFirst = new Date(year, month, 1)
+  const lastDay = dayKey(new Date(year, month, 0))
+  const fromIso = new Date(year, month - 1, 1).toISOString()
+  const toIso = nextFirst.toISOString()
+  const today = dayKey()
 
-  const [habitsRes, logsRes, goalsRes, txRes, brainRes, achievementsRes, scoreRes] = await Promise.all([
-    db.from('life_habits').select('id,name').eq('user_id', userId).eq('is_active', true),
-    db.from('life_habit_logs').select('habit_id,completed_date').eq('user_id', userId)
-      .gte('completed_date', monthStart).lte('completed_date', monthEnd),
-    db.from('life_goals').select('status,progress,name').eq('user_id', userId),
-    db.from('life_transactions').select('type,amount').eq('user_id', userId)
-      .gte('occurred_at', monthStart + 'T00:00:00').lte('occurred_at', monthEnd + 'T23:59:59'),
-    db.from('life_brain_items').select('type,is_completed').eq('user_id', userId)
-      .gte('created_at', monthStart + 'T00:00:00').lte('created_at', monthEnd + 'T23:59:59'),
-    db.from('life_achievements').select('id').eq('user_id', userId)
-      .gte('achieved_at', monthStart + 'T00:00:00').lte('achieved_at', monthEnd + 'T23:59:59'),
-    db.from('life_score').select('score').eq('user_id', userId).maybeSingle(),
+  const q = (table: string, cols: string) => db.from(table).select(cols).eq('user_id', userId)
+  const [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, tasksRes, achRes] = await Promise.all([
+    q('life_habits', 'id,name,frequency,created_at').eq('is_active', true),
+    q('life_habit_logs', 'habit_id,completed_date').gte('completed_date', firstDay).lte('completed_date', lastDay),
+    q('life_goal_milestones', 'id').gte('completed_at', fromIso).lt('completed_at', toIso),
+    q('life_goals', 'id').eq('status', 'in_progress'),
+    q('life_transactions', 'type,amount,currency').gte('occurred_at', fromIso).lt('occurred_at', toIso),
+    q('life_brain_items', 'type').gte('created_at', fromIso).lt('created_at', toIso),
+    q('life_brain_items', 'id').eq('type', 'task').gte('completed_at', fromIso).lt('completed_at', toIso),
+    q('life_achievements', 'id').gte('achieved_at', fromIso).lt('achieved_at', toIso),
   ])
+  const failed = [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, achRes].find(r => r.error)
+  if (failed) throw failed.error
 
-  const habits: { id: string; name: string }[] = habitsRes.data ?? []
+  // Hábitos: días programados del mes (desde que existe el hábito y hasta hoy) vs. días cumplidos
+  const habits: HabitRow[] = habitsRes.data ?? []
   const logs: { habit_id: string; completed_date: string }[] = logsRes.data ?? []
-  const goals: { status: string; progress: number; name: string }[] = goalsRes.data ?? []
-  const txs: { type: string; amount: string }[] = txRes.data ?? []
-  const brainItems: { type: string; is_completed: boolean }[] = brainRes.data ?? []
-  const achievements: { id: string }[] = achievementsRes.data ?? []
-
-  // Habit stats
-  const habitsDone = new Set(logs.map(l => l.habit_id)).size
-  // Per-habit log count (for best streak proxy)
-  const logsByHabit: Record<string, number> = {}
-  logs.forEach(l => { logsByHabit[l.habit_id] = (logsByHabit[l.habit_id] ?? 0) + 1 })
-  const topEntry = Object.entries(logsByHabit).sort((a, b) => b[1] - a[1])[0]
-  const topHabitId = topEntry?.[0]
-  const topHabitName = topHabitId ? (habits.find(h => h.id === topHabitId)?.name ?? null) : null
-  const habitsBestStreak = topEntry?.[1] ?? 0
-
-  // Goal stats
-  const completed = goals.filter(g => g.status === 'completed')
-  const active    = goals.filter(g => g.status === 'in_progress')
-  const avgGoalProgress = active.length > 0
-    ? Math.round(active.reduce((s, g) => s + g.progress, 0) / active.length)
-    : 0
-
-  // Money
-  const income  = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
-  const expense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
-
-  // Brain
-  const ideasCount    = brainItems.filter(i => i.type === 'idea').length
-  const notesCount    = brainItems.filter(i => i.type === 'note').length
-  const tasksCompleted = brainItems.filter(i => i.type === 'task' && i.is_completed).length
-
-  const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
-  const monthLabel = `${MONTHS_ES[month - 1]} ${year}`
-
-  const summary: ReplaySummary = {
-    monthLabel,
-    habitsDone, habitsTotal: habits.length, habitsBestStreak, topHabitName,
-    goalsCompleted: completed.length, goalsActive: active.length, avgGoalProgress,
-    monthIncome: income, monthExpense: expense, monthBalance: income - expense,
-    ideasCount, notesCount, tasksCompleted,
-    achievementsCount: achievements.length,
-    lifeScore: scoreRes.data?.score ?? null,
+  const days = daysOfMonth(year, month, today)
+  let scheduledTotal = 0
+  let doneTotal = 0
+  let top: { name: string; rate: number; done: number } | null = null
+  let longestStreak = 0
+  for (const h of habits) {
+    const sched = h.frequency?.days?.length ? h.frequency.days : [0, 1, 2, 3, 4, 5, 6]
+    const since = dayKey(new Date(h.created_at))
+    const done = new Set(logs.filter(l => l.habit_id === h.id).map(l => l.completed_date))
+    let scheduled = 0
+    let streak = 0
+    for (const d of days) {
+      if (d < since && !done.has(d)) continue
+      const isSched = sched.includes(weekday(d))
+      if (isSched) scheduled++
+      if (done.has(d)) { streak++; longestStreak = Math.max(longestStreak, streak) }
+      else if (isSched && d !== today) streak = 0
+    }
+    const doneCount = days.filter(d => done.has(d)).length
+    scheduledTotal += scheduled
+    doneTotal += Math.min(doneCount, scheduled || doneCount)
+    if (doneCount > 0) {
+      const rate = scheduled ? doneCount / scheduled : 1
+      if (!top || rate > top.rate || (rate === top.rate && doneCount > top.done)) top = { name: h.name, rate, done: doneCount }
+    }
   }
 
-  // Cache in life_snapshots (upsert)
-  await db.from('life_snapshots').upsert(
-    { user_id: userId, period_type: 'month', period_date: monthStart, summary },
-    { onConflict: 'user_id,period_type,period_date' }
-  )
+  // Dinero: sólo la moneda principal se suma; las demás se nombran
+  const txs: { type: string; amount: string; currency: string | null }[] = txRes.data ?? []
+  const main = txs.filter(t => (t.currency ?? mainCurrency) === mainCurrency)
+  const income = main.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
+  const expense = main.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
+  const otherCurrencies = [...new Set(txs.map(t => t.currency ?? mainCurrency).filter(c => c !== mainCurrency))]
 
-  return summary
+  const brain: { type: string }[] = brainRes.data ?? []
+
+  return {
+    habitsScheduled: scheduledTotal,
+    habitsDone: doneTotal,
+    topHabitName: top?.name ?? null,
+    longestStreak,
+    stepsDone: (stepsRes.data ?? []).length,
+    activeGoals: (goalsRes.data ?? []).length,
+    currency: mainCurrency,
+    income, expense, otherCurrencies,
+    ideasCount: brain.filter(b => b.type === 'idea').length,
+    notesCount: brain.filter(b => b.type === 'note').length,
+    tasksCompleted: tasksRes.error ? 0 : (tasksRes.data ?? []).length,
+    achievementsCount: (achRes.data ?? []).length,
+  }
 }
 
-// ── Story Card ────────────────────────────────────────────────────────────────
-function StoryCard({
-  gradient, children, index, total,
-}: {
-  gradient: string
-  children: React.ReactNode
-  index: number
-  total: number
-}) {
+// ── Piezas visuales ───────────────────────────────────────────────────────────
+
+function StoryCard({ gradient, children, index, total }: { gradient: string; children: React.ReactNode; index: number; total: number }) {
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-20%' }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] as const }}
       style={{
-        minHeight: '78vh',
-        borderRadius: radius['2xl'],
-        background: gradient,
-        padding: '36px 28px',
-        marginBottom: '12px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        position: 'relative',
-        overflow: 'hidden',
+        minHeight: '72dvh', borderRadius: radius['2xl'], background: gradient, padding: '32px 24px', marginBottom: '12px',
+        display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden',
       }}
     >
-      {/* Progress dots */}
-      <div style={{ display: 'flex', gap: '5px', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', gap: '5px', marginBottom: '8px' }} aria-hidden="true">
         {Array.from({ length: total }).map((_, i) => (
-          <div key={i} style={{
-            flex: 1, height: 2.5, borderRadius: '2px',
-            background: i <= index ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
-          }} />
+          <div key={i} style={{ flex: 1, height: 2.5, borderRadius: '2px', background: i <= index ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)' }} />
         ))}
       </div>
       {children}
-    </motion.div>
+    </motion.section>
   )
 }
 
 function BigStat({ value, label }: { value: string; label: string }) {
   return (
     <div style={{ marginBottom: '4px' }}>
-      <p style={{ fontFamily: font, fontSize: '64px', fontWeight: 800, color: '#fff', margin: 0, lineHeight: 1 }}>
-        {value}
-      </p>
-      <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', margin: '6px 0 0' }}>
-        {label}
-      </p>
+      <p dir="ltr" style={{ fontFamily: font, fontSize: 'clamp(40px, 14vw, 64px)', fontWeight: 800, color: '#fff', margin: 0, lineHeight: 1, textAlign: 'start' }}>{value}</p>
+      <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 600, color: 'rgba(255,255,255,0.75)', margin: '8px 0 0' }}>{label}</p>
     </div>
   )
 }
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-      <span style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.65)', fontWeight: 500 }}>{label}</span>
-      <span style={{ fontFamily: font, fontSize: '14px', color: '#fff', fontWeight: 700 }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <span style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>{label}</span>
+      <span style={{ fontFamily: font, fontSize: '14px', color: '#fff', fontWeight: 700, textAlign: 'end' }}>{value}</span>
     </div>
   )
 }
 
-function CardIcon({ icon: Icon }: { icon: typeof Flame }) {
+function CardHeader({ icon: Icon, kicker, title }: { icon: typeof Flame; kicker: string; title: string }) {
   return (
-    <div style={{ width: 52, height: 52, borderRadius: '18px', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Icon size={26} style={{ color: '#fff' }} strokeWidth={1.8} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+      <div style={{ width: 52, height: 52, borderRadius: '18px', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Icon size={26} style={{ color: '#fff' }} strokeWidth={1.8} aria-hidden="true" />
+      </div>
+      <div>
+        <p style={{ fontFamily: font, fontSize: '11px', color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: '0.08em', margin: 0, textTransform: 'uppercase' }}>{kicker}</p>
+        <h2 style={{ fontFamily: font, fontSize: '20px', color: '#fff', fontWeight: 800, margin: 0 }}>{title}</h2>
+      </div>
     </div>
   )
 }
 
-function formatMoney(n: number): string {
-  const abs = Math.abs(n)
-  if (abs >= 1_000_000) return `$${(abs / 1_000_000).toFixed(1)}M`
-  if (abs >= 1_000) return `$${(abs / 1_000).toFixed(0)}k`
-  return `$${Math.round(abs).toLocaleString('es')}`
-}
-
-// ── Skeleton ──────────────────────────────────────────────────────────────────
 function ReplaySkeleton() {
   return (
-    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '20px 16px' }}>
-      <motion.div animate={{ opacity: [0.3, 0.55, 0.3] }} transition={{ duration: 1.8, repeat: Infinity }}>
-        {[{ h: '78vh' }, { h: '78vh' }].map(({ h }, i) => (
-          <div key={i} style={{ height: h, background: colors.surface.base, borderRadius: radius['2xl'], marginBottom: '12px' }} />
-        ))}
-      </motion.div>
-    </div>
+    <motion.div animate={{ opacity: [0.3, 0.55, 0.3] }} transition={{ duration: 1.8, repeat: Infinity }}>
+      {[0, 1].map(i => <div key={i} style={{ height: '72dvh', background: colors.surface.base, borderRadius: radius['2xl'], marginBottom: '12px' }} />)}
+    </motion.div>
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Página ────────────────────────────────────────────────────────────────────
+
 export function LifeReplayPage() {
   const navigate = useNavigate()
+  const t = useLifeT()
+  const r = t.replay
+  const locale = langLocale(useAppLang(s => s.lang))
+  const currency = useLocaleStore(s => s.currency)
   const { user } = useAuthStore()
-  const [summary, setSummary] = useState<ReplaySummary | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const now = new Date()
+  const [cursor, setCursor] = useState({ y: now.getFullYear(), m: now.getMonth() + 1 })
+  const [attempt, setAttempt] = useState(0)
+  const key = `${cursor.y}-${cursor.m}-${currency}-${attempt}`
+  const [result, setResult] = useState<{ key: string; summary: ReplaySummary | null; error: boolean } | null>(null)
 
-  const load = useCallback(async () => {
+  useEffect(() => {
     if (!user) return
-    setLoading(true)
+    let alive = true
+    generateReplay(user.id, cursor.y, cursor.m, currency)
+      .then(summary => { if (alive) setResult({ key, summary, error: false }) })
+      .catch(() => { if (alive) setResult({ key, summary: null, error: true }) })
+    return () => { alive = false }
+  }, [user, cursor, currency, key])
+
+  const loading = result?.key !== key
+  const summary = result?.summary ?? null
+  const isCurrentMonth = cursor.y === now.getFullYear() && cursor.m === now.getMonth() + 1
+  const rawLabel = new Date(cursor.y, cursor.m - 1, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
+  const monthLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1)
+  const shift = (delta: number) => setCursor(c => {
+    const d = new Date(c.y, c.m - 1 + delta, 1)
+    return { y: d.getFullYear(), m: d.getMonth() + 1 }
+  })
+  const money = (n: number) => {
     try {
-      const now = new Date()
-      const result = await generateReplay(user.id, now.getFullYear(), now.getMonth() + 1)
-      setSummary(result)
-    } catch {
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [user])
-
-  useEffect(() => { load() }, [load])
-
-  if (loading) return <ReplaySkeleton />
-
-  if (error || !summary) {
-    return (
-      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
-        <p style={{ fontFamily: font, color: colors.text.tertiary, fontSize: '14px' }}>
-          No se pudo generar el recap. Intentá de nuevo.
-        </p>
-      </div>
-    )
+      return new Intl.NumberFormat(locale, { style: 'currency', currency, notation: Math.abs(n) >= 100000 ? 'compact' : 'standard', maximumFractionDigits: Math.abs(n) >= 100000 ? 1 : 0 }).format(n)
+    } catch { return `${currency} ${Math.round(n)}` }
   }
 
+  const navBtn: React.CSSProperties = {
+    width: 40, height: 40, borderRadius: radius.full, border: `1px solid ${colors.border.subtle}`, background: 'transparent',
+    color: colors.text.secondary, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  }
+
+  const balance = summary ? summary.income - summary.expense : 0
+  const hasData = !!summary && (
+    summary.habitsDone > 0 || summary.stepsDone > 0 || summary.income > 0 || summary.expense > 0 ||
+    summary.ideasCount > 0 || summary.notesCount > 0 || summary.tasksCompleted > 0 || summary.achievementsCount > 0 ||
+    summary.otherCurrencies.length > 0
+  )
   const TOTAL = 6
-  const hasData = summary.habitsDone > 0 || summary.goalsCompleted > 0 || summary.monthBalance !== 0 || summary.tasksCompleted > 0
 
   return (
-    <div style={{ background: colors.bg, minHeight: '100vh', paddingBottom: 'calc(32px + env(safe-area-inset-bottom))' }}>
+    <div style={{ background: colors.bg, paddingBottom: 'calc(32px + env(safe-area-inset-bottom))' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 16px' }}>
-
-        {/* Back button */}
-        <div style={{ paddingTop: '20px', paddingBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            onClick={() => navigate('/life')}
+        <div style={{ paddingTop: '20px', paddingBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+          <button type="button" onClick={() => navigate('/life')}
             style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '8px 12px', borderRadius: radius.full,
+              display: 'flex', alignItems: 'center', gap: '6px', minHeight: 40, padding: '8px 12px', borderRadius: radius.full,
               background: 'rgba(255,255,255,0.05)', border: `1px solid ${colors.border.subtle}`,
-              color: colors.text.secondary, fontFamily: font, fontSize: '13px', fontWeight: 600,
-              cursor: 'pointer', transition: 'background 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.09)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-          >
-            <ArrowLeft size={14} strokeWidth={2.5} />
-            Volver
+              color: colors.text.secondary, fontFamily: font, fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+            }}>
+            <ArrowLeft size={14} strokeWidth={2.5} aria-hidden="true" className="flip-rtl" /> {r.back}
           </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <button type="button" style={navBtn} onClick={() => shift(-1)} aria-label={r.prevMonth}><ChevronLeft size={16} aria-hidden="true" className="flip-rtl" /></button>
+            <span aria-live="polite" style={{ fontFamily: font, fontSize: 14, fontWeight: 700, color: colors.text.primary, minWidth: 120, textAlign: 'center' }}>{monthLabel}</span>
+            <button type="button" style={{ ...navBtn, opacity: isCurrentMonth ? 0.35 : 1 }} disabled={isCurrentMonth}
+              onClick={() => shift(1)} aria-label={r.nextMonth}><ChevronRight size={16} aria-hidden="true" className="flip-rtl" /></button>
+          </div>
         </div>
 
-        {!hasData ? (
-          /* Not enough data */
-          <div style={{
-            minHeight: '70vh', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 24px',
-          }}>
+        {loading ? <ReplaySkeleton /> : result?.error || !summary ? (
+          <div style={{ padding: '40px 16px', textAlign: 'center' }}>
+            <p style={{ fontFamily: font, color: colors.text.secondary, fontSize: '14px' }}>{r.error}</p>
+            <button type="button" onClick={() => setAttempt(a => a + 1)}
+              style={{ marginTop: 12, minHeight: 44, padding: '10px 20px', borderRadius: radius.full, border: `1px solid ${colors.border.medium}`, background: 'transparent', color: colors.text.primary, fontFamily: font, fontWeight: 600, cursor: 'pointer' }}>
+              {r.retry}
+            </button>
+          </div>
+        ) : !hasData ? (
+          <div style={{ minHeight: '60dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 24px' }}>
             <div style={{ width: 72, height: 72, borderRadius: '24px', background: `${colors.accent.default}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
-              <Star size={32} style={{ color: colors.accent.default }} strokeWidth={1.5} />
+              <Star size={32} style={{ color: colors.accent.default }} strokeWidth={1.5} aria-hidden="true" />
             </div>
-            <h2 style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color: colors.text.primary, margin: '0 0 10px' }}>
-              Tu historia se está escribiendo
-            </h2>
-            <p style={{ fontFamily: font, fontSize: '14px', color: colors.text.tertiary, lineHeight: 1.7, margin: 0 }}>
-              Seguí usando Life OS este mes — hábitos, metas, dinero y Brain — y acá vas a ver tu replay personal.
-            </p>
+            <h2 style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color: colors.text.primary, margin: '0 0 10px' }}>{r.emptyTitle}</h2>
+            <p style={{ fontFamily: font, fontSize: '14px', color: colors.text.secondary, lineHeight: 1.7, margin: 0 }}>{r.emptyText}</p>
           </div>
         ) : (
           <>
-            {/* Card 0 — Cover */}
             <StoryCard gradient="linear-gradient(145deg, #1A0D2E 0%, #2D1B4E 50%, #1E1040 100%)" index={0} total={TOTAL}>
               <div>
-                <p style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', margin: '0 0 8px' }}>
-                  TU MES EN REVIEW
-                </p>
-                <h1 style={{ fontFamily: font, fontSize: '36px', fontWeight: 800, color: '#fff', margin: '0 0 6px', textTransform: 'capitalize' }}>
-                  {summary.monthLabel}
-                </h1>
+                <p style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', margin: '0 0 8px', textTransform: 'uppercase' }}>{r.cover}</p>
+                <h1 style={{ fontFamily: font, fontSize: '36px', fontWeight: 800, color: '#fff', margin: 0 }}>{monthLabel}</h1>
               </div>
-              <div>
-                {summary.lifeScore !== null && (
-                  <div style={{ marginBottom: '20px' }}>
-                    <p style={{ fontFamily: font, fontSize: '80px', fontWeight: 800, color: '#fff', margin: 0, lineHeight: 1 }}>
-                      {summary.lifeScore}
-                    </p>
-                    <p style={{ fontFamily: font, fontSize: '14px', color: 'rgba(255,255,255,0.55)', margin: '4px 0 0', fontWeight: 600 }}>
-                      Life Score final
-                    </p>
-                  </div>
-                )}
-                <p style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-                  Deslizá para ver tu recap ↓
-                </p>
-              </div>
+              <p style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>{r.swipe}</p>
             </StoryCard>
 
-            {/* Card 1 — Habits */}
             <StoryCard gradient="linear-gradient(145deg, #1A1000 0%, #3D2600 50%, #291A00 100%)" index={1} total={TOTAL}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                <CardIcon icon={Flame} />
-                <div>
-                  <p style={{ fontFamily: font, fontSize: '11px', color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>HÁBITOS</p>
-                  <p style={{ fontFamily: font, fontSize: '20px', color: '#fff', fontWeight: 800, margin: 0 }}>Consistencia</p>
-                </div>
-              </div>
+              <CardHeader icon={Flame} kicker={r.habits} title={r.habitsTitle} />
               <div>
-                <BigStat
-                  value={summary.habitsTotal > 0
-                    ? `${Math.round((summary.habitsDone / summary.habitsTotal) * 100)}%`
-                    : '—'
-                  }
-                  label={`${summary.habitsDone} hábitos completados este mes`}
-                />
+                <BigStat value={summary.habitsScheduled > 0 ? `${Math.round((summary.habitsDone / summary.habitsScheduled) * 100)}%` : '—'} label={r.habitsRate} />
+                <p style={{ fontFamily: font, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: '12px 0 0' }}>{r.habitsDone(summary.habitsDone)}</p>
                 {summary.topHabitName && (
                   <div style={{ marginTop: '24px' }}>
-                    <StatRow label="Más constante" value={summary.topHabitName} />
-                    <StatRow label="Racha más larga" value={`${summary.habitsBestStreak} días`} />
+                    <StatRow label={r.mostConsistent} value={summary.topHabitName} />
+                    <StatRow label={r.longestStreak} value={r.days(summary.longestStreak)} />
                   </div>
                 )}
               </div>
             </StoryCard>
 
-            {/* Card 2 — Goals */}
             <StoryCard gradient="linear-gradient(145deg, #001020 0%, #001D3D 50%, #00142B 100%)" index={2} total={TOTAL}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                <CardIcon icon={Target} />
-                <div>
-                  <p style={{ fontFamily: font, fontSize: '11px', color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>METAS</p>
-                  <p style={{ fontFamily: font, fontSize: '20px', color: '#fff', fontWeight: 800, margin: 0 }}>Objetivos</p>
-                </div>
-              </div>
+              <CardHeader icon={Target} kicker={r.goals} title={r.goalsTitle} />
               <div>
-                <BigStat
-                  value={String(summary.goalsCompleted)}
-                  label={`meta${summary.goalsCompleted !== 1 ? 's' : ''} completada${summary.goalsCompleted !== 1 ? 's' : ''}`}
-                />
+                <BigStat value={String(summary.stepsDone)} label={r.stepsDone(summary.stepsDone)} />
                 <div style={{ marginTop: '24px' }}>
-                  <StatRow label="En progreso" value={summary.goalsActive} />
-                  <StatRow label="Progreso promedio" value={`${summary.avgGoalProgress}%`} />
+                  <StatRow label={r.activeGoals} value={summary.activeGoals} />
                 </div>
               </div>
             </StoryCard>
 
-            {/* Card 3 — Money */}
             <StoryCard
-              gradient={summary.monthBalance >= 0
+              gradient={balance >= 0
                 ? 'linear-gradient(145deg, #001A0A 0%, #00381A 50%, #002610 100%)'
-                : 'linear-gradient(145deg, #1A0000 0%, #380000 50%, #260000 100%)'
-              }
-              index={3} total={TOTAL}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                <CardIcon icon={Wallet} />
-                <div>
-                  <p style={{ fontFamily: font, fontSize: '11px', color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>DINERO</p>
-                  <p style={{ fontFamily: font, fontSize: '20px', color: '#fff', fontWeight: 800, margin: 0 }}>Finanzas del mes</p>
-                </div>
-              </div>
+                : 'linear-gradient(145deg, #1A0000 0%, #380000 50%, #260000 100%)'}
+              index={3} total={TOTAL}>
+              <CardHeader icon={Wallet} kicker={r.money} title={r.moneyTitle} />
               <div>
-                <BigStat
-                  value={(summary.monthBalance >= 0 ? '+' : '-') + formatMoney(summary.monthBalance)}
-                  label={summary.monthBalance >= 0 ? 'balance positivo ✦' : 'balance negativo'}
-                />
+                <BigStat value={money(balance)} label={`${balance >= 0 ? r.positive : r.negative} · ${summary.currency}`} />
                 <div style={{ marginTop: '24px' }}>
-                  <StatRow label="Ingresos" value={'+' + formatMoney(summary.monthIncome)} />
-                  <StatRow label="Gastos"   value={'-' + formatMoney(summary.monthExpense)} />
+                  <StatRow label={r.income} value={money(summary.income)} />
+                  <StatRow label={r.expense} value={money(summary.expense)} />
                 </div>
+                {summary.otherCurrencies.length > 0 && (
+                  <p style={{ fontFamily: font, fontSize: 12.5, color: 'rgba(255,255,255,0.6)', margin: '14px 0 0' }}>
+                    {r.otherCurrencies(summary.otherCurrencies.join(', '))}
+                  </p>
+                )}
               </div>
             </StoryCard>
 
-            {/* Card 4 — Brain */}
             <StoryCard gradient="linear-gradient(145deg, #0A0014 0%, #1E0038 50%, #140020 100%)" index={4} total={TOTAL}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                <CardIcon icon={Zap} />
-                <div>
-                  <p style={{ fontFamily: font, fontSize: '11px', color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>BRAIN</p>
-                  <p style={{ fontFamily: font, fontSize: '20px', color: '#fff', fontWeight: 800, margin: 0 }}>Segunda mente</p>
-                </div>
-              </div>
+              <CardHeader icon={Zap} kicker={r.brain} title={r.brainTitle} />
               <div>
-                <BigStat
-                  value={String(summary.ideasCount + summary.notesCount + summary.tasksCompleted)}
-                  label="capturas este mes"
-                />
+                <BigStat value={String(summary.ideasCount + summary.notesCount)} label={r.captures} />
                 <div style={{ marginTop: '24px' }}>
-                  <StatRow label="Ideas guardadas"    value={summary.ideasCount} />
-                  <StatRow label="Notas creadas"      value={summary.notesCount} />
-                  <StatRow label="Tareas completadas" value={summary.tasksCompleted} />
+                  <StatRow label={r.ideas} value={summary.ideasCount} />
+                  <StatRow label={r.notes} value={summary.notesCount} />
+                  <StatRow label={r.tasksDone} value={summary.tasksCompleted} />
                 </div>
               </div>
             </StoryCard>
 
-            {/* Card 5 — Achievements + close */}
             <StoryCard gradient="linear-gradient(145deg, #1A0F00 0%, #3D2600 40%, #2B1E00 100%)" index={5} total={TOTAL}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                <CardIcon icon={Trophy} />
-                <div>
-                  <p style={{ fontFamily: font, fontSize: '11px', color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>LOGROS</p>
-                  <p style={{ fontFamily: font, fontSize: '20px', color: '#fff', fontWeight: 800, margin: 0 }}>Este mes</p>
-                </div>
-              </div>
+              <CardHeader icon={Trophy} kicker={r.achievements} title={r.achievementsTitle} />
               <div>
-                <BigStat
-                  value={String(summary.achievementsCount)}
-                  label={`logro${summary.achievementsCount !== 1 ? 's' : ''} desbloqueado${summary.achievementsCount !== 1 ? 's' : ''}`}
-                />
+                <BigStat value={String(summary.achievementsCount)} label={r.unlocked(summary.achievementsCount)} />
                 <div style={{ marginTop: '32px', padding: '20px', borderRadius: radius.lg, background: 'rgba(255,255,255,0.06)', textAlign: 'center' }}>
-                  <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>
-                    Seguí construyendo
-                  </p>
-                  <p style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.6 }}>
-                    Cada acción cuenta. Tu próximo recap va a contar una historia aún mejor.
-                  </p>
+                  <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>{r.keepGoing}</p>
+                  <p style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>{r.keepGoingText}</p>
                 </div>
               </div>
             </StoryCard>

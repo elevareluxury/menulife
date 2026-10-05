@@ -1,5 +1,4 @@
 /* === TIPOGRAFÍA (debe preceder a @import "tailwindcss") === */
-@import url('https://fonts.googleapis.com/css2?family=Ruda:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Geist:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
 
@@ -60,8 +59,8 @@
   --color-orange-dim:  rgba(255, 107, 107, 0.08);
 
   /* === FUENTES === */
-  --font-display: 'Ruda', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans:    "Geist", "Inter", -apple-system, BlinkMacSystemFont,
+  --font-display: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-sans:    "Geist", -apple-system, BlinkMacSystemFont,
                   "SF Pro Text", "Segoe UI", system-ui, sans-serif;
 
   /* === ANIMACIONES TEMA === */
@@ -187,25 +186,29 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* clip (no hidden): recorta el desborde sin convertir html/body en contenedores de scroll,
+     así window.scrollTo y position: fixed funcionan bien en todos los navegadores */
   -webkit-overflow-scrolling: touch;
   overflow-x: clip;
   width: 100%;
   -webkit-text-size-adjust: 100%;
+  /* Sin rebote elástico: en iOS el rebote arrastra las barras fijas (menú inferior, botón +) */
+  overscroll-behavior-y: none;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
   font-weight: 400;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow-x: clip;
+  overscroll-behavior-y: none;
   width: 100%;
   @apply bg-gray-50 text-gray-900;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Ruda', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
 h1 { font-weight: 900; letter-spacing: -0.03em;  line-height: 1.05; }
@@ -272,7 +275,7 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
    TIPOGRAFÍA PREMIUM
    ===================================================== */
 .price-amount {
-  font-family: 'Space Mono', monospace;
+  font-family: var(--font-mono);
   font-weight: 700;
   color: var(--primary-coral);
   letter-spacing: -0.02em;
@@ -329,7 +332,7 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 
 /* Fuente del dashboard */
 .dashboard-body {
-  font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
   font-feature-settings: 'cv11', 'ss01', 'ss03';
 }
 
@@ -358,11 +361,16 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   --ml-gray-200:      #e0ddd8;
   --ml-gray-500:      #8a8780;
   --ml-gray-700:      #3d3c39;
-  --font-syne:        'Ruda', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-jakarta:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Sistema tipográfico Mycen: Geist (interfaz), Instrument Serif (acento editorial), Geist Mono (datos).
+     Los nombres viejos (--font-syne, --font-jakarta, --font-ruda) se mantienen como alias. */
+  --font-syne:        'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-jakarta:     'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-ruda:        'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-serif:       'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-mono:        'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-/* Landing title letter-spacing — Ruda */
+/* Landing title letter-spacing */
 .landing-page h1,
 .landing-page h2,
 [style*="font-syne"] {
@@ -437,7 +445,7 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   color: var(--text-white);
   padding: 16px 48px;
   border-radius: 12px;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-jakarta);
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -455,7 +463,7 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   background-size: 200% 100%;
   animation: shimmer 3s linear infinite;
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-jakarta);
   font-weight: 700;
   font-size: 0.875rem;
   text-transform: uppercase;
@@ -923,7 +931,7 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 
 .ch-intro h1 {
   font-family: var(--font-syne);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.03em;
   margin-bottom: 20px;
@@ -937,8 +945,12 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 
 .ch-line2 {
   display: block;
-  font-size: clamp(2.5rem, 6vw, 5rem);
-  color: #F4705A;
+  /* Acento editorial: Instrument Serif itálica */
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: clamp(2.75rem, 6.6vw, 5.5rem);
+  color: #F1F0E9;
   font-style: italic;
 }
 
@@ -1369,3 +1381,12 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 /* Hub public — safe area + GPU composite */
 .hub-bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .hub-fixed { -webkit-transform: translateZ(0); transform: translateZ(0); }
+
+/* iOS hace zoom al enfocar campos con letra < 16px y "corre" los elementos fijos.
+   En pantallas táctiles chicas, todos los campos usan 16px. */
+@media (max-width: 767px) {
+  input, textarea, select { font-size: 16px !important; }
+}
+
+/* Íconos direccionales (flechas, chevrons) se espejan en idiomas de derecha a izquierda */
+[dir='rtl'] .flip-rtl { transform: scaleX(-1); }

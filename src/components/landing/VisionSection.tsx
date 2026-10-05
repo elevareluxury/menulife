@@ -1,30 +1,21 @@
 import { useEffect, useRef } from 'react'
 
+import { useLandingT } from '@/i18n/app/landing'
+
+import { reducedMotion } from './motion'
+import { SplitText } from './SplitText'
+
 declare const gsap: any
-declare const Splitting: any
 
 export function VisionSection() {
+  const t = useLandingT().vision
   const titleRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
-    if (typeof gsap === 'undefined') return
+    if (typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
 
-    if (typeof Splitting !== 'undefined' && titleRef.current) {
-      const res = Splitting({ target: titleRef.current, by: 'words' })
-      if (res?.[0]?.words?.length) {
-        gsap.fromTo(res[0].words,
-          { opacity: 0, y: -20, filter: 'blur(4px)' },
-          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.65, stagger: 0.06, ease: 'power3.out',
-            scrollTrigger: { trigger: titleRef.current, start: 'top 82%' } })
-      }
-    } else {
-      gsap.fromTo(titleRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: titleRef.current, start: 'top 82%' } })
-    }
 
     gsap.fromTo('[data-vision-body]',
       { opacity: 0, y: 28 },
@@ -47,16 +38,16 @@ export function VisionSection() {
           fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
           textTransform: 'uppercase', color: 'var(--ml-salmon)',
           fontFamily: 'var(--font-jakarta)', marginBottom: '24px',
-        }}>VISIÓN</p>
+        }}>{t.label}</p>
 
-        <h2 ref={titleRef} style={{
+        <h2 ref={titleRef} data-split style={{
           fontFamily: 'var(--font-syne)', fontWeight: 800,
           fontSize: 'clamp(32px,5vw,60px)',
           color: '#fff', lineHeight: 1.08,
           marginBottom: '28px', letterSpacing: '-0.02em',
         }}>
-          Estamos construyendo el futuro de la{' '}
-          <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>vida digital.</em>
+          <SplitText text={t.title} />{' '}
+          <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>{t.titleAccent}</em>
         </h2>
 
         <p data-vision-body style={{
@@ -68,8 +59,7 @@ export function VisionSection() {
           maxWidth: '640px',
           margin: '0 auto',
         }}>
-          Creemos que las personas y los negocios merecen una forma más simple,
-          conectada y humana de gestionar todo lo que importa.
+          {t.body}
         </p>
 
       </div>

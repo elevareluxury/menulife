@@ -1,9 +1,19 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { LoginForm } from '@/modules/auth/components/LoginForm'
+import { LanguageSelect } from '@/components/ui/LanguageSelect'
+import { useAuthT } from '@/i18n/app/auth'
+import { useLangDir } from '@/i18n/app/useLangDir'
+
+// Avisos que llegan por la URL desde otros pasos (códigos, no texto: así se muestran en el idioma de la persona)
+const MESSAGES = { password_updated: 'passwordUpdated' } as const
 
 export function LoginPage() {
+  const t = useAuthT()
+  useLangDir()
   const [params] = useSearchParams()
-  const message = params.get('message')
+  const code = params.get('message')
+  const message = code && code in MESSAGES ? t.login[MESSAGES[code as keyof typeof MESSAGES]]
+    : params.get('error') ? t.login.linkInvalid : null
 
   return (
     <div style={{
@@ -27,13 +37,17 @@ export function LoginPage() {
         position: 'relative', zIndex: 1,
         animation: 'ml-fade-up 0.45s ease-out both',
       }}>
+        <div style={{ position: 'absolute', top: '16px', insetInlineEnd: '16px' }}>
+          <LanguageSelect label={t.common.language} />
+        </div>
+
         {/* Logo + title */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', marginBottom: '16px' }}>
-            <img src="/logo.png" alt="MenuLife" className="h-8 w-auto" />
+            <img src="/logo.png" alt="Mycen" className="h-8 w-auto" />
           </Link>
-          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-            Iniciá sesión en tu cuenta
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.7)', margin: 0 }}>
+            {t.login.subtitle}
           </p>
         </div>
 
@@ -46,24 +60,24 @@ export function LoginPage() {
             fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.65)',
             lineHeight: 1.5,
           }}>
-            {decodeURIComponent(message)}
+            {message}
           </div>
         )}
 
         <LoginForm />
 
-        <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.3)' }}>
-          ¿Sos nuevo?{' '}
+        <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.65)' }}>
+          {t.login.newHere}{' '}
           <Link to="/register" style={{ color: 'var(--ml-salmon)', fontWeight: 600, textDecoration: 'none' }}>
-            Creá tu perfil gratis →
+            {t.login.createFree}
           </Link>
         </p>
 
         <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'rgba(255,255,255,0.18)', margin: 0 }}>
-            ¿Sos del equipo MenuLife?{' '}
-            <Link to="/super-admin" style={{ color: 'rgba(255,255,255,0.22)', textDecoration: 'underline' }}>
-              Acceder como admin →
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>
+            {t.login.team}{' '}
+            <Link to="/super-admin" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'underline' }}>
+              {t.login.adminAccess}
             </Link>
           </p>
         </div>

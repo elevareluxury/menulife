@@ -243,7 +243,7 @@ export default {
     nav_screens: 'Bildschirme',
     nav_logout: 'Abmelden',
     nav_more: 'Mehr',
-    nav_hub: 'Öffentlicher Hub',
+    nav_hub: 'Meine Identität',
     nav_catalogo: 'Katalog',
     nav_inventario: 'Lager',
     nav_agenda: 'Terminkalender',

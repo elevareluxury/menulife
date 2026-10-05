@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Lightbulb, StickyNote, CheckSquare, Target, TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -7,8 +8,13 @@ import { award } from '../lib/checkMilestone'
 import { BrainItemSheet } from './BrainItemSheet'
 import { GoalSheet } from './GoalSheet'
 import { TransactionSheet } from './TransactionSheet'
+import { TaskSheet } from './TaskSheet'
+import { taskColumns, type TaskFormData } from '../hooks/useTasks'
+import { enqueue, isOfflineError, type OutboxItem } from '../lib/outbox'
+import toast from 'react-hot-toast'
 import { colors, font, radius } from '../design-system'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
+import { useLifeT } from '@/i18n/app/life'
 import type { BrainItemType } from '../hooks/useBrain'
 import type { GoalFormData } from '../hooks/useGoals'
 import type { TransactionFormData } from '../hooks/useMoney'
@@ -18,17 +24,18 @@ const db = supabase as any
 
 // ── Actions config ────────────────────────────────────────────────────────────
 const ACTIONS = [
-  { id: 'idea',        label: 'Idea',        icon: Lightbulb,   color: '#8B5CF6' },
-  { id: 'note',        label: 'Nota',        icon: StickyNote,  color: '#3B82F6' },
-  { id: 'task',        label: 'Tarea',       icon: CheckSquare, color: '#22C55E' },
-  { id: 'goal',        label: 'Meta',        icon: Target,      color: colors.area.goals },
-  { id: 'transaction', label: 'Movimiento',  icon: TrendingUp,  color: colors.area.money },
+  { id: 'idea',        icon: Lightbulb,   color: '#8B5CF6' },
+  { id: 'note',        icon: StickyNote,  color: '#3B82F6' },
+  { id: 'task',        icon: CheckSquare, color: '#22C55E' },
+  { id: 'goal',        icon: Target,      color: colors.area.goals },
+  { id: 'transaction', icon: TrendingUp,  color: colors.area.money },
 ] as const
 
 type ActionId = typeof ACTIONS[number]['id']
 
 export function CaptureButton() {
   const { user } = useAuthStore()
+  const t = useLifeT()
 
 
   const [open, setOpen]             = useState(false)
@@ -36,10 +43,13 @@ export function CaptureButton() {
   const [brainType, setBrainType]   = useState<BrainItemType>('idea')
   const [goalOpen, setGoalOpen]     = useState(false)
   const [moneyOpen, setMoneyOpen]   = useState(false)
+  const [taskOpen, setTaskOpen]     = useState(false)
 
   const handleAction = (id: ActionId) => {
     setOpen(false)
-    if (id === 'idea' || id === 'note' || id === 'task') {
+    if (id === 'task') {
+      setTaskOpen(true)
+    } else if (id === 'idea' || id === 'note') {
       setBrainType(id)
       setBrainOpen(true)
     } else if (id === 'goal') {
@@ -49,46 +59,76 @@ export function CaptureButton() {
     }
   }
 
-  const handleBrainSave = async (data: { type: BrainItemType; title: string; content?: string }) => {
+  /**
+   * Inserta la fila; si no hay conexión la deja en la cola del dispositivo (se sube sola después).
+   * Devuelve true si se guardó en la base ahora.
+   */
+  const saveOrQueue = async (item: OutboxItem): Promise<boolean> => {
+    try {
+      const { error } = await db.from(item.table).insert(item.row)
+      if (error) throw error
+      window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: item.module } }))
+      return true
+    } catch (e) {
+      if (!isOfflineError(e)) throw e
+      enqueue(item)
+      toast(t.offline.queued, { icon: '☁️' })
+      return false
+    }
+  }
+
+  const awardFirstCapture = async (userId: string, type: BrainItemType) => {
+    const { count: total } = await db.from('life_brain_items')
+      .select('*', { count: 'exact', head: true }).eq('user_id', userId)
+    if (total === 1) void award(userId, 'first_brain_item', 'Primera captura')
+    if (type === 'idea') {
+      const { count: ic } = await db.from('life_brain_items')
+        .select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('type', 'idea')
+      if (ic === 10) void award(userId, 'ideas_10', '10 ideas guardadas')
+      if (ic === 50) void award(userId, 'ideas_50', '50 ideas guardadas')
+    }
+  }
+
+  const handleBrainSave = async (data: { type: BrainItemType; title: string; content?: string; goal_id?: string | null }) => {
     if (!user) return
-    await db.from('life_brain_items').insert({
-      ...data, user_id: user.id, is_completed: false, is_archived: false,
-    })
-    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
-    ;(async () => {
-      const { count: total } = await db.from('life_brain_items')
-        .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-      if (total === 1) void award(user.id, 'first_brain_item', 'Primera captura')
-      if (data.type === 'idea') {
-        const { count: ic } = await db.from('life_brain_items')
-          .select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('type', 'idea')
-        if (ic === 10) void award(user.id, 'ideas_10', '10 ideas guardadas')
-        if (ic === 50) void award(user.id, 'ideas_50', '50 ideas guardadas')
-      }
-    })()
+    const row = { id: crypto.randomUUID(), ...data, user_id: user.id, is_completed: false, is_archived: false }
+    if (await saveOrQueue({ table: 'life_brain_items', row, module: 'brain' })) void awardFirstCapture(user.id, data.type)
+  }
+
+  const handleTaskSave = async (data: TaskFormData) => {
+    if (!user) return
+    const row = { id: crypto.randomUUID(), ...taskColumns(data), type: 'task', user_id: user.id, is_completed: false, is_archived: false }
+    if (await saveOrQueue({ table: 'life_brain_items', row, module: 'brain' })) void awardFirstCapture(user.id, 'task')
   }
 
   const handleGoalSave = async (data: GoalFormData) => {
     if (!user) return
-    const { count: existing } = await db.from('life_goals')
-      .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-    await db.from('life_goals').insert({ ...data, user_id: user.id, sort_order: existing ?? 0 })
-    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'goals' } }))
-    void award(user.id, 'first_goal', 'Primera meta definida')
-    const newCount = (existing ?? 0) + 1
-    if (newCount >= 5) void award(user.id, 'goals_5', 'Cinco metas')
+    let existing = 0
+    try {
+      const { count } = await db.from('life_goals').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+      existing = count ?? 0
+    } catch { /* sin conexión: va al final igual */ }
+    const row = { id: crypto.randomUUID(), ...data, user_id: user.id, sort_order: existing }
+    if (await saveOrQueue({ table: 'life_goals', row, module: 'goals' })) {
+      void award(user.id, 'first_goal', 'Primera meta definida')
+      if (existing + 1 >= 5) void award(user.id, 'goals_5', 'Cinco metas')
+    }
   }
 
   const handleMoneySave = async (data: TransactionFormData) => {
     if (!user) return
-    await db.from('life_transactions').insert({ ...data, user_id: user.id })
-    window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'money' } }))
-    const { count } = await db.from('life_transactions')
-      .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-    if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
+    const row = { id: crypto.randomUUID(), ...data, user_id: user.id }
+    if (await saveOrQueue({ table: 'life_transactions', row, module: 'money' })) {
+      void (async () => {
+        const { count } = await db.from('life_transactions')
+          .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+        if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
+      })()
+    }
   }
 
-  return (
+  // Portal a <body>: el botón fijo no depende de ningún contenedor
+  return createPortal(
     <>
       {/* Backdrop */}
       <AnimatePresence>
@@ -152,7 +192,7 @@ export function CaptureButton() {
                 }}>
                   <action.icon size={14} style={{ color: action.color }} strokeWidth={2.5} />
                 </div>
-                {action.label}
+                {t.capture[action.id]}
               </motion.button>
             ))}
           </div>
@@ -180,7 +220,7 @@ export function CaptureButton() {
           zIndex: 49,
           transition: 'background 0.22s ease, box-shadow 0.22s ease',
         }}
-        aria-label={open ? 'Cerrar' : 'Capturar'}
+        aria-label={open ? t.capture.close : t.capture.open}
       >
         <motion.div
           animate={{ rotate: open ? 45 : 0 }}
@@ -197,6 +237,11 @@ export function CaptureButton() {
         initialType={brainType}
         onSave={handleBrainSave}
       />
+      <TaskSheet
+        open={taskOpen}
+        onClose={() => setTaskOpen(false)}
+        onSave={handleTaskSave}
+      />
       <GoalSheet
         open={goalOpen}
         onClose={() => setGoalOpen(false)}
@@ -208,6 +253,7 @@ export function CaptureButton() {
         onClose={() => setMoneyOpen(false)}
         onSave={handleMoneySave}
       />
-    </>
+    </>,
+    document.body,
   )
 }

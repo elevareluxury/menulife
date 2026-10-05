@@ -1,30 +1,50 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
+import { PrefsInit } from '@/app/PrefsInit'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
-import { LandingPage } from '@/modules/landing/pages/LandingPage'
-import { LoginPage } from './routes/login'
-import { RegisterPage } from './routes/register'
-import { DashboardPage, DashboardHome } from './routes/dashboard'
-import { MenuManagement } from '@/modules/menu/pages/MenuManagement'
-import { QRGenerator } from '@/modules/menu/pages/QRGenerator'
-import { PublicMenu } from '@/modules/public/pages/PublicMenu'
-import { WaiterLogin } from '@/modules/waiter/pages/WaiterLogin'
-import { WaiterApp } from '@/modules/waiter/pages/WaiterApp'
-import { TableBill } from '@/modules/waiter/pages/TableBill'
-import { OnboardingFlow } from '@/modules/onboarding/pages/OnboardingFlow'
-import { OrderTracking } from '@/modules/public/pages/OrderTracking'
-import { AuthCallback } from '@/pages/AuthCallback'
-import { ForgotPassword } from '@/pages/ForgotPassword'
-import { ResetPassword } from '@/pages/ResetPassword'
-import { ReservationFormPage } from '@/modules/public/pages/ReservationFormPage'
+import { ScrollToTop } from '@/components/ScrollToTop'
 import { RequirePlan } from '@/app/RequirePlan'
 import { RequireStaffAuth } from '@/app/RequireStaffAuth'
 
-// Heavy modules — lazy loaded
+// Todo se carga al entrar a su ruta: quien abre un perfil público no descarga la landing ni Mycen Business (Lanzamiento L1)
+const LandingPage = lazy(() => import('@/modules/landing/pages/LandingPage').then(m => ({ default: m.LandingPage })))
+const LoginPage = lazy(() => import('./routes/login').then(m => ({ default: m.LoginPage })))
+const RegisterPage = lazy(() => import('./routes/register').then(m => ({ default: m.RegisterPage })))
+const MenuManagement = lazy(() => import('@/modules/menu/pages/MenuManagement').then(m => ({ default: m.MenuManagement })))
+const QRGenerator = lazy(() => import('@/modules/menu/pages/QRGenerator').then(m => ({ default: m.QRGenerator })))
+const PublicMenu = lazy(() => import('@/modules/public/pages/PublicMenu').then(m => ({ default: m.PublicMenu })))
+const WaiterLogin = lazy(() => import('@/modules/waiter/pages/WaiterLogin').then(m => ({ default: m.WaiterLogin })))
+const WaiterApp = lazy(() => import('@/modules/waiter/pages/WaiterApp').then(m => ({ default: m.WaiterApp })))
+const TableBill = lazy(() => import('@/modules/waiter/pages/TableBill').then(m => ({ default: m.TableBill })))
+const OnboardingFlow = lazy(() => import('@/modules/onboarding/pages/OnboardingFlow').then(m => ({ default: m.OnboardingFlow })))
+const OrderTracking = lazy(() => import('@/modules/public/pages/OrderTracking').then(m => ({ default: m.OrderTracking })))
+const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(m => ({ default: m.AuthCallback })))
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })))
+const ResetPassword = lazy(() => import('@/pages/ResetPassword').then(m => ({ default: m.ResetPassword })))
+const ReservationFormPage = lazy(() => import('@/modules/public/pages/ReservationFormPage').then(m => ({ default: m.ReservationFormPage })))
+const DashboardPage = lazy(() => import('./routes/dashboard').then(m => ({ default: m.DashboardPage })))
+const DashboardHome = lazy(() => import('./routes/dashboard').then(m => ({ default: m.DashboardHome })))
 const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
+const ProfilePublicPage = lazy(() => import('@/modules/profile/pages/ProfilePublicPage').then(m => ({ default: m.ProfilePublicPage })))
+const LegalPage       = lazy(() => import('@/modules/legal/LegalPage').then(m => ({ default: m.LegalPage })))
+const ProjectPublicPage = lazy(() => import('@/modules/profile/pages/ProjectPublicPage').then(m => ({ default: m.ProjectPublicPage })))
+const StudioShell     = lazy(() => import('@/modules/studio/StudioShell').then(m => ({ default: m.StudioShell })))
+const StudioOverview  = lazy(() => import('@/modules/studio/pages/OverviewPage').then(m => ({ default: m.OverviewPage })))
+const StudioIdentity  = lazy(() => import('@/modules/studio/pages/IdentityPage').then(m => ({ default: m.IdentityPage })))
+const StudioModules   = lazy(() => import('@/modules/studio/pages/ModulesPage').then(m => ({ default: m.ModulesPage })))
+const StudioAppearance = lazy(() => import('@/modules/studio/pages/AppearancePage').then(m => ({ default: m.AppearancePage })))
+const StudioExchange  = lazy(() => import('@/modules/studio/pages/ExchangePage').then(m => ({ default: m.ExchangePage })))
+const StudioAnalytics = lazy(() => import('@/modules/studio/pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })))
+const StudioSettings  = lazy(() => import('@/modules/studio/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const StudioProjects  = lazy(() => import('@/modules/studio/pages/ProjectsPage').then(m => ({ default: m.ProjectsPage })))
+const StudioProject   = lazy(() => import('@/modules/studio/pages/ProjectEditorPage').then(m => ({ default: m.ProjectEditorPage })))
+const StudioPreview   = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.PreviewPage })))
+const StudioEditor    = lazy(() => import('@/modules/studio/pages/EditorPage').then(m => ({ default: m.EditorPage })))
+const StudioSpaces    = lazy(() => import('@/modules/studio/pages/SpacesPage').then(m => ({ default: m.SpacesPage })))
+const StudioMore      = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.MorePage })))
 const SuperAdminPage   = lazy(() => import('./routes/super-admin').then(m => ({ default: m.SuperAdminPage })))
 const BusinessSettings = lazy(() => import('@/modules/settings/pages/BusinessSettings').then(m => ({ default: m.BusinessSettings })))
 const OrdersManagement = lazy(() => import('@/modules/orders/pages/OrdersManagement').then(m => ({ default: m.OrdersManagement })))
@@ -43,7 +63,6 @@ const GastosPage       = lazy(() => import('@/modules/pos/pages/GastosPage').the
 const InventarioPage   = lazy(() => import('@/modules/inventory/pages/InventarioPage'))
 const CatalogoPage     = lazy(() => import('@/modules/catalog/pages/CatalogoPage'))
 const CatalogoPublic   = lazy(() => import('@/modules/public/pages/CatalogoPublic'))
-const HubPage                = lazy(() => import('@/modules/hub/pages/HubPage'))
 const ServicesClientesPage   = lazy(() => import('@/modules/services/pages/ServicesClientesPage').then(m => ({ default: m.ServicesClientesPage })))
 const CustomerProfilePage    = lazy(() => import('@/modules/services/pages/CustomerProfilePage').then(m => ({ default: m.CustomerProfilePage })))
 const ServicesAgendaPage     = lazy(() => import('@/modules/services/pages/ServicesAgendaPage').then(m => ({ default: m.ServicesAgendaPage })))
@@ -64,8 +83,9 @@ const LifeMoneyPage  = lazy(() => import('@/modules/life/pages/LifeMoneyPage').t
 const LifeGoalsPage  = lazy(() => import('@/modules/life/pages/LifeGoalsPage').then(m => ({ default: m.LifeGoalsPage })))
 const LifeHabitsPage = lazy(() => import('@/modules/life/pages/LifeHabitsPage').then(m => ({ default: m.LifeHabitsPage })))
 const LifeBrainPage  = lazy(() => import('@/modules/life/pages/LifeBrainPage').then(m => ({ default: m.LifeBrainPage })))
+const LifeSettingsPage = lazy(() => import('@/modules/life/pages/LifeSettingsPage').then(m => ({ default: m.LifeSettingsPage })))
+const LifeInsightsPage = lazy(() => import('@/modules/life/pages/LifeInsightsPage').then(m => ({ default: m.LifeInsightsPage })))
 const LifeReplayPage = lazy(() => import('@/modules/life/pages/LifeReplayPage').then(m => ({ default: m.LifeReplayPage })))
-const LifeHubPage    = lazy(() => import('@/modules/life/pages/LifeHubPage').then(m => ({ default: m.LifeHubPage })))
 
 function LoadingSpinner() {
   return (
@@ -80,12 +100,21 @@ function WaiterLegacyRedirect() {
   return <Navigate to={`/mozo/${slug ?? ''}`} replace />
 }
 
+// Mycen Identity: la página pública. El Hub viejo queda accesible con ?v=1
+// como respaldo temporal durante la transición.
+function PublicSlugRoute() {
+  const [params] = useSearchParams()
+  return params.get('v') === '1' ? <HubPublicPage /> : <ProfilePublicPage />
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthInit />
+      <PrefsInit />
       <OfflineBanner />
-      <Toaster position="top-right" />
+      <Toaster position="top-right" containerStyle={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
 
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
@@ -114,7 +143,8 @@ function App() {
             <Route path="gastos"        element={<GastosPage />} />
             <Route path="inventario"    element={<InventarioPage />} />
             <Route path="catalogo"      element={<CatalogoPage />} />
-            <Route path="hub"           element={<HubPage />} />
+            {/* El editor del Hub fue reemplazado por Mycen Studio */}
+            <Route path="hub"           element={<Navigate to="/studio" replace />} />
             {/* ── Servicios routes — all require os_full plan ── */}
             <Route path="services/clientes"     element={<RequirePlan feature="services_catalog"><ServicesClientesPage /></RequirePlan>} />
             <Route path="services/clientes/:id" element={<RequirePlan feature="services_catalog"><CustomerProfilePage /></RequirePlan>} />
@@ -129,6 +159,25 @@ function App() {
             <Route path="services/forms"              element={<RequirePlan feature="services_catalog"><ServicesFormsPage /></RequirePlan>} />
             <Route path="services/forms/:id/builder"  element={<RequirePlan feature="services_catalog"><FormBuilderPage /></RequirePlan>} />
           </Route>
+          <Route path="/terminos"   element={<LegalPage doc="terms" />} />
+          <Route path="/privacidad" element={<LegalPage doc="privacy" />} />
+          {/* ── Mycen Studio — edición de la identidad (Profile) ── */}
+          <Route path="/studio" element={<ErrorBoundary label="studio"><StudioShell /></ErrorBoundary>}>
+            <Route index element={<StudioOverview />} />
+            <Route path="identity"   element={<StudioIdentity />} />
+            <Route path="modules"    element={<StudioModules />} />
+            <Route path="projects"   element={<StudioProjects />} />
+            <Route path="projects/:id" element={<StudioProject />} />
+            <Route path="appearance" element={<StudioAppearance />} />
+            <Route path="exchange"   element={<StudioExchange />} />
+            <Route path="analytics"  element={<StudioAnalytics />} />
+            <Route path="settings"   element={<StudioSettings />} />
+            <Route path="preview"    element={<StudioPreview />} />
+            <Route path="editor"     element={<StudioEditor />} />
+            <Route path="spaces"     element={<StudioSpaces />} />
+            <Route path="more"       element={<StudioMore />} />
+            <Route path="*"          element={<Navigate to="/studio" replace />} />
+          </Route>
           {/* ── Life OS — capa personal, no requiere restaurant ── */}
           <Route path="/life" element={<ErrorBoundary label="life"><LifeShell /></ErrorBoundary>}>
             <Route index element={<LifePage />} />
@@ -136,8 +185,10 @@ function App() {
             <Route path="goals"  element={<LifeGoalsPage />}  />
             <Route path="habits" element={<LifeHabitsPage />} />
             <Route path="brain"  element={<LifeBrainPage />}  />
-            <Route path="hub"    element={<LifeHubPage />}    />
+            <Route path="hub"    element={<Navigate to="/studio" replace />} />
             <Route path="replay" element={<LifeReplayPage />} />
+            <Route path="insights" element={<LifeInsightsPage />} />
+            <Route path="settings" element={<LifeSettingsPage />} />
           </Route>
           {/* Portal del cliente */}
           <Route path="/portal/:restaurantId/*" element={<PortalApp />} />
@@ -199,7 +250,10 @@ function App() {
           {/* Catálogo retail público */}
           <Route path="/catalogo/:slug" element={<CatalogoPublic />} />
           {/* Hub Público — /:slug debe ir antes del catch-all */}
-          <Route path="/:slug" element={<ErrorBoundary><HubPublicPage /></ErrorBoundary>} />
+          <Route path="/:slug" element={<ErrorBoundary><PublicSlugRoute /></ErrorBoundary>} />
+          <Route path="/:slug/projects/:projectSlug" element={<ErrorBoundary><ProjectPublicPage /></ErrorBoundary>} />
+          {/* Space secundario dentro del principal: /ana/estudio (Identity Fase 10) */}
+          <Route path="/:slug/:space" element={<ErrorBoundary><ProfilePublicPage /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

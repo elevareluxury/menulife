@@ -157,7 +157,7 @@ export default function CatalogoPublic() {
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ background: '#0F1115', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ background: '#0F1115', minHeight: '100vh', fontFamily: 'Geist, sans-serif' }}>
       <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
 
         {/* ── HEADER ── */}
@@ -180,7 +180,7 @@ export default function CatalogoPublic() {
             )}
             <h1
               className="text-2xl font-bold text-white mb-1"
-              style={{ fontFamily: 'Ruda, Inter, sans-serif' }}
+              style={{ fontFamily: 'Geist, sans-serif' }}
             >
               {restaurant.name}
             </h1>
@@ -399,7 +399,7 @@ export default function CatalogoPublic() {
                 <div className="flex items-start justify-between gap-3">
                   <h2
                     className="text-xl font-bold text-white leading-tight flex-1"
-                    style={{ fontFamily: 'Ruda, Inter, sans-serif' }}
+                    style={{ fontFamily: 'Geist, sans-serif' }}
                   >
                     {pName(selected)}
                   </h2>

@@ -1,24 +1,29 @@
 import { useEffect, useRef } from 'react'
 import { Share2, Target, FileText, Users, Building2, Wallet } from 'lucide-react'
+import { useLandingT } from '@/i18n/app/landing'
+
+import { reducedMotion } from './motion'
+import { SplitText } from './SplitText'
 
 declare const gsap: any
 
 const FRAGS = [
-  { Icon: Share2,    label: 'Redes',     color: '#3B82F6', top: '18%', left: '10%',  dur: 6.2, delay: 0   },
-  { Icon: Target,    label: 'Objetivos', color: '#8B5CF6', top: '12%', left: '60%',  dur: 7.5, delay: 1.2 },
-  { Icon: FileText,  label: 'Notas',     color: '#F59E0B', top: '62%', left: '7%',   dur: 8.1, delay: 0.7 },
-  { Icon: Users,     label: 'Clientes',  color: '#10B981', top: '68%', left: '52%',  dur: 6.8, delay: 1.8 },
-  { Icon: Building2, label: 'Negocio',   color: '#F4705A', top: '25%', left: '78%',  dur: 7.2, delay: 0.4 },
-  { Icon: Wallet,    label: 'Finanzas',  color: '#EC4899', top: '74%', left: '80%',  dur: 8.6, delay: 2.1 },
-]
+  { Icon: Share2,    key: 'social',    color: '#3B82F6', top: '18%', left: '10%',  dur: 6.2, delay: 0   },
+  { Icon: Target,    key: 'goals',     color: '#8B5CF6', top: '12%', left: '60%',  dur: 7.5, delay: 1.2 },
+  { Icon: FileText,  key: 'notes',     color: '#F59E0B', top: '62%', left: '7%',   dur: 8.1, delay: 0.7 },
+  { Icon: Users,     key: 'clients',   color: '#10B981', top: '68%', left: '52%',  dur: 6.8, delay: 1.8 },
+  { Icon: Building2, key: 'business',  color: '#F4705A', top: '25%', left: '78%',  dur: 7.2, delay: 0.4 },
+  { Icon: Wallet,    key: 'money',     color: '#EC4899', top: '74%', left: '80%',  dur: 8.6, delay: 2.1 },
+] as const
 
 export function FragmentationSection() {
+  const t = useLandingT().problem
   const sectionRef = useRef<HTMLElement>(null)
   const titleRef   = useRef<HTMLDivElement>(null)
   const vizRef     = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (typeof gsap === 'undefined') return
+    if (typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
 
@@ -31,6 +36,22 @@ export function FragmentationSection() {
       { opacity: 0, scale: 0.6 },
       { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.6)', stagger: 0.12,
         scrollTrigger: { trigger: vizRef.current, start: 'top 80%' } })
+
+    // Al bajar, los fragmentos se acercan al centro (anticipa "todo conectado") y el signo de pregunta gira
+    const viz = vizRef.current
+    if (!viz) return
+    const tl = gsap.timeline({ scrollTrigger: { trigger: viz, start: 'top 60%', end: 'bottom 20%', scrub: 1 } })
+    viz.querySelectorAll<HTMLElement>('[data-frag-box]').forEach(box => {
+      const holder = box.parentElement as HTMLElement
+      const vr = viz.getBoundingClientRect()
+      const hr = holder.getBoundingClientRect()
+      const dx = (vr.left + vr.width / 2) - (hr.left + hr.width / 2)
+      const dy = (vr.top + vr.height / 2) - (hr.top + hr.height / 2)
+      tl.to(box, { x: dx * 0.35, y: dy * 0.35, rotate: gsap.utils.random(-25, 25), ease: 'none' }, 0)
+    })
+    tl.to('[data-frag-q]', { rotate: 360, scale: 1.25, borderColor: 'rgba(244,112,90,0.6)', ease: 'none' }, 0)
+    tl.to('[data-frag-line]', { strokeDashoffset: -60, attr: { stroke: 'rgba(244,112,90,0.35)' }, ease: 'none' }, 0)
+    return () => { tl.scrollTrigger?.kill(); tl.kill() }
   }, [])
 
   return (
@@ -50,19 +71,19 @@ export function FragmentationSection() {
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',
             fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
-          }}>EL PROBLEMA</p>
+          }}>{t.label}</p>
           <h2 style={{
             fontFamily: 'var(--font-syne)', fontWeight: 800,
             fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
             lineHeight: 1.1, margin: '0 0 16px',
-          }}>Hoy tu vida digital está{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>fragmentada.</em>
+          }} data-split><SplitText text={t.title} />{' '}
+            <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>{t.titleAccent}</em>
           </h2>
           <p style={{
             fontFamily: 'var(--font-jakarta)', fontSize: '17px',
             color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
             maxWidth: '520px', margin: '0 auto',
-          }}>Demasiadas herramientas. Demasiado desorden.</p>
+          }}>{t.subtitle}</p>
         </div>
 
         {/* Visualization */}
@@ -85,16 +106,16 @@ export function FragmentationSection() {
 
           {/* Connection lines (visual noise — disconnected) */}
           <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-            <line x1="15%" y1="25%" x2="65%" y2="18%"  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 6" />
-            <line x1="65%" y1="18%" x2="82%" y2="32%"  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 6" />
-            <line x1="12%" y1="68%" x2="55%" y2="74%"  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 6" />
-            <line x1="82%" y1="78%" x2="55%" y2="74%"  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 6" />
+            <line data-frag-line x1="15%" y1="25%" x2="65%" y2="18%"  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 6" />
+            <line data-frag-line x1="65%" y1="18%" x2="82%" y2="32%"  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 6" />
+            <line data-frag-line x1="12%" y1="68%" x2="55%" y2="74%"  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 6" />
+            <line data-frag-line x1="82%" y1="78%" x2="55%" y2="74%"  stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 6" />
           </svg>
 
           {/* Floating icons */}
-          {FRAGS.map(({ Icon, label, color, top, left, dur, delay }) => (
+          {FRAGS.map(({ Icon, key, color, top, left, dur, delay }) => (
             <div
-              key={label}
+              key={key}
               data-frag-icon
               style={{
                 position: 'absolute',
@@ -107,7 +128,7 @@ export function FragmentationSection() {
                 animationDelay: `${delay}s`,
               }}
             >
-              <div style={{
+              <div data-frag-box style={{
                 width: '56px', height: '56px',
                 borderRadius: '16px',
                 background: `${color}12`,
@@ -123,7 +144,7 @@ export function FragmentationSection() {
                 fontSize: '11px', fontWeight: 500,
                 color: 'rgba(255,255,255,0.3)',
                 whiteSpace: 'nowrap',
-              }}>{label}</span>
+              }}>{t.items[key]}</span>
             </div>
           ))}
 
@@ -134,7 +155,7 @@ export function FragmentationSection() {
             transform: 'translate(-50%, -50%)',
             textAlign: 'center',
           }}>
-            <div style={{
+            <div data-frag-q style={{
               width: '72px', height: '72px', borderRadius: '50%',
               background: 'rgba(255,255,255,0.03)',
               border: '1px solid rgba(255,255,255,0.08)',
@@ -146,7 +167,7 @@ export function FragmentationSection() {
             <p style={{
               fontFamily: 'var(--font-jakarta)', fontSize: '12px',
               color: 'rgba(255,255,255,0.2)',
-            }}>Sin conexión</p>
+            }}>{t.disconnected}</p>
           </div>
         </div>
 

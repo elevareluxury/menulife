@@ -4,6 +4,7 @@ import { Trophy, Flame, Target, Star, CheckCircle2, Lightbulb, Wallet } from 'lu
 import type { LucideIcon } from 'lucide-react'
 import { useLifeStore } from '@/store/lifeStore'
 import { colors, font, radius } from '../design-system'
+import { useLifeT } from '@/i18n/app/life'
 
 const ICON_MAP: Record<string, { icon: LucideIcon; color: string }> = {
   first_brain_item:      { icon: Lightbulb,    color: '#8B5CF6' },
@@ -23,6 +24,7 @@ const ICON_MAP: Record<string, { icon: LucideIcon; color: string }> = {
 
 export function AchievementToast() {
   const { achievementToast, clearAchievement } = useLifeStore()
+  const t = useLifeT()
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -44,11 +46,14 @@ export function AchievementToast() {
           exit={{ opacity: 0, y: 12, scale: 0.96 }}
           transition={{ type: 'spring', stiffness: 360, damping: 28 }}
           onClick={clearAchievement}
+          role="status"
           style={{
             position: 'fixed',
             bottom: 'calc(96px + env(safe-area-inset-bottom))',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: 0,
+            right: 0,
+            marginInline: 'auto',
+            width: 'fit-content',
             zIndex: 60,
             display: 'flex',
             alignItems: 'center',
@@ -77,11 +82,11 @@ export function AchievementToast() {
 
           {/* Text */}
           <div>
-            <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 700, color: meta.color, margin: '0 0 2px', letterSpacing: '0.08em' }}>
-              LOGRO DESBLOQUEADO
+            <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 700, color: meta.color, margin: '0 0 2px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              {t.achievements.unlocked}
             </p>
             <p style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: colors.text.primary, margin: 0 }}>
-              {achievementToast.title}
+              {t.achievements.titles[achievementToast.type] ?? achievementToast.title}
             </p>
           </div>
         </motion.div>

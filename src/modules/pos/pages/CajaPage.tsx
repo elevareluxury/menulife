@@ -57,7 +57,7 @@ function KpiCard({ label, value, icon: Icon, color }: {
         </div>
         <span style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
       </div>
-      <span style={{ fontSize: 22, fontWeight: 800, color: TEXT, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>{value}</span>
+      <span style={{ fontSize: 22, fontWeight: 800, color: TEXT, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>{value}</span>
     </div>
   )
 }
@@ -113,7 +113,7 @@ function OpenRegisterPanel({ restaurantId, userName, onOpened }: {
           <Banknote style={{ width: 24, height: 24, color: ACCENT }} />
         </div>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
             Apertura de Caja
           </h1>
           <p style={{ fontSize: 13, color: MUTED, margin: 0 }}>Registrá el monto inicial para comenzar</p>
@@ -157,7 +157,7 @@ function OpenRegisterPanel({ restaurantId, userName, onOpened }: {
               width: '100%', boxSizing: 'border-box', padding: '12px 14px',
               background: 'rgba(255,255,255,0.06)', border: `1px solid rgba(255,255,255,0.12)`,
               borderRadius: 10, color: TEXT, fontSize: 18, fontWeight: 700,
-              outline: 'none', fontFamily: 'var(--font-ruda, Ruda, sans-serif)',
+              outline: 'none', fontFamily: 'var(--font-ruda, Geist, sans-serif)',
             }}
           />
         </div>
@@ -187,7 +187,7 @@ function OpenRegisterPanel({ restaurantId, userName, onOpened }: {
             width: '100%', padding: '14px', background: saving ? 'rgba(244,112,90,0.5)' : ACCENT,
             border: 'none', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 800,
             cursor: saving ? 'not-allowed' : 'pointer', letterSpacing: '0.05em',
-            fontFamily: 'var(--font-ruda, Ruda, sans-serif)',
+            fontFamily: 'var(--font-ruda, Geist, sans-serif)',
           }}
         >
           {saving ? 'Abriendo...' : 'ABRIR CAJA'}
@@ -265,7 +265,7 @@ function NewMovementModal({ registerId, restaurantId, userName, onClose, onSaved
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
       <div style={{ position: 'relative', width: '100%', maxWidth: 460, background: SURFACE, borderRadius: 20, border: BDR, padding: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
             Nuevo Movimiento
           </h2>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: BDR, borderRadius: 8, padding: '4px 8px', color: MUTED, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
@@ -413,7 +413,7 @@ function CloseCashModal({ register, summary, userName, onClose, onClosed }: {
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
       <div style={{ position: 'relative', width: '100%', maxWidth: 480, background: SURFACE, borderRadius: 20, border: BDR, padding: 28, maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
             Cierre de Caja
           </h2>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: BDR, borderRadius: 8, padding: '4px 8px', color: MUTED, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
@@ -456,7 +456,7 @@ function CloseCashModal({ register, summary, userName, onClose, onClosed }: {
             width: '100%', padding: '14px', background: saving || !counted ? 'rgba(239,68,68,0.3)' : RED,
             border: 'none', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 800,
             cursor: saving || !counted ? 'not-allowed' : 'pointer', letterSpacing: '0.05em',
-            fontFamily: 'var(--font-ruda, Ruda, sans-serif)',
+            fontFamily: 'var(--font-ruda, Geist, sans-serif)',
           }}
         >
           {saving ? 'Cerrando...' : 'CERRAR CAJA'}
@@ -486,7 +486,7 @@ function CajaDashboard({ register, movements, summary, userName, onReload, onClo
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
               Caja
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(34,197,94,0.12)', borderRadius: 999, padding: '3px 10px', border: '1px solid rgba(34,197,94,0.3)' }}>

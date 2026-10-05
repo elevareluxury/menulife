@@ -1,365 +1,359 @@
-import { useState, useRef } from 'react'
+import { createElement, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle2, Plus, Trash2, Edit3, Pause, Play, Sparkles } from 'lucide-react'
-import { LifeSheet, LifeConfirmDialog, MiniProgressRing, colors, font, radius } from '../design-system'
+import { CalendarDays, Check, CheckCircle2, Plus, Trash2, Edit3, Pause, Play, RotateCcw, Lightbulb, StickyNote, Link2 } from 'lucide-react'
+import { useLifeT } from '@/i18n/app/life'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
+import { LifeSheet, MiniProgressRing, colors, font, radius } from '../design-system'
 import type { Goal, Milestone } from '../hooks/useGoals'
-import { GoalCheckinHistory } from './GoalCheckinHistory'
-import { GoalProgressChart } from './GoalProgressChart'
+import { useTasks } from '../hooks/useTasks'
+import { TaskList } from './TasksView'
+import { useGoalLinks } from '../hooks/useGoalLinks'
+import { getHabitIcon } from '../lib/lifePalette'
+import { formatMoney } from '@/lib/currencies'
 
 interface GoalDetailSheetProps {
   goal: Goal | null
   open: boolean
   onClose: () => void
   onEdit: (goal: Goal) => void
-  onDelete: (id: string) => Promise<void>
-  onToggleMilestone: (ms: Milestone) => Promise<void>
+  onDelete: (goal: Goal) => void
+  onToggleMilestone: (ms: Milestone) => void
   onAddMilestone: (goalId: string, title: string) => Promise<void>
-  onDeleteMilestone: (id: string, goalId: string) => Promise<void>
-  onUpdateProgress: (goalId: string, progress: number) => Promise<void>
-  onUpdateStatus: (goalId: string, status: string) => Promise<void>
-  hasPendingCheckin?: boolean
-  onCheckin?: () => void
-  checkinRefreshKey?: number
+  onDeleteMilestone: (id: string, goalId: string) => void
+  onUpdateProgress: (goalId: string, progress: number) => void
+  onUpdateStatus: (goalId: string, status: string) => void
 }
 
-function formatDate(iso: string): string {
-  const d = new Date(iso + 'T12:00:00')
-  return d.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })
+const STATUS_COLOR = {
+  in_progress: colors.area.goals,
+  completed:   colors.semantic.success,
+  paused:      colors.text.tertiary,
+}
+
+const sectionLabel: React.CSSProperties = {
+  fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary,
+  letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 10px',
+}
+const actionBtn: React.CSSProperties = {
+  flex: 1, minHeight: 44, padding: '10px', borderRadius: radius.md,
+  background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
+  color: colors.text.secondary, fontFamily: font, fontSize: '13px', fontWeight: 600,
+  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
 }
 
 export function GoalDetailSheet({
   goal, open, onClose, onEdit, onDelete,
   onToggleMilestone, onAddMilestone, onDeleteMilestone,
   onUpdateProgress, onUpdateStatus,
-  hasPendingCheckin, onCheckin, checkinRefreshKey = 0,
 }: GoalDetailSheetProps) {
-  const [newMsTitle, setNewMsTitle]     = useState('')
-  const [addingMs, setAddingMs]         = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState(false)
-  const [celebrating, setCelebrating]   = useState(false)
-  const prevProgress = useRef(goal?.progress ?? 0)
+  const t = useLifeT()
+  const d = t.goalDetail
+  const locale = langLocale(useAppLang(s => s.lang))
+  const [newMsTitle, setNewMsTitle] = useState('')
+  const [addingMs, setAddingMs]     = useState(false)
+  const [addError, setAddError]     = useState(false)
+  const [celebrating, setCelebrating] = useState(false)
+  const prevProgress = useRef<number | null>(null)
+
+  // Festejo al llegar al 100 % (sólo cuando cruza el umbral, no al abrir una meta ya completa)
+  useEffect(() => {
+    if (!goal) { prevProgress.current = null; return }
+    const prev = prevProgress.current
+    prevProgress.current = goal.progress
+    if (prev != null && prev < 100 && goal.progress === 100) {
+      const on = window.setTimeout(() => setCelebrating(true), 0)
+      const off = window.setTimeout(() => setCelebrating(false), 2200)
+      return () => { window.clearTimeout(on); window.clearTimeout(off) }
+    }
+  }, [goal])
 
   if (!goal) return null
 
-  // Detect 100% milestone
-  if (goal.progress === 100 && prevProgress.current < 100 && !celebrating) {
-    setCelebrating(true)
-    setTimeout(() => setCelebrating(false), 2200)
-  }
-  prevProgress.current = goal.progress
-
   const hasMilestones = goal.milestones.length > 0
-
-  const handleToggleMs = async (ms: Milestone) => {
-    await onToggleMilestone(ms)
-  }
+  const statusColor = STATUS_COLOR[goal.status]
+  const isCompleted = goal.status === 'completed'
 
   const handleAddMs = async () => {
-    if (!newMsTitle.trim()) return
-    setAddingMs(true)
-    await onAddMilestone(goal.id, newMsTitle.trim())
-    setNewMsTitle('')
-    setAddingMs(false)
+    if (!newMsTitle.trim() || addingMs) return
+    setAddingMs(true); setAddError(false)
+    try {
+      await onAddMilestone(goal.id, newMsTitle.trim())
+      setNewMsTitle('')
+    } catch { setAddError(true) }
+    finally { setAddingMs(false) }
   }
 
-  const STATUS_CONFIG = {
-    in_progress: { label: 'En progreso', color: colors.area.goals },
-    completed:   { label: 'Completada',  color: colors.semantic.success },
-    paused:      { label: 'Pausada',     color: colors.text.tertiary },
+  return (
+    <LifeSheet open={open} onClose={onClose} title={goal.name} maxHeight="92vh">
+      <div style={{ position: 'relative' }}>
+        <AnimatePresence>
+          {celebrating && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} aria-hidden="true"
+              style={{
+                position: 'absolute', inset: 0, zIndex: 10, background: `${goal.color}18`, borderRadius: radius.xl,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
+              }}>
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 280, damping: 20 }}>
+                <CheckCircle2 size={80} style={{ color: goal.color }} strokeWidth={1.5} />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div aria-hidden="true" style={{ height: 4, borderRadius: radius.full, background: goal.color, marginBottom: '18px' }} />
+
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: '16px' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {goal.description && (
+              <p style={{ fontFamily: font, fontSize: '14px', color: colors.text.secondary, lineHeight: 1.5, margin: 0 }}>
+                {goal.description}
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: '8px', marginTop: goal.description ? 12 : 0, flexWrap: 'wrap' }}>
+              <span style={{ padding: '4px 10px', borderRadius: radius.full, background: `${statusColor}14`, border: `1px solid ${statusColor}28`, fontFamily: font, fontSize: '11px', fontWeight: 700, color: statusColor }}>
+                {t.status[goal.status]}
+              </span>
+              {goal.target_date && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: radius.full, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`, fontFamily: font, fontSize: '11px', fontWeight: 600, color: colors.text.secondary }}>
+                  <CalendarDays size={12} aria-label={t.goals.targetDate} />
+                  {new Date(goal.target_date + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+              )}
+            </div>
+          </div>
+          <MiniProgressRing progress={goal.progress} color={goal.color} size={56} showLabel />
+        </div>
+
+        {/* Pasos */}
+        <div style={{ marginBottom: '20px' }}>
+          <p style={sectionLabel}>{d.steps}</p>
+          <p style={{ fontFamily: font, fontSize: '12.5px', color: colors.text.tertiary, margin: '0 0 10px', lineHeight: 1.5 }}>
+            {hasMilestones ? d.stepsHelp : d.stepsEmpty}
+          </p>
+
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {goal.milestones.map(ms => (
+              <li key={ms.id} style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '4px 6px', borderRadius: radius.sm,
+                background: ms.is_completed ? `${goal.color}0A` : 'transparent',
+              }}>
+                <button type="button" role="checkbox" aria-checked={ms.is_completed} aria-label={d.completeStep(ms.title)}
+                  onClick={() => onToggleMilestone(ms)}
+                  style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                  <span aria-hidden="true" style={{
+                    width: 22, height: 22, borderRadius: '50%',
+                    border: `2px solid ${ms.is_completed ? goal.color : colors.border.medium}`,
+                    background: ms.is_completed ? goal.color : 'transparent',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {ms.is_completed && <Check size={13} style={{ color: '#fff' }} strokeWidth={3} />}
+                  </span>
+                </button>
+                <span style={{
+                  flex: 1, minWidth: 0, fontFamily: font, fontSize: '14px', fontWeight: 500,
+                  color: ms.is_completed ? colors.text.tertiary : colors.text.primary,
+                  textDecoration: ms.is_completed ? 'line-through' : 'none',
+                }}>
+                  {ms.title}
+                </span>
+                <button type="button" onClick={() => onDeleteMilestone(ms.id, goal.id)} aria-label={d.deleteStep(ms.title)}
+                  style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', color: colors.text.tertiary }}>
+                  <Trash2 size={14} aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            <input value={newMsTitle} onChange={e => setNewMsTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') void handleAddMs() }}
+              placeholder={d.addStep} aria-label={d.addStepButton} maxLength={100}
+              style={{
+                flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: radius.sm,
+                background: colors.surface.high, border: `1px solid ${addError ? colors.semantic.error : colors.border.subtle}`,
+                color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
+              }} />
+            <button type="button" onClick={() => void handleAddMs()} disabled={addingMs || !newMsTitle.trim()} aria-label={d.addStepButton}
+              style={{
+                width: 44, height: 44, borderRadius: radius.sm, background: goal.color, border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: !newMsTitle.trim() ? 0.4 : 1, flexShrink: 0,
+              }}>
+              <Plus size={18} style={{ color: '#fff' }} strokeWidth={2.5} aria-hidden="true" />
+            </button>
+          </div>
+          {addError && <p role="alert" style={{ fontFamily: font, fontSize: '12px', color: colors.semantic.error, margin: '6px 0 0' }}>{t.common.saveError}</p>}
+        </div>
+
+        <GoalTasks goal={goal} />
+
+        <GoalLinks goal={goal} />
+
+        {/* Progreso manual (sólo sin pasos) */}
+        {!hasMilestones && (
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label htmlFor="goal-progress" style={{ ...sectionLabel, margin: 0 }}>{d.manualProgress}</label>
+              <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 800, color: goal.color }}>{goal.progress}%</span>
+            </div>
+            <input id="goal-progress" type="range" min={0} max={100} value={goal.progress}
+              onChange={e => onUpdateProgress(goal.id, Number(e.target.value))}
+              style={{ width: '100%', accentColor: goal.color, cursor: 'pointer', minHeight: 32 }} />
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', paddingTop: '4px' }}>
+          <button type="button" onClick={() => onEdit(goal)} style={actionBtn}>
+            <Edit3 size={14} aria-hidden="true" /> {d.edit}
+          </button>
+          {!isCompleted && (
+            <button type="button" onClick={() => onUpdateStatus(goal.id, goal.status === 'paused' ? 'in_progress' : 'paused')} style={actionBtn}>
+              {goal.status === 'paused'
+                ? <><Play size={14} aria-hidden="true" /> {t.goals.resume}</>
+                : <><Pause size={14} aria-hidden="true" /> {t.goals.pause}</>}
+            </button>
+          )}
+          {isCompleted ? (
+            <button type="button" onClick={() => onUpdateStatus(goal.id, 'in_progress')} style={actionBtn}>
+              <RotateCcw size={14} aria-hidden="true" /> {d.reopen}
+            </button>
+          ) : (
+            <button type="button" onClick={() => onUpdateStatus(goal.id, 'completed')}
+              style={{ ...actionBtn, color: goal.color, border: `1px solid ${goal.color}40` }}>
+              <CheckCircle2 size={14} aria-hidden="true" /> {d.complete}
+            </button>
+          )}
+        </div>
+
+        <button type="button" onClick={() => onDelete(goal)}
+          style={{
+            width: '100%', marginTop: '12px', minHeight: 44, padding: '10px', borderRadius: radius.md,
+            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)',
+            color: colors.semantic.error, fontFamily: font, fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+          }}>
+          <Trash2 size={14} aria-hidden="true" /> {d.delete}
+        </button>
+      </div>
+    </LifeSheet>
+  )
+}
+
+/** Tareas de Brain vinculadas a la meta (se completan desde acá; se crean ya vinculadas). */
+function GoalTasks({ goal }: { goal: Goal }) {
+  const t = useLifeT()
+  const { tasks, loading, createTask, toggleTask } = useTasks()
+  const [title, setTitle] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const mine = tasks
+    .filter(x => x.goal_id === goal.id)
+    .sort((a, b) => Number(!!a.completed_at) - Number(!!b.completed_at) || (a.due_date ?? '9999').localeCompare(b.due_date ?? '9999'))
+
+  const add = async () => {
+    if (!title.trim() || adding) return
+    setAdding(true); setFailed(false)
+    try {
+      await createTask({ title: title.trim(), goal_id: goal.id })
+      setTitle('')
+    } catch { setFailed(true) } finally { setAdding(false) }
   }
-  const status = STATUS_CONFIG[goal.status]
+
+  return (
+    <div style={{ marginBottom: '20px' }}>
+      <p style={sectionLabel}>{t.tasks.goalTasks}</p>
+      {!loading && mine.length === 0 && (
+        <p style={{ fontFamily: font, fontSize: '12.5px', color: colors.text.tertiary, margin: '0 0 10px', lineHeight: 1.5 }}>{t.tasks.goalTasksEmpty}</p>
+      )}
+      {mine.length > 0 && (
+        <TaskList tasks={mine} showDate
+          onToggle={x => { toggleTask(x).catch(() => setFailed(true)) }} />
+      )}
+      <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+        <input value={title} onChange={e => setTitle(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') void add() }}
+          placeholder={t.tasks.goalTaskPlaceholder} aria-label={t.tasks.goalTaskPlaceholder} maxLength={200}
+          style={{
+            flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: radius.sm,
+            background: colors.surface.high, border: `1px solid ${failed ? colors.semantic.error : colors.border.subtle}`,
+            color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
+          }} />
+        <button type="button" onClick={() => void add()} disabled={adding || !title.trim()} aria-label={t.agenda.addTask}
+          style={{
+            width: 44, height: 44, borderRadius: radius.sm, background: goal.color, border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: !title.trim() ? 0.4 : 1, flexShrink: 0,
+          }}>
+          <Plus size={18} style={{ color: '#fff' }} strokeWidth={2.5} aria-hidden="true" />
+        </button>
+      </div>
+      {failed && <p role="alert" style={{ fontFamily: font, fontSize: '12px', color: colors.semantic.error, margin: '6px 0 0' }}>{t.common.saveError}</p>}
+    </div>
+  )
+}
+
+/** Hábitos, dinero y notas vinculados a la meta (se vinculan desde su propia edición). */
+function GoalLinks({ goal }: { goal: Goal }) {
+  const t = useLifeT()
+  const c = t.connections
+  const locale = langLocale(useAppLang(s => s.lang))
+  const { habits, money, notes, loaded } = useGoalLinks(goal.id)
+  if (!loaded) return null
+
+  const row: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }
+  const name: React.CSSProperties = { flex: 1, minWidth: 0, fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+  const meta: React.CSSProperties = { fontFamily: font, fontSize: '12px', color: colors.text.tertiary, flexShrink: 0 }
+
+  if (habits.length === 0 && money.length === 0 && notes.length === 0) {
+    return (
+      <p style={{ display: 'flex', gap: 8, fontFamily: font, fontSize: '12.5px', color: colors.text.tertiary, margin: '0 0 20px', lineHeight: 1.5 }}>
+        <Link2 size={14} aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />{c.hint}
+      </p>
+    )
+  }
 
   return (
     <>
-      <LifeSheet open={open} onClose={onClose} title="" maxHeight="92vh">
-        <div style={{ position: 'relative' }}>
-          {/* Celebration overlay */}
-          <AnimatePresence>
-            {celebrating && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{
-                  position: 'absolute', inset: 0, zIndex: 10,
-                  background: `${goal.color}18`,
-                  borderRadius: radius.xl,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  pointerEvents: 'none',
-                }}
-              >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-                >
-                  <CheckCircle2 size={80} style={{ color: goal.color }} strokeWidth={1.5} />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Header */}
-          <div style={{
-            height: 4, borderRadius: radius.full,
-            background: goal.color, marginBottom: '18px',
-          }} />
-
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <div style={{ flex: 1, paddingRight: '12px' }}>
-              <h2 style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color: colors.text.primary, margin: '0 0 6px' }}>
-                {goal.name}
-              </h2>
-              {goal.description && (
-                <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.secondary, lineHeight: 1.5, margin: 0 }}>
-                  {goal.description}
-                </p>
-              )}
-            </div>
-            <MiniProgressRing progress={goal.progress} color={goal.color} size={56} />
-          </div>
-
-          {/* Meta info */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-            <div style={{
-              padding: '4px 10px', borderRadius: radius.full,
-              background: `${status.color}14`, border: `1px solid ${status.color}28`,
-            }}>
-              <span style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: status.color }}>
-                {status.label}
+      {habits.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <p style={sectionLabel}>{c.habits}</p>
+          {habits.map(h => (
+            <div key={h.id} style={row}>
+              <span aria-hidden="true" style={{ width: 30, height: 30, borderRadius: 9, flexShrink: 0, background: `${h.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {createElement(getHabitIcon(h.icon), { size: 14, style: { color: h.color }, strokeWidth: 2.2 })}
               </span>
+              <span style={name}>{h.name}</span>
+              {h.scheduled > 0 && <span style={meta}>{c.habitRate(h.done, h.scheduled)}</span>}
             </div>
-            {goal.target_date && (
-              <div style={{
-                padding: '4px 10px', borderRadius: radius.full,
-                background: colors.surface.high, border: `1px solid ${colors.border.subtle}`,
-              }}>
-                <span style={{ fontFamily: font, fontSize: '11px', fontWeight: 600, color: colors.text.secondary }}>
-                  🗓 {formatDate(goal.target_date)}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Check-in CTA */}
-          {hasPendingCheckin && onCheckin && (
-            <button
-              onClick={onCheckin}
-              style={{
-                width: '100%', padding: '12px 0', marginBottom: '20px',
-                borderRadius: radius.full,
-                background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
-                border: 'none', color: '#fff',
-                fontFamily: font, fontSize: '14px', fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              }}
-            >
-              <Sparkles size={14} />
-              Hacer check-in de esta semana
-            </button>
-          )}
-
-          {/* Milestones */}
-          <div style={{ marginBottom: '20px' }}>
-            <p style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', marginBottom: '10px' }}>
-              PASOS
-            </p>
-
-            {goal.milestones.length === 0 && (
-              <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.tertiary, marginBottom: '10px' }}>
-                Agregá pasos para dividir tu meta en hitos alcanzables.
-              </p>
-            )}
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {goal.milestones.map(ms => (
-                <div
-                  key={ms.id}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '9px 10px', borderRadius: radius.sm,
-                    background: ms.is_completed ? `${goal.color}0A` : 'transparent',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  <button
-                    onClick={() => handleToggleMs(ms)}
-                    style={{
-                      width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                      border: `2px solid ${ms.is_completed ? goal.color : colors.border.medium}`,
-                      background: ms.is_completed ? goal.color : 'transparent',
-                      cursor: 'pointer', transition: 'all 0.18s',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                  >
-                    {ms.is_completed && (
-                      <CheckCircle2 size={13} style={{ color: '#fff' }} strokeWidth={3} />
-                    )}
-                  </button>
-                  <span style={{
-                    flex: 1, fontFamily: font, fontSize: '14px', fontWeight: 500,
-                    color: ms.is_completed ? colors.text.tertiary : colors.text.primary,
-                    textDecoration: ms.is_completed ? 'line-through' : 'none',
-                  }}>
-                    {ms.title}
-                  </span>
-                  <button
-                    onClick={() => onDeleteMilestone(ms.id, goal.id)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', opacity: 0.4, transition: 'opacity 0.15s' }}
-                    onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
-                    onMouseLeave={e => { e.currentTarget.style.opacity = '0.4' }}
-                  >
-                    <Trash2 size={13} style={{ color: colors.text.secondary }} />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Add milestone input */}
-            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-              <input
-                value={newMsTitle}
-                onChange={e => setNewMsTitle(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleAddMs() }}
-                placeholder="Agregar paso…"
-                maxLength={100}
-                style={{
-                  flex: 1, padding: '9px 12px',
-                  borderRadius: radius.sm,
-                  background: colors.surface.high,
-                  border: `1px solid ${colors.border.subtle}`,
-                  color: colors.text.primary,
-                  fontFamily: font, fontSize: '13px', outline: 'none',
-                }}
-              />
-              <button
-                onClick={handleAddMs}
-                disabled={addingMs || !newMsTitle.trim()}
-                style={{
-                  width: 36, height: 36, borderRadius: radius.sm,
-                  background: goal.color, border: 'none', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  opacity: !newMsTitle.trim() ? 0.4 : 1, transition: 'opacity 0.15s',
-                }}
-              >
-                <Plus size={18} style={{ color: '#fff' }} strokeWidth={2.5} />
-              </button>
-            </div>
-          </div>
-
-          {/* Manual progress (only if no milestones) */}
-          {!hasMilestones && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <p style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', margin: 0 }}>
-                  PROGRESO MANUAL
-                </p>
-                <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 800, color: goal.color }}>
-                  {goal.progress}%
-                </span>
-              </div>
-              <input
-                type="range" min={0} max={100}
-                value={goal.progress}
-                onChange={e => onUpdateProgress(goal.id, Number(e.target.value))}
-                style={{ width: '100%', accentColor: goal.color, cursor: 'pointer' }}
-              />
-            </div>
-          )}
-
-          {/* Progress chart */}
-          <div style={{ marginBottom: '20px' }}>
-            <GoalProgressChart key={`chart-${checkinRefreshKey}`} goalId={goal.id} />
-          </div>
-
-          {/* Check-in history */}
-          <div style={{ marginBottom: '20px' }}>
-            <p style={{
-              fontFamily: font, fontSize: '11px', fontWeight: 700,
-              color: colors.text.tertiary, letterSpacing: '0.08em',
-              textTransform: 'uppercase', margin: '0 0 10px',
-            }}>
-              HISTORIAL DE CHECK-INS
-            </p>
-            <GoalCheckinHistory key={`history-${checkinRefreshKey}`} goalId={goal.id} />
-          </div>
-
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', paddingTop: '4px' }}>
-            <button
-              onClick={() => onEdit(goal)}
-              style={{
-                flex: 1, padding: '10px', borderRadius: radius.md,
-                background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
-                color: colors.text.secondary,
-                fontFamily: font, fontSize: '13px', fontWeight: 600,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              }}
-            >
-              <Edit3 size={14} /> Editar
-            </button>
-
-            <button
-              onClick={() => onUpdateStatus(goal.id, goal.status === 'paused' ? 'in_progress' : 'paused')}
-              style={{
-                flex: 1, padding: '10px', borderRadius: radius.md,
-                background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
-                color: colors.text.secondary,
-                fontFamily: font, fontSize: '13px', fontWeight: 600,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              }}
-            >
-              {goal.status === 'paused' ? <><Play size={14} /> Reanudar</> : <><Pause size={14} /> Pausar</>}
-            </button>
-
-            <button
-              onClick={() => onUpdateStatus(goal.id, 'completed')}
-              disabled={goal.status === 'completed'}
-              style={{
-                flex: 1, padding: '10px', borderRadius: radius.md,
-                background: goal.status === 'completed' ? `${goal.color}18` : colors.surface.high,
-                border: `1px solid ${goal.status === 'completed' ? goal.color + '40' : colors.border.medium}`,
-                color: goal.status === 'completed' ? goal.color : colors.text.secondary,
-                fontFamily: font, fontSize: '13px', fontWeight: 600,
-                cursor: goal.status === 'completed' ? 'default' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              }}
-            >
-              <CheckCircle2 size={14} /> {goal.status === 'completed' ? '¡Completada!' : 'Completar'}
-            </button>
-          </div>
-
-          <button
-            onClick={() => setDeleteConfirm(true)}
-            style={{
-              width: '100%', marginTop: '12px', padding: '10px',
-              borderRadius: radius.md,
-              background: 'rgba(239,68,68,0.06)', border: `1px solid rgba(239,68,68,0.15)`,
-              color: colors.semantic.error,
-              fontFamily: font, fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            }}
-          >
-            <Trash2 size={14} /> Eliminar meta
-          </button>
+          ))}
         </div>
-      </LifeSheet>
-
-      <LifeConfirmDialog
-        open={deleteConfirm}
-        title="¿Eliminar esta meta?"
-        message={`"${goal.name}" y todos sus pasos serán eliminados permanentemente.`}
-        confirmLabel="Eliminar"
-        onConfirm={async () => {
-          setDeleteConfirm(false)
-          await onDelete(goal.id)
-          onClose()
-        }}
-        onCancel={() => setDeleteConfirm(false)}
-        danger
-      />
+      )}
+      {money.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <p style={sectionLabel}>{c.money}</p>
+          {money.map(m => (
+            <div key={m.currency} style={{ ...row, flexWrap: 'wrap', fontFamily: font, fontSize: '13px', color: colors.text.secondary }}>
+              <span style={{ fontWeight: 700, color: colors.text.primary, minWidth: 40 }}>{m.currency}</span>
+              {m.income > 0 && <span>{t.money.income} <strong style={{ color: colors.semantic.success }}>{formatMoney(m.income, m.currency, locale)}</strong></span>}
+              {m.expense > 0 && <span>{t.money.expense} <strong style={{ color: colors.text.primary }}>{formatMoney(m.expense, m.currency, locale)}</strong></span>}
+              <span style={{ ...meta, marginInlineStart: 'auto' }}>{c.movements(m.count)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {notes.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <p style={sectionLabel}>{c.notes}</p>
+          {notes.map(n => (
+            <div key={n.id} style={row}>
+              {n.type === 'idea'
+                ? <Lightbulb size={15} aria-label={t.brain.types.idea} style={{ color: '#8B5CF6', flexShrink: 0 }} />
+                : <StickyNote size={15} aria-label={t.brain.types.note} style={{ color: '#3B82F6', flexShrink: 0 }} />}
+              <span style={name}>{n.title}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </>
   )
 }

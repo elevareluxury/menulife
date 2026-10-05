@@ -101,7 +101,7 @@ function DiscountModal({ subtotal, onApply, onClose }: {
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} onClick={onClose} />
       <div style={{ position: 'relative', width: '100%', maxWidth: 380, background: SURFACE2, borderRadius: 18, border: BDR, padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>Aplicar Descuento</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>Aplicar Descuento</h3>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: BDR, borderRadius: 6, padding: '3px 7px', color: MUTED, cursor: 'pointer' }}>
             <X style={{ width: 14, height: 14 }} />
           </button>
@@ -572,7 +572,7 @@ export function CheckoutModal({
         }}>
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px 16px', borderBottom: BDR, flexShrink: 0 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
               Cuenta — Mesa {tableNumber}
             </h2>
             <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: BDR, borderRadius: 8, padding: '5px 9px', color: MUTED, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
@@ -718,8 +718,8 @@ export function CheckoutModal({
                   </div>
 
                   <div style={{ borderTop: BDR, marginTop: 10, paddingTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 16, fontWeight: 800, color: TEXT, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>TOTAL</span>
-                    <span style={{ fontSize: 22, fontWeight: 800, color: ACCENT, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+                    <span style={{ fontSize: 16, fontWeight: 800, color: TEXT, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>TOTAL</span>
+                    <span style={{ fontSize: 22, fontWeight: 800, color: ACCENT, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
                       ${total.toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                     </span>
                   </div>
@@ -828,7 +828,7 @@ export function CheckoutModal({
                     width: '100%', padding: '16px', background: saving ? 'rgba(244,112,90,0.5)' : ACCENT,
                     border: 'none', borderRadius: 14, color: '#fff', fontSize: 16, fontWeight: 800,
                     cursor: saving ? 'not-allowed' : 'pointer', letterSpacing: '0.04em',
-                    fontFamily: 'var(--font-ruda, Ruda, sans-serif)',
+                    fontFamily: 'var(--font-ruda, Geist, sans-serif)',
                   }}
                 >
                   {saving ? 'Procesando...' : 'CONFIRMAR COBRO'}

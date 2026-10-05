@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { useLanguage } from '@/hooks/useLanguage'
+import { useLandingT } from '@/i18n/app/landing'
+import { LanguageSelect } from '@/components/ui/LanguageSelect'
 
 export function Navbar() {
-  const { t } = useTranslation()
-  const { currentLang, toggleLanguage } = useLanguage()
+  const l = useLandingT()
   const [scrolled,   setScrolled]   = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const NAV_LINKS = [
-    { label: 'Producto', href: '#experiencias' },
-    { label: 'Precios',  href: '#precios' },
+    { label: l.nav.product, href: '#soluciones' },
+    { label: l.nav.pricing, href: '#pricing' },
   ]
 
   useEffect(() => {
@@ -35,7 +34,7 @@ export function Navbar() {
       }}>
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <img src="/Logo.png" alt="Mycen" style={{ height: '36px', width: 'auto' }} />
+          <img src="/logo.png" alt="Mycen" style={{ height: '36px', width: 'auto' }} />
         </Link>
 
         {/* Desktop links */}
@@ -47,7 +46,7 @@ export function Navbar() {
 
         {/* Desktop CTAs */}
         <div className="hidden lg:flex" style={{ gap: '12px', alignItems: 'center' }}>
-          <LanguageToggle currentLang={currentLang} onToggle={toggleLanguage} />
+          <LanguageSelect label={l.nav.language} />
           <Link to="/login" style={{ textDecoration: 'none' }}>
             <button style={{
               padding: '8px 20px', border: '1px solid rgba(255,255,255,0.25)',
@@ -57,15 +56,15 @@ export function Navbar() {
             }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; e.currentTarget.style.color = '#fff' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)' }}
-            >{t('nav.login')}</button>
+            >{l.nav.login}</button>
           </Link>
           <Link to="/register" style={{ textDecoration: 'none' }}>
-            <ShimmerButton>{t('nav.cta')}</ShimmerButton>
+            <ShimmerButton magnetic>{l.nav.cta}</ShimmerButton>
           </Link>
         </div>
 
         {/* Mobile burger */}
-        <button className="lg:hidden" onClick={() => setMobileOpen(v => !v)} aria-label="Menú"
+        <button className="lg:hidden" onClick={() => setMobileOpen(v => !v)} aria-label={l.nav.menu} aria-expanded={mobileOpen}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', padding: '4px' }}>
           {mobileOpen
             ? <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" /></svg>
@@ -87,17 +86,17 @@ export function Navbar() {
             }}>{link.label}</a>
           ))}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-            <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>Idioma</span>
-            <LanguageToggle currentLang={currentLang} onToggle={toggleLanguage} />
+            <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>{l.nav.language}</span>
+            <LanguageSelect label={l.nav.language} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
             <Link to="/login" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
               <button style={{ width: '100%', padding: '12px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50px', background: 'transparent', color: '#fff', fontSize: '14px', cursor: 'pointer', fontFamily: 'var(--font-jakarta)' }}>
-                {t('nav.login')}
+                {l.nav.login}
               </button>
             </Link>
             <Link to="/register" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
-              <ShimmerButton style={{ width: '100%' }}>{t('nav.cta')}</ShimmerButton>
+              <ShimmerButton style={{ width: '100%' }}>{l.nav.cta}</ShimmerButton>
             </Link>
           </div>
         </div>
@@ -118,37 +117,15 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   )
 }
 
-function LanguageToggle({ currentLang, onToggle }: { currentLang: string; onToggle: () => void }) {
-  return (
-    <button
-      onClick={onToggle}
-      aria-label="Change language"
-      style={{
-        display: 'flex', alignItems: 'center', gap: '5px',
-        padding: '6px 12px', borderRadius: '999px',
-        border: '1px solid rgba(255,255,255,0.15)',
-        background: 'rgba(255,255,255,0.05)',
-        cursor: 'pointer', transition: 'all 0.2s',
-        fontFamily: 'var(--font-jakarta)',
-        fontSize: '12px', fontWeight: 600, letterSpacing: '0.05em',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-    >
-      <span style={{ color: currentLang === 'es' ? '#fff' : 'rgba(255,255,255,0.4)' }}>ES</span>
-      <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
-      <span style={{ color: currentLang === 'en' ? '#fff' : 'rgba(255,255,255,0.4)' }}>EN</span>
-    </button>
-  )
-}
-
-export function ShimmerButton({ children, style, onClick }: {
+export function ShimmerButton({ children, style, onClick, magnetic }: {
   children: React.ReactNode
   style?: React.CSSProperties
   onClick?: () => void
+  /** se acerca al puntero (ver landing/motion.ts) */
+  magnetic?: boolean
 }) {
   return (
-    <button onClick={onClick} className="liquid-glass-btn" style={{
+    <button onClick={onClick} data-magnetic={magnetic ? '' : undefined} className="liquid-glass-btn" style={{
       padding: '9px 22px',
       color: '#fff',
       fontSize: '13px', fontWeight: 600, cursor: 'pointer',

@@ -1,19 +1,26 @@
-import { useState } from 'react'
+import { createElement, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import {
-  Target, TrendingUp, CheckSquare, Brain,
-  Link2, Settings2, ChevronRight, Sparkles,
-} from 'lucide-react'
+import toast from 'react-hot-toast'
+import { Link2, Settings2, ChevronRight, Globe, Settings, Plus, Check, AlertCircle } from 'lucide-react'
+import { useLifeT, type LifeDict } from '@/i18n/app/life'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
+import { formatMoney as fmtMoney } from '@/lib/currencies'
+import { LanguageSheet } from '../components/LanguageSheet'
+import { TaskSheet } from '../components/TaskSheet'
+import { TaskList } from '../components/TasksView'
 import { useAuthStore } from '@/store/authStore'
 import { useLifeStore } from '@/store/lifeStore'
-import { useLocaleStore } from '@/store/localeStore'
-import { useLifeData } from '../hooks/useLifeData'
-import { useLifeEngagement } from '../hooks/useLifeEngagement'
-import { useInstallPWA } from '@/hooks/useInstallPWA'
+import { useActiveGoals } from '../hooks/useActiveGoals'
+import { useTasks, localDateKey, type LifeTask } from '../hooks/useTasks'
+import { useHabits } from '../hooks/useHabits'
+import { useMoney } from '../hooks/useMoney'
+import { useToday } from '../hooks/useToday'
+import { getHabitIcon } from '../lib/lifePalette'
+import { useInsights } from '../hooks/useInsights'
+import { InsightCard } from '../components/InsightCard'
 import { colors, font, radius, fadeInUp, stagger } from '../design-system'
-import { InstallAppBanner } from '../components/InstallAppBanner'
-import { InstallAppModalIOS } from '../components/InstallAppModalIOS'
 
 // ── Deterministic starfield ───────────────────────────────────────────────────
 
@@ -34,9 +41,9 @@ const STARS = (() => {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function greet() {
+function greet(t: LifeDict) {
   const h = new Date().getHours()
-  return h < 12 ? 'Buenos días' : h < 20 ? 'Buenas tardes' : 'Buenas noches'
+  return h < 12 ? t.home.greetMorning : h < 20 ? t.home.greetAfternoon : t.home.greetEvening
 }
 
 function getInitials(user: { user_metadata?: Record<string, unknown>; email?: string } | null) {
@@ -59,64 +66,22 @@ function getAvatarUrl(user: { user_metadata?: Record<string, unknown> } | null):
   return (m['avatar_url'] as string | undefined) ?? (m['picture'] as string | undefined) ?? null
 }
 
-// ── SVG Textures ──────────────────────────────────────────────────────────────
+// ── Insight destacado ────────────────────────────────────────────────────────
 
-function WavesTexture() {
+function InsightTeaser() {
+  const t = useLifeT()
+  const { insights } = useInsights()
+  // Las vencidas ya se ven en la tarjeta de tareas: destacamos otro insight
+  const featured = insights.find(i => i.kind !== 'tasksOverdue')
+  if (!featured) return null
   return (
-    <svg viewBox="0 0 120 70" fill="none" style={{
-      position: 'absolute', bottom: 0, right: 0, width: '80%',
-      opacity: 0.14, pointerEvents: 'none',
-    }}>
-      <path d="M0 55 Q30 38 60 50 Q90 62 120 48" stroke="#22C55E" strokeWidth="2" />
-      <path d="M0 65 Q30 50 60 60 Q90 70 120 58" stroke="#22C55E" strokeWidth="1.5" />
-      <path d="M0 45 Q30 28 60 40 Q90 52 120 38" stroke="#22C55E" strokeWidth="1" />
-    </svg>
-  )
-}
-
-function OrbitsTexture() {
-  return (
-    <svg viewBox="0 0 120 100" fill="none" style={{
-      position: 'absolute', bottom: -8, right: -8, width: '70%',
-      opacity: 0.14, pointerEvents: 'none',
-    }}>
-      <ellipse cx="85" cy="80" rx="52" ry="32" stroke="#3B82F6" strokeWidth="1.5" />
-      <ellipse cx="85" cy="80" rx="34" ry="20" stroke="#3B82F6" strokeWidth="1" />
-      <circle cx="85" cy="80" r="5" fill="#3B82F6" opacity="0.4" />
-      <circle cx="118" cy="66" r="3" fill="#3B82F6" opacity="0.3" />
-    </svg>
-  )
-}
-
-function FlameTexture() {
-  return (
-    <svg viewBox="0 0 70 90" fill="none" style={{
-      position: 'absolute', bottom: -4, right: 6, width: '42%',
-      opacity: 0.15, pointerEvents: 'none',
-    }}>
-      <path d="M35 82 C18 68 8 50 18 34 C23 26 28 36 25 46 C36 32 44 12 34 2 C50 14 58 36 48 54 C56 46 58 32 54 24 C64 38 66 58 56 70 C51 77 43 82 35 82Z" fill="#F59E0B" />
-    </svg>
-  )
-}
-
-function NeuralTexture() {
-  return (
-    <svg viewBox="0 0 110 90" fill="none" style={{
-      position: 'absolute', bottom: 0, right: 0, width: '72%',
-      opacity: 0.13, pointerEvents: 'none',
-    }}>
-      <circle cx="85" cy="15" r="4" fill="#8B5CF6" />
-      <circle cx="105" cy="42" r="3" fill="#8B5CF6" />
-      <circle cx="90" cy="68" r="4" fill="#8B5CF6" />
-      <circle cx="70" cy="82" r="3" fill="#8B5CF6" />
-      <circle cx="104" cy="76" r="2.5" fill="#8B5CF6" />
-      <line x1="85" y1="15" x2="105" y2="42" stroke="#8B5CF6" strokeWidth="1" />
-      <line x1="105" y1="42" x2="90" y2="68" stroke="#8B5CF6" strokeWidth="1" />
-      <line x1="90" y1="68" x2="70" y2="82" stroke="#8B5CF6" strokeWidth="1" />
-      <line x1="90" y1="68" x2="104" y2="76" stroke="#8B5CF6" strokeWidth="1" />
-      <line x1="85" y1="15" x2="90" y2="68" stroke="#8B5CF6" strokeWidth="0.5" opacity="0.5" />
-      <line x1="105" y1="42" x2="104" y2="76" stroke="#8B5CF6" strokeWidth="0.5" opacity="0.5" />
-    </svg>
+    <motion.section variants={fadeInUp} style={cardStyle} aria-label={t.insights.title}>
+      <CardHeader title={t.insights.title} color={colors.accent.default} />
+      <InsightCard insight={featured} compact />
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <SeeAllLink to="/life/insights" label={insights.length > 1 ? `${t.insights.seeAll} · ${insights.length}` : t.insights.seeAll} />
+      </div>
+    </motion.section>
   )
 }
 
@@ -152,13 +117,13 @@ function StarfieldBackground() {
 interface HubSectionProps {
   hasRestaurant: boolean
   restaurantSlug: string | null
-  onboardingCompleted: boolean | null
   avatarUrl: string | null
   initials: string
 }
 
-function HubSection({ hasRestaurant, restaurantSlug, onboardingCompleted, avatarUrl, initials }: HubSectionProps) {
+function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubSectionProps) {
   const navigate = useNavigate()
+  const t = useLifeT()
 
   return (
     <div style={{
@@ -244,243 +209,298 @@ function HubSection({ hasRestaurant, restaurantSlug, onboardingCompleted, avatar
           fontFamily: font, fontSize: '15px', fontWeight: 700,
           color: colors.text.primary, margin: '0 0 2px', letterSpacing: '-0.01em',
         }}>
-          ID Digital
+          {t.home.identityTitle}
         </p>
         <p style={{
           fontFamily: font, fontSize: '12px', color: colors.text.tertiary,
           margin: '0 0 13px', lineHeight: 1.4,
         }}>
-          {hasRestaurant && restaurantSlug ? `@${restaurantSlug}` : 'Tu presencia en la web'}
+          {hasRestaurant && restaurantSlug ? `Mycen Identity · @${restaurantSlug}` : t.home.identitySubtitle}
         </p>
 
-        {(() => {
-          if (!hasRestaurant) {
-            return (
-              <button
-                onClick={() => navigate('/life/hub')}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  padding: '8px 16px', borderRadius: radius.full,
-                  background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.30)',
-                  color: '#818CF8', fontFamily: font, fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                }}
-              >
-                Crear mi ID
-              </button>
-            )
-          }
-
-          if (onboardingCompleted !== true) {
-            return (
-              <button
-                onClick={() => navigate('/onboarding')}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  padding: '8px 16px', borderRadius: radius.full,
-                  background: 'rgba(244,112,90,0.13)', border: '1px solid rgba(244,112,90,0.30)',
-                  color: '#F4705A', fontFamily: font, fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                }}
-              >
-                <Sparkles size={12} strokeWidth={2.5} />
-                Continuar configurando mi ID
-              </button>
-            )
-          }
-
-          return (
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => navigate(`/${restaurantSlug ?? ''}`)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '4px',
-                  padding: '6px 12px', borderRadius: radius.full,
-                  background: 'rgba(99,102,241,0.13)', border: '1px solid rgba(99,102,241,0.28)',
-                  color: '#818CF8', fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                }}
-              >
-                <Link2 size={11} strokeWidth={2.5} />
-                Ver ID
-              </button>
-              <button
-                onClick={() => navigate('/life/hub')}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '4px',
-                  padding: '6px 12px', borderRadius: radius.full,
-                  background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
-                  color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                }}
-              >
-                <Settings2 size={11} strokeWidth={2.5} />
-                Configurar
-              </button>
-            </div>
-          )
-        })()}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {/* Mycen Studio: editar la identidad (si no hay perfil, Studio ofrece crearlo) */}
+          <button
+            type="button"
+            onClick={() => navigate('/studio')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              padding: '8px 14px', borderRadius: radius.full,
+              background: '#F1F0E9', border: '1px solid #F1F0E9',
+              color: '#111311', fontFamily: font, fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            <Settings2 size={12} strokeWidth={2.5} />
+            {t.home.openStudio}
+          </button>
+          {hasRestaurant && restaurantSlug && (
+            <button
+              type="button"
+              onClick={() => navigate(`/${restaurantSlug}`)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                padding: '8px 12px', borderRadius: radius.full,
+                background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+                color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              <Link2 size={11} strokeWidth={2.5} />
+              {t.home.viewProfile}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-// ── HoySummaryCard ────────────────────────────────────────────────────────────
+// ── Tarjetas de "Tu día" ─────────────────────────────────────────────────────
 
-interface HoyProps {
-  goalsCount: number
-  habitsCompleted: number
-  habitsTotal: number
-  moneyBalance: number
-  pendingTasks: number
-  currency: string
+const cardStyle: React.CSSProperties = {
+  position: 'relative', overflow: 'hidden',
+  background: 'rgba(255,255,255,0.028)',
+  backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+  border: '1px solid rgba(255,255,255,0.07)',
+  borderRadius: radius.xl,
+  padding: '12px 14px',
 }
 
-function HoySummaryCard({ goalsCount, habitsCompleted, habitsTotal, moneyBalance, pendingTasks, currency }: HoyProps) {
-  const navigate = useNavigate()
-  const formatMoney = (n: number) =>
-    new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(n)
+const cardTitle: React.CSSProperties = {
+  fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary,
+  letterSpacing: '0.09em', textTransform: 'uppercase', margin: 0,
+}
 
-  const rows = [
-    { icon: Target,      label: 'Metas',    value: `${goalsCount} en curso`,                    color: colors.area.goals,  route: '/life/goals'  },
-    { icon: TrendingUp,  label: 'Dinero',   value: formatMoney(moneyBalance),                   color: colors.area.money,  route: '/life/money'  },
-    { icon: CheckSquare, label: 'Hábitos',  value: `${habitsCompleted}/${habitsTotal} hoy`,     color: colors.area.habits, route: '/life/habits' },
-    { icon: Brain,       label: 'Brain',    value: `${pendingTasks} pendientes`,                 color: colors.area.brain,  route: '/life/brain'  },
-  ]
+const mutedText: React.CSSProperties = { fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: '6px 0 2px', lineHeight: 1.5 }
+
+const linkBtn: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 2, minHeight: 32, padding: '4px 0',
+  background: 'none', border: 'none', cursor: 'pointer',
+  fontFamily: font, fontSize: '12px', fontWeight: 700, color: colors.text.secondary,
+}
+
+function CardHeader({ title, color, action }: { title: string; color: string; action?: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, minHeight: 32 }}>
+      <h2 style={{ ...cardTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
+        <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: '50%', background: color }} />
+        {title}
+      </h2>
+      {action}
+    </div>
+  )
+}
+
+function SeeAllLink({ to, label }: { to: string; label: string }) {
+  const navigate = useNavigate()
+  return (
+    <button type="button" onClick={() => navigate(to)} style={linkBtn}>
+      {label}<ChevronRight size={13} className="flip-rtl" aria-hidden="true" />
+    </button>
+  )
+}
+
+function SeeAll({ to }: { to: string }) {
+  return <SeeAllLink to={to} label={useLifeT().day.seeAll} />
+}
+
+/** Tareas del día: foco, las que vencen hoy y las que ya completaste hoy. */
+function TodayTasksCard() {
+  const t = useLifeT()
+  const navigate = useNavigate()
+  const today = useToday()
+  const { tasks, error, createTask, updateTask, toggleTask, setFocus } = useTasks()
+  const [sheet, setSheet] = useState<{ open: boolean; task: LifeTask | null }>({ open: false, task: null })
+
+  const { list, overdue } = useMemo(() => {
+    const doneToday = (x: LifeTask) => !!x.completed_at && localDateKey(new Date(x.completed_at)) === today
+    const pending = tasks.filter(x => !x.completed_at)
+    const focus = pending.filter(x => x.is_focus)
+    const dueToday = pending.filter(x => !x.is_focus && x.due_date === today)
+      .sort((a, b) => (a.due_time ?? '99').localeCompare(b.due_time ?? '99'))
+    return {
+      list: [...focus, ...dueToday, ...tasks.filter(doneToday)],
+      overdue: pending.filter(x => x.due_date && x.due_date < today).length,
+    }
+  }, [tasks, today])
+
+  const fail = () => toast.error(t.common.saveError)
+  const shown = list.slice(0, 6)
 
   return (
-    <div style={{
-      position: 'relative', overflow: 'hidden',
-      background: 'rgba(255,255,255,0.028)',
-      backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-      border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: radius.xl,
-      padding: '4px 0',
-    }}>
-      {/* Sunrise halo */}
-      <div style={{
-        position: 'absolute', top: '-40%', left: '-8%',
-        width: '55%', height: '210%',
-        background: 'radial-gradient(ellipse, rgba(251,146,60,0.07) 0%, transparent 65%)',
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{
-        padding: '11px 16px 5px',
-        fontFamily: font, fontSize: '10px', fontWeight: 700,
-        color: colors.text.tertiary, letterSpacing: '0.09em', textTransform: 'uppercase',
-      }}>
-        Hoy
+    <section style={cardStyle} aria-label={t.day.tasksTitle}>
+      <div>
+        <CardHeader title={t.day.tasksTitle} color={colors.area.brain} action={
+          <button type="button" onClick={() => setSheet({ open: true, task: null })} aria-label={t.day.addTask} title={t.day.addTask}
+            style={{
+              width: 36, height: 36, borderRadius: radius.full, border: `1px solid ${colors.accent.soft}`, cursor: 'pointer',
+              background: colors.accent.soft, color: colors.accent.default,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+            <Plus size={16} strokeWidth={2.5} aria-hidden="true" />
+          </button>
+        } />
       </div>
-
-      {rows.map((row, i) => {
-        const Icon = row.icon
-        return (
-          <button
-            key={row.route}
-            onClick={() => navigate(row.route)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '12px',
-              width: '100%', padding: '9px 16px',
-              background: 'transparent', border: 'none', cursor: 'pointer',
-              borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.04)',
-              textAlign: 'left',
-            }}
-          >
-            <div style={{
-              width: 30, height: 30, borderRadius: '8px', flexShrink: 0,
-              background: `${row.color}14`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Icon size={13} style={{ color: row.color }} strokeWidth={2.3} />
-            </div>
-            <p style={{ flex: 1, fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.text.primary, margin: 0 }}>
-              {row.label}
-            </p>
-            <p style={{ fontFamily: font, fontSize: '12px', color: colors.text.secondary, margin: '0 4px 0 0' }}>
-              {row.value}
-            </p>
-            <ChevronRight size={13} style={{ color: colors.text.tertiary, flexShrink: 0 }} />
+      {error ? <p role="alert" style={{ ...mutedText, color: colors.semantic.error }}>{t.day.loadError}</p>
+        : shown.length === 0 ? <p style={mutedText}>{t.day.noTasksToday}</p>
+          : <TaskList tasks={shown} markFocus
+              onToggle={x => { toggleTask(x).catch(fail) }}
+              onEdit={x => setSheet({ open: true, task: x })}
+              onFocus={x => { setFocus(x, !x.is_focus).catch(fail) }} />}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 4 }}>
+        {overdue > 0 ? (
+          <button type="button" onClick={() => navigate('/life/brain?vista=tareas')}
+            style={{ ...linkBtn, color: colors.semantic.error }}>
+            <AlertCircle size={13} aria-hidden="true" style={{ marginInlineEnd: 4 }} />{t.tasks.overdue} · {overdue}
           </button>
-        )
-      })}
-    </div>
+        ) : <span />}
+        <SeeAll to="/life/brain?vista=tareas" />
+      </div>
+      <TaskSheet open={sheet.open} initial={sheet.task} defaultDate={sheet.task ? null : today}
+        onClose={() => setSheet(s => ({ ...s, open: false }))}
+        onSave={data => (sheet.task ? updateTask(sheet.task.id, data) : createTask(data))} />
+    </section>
   )
 }
 
-// ── ModuleGrid ────────────────────────────────────────────────────────────────
-
-const MODULES = [
-  { id: 'money',  label: 'Dinero',  icon: TrendingUp,  color: '#22C55E', route: '/life/money',  Texture: WavesTexture  },
-  { id: 'goals',  label: 'Metas',   icon: Target,      color: '#3B82F6', route: '/life/goals',  Texture: OrbitsTexture },
-  { id: 'habits', label: 'Hábitos', icon: CheckSquare, color: '#F59E0B', route: '/life/habits', Texture: FlameTexture  },
-  { id: 'brain',  label: 'Brain',   icon: Brain,       color: '#8B5CF6', route: '/life/brain',  Texture: NeuralTexture },
-]
-
-function ModuleGrid() {
+/** Hábitos programados para hoy, para tildar desde el inicio. */
+function TodayHabitsCard() {
+  const t = useLifeT()
   const navigate = useNavigate()
+  const { activeHabits, todayHabits, completedToday, error, toggleToday } = useHabits()
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-      {MODULES.map(mod => {
-        const Icon = mod.icon
-        const { Texture } = mod
-        return (
-          <button
-            key={mod.id}
-            onClick={() => navigate(mod.route)}
-            style={{
-              position: 'relative', overflow: 'hidden',
-              padding: '18px 16px 16px', borderRadius: radius.xl,
-              background: `linear-gradient(135deg, ${mod.color}13 0%, ${mod.color}07 100%)`,
-              border: `1px solid ${mod.color}1E`,
-              cursor: 'pointer', textAlign: 'left',
-              minHeight: '112px',
-              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-            }}
-          >
-            <Texture />
-            <div style={{
-              width: 34, height: 34, borderRadius: '10px',
-              background: `${mod.color}18`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative', zIndex: 1,
-            }}>
-              <Icon size={15} style={{ color: mod.color }} strokeWidth={2.3} />
-            </div>
-            <p style={{
-              fontFamily: font, fontSize: '14px', fontWeight: 700,
-              color: colors.text.primary, margin: 0,
-              position: 'relative', zIndex: 1,
-            }}>
-              {mod.label}
-            </p>
-          </button>
-        )
-      })}
-    </div>
+    <section style={cardStyle} aria-label={t.day.habitsTitle}>
+      <CardHeader title={t.day.habitsTitle} color={colors.area.habits} action={
+        todayHabits.length > 0
+          ? <span style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: colors.text.secondary }}>{completedToday}/{todayHabits.length}</span>
+          : undefined
+      } />
+      {error ? <p role="alert" style={{ ...mutedText, color: colors.semantic.error }}>{t.day.loadError}</p>
+        : activeHabits.length === 0 ? (
+          <>
+            <p style={mutedText}>{t.day.noHabits}</p>
+            <button type="button" onClick={() => navigate('/life/habits')} style={{ ...linkBtn, color: colors.area.habits }}>{t.day.createHabit}</button>
+          </>
+        ) : todayHabits.length === 0 ? <p style={mutedText}>{t.day.noHabitsToday}</p> : (
+          <ul style={{ listStyle: 'none', margin: '4px 0 0', padding: 0, display: 'flex', flexDirection: 'column' }}>
+            {todayHabits.map((h, i) => (
+              <li key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0', borderTop: i ? `1px solid ${colors.border.subtle}` : 'none' }}>
+                <span aria-hidden="true" style={{
+                  width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: `${h.color}18`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {createElement(getHabitIcon(h.icon), { size: 15, style: { color: h.color }, strokeWidth: 2.2 })}
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{
+                    display: 'block', fontFamily: font, fontSize: '14px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    color: h.completedToday ? colors.text.secondary : colors.text.primary,
+                  }}>{h.name}</span>
+                  {h.streak > 0 && <span style={{ display: 'block', fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary }}>{t.habits.streak(h.streak)}</span>}
+                </span>
+                <button type="button" role="checkbox" aria-checked={h.completedToday}
+                  aria-label={h.completedToday ? t.habits.unmarkToday(h.name) : t.habits.markToday(h.name)}
+                  onClick={() => { toggleToday(h.id, !h.completedToday).catch(() => toast.error(t.common.saveError)) }}
+                  style={{ width: 44, height: 44, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                  <span aria-hidden="true" style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    border: `2px solid ${h.completedToday ? h.color : colors.border.medium}`,
+                    background: h.completedToday ? h.color : 'transparent',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s',
+                  }}>
+                    {h.completedToday && <Check size={15} strokeWidth={3} style={{ color: '#fff' }} />}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      {activeHabits.length > 0 && <div style={{ display: 'flex', justifyContent: 'flex-end' }}><SeeAll to="/life/habits" /></div>}
+    </section>
   )
 }
 
-// ── PageSkeleton ──────────────────────────────────────────────────────────────
+function GoalsCard() {
+  const t = useLifeT()
+  const navigate = useNavigate()
+  const { goals, total, error } = useActiveGoals(3)
 
-function PageSkeleton() {
   return (
-    <div style={{
-      minHeight: '100vh', background: '#0A0B0F',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <motion.div
-        animate={{ opacity: [0.3, 0.52, 0.3] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          display: 'flex', flexDirection: 'column', gap: '12px',
-          padding: '32px', width: '100%', maxWidth: '420px',
-        }}
-      >
-        {([48, 158, 140, 136] as const).map((h, i) => (
-          <div key={i} style={{
-            height: h, background: 'rgba(255,255,255,0.04)', borderRadius: radius.xl,
-          }} />
-        ))}
-      </motion.div>
-    </div>
+    <section style={cardStyle} aria-label={t.day.goalsTitle}>
+      <CardHeader title={total > 0 ? `${t.day.goalsTitle} · ${total}` : t.day.goalsTitle} color={colors.area.goals} />
+      {error ? <p role="alert" style={{ ...mutedText, color: colors.semantic.error }}>{t.day.loadError}</p>
+        : goals.length === 0 ? (
+          <>
+            <p style={mutedText}>{t.day.noGoals}</p>
+            <button type="button" onClick={() => navigate('/life/goals')} style={{ ...linkBtn, color: colors.area.goals }}>{t.day.createGoal}</button>
+          </>
+        ) : (
+          <>
+            <ul style={{ listStyle: 'none', margin: '6px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {goals.map(g => (
+                <li key={g.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
+                    <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.name}</span>
+                    <span style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: g.color, flexShrink: 0 }}>{g.progress}%</span>
+                  </div>
+                  <div role="progressbar" aria-label={g.name} aria-valuemin={0} aria-valuemax={100} aria-valuenow={g.progress}
+                    style={{ height: 6, borderRadius: radius.full, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                    <div style={{ width: `${g.progress}%`, height: '100%', borderRadius: radius.full, background: g.color }} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}><SeeAll to="/life/goals" /></div>
+          </>
+        )}
+    </section>
   )
+}
+
+/** Resumen del mes en la moneda principal; las otras monedas se muestran aparte (nunca se suman). */
+function MoneyCard() {
+  const t = useLifeT()
+  const locale = langLocale(useAppLang(s => s.lang))
+  const { monthIncome, monthExpense, monthBalance, otherTotals, mainCurrency, loading } = useMoney()
+  const empty = monthIncome === 0 && monthExpense === 0 && otherTotals.length === 0
+
+  return (
+    <section style={cardStyle} aria-label={t.day.moneyTitle}>
+      <CardHeader title={t.day.moneyTitle} color={colors.area.money} />
+      {loading ? null : empty ? <p style={mutedText}>{t.day.noMoney}</p> : (
+        <>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: font, fontSize: '12px', color: colors.text.tertiary }}>{t.day.balance}</span>
+            <span style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color: monthBalance < 0 ? colors.semantic.error : colors.text.primary }}>
+              {fmtMoney(monthBalance, mainCurrency, locale)}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 16, marginTop: 4, fontFamily: font, fontSize: '12.5px', color: colors.text.secondary, flexWrap: 'wrap' }}>
+            <span>{t.money.income} <strong style={{ color: colors.semantic.success }}>{fmtMoney(monthIncome, mainCurrency, locale)}</strong></span>
+            <span>{t.money.expense} <strong style={{ color: colors.text.primary }}>{fmtMoney(monthExpense, mainCurrency, locale)}</strong></span>
+          </div>
+          {otherTotals.length > 0 && (
+            <ul style={{ listStyle: 'none', margin: '8px 0 0', padding: '8px 0 0', borderTop: `1px solid ${colors.border.subtle}` }}>
+              {otherTotals.map(r => (
+                <li key={r.currency} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: font, fontSize: '12.5px', color: colors.text.secondary, padding: '2px 0' }}>
+                  <span>{r.currency}</span>
+                  <span style={{ color: r.balance < 0 ? colors.semantic.error : colors.text.primary, fontWeight: 600 }}>{fmtMoney(r.balance, r.currency, locale)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}><SeeAll to="/life/money" /></div>
+    </section>
+  )
+}
+
+const iconBtn: React.CSSProperties = {
+  width: 36, height: 36, borderRadius: radius.full, flexShrink: 0,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+  color: colors.text.secondary, cursor: 'pointer',
 }
 
 // ── LifePage ──────────────────────────────────────────────────────────────────
@@ -488,21 +508,17 @@ function PageSkeleton() {
 export function LifePage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { hasRestaurant, restaurantSlug, restaurantPlan, onboardingCompleted } = useLifeStore()
-  const { currency } = useLocaleStore()
-  const data = useLifeData()
-  const { isEngaged } = useLifeEngagement()
-  const { canInstall, isInstalled, isDismissed, needsIOSInstructions, install, dismiss } = useInstallPWA()
-  const [iosModalOpen, setIosModalOpen] = useState(false)
-
-  const shouldShowBanner = isEngaged && !isInstalled && !isDismissed && (canInstall || needsIOSInstructions)
-
-  if (data.loading) return <PageSkeleton />
+  const { hasRestaurant, restaurantSlug, restaurantPlan } = useLifeStore()
+  const t = useLifeT()
+  const locale = langLocale(useAppLang(s => s.lang))
+  const today = useToday()
+  const [langOpen, setLangOpen] = useState(false)
 
   const firstName = getFirstName(user)
   const initials  = getInitials(user)
   const avatarUrl = getAvatarUrl(user)
-  const balance   = data.monthIncome - data.monthExpense
+  const rawDate = new Date(`${today}T12:00:00`).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })
+  const dateLabel = rawDate.charAt(0).toUpperCase() + rawDate.slice(1)
 
   return (
     <>
@@ -523,24 +539,13 @@ export function LifePage() {
           <motion.div variants={fadeInUp} style={{
             display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0 2px',
           }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-              background: 'linear-gradient(135deg, #F4705A 0%, #8B5CF6 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: font, fontSize: '15px', fontWeight: 800, color: '#fff',
-              boxShadow: '0 0 0 2px rgba(244,112,90,0.22)',
-              overflow: 'hidden',
-            }}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : initials}
-            </div>
+            {/* La foto de perfil se muestra una sola vez: en la tarjeta "Mi identidad" */}
             <div style={{ flex: 1 }}>
               <p style={{
                 fontFamily: font, fontSize: '11px', color: colors.text.tertiary,
                 margin: '0 0 1px', letterSpacing: '0.02em',
               }}>
-                {greet()}
+                {greet(t)}
               </p>
               <p style={{
                 fontFamily: font, fontSize: '17px', fontWeight: 700,
@@ -563,75 +568,61 @@ export function LifePage() {
                 cursor: 'pointer',
               }}
             >
-              Mi negocio
+              {t.home.myBusiness}
+            </button>
+            <button type="button" onClick={() => setLangOpen(true)} aria-label={t.home.language} title={t.home.language}
+              style={iconBtn}>
+              <Globe size={16} aria-hidden="true" />
+            </button>
+            <button type="button" onClick={() => navigate('/life/settings')} aria-label={t.home.settings} title={t.home.settings}
+              style={iconBtn}>
+              <Settings size={16} aria-hidden="true" />
             </button>
           </motion.div>
 
-          {/* ── Install banner (C3 gate: 1 goal + 1 brain item) ────────────── */}
-          {shouldShowBanner && (
-            <motion.div variants={fadeInUp}>
-              <InstallAppBanner
-                needsIOSInstructions={needsIOSInstructions}
-                onInstall={install}
-                onShowIOSInstructions={() => setIosModalOpen(true)}
-                onDismiss={dismiss}
-              />
-            </motion.div>
-          )}
+          {/* ── Tu día ─────────────────────────────────────────────────────── */}
+          <motion.div variants={fadeInUp} style={{ padding: '6px 2px 0' }}>
+            <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0, letterSpacing: '-0.02em' }}>
+              {t.day.yourDay}
+            </h1>
+            <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.tertiary, margin: '2px 0 0' }}>{dateLabel}</p>
+          </motion.div>
+          <motion.div variants={fadeInUp}><TodayTasksCard /></motion.div>
+          <motion.div variants={fadeInUp}><TodayHabitsCard /></motion.div>
+          <motion.div variants={fadeInUp}><GoalsCard /></motion.div>
+          <motion.div variants={fadeInUp}><MoneyCard /></motion.div>
+          <InsightTeaser />
 
-          {/* ── ID Digital ─────────────────────────────────────────────────── */}
+          {/* ── Mi identidad (Mycen Identity → Studio) ──────────────────────── */}
           <motion.div variants={fadeInUp}>
             <HubSection
               hasRestaurant={hasRestaurant}
               restaurantSlug={restaurantSlug}
-              onboardingCompleted={onboardingCompleted}
               avatarUrl={avatarUrl}
               initials={initials}
             />
           </motion.div>
 
-          {/* ── Hoy card ───────────────────────────────────────────────────── */}
-          <motion.div variants={fadeInUp}>
-            <HoySummaryCard
-              goalsCount={data.activeGoalsCount}
-              habitsCompleted={data.habitsCompletedToday}
-              habitsTotal={data.habitsTotalToday}
-              moneyBalance={balance}
-              pendingTasks={data.pendingTasksCount}
-              currency={currency}
-            />
+          {/* ── Recap del mes ───────────────────────────────────────────────── */}
+          <motion.div variants={fadeInUp} style={{ display: 'flex', justifyContent: 'center', paddingTop: '4px' }}>
+            <button
+              type="button"
+              onClick={() => navigate('/life/replay')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                minHeight: 36, padding: '7px 16px', borderRadius: radius.full,
+                background: 'rgba(244,112,90,0.07)', border: `1px solid ${colors.accent.glow}`,
+                color: colors.accent.default, fontFamily: font, fontSize: '12px', fontWeight: 700,
+                cursor: 'pointer', letterSpacing: '0.01em',
+              }}
+            >
+              {t.home.recap}
+            </button>
           </motion.div>
-
-          {/* ── Module grid ─────────────────────────────────────────────────── */}
-          <motion.div variants={fadeInUp}>
-            <ModuleGrid />
-          </motion.div>
-
-          {/* ── Recap link ──────────────────────────────────────────────────── */}
-          {!data.isNewUser && (
-            <motion.div variants={fadeInUp} style={{ display: 'flex', justifyContent: 'center', paddingTop: '4px' }}>
-              <button
-                onClick={() => navigate('/life/replay')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '7px 16px', borderRadius: radius.full,
-                  background: 'rgba(244,112,90,0.07)', border: `1px solid ${colors.accent.glow}`,
-                  color: colors.accent.default, fontFamily: font, fontSize: '12px', fontWeight: 700,
-                  cursor: 'pointer', letterSpacing: '0.01em',
-                }}
-              >
-                ✦ Ver recap del mes
-              </button>
-            </motion.div>
-          )}
 
         </motion.div>
       </div>
-
-      <InstallAppModalIOS
-        open={iosModalOpen}
-        onClose={() => setIosModalOpen(false)}
-      />
+      <LanguageSheet open={langOpen} onClose={() => setLangOpen(false)} />
     </>
   )
 }

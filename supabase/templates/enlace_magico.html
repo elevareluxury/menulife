@@ -1,0 +1,98 @@
+{{/* Mycen — Magic Link (enlace_magico). Generado por scripts/build-email-templates.mjs: editar allá, no acá. */}}
+{{ $l := "es" }}{{ with .Data }}{{ with .locale }}{{ $l = . }}{{ end }}{{ end }}<!doctype html>
+<html lang="{{ $l }}" dir="{{ if eq $l "ar" }}rtl{{ else }}ltr{{ end }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"></head>
+<body style="margin:0;padding:0;background:#f4f3ef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f3ef;padding:32px 16px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;padding:36px 32px;text-align:start">
+<tr><td style="padding-bottom:24px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:#0F1115">Mycen</td></tr>
+<tr><td>{{ if eq $l "en" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Log in to Mycen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Tap the button to log in. The link works only once.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Log in</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">If the button doesn’t work, copy this link into your browser:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">If this wasn’t you, you can ignore this email.</p>
+{{ else if eq $l "pt" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Entre no Mycen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Toque no botão para entrar. O link funciona uma única vez.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Entrar</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Se o botão não funcionar, copie este link no seu navegador:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Se não foi você, pode ignorar este e-mail.</p>
+{{ else if eq $l "fr" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Connectez-vous à Mycen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Touchez le bouton pour vous connecter. Le lien ne fonctionne qu’une fois.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Se connecter</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Si ce n’était pas vous, vous pouvez ignorer cet e-mail.</p>
+{{ else if eq $l "de" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Bei Mycen anmelden</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Tippe auf den Button, um dich anzumelden. Der Link funktioniert nur einmal.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Anmelden</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Wenn du das nicht warst, kannst du diese E-Mail ignorieren.</p>
+{{ else if eq $l "it" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Accedi a Mycen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Tocca il pulsante per accedere. Il link funziona una sola volta.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Accedi</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Se il pulsante non funziona, copia questo link nel browser:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Se non sei stato tu, puoi ignorare questa email.</p>
+{{ else if eq $l "zh" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">登录 Mycen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">点击按钮即可登录。链接只能使用一次。</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">登录</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">如果按钮无法使用，请将此链接复制到浏览器中：</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">如果这不是你本人的操作，请忽略这封邮件。</p>
+{{ else if eq $l "ja" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Mycen にログイン</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">ボタンをタップしてログインしてください。リンクは 1 回だけ使えます。</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">ログイン</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">ボタンが使えない場合は、このリンクをブラウザに貼り付けてください：</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">お心当たりがない場合は、このメールを無視してください。</p>
+{{ else if eq $l "ko" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Mycen에 로그인</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">버튼을 눌러 로그인하세요. 링크는 한 번만 사용할 수 있습니다.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">로그인</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">버튼이 작동하지 않으면 이 링크를 브라우저에 붙여 넣으세요:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">본인이 요청하지 않았다면 이 메일을 무시하셔도 됩니다.</p>
+{{ else if eq $l "hi" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Mycen में लॉग इन करें</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">लॉग इन करने के लिए बटन दबाएँ। यह लिंक सिर्फ़ एक बार काम करता है।</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">लॉग इन</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">अगर बटन काम न करे, तो यह लिंक अपने ब्राउज़र में कॉपी करें:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">अगर यह आपने नहीं किया, तो इस ईमेल को अनदेखा कर दें।</p>
+{{ else if eq $l "ar" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">سجّل الدخول إلى Mycen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">اضغط الزر لتسجيل الدخول. يعمل الرابط مرة واحدة فقط.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">تسجيل الدخول</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">إذا لم يعمل الزر، انسخ هذا الرابط في متصفحك:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">إذا لم تكن أنت، يمكنك تجاهل هذه الرسالة.</p>
+{{ else if eq $l "ru" }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Вход в Mycen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Нажмите кнопку, чтобы войти. Ссылка работает только один раз.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Войти</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Если кнопка не работает, скопируйте эту ссылку в браузер:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Если это были не вы, просто проигнорируйте это письмо.</p>
+{{ else }}
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">Entrá a Mycen</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">Tocá el botón para iniciar sesión. El link sirve una sola vez.</p>
+<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Iniciar sesión</a></p>
+<p style="margin:0 0 6px;font-size:13px;color:#5f6368">Si el botón no funciona, copiá este link en tu navegador:</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:28px 0 0;font-size:12px;color:#80868b">Si no fuiste vos, podés ignorar este mail.</p>
+{{ end }}</td></tr>
+</table>
+<p style="margin:16px 0 0;font-size:12px;color:#80868b">Mycen · <a href="https://mycen.id" style="color:#80868b">mycen.id</a></p>
+</td></tr></table>
+</body>
+</html>

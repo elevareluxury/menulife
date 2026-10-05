@@ -67,7 +67,7 @@ const GASTRONOMY_NAV: NavGroup[] = [
   {
     section: null,
     items: [
-      { to: '/dashboard/hub', icon: Globe, labelKey: 'dashboard.nav_hub' },
+      { to: '/studio', icon: Globe, labelKey: 'dashboard.nav_hub' },
     ],
   },
 ]
@@ -99,7 +99,7 @@ const RETAIL_NAV: NavGroup[] = [
   {
     section: null,
     items: [
-      { to: '/dashboard/hub', icon: Globe, labelKey: 'dashboard.nav_hub' },
+      { to: '/studio', icon: Globe, labelKey: 'dashboard.nav_hub' },
     ],
   },
 ]
@@ -137,7 +137,7 @@ function useServicesNav(): NavGroup[] {
     },
     {
       section: null,
-      items: [{ to: '/dashboard/hub', icon: Globe, labelKey: 'dashboard.nav_hub' }],
+      items: [{ to: '/studio', icon: Globe, labelKey: 'dashboard.nav_hub' }],
     },
   ], [term])
 }
@@ -363,11 +363,11 @@ export function Sidebar({ restaurantSlug, restaurantName = '' }: SidebarProps) {
           {isHubFree ? (
             /* hub_free — only Hub item is active, rest are locked */
             <>
-              {navConfig.flatMap(g => g.items).filter(item => item.to !== '/dashboard/hub').map(item => (
+              {navConfig.flatMap(g => g.items).filter(item => item.to !== '/studio').map(item => (
                 <LockedNavItem key={item.to} icon={item.icon} labelKey={item.labelKey} onUnlock={() => setShowUpgrade(true)} />
               ))}
               <div className="border-t my-3" style={{ borderColor: 'var(--border-subtle)' }} />
-              <NavItem to="/dashboard/hub" icon={Globe} labelKey="dashboard.nav_hub" />
+              <NavItem to="/studio" icon={Globe} labelKey="dashboard.nav_hub" />
             </>
           ) : (
             navConfig.map((group, gi) => {

@@ -1,22 +1,26 @@
 import { useEffect, useRef } from 'react'
 import { Globe, Target, Rocket } from 'lucide-react'
+import { useLandingT } from '@/i18n/app/landing'
+
+import { reducedMotion } from './motion'
+import { SplitText } from './SplitText'
 
 declare const gsap: any
 
 const SATELLITES = [
   {
-    Icon: Globe,   label: 'Identidad',    sub: 'Tu presencia digital unificada',
+    Icon: Globe,   key: 'identity',
     color: '#3B82F6', angle: 270, // top
   },
   {
-    Icon: Target,  label: 'Organización', sub: 'Tu vida personal en orden',
+    Icon: Target,  key: 'organization',
     color: '#8B5CF6', angle: 30, // bottom-right
   },
   {
-    Icon: Rocket,  label: 'Negocios',    sub: 'Tu operación potenciada',
+    Icon: Rocket,  key: 'business',
     color: '#F4705A', angle: 150, // bottom-left
   },
-]
+] as const
 
 function polarToPercent(angle: number, rx: number, ry: number) {
   const rad = (angle - 90) * (Math.PI / 180)
@@ -27,12 +31,14 @@ function polarToPercent(angle: number, rx: number, ry: number) {
 }
 
 export function SolutionSection() {
+  const t = useLandingT().solution
+  const sats = SATELLITES.map(s => ({ ...s, label: t[s.key], sub: t[`${s.key}Sub`] }))
   const sectionRef = useRef<HTMLElement>(null)
   const titleRef   = useRef<HTMLDivElement>(null)
   const vizRef     = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (typeof gsap === 'undefined') return
+    if (typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
 
@@ -72,8 +78,16 @@ export function SolutionSection() {
       `,
       padding: '96px 24px',
       overflow: 'hidden',
+      position: 'relative',
     }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+      {/* Orbes de fondo: respiran y se desplazan con el scroll */}
+      <div aria-hidden="true" data-parallax="0.5" style={{ position: 'absolute', top: '8%', left: '-8%', width: '420px', height: '420px', pointerEvents: 'none' }}>
+        <div className="ml-orb" style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.18), transparent 65%)', filter: 'blur(20px)' }} />
+      </div>
+      <div aria-hidden="true" data-parallax="0.9" style={{ position: 'absolute', bottom: '5%', right: '-10%', width: '480px', height: '480px', pointerEvents: 'none' }}>
+        <div className="ml-orb" style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(244,112,90,0.16), transparent 65%)', filter: 'blur(24px)', animationDelay: '-4s' }} />
+      </div>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative' }}>
 
         {/* Header */}
         <div ref={titleRef} style={{ textAlign: 'center', marginBottom: '72px' }}>
@@ -81,18 +95,18 @@ export function SolutionSection() {
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',
             fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
-          }}>LA SOLUCIÓN</p>
+          }}>{t.label}</p>
           <h2 style={{
             fontFamily: 'var(--font-syne)', fontWeight: 800,
             fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
             lineHeight: 1.1, margin: '0 0 16px',
-          }}>Todo conectado dentro de{' '}
-            <em style={{ color: 'var(--ml-salmon)', fontStyle: 'italic' }}>Mycen.</em>
+          }} data-split><SplitText text={t.title} />{' '}
+            <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>{t.titleAccent}</em>
           </h2>
           <p style={{
             fontFamily: 'var(--font-jakarta)', fontSize: '17px',
             color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
-          }}>Una cuenta. Una plataforma. Un ecosistema.</p>
+          }}>{t.subtitle}</p>
         </div>
 
         {/* Orbital visualization */}
@@ -109,6 +123,7 @@ export function SolutionSection() {
           >
             {/* Orbit ellipse */}
             <ellipse
+              className="ml-orbit"
               cx="50" cy="50"
               rx={RX} ry={RY}
               fill="none"
@@ -117,7 +132,7 @@ export function SolutionSection() {
               strokeDasharray="2 3"
             />
             {/* Connection lines */}
-            {SATELLITES.map(({ label, color, angle }) => {
+            {sats.map(({ label, color, angle }) => {
               const pos = polarToPercent(angle, RX, RY)
               return (
                 <line
@@ -133,7 +148,25 @@ export function SolutionSection() {
                 />
               )
             })}
+            {/* Datos que viajan del núcleo a cada parte */}
+            {sats.map(({ label, color, angle }) => {
+              const pos = polarToPercent(angle, RX, RY)
+              return (
+                <line key={`flow-${label}`} className="ml-flow" x1="50" y1="50" x2={pos.x} y2={pos.y}
+                  stroke={color} strokeWidth="0.9" strokeLinecap="round" strokeDasharray="0.1 7.9" strokeOpacity="0.95" />
+              )
+            })}
           </svg>
+
+          {/* Ondas que salen del núcleo */}
+          <div aria-hidden="true">
+            {[0, 1].map(i => (
+              <span key={i} className="ml-core-ring" style={{
+                position: 'absolute', top: '50%', left: '50%', width: '80px', height: '80px', borderRadius: '50%',
+                border: '1.5px solid rgba(244,112,90,0.5)', transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 1,
+              }} />
+            ))}
+          </div>
 
           {/* Core node */}
           <div data-sol-core style={{
@@ -156,7 +189,7 @@ export function SolutionSection() {
           </div>
 
           {/* Satellite nodes */}
-          {SATELLITES.map(({ Icon, label, color, angle }) => {
+          {sats.map(({ Icon, label, color, angle }) => {
             const pos = polarToPercent(angle, RX, RY)
             return (
               <div
@@ -171,7 +204,8 @@ export function SolutionSection() {
                   zIndex: 3,
                 }}
               >
-                <div style={{
+                <div className="ml-sat-float" style={{
+                  animationDelay: `${angle / -120}s`,
                   width: '52px', height: '52px',
                   borderRadius: '14px',
                   background: `${color}15`,
@@ -201,7 +235,7 @@ export function SolutionSection() {
           maxWidth: '900px',
           margin: '0 auto',
         }}>
-          {SATELLITES.map(({ Icon, label, sub, color }) => (
+          {sats.map(({ Icon, label, sub, color }) => (
             <div
               key={label}
               data-sol-cards
@@ -210,11 +244,10 @@ export function SolutionSection() {
                 padding: '28px 24px',
                 background: 'rgba(15,17,21,0.97)',
                 border: `1px solid ${color}20`,
-                transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = '' }}
+              data-tilt
             >
+              <span className="ml-spot" aria-hidden="true" />
               <div style={{
                 width: '44px', height: '44px', borderRadius: '12px',
                 background: `${color}15`,

@@ -1,20 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ThemeSelector } from '../components/ThemeSelector'
-import type { HubTheme } from '../lib/themeConfig'
-import { THEME_META } from '../lib/themeConfig'
-import { HubBlockEditor } from '../components/HubBlockEditor'
-import type { BlockType } from '../lib/blocksConfig'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Globe, Plus, Trash2, Eye, EyeOff, ExternalLink,
   ImageIcon, X, Star, GripVertical, Save, Download, Link2,
-  ArrowLeft,
+  BarChart2, ArrowLeft,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useRestaurant } from '@/modules/menu/hooks/useRestaurant'
-import { useRestaurantStore } from '@/store/restaurantStore'
-import type { Restaurant } from '@/types/restaurant'
 import { useImageUpload } from '@/modules/menu/hooks/useImageUpload'
 import { QRCodeSVG } from 'qrcode.react'
 import {
@@ -27,7 +20,10 @@ import {
   arrayMove, sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { TabAnalytics } from '../components/analytics/TabAnalytics'
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, CartesianGrid,
+} from 'recharts'
 import toast from 'react-hot-toast'
 
 const db = supabase as any
@@ -39,7 +35,11 @@ interface HubStory {
   id: string; restaurant_id: string
   image_url: string | null; title: string | null; title_en: string | null
   description: string | null; description_en: string | null; is_active: boolean
+  text?: string | null; text_en?: string | null
 }
+
+// Fila real de hub_reviews (reviewer_*) o del esquema del repo (author_*)
+type LegacyReviewRow = HubReview & { reviewer_name?: string; reviewer_initial?: string | null }
 
 interface HubFeaturedProduct {
   id: string; restaurant_id: string
@@ -90,17 +90,16 @@ const HUB_CATEGORIES = [
   'Delivery', 'Ropa', 'Accesorios', 'Tecnología', 'Servicios', 'Otro',
 ]
 
-type Tab = 'general' | 'blocks' | 'links' | 'novedad' | 'destacado' | 'galeria' | 'resenas' | 'analytics' | 'preview'
+type Tab = 'general' | 'links' | 'novedad' | 'destacado' | 'galeria' | 'resenas' | 'analytics' | 'preview'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'general',   label: 'General'      },
-  { id: 'blocks',    label: 'Bloques'      },
   { id: 'links',     label: 'Links'        },
   { id: 'novedad',   label: 'Novedad'      },
   { id: 'destacado', label: 'Destacado'    },
   { id: 'galeria',   label: 'Galería'      },
   { id: 'resenas',   label: 'Reseñas'      },
-  { id: 'analytics', label: 'Estadísticas' },
+  { id: 'analytics', label: 'Analytics'   },
   { id: 'preview',   label: 'Vista previa' },
 ]
 
@@ -208,6 +207,16 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
   )
 }
 
+function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+  return (
+    <div className="rounded-xl p-4" style={{ background: '#0F1115', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <p className="text-2xl font-bold text-white">{value}</p>
+      <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+      {sub && <p className="text-[11px] mt-0.5" style={{ color: ACC }}>{sub}</p>}
+    </div>
+  )
+}
+
 function ImageUploadArea({
   url, onUpload, onClear, uploading, height = 'h-32',
 }: {
@@ -244,8 +253,6 @@ function ImageUploadArea({
 function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string | undefined }) {
   const { uploadImage, uploading } = useImageUpload()
   const { user } = useAuthStore()
-  const { restaurant: storeRestaurant } = useRestaurant()
-  const updateRestaurant = useRestaurantStore(s => s.updateRestaurant)
   const qrRef = useRef<HTMLDivElement>(null)
   const fileAvatarRef = useRef<HTMLInputElement>(null)
   const [saving, setSaving] = useState(false)
@@ -280,34 +287,35 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
     show_schedule: true,
     hub_title: '',
     title_font: 'syne',
-    theme: null,
-    accent_color: '#F4705A',
   })
   const [scheduleForm, setScheduleForm] = useState<Record<string,any>>({})
 
-  // Initialize hub form fields from store (no Supabase SELECT needed)
   useEffect(() => {
-    if (!storeRestaurant) return
-    setForm({
-      hub_about: storeRestaurant.hub_about ?? '',
-      hub_about_en: storeRestaurant.hub_about_en ?? '',
-      hub_category_tags: (storeRestaurant.hub_category_tags as string[]) ?? [],
-      hub_category_tags_en: (storeRestaurant.hub_category_tags_en as string[]) ?? [],
-      hub_enabled: storeRestaurant.hub_enabled !== false,
-      hub_bottom_nav: (storeRestaurant.hub_bottom_nav as any) !== false,
-      hub_cover_url: storeRestaurant.hub_cover_url ?? '',
-      hub_category: storeRestaurant.hub_category ?? '',
-      hub_main_cta_text: storeRestaurant.hub_main_cta_text ?? '',
-      hub_main_cta_url: storeRestaurant.hub_main_cta_url ?? '',
-      google_rating: storeRestaurant.google_rating != null ? String(storeRestaurant.google_rating) : '',
-      google_review_count: storeRestaurant.google_review_count != null ? String(storeRestaurant.google_review_count) : '',
-      google_review_url: storeRestaurant.google_review_url ?? '',
-    })
-    if (storeRestaurant.schedule) setScheduleForm(storeRestaurant.schedule as Record<string, any>)
-    setLoaded(true)
-  }, [storeRestaurant])
+    db.from('restaurants').select(
+      'hub_about,hub_about_en,hub_category_tags,hub_category_tags_en,hub_enabled,hub_bottom_nav,hub_cover_url,hub_category,hub_main_cta_text,hub_main_cta_url,google_rating,google_review_count,google_review_url'
+    ).eq('id', restaurantId).maybeSingle()
+      .then(({ data }: { data: Record<string, unknown> | null }) => {
+        if (data) {
+          setForm({
+            hub_about: (data.hub_about as string) ?? '',
+            hub_about_en: (data.hub_about_en as string) ?? '',
+            hub_category_tags: (data.hub_category_tags as string[]) ?? [],
+            hub_category_tags_en: (data.hub_category_tags_en as string[]) ?? [],
+            hub_enabled: data.hub_enabled !== false,
+            hub_bottom_nav: data.hub_bottom_nav !== false,
+            hub_cover_url: (data.hub_cover_url as string) ?? '',
+            hub_category: (data.hub_category as string) ?? '',
+            hub_main_cta_text: (data.hub_main_cta_text as string) ?? '',
+            hub_main_cta_url: (data.hub_main_cta_url as string) ?? '',
+            google_rating: data.google_rating != null ? String(data.google_rating) : '',
+            google_review_count: data.google_review_count != null ? String(data.google_review_count) : '',
+            google_review_url: (data.google_review_url as string) ?? '',
+          })
+        }
+        setLoaded(true)
+      })
+  }, [restaurantId])
 
-  // Fetch hub_config (separate table, not in restaurant store)
   useEffect(() => {
     db.from('hub_config').select('*').eq('restaurant_id', restaurantId).maybeSingle()
       .then(({ data }: { data: Record<string,any> | null }) => {
@@ -319,9 +327,11 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           show_schedule:       data.show_schedule       ?? true,
           hub_title:           data.hub_title           || '',
           title_font:          data.title_font          || 'syne',
-          theme:               data.theme               ?? null,
-          accent_color:        data.accent_color        || '#F4705A',
         })
+      })
+    db.from('restaurants').select('schedule,name').eq('id', restaurantId).maybeSingle()
+      .then(({ data }: { data: Record<string,any> | null }) => {
+        if (data?.schedule) setScheduleForm(data.schedule)
       })
   }, [restaurantId])
 
@@ -354,7 +364,6 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           db.from('restaurants').update({ logo_url: r.url }).eq('id', restaurantId),
         ])
         setAvatarUrl(r.url)
-        updateRestaurant({ logo_url: r.url })
         toast.success('Foto de perfil actualizada')
       } else {
         toast.error('Error al subir la foto')
@@ -385,8 +394,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         google_review_count: form.google_review_count ? parseInt(form.google_review_count) : null,
         google_review_url: form.google_review_url.trim() || null,
       }
-      console.log('Saving hub payload:', payload)
-      const { data, error } = await db
+      const { error } = await db
         .from('restaurants')
         .update(payload)
         .eq('id', restaurantId)
@@ -397,13 +405,9 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         toast.error(`Error al guardar: ${error.message}`)
         return
       }
-      console.log('Hub saved:', data)
-      updateRestaurant(payload as Partial<Restaurant>)
-      toast.success('Configuración guardada')
-      await db.from('hub_config').upsert({
-        restaurant_id:       restaurantId,
-        accent_color:        hubConfig.accent_color        || '#F4705A',
-        theme:               hubConfig.theme               ?? null,
+      const { error: cfgError } = await db.from('hub_config').upsert({
+        restaurant_id: restaurantId,
+        accent_color: '#F4705A',
         show_open_status:    hubConfig.show_open_status    ?? true,
         show_catalog_banner: hubConfig.show_catalog_banner ?? true,
         show_locations:      hubConfig.show_locations      ?? true,
@@ -411,10 +415,12 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         show_schedule:       hubConfig.show_schedule       ?? true,
         hub_title:           hubConfig.hub_title           || null,
         title_font:          hubConfig.title_font          || 'syne',
-        updated_at:          new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       }, { onConflict: 'restaurant_id' })
-      await db.from('restaurants').update({ schedule: scheduleForm }).eq('id', restaurantId)
-      updateRestaurant({ schedule: scheduleForm as Restaurant['schedule'] })
+      if (cfgError) throw cfgError
+      const { error: scheduleError } = await db.from('restaurants').update({ schedule: scheduleForm }).eq('id', restaurantId)
+      if (scheduleError) throw scheduleError
+      toast.success('Configuración guardada')
     } catch (err) {
       toast.error(`Error al guardar: ${(err as Error)?.message ?? err}`)
       console.error(err)
@@ -455,7 +461,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
       {/* Profile photo */}
       <Card className="space-y-3">
         <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Foto de perfil</h3>
-        <p className="text-xs text-gray-500">Aparece en tu ID público, en la esfera de Life y en el saludo.</p>
+        <p className="text-xs text-gray-500">Aparece en tu Hub público, en la esfera de Life y en el saludo.</p>
         <div className="flex flex-col items-center gap-2">
           <button
             type="button"
@@ -498,9 +504,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
           url={form.hub_cover_url}
           onUpload={async f => {
             const r = await uploadImage(f, 'hub-assets')
-            console.log('Cover upload result:', r)
             if (r.success) {
-              console.log('Cover URL set:', r.url)
               setForm(p => ({ ...p, hub_cover_url: r.url }))
             }
           }}
@@ -602,38 +606,19 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         <h3 className="text-white font-semibold text-sm uppercase tracking-wide mb-1">Visibilidad</h3>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-white font-medium">ID activo</p>
-            <p className="text-xs text-gray-500">Los clientes pueden ver tu ID Público</p>
+            <p className="text-sm text-white font-medium">Hub activo</p>
+            <p className="text-xs text-gray-500">Los clientes pueden ver tu Hub Público</p>
           </div>
           <Toggle value={form.hub_enabled} onChange={v => setForm(p => ({ ...p, hub_enabled: v }))} />
         </div>
         <div className="w-full h-px bg-white/5" />
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-white font-medium">Nav inferior en ID</p>
+            <p className="text-sm text-white font-medium">Nav inferior en Hub</p>
             <p className="text-xs text-gray-500">Muestra la barra de navegación con secciones</p>
           </div>
           <Toggle value={form.hub_bottom_nav} onChange={v => setForm(p => ({ ...p, hub_bottom_nav: v }))} />
         </div>
-      </Card>
-
-      {/* Tema visual */}
-      <Card className="space-y-4">
-        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Apariencia</h3>
-        <ThemeSelector
-          value={(hubConfig.theme as HubTheme | null) ?? null}
-          onChange={(newTheme) => {
-            const currentAccent = hubConfig.accent_color
-            const oldThemeDefault = hubConfig.theme
-              ? THEME_META[hubConfig.theme as HubTheme]?.defaultAccent
-              : '#F4705A'
-            // Reset accent only if it was the old theme's default
-            const newAccent = (currentAccent === oldThemeDefault || !currentAccent)
-              ? THEME_META[newTheme].defaultAccent
-              : currentAccent
-            setHubConfig({ ...hubConfig, theme: newTheme, accent_color: newAccent })
-          }}
-        />
       </Card>
 
       {/* Nombre y tipografía */}
@@ -651,12 +636,12 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
         </div>
         <div className="space-y-2">
           {[
-            { id: 'syne',          family: 'Syne',            weight: 800, preview: 'Moderno'   },
+            { id: 'syne',          family: 'Geist',            weight: 800, preview: 'Moderno'   },
             { id: 'playfair',      family: 'Playfair Display', weight: 700, preview: 'Elegante'  },
             { id: 'space-grotesk', family: 'Space Grotesk',   weight: 700, preview: 'Técnico'   },
             { id: 'bebas',         family: 'Bebas Neue',      weight: 400, preview: 'Impacto'   },
-            { id: 'dm-sans',       family: 'DM Sans',         weight: 700, preview: 'Limpio'    },
-            { id: 'inter',         family: 'Inter',           weight: 700, preview: 'Neutral'   },
+            { id: 'dm-sans',       family: 'Geist',         weight: 700, preview: 'Limpio'    },
+            { id: 'inter',         family: 'Geist',           weight: 700, preview: 'Neutral'   },
           ].map(font => (
             <button
               key={font.id}
@@ -679,7 +664,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
               </span>
               <span style={{
                 fontSize: 11, color: hubConfig.title_font === font.id ? 'white' : 'rgba(255,255,255,0.3)',
-                fontFamily: 'DM Sans',
+                fontFamily: 'Geist',
               }}>
                 {font.preview}
               </span>
@@ -729,7 +714,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
                 display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
               }}>
-                <span style={{ width: 82, fontSize: 13, color: 'white', fontFamily: 'DM Sans', flexShrink: 0 }}>
+                <span style={{ width: 82, fontSize: 13, color: 'white', fontFamily: 'Geist', flexShrink: 0 }}>
                   {day.label}
                 </span>
                 <Toggle
@@ -745,7 +730,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
                       style={{
                         background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: 8, padding: '5px 7px', color: 'white', fontSize: 12,
-                        fontFamily: 'DM Mono, monospace', width: 82, flexShrink: 0,
+                        fontFamily: 'Geist Mono, monospace', width: 82, flexShrink: 0,
                       }}
                     />
                     <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>—</span>
@@ -756,12 +741,12 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
                       style={{
                         background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: 8, padding: '5px 7px', color: 'white', fontSize: 12,
-                        fontFamily: 'DM Mono, monospace', width: 82, flexShrink: 0,
+                        fontFamily: 'Geist Mono, monospace', width: 82, flexShrink: 0,
                       }}
                     />
                   </>
                 ) : (
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans' }}>Cerrado</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'Geist' }}>Cerrado</span>
                 )}
               </div>
             )
@@ -779,7 +764,7 @@ function TabGeneral({ restaurantId, slug }: { restaurantId: string; slug: string
       {/* QR Section */}
       {slug && (
         <Card className="space-y-4">
-          <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Tu QR del ID</h3>
+          <h3 className="text-white font-semibold text-sm uppercase tracking-wide">Tu QR del Hub</h3>
           <p className="text-xs text-gray-500">
             Compartí este QR en tu local, menús impresos o redes sociales.
           </p>
@@ -1123,9 +1108,10 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
           setForm({
             image_url: data.image_url ?? '',
             title: data.title ?? '',
-            title_en: (data as any).title_en ?? '',
-            description: data.description ?? '',
-            description_en: (data as any).description_en ?? '',
+            title_en: data.title_en ?? '',
+            // Columnas reales: text / text_en
+            description: data.text ?? data.description ?? '',
+            description_en: data.text_en ?? data.description_en ?? '',
             is_active: data.is_active,
           })
         }
@@ -1139,13 +1125,14 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
       const payload = {
         restaurant_id: restaurantId,
         image_url: form.image_url.trim() || null,
-        title: form.title.trim() || null,
+        title: form.title.trim(),
         title_en: form.title_en.trim() || null,
-        description: form.description.trim() || null,
-        description_en: form.description_en.trim() || null,
+        text: form.description.trim() || null,
+        text_en: form.description_en.trim() || null,
         is_active: form.is_active,
         updated_at: new Date().toISOString(),
       }
+      if (!payload.title) { toast.error('El título es requerido'); setSaving(false); return }
       let error: unknown
       if (story) {
         ;({ error } = await db.from('hub_stories').update(payload).eq('id', story.id))
@@ -1177,7 +1164,7 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-400">Novedad destacada en la parte superior del ID.</p>
+        <p className="text-sm text-gray-400">Novedad destacada en la parte superior del Hub.</p>
         {story && (
           <button type="button" onClick={handleDelete} className="text-xs text-red-400 hover:text-red-300">
             Eliminar
@@ -1210,8 +1197,8 @@ function TabNovedad({ restaurantId }: { restaurantId: string }) {
         </div>
         <div className="flex items-center justify-between pt-1">
           <div>
-            <p className="text-sm text-white font-medium">Visible en ID</p>
-            <p className="text-xs text-gray-500">Muestra este banner en el ID Público</p>
+            <p className="text-sm text-white font-medium">Visible en Hub</p>
+            <p className="text-xs text-gray-500">Muestra este banner en el Hub Público</p>
           </div>
           <Toggle value={form.is_active} onChange={v => setForm(p => ({ ...p, is_active: v }))} />
         </div>
@@ -1306,7 +1293,7 @@ function TabDestacado({ restaurantId }: { restaurantId: string }) {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-400">Producto o plato destacado en tu ID.</p>
+        <p className="text-sm text-gray-400">Producto o plato destacado en tu Hub.</p>
         {product && (
           <button type="button" onClick={handleDelete} className="text-xs text-red-400 hover:text-red-300">
             Eliminar
@@ -1342,8 +1329,8 @@ function TabDestacado({ restaurantId }: { restaurantId: string }) {
           onChange={v => setForm(p => ({ ...p, cta_url: v }))} placeholder="https://…" />
         <div className="flex items-center justify-between pt-1">
           <div>
-            <p className="text-sm text-white font-medium">Visible en ID</p>
-            <p className="text-xs text-gray-500">Muestra este destacado en el ID Público</p>
+            <p className="text-sm text-white font-medium">Visible en Hub</p>
+            <p className="text-xs text-gray-500">Muestra este destacado en el Hub Público</p>
           </div>
           <Toggle value={form.is_active} onChange={v => setForm(p => ({ ...p, is_active: v }))} />
         </div>
@@ -1566,14 +1553,13 @@ function ReviewModal({ restaurantId, review, count, onClose, onSaved }: {
     try {
       const payload = {
         restaurant_id: restaurantId,
-        author_name: form.author_name.trim(),
-        author_initial: form.author_initial.trim() || form.author_name.trim()[0]?.toUpperCase() || null,
+        reviewer_name: form.author_name.trim(),
+        reviewer_initial: form.author_initial.trim() || form.author_name.trim()[0]?.toUpperCase() || null,
         profile_color: form.profile_color,
         rating: form.rating,
         text: form.text.trim(),
         relative_time: form.relative_time.trim() || 'Hace poco',
         sort_order: review?.sort_order ?? count,
-        updated_at: new Date().toISOString(),
       }
       let error: unknown
       if (review) {
@@ -1659,7 +1645,11 @@ function TabResenas({ restaurantId }: { restaurantId: string }) {
   const loadReviews = useCallback(async () => {
     const { data } = await db.from('hub_reviews').select('*')
       .eq('restaurant_id', restaurantId).order('sort_order')
-    setReviews(data ?? [])
+    setReviews(((data ?? []) as LegacyReviewRow[]).map(r => ({
+      ...r,
+      author_name: r.reviewer_name ?? r.author_name ?? '',
+      author_initial: r.reviewer_initial ?? r.author_initial ?? null,
+    })) as HubReview[])
     setLoaded(true)
   }, [restaurantId])
 
@@ -1733,6 +1723,113 @@ function TabResenas({ restaurantId }: { restaurantId: string }) {
 
 // ─── Tab: Analytics ──────────────────────────────────────────────────────────
 
+interface AnalyticsEvent { event_type: string; link_id: string | null; created_at: string; user_agent: string | null }
+interface LinkLabel { id: string; label: string }
+
+function TabAnalytics({ restaurantId }: { restaurantId: string }) {
+  const [loading, setLoading] = useState(true)
+  const [profileViews, setProfileViews] = useState(0)
+  const [linkClicks, setLinkClicks] = useState(0)
+  const [topLink, setTopLink] = useState<string | null>(null)
+  const [uniqueVisitors, setUniqueVisitors] = useState(0)
+  const [chartData, setChartData] = useState<{ day: string; visitas: number }[]>([])
+
+  useEffect(() => {
+    async function load() {
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+      const [{ data: events }, { data: linkRows }] = await Promise.all([
+        db.from('hub_analytics')
+          .select('event_type, link_id, created_at, user_agent')
+          .eq('restaurant_id', restaurantId)
+          .gte('created_at', thirtyDaysAgo.toISOString()),
+        db.from('hub_links').select('id, label').eq('restaurant_id', restaurantId),
+      ])
+
+      const evts = (events ?? []) as AnalyticsEvent[]
+      const links = (linkRows ?? []) as LinkLabel[]
+
+      const views = evts.filter(e => e.event_type === 'profile_view').length
+      const clicks = evts.filter(e => e.event_type === 'link_click').length
+      setProfileViews(views)
+      setLinkClicks(clicks)
+
+      // Unique visitors: unique user_agent+date combos
+      const uniqSet = new Set(evts.map(e => `${(e.user_agent ?? '').slice(0, 30)}_${e.created_at?.slice(0, 10)}`))
+      setUniqueVisitors(uniqSet.size)
+
+      // Top link
+      const linkCounts: Record<string, number> = {}
+      evts.filter(e => e.event_type === 'link_click' && e.link_id).forEach(e => {
+        linkCounts[e.link_id!] = (linkCounts[e.link_id!] ?? 0) + 1
+      })
+      const topId = Object.entries(linkCounts).sort((a, b) => b[1] - a[1])[0]?.[0]
+      const topLabel = links.find(l => l.id === topId)?.label ?? null
+      setTopLink(topLabel)
+
+      // Chart: last 14 days profile views
+      const chart: { day: string; visitas: number }[] = []
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date()
+        d.setDate(d.getDate() - i)
+        const key = d.toISOString().slice(0, 10)
+        chart.push({
+          day: d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
+          visitas: evts.filter(e => e.event_type === 'profile_view' && e.created_at?.startsWith(key)).length,
+        })
+      }
+      setChartData(chart)
+      setLoading(false)
+    }
+    load()
+  }, [restaurantId])
+
+  if (loading) return <Spinner />
+
+  return (
+    <div className="space-y-5">
+      <p className="text-sm text-gray-400">Últimos 30 días</p>
+
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard label="Visitas al perfil" value={profileViews} sub="profile views" />
+        <StatCard label="Clicks en links" value={linkClicks} sub="link clicks" />
+        <StatCard label="Link más clickeado" value={topLink ?? '—'} />
+        <StatCard label="Visitantes únicos" value={uniqueVisitors} sub="aprox." />
+      </div>
+
+      <Card className="space-y-3">
+        <h3 className="text-white font-semibold text-sm uppercase tracking-wide">
+          Visitas últimos 14 días
+        </h3>
+        {chartData.every(d => d.visitas === 0) ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="text-center">
+              <BarChart2 className="w-8 h-8 mx-auto mb-2" style={{ color: '#374151' }} />
+              <p className="text-sm text-gray-500">Sin datos aún</p>
+            </div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={160}>
+            <LineChart data={chartData} margin={{ top: 5, right: 8, bottom: 5, left: -28 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="day" tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} interval={1} />
+              <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{ background: '#1F2937', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
+                labelStyle={{ color: '#9CA3AF' }}
+                itemStyle={{ color: ACC }}
+                formatter={(v) => [v, 'visitas']}
+              />
+              <Line type="monotone" dataKey="visitas" stroke={ACC} strokeWidth={2} dot={false} activeDot={{ r: 4, fill: ACC }} />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+      </Card>
+    </div>
+  )
+}
+
 // ─── Tab: Vista previa ────────────────────────────────────────────────────────
 
 function TabPreview({ slug }: { slug: string | undefined }) {
@@ -1752,7 +1849,7 @@ function TabPreview({ slug }: { slug: string | undefined }) {
       </button>
       <div className="rounded-[2.5rem] overflow-hidden shadow-2xl"
         style={{ width: 300, height: 600, border: '6px solid rgba(255,255,255,0.1)', boxShadow: '0 0 0 1px rgba(255,255,255,0.05), 0 40px 80px rgba(0,0,0,0.6)' }}>
-        <iframe src={`/${slug}`} className="w-full h-full" title="ID preview" />
+        <iframe src={`/${slug}`} className="w-full h-full" title="Hub preview" />
       </div>
     </div>
   )
@@ -1764,17 +1861,20 @@ export default function HubPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { restaurant, loading } = useRestaurant()
-  const updateRestaurant = useRestaurantStore(s => s.updateRestaurant)
   const [activeTab, setActiveTab] = useState<Tab>('general')
   const [hubEnabled, setHubEnabled] = useState<boolean | null>(null)
   const [savingEnabled, setSavingEnabled] = useState(false)
 
   const isLifeContext = location.pathname.startsWith('/life')
 
-  // Derive hub_enabled from store — no SELECT needed
   useEffect(() => {
-    if (restaurant) setHubEnabled(restaurant.hub_enabled !== false)
-  }, [restaurant?.hub_enabled])
+    if (restaurant?.id) {
+      db.from('restaurants').select('hub_enabled').eq('id', restaurant.id).maybeSingle()
+        .then(({ data }: { data: { hub_enabled: boolean } | null }) => {
+          setHubEnabled(data?.hub_enabled !== false)
+        })
+    }
+  }, [restaurant?.id])
 
   async function toggleHubEnabled() {
     if (!restaurant?.id || hubEnabled === null) return
@@ -1782,11 +1882,8 @@ export default function HubPage() {
     setSavingEnabled(true)
     const { error } = await db.from('restaurants').update({ hub_enabled: next }).eq('id', restaurant.id)
     setSavingEnabled(false)
-    if (!error) {
-      setHubEnabled(next)
-      updateRestaurant({ hub_enabled: next })
-      toast.success(next ? 'Hub activado' : 'Hub desactivado')
-    } else toast.error('Error al actualizar')
+    if (!error) { setHubEnabled(next); toast.success(next ? 'Hub activado' : 'Hub desactivado') }
+    else toast.error('Error al actualizar')
   }
 
   if (loading) {
@@ -1800,6 +1897,14 @@ export default function HubPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
+      {/* Acceso al editor nuevo (Mycen Studio) */}
+      <a href="/studio"
+        className="mb-4 flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm transition-all hover:opacity-90"
+        style={{ background: '#F1F0E9', color: '#111311' }}>
+        <span><strong>Nuevo: Mycen Studio.</strong> Editá tu perfil con vista previa en vivo.</span>
+        <span aria-hidden="true">→</span>
+      </a>
+
       {/* Header */}
       <div className="mb-6 space-y-3">
         {/* Row 1: title/URL left — Life + toggle right */}
@@ -1810,7 +1915,7 @@ export default function HubPage() {
               <Globe className="w-5 h-5" style={{ color: ACC }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">ID Público</h1>
+              <h1 className="text-xl font-bold text-white">Hub Público</h1>
               {restaurant?.slug && (
                 <a href={`/${restaurant.slug}`} target="_blank" rel="noreferrer"
                   className="text-xs font-mono px-2 py-0.5 rounded-md inline-block mt-0.5 hover:opacity-80 transition-all"
@@ -1873,24 +1978,6 @@ export default function HubPage() {
       ) : (
         <>
           {activeTab === 'general'   && <TabGeneral   restaurantId={restaurant.id} slug={restaurant.slug} />}
-          {activeTab === 'blocks'    && (
-            <HubBlockEditor
-              restaurantId={restaurant.id}
-              onEditLegacyBlock={(blockType: BlockType) => {
-                // Redirigir al tab del editor legacy correspondiente
-                const legacyTabMap: Partial<Record<BlockType, Tab>> = {
-                  links:            'links',
-                  stories:          'novedad',
-                  featured:         'destacado',
-                  featured_products:'destacado',
-                  gallery:          'galeria',
-                  reviews:          'resenas',
-                }
-                const dest = legacyTabMap[blockType]
-                if (dest) setActiveTab(dest)
-              }}
-            />
-          )}
           {activeTab === 'links'     && <TabLinks     restaurantId={restaurant.id} />}
           {activeTab === 'novedad'   && <TabNovedad   restaurantId={restaurant.id} />}
           {activeTab === 'destacado' && <TabDestacado restaurantId={restaurant.id} />}

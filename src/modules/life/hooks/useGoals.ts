@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
+import { LIFE_DATA_UPDATED } from './useBrain'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface Milestone {
   id: string
@@ -36,6 +37,12 @@ export interface GoalFormData {
   color: string
 }
 
+/** Con pasos, el progreso es pasos hechos sobre el total. Sin pasos, queda el manual. */
+function progressFromSteps(steps: Pick<Milestone, 'is_completed'>[]): number | null {
+  if (!steps.length) return null
+  return Math.round((steps.filter(s => s.is_completed).length / steps.length) * 100)
+}
+
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useGoals() {
@@ -43,28 +50,37 @@ export function useGoals() {
   const [rawGoals, setRawGoals] = useState<Omit<Goal, 'milestones'>[]>([])
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [loading, setLoading] = useState(true)
+  const progressTimers = useRef(new Map<string, number>())
 
   const load = useCallback(async () => {
     if (!user) return
-    setLoading(true)
     const [goalsRes, msRes] = await Promise.all([
       db.from('life_goals').select('*').eq('user_id', user.id).order('sort_order'),
       db.from('life_goal_milestones').select('*').eq('user_id', user.id).order('sort_order'),
     ])
-    setRawGoals(goalsRes.data ?? [])
-    setMilestones(msRes.data ?? [])
+    if (!goalsRes.error) setRawGoals(goalsRes.data ?? [])
+    if (!msRes.error) setMilestones(msRes.data ?? [])
     setLoading(false)
   }, [user])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    let alive = true
+    const id = window.setTimeout(() => { if (alive) void load() }, 0)
+    return () => { alive = false; window.clearTimeout(id) }
+  }, [load])
+
+  // Recargar cuando el botón + crea una meta
+  useEffect(() => {
+    const handler = (e: Event) => {
+      if ((e as CustomEvent<{ module: string }>).detail?.module === 'goals') void load()
+    }
+    window.addEventListener(LIFE_DATA_UPDATED, handler)
+    return () => window.removeEventListener(LIFE_DATA_UPDATED, handler)
+  }, [load])
 
   const goals: Goal[] = useMemo(() =>
-    rawGoals.map(g => ({
-      ...g,
-      milestones: milestones.filter(m => m.goal_id === g.id),
-    })),
-    [rawGoals, milestones]
-  )
+    rawGoals.map(g => ({ ...g, milestones: milestones.filter(m => m.goal_id === g.id) })),
+  [rawGoals, milestones])
 
   const activeCount    = useMemo(() => goals.filter(g => g.status === 'in_progress').length, [goals])
   const completedCount = useMemo(() => goals.filter(g => g.status === 'completed').length, [goals])
@@ -74,11 +90,25 @@ export function useGoals() {
     return Math.round(active.reduce((s, g) => s + g.progress, 0) / active.length)
   }, [goals])
 
-  // ── Actions ────────────────────────────────────────────────────────────────
+  const saveProgress = useCallback(async (goalId: string, progress: number) => {
+    const { error } = await db.from('life_goals').update({ progress }).eq('id', goalId).eq('user_id', user?.id)
+    if (error) throw error
+  }, [user])
+
+  /** Recalcula el progreso según los pasos (si tiene) y lo guarda. */
+  const syncStepProgress = useCallback(async (goalId: string, steps: Milestone[]) => {
+    const p = progressFromSteps(steps)
+    if (p == null) return   // sin pasos: se conserva el progreso manual
+    setRawGoals(prev => prev.map(g => (g.id === goalId ? { ...g, progress: p } : g)))
+    await saveProgress(goalId, p)
+  }, [saveProgress])
+
+  // ── Acciones ───────────────────────────────────────────────────────────────
 
   const createGoal = useCallback(async (data: GoalFormData) => {
     if (!user) return
-    await db.from('life_goals').insert({ ...data, user_id: user.id, sort_order: rawGoals.length })
+    const { error } = await db.from('life_goals').insert({ ...data, user_id: user.id, sort_order: rawGoals.length })
+    if (error) throw error
     await load()
     void award(user.id, 'first_goal', 'Primera meta definida')
     const { count } = await db.from('life_goals').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
@@ -87,65 +117,66 @@ export function useGoals() {
 
   const updateGoal = useCallback(async (id: string, data: Partial<GoalFormData & { status: string; progress: number }>) => {
     if (!user) return
-    await db.from('life_goals').update(data).eq('id', id).eq('user_id', user.id)
+    const { error } = await db.from('life_goals').update(data).eq('id', id).eq('user_id', user.id)
+    if (error) throw error
     await load()
     if (data.status === 'completed') void award(user.id, 'first_goal_completed', 'Meta alcanzada')
   }, [user, load])
 
   const deleteGoal = useCallback(async (id: string) => {
     if (!user) return
-    await db.from('life_goals').delete().eq('id', id).eq('user_id', user.id)
+    const { error } = await db.from('life_goals').delete().eq('id', id).eq('user_id', user.id)
+    if (error) throw error
     await load()
   }, [user, load])
 
+  /** Progreso manual: se ve al instante y se guarda cuando el usuario suelta el control. */
   const updateProgress = useCallback(async (goalId: string, progress: number) => {
     if (!user) return
     const clamped = Math.max(0, Math.min(100, Math.round(progress)))
-    // Optimistic
-    setRawGoals(prev => prev.map(g => g.id === goalId ? { ...g, progress: clamped } : g))
-    await db.from('life_goals').update({ progress: clamped }).eq('id', goalId).eq('user_id', user.id)
-  }, [user])
+    setRawGoals(prev => prev.map(g => (g.id === goalId ? { ...g, progress: clamped } : g)))
+    const timers = progressTimers.current
+    window.clearTimeout(timers.get(goalId))
+    await new Promise<void>((resolve, reject) => {
+      timers.set(goalId, window.setTimeout(() => { saveProgress(goalId, clamped).then(resolve, reject) }, 450))
+    })
+  }, [user, saveProgress])
 
   const addMilestone = useCallback(async (goalId: string, title: string) => {
     if (!user) return
-    const count = milestones.filter(m => m.goal_id === goalId).length
-    await db.from('life_goal_milestones').insert({
-      goal_id: goalId, user_id: user.id, title, sort_order: count,
-    })
-    await load()
-  }, [user, milestones, load])
+    const current = milestones.filter(m => m.goal_id === goalId)
+    const { data, error } = await db.from('life_goal_milestones').insert({
+      goal_id: goalId, user_id: user.id, title, sort_order: current.length,
+    }).select('*').single()
+    if (error) throw error
+    const next = [...current, data as Milestone]
+    setMilestones(prev => [...prev, data as Milestone])
+    await syncStepProgress(goalId, next)
+  }, [user, milestones, syncStepProgress])
 
   const toggleMilestone = useCallback(async (ms: Milestone) => {
     if (!user) return
-    const now = !ms.is_completed
-    // Optimistic
-    setMilestones(prev => prev.map(m =>
-      m.id === ms.id ? { ...m, is_completed: now, completed_at: now ? new Date().toISOString() : null } : m
-    ))
-    await db.from('life_goal_milestones').update({
-      is_completed: now,
-      completed_at: now ? new Date().toISOString() : null,
-    }).eq('id', ms.id)
-    // Recompute + save progress
-    const goalMs = milestones.map(m => m.id === ms.id ? { ...m, is_completed: now } : m)
-      .filter(m => m.goal_id === ms.goal_id)
-    if (goalMs.length > 0) {
-      const p = Math.round(goalMs.filter(m => m.is_completed).length / goalMs.length * 100)
-      setRawGoals(prev => prev.map(g => g.id === ms.goal_id ? { ...g, progress: p } : g))
-      await db.from('life_goals').update({ progress: p }).eq('id', ms.goal_id).eq('user_id', user.id)
+    const done = !ms.is_completed
+    const completed_at = done ? new Date().toISOString() : null
+    setMilestones(prev => prev.map(m => (m.id === ms.id ? { ...m, is_completed: done, completed_at } : m)))
+    const { error } = await db.from('life_goal_milestones').update({ is_completed: done, completed_at }).eq('id', ms.id)
+    if (error) {
+      setMilestones(prev => prev.map(m => (m.id === ms.id ? ms : m)))
+      throw error
     }
-  }, [user, milestones])
+    const steps = milestones.map(m => (m.id === ms.id ? { ...m, is_completed: done } : m)).filter(m => m.goal_id === ms.goal_id)
+    await syncStepProgress(ms.goal_id, steps)
+  }, [user, milestones, syncStepProgress])
 
   const deleteMilestone = useCallback(async (id: string, goalId: string) => {
     if (!user) return
-    await db.from('life_goal_milestones').delete().eq('id', id)
+    const { error } = await db.from('life_goal_milestones').delete().eq('id', id)
+    if (error) throw error
     const remaining = milestones.filter(m => m.goal_id === goalId && m.id !== id)
-    const p = remaining.length > 0
-      ? Math.round(remaining.filter(m => m.is_completed).length / remaining.length * 100)
-      : 0
-    await db.from('life_goals').update({ progress: p }).eq('id', goalId).eq('user_id', user.id)
-    await load()
-  }, [user, milestones, load])
+    setMilestones(prev => prev.filter(m => m.id !== id))
+    // Si era el último paso, el progreso queda como estaba (no vuelve a 0)
+    await syncStepProgress(goalId, remaining)
+  }, [user, milestones, syncStepProgress])
 
   return {
     goals, loading, reload: load,

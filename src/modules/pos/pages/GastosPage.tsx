@@ -184,7 +184,7 @@ function NewExpenseModal({ restaurantId, userName, cashRegisterId, onClose, onSa
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
             Nuevo Gasto
           </h2>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: BDR, borderRadius: 8, padding: '4px 8px', color: MUTED, cursor: 'pointer', display: 'flex' }}>
@@ -204,7 +204,7 @@ function NewExpenseModal({ restaurantId, userName, cashRegisterId, onClose, onSa
               onChange={e => setAmount(e.target.value)}
               placeholder="$0"
               autoFocus
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', background: 'rgba(255,255,255,0.06)', border: `1px solid rgba(255,255,255,0.15)`, borderRadius: 10, color: TEXT, fontSize: 20, fontWeight: 800, outline: 'none', fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', background: 'rgba(255,255,255,0.06)', border: `1px solid rgba(255,255,255,0.15)`, borderRadius: 10, color: TEXT, fontSize: 20, fontWeight: 800, outline: 'none', fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}
             />
           </div>
 
@@ -286,7 +286,7 @@ function NewExpenseModal({ restaurantId, userName, cashRegisterId, onClose, onSa
               width: '100%', padding: '13px', background: saving ? 'rgba(244,112,90,0.5)' : ACCENT,
               border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 800,
               cursor: saving ? 'not-allowed' : 'pointer', letterSpacing: '0.04em',
-              fontFamily: 'var(--font-ruda, Ruda, sans-serif)', marginTop: 4,
+              fontFamily: 'var(--font-ruda, Geist, sans-serif)', marginTop: 4,
             }}
           >
             {saving ? 'Guardando...' : 'Registrar Gasto'}
@@ -341,7 +341,7 @@ function AnalyticsSection({ restaurantId }: { restaurantId: string }) {
   return (
     <div style={{ marginTop: 40 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+        <h2 style={{ fontSize: 16, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
           Analytics
         </h2>
         <div style={{ display: 'flex', gap: 6 }}>
@@ -378,7 +378,7 @@ function AnalyticsSection({ restaurantId }: { restaurantId: string }) {
             <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
               Total gastado
             </p>
-            <p style={{ fontSize: 32, fontWeight: 800, color: RED, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+            <p style={{ fontSize: 32, fontWeight: 800, color: RED, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
               {fmtARS(total)}
             </p>
             <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>{expenses.length} gasto{expenses.length !== 1 ? 's' : ''}</p>
@@ -560,7 +560,7 @@ export function GastosPage() {
               <TrendingDown style={{ width: 22, height: 22, color: RED }} />
             </div>
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+              <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT, margin: 0, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
                 Gastos
               </h1>
               <p style={{ fontSize: 13, color: MUTED, margin: 0 }}>
@@ -665,7 +665,7 @@ export function GastosPage() {
                     <span style={{ fontSize: 12, color: MUTED }}>{fmtDateTime(exp.created_at)}</span>
                     <CategoryBadge cat={exp.category} />
                     <span style={{ fontSize: 13, color: TEXT }}>{exp.created_by}</span>
-                    <span style={{ fontSize: 14, fontWeight: 800, color: RED, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: RED, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
                       -{fmtARS(exp.amount)}
                     </span>
                     <span style={{ fontSize: 13, color: MUTED, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 8 }}>
@@ -698,7 +698,7 @@ export function GastosPage() {
                       )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                      <span style={{ fontSize: 16, fontWeight: 800, color: RED, fontFamily: 'var(--font-ruda, Ruda, sans-serif)' }}>
+                      <span style={{ fontSize: 16, fontWeight: 800, color: RED, fontFamily: 'var(--font-ruda, Geist, sans-serif)' }}>
                         -{fmtARS(exp.amount)}
                       </span>
                       <button

@@ -1,16 +1,19 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Target, Plus, MoreHorizontal, Pencil, Trash2, Pause, Play, CheckCircle2 } from 'lucide-react'
+import { Navigate, useSearchParams } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import toast from 'react-hot-toast'
+import { Target, Plus, Pencil, Trash2, Pause, Play, CheckCircle2, CalendarDays } from 'lucide-react'
+import { useLifeT } from '@/i18n/app/life'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
 import {
   LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
-  MiniProgressRing, colors, font, radius, stagger, fadeInUp, scaleIn,
+  MiniProgressRing, colors, font, radius, stagger, fadeInUp,
 } from '../design-system'
 import { useGoals, type Goal } from '../hooks/useGoals'
-import { useGoalsNeedingCheckin } from '../hooks/useGoalCheckins'
 import { GoalSheet } from '../components/GoalSheet'
 import { GoalDetailSheet } from '../components/GoalDetailSheet'
-import { GoalCheckinBanner } from '../components/GoalCheckinBanner'
-import { WeeklyCheckInFlow } from '../components/WeeklyCheckInFlow'
+import { ActionMenu } from '../components/ActionMenu'
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function GoalSkeleton() {
@@ -28,14 +31,13 @@ function GoalSkeleton() {
   )
 }
 
-// ── Status Config ─────────────────────────────────────────────────────────────
-const STATUS_CONFIG = {
-  in_progress: { label: 'En progreso', color: colors.area.goals },
-  completed:   { label: 'Completada',  color: colors.semantic.success },
-  paused:      { label: 'Pausada',     color: colors.text.quaternary },
+const STATUS_COLOR = {
+  in_progress: colors.area.goals,
+  completed:   colors.semantic.success,
+  paused:      colors.text.tertiary,
 }
 
-// ── Goal Card ─────────────────────────────────────────────────────────────────
+// ── Tarjeta de meta ───────────────────────────────────────────────────────────
 function GoalCard({ goal, onOpen, onEdit, onDelete, onToggleStatus }: {
   goal: Goal
   onOpen: () => void
@@ -43,125 +45,63 @@ function GoalCard({ goal, onOpen, onEdit, onDelete, onToggleStatus }: {
   onDelete: () => void
   onToggleStatus: () => void
 }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const status = STATUS_CONFIG[goal.status]
+  const t = useLifeT()
+  const locale = langLocale(useAppLang(s => s.lang))
   const isPaused = goal.status === 'paused'
-  const isCompleted = goal.status === 'completed'
-
+  const statusColor = STATUS_COLOR[goal.status]
   const completedMs = goal.milestones.filter(m => m.is_completed).length
   const totalMs = goal.milestones.length
 
   return (
-    <LifeCard onClick={onOpen} style={{ opacity: isPaused ? 0.65 : 1, position: 'relative' }}>
-      {/* Color accent line */}
-      <div style={{
-        position: 'absolute', left: 0, top: 0, bottom: 0,
-        width: 3, borderRadius: `${radius.xl} 0 0 ${radius.xl}`,
-        background: goal.color,
+    <LifeCard style={{ opacity: isPaused ? 0.65 : 1, position: 'relative' }}>
+      <div aria-hidden="true" style={{
+        position: 'absolute', insetInlineStart: 0, top: 0, bottom: 0, width: 3,
+        borderStartStartRadius: radius.xl, borderEndStartRadius: radius.xl, background: goal.color,
       }} />
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingLeft: '10px' }}>
-        {/* Progress ring */}
-        <div onClick={e => e.stopPropagation()}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingInlineStart: '10px' }}>
+        <button type="button" onClick={onOpen} aria-label={t.goals.open(goal.name)}
+          style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'start' }}>
           <MiniProgressRing progress={goal.progress} color={goal.color} size={48} showLabel />
-        </div>
-
-        {/* Info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{
-            fontFamily: font, fontSize: '15px', fontWeight: 700,
-            color: isCompleted ? colors.text.secondary : colors.text.primary,
-            margin: '0 0 4px',
-            textDecoration: isCompleted ? 'line-through' : 'none',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
-            {goal.name}
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <div style={{
-              padding: '2px 7px', borderRadius: radius.full,
-              background: `${status.color}14`, border: `1px solid ${status.color}28`,
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{
+              display: 'block', fontFamily: font, fontSize: '15px', fontWeight: 700, color: colors.text.primary,
+              margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
-              <span style={{ fontFamily: font, fontSize: '10px', fontWeight: 700, color: status.color }}>
-                {status.label}
+              {goal.name}
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ padding: '2px 7px', borderRadius: radius.full, background: `${statusColor}14`, border: `1px solid ${statusColor}28`, fontFamily: font, fontSize: '10px', fontWeight: 700, color: statusColor }}>
+                {t.status[goal.status]}
               </span>
-            </div>
-            {totalMs > 0 && (
-              <span style={{ fontFamily: font, fontSize: '11px', fontWeight: 600, color: colors.text.quaternary }}>
-                {completedMs}/{totalMs} pasos
-              </span>
-            )}
-            {goal.target_date && (
-              <span style={{ fontFamily: font, fontSize: '11px', fontWeight: 600, color: colors.text.quaternary }}>
-                🗓 {new Date(goal.target_date + 'T12:00:00').toLocaleDateString('es', { day: 'numeric', month: 'short' })}
-              </span>
-            )}
-          </div>
-        </div>
+              {totalMs > 0 && (
+                <span style={{ fontFamily: font, fontSize: '11px', fontWeight: 600, color: colors.text.tertiary }}>
+                  {t.goals.steps(completedMs, totalMs)}
+                </span>
+              )}
+              {goal.target_date && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontFamily: font, fontSize: '11px', fontWeight: 600, color: colors.text.tertiary }}>
+                  <CalendarDays size={11} aria-label={t.goals.targetDate} />
+                  {new Date(goal.target_date + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
+                </span>
+              )}
+            </span>
+          </span>
+        </button>
 
-        {/* Context menu */}
-        <div style={{ position: 'relative', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-          <button
-            onClick={() => setMenuOpen(v => !v)}
-            style={{
-              width: 28, height: 28, borderRadius: radius.full,
-              background: 'transparent', border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: colors.text.tertiary, transition: 'background 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = colors.border.subtle }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-          >
-            <MoreHorizontal size={16} strokeWidth={2} />
-          </button>
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                variants={scaleIn} initial="hidden" animate="visible" exit="hidden"
-                style={{
-                  position: 'absolute', right: 0, top: '32px', zIndex: 10,
-                  background: colors.surface.high,
-                  border: `1px solid ${colors.border.medium}`,
-                  borderRadius: radius.md,
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-                  minWidth: 150, overflow: 'hidden',
-                }}
-                onMouseLeave={() => setMenuOpen(false)}
-              >
-                {([
-                  { icon: Pencil, label: 'Editar',   danger: false, action: () => { setMenuOpen(false); onEdit() } },
-                  { icon: isPaused ? Play : Pause, label: isPaused ? 'Reanudar' : 'Pausar', danger: false, action: () => { setMenuOpen(false); onToggleStatus() } },
-                  { icon: Trash2, label: 'Eliminar', danger: true,  action: () => { setMenuOpen(false); onDelete() } },
-                ]).map(({ icon: Icon2, label, action, danger }) => (
-                  <button
-                    key={label}
-                    onClick={action}
-                    style={{
-                      width: '100%', padding: '10px 14px',
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', gap: '8px',
-                      fontFamily: font, fontSize: '13px', fontWeight: 600,
-                      color: danger ? colors.semantic.error : colors.text.secondary,
-                      textAlign: 'left', transition: 'background 0.12s',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = colors.border.subtle }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
-                  >
-                    <Icon2 size={13} />
-                    {label}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <ActionMenu label={t.goals.options} actions={[
+          { icon: Pencil, label: t.common.edit, onSelect: onEdit },
+          { icon: isPaused ? Play : Pause, label: isPaused ? t.goals.resume : t.goals.pause, onSelect: onToggleStatus },
+          { icon: Trash2, label: t.common.delete, onSelect: onDelete, danger: true },
+        ]} />
       </div>
     </LifeCard>
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Página ────────────────────────────────────────────────────────────────────
 export function LifeGoalsPage() {
+  const tNav = useLifeT().nav
+  const t = useLifeT()
   const {
     goals, loading,
     activeCount, completedCount, avgProgress,
@@ -169,90 +109,65 @@ export function LifeGoalsPage() {
     addMilestone, toggleMilestone, deleteMilestone,
   } = useGoals()
 
-  const [sheetOpen, setSheetOpen]         = useState(false)
-  const [editGoal, setEditGoal]           = useState<Goal | null>(null)
-  const [detailGoal, setDetailGoal]       = useState<Goal | null>(null)
-  const [detailOpen, setDetailOpen]       = useState(false)
-  const [deleteTarget, setDeleteTarget]   = useState<Goal | null>(null)
-  const [checkinGoal, setCheckinGoal]     = useState<Goal | null>(null)
-  const [checkinRefreshKey, setCheckinRefreshKey] = useState(0)
+  const [sheetOpen, setSheetOpen]       = useState(false)
+  const [editGoal, setEditGoal]         = useState<Goal | null>(null)
+  const [detailId, setDetailId]         = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Goal | null>(null)
+  const [params] = useSearchParams()
 
-  const activeGoals = goals.filter(g => g.status === 'in_progress')
-  const pendingIds  = useGoalsNeedingCheckin(activeGoals)
-
+  // La agenda ahora vive en Brain → Tareas (los enlaces viejos siguen funcionando)
+  if (params.get('vista') === 'agenda') return <Navigate to="/life/brain?vista=tareas" replace />
   if (loading) return <GoalSkeleton />
 
+  const fail = () => toast.error(t.common.saveError)
   const inProgress = goals.filter(g => g.status !== 'completed')
   const completed  = goals.filter(g => g.status === 'completed')
-
-  // Always show the latest server data in the detail sheet
-  const currentDetailGoal = detailGoal
-    ? (goals.find(g => g.id === detailGoal.id) ?? detailGoal)
-    : null
-
-  const pendingGoals = activeGoals.filter(g => pendingIds.includes(g.id))
+  const detailGoal = detailId ? goals.find(g => g.id === detailId) ?? null : null
+  const openNew = () => { setEditGoal(null); setSheetOpen(true) }
 
   return (
     <LifeScreenContainer>
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '24px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.goals}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Target size={20} style={{ color: colors.area.goals }} strokeWidth={2} />
+            <Target size={20} style={{ color: colors.area.goals }} strokeWidth={2} aria-hidden="true" />
           </div>
           <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>
-            Goals
+            {tNav.goals}
           </h1>
         </div>
-        <button
-          onClick={() => { setEditGoal(null); setSheetOpen(true) }}
+        <button type="button" aria-label={t.goals.add} title={t.goals.add} onClick={openNew}
           style={{
-            width: 36, height: 36, borderRadius: radius.full,
-            background: colors.accent.soft,
-            border: `1px solid ${colors.accent.soft}`,
+            width: 40, height: 40, borderRadius: radius.full,
+            background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`,
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <Plus size={18} style={{ color: colors.accent.default }} strokeWidth={2.5} />
+          }}>
+          <Plus size={18} style={{ color: colors.accent.default }} strokeWidth={2.5} aria-hidden="true" />
         </button>
       </div>
 
-      {/* Stats row (only when there are goals) */}
       {goals.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
           {[
-            { label: 'Activas',     value: String(activeCount),    color: colors.area.goals },
-            { label: 'Completadas', value: String(completedCount), color: colors.semantic.success },
-            { label: 'Progreso',    value: `${avgProgress}%`,      color: colors.accent.default },
+            { label: t.goals.active,    value: String(activeCount),    color: colors.area.goals },
+            { label: t.goals.completed, value: String(completedCount), color: colors.semantic.success },
+            { label: t.goals.progress,  value: `${avgProgress}%`,      color: colors.accent.default },
           ].map(({ label, value, color }) => (
             <LifeCard key={label} style={{ textAlign: 'center', padding: '12px 8px' }}>
-              <p style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color, margin: '0 0 2px' }}>
-                {value}
-              </p>
-              <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.quaternary, margin: 0, letterSpacing: '0.04em' }}>
-                {label.toUpperCase()}
+              <p style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color, margin: '0 0 2px' }}>{value}</p>
+              <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.tertiary, margin: 0, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                {label}
               </p>
             </LifeCard>
           ))}
         </div>
       )}
 
-      {/* Check-in banner (solo vie/sáb/dom, solo si hay metas pendientes) */}
-      <GoalCheckinBanner
-        pendingCount={pendingGoals.length}
-        onCheckIn={() => setCheckinGoal(pendingGoals[0] ?? null)}
-      />
-
-      {/* Goal list or empty state */}
       {goals.length === 0 ? (
         <LifeCard>
-          <LifeEmptyState
-            icon={Target}
-            iconColor={colors.area.goals}
-            title="Las metas dan dirección"
-            subtitle="Creá tu primera meta y dividila en pasos alcanzables."
-            action={{ label: 'Crear primera meta', onClick: () => { setEditGoal(null); setSheetOpen(true) } }}
-          />
+          <LifeEmptyState icon={Target} iconColor={colors.area.goals}
+            title={t.goals.emptyTitle} subtitle={t.goals.emptyText}
+            action={{ label: t.goals.emptyAction, onClick: openNew }} />
         </LifeCard>
       ) : (
         <motion.div variants={stagger} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -260,10 +175,10 @@ export function LifeGoalsPage() {
             <motion.div key={goal.id} variants={fadeInUp}>
               <GoalCard
                 goal={goal}
-                onOpen={() => { setDetailGoal(goal); setDetailOpen(true) }}
+                onOpen={() => setDetailId(goal.id)}
                 onEdit={() => { setEditGoal(goal); setSheetOpen(true) }}
                 onDelete={() => setDeleteTarget(goal)}
-                onToggleStatus={() => updateGoal(goal.id, { status: goal.status === 'paused' ? 'in_progress' : 'paused' })}
+                onToggleStatus={() => { updateGoal(goal.id, { status: goal.status === 'paused' ? 'in_progress' : 'paused' }).catch(fail) }}
               />
             </motion.div>
           ))}
@@ -271,26 +186,17 @@ export function LifeGoalsPage() {
           {completed.length > 0 && (
             <motion.div variants={fadeInUp}>
               <LifeCard style={{ marginTop: '4px' }}>
-                <LifeSectionHeader title={`Completadas (${completed.length})`} />
+                <LifeSectionHeader title={t.goals.completedList(completed.length)} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
                   {completed.map(goal => (
-                    <button
-                      key={goal.id}
-                      onClick={() => { setDetailGoal(goal); setDetailOpen(true) }}
+                    <button key={goal.id} type="button" onClick={() => setDetailId(goal.id)}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: '10px',
-                        padding: '8px 4px',
-                        background: 'none', border: 'none', cursor: 'pointer',
-                        textAlign: 'left', width: '100%',
-                        borderRadius: radius.sm, transition: 'background 0.15s',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.background = colors.border.subtle }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
-                    >
-                      <CheckCircle2 size={18} style={{ color: goal.color, flexShrink: 0 }} strokeWidth={2} />
+                        display: 'flex', alignItems: 'center', gap: '10px', minHeight: 40, padding: '8px 4px',
+                        background: 'none', border: 'none', cursor: 'pointer', textAlign: 'start', width: '100%', borderRadius: radius.sm,
+                      }}>
+                      <CheckCircle2 size={18} style={{ color: goal.color, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />
                       <span style={{
-                        fontFamily: font, fontSize: '14px', fontWeight: 600,
-                        color: colors.text.tertiary, textDecoration: 'line-through',
+                        fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.secondary, textDecoration: 'line-through',
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>
                         {goal.name}
@@ -304,7 +210,6 @@ export function LifeGoalsPage() {
         </motion.div>
       )}
 
-      {/* Create / Edit Sheet */}
       <GoalSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
@@ -315,57 +220,32 @@ export function LifeGoalsPage() {
         }}
       />
 
-      {/* Detail Sheet */}
       <GoalDetailSheet
-        goal={currentDetailGoal}
-        open={detailOpen}
-        onClose={() => setDetailOpen(false)}
-        onEdit={goal => {
-          setDetailOpen(false)
-          setEditGoal(goal)
-          setSheetOpen(true)
-        }}
-        onDelete={async id => {
-          await deleteGoal(id)
-          setDetailOpen(false)
-          setDetailGoal(null)
-        }}
-        onToggleMilestone={toggleMilestone}
-        onAddMilestone={addMilestone}
-        onDeleteMilestone={deleteMilestone}
-        onUpdateProgress={updateProgress}
-        onUpdateStatus={async (id, status) => updateGoal(id, { status })}
-        hasPendingCheckin={currentDetailGoal ? pendingIds.includes(currentDetailGoal.id) : false}
-        onCheckin={currentDetailGoal ? () => setCheckinGoal(currentDetailGoal) : undefined}
-        checkinRefreshKey={checkinRefreshKey}
+        goal={detailGoal}
+        open={!!detailGoal}
+        onClose={() => setDetailId(null)}
+        onEdit={goal => { setDetailId(null); setEditGoal(goal); setSheetOpen(true) }}
+        onDelete={goal => { setDetailId(null); setDeleteTarget(goal) }}
+        onToggleMilestone={ms => { toggleMilestone(ms).catch(fail) }}
+        onAddMilestone={(goalId, title) => addMilestone(goalId, title)}
+        onDeleteMilestone={(id, goalId) => { deleteMilestone(id, goalId).catch(fail) }}
+        onUpdateProgress={(goalId, p) => { updateProgress(goalId, p).catch(fail) }}
+        onUpdateStatus={(id, status) => { updateGoal(id, { status }).catch(fail) }}
       />
 
-      {/* Delete Confirm */}
       <LifeConfirmDialog
         open={!!deleteTarget}
-        title="¿Eliminar meta?"
-        message={`"${deleteTarget?.name}" y todos sus pasos serán eliminados.`}
-        confirmLabel="Eliminar"
+        title={t.goals.deleteTitle}
+        message={deleteTarget ? t.goals.deleteText(deleteTarget.name) : ''}
+        confirmLabel={t.common.delete}
         onConfirm={async () => {
-          if (deleteTarget) await deleteGoal(deleteTarget.id)
+          const target = deleteTarget
           setDeleteTarget(null)
+          if (target) await deleteGoal(target.id).catch(fail)
         }}
         onCancel={() => setDeleteTarget(null)}
         danger
       />
-
-      {/* Weekly check-in flow — fullscreen overlay */}
-      {checkinGoal && (
-        <WeeklyCheckInFlow
-          goal={checkinGoal}
-          open={!!checkinGoal}
-          onClose={() => setCheckinGoal(null)}
-          onCompleted={() => {
-            setCheckinGoal(null)
-            setCheckinRefreshKey(k => k + 1)
-          }}
-        />
-      )}
     </LifeScreenContainer>
   )
 }

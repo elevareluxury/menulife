@@ -3,15 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import type { Restaurant } from '@/types'
-import { buildHubC, NULL_C, isValidTheme, getBodyFont, type HubC } from '@/modules/hub/lib/themeConfig'
-import { useThemeFonts } from '@/modules/hub/hooks/useThemeFonts'
-import { useHubBlocks } from '@/modules/hub/hooks/useHubBlocks'
-import { HubBlockRenderer } from '@/modules/hub/components/HubBlockRenderer'
-import { FooterViral } from '@/modules/hub/components/FooterViral'
+import { isReservedUsername } from '@/lib/reservedUsernames'
 
 const db = supabase as any
 
-/* â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Types ──────────────────────────────────────────────────────────────────── */
 
 interface HubStory {
   id: string; image_url: string | null; title: string | null
@@ -41,18 +37,17 @@ interface SocialLinks {
   google_review?: string | null; google_maps?: string | null
 }
 
-/* â”€â”€ Reserved slugs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Design tokens ──────────────────────────────────────────────────────────── */
 
-const RESERVED_SLUGS = new Set([
-  'dashboard','login','register','mozo','kitchen','delivery','r','waiter',
-  'super-admin','superadmin','onboarding','solicitar-acceso','auth',
-  'forgot-password','reset-password','catalogo',
-])
-
-/* â”€â”€ Design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-// C is computed inside HubPublicPage from hubConfig.theme.
-// NULL_C is used only in pre-data states (HubLoading, HubNotFound)
-// to preserve the exact current dark look.
+const C = {
+  bg:'#06080F', bg2:'#0A0D16',
+  sur:'rgba(255,255,255,0.04)', sur2:'rgba(255,255,255,0.07)',
+  bdr:'rgba(255,255,255,0.08)', bdr2:'rgba(255,255,255,0.16)',
+  acc:'#F59E0B', acc2:'#FCD34D', grn:'#10B981', red:'#EF4444',
+  t1:'#F8F9FA', t2:'rgba(248,249,250,0.60)',
+  t3:'rgba(248,249,250,0.32)', t4:'rgba(248,249,250,0.14)',
+  card:'#111318',
+}
 
 const HUB_CSS = `
   @keyframes hubMesh{0%{transform:translate(0,0) scale(1)}100%{transform:translate(20px,-25px) scale(1.1)}}
@@ -67,7 +62,7 @@ const HUB_CSS = `
 `
 
 
-/* â”€â”€ Social icons (SVG blancos inline) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Social icons (SVG blancos inline) ─────────────────────────────────────── */
 
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   ig: (
@@ -97,7 +92,7 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   ),
 }
 
-/* â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Helpers ────────────────────────────────────────────────────────────────── */
 
 function parseSocial(raw: unknown): SocialLinks {
   if (!raw || typeof raw !== 'object') return {}
@@ -133,44 +128,21 @@ function hasScheduleData(bh: unknown): boolean {
   return Object.values(bh as Record<string, any>).some(d => d?.open || d?.closed === true)
 }
 
-function starStr(n: number) { return 'â­'.repeat(Math.min(5,Math.max(1,Math.round(n)))) }
+function starStr(n: number) { return '⭐'.repeat(Math.min(5,Math.max(1,Math.round(n)))) }
 
-/* â”€â”€ Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-
-function detectDevice(): 'mobile' | 'tablet' | 'desktop' {
-  const ua = navigator.userAgent
-  if (/iPad|Tablet/i.test(ua)) return 'tablet'
-  if (/Android|iPhone|iPod|Mobile/i.test(ua)) return 'mobile'
-  return 'desktop'
-}
+/* ── Analytics ──────────────────────────────────────────────────────────────── */
 
 function trackEvent(restaurantId: string, eventType: string, linkId?: string) {
-  const payload = JSON.stringify({
+  db.from('hub_analytics').insert({
     restaurant_id: restaurantId,
     event_type: eventType,
     link_id: linkId ?? null,
-    referrer: document.referrer || null,
-    user_agent: navigator.userAgent,
-    device: detectDevice(),
-  })
-
-  const SUPABASE_URL     = import.meta.env.VITE_SUPABASE_URL as string
-  const SUPABASE_ANON    = import.meta.env.VITE_SUPABASE_ANON_KEY as string
-
-  fetch(`${SUPABASE_URL}/rest/v1/hub_analytics`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SUPABASE_ANON,
-      Authorization: `Bearer ${SUPABASE_ANON}`,
-      Prefer: 'return=minimal',
-    },
-    body: payload,
-    keepalive: true,
-  }).catch(() => { /* silent fail */ })
+    referrer: typeof document !== 'undefined' ? document.referrer : '',
+    user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+  }).then()
 }
 
-/* â”€â”€ Scroll-reveal wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Scroll-reveal wrapper ──────────────────────────────────────────────────── */
 
 function Reveal({children,delay=0}:{children:React.ReactNode;delay?:number}) {
   return (
@@ -185,19 +157,18 @@ function Reveal({children,delay=0}:{children:React.ReactNode;delay?:number}) {
   )
 }
 
-/* â”€â”€ Section label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Section label ──────────────────────────────────────────────────────────── */
 
-function SL({children, color}:{children:React.ReactNode; color?: string}) {
+function SL({children}:{children:React.ReactNode}) {
   return (
-    <p style={{fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,
-      color: color || NULL_C.t1,
-      textTransform:'uppercase',letterSpacing:'0.14em',margin:'0 0 12px'}}>
+    <p style={{fontFamily:"'Geist Mono',monospace",fontSize:10,fontWeight:500,color:'#FFFFFF',
+      textTransform:'uppercase',letterSpacing:'0.14em',marginBottom:12,margin:'0 0 12px'}}>
       {children}
     </p>
   )
 }
 
-/* â”€â”€ Gallery lightbox â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Gallery lightbox ───────────────────────────────────────────────────────── */
 
 function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:number;onClose:()=>void}) {
   const [cur,setCur] = useState(startIndex)
@@ -251,23 +222,22 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
             background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:28,cursor:'pointer',
             display:'flex',alignItems:'center',justifyContent:'center'}}>›</button>
       </>}
-      <p style={{position:'absolute',bottom:16,fontFamily:"'DM Mono',monospace",fontSize:12,color:'rgba(255,255,255,.4)'}}>
+      <p style={{position:'absolute',bottom:16,fontFamily:"'Geist Mono',monospace",fontSize:12,color:'rgba(255,255,255,.4)'}}>
         {cur+1} / {items.length}
       </p>
     </motion.div>
   )
 }
 
-/* â”€â”€ Bottom navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Bottom navigation ──────────────────────────────────────────────────────── */
 
 function BottomNav({
-  isRetail, plan, hubConfig, hasFeatured, C,
+  isRetail, plan, hubConfig, hasFeatured,
 }: {
   isRetail: boolean
   plan: string | null
   hubConfig: Record<string,any>
   hasFeatured: boolean
-  C: HubC
 }) {
   const [activeSection, setActiveSection] = useState('inicio')
 
@@ -362,13 +332,13 @@ function BottomNav({
       display: 'flex',
       alignItems: 'center',
       justifyContent: soloInicio ? 'center' : 'space-around',
-      background: C.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.85)',
+      background: 'rgba(255,255,255,0.05)',
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
-      border: `1px solid ${C.isDark ? 'rgba(255,255,255,0.08)' : C.bdr}`,
+      border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: 20,
       padding: '0 8px',
-      boxShadow: C.isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(0,0,0,0.12)',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
       zIndex: 1000,
       boxSizing: 'border-box',
     }}>
@@ -386,7 +356,7 @@ function BottomNav({
             border: 'none',
             background: 'none',
             cursor: 'pointer',
-            color: activeSection === item.section ? C.t1 : C.t3,
+            color: activeSection === item.section ? '#FFFFFF' : 'rgba(255,255,255,0.35)',
             flexShrink: 0,
             transition: 'color 0.15s',
           }}
@@ -394,7 +364,7 @@ function BottomNav({
           {item.icon}
           <span style={{
             fontSize: soloInicio ? 13 : 10,
-            fontFamily: "'DM Sans',sans-serif",
+            fontFamily: "'Geist',sans-serif",
             fontWeight: 500,
             whiteSpace: 'nowrap',
           }}>
@@ -406,7 +376,7 @@ function BottomNav({
   )
 }
 
-/* â”€â”€ Horarios compactos con tooltip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Horarios compactos con tooltip ────────────────────────────────────────── */
 
 const DAYS_COMPACT = [
   {key:'monday',    initial:'L', label:'Lunes'},
@@ -418,7 +388,7 @@ const DAYS_COMPACT = [
   {key:'sunday',    initial:'D', label:'Domingo'},
 ]
 
-function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: HubC}) {
+function HorariosCompact({schedule}:{schedule:Record<string,any>|null}) {
   const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()]
   const [activeDay,setActiveDay] = useState<string|null>(null)
 
@@ -432,8 +402,8 @@ function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: Hub
 
   return (
     <div style={{padding:'16px'}}>
-      <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,
-        color:C.t3,textTransform:'uppercase',
+      <p style={{fontFamily:"'Geist',sans-serif",fontWeight:700,fontSize:14,
+        color:'rgba(255,255,255,0.5)',textTransform:'uppercase',
         letterSpacing:'0.08em',marginBottom:12}}>
         Horarios
       </p>
@@ -482,12 +452,12 @@ function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: Hub
                       border:'1px solid rgba(255,255,255,0.12)',
                       borderTop:'none',borderLeft:'none',
                     }}/>
-                    <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:11,
+                    <p style={{fontFamily:"'Geist',sans-serif",fontWeight:700,fontSize:11,
                       color:'#fff',marginBottom:2}}>{day.label}</p>
                     {isClosed ? (
-                      <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:C.red,margin:0}}>Cerrado</p>
+                      <p style={{fontFamily:"'Geist',sans-serif",fontSize:11,color:C.red,margin:0}}>Cerrado</p>
                     ) : (
-                      <p style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:'#FFFFFF',margin:0}}>
+                      <p style={{fontFamily:"'Geist Mono',monospace",fontSize:11,color:'#FFFFFF',margin:0}}>
                         {slot.open} — {slot.close}
                       </p>
                     )}
@@ -500,10 +470,10 @@ function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: Hub
                 onClick={(e)=>{e.stopPropagation();setActiveDay(activeDay===day.key?null:day.key)}}
                 style={{
                   width:36,height:36,borderRadius:'50%',
-                  border:isToday?`1.5px solid ${C.t1}`:`1px solid ${C.bdr}`,
-                  background:isActive?`${C.acc}26`:isToday?`${C.acc}14`:C.sur,
-                  color:isClosed?C.t4:isToday?C.t1:C.t2,
-                  fontSize:12,fontFamily:"'DM Mono',monospace",fontWeight:500,
+                  border:isToday?`1.5px solid ${'#FFFFFF'}`:'1px solid rgba(255,255,255,0.1)',
+                  background:isActive?'rgba(245,158,11,0.15)':isToday?'rgba(245,158,11,0.08)':'rgba(255,255,255,0.04)',
+                  color:isClosed?'rgba(255,255,255,0.2)':isToday?'#FFFFFF':'rgba(255,255,255,0.7)',
+                  fontSize:12,fontFamily:"'Geist Mono',monospace",fontWeight:500,
                   cursor:'pointer',
                   display:'flex',alignItems:'center',justifyContent:'center',
                   position:'relative',
@@ -514,7 +484,7 @@ function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: Hub
                   <span style={{
                     position:'absolute',bottom:2,left:'50%',transform:'translateX(-50%)',
                     width:3,height:3,borderRadius:'50%',
-                    background:isToday?C.t1:C.t3,
+                    background:isToday?'#FFFFFF':'rgba(255,255,255,0.4)',
                   }}/>
                 )}
               </button>
@@ -526,15 +496,15 @@ function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: Hub
   )
 }
 
-/* â”€â”€ Loading / 404 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Loading / 404 ──────────────────────────────────────────────────────────── */
 
 function HubLoading() {
   return (
-    <div style={{minHeight:'100svh',background:NULL_C.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <div style={{minHeight:'100svh',background:C.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
       <style>{`@keyframes _hubSpin{to{transform:rotate(360deg)}}`}</style>
       <div style={{width:32,height:32,borderRadius:'50%',
         border:`2px solid rgba(245,158,11,0.3)`,
-        borderTop:`2px solid ${NULL_C.t1}`,
+        borderTop:`2px solid ${'#FFFFFF'}`,
         animation:'_hubSpin 0.8s linear infinite'}}/>
     </div>
   )
@@ -542,20 +512,20 @@ function HubLoading() {
 
 function HubNotFound() {
   return (
-    <div style={{minHeight:'100svh',background:NULL_C.bg,display:'flex',flexDirection:'column',
+    <div style={{minHeight:'100svh',background:C.bg,display:'flex',flexDirection:'column',
       alignItems:'center',justifyContent:'center',padding:'0 24px',textAlign:'center',
-      fontFamily:"'DM Sans',sans-serif"}}>
-      <p style={{fontFamily:"'Syne',sans-serif",fontSize:64,fontWeight:800,color:NULL_C.t3,marginBottom:8}}>404</p>
-      <p style={{color:NULL_C.t2,marginBottom:24}}>Este Hub no fue encontrado.</p>
+      fontFamily:"'Geist',sans-serif"}}>
+      <p style={{fontFamily:"'Geist',sans-serif",fontSize:64,fontWeight:800,color:C.t3,marginBottom:8}}>404</p>
+      <p style={{color:C.t2,marginBottom:24}}>Este Hub no fue encontrado.</p>
       <a href="/" style={{background:'#FFFFFF',color:'#000',padding:'10px 24px',borderRadius:100,
-        fontWeight:600,fontSize:14,fontFamily:"'DM Sans',sans-serif",textDecoration:'none'}}>
+        fontWeight:600,fontSize:14,fontFamily:"'Geist',sans-serif",textDecoration:'none'}}>
         Volver al inicio
       </a>
     </div>
   )
 }
 
-/* â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Main component ─────────────────────────────────────────────────────────── */
 
 export function HubPublicPage() {
   const { slug } = useParams<{slug:string}>()
@@ -573,12 +543,6 @@ export function HubPublicPage() {
   const [lightboxIndex, setLightboxIndex]     = useState<number|null>(null)
   const [scrollY, setScrollY]                 = useState(0)
 
-  // Hub blocks — realtime habilitado (activeOnly=true activa el canal)
-  const { blocks: hubBlocks } = useHubBlocks({
-    restaurantId: restaurant?.id,
-    activeOnly: true,
-  })
-
   // Scroll tracking for parallax
   useEffect(()=>{
     const onScroll = ()=>{
@@ -589,40 +553,32 @@ export function HubPublicPage() {
     return ()=>window.removeEventListener('scroll', onScroll)
   },[])
 
-  // Compute theme-aware palette — NULL_C for theme=null (zero regression for existing users)
-  const C = buildHubC((hubConfig as any).theme, (hubConfig as any).accent_color)
-
-  // Load dynamic fonts (only Source Sans 3 for warm; others are in index.html)
-  const activeTheme = isValidTheme((hubConfig as any).theme) ? (hubConfig as any).theme : null
-  useThemeFonts(activeTheme)
-
-  // Inject keyframe CSS once
+  // Inject keyframe CSS + override body background
   useEffect(()=>{
     const id='hub-public-css'
     if (!document.getElementById(id)) {
       const s=document.createElement('style'); s.id=id; s.textContent=HUB_CSS
       document.head.appendChild(s)
     }
-  },[])
-
-  // Body background synced to theme
-  useEffect(()=>{
     const prev = document.body.style.background
     document.body.style.background = C.bg
     return ()=>{ document.body.style.background = prev }
-  },[C.bg])
+  },[])
 
   useEffect(()=>{
     if (!slug) { setNotFound(true); setLoading(false); return }
     const first=slug.split('/')[0].toLowerCase()
-    if (RESERVED_SLUGS.has(first)) { navigate('/',{replace:true}); return }
+    if (isReservedUsername(first)) { navigate('/',{replace:true}); return }
 
     async function load() {
       try {
-        console.log('HUB LOAD - slug:', slug)
         const {data:rest,error} = await db.from('restaurants').select('*').eq('slug',slug!).or('is_active.eq.true,is_active.is.null').single()
-        console.log('HUB LOAD - restaurant:', rest, 'error:', error)
         if (error||!rest) { setNotFound(true); return }
+        // Hub desactivado: sólo el dueño puede verlo (vista previa desde el editor)
+        if ((rest as {hub_enabled?:boolean}).hub_enabled === false) {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.user.id !== (rest as Restaurant).owner_id) { setNotFound(true); return }
+        }
         setRestaurant(rest as Restaurant)
         const id=(rest as Restaurant).id
 
@@ -634,10 +590,15 @@ export function HubPublicPage() {
           db.from('hub_links').select('*').eq('restaurant_id',id).eq('is_active',true).order('sort_order'),
         ])
 
-        setStory(storyRes.data??null)
+        // Columnas reales: hub_stories.text, hub_reviews.reviewer_name / reviewer_initial
+        setStory(storyRes.data ? { ...storyRes.data, description: storyRes.data.text ?? storyRes.data.description ?? null } : null)
         setGallery(gallRes.data??[])
         setFeaturedProduct(fpRes.data??null)
-        setReviews(revRes.data??[])
+        setReviews(((revRes.data??[]) as (HubReview & {reviewer_name?:string;reviewer_initial?:string|null})[]).map(rv=>({
+          ...rv,
+          author_name: rv.reviewer_name ?? rv.author_name ?? '',
+          author_initial: rv.reviewer_initial ?? rv.author_initial ?? null,
+        })) as HubReview[])
         setLinks(linksRes.data??[])
 
         const { data: hubCfg } = await db.from('hub_config').select('*').eq('restaurant_id', id).maybeSingle()
@@ -655,42 +616,20 @@ export function HubPublicPage() {
     if (restaurant?.id) trackEvent(restaurant.id, 'profile_view')
   },[restaurant?.id])
 
-  console.log('HUB RENDER - loading:', loading, 'restaurant:', restaurant?.id ?? null, 'notFound:', notFound)
   if (loading) return <HubLoading/>
   if (notFound||!restaurant) return <HubNotFound/>
 
   // ── Derived values
   const r  = restaurant
   const ra = r as any
-
-  // Hub blocks: visibilidad de bloques legacy + slots para bloques nuevos.
-  // Si hub_blocks tiene datos para este restaurant, usarlos para controlar visibilidad.
-  // Si está vacío (restaurant nunca abrió el editor), usar lógica legacy (mostrar todo).
-  const hasBlocksConfig = hubBlocks.length > 0
-
-  function isLegacyBlockActive(blockType: string): boolean {
-    if (!hasBlocksConfig) return true // fallback legacy
-    const block = hubBlocks.find(b => b.block_type === blockType)
-    return block ? block.is_active : false
-  }
-
-  // Bloques nuevos (JSONB) activos, ordenados por sort_order
-  const activeNewBlocks = hubBlocks
-    .filter(b => ['video', 'bio', 'stats', 'contact_form'].includes(b.block_type) && b.is_active)
-    .sort((a, b) => a.sort_order - b.sort_order)
-
-  // Slot 1: bloques nuevos con sort_order < 10 (antes de links, ej: bio)
-  const preLinksNewBlocks = activeNewBlocks.filter(b => b.sort_order < 10)
-  // Slot 2: bloques nuevos con sort_order >= 10 (después de reviews, ej: stats, video)
-  const postReviewsNewBlocks = activeNewBlocks.filter(b => b.sort_order >= 10)
-
   const social            = parseSocial(r.social_links)
   const waPhone           = social.whatsapp||r.phone||''
   const cleanWa           = waPhone.replace(/\D/g,'')
   const isRetail          = r.business_type==='retail'
-  const open              = isOpen(ra.business_hours??r.schedule)
-  const hoursText         = todayHours(ra.business_hours??r.schedule)
-  const schedule          = ra.business_hours??r.schedule
+  // Los editores (Hub y Configuración) guardan en `schedule`; business_hours sólo tiene el default de la DB
+  const open              = isOpen(r.schedule)
+  const hoursText         = todayHours(r.schedule)
+  const schedule          = r.schedule
   const categoryTags: string[] = ra.hub_category_tags??[]
   const hubCategory: string    = ra.hub_category??''
   const hubAbout: string       = ra.hub_about??''
@@ -703,7 +642,7 @@ export function HubPublicPage() {
   const address = [r.address,r.city].filter(Boolean).join(', ')
   const menuHref = isRetail ? `/catalogo/${slug}` : `/r/${slug}`
 
-  // â”€â”€ CTA buttons
+  // ── CTA buttons
   type CTABtn={icon:string;label:string;href?:string;scroll?:string;primary?:boolean;trackEvent?:string}
   const ctaBtns: CTABtn[] = []
   const primaryLabel = hubMainCtaText || (isRetail ? 'Ver catálogo' : 'Ver menú')
@@ -720,23 +659,23 @@ export function HubPublicPage() {
     ctaBtns.push({ icon:'📍', label:'Cómo llegar', scroll:'locales', trackEvent: 'maps_click' })
   }
 
-  // â”€â”€ Smart link click handler
+  // ── Smart link click handler
   async function handleLinkClick(link: HubLink) {
     trackEvent(r.id, 'link_click', link.id)
     db.from('hub_links').update({ click_count: (link.click_count || 0) + 1 }).eq('id', link.id).then()
     window.open(link.url, '_blank', 'noopener,noreferrer')
   }
 
-  // â”€â”€ Social entries
+  // ── Social entries
   type SocialEntry={key:string;label:string;icon:string;url:string;color:string;bg:string}
   const socialEntries: SocialEntry[] = []
   if (social.instagram) socialEntries.push({key:'ig',label:'Instagram',icon:'📸',url:`https://instagram.com/${social.instagram}`,color:'#E1306C',bg:'rgba(225,48,108,.06)'})
   if (social.tiktok)    socialEntries.push({key:'tt',label:'TikTok',icon:'🎵',url:`https://tiktok.com/@${social.tiktok}`,color:'rgba(255,255,255,.9)',bg:'rgba(255,255,255,.04)'})
-  if (social.youtube)   socialEntries.push({key:'yt',label:'YouTube',icon:'â–¶',url:String(social.youtube),color:'#FF4444',bg:'rgba(255,0,0,.06)'})
+  if (social.youtube)   socialEntries.push({key:'yt',label:'YouTube',icon:'▶',url:String(social.youtube),color:'#FF4444',bg:'rgba(255,0,0,.06)'})
   if (social.facebook)  socialEntries.push({key:'fb',label:'Facebook',icon:'f',url:`https://facebook.com/${social.facebook}`,color:'#3B82F6',bg:'rgba(59,130,246,.06)'})
   if (cleanWa)          socialEntries.push({key:'wa',label:'WhatsApp',icon:'💬',url:`https://wa.me/${cleanWa}`,color:'#25D366',bg:'rgba(37,211,102,.06)'})
 
-  // â”€â”€ Contact items
+  // ── Contact items
   type ContactItem={icon:string;label:string;value:string;href:string;iconBg:string}
   const contactItems: ContactItem[] = []
   if (cleanWa) contactItems.push({icon:'💬',label:'WhatsApp',value:waPhone,href:`https://wa.me/${cleanWa}`,iconBg:'rgba(37,211,102,.15)'})
@@ -750,24 +689,14 @@ export function HubPublicPage() {
 
   const displayTitle = hubConfig.hub_title || r.name
   const FONT_MAP: Record<string,{family:string;weight:number}> = {
-    syne:          {family:"'Syne',sans-serif",         weight:800},
+    syne:          {family:"'Geist',sans-serif",         weight:800},
     playfair:      {family:"'Playfair Display',serif",  weight:700},
     'space-grotesk':{family:"'Space Grotesk',sans-serif",weight:700},
     bebas:         {family:"'Bebas Neue',sans-serif",   weight:400},
-    'dm-sans':     {family:"'DM Sans',sans-serif",      weight:700},
-    inter:         {family:"'Inter',sans-serif",        weight:700},
+    'dm-sans':     {family:"'Geist',sans-serif",      weight:700},
+    inter:         {family:"'Geist',sans-serif",        weight:700},
   }
-  const rawFont = hubConfig.title_font || 'syne'
-  const isDefaultFont = !hubConfig.title_font || hubConfig.title_font === 'syne'
-  // User's explicit font choice wins; if on default 'syne', use the theme's title font
-  const finalTitleFont = (() => {
-    if (isDefaultFont && activeTheme === 'dark')  return {family:"'Syne',sans-serif",         weight:800}
-    if (isDefaultFont && activeTheme === 'light') return {family:"'Inter',sans-serif",         weight:700}
-    if (isDefaultFont && activeTheme === 'warm')  return {family:"'Playfair Display',serif",   weight:700}
-    if (isDefaultFont && activeTheme === 'blue')  return {family:"'Space Grotesk',sans-serif", weight:700}
-    return FONT_MAP[rawFont] || FONT_MAP.syne
-  })()
-  const bodyFont = getBodyFont(activeTheme)
+  const titleFont = FONT_MAP[hubConfig.title_font || 'syne'] || FONT_MAP.syne
 
   // Parallax calculations
   const coverOpacity = Math.max(0, 1 - scrollY / 300)
@@ -796,20 +725,19 @@ export function HubPublicPage() {
             backgroundSize:'cover',backgroundPosition:'center',
           }}>
             <div style={{position:'absolute',inset:0,
-              background:`linear-gradient(to bottom,${C.bg}4D 0%,${C.bg}B3 60%,${C.bg}FF 100%)`}}/>
+              background:'linear-gradient(to bottom,rgba(6,8,15,0.3) 0%,rgba(6,8,15,0.7) 60%,rgba(6,8,15,1) 100%)'}}/>
           </div>
         </div>
       )}
 
       <div style={{
-        fontFamily: bodyFont,
-        color: C.t1,
+        fontFamily:"'Geist',sans-serif",
         maxWidth:430, margin:'0 auto', minHeight:'100svh', position:'relative',
       }}>
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             1. HERO
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ══════════════════════════════════════════════════════ */}
         <section id="inicio" style={{
           minHeight:'100svh',position:'relative',zIndex:1,
           display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
@@ -851,7 +779,7 @@ export function HubPublicPage() {
                 boxShadow:'0 0 40px rgba(245,158,11,.18)'}}>
                 {r.logo_url
                   ? <img src={r.logo_url} alt={r.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-                  : <span style={{fontFamily:"'Syne',sans-serif",fontSize:30,fontWeight:800,color:'#FFFFFF'}}>{r.name[0]?.toUpperCase()}</span>
+                  : <span style={{fontFamily:"'Geist',sans-serif",fontSize:30,fontWeight:800,color:'#FFFFFF'}}>{r.name[0]?.toUpperCase()}</span>
                 }
               </div>
             </motion.div>
@@ -864,7 +792,7 @@ export function HubPublicPage() {
                 border:`1px solid ${open?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'}`}}>
               <span style={{width:7,height:7,borderRadius:'50%',background:open?C.grn:C.red,
                 animation:'hubPulse 1.5s ease-in-out infinite',display:'inline-block'}}/>
-              <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:open?C.grn:C.red}}>
+              <span style={{fontFamily:"'Geist Mono',monospace",fontSize:11,fontWeight:500,color:open?C.grn:C.red}}>
                 {open?'Abierto ahora':'Cerrado'}
               </span>
             </motion.div>
@@ -873,7 +801,7 @@ export function HubPublicPage() {
             {/* Business name */}
             <motion.h1 initial={{opacity:0,y:20}} animate={{opacity:1,y:0}}
               transition={{delay:.42,duration:.7,ease:[.22,1,.36,1]}}
-              style={{fontFamily:finalTitleFont.family,fontSize:34,fontWeight:finalTitleFont.weight,
+              style={{fontFamily:titleFont.family,fontSize:34,fontWeight:titleFont.weight,
                 letterSpacing:-1,color:C.t1,margin:0,lineHeight:1.1}}>
               {displayTitle}
             </motion.h1>
@@ -881,7 +809,7 @@ export function HubPublicPage() {
             {/* Category tags / hub_category */}
             {(categoryTags.length>0||hubCategory) && (
               <motion.p initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.55,duration:.6}}
-                style={{fontFamily:"'DM Mono',monospace",fontSize:12.5,color:C.t3,margin:0}}>
+                style={{fontFamily:"'Geist Mono',monospace",fontSize:12.5,color:C.t3,margin:0}}>
                 {categoryTags.length>0 ? categoryTags.join(' · ') : hubCategory}
               </motion.p>
             )}
@@ -890,16 +818,16 @@ export function HubPublicPage() {
             <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.6}}
               style={{display:'flex',alignItems:'center',gap:10,fontSize:13,color:C.t3,flexWrap:'wrap',justifyContent:'center'}}>
               {r.city && <span>📍 {r.city}</span>}
-              {googleRating && <><span style={{color:C.t4}}>·</span><span>â­ {googleRating}</span></>}
+              {googleRating && <><span style={{color:C.t4}}>·</span><span>⭐ {googleRating}</span></>}
             </motion.div>
           </div>
 
         </section>
 
-        {/* â”€â”€ Solid background content wrapper â”€â”€ */}
+        {/* ── Solid background content wrapper ── */}
         <div style={{
           position:'relative',zIndex:1,
-          background: C.bg,
+          background:C.bg,
           borderRadius:'24px 24px 0 0',
           marginTop:'-24px',
           paddingTop:24,
@@ -907,9 +835,9 @@ export function HubPublicPage() {
         }}>
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             2. SOCIAL ICONS ROW
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ══════════════════════════════════════════════════════ */}
         {socialEntries.length>0 && (
           <motion.div
             initial={{opacity:0,y:12}}
@@ -926,7 +854,7 @@ export function HubPublicPage() {
                 href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={()=>trackEvent(r.id, `social_${s.key}_click`)}
+                onClick={()=>trackEvent(r.id, s.key==='wa'?'whatsapp_click':'link_click')}
                 style={{
                   color:'white',display:'flex',alignItems:'center',justifyContent:'center',
                   opacity:0.75,transition:'opacity 0.15s,transform 0.15s',
@@ -942,9 +870,9 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             3. CTA BUTTONS
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ══════════════════════════════════════════════════════ */}
         <section id="menu-ctas" style={{padding:'12px 20px 0'}}>
           <Reveal>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
@@ -952,9 +880,9 @@ export function HubPublicPage() {
                 const isPrimary=!!btn.primary
                 const btnStyle: React.CSSProperties = {
                   background:isPrimary
-                    ?`${C.acc}26`
+                    ?'linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.06))'
                     :C.sur,
-                  border:`1px solid ${isPrimary?`${C.acc}40`:C.bdr}`,
+                  border:`1px solid ${isPrimary?'rgba(245,158,11,.25)':C.bdr}`,
                   borderRadius:16,padding:'18px 14px',
                   flexDirection:'column',alignItems:'center',justifyContent:'center',
                   backdropFilter:'blur(12px)',WebkitBackdropFilter:'blur(12px)',
@@ -963,12 +891,12 @@ export function HubPublicPage() {
                   <>
                     <div style={{width:48,height:48,borderRadius:14,marginBottom:10,
                       display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,
-                      background:isPrimary?`${C.acc}26`:C.sur2,
-                      boxShadow:isPrimary?`0 0 20px ${C.acc}20`:'none'}}>
+                      background:isPrimary?'rgba(245,158,11,.15)':'rgba(255,255,255,0.07)',
+                      boxShadow:isPrimary?'0 0 20px rgba(245,158,11,.12)':'none'}}>
                       {btn.icon}
                     </div>
-                    <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:13.5,fontWeight:500,
-                      color:isPrimary?C.acc:C.t1,textAlign:'center',lineHeight:1.2}}>
+                    <span style={{fontFamily:"'Geist',sans-serif",fontSize:13.5,fontWeight:500,
+                      color:isPrimary?C.acc2:C.t1,textAlign:'center',lineHeight:1.2}}>
                       {btn.label}
                     </span>
                   </>
@@ -998,9 +926,9 @@ export function HubPublicPage() {
         </section>
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             3. SOBRE NOSOTROS
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ══════════════════════════════════════════════════════ */}
         {hubAbout && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
@@ -1011,20 +939,13 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             4. SMART LINKS
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        {/* SLOT 1 — Bloques nuevos con sort_order < 10 (ej: bio extendida) */}
-        {preLinksNewBlocks.map(block => (
-          <Reveal key={block.id}>
-            <HubBlockRenderer block={block} restaurantId={r.id} C={C} />
-          </Reveal>
-        ))}
-
-        {isLegacyBlockActive('links') && links.length>0 && (
+        ══════════════════════════════════════════════════════ */}
+        {links.length>0 && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL color={C.t1}>Links</SL>
+              <SL>Links</SL>
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {links.map((link,i)=>(
                   <motion.button
@@ -1037,7 +958,7 @@ export function HubPublicPage() {
                     style={{
                       width:'100%',display:'flex',alignItems:'center',gap:14,
                       padding:'14px 18px',borderRadius:16,cursor:'pointer',
-                      background:C.card,border:`1px solid ${C.bdr}`,
+                      background:C.card,border:`1px solid rgba(255,255,255,0.08)`,
                       textAlign:'left',
                     }}
                   >
@@ -1050,7 +971,7 @@ export function HubPublicPage() {
                       <span style={{fontSize:22,flexShrink:0,lineHeight:1}}>{link.icon??'🔗'}</span>
                     )}
                     <span style={{
-                      fontFamily:"'DM Sans',sans-serif",fontSize:15,fontWeight:700,
+                      fontFamily:"'Geist',sans-serif",fontSize:15,fontWeight:700,
                       color:C.t1,flex:1,textAlign:'left',
                     }}>
                       {link.label}
@@ -1064,10 +985,10 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             5. NOVEDAD / STORY
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        {isLegacyBlockActive('stories') && story && (
+        ══════════════════════════════════════════════════════ */}
+        {story && (
           <section id="novedades" style={{padding:'28px 20px 0'}}>
             <Reveal>
               <div style={{borderRadius:20,overflow:'hidden',position:'relative',
@@ -1086,14 +1007,14 @@ export function HubPublicPage() {
                     background:'radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%)'}}/>
                 </>}
                 <div style={{position:'absolute',top:14,left:14,background:'#FFFFFF',color:'#000',
-                  fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:600,padding:'4px 10px',
+                  fontFamily:"'Geist Mono',monospace",fontSize:10,fontWeight:600,padding:'4px 10px',
                   borderRadius:100,textTransform:'uppercase',letterSpacing:'0.08em',
                   animation:'hubPopIn .4s cubic-bezier(.34,1.56,.64,1) .8s both'}}>
-                  â˜… Nuevo
+                  ★ Nuevo
                 </div>
                 <div style={{position:'relative',padding:'52px 18px 20px'}}>
                   {story.title && (
-                    <h3 style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:C.t1,margin:'0 0 8px'}}>
+                    <h3 style={{fontFamily:"'Geist',sans-serif",fontSize:22,fontWeight:700,color:C.t1,margin:'0 0 8px'}}>
                       {story.title}
                     </h3>
                   )}
@@ -1112,10 +1033,10 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             6. FEATURED PRODUCT
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        {isLegacyBlockActive('featured_products') && featuredProduct && (
+        ══════════════════════════════════════════════════════ */}
+        {featuredProduct && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
               <SL>{isRetail?'Destacado':'Más pedido'}</SL>
@@ -1131,11 +1052,11 @@ export function HubPublicPage() {
                 </div>
                 <div style={{padding:'14px 16px',flex:1,display:'flex',flexDirection:'column',gap:5}}>
                   {featuredProduct.tag && (
-                    <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,color:'#FFFFFF',textTransform:'uppercase',letterSpacing:'0.1em'}}>
+                    <span style={{fontFamily:"'Geist Mono',monospace",fontSize:10,color:'#FFFFFF',textTransform:'uppercase',letterSpacing:'0.1em'}}>
                       {featuredProduct.tag}
                     </span>
                   )}
-                  <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0,lineHeight:1.2}}>
+                  <p style={{fontFamily:"'Geist',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0,lineHeight:1.2}}>
                     {featuredProduct.name}
                   </p>
                   {featuredProduct.description && (
@@ -1145,7 +1066,7 @@ export function HubPublicPage() {
                     </p>
                   )}
                   {featuredProduct.price!=null && (
-                    <p style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:700,color:'#FFFFFF',margin:'2px 0 0'}}>
+                    <p style={{fontFamily:"'Geist',sans-serif",fontSize:20,fontWeight:700,color:'#FFFFFF',margin:'2px 0 0'}}>
                       ${featuredProduct.price.toLocaleString('es-AR')}
                     </p>
                   )}
@@ -1165,10 +1086,10 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             7. GALLERY
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        {isLegacyBlockActive('gallery') && gallery.length>0 && (
+        ══════════════════════════════════════════════════════ */}
+        {gallery.length>0 && (
           <section id="galeria" style={{padding:'32px 20px 0'}}>
             <Reveal>
               <SL>Galería</SL>
@@ -1183,7 +1104,7 @@ export function HubPublicPage() {
                           <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',
                             justifyContent:'center',background:'rgba(0,0,0,.4)'}}>
                             <span style={{width:38,height:38,borderRadius:'50%',background:'rgba(0,0,0,.6)',
-                              display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#fff'}}>â–¶</span>
+                              display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#fff'}}>▶</span>
                           </div>
                         </>
                       : <img src={item.url} alt={item.caption||''} loading="lazy"
@@ -1197,9 +1118,9 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             8. MENU / CATALOG BANNER
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ══════════════════════════════════════════════════════ */}
         {hubConfig.show_catalog_banner !== false && (
         <section style={{padding:'28px 20px 0'}}>
           <Reveal>
@@ -1209,10 +1130,10 @@ export function HubPublicPage() {
                 background:'linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.06))',
                 border:'1px solid rgba(245,158,11,.25)',borderRadius:20,textDecoration:'none'}}>
               <div>
-                <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:'0 0 4px'}}>
+                <p style={{fontFamily:"'Geist',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:'0 0 4px'}}>
                   {isRetail?'Ver catálogo completo':'Ver el menú completo'}
                 </p>
-                <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,margin:0}}>
+                <p style={{fontFamily:"'Geist Mono',monospace",fontSize:12,color:C.t3,margin:0}}>
                   {isRetail?'Productos · Precios · Categorías':'Carta · Bebidas · Postres'}
                 </p>
               </div>
@@ -1226,31 +1147,31 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             9. HORARIOS (compacto con tooltip)
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ══════════════════════════════════════════════════════ */}
         {hubConfig.show_schedule !== false && hasScheduleData(schedule) && (
           <section style={{padding:'24px 20px 0'}}>
             <Reveal>
               <div style={{...cardBase,overflow:'visible'}}>
-                <HorariosCompact schedule={schedule as Record<string,any>} C={C} />
+                <HorariosCompact schedule={schedule as Record<string,any>} />
               </div>
             </Reveal>
           </section>
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             10. LOCATIONS
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        ══════════════════════════════════════════════════════ */}
         {hubConfig.show_locations !== false && (
         <section id="locales" style={{padding:'32px 20px 0'}}>
           <Reveal>
-            <SL color={C.t1}>Locales</SL>
+            <SL>Locales</SL>
             <div style={{...cardBase,padding:18}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-                <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0}}>{r.name}</p>
-                <span style={{padding:'4px 10px',borderRadius:100,fontFamily:"'DM Mono',monospace",fontSize:10,fontWeight:500,
+                <p style={{fontFamily:"'Geist',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:0}}>{r.name}</p>
+                <span style={{padding:'4px 10px',borderRadius:100,fontFamily:"'Geist Mono',monospace",fontSize:10,fontWeight:500,
                   background:open?'rgba(16,185,129,.12)':'rgba(239,68,68,.12)',
                   border:`1px solid ${open?'rgba(16,185,129,.25)':'rgba(239,68,68,.25)'}`,
                   color:open?C.grn:C.red}}>
@@ -1263,7 +1184,7 @@ export function HubPublicPage() {
                 </p>
               )}
               {hoursText && (
-                <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,marginBottom:14,margin:'0 0 14px'}}>
+                <p style={{fontFamily:"'Geist Mono',monospace",fontSize:12,color:C.t3,marginBottom:14,margin:'0 0 14px'}}>
                   Hoy: {hoursText}
                 </p>
               )}
@@ -1301,10 +1222,10 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             11. REVIEWS
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        {isLegacyBlockActive('reviews') && (reviews.length>0||googleRating) && (
+        ══════════════════════════════════════════════════════ */}
+        {(reviews.length>0||googleRating) && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
               <SL>Reseñas</SL>
@@ -1314,29 +1235,29 @@ export function HubPublicPage() {
                     cursor:googleReviewUrl?'pointer':'default'}}
                   onClick={()=>{
                     if (googleReviewUrl) {
-                      trackEvent(r.id,'google_reviews_click')
+                      trackEvent(r.id,'link_click')
                       window.open(googleReviewUrl,'_blank','noopener,noreferrer')
                     }
                   }}
                 >
                   <div style={{width:40,height:40,borderRadius:'50%',flexShrink:0,
                     background:'#fff',display:'flex',alignItems:'center',justifyContent:'center',
-                    fontFamily:"'DM Mono',monospace",fontWeight:700,fontSize:16,color:'#4285F4'}}>
+                    fontFamily:"'Geist Mono',monospace",fontWeight:700,fontSize:16,color:'#4285F4'}}>
                     G
                   </div>
                   <div style={{flex:1}}>
                     <p style={{margin:'0 0 2px',fontSize:13.5,fontWeight:600,color:C.t1}}>Google Reviews</p>
                     {googleReviewCount && (
-                      <p style={{fontFamily:"'DM Mono',monospace",fontSize:11.5,color:C.t3,margin:0}}>
+                      <p style={{fontFamily:"'Geist Mono',monospace",fontSize:11.5,color:C.t3,margin:0}}>
                         {googleReviewCount} reseñas
                       </p>
                     )}
                   </div>
                   <div style={{display:'flex',alignItems:'center',gap:4}}>
-                    <span style={{fontFamily:"'Syne',sans-serif",fontSize:24,fontWeight:800,color:'#FFFFFF',lineHeight:1}}>
+                    <span style={{fontFamily:"'Geist',sans-serif",fontSize:24,fontWeight:800,color:'#FFFFFF',lineHeight:1}}>
                       {googleRating}
                     </span>
-                    <span style={{color:'#FFFFFF',fontSize:20}}>â˜…</span>
+                    <span style={{color:'#FFFFFF',fontSize:20}}>★</span>
                   </div>
                 </div>
               )}
@@ -1348,12 +1269,12 @@ export function HubPublicPage() {
                         <div style={{width:36,height:36,borderRadius:'50%',flexShrink:0,
                           background:`linear-gradient(135deg,${rev.profile_color||'#FFFFFF'},rgba(139,92,246,.7))`,
                           display:'flex',alignItems:'center',justifyContent:'center',
-                          fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15,color:'#fff'}}>
+                          fontFamily:"'Geist',sans-serif",fontWeight:700,fontSize:15,color:'#fff'}}>
                           {rev.author_initial||rev.author_name[0]?.toUpperCase()}
                         </div>
                         <div style={{flex:1}}>
                           <p style={{margin:0,fontWeight:600,fontSize:13.5,color:C.t1}}>{rev.author_name}</p>
-                          <p style={{margin:0,fontFamily:"'DM Mono',monospace",fontSize:10.5,color:C.t3}}>
+                          <p style={{margin:0,fontFamily:"'Geist Mono',monospace",fontSize:10.5,color:C.t3}}>
                             {rev.relative_time||'Hace poco'} · {starStr(rev.rating)}
                           </p>
                         </div>
@@ -1365,9 +1286,9 @@ export function HubPublicPage() {
               )}
               {social.google_review && (
                 <a href={social.google_review} target="_blank" rel="noopener noreferrer"
-                  onClick={()=>trackEvent(r.id,'google_maps_click')}
+                  onClick={()=>trackEvent(r.id,'link_click')}
                   style={{display:'block',textAlign:'center',marginTop:12,
-                    fontFamily:"'DM Mono',monospace",fontSize:12.5,color:'#FFFFFF',textDecoration:'none'}}>
+                    fontFamily:"'Geist Mono',monospace",fontSize:12.5,color:'#FFFFFF',textDecoration:'none'}}>
                   Ver en Google →
                 </a>
               )}
@@ -1378,20 +1299,13 @@ export function HubPublicPage() {
 
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             13. CONTACT LIST
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        {/* SLOT 2 — Bloques nuevos con sort_order >= 10 (ej: stats, video) */}
-        {postReviewsNewBlocks.map(block => (
-          <Reveal key={block.id}>
-            <HubBlockRenderer block={block} restaurantId={r.id} C={C} />
-          </Reveal>
-        ))}
-
+        ══════════════════════════════════════════════════════ */}
         {contactItems.length>0 && (
           <section id="contacto" style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL color={C.t1}>Contacto</SL>
+              <SL>Contacto</SL>
               <div style={{display:'flex',flexDirection:'column',gap:6}}>
                 {contactItems.map(c=>(
                   <a key={c.label} href={c.href}
@@ -1404,7 +1318,7 @@ export function HubPublicPage() {
                       {c.icon}
                     </div>
                     <div style={{flex:1}}>
-                      <p style={{margin:0,fontFamily:"'DM Mono',monospace",fontSize:10,color:C.t3,
+                      <p style={{margin:0,fontFamily:"'Geist Mono',monospace",fontSize:10,color:C.t3,
                         textTransform:'uppercase',letterSpacing:'0.1em'}}>{c.label}</p>
                       <p style={{margin:'2px 0 0',fontSize:13.5,color:C.t1,fontWeight:500}}>{c.value}</p>
                     </div>
@@ -1417,10 +1331,21 @@ export function HubPublicPage() {
         )}
 
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        {/* ══════════════════════════════════════════════════════
             14. FOOTER
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        <FooterViral slug={r.slug ?? ''} C={C} />
+        ══════════════════════════════════════════════════════ */}
+        <footer style={{margin:'40px 20px 0',padding:'24px 0',
+          borderTop:`1px solid ${C.bdr}`,textAlign:'center'}}>
+          <p style={{fontFamily:"'Geist',sans-serif",fontSize:16,fontWeight:800,color:C.t1,margin:'0 0 4px'}}>{r.name}</p>
+          {hoursText && <p style={{fontFamily:"'Geist Mono',monospace",fontSize:12,color:C.t3,margin:'0 0 4px'}}>{hoursText}</p>}
+          {r.city && <p style={{fontSize:12,color:C.t4,margin:'0 0 16px'}}>{r.city}</p>}
+          <a href="https://menulife.digital" target="_blank" rel="noopener noreferrer"
+            style={{display:'inline-flex',alignItems:'center',gap:5,padding:'7px 14px',borderRadius:100,
+              background:C.sur,border:`1px solid ${C.bdr}`,textDecoration:'none'}}>
+            <span style={{fontFamily:"'Geist Mono',monospace",fontSize:11,color:C.t3}}>Powered by</span>
+            <span style={{fontFamily:"'Geist Mono',monospace",fontSize:11,fontWeight:500,color:'#FFFFFF'}}>MenuLife</span>
+          </a>
+        </footer>
 
         </div>{/* end solid-bg content wrapper */}
       </div>
@@ -1431,7 +1356,6 @@ export function HubPublicPage() {
         plan={ra.plan ?? null}
         hubConfig={hubConfig}
         hasFeatured={!!featuredProduct}
-        C={C}
       />
 
       {/* GALLERY LIGHTBOX */}

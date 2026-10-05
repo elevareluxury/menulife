@@ -780,7 +780,7 @@ export function PublicMenu() {
             position: 'absolute',
             top: 0,
             right: 0,
-            fontFamily: "'Ruda', sans-serif",
+            fontFamily: "'Geist', sans-serif",
             fontSize: 18,
             fontWeight: 700,
             color: '#FFFFFF',

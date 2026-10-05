@@ -1,33 +1,43 @@
+import { createPortal } from 'react-dom'
 import { useLocation, Link } from 'react-router-dom'
 import { Sun, Wallet, Target, Flame, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useLifeT, type LifeDict } from '@/i18n/app/life'
+import { useAppLang } from '@/i18n/app/store'
+import { langDir } from '@/i18n/app/languages'
 
 interface Tab {
   to: string
-  label: string
+  label: keyof LifeDict['nav']
   icon: LucideIcon
 }
 
 const TABS: Tab[] = [
-  { to: '/life',         label: 'Life',   icon: Sun    },
-  { to: '/life/money',   label: 'Money',  icon: Wallet },
-  { to: '/life/goals',   label: 'Goals',  icon: Target },
-  { to: '/life/habits',  label: 'Habits', icon: Flame  },
-  { to: '/life/brain',   label: 'Brain',  icon: Zap    },
+  { to: '/life',         label: 'life',   icon: Sun    },
+  { to: '/life/money',   label: 'money',  icon: Wallet },
+  { to: '/life/goals',   label: 'goals',  icon: Target },
+  { to: '/life/habits',  label: 'habits', icon: Flame  },
+  { to: '/life/brain',   label: 'brain',  icon: Zap    },
 ]
 
 export function LifeNav() {
   const { pathname } = useLocation()
+  const t = useLifeT()
+  const dir = langDir(useAppLang(s => s.lang))
 
   const isActive = (to: string) =>
     to === '/life' ? pathname === '/life' : pathname.startsWith(to)
 
-  return (
-    <nav style={{
+  // Portal a <body>: ningún contenedor puede alterar su position: fixed
+  return createPortal(
+    <nav aria-label="Life OS" dir={dir} style={{
+      // Fija al pie sin transform (con transform algunos navegadores la desplazan al hacer scroll)
       position: 'fixed',
       bottom: 'calc(16px + env(safe-area-inset-bottom))',
-      left: '50%',
-      transform: 'translateX(-50%)',
+      left: 0,
+      right: 0,
+      marginInline: 'auto',
+      width: 'fit-content',
       display: 'flex',
       alignItems: 'center',
       gap: '2px',
@@ -41,47 +51,42 @@ export function LifeNav() {
       zIndex: 50,
       userSelect: 'none',
     }}>
-      {TABS.map(({ to, label, icon: Icon }) => {
+      {TABS.map(({ to, label: key, icon: Icon }) => {
         const active = isActive(to)
+        const label = t.nav[key]
         return (
           <Link
             key={to}
             to={to}
+            aria-label={label}
+            aria-current={active ? 'page' : undefined}
+            title={label}
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: '2px',
-              padding: '7px 13px',
+              justifyContent: 'center',
+              padding: '11px 14px',
               borderRadius: '9999px',
               textDecoration: 'none',
               background: active ? 'rgba(244,112,90,0.13)' : 'transparent',
               transition: 'background 0.18s ease',
-              minWidth: '52px',
+              minWidth: '48px',
+              minHeight: '44px',
             }}
           >
             <Icon
-              size={18}
+              aria-hidden="true"
+              size={20}
               style={{
                 color: active ? '#F4705A' : 'rgba(255,255,255,0.32)',
                 transition: 'color 0.18s',
                 strokeWidth: active ? 2.2 : 1.8,
               }}
             />
-            <span style={{
-              fontSize: '10px',
-              fontWeight: active ? 700 : 500,
-              letterSpacing: '0.01em',
-              color: active ? '#F4705A' : 'rgba(255,255,255,0.28)',
-              transition: 'color 0.18s, font-weight 0.18s',
-              fontFamily: 'var(--font-jakarta)',
-              lineHeight: 1,
-            }}>
-              {label}
-            </span>
           </Link>
         )
       })}
-    </nav>
+    </nav>,
+    document.body,
   )
 }

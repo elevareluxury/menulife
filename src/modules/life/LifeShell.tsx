@@ -1,33 +1,31 @@
 import { useState, useEffect } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
-import { Settings2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useLifeStore } from '@/store/lifeStore'
 import { supabase } from '@/lib/supabase'
 import { Spinner } from '@/components/ui/Spinner'
-import { colors, radius } from './design-system'
 import { LifeNav } from './components/LifeNav'
 import { CaptureButton } from './components/CaptureButton'
 import { AchievementToast } from './components/AchievementToast'
-import { LifeSettingsModal } from './components/LifeSettingsModal'
-import { InstallAppModalIOS } from './components/InstallAppModalIOS'
+import { OfflineBanner } from './components/OfflineBanner'
+import { flushOutbox } from './lib/outbox'
+import { useTaskReminders } from './hooks/useTaskReminders'
+import { useAppBackground } from '@/lib/useAppBackground'
+import { useAppLang } from '@/i18n/app/store'
+import { langDir } from '@/i18n/app/languages'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
 export function LifeShell() {
   const { user, loading, initialized } = useAuthStore()
-  const { setHasRestaurant, setRestaurantName, setRestaurantSlug, setRestaurantPlan, setOnboardingCompleted } = useLifeStore()
-  const [timedOut, setTimedOut]       = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [iosModalOpen, setIosModalOpen] = useState(false)
+  const { setHasRestaurant, setRestaurantName, setRestaurantSlug, setRestaurantPlan } = useLifeStore()
+  const [timedOut, setTimedOut] = useState(false)
+  useTaskReminders(user?.id)
+  const dir = langDir(useAppLang(s => s.lang))
 
-  // Force body background dark so no white flash between Life OS pages
-  useEffect(() => {
-    const prev = document.body.style.background
-    document.body.style.background = '#0A0B0F'
-    return () => { document.body.style.background = prev }
-  }, [])
+  // Fondo oscuro en html y body: sin flashes blancos ni franjas al llegar a los bordes
+  useAppBackground('#0F1115')
 
   // Safety timeout — same pattern as DashboardPage
   useEffect(() => {
@@ -35,26 +33,34 @@ export function LifeShell() {
     return () => clearTimeout(t)
   }, [])
 
+  // Capturas guardadas sin conexión: se suben al entrar y cada vez que vuelve la red
+  useEffect(() => {
+    if (!user) return
+    const flush = () => { void flushOutbox() }
+    flush()
+    window.addEventListener('online', flush)
+    return () => window.removeEventListener('online', flush)
+  }, [user])
+
   // Detect if user has a business restaurant (for showing the "Mi negocio" link)
   useEffect(() => {
     if (!user) return
     db.from('restaurants')
-      .select('id,name,slug,plan,onboarding_completed')
+      .select('id,name,slug,plan')
       .eq('owner_id', user.id)
       .maybeSingle()
-      .then(({ data }: { data: { id: string; name: string; slug: string; plan: string | null; onboarding_completed: boolean | null } | null }) => {
+      .then(({ data }: { data: { id: string; name: string; slug: string; plan: string | null } | null }) => {
         setHasRestaurant(!!data)
         setRestaurantName(data?.name ?? null)
         setRestaurantSlug(data?.slug ?? null)
         setRestaurantPlan(data?.plan ?? null)
-        setOnboardingCompleted(data?.onboarding_completed ?? null)
       })
   }, [user, setHasRestaurant])
 
   if ((!initialized || loading) && !timedOut) {
     return (
       <div style={{
-        minHeight: '100vh', background: '#0F1115',
+        minHeight: '100dvh', background: '#0F1115',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <Spinner size="lg" />
@@ -65,54 +71,22 @@ export function LifeShell() {
   if (!user) return <Navigate to="/login" replace />
 
   return (
-    <div style={{
-      minHeight: '100vh',
+    // Marco de app: la página no scrollea, scrollea este contenedor. Así iOS no mueve
+    // el menú ni el botón + (rebote / barra de Safari) y si el contenido entra no hay scroll.
+    <div data-scroll-root dir={dir} style={{
+      height: '100dvh',
+      overflowY: 'auto',
+      overscrollBehaviorY: 'contain',
+      WebkitOverflowScrolling: 'touch',
       background: '#0F1115',
       color: '#F5F7FA',
       paddingBottom: 'calc(88px + env(safe-area-inset-bottom))',
     }}>
+      <OfflineBanner />
       <Outlet />
       <CaptureButton />
       <AchievementToast />
       <LifeNav />
-
-      {/* Gear button — fixed bottom-left above nav */}
-      <button
-        onClick={() => setSettingsOpen(true)}
-        style={{
-          position: 'fixed',
-          bottom: 'calc(96px + env(safe-area-inset-bottom))',
-          left: '16px',
-          zIndex: 50,
-          width: 32, height: 32,
-          borderRadius: radius.full,
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.09)',
-          cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: colors.text.tertiary,
-          transition: 'background 0.15s, color 0.15s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.10)'; e.currentTarget.style.color = colors.text.secondary }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = colors.text.tertiary }}
-        aria-label="Ajustes"
-      >
-        <Settings2 size={14} strokeWidth={2} />
-      </button>
-
-      <LifeSettingsModal
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onShowIOSInstructions={() => {
-          setSettingsOpen(false)
-          setIosModalOpen(true)
-        }}
-      />
-
-      <InstallAppModalIOS
-        open={iosModalOpen}
-        onClose={() => setIosModalOpen(false)}
-      />
     </div>
   )
 }

@@ -68,13 +68,17 @@ export default defineConfig({
     },
   },
   build: {
+    // manifest.json: lo usa scripts/check-bundle-budget.mjs para medir lo que descarga cada página
+    manifest: true,
+    // Las fuentes nunca dentro del CSS: cada idioma baja sólo su archivo (unicode-range). Embebidas, el CSS pesaba 4× más.
+    assetsInlineLimit: (file: string) => (/\.woff2?$/.test(file) ? false : undefined),
     rollupOptions: {
       output: {
+        // Sólo se agrupan librerías que usa casi toda página. recharts y framer-motion NO: agruparlas a mano
+        // arrastraba dependencias compartidas y hacía que cada perfil público descargara gráficos y animaciones.
         manualChunks(id) {
-          if (id.includes('recharts'))            return 'recharts'
-          if (id.includes('@supabase'))           return 'supabase'
-          if (id.includes('framer-motion'))       return 'framer'
-          if (id.includes('react-dom') || id.includes('react-router-dom')) return 'vendor'
+          if (id.includes('node_modules/@supabase/')) return 'supabase'
+          if (/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)) return 'vendor'
         },
       },
     },

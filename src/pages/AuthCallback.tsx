@@ -1,8 +1,11 @@
 import { useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { useAuthT } from '@/i18n/app/auth'
 
 export function AuthCallback() {
+  const t = useAuthT()
   const navigate = useNavigate()
 
   // Capture URL params SYNCHRONOUSLY during render — Supabase's async _initialize()
@@ -33,9 +36,13 @@ export function AuthCallback() {
       if (superAdmin) {
         navigate('/super-admin', { replace: true })
       } else if (!restaurant) {
-        navigate('/life', { replace: true })
+        // Sin negocio: si todavía no armó su identidad, va al onboarding de Studio
+        // profiles todavía no está en database.types.ts
+        const { data: profile } = await (supabase as unknown as SupabaseClient)
+          .from('profiles').select('id').eq('user_id', id).limit(1).maybeSingle()
+        navigate(profile ? '/life' : '/studio', { replace: true })
       } else if (restaurant.plan === 'hub_free') {
-        navigate('/dashboard/hub', { replace: true })
+        navigate('/studio', { replace: true })
       } else {
         navigate('/dashboard', { replace: true })
       }
@@ -45,11 +52,10 @@ export function AuthCallback() {
       try {
         // CASE 1: Explicit error in URL
         if (error) {
-          const msg = errorDesc
-            ? decodeURIComponent(errorDesc.replace(/\+/g, ' '))
-            : 'Link inválido o expirado'
+          // Se pasa un código (no el texto en inglés de Supabase): la pantalla lo muestra en el idioma de la persona
+          const code = /expired/i.test(errorDesc ?? '') ? 'expired' : 'invalid'
           const dest = type === 'recovery' ? '/forgot-password' : '/login'
-          navigate(`${dest}?error=${encodeURIComponent(msg)}`, { replace: true })
+          navigate(`${dest}?error=${code}`, { replace: true })
           return
         }
 
@@ -62,7 +68,7 @@ export function AuthCallback() {
           if (code) {
             const { error: ex } = await supabase.auth.exchangeCodeForSession(code)
             if (ex) {
-              navigate('/forgot-password?error=Sesión+inválida', { replace: true })
+              navigate('/forgot-password?error=invalid', { replace: true })
               return
             }
           }
@@ -87,7 +93,7 @@ export function AuthCallback() {
         if (code) {
           const { error: ex } = await supabase.auth.exchangeCodeForSession(code)
           if (ex) {
-            navigate('/login?error=Sesión+inválida', { replace: true })
+            navigate('/login?error=invalid', { replace: true })
             return
           }
           await redirectByRole()
@@ -103,8 +109,7 @@ export function AuthCallback() {
         } else {
           navigate('/login', { replace: true })
         }
-      } catch (err) {
-        console.error('[AuthCallback] error:', err)
+      } catch {
         navigate('/login', { replace: true })
       }
     }
@@ -131,8 +136,8 @@ export function AuthCallback() {
         borderRadius:   '50%',
         animation:      'spin 0.8s linear infinite',
       }} />
-      <p style={{ color: '#98A2B3', fontSize: '0.9375rem' }}>
-        Verificando acceso...
+      <p role="status" style={{ color: '#98A2B3', fontSize: '0.9375rem' }}>
+        {t.common.checking}
       </p>
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>

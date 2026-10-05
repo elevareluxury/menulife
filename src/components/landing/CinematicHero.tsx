@@ -2,10 +2,15 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import FlowFieldBackground from '@/components/ui/flow-field-background'
 import { HubPhonePreview } from './HubPhonePreview'
+import { useLandingT } from '@/i18n/app/landing'
+import { SplitText } from './SplitText'
+
+import { reducedMotion } from './motion'
 
 declare const gsap: any
 
 export function CinematicHero() {
+  const l = useLandingT()
   const sectionRef    = useRef<HTMLElement>(null)
   const introRef      = useRef<HTMLDivElement>(null)
   const cardRef       = useRef<HTMLDivElement>(null)
@@ -17,7 +22,7 @@ export function CinematicHero() {
 
   /* ── ScrollTrigger pinned timeline ── */
   useEffect(() => {
-    if (typeof gsap === 'undefined') return
+    if (typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
     if (!ST) return
     gsap.registerPlugin(ST)
@@ -84,7 +89,7 @@ export function CinematicHero() {
   /* ── Parallax del phone con mouse ── */
   useEffect(() => {
     const phone = phoneRef.current
-    if (!phone) return
+    if (!phone || reducedMotion()) return
 
     function onMouseMove(e: MouseEvent) {
       if (window.innerWidth < 768 || !phone) return
@@ -146,31 +151,28 @@ export function CinematicHero() {
 
       {/* FASE 1: Intro */}
       <div ref={introRef} className="ch-intro">
-        <h1>
-          <span className="ch-line1">Tu mundo digital</span>
-          <span className="ch-line2">en un solo lugar.</span>
+        <h1 data-split>
+          <span className="ch-line1"><SplitText text={l.hero.line1} /></span>
+          <span className="ch-line2"><SplitText text={l.hero.line2} /></span>
         </h1>
-        <p className="ch-subtitle">
-          Construye tu identidad digital, organiza tu vida y potencia tu negocio
-          desde una única plataforma.
-        </p>
+        <p className="ch-subtitle">{l.hero.subtitle}</p>
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '8px' }}>
           <Link to="/register" style={{ textDecoration: 'none' }}>
-            <button className="liquid-glass-btn" style={{
+            <button data-magnetic className="liquid-glass-btn" style={{
               padding: '12px 28px', fontSize: '14px', fontWeight: 600,
               color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
               borderRadius: '50px',
             }}>
-              <span>Crear Mi Espacio Gratis →</span>
+              <span>{l.hero.cta}</span>
             </button>
           </Link>
           <a href="#soluciones" style={{ textDecoration: 'none' }}>
-            <button className="liquid-glass-btn-ghost" style={{
+            <button data-magnetic className="liquid-glass-btn-ghost" style={{
               padding: '12px 24px', fontSize: '14px', fontWeight: 500,
               color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'var(--font-jakarta)',
               borderRadius: '50px',
             }}>
-              Ver Soluciones
+              {l.hero.how}
             </button>
           </a>
         </div>
@@ -179,10 +181,9 @@ export function CinematicHero() {
       {/* FASE 2: Card que sube con scroll */}
       <div ref={cardRef} className="ch-card">
         <div className="ch-card-content">
-          <h2 className="ch-card-heading">Tu identidad digital, tu negocio y tu vida. Todo en uno.</h2>
+          <h2 className="ch-card-heading" data-split><SplitText text={l.hero.cardTitle} /></h2>
           <p className="ch-card-description">
-            <strong>Mycen</strong> unifica tu ID Digital, tu sistema personal y tu
-            plataforma de negocio — sin apps que instalar, sin silos.
+            <strong>Mycen</strong> {l.hero.cardText}
           </p>
         </div>
 
@@ -197,12 +198,12 @@ export function CinematicHero() {
 
           {/* Floating badges */}
           <div ref={badgeLeftRef} className="floating-badge ch-badge-left">
-            <span className="ch-badge-title">✨ Hub creado</span>
-            <span>mycen.digital/tu-perfil</span>
+            <span className="ch-badge-title">{l.hero.badgePublished}</span>
+            <span>{l.hero.badgeUrl}</span>
           </div>
           <div ref={badgeRightRef} className="floating-badge ch-badge-right">
-            <span className="ch-badge-title">🎯 Meta alcanzada</span>
-            <span>6/10 hábitos este mes</span>
+            <span className="ch-badge-title">{l.hero.badgeGoal}</span>
+            <span>{l.hero.badgeGoalSub}</span>
           </div>
         </div>
       </div>
