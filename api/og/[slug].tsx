@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { ImageResponse } from '@vercel/og'
 
 export const config = { runtime: 'edge' }
