@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle2, Plus, Trash2, Edit3, Pause, Play } from 'lucide-react'
+import { CheckCircle2, Plus, Trash2, Edit3, Pause, Play, Sparkles } from 'lucide-react'
 import { LifeSheet, LifeConfirmDialog, MiniProgressRing, colors, font, radius } from '../design-system'
 import type { Goal, Milestone } from '../hooks/useGoals'
+import { GoalCheckinHistory } from './GoalCheckinHistory'
+import { GoalProgressChart } from './GoalProgressChart'
 
 interface GoalDetailSheetProps {
   goal: Goal | null
@@ -15,6 +17,9 @@ interface GoalDetailSheetProps {
   onDeleteMilestone: (id: string, goalId: string) => Promise<void>
   onUpdateProgress: (goalId: string, progress: number) => Promise<void>
   onUpdateStatus: (goalId: string, status: string) => Promise<void>
+  hasPendingCheckin?: boolean
+  onCheckin?: () => void
+  checkinRefreshKey?: number
 }
 
 function formatDate(iso: string): string {
@@ -26,6 +31,7 @@ export function GoalDetailSheet({
   goal, open, onClose, onEdit, onDelete,
   onToggleMilestone, onAddMilestone, onDeleteMilestone,
   onUpdateProgress, onUpdateStatus,
+  hasPendingCheckin, onCheckin, checkinRefreshKey = 0,
 }: GoalDetailSheetProps) {
   const [newMsTitle, setNewMsTitle]     = useState('')
   const [addingMs, setAddingMs]         = useState(false)
@@ -136,6 +142,25 @@ export function GoalDetailSheet({
             )}
           </div>
 
+          {/* Check-in CTA */}
+          {hasPendingCheckin && onCheckin && (
+            <button
+              onClick={onCheckin}
+              style={{
+                width: '100%', padding: '12px 0', marginBottom: '20px',
+                borderRadius: radius.full,
+                background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+                border: 'none', color: '#fff',
+                fontFamily: font, fontSize: '14px', fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+              }}
+            >
+              <Sparkles size={14} />
+              Hacer check-in de esta semana
+            </button>
+          )}
+
           {/* Milestones */}
           <div style={{ marginBottom: '20px' }}>
             <p style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', marginBottom: '10px' }}>
@@ -243,6 +268,23 @@ export function GoalDetailSheet({
               />
             </div>
           )}
+
+          {/* Progress chart */}
+          <div style={{ marginBottom: '20px' }}>
+            <GoalProgressChart key={`chart-${checkinRefreshKey}`} goalId={goal.id} />
+          </div>
+
+          {/* Check-in history */}
+          <div style={{ marginBottom: '20px' }}>
+            <p style={{
+              fontFamily: font, fontSize: '11px', fontWeight: 700,
+              color: colors.text.tertiary, letterSpacing: '0.08em',
+              textTransform: 'uppercase', margin: '0 0 10px',
+            }}>
+              HISTORIAL DE CHECK-INS
+            </p>
+            <GoalCheckinHistory key={`history-${checkinRefreshKey}`} goalId={goal.id} />
+          </div>
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', paddingTop: '4px' }}>

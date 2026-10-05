@@ -6,8 +6,11 @@ import {
   MiniProgressRing, colors, font, radius, stagger, fadeInUp, scaleIn,
 } from '../design-system'
 import { useGoals, type Goal } from '../hooks/useGoals'
+import { useGoalsNeedingCheckin } from '../hooks/useGoalCheckins'
 import { GoalSheet } from '../components/GoalSheet'
 import { GoalDetailSheet } from '../components/GoalDetailSheet'
+import { GoalCheckinBanner } from '../components/GoalCheckinBanner'
+import { WeeklyCheckInFlow } from '../components/WeeklyCheckInFlow'
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function GoalSkeleton() {
@@ -166,11 +169,16 @@ export function LifeGoalsPage() {
     addMilestone, toggleMilestone, deleteMilestone,
   } = useGoals()
 
-  const [sheetOpen, setSheetOpen]       = useState(false)
-  const [editGoal, setEditGoal]         = useState<Goal | null>(null)
-  const [detailGoal, setDetailGoal]     = useState<Goal | null>(null)
-  const [detailOpen, setDetailOpen]     = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState<Goal | null>(null)
+  const [sheetOpen, setSheetOpen]         = useState(false)
+  const [editGoal, setEditGoal]           = useState<Goal | null>(null)
+  const [detailGoal, setDetailGoal]       = useState<Goal | null>(null)
+  const [detailOpen, setDetailOpen]       = useState(false)
+  const [deleteTarget, setDeleteTarget]   = useState<Goal | null>(null)
+  const [checkinGoal, setCheckinGoal]     = useState<Goal | null>(null)
+  const [checkinRefreshKey, setCheckinRefreshKey] = useState(0)
+
+  const activeGoals = goals.filter(g => g.status === 'in_progress')
+  const pendingIds  = useGoalsNeedingCheckin(activeGoals)
 
   if (loading) return <GoalSkeleton />
 
@@ -181,6 +189,8 @@ export function LifeGoalsPage() {
   const currentDetailGoal = detailGoal
     ? (goals.find(g => g.id === detailGoal.id) ?? detailGoal)
     : null
+
+  const pendingGoals = activeGoals.filter(g => pendingIds.includes(g.id))
 
   return (
     <LifeScreenContainer>
@@ -226,6 +236,12 @@ export function LifeGoalsPage() {
           ))}
         </div>
       )}
+
+      {/* Check-in banner (solo vie/sáb/dom, solo si hay metas pendientes) */}
+      <GoalCheckinBanner
+        pendingCount={pendingGoals.length}
+        onCheckIn={() => setCheckinGoal(pendingGoals[0] ?? null)}
+      />
 
       {/* Goal list or empty state */}
       {goals.length === 0 ? (
@@ -319,6 +335,9 @@ export function LifeGoalsPage() {
         onDeleteMilestone={deleteMilestone}
         onUpdateProgress={updateProgress}
         onUpdateStatus={async (id, status) => updateGoal(id, { status })}
+        hasPendingCheckin={currentDetailGoal ? pendingIds.includes(currentDetailGoal.id) : false}
+        onCheckin={currentDetailGoal ? () => setCheckinGoal(currentDetailGoal) : undefined}
+        checkinRefreshKey={checkinRefreshKey}
       />
 
       {/* Delete Confirm */}
@@ -334,6 +353,19 @@ export function LifeGoalsPage() {
         onCancel={() => setDeleteTarget(null)}
         danger
       />
+
+      {/* Weekly check-in flow — fullscreen overlay */}
+      {checkinGoal && (
+        <WeeklyCheckInFlow
+          goal={checkinGoal}
+          open={!!checkinGoal}
+          onClose={() => setCheckinGoal(null)}
+          onCompleted={() => {
+            setCheckinGoal(null)
+            setCheckinRefreshKey(k => k + 1)
+          }}
+        />
+      )}
     </LifeScreenContainer>
   )
 }

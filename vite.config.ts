@@ -26,15 +26,15 @@ export default defineConfig({
       },
 
       manifest: {
-        name: 'MenuLife',
-        short_name: 'MenuLife',
-        description: 'Sistema operativo para negocios gastronómicos',
-        theme_color: '#0F1115',
-        background_color: '#0F1115',
+        name: 'Mycen — Tu mundo digital',
+        short_name: 'Mycen',
+        description: 'Construye tu identidad digital, organiza tu vida y potencia tu negocio.',
+        theme_color: '#0A0B0F',
+        background_color: '#0A0B0F',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/',
+        start_url: '/life',
         icons: [
           { src: 'web-app-manifest-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'web-app-manifest-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
@@ -42,17 +42,17 @@ export default defineConfig({
         ],
         shortcuts: [
           {
-            name: 'Dashboard',
-            url: '/dashboard',
+            name: 'Life OS',
+            url: '/life',
             icons: [{ src: 'web-app-manifest-192x192.png', sizes: '192x192' }],
           },
           {
-            name: 'Pedidos',
-            url: '/dashboard/orders',
+            name: 'Mi ID',
+            url: '/life/hub',
             icons: [{ src: 'web-app-manifest-192x192.png', sizes: '192x192' }],
           },
         ],
-        categories: ['food', 'business', 'productivity'],
+        categories: ['productivity', 'lifestyle', 'business'],
       },
 
       devOptions: {
