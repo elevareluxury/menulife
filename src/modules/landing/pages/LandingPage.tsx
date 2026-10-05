@@ -24,7 +24,7 @@ export function LandingPage() {
   }, [])
 
   return (
-    <div style={{ background: 'var(--ml-dark)', overflowX: 'hidden', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--ml-dark)', minHeight: '100vh' }}>
       <Navbar />
 
       <main>
