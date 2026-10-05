@@ -14,14 +14,16 @@ export { DashboardHome } from '@/modules/dashboard/pages/DashboardHome'
 export function DashboardPage() {
   const { loading, initialized, isAuthenticated } = useAuth()
   const { restaurant, loading: restaurantLoading } = useRestaurant()
-  const setBusinessType = useRestaurantStore(s => s.setBusinessType)
-  const setPlan         = useRestaurantStore(s => s.setPlan)
+  const setRestaurant = useRestaurantStore(s => s.setRestaurant)
   const [timedOut, setTimedOut] = useState(false)
 
   useEffect(() => {
-    setBusinessType(restaurant?.business_type ?? 'gastronomy')
-    setPlan(restaurant?.plan ?? null)
-  }, [restaurant?.business_type, restaurant?.plan, setBusinessType, setPlan])
+    setRestaurant(
+      restaurant
+        ? { ...restaurant, business_type: restaurant.business_type ?? 'gastronomy' }
+        : null
+    )
+  }, [restaurant, setRestaurant])
 
   // Load terminology for Services vertical (no-op for gastronomy/retail)
   useLoadTerminology(restaurant?.id)
