@@ -12,6 +12,7 @@ import { VisionSection }        from '@/components/landing/VisionSection'
 import { FinalCTA }             from '@/components/landing/FinalCTA'
 import { FAQSection }           from '@/components/landing/FAQSection'
 import { Footer }               from '@/components/landing/Footer'
+import { ReferralHeroSection } from '@/components/landing/ReferralHeroSection'
 
 export function LandingPage() {
   useEffect(() => {
@@ -23,10 +24,13 @@ export function LandingPage() {
   }, [])
 
   return (
-    <div style={{ background: 'var(--ml-dark)', overflowX: 'hidden', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--ml-dark)', minHeight: '100vh' }}>
       <Navbar />
 
       <main>
+        {/* Referral section — solo cuando llega con ?ref=hub&from=X */}
+        <ReferralHeroSection />
+
         {/* Section 1 — Hero */}
         <CinematicHero />
 

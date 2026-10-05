@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -8,7 +9,11 @@ import { useAuthStore } from '@/store/authStore'
 import { useLifeStore } from '@/store/lifeStore'
 import { useLocaleStore } from '@/store/localeStore'
 import { useLifeData } from '../hooks/useLifeData'
+import { useLifeEngagement } from '../hooks/useLifeEngagement'
+import { useInstallPWA } from '@/hooks/useInstallPWA'
 import { colors, font, radius, fadeInUp, stagger } from '../design-system'
+import { InstallAppBanner } from '../components/InstallAppBanner'
+import { InstallAppModalIOS } from '../components/InstallAppModalIOS'
 
 // ── Deterministic starfield ───────────────────────────────────────────────────
 
@@ -486,6 +491,11 @@ export function LifePage() {
   const { hasRestaurant, restaurantSlug, restaurantPlan, onboardingCompleted } = useLifeStore()
   const { currency } = useLocaleStore()
   const data = useLifeData()
+  const { isEngaged } = useLifeEngagement()
+  const { canInstall, isInstalled, isDismissed, needsIOSInstructions, install, dismiss } = useInstallPWA()
+  const [iosModalOpen, setIosModalOpen] = useState(false)
+
+  const shouldShowBanner = isEngaged && !isInstalled && !isDismissed && (canInstall || needsIOSInstructions)
 
   if (data.loading) return <PageSkeleton />
 
@@ -557,6 +567,18 @@ export function LifePage() {
             </button>
           </motion.div>
 
+          {/* ── Install banner (C3 gate: 1 goal + 1 brain item) ────────────── */}
+          {shouldShowBanner && (
+            <motion.div variants={fadeInUp}>
+              <InstallAppBanner
+                needsIOSInstructions={needsIOSInstructions}
+                onInstall={install}
+                onShowIOSInstructions={() => setIosModalOpen(true)}
+                onDismiss={dismiss}
+              />
+            </motion.div>
+          )}
+
           {/* ── ID Digital ─────────────────────────────────────────────────── */}
           <motion.div variants={fadeInUp}>
             <HubSection
@@ -605,6 +627,11 @@ export function LifePage() {
 
         </motion.div>
       </div>
+
+      <InstallAppModalIOS
+        open={iosModalOpen}
+        onClose={() => setIosModalOpen(false)}
+      />
     </>
   )
 }

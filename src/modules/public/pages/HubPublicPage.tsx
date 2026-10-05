@@ -7,6 +7,7 @@ import { buildHubC, NULL_C, isValidTheme, getBodyFont, type HubC } from '@/modul
 import { useThemeFonts } from '@/modules/hub/hooks/useThemeFonts'
 import { useHubBlocks } from '@/modules/hub/hooks/useHubBlocks'
 import { HubBlockRenderer } from '@/modules/hub/components/HubBlockRenderer'
+import { FooterViral } from '@/modules/hub/components/FooterViral'
 
 const db = supabase as any
 
@@ -123,7 +124,7 @@ function todayHours(bh: unknown): string {
   const slot = (bh as Record<string,any>)[day]
   if (!slot) return ''
   if (slot.closed===true) return 'Cerrado hoy'
-  if (slot.open && slot.close) return `${slot.open} â€“ ${slot.close}`
+  if (slot.open && slot.close) return `${slot.open} – ${slot.close}`
   return ''
 }
 
@@ -136,14 +137,37 @@ function starStr(n: number) { return 'â­'.repeat(Math.min(5,Math.max(1,Math.
 
 /* â”€â”€ Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
+function detectDevice(): 'mobile' | 'tablet' | 'desktop' {
+  const ua = navigator.userAgent
+  if (/iPad|Tablet/i.test(ua)) return 'tablet'
+  if (/Android|iPhone|iPod|Mobile/i.test(ua)) return 'mobile'
+  return 'desktop'
+}
+
 function trackEvent(restaurantId: string, eventType: string, linkId?: string) {
-  db.from('hub_analytics').insert({
+  const payload = JSON.stringify({
     restaurant_id: restaurantId,
     event_type: eventType,
     link_id: linkId ?? null,
-    referrer: typeof document !== 'undefined' ? document.referrer : '',
-    user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-  }).then()
+    referrer: document.referrer || null,
+    user_agent: navigator.userAgent,
+    device: detectDevice(),
+  })
+
+  const SUPABASE_URL     = import.meta.env.VITE_SUPABASE_URL as string
+  const SUPABASE_ANON    = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+
+  fetch(`${SUPABASE_URL}/rest/v1/hub_analytics`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SUPABASE_ANON,
+      Authorization: `Bearer ${SUPABASE_ANON}`,
+      Prefer: 'return=minimal',
+    },
+    body: payload,
+    keepalive: true,
+  }).catch(() => { /* silent fail */ })
 }
 
 /* â”€â”€ Scroll-reveal wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -207,7 +231,7 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
         style={{position:'absolute',top:20,right:20,width:44,height:44,borderRadius:'50%',
           background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:22,
           cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1}}>
-        Ã—
+        ×
       </button>
       <motion.div key={cur} initial={{opacity:0,scale:.95}} animate={{opacity:1,scale:1}}
         exit={{opacity:0,scale:.95}} transition={{duration:.2}} onClick={e=>e.stopPropagation()}
@@ -221,11 +245,11 @@ function Lightbox({items,startIndex,onClose}:{items:HubGalleryItem[];startIndex:
         <button onClick={e=>{e.stopPropagation();setCur(c=>(c-1+items.length)%items.length)}}
           style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',width:44,height:44,borderRadius:'50%',
             background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:28,cursor:'pointer',
-            display:'flex',alignItems:'center',justifyContent:'center'}}>â€¹</button>
+            display:'flex',alignItems:'center',justifyContent:'center'}}>‹</button>
         <button onClick={e=>{e.stopPropagation();setCur(c=>(c+1)%items.length)}}
           style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',width:44,height:44,borderRadius:'50%',
             background:'rgba(255,255,255,.1)',color:'#fff',border:'none',fontSize:28,cursor:'pointer',
-            display:'flex',alignItems:'center',justifyContent:'center'}}>â€º</button>
+            display:'flex',alignItems:'center',justifyContent:'center'}}>›</button>
       </>}
       <p style={{position:'absolute',bottom:16,fontFamily:"'DM Mono',monospace",fontSize:12,color:'rgba(255,255,255,.4)'}}>
         {cur+1} / {items.length}
@@ -269,11 +293,11 @@ function BottomNav({
   // Build dynamic nav items
   const items: { id: string; label: string; icon: React.ReactNode; section: string }[] = []
 
-  // MenÃº/CatÃ¡logo â€” solo OS
+  // Menú/Catálogo — solo OS
   if (plan && plan !== 'hub_free') {
     items.push({
       id: isRetail ? 'catalog' : 'menu',
-      label: isRetail ? 'CatÃ¡logo' : 'MenÃº',
+      label: isRetail ? 'Catálogo' : 'Menú',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="20" height="20">
           <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
@@ -284,7 +308,7 @@ function BottomNav({
     })
   }
 
-  // Inicio â€” siempre (se inserta en el centro)
+  // Inicio — siempre (se inserta en el centro)
   items.splice(Math.floor(items.length / 2), 0, {
     id: 'inicio',
     label: 'Inicio',
@@ -312,7 +336,7 @@ function BottomNav({
     })
   }
 
-  // Novedades â€” si hay featured product activo
+  // Novedades — si hay featured product activo
   if (hasFeatured) {
     items.push({
       id: 'novedades',
@@ -387,10 +411,10 @@ function BottomNav({
 const DAYS_COMPACT = [
   {key:'monday',    initial:'L', label:'Lunes'},
   {key:'tuesday',   initial:'M', label:'Martes'},
-  {key:'wednesday', initial:'X', label:'MiÃ©rcoles'},
+  {key:'wednesday', initial:'X', label:'Miércoles'},
   {key:'thursday',  initial:'J', label:'Jueves'},
   {key:'friday',    initial:'V', label:'Viernes'},
-  {key:'saturday',  initial:'S', label:'SÃ¡bado'},
+  {key:'saturday',  initial:'S', label:'Sábado'},
   {key:'sunday',    initial:'D', label:'Domingo'},
 ]
 
@@ -423,7 +447,7 @@ function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: Hub
           const isLast = index===DAYS_COMPACT.length-1
           return (
             <div key={day.key} style={{position:'relative',flexShrink:0}}>
-              {/* Tooltip â€” absolute, pegado sobre el cÃ­rculo */}
+              {/* Tooltip — absolute, pegado sobre el círculo */}
               <AnimatePresence>
                 {isActive && (
                   <motion.div
@@ -464,13 +488,13 @@ function HorariosCompact({schedule, C}:{schedule:Record<string,any>|null; C: Hub
                       <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:C.red,margin:0}}>Cerrado</p>
                     ) : (
                       <p style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:'#FFFFFF',margin:0}}>
-                        {slot.open} â€” {slot.close}
+                        {slot.open} — {slot.close}
                       </p>
                     )}
                   </motion.div>
                 )}
               </AnimatePresence>
-              {/* CÃ­rculo */}
+              {/* Círculo */}
               <button
                 onTouchStart={(e)=>{e.stopPropagation();setActiveDay(activeDay===day.key?null:day.key)}}
                 onClick={(e)=>{e.stopPropagation();setActiveDay(activeDay===day.key?null:day.key)}}
@@ -565,7 +589,7 @@ export function HubPublicPage() {
     return ()=>window.removeEventListener('scroll', onScroll)
   },[])
 
-  // Compute theme-aware palette â€” NULL_C for theme=null (zero regression for existing users)
+  // Compute theme-aware palette — NULL_C for theme=null (zero regression for existing users)
   const C = buildHubC((hubConfig as any).theme, (hubConfig as any).accent_color)
 
   // Load dynamic fonts (only Source Sans 3 for warm; others are in index.html)
@@ -682,18 +706,18 @@ export function HubPublicPage() {
   // â”€â”€ CTA buttons
   type CTABtn={icon:string;label:string;href?:string;scroll?:string;primary?:boolean;trackEvent?:string}
   const ctaBtns: CTABtn[] = []
-  const primaryLabel = hubMainCtaText || (isRetail ? 'Ver catÃ¡logo' : 'Ver menÃº')
+  const primaryLabel = hubMainCtaText || (isRetail ? 'Ver catálogo' : 'Ver menú')
   const primaryHref  = hubMainCtaUrl  || menuHref
-  const primaryIcon  = isRetail ? 'ðŸ›' : 'ðŸ½'
+  const primaryIcon  = isRetail ? '🛍' : '🍽'
   ctaBtns.push({ icon: primaryIcon, label: primaryLabel, href: primaryHref, primary: true, trackEvent: 'cta_click' })
   if (isRetail) {
-    if (cleanWa) ctaBtns.push({ icon:'ðŸ’¬', label:'WhatsApp', href:`https://wa.me/${cleanWa}`, trackEvent: 'whatsapp_click' })
-    ctaBtns.push({ icon:'ðŸ“', label:'CÃ³mo llegar', scroll:'locales', trackEvent: 'maps_click' })
-    if (r.phone) ctaBtns.push({ icon:'ðŸ“ž', label:'Llamar', href:`tel:${r.phone}` })
+    if (cleanWa) ctaBtns.push({ icon:'💬', label:'WhatsApp', href:`https://wa.me/${cleanWa}`, trackEvent: 'whatsapp_click' })
+    ctaBtns.push({ icon:'📍', label:'Cómo llegar', scroll:'locales', trackEvent: 'maps_click' })
+    if (r.phone) ctaBtns.push({ icon:'📞', label:'Llamar', href:`tel:${r.phone}` })
   } else {
-    if (r.reservations_enabled) ctaBtns.push({ icon:'ðŸ“…', label:'Reservar', href:`/r/${slug}/reservar` })
-    if (cleanWa) ctaBtns.push({ icon:'ðŸ’¬', label:'WhatsApp', href:`https://wa.me/${cleanWa}`, trackEvent: 'whatsapp_click' })
-    ctaBtns.push({ icon:'ðŸ“', label:'CÃ³mo llegar', scroll:'locales', trackEvent: 'maps_click' })
+    if (r.reservations_enabled) ctaBtns.push({ icon:'📅', label:'Reservar', href:`/r/${slug}/reservar` })
+    if (cleanWa) ctaBtns.push({ icon:'💬', label:'WhatsApp', href:`https://wa.me/${cleanWa}`, trackEvent: 'whatsapp_click' })
+    ctaBtns.push({ icon:'📍', label:'Cómo llegar', scroll:'locales', trackEvent: 'maps_click' })
   }
 
   // â”€â”€ Smart link click handler
@@ -706,18 +730,18 @@ export function HubPublicPage() {
   // â”€â”€ Social entries
   type SocialEntry={key:string;label:string;icon:string;url:string;color:string;bg:string}
   const socialEntries: SocialEntry[] = []
-  if (social.instagram) socialEntries.push({key:'ig',label:'Instagram',icon:'ðŸ“¸',url:`https://instagram.com/${social.instagram}`,color:'#E1306C',bg:'rgba(225,48,108,.06)'})
-  if (social.tiktok)    socialEntries.push({key:'tt',label:'TikTok',icon:'ðŸŽµ',url:`https://tiktok.com/@${social.tiktok}`,color:'rgba(255,255,255,.9)',bg:'rgba(255,255,255,.04)'})
+  if (social.instagram) socialEntries.push({key:'ig',label:'Instagram',icon:'📸',url:`https://instagram.com/${social.instagram}`,color:'#E1306C',bg:'rgba(225,48,108,.06)'})
+  if (social.tiktok)    socialEntries.push({key:'tt',label:'TikTok',icon:'🎵',url:`https://tiktok.com/@${social.tiktok}`,color:'rgba(255,255,255,.9)',bg:'rgba(255,255,255,.04)'})
   if (social.youtube)   socialEntries.push({key:'yt',label:'YouTube',icon:'â–¶',url:String(social.youtube),color:'#FF4444',bg:'rgba(255,0,0,.06)'})
   if (social.facebook)  socialEntries.push({key:'fb',label:'Facebook',icon:'f',url:`https://facebook.com/${social.facebook}`,color:'#3B82F6',bg:'rgba(59,130,246,.06)'})
-  if (cleanWa)          socialEntries.push({key:'wa',label:'WhatsApp',icon:'ðŸ’¬',url:`https://wa.me/${cleanWa}`,color:'#25D366',bg:'rgba(37,211,102,.06)'})
+  if (cleanWa)          socialEntries.push({key:'wa',label:'WhatsApp',icon:'💬',url:`https://wa.me/${cleanWa}`,color:'#25D366',bg:'rgba(37,211,102,.06)'})
 
   // â”€â”€ Contact items
   type ContactItem={icon:string;label:string;value:string;href:string;iconBg:string}
   const contactItems: ContactItem[] = []
-  if (cleanWa) contactItems.push({icon:'ðŸ’¬',label:'WhatsApp',value:waPhone,href:`https://wa.me/${cleanWa}`,iconBg:'rgba(37,211,102,.15)'})
-  if (r.phone&&!social.whatsapp) contactItems.push({icon:'ðŸ“ž',label:'TelÃ©fono',value:r.phone,href:`tel:${r.phone}`,iconBg:'rgba(59,130,246,.15)'})
-  if (r.email) contactItems.push({icon:'âœ‰',label:'Email',value:r.email,href:`mailto:${r.email}`,iconBg:'rgba(245,158,11,.15)'})
+  if (cleanWa) contactItems.push({icon:'💬',label:'WhatsApp',value:waPhone,href:`https://wa.me/${cleanWa}`,iconBg:'rgba(37,211,102,.15)'})
+  if (r.phone&&!social.whatsapp) contactItems.push({icon:'📞',label:'Teléfono',value:r.phone,href:`tel:${r.phone}`,iconBg:'rgba(59,130,246,.15)'})
+  if (r.email) contactItems.push({icon:'✉',label:'Email',value:r.email,href:`mailto:${r.email}`,iconBg:'rgba(245,158,11,.15)'})
 
   const cardBase: React.CSSProperties = {
     background:C.sur, border:`1px solid ${C.bdr}`, borderRadius:16,
@@ -792,7 +816,7 @@ export function HubPublicPage() {
           paddingTop:56,paddingBottom:40,
         }}>
 
-          {/* Animated mesh blobs â€” shown when no cover or as overlay */}
+          {/* Animated mesh blobs — shown when no cover or as overlay */}
           <div style={{position:'absolute',inset:0,zIndex:0,pointerEvents:'none',
             opacity:hubCoverUrl?0.4:1}}>
             <div style={{position:'absolute',width:420,height:420,top:-80,left:-100,borderRadius:'50%',
@@ -858,15 +882,15 @@ export function HubPublicPage() {
             {(categoryTags.length>0||hubCategory) && (
               <motion.p initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.55,duration:.6}}
                 style={{fontFamily:"'DM Mono',monospace",fontSize:12.5,color:C.t3,margin:0}}>
-                {categoryTags.length>0 ? categoryTags.join(' Â· ') : hubCategory}
+                {categoryTags.length>0 ? categoryTags.join(' · ') : hubCategory}
               </motion.p>
             )}
 
             {/* Meta: city + rating */}
             <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.6}}
               style={{display:'flex',alignItems:'center',gap:10,fontSize:13,color:C.t3,flexWrap:'wrap',justifyContent:'center'}}>
-              {r.city && <span>ðŸ“ {r.city}</span>}
-              {googleRating && <><span style={{color:C.t4}}>Â·</span><span>â­ {googleRating}</span></>}
+              {r.city && <span>📍 {r.city}</span>}
+              {googleRating && <><span style={{color:C.t4}}>·</span><span>â­ {googleRating}</span></>}
             </motion.div>
           </div>
 
@@ -902,7 +926,7 @@ export function HubPublicPage() {
                 href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={()=>trackEvent(r.id, s.key==='wa'?'whatsapp_click':'link_click')}
+                onClick={()=>trackEvent(r.id, `social_${s.key}_click`)}
                 style={{
                   color:'white',display:'flex',alignItems:'center',justifyContent:'center',
                   opacity:0.75,transition:'opacity 0.15s,transform 0.15s',
@@ -980,7 +1004,7 @@ export function HubPublicPage() {
         {hubAbout && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>QuiÃ©nes somos</SL>
+              <SL>Quiénes somos</SL>
               <p style={{fontSize:14,color:C.t2,lineHeight:1.7,margin:0}}>{hubAbout.slice(0,500)}</p>
             </Reveal>
           </section>
@@ -1023,7 +1047,7 @@ export function HubPublicPage() {
                         <img src={link.image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                       </div>
                     ) : (
-                      <span style={{fontSize:22,flexShrink:0,lineHeight:1}}>{link.icon??'ðŸ”—'}</span>
+                      <span style={{fontSize:22,flexShrink:0,lineHeight:1}}>{link.icon??'🔗'}</span>
                     )}
                     <span style={{
                       fontFamily:"'DM Sans',sans-serif",fontSize:15,fontWeight:700,
@@ -1031,7 +1055,7 @@ export function HubPublicPage() {
                     }}>
                       {link.label}
                     </span>
-                    <span style={{color:C.t3,fontSize:18,lineHeight:1,flexShrink:0}}>â€º</span>
+                    <span style={{color:C.t3,fontSize:18,lineHeight:1,flexShrink:0}}>›</span>
                   </motion.button>
                 ))}
               </div>
@@ -1079,7 +1103,7 @@ export function HubPublicPage() {
                   <a href={menuHref} className="hub-btn" style={{display:'inline-flex',alignItems:'center',
                     background:'#FFFFFF',color:'#000',fontSize:13,fontWeight:600,
                     padding:'10px 20px',borderRadius:100,textDecoration:'none'}}>
-                    {isRetail?'Ver catÃ¡logo â†’':'Ver menÃº â†’'}
+                    {isRetail?'Ver catálogo →':'Ver menú →'}
                   </a>
                 </div>
               </div>
@@ -1094,14 +1118,14 @@ export function HubPublicPage() {
         {isLegacyBlockActive('featured_products') && featuredProduct && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>{isRetail?'Destacado':'MÃ¡s pedido'}</SL>
+              <SL>{isRetail?'Destacado':'Más pedido'}</SL>
               <div style={{...cardBase,display:'flex',overflow:'hidden'}}>
                 <div style={{width:110,flexShrink:0,position:'relative',overflow:'hidden',minHeight:110,
                   background:featuredProduct.image_url?'transparent':'linear-gradient(135deg,rgba(245,158,11,.12),rgba(139,92,246,.08))'}}>
                   {featuredProduct.image_url
                     ? <img src={featuredProduct.image_url} alt={featuredProduct.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                     : <div style={{width:'100%',height:'100%',minHeight:110,display:'flex',alignItems:'center',justifyContent:'center',fontSize:32}}>
-                        {isRetail?'ðŸ›':'ðŸ½'}
+                        {isRetail?'🛍':'🍽'}
                       </div>
                   }
                 </div>
@@ -1147,7 +1171,7 @@ export function HubPublicPage() {
         {isLegacyBlockActive('gallery') && gallery.length>0 && (
           <section id="galeria" style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>GalerÃ­a</SL>
+              <SL>Galería</SL>
               <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:3,borderRadius:16,overflow:'hidden'}}>
                 {gallery.slice(0,12).map((item,i)=>(
                   <button key={item.id} className="hub-btn" onClick={()=>setLightboxIndex(i)}
@@ -1186,15 +1210,15 @@ export function HubPublicPage() {
                 border:'1px solid rgba(245,158,11,.25)',borderRadius:20,textDecoration:'none'}}>
               <div>
                 <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:C.t1,margin:'0 0 4px'}}>
-                  {isRetail?'Ver catÃ¡logo completo':'Ver el menÃº completo'}
+                  {isRetail?'Ver catálogo completo':'Ver el menú completo'}
                 </p>
                 <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,margin:0}}>
-                  {isRetail?'Productos Â· Precios Â· CategorÃ­as':'Carta Â· Bebidas Â· Postres'}
+                  {isRetail?'Productos · Precios · Categorías':'Carta · Bebidas · Postres'}
                 </p>
               </div>
               <div style={{width:40,height:40,borderRadius:12,background:'#FFFFFF',flexShrink:0,marginLeft:12,
                 display:'flex',alignItems:'center',justifyContent:'center'}}>
-                <span style={{color:'#000',fontSize:18,fontWeight:700}}>â†’</span>
+                <span style={{color:'#000',fontSize:18,fontWeight:700}}>→</span>
               </div>
             </a>
           </Reveal>
@@ -1235,7 +1259,7 @@ export function HubPublicPage() {
               </div>
               {address && (
                 <p style={{fontSize:13.5,color:C.t2,marginBottom:10,display:'flex',alignItems:'flex-start',gap:8,margin:'0 0 10px'}}>
-                  <span>ðŸ“</span>{address}
+                  <span>📍</span>{address}
                 </p>
               )}
               {hoursText && (
@@ -1250,7 +1274,7 @@ export function HubPublicPage() {
                     onClick={()=>trackEvent(r.id,'maps_click')}
                     style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
                       borderRadius:12,background:'#FFFFFF',color:'#000',fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
-                    ðŸ—º Maps
+                    🗺 Maps
                   </a>
                 )}
                 {r.phone && (
@@ -1258,7 +1282,7 @@ export function HubPublicPage() {
                     style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
                       borderRadius:12,background:C.sur2,border:`1px solid ${C.bdr}`,
                       color:C.t1,fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
-                    ðŸ“ž Llamar
+                    📞 Llamar
                   </a>
                 )}
                 {cleanWa && (
@@ -1267,7 +1291,7 @@ export function HubPublicPage() {
                     style={{flex:1,alignItems:'center',justifyContent:'center',gap:5,padding:'10px 8px',
                       borderRadius:12,background:C.sur2,border:`1px solid ${C.bdr}`,
                       color:C.t1,fontSize:12.5,fontWeight:600,textDecoration:'none'}}>
-                    ðŸ’¬ WA
+                    💬 WA
                   </a>
                 )}
               </div>
@@ -1283,14 +1307,14 @@ export function HubPublicPage() {
         {isLegacyBlockActive('reviews') && (reviews.length>0||googleRating) && (
           <section style={{padding:'32px 20px 0'}}>
             <Reveal>
-              <SL>ReseÃ±as</SL>
+              <SL>Reseñas</SL>
               {googleRating && (
                 <div
                   style={{...cardBase,padding:'20px',marginBottom:10,display:'flex',alignItems:'center',gap:16,
                     cursor:googleReviewUrl?'pointer':'default'}}
                   onClick={()=>{
                     if (googleReviewUrl) {
-                      trackEvent(r.id,'link_click')
+                      trackEvent(r.id,'google_reviews_click')
                       window.open(googleReviewUrl,'_blank','noopener,noreferrer')
                     }
                   }}
@@ -1304,7 +1328,7 @@ export function HubPublicPage() {
                     <p style={{margin:'0 0 2px',fontSize:13.5,fontWeight:600,color:C.t1}}>Google Reviews</p>
                     {googleReviewCount && (
                       <p style={{fontFamily:"'DM Mono',monospace",fontSize:11.5,color:C.t3,margin:0}}>
-                        {googleReviewCount} reseÃ±as
+                        {googleReviewCount} reseñas
                       </p>
                     )}
                   </div>
@@ -1330,7 +1354,7 @@ export function HubPublicPage() {
                         <div style={{flex:1}}>
                           <p style={{margin:0,fontWeight:600,fontSize:13.5,color:C.t1}}>{rev.author_name}</p>
                           <p style={{margin:0,fontFamily:"'DM Mono',monospace",fontSize:10.5,color:C.t3}}>
-                            {rev.relative_time||'Hace poco'} Â· {starStr(rev.rating)}
+                            {rev.relative_time||'Hace poco'} · {starStr(rev.rating)}
                           </p>
                         </div>
                       </div>
@@ -1341,10 +1365,10 @@ export function HubPublicPage() {
               )}
               {social.google_review && (
                 <a href={social.google_review} target="_blank" rel="noopener noreferrer"
-                  onClick={()=>trackEvent(r.id,'link_click')}
+                  onClick={()=>trackEvent(r.id,'google_maps_click')}
                   style={{display:'block',textAlign:'center',marginTop:12,
                     fontFamily:"'DM Mono',monospace",fontSize:12.5,color:'#FFFFFF',textDecoration:'none'}}>
-                  Ver en Google â†’
+                  Ver en Google →
                 </a>
               )}
             </Reveal>
@@ -1384,7 +1408,7 @@ export function HubPublicPage() {
                         textTransform:'uppercase',letterSpacing:'0.1em'}}>{c.label}</p>
                       <p style={{margin:'2px 0 0',fontSize:13.5,color:C.t1,fontWeight:500}}>{c.value}</p>
                     </div>
-                    <span style={{color:C.t3,fontSize:18,lineHeight:1}}>â€º</span>
+                    <span style={{color:C.t3,fontSize:18,lineHeight:1}}>›</span>
                   </a>
                 ))}
               </div>
@@ -1396,18 +1420,7 @@ export function HubPublicPage() {
         {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
             14. FOOTER
         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        <footer style={{margin:'40px 20px 0',padding:'24px 0',
-          borderTop:`1px solid ${C.bdr}`,textAlign:'center'}}>
-          <p style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:C.t1,margin:'0 0 4px'}}>{r.name}</p>
-          {hoursText && <p style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:C.t3,margin:'0 0 4px'}}>{hoursText}</p>}
-          {r.city && <p style={{fontSize:12,color:C.t4,margin:'0 0 16px'}}>{r.city}</p>}
-          <a href="https://menulife.digital" target="_blank" rel="noopener noreferrer"
-            style={{display:'inline-flex',alignItems:'center',gap:5,padding:'7px 14px',borderRadius:100,
-              background:C.sur,border:`1px solid ${C.bdr}`,textDecoration:'none'}}>
-            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:C.t3}}>Powered by</span>
-            <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,color:C.t1}}>MenuLife</span>
-          </a>
-        </footer>
+        <FooterViral slug={r.slug ?? ''} C={C} />
 
         </div>{/* end solid-bg content wrapper */}
       </div>

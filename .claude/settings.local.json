@@ -57,7 +57,11 @@
       "Bash(Select-Object Name, PSIsContainer)",
       "Bash(npx grep *)",
       "Bash(Sort-Object)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Read(//e//**)",
+      "Read(//c/Users/Usuario//**)",
+      "Bash(cmd /c \"cd E:\\\\only-members && npx tsc --noEmit 2>&1\")",
+      "Bash(cmd *)"
     ]
   }
 }

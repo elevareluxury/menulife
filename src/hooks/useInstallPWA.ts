@@ -1,18 +1,47 @@
 import { useState, useEffect } from 'react'
 
-// BeforeInstallPromptEvent is not yet in standard TS lib
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+export type PWAPlatform = 'android' | 'ios' | 'desktop' | 'unknown'
+
+const DISMISSED_KEY = 'mycen_pwa_install_dismissed'
+const INSTALLED_KEY  = 'mycen_pwa_installed'
+
+function detectPlatform(): PWAPlatform {
+  const ua = navigator.userAgent
+  if (/iPhone|iPad|iPod/i.test(ua)) return 'ios'
+  if (/Android/i.test(ua)) return 'android'
+  if (/Macintosh|Windows|Linux/i.test(ua)) return 'desktop'
+  return 'unknown'
+}
+
+function checkStandalone(): boolean {
+  if (window.matchMedia('(display-mode: standalone)').matches) return true
+  // iOS legacy (Safari < 16.4)
+  if ('standalone' in window.navigator && (window.navigator as { standalone?: boolean }).standalone === true) return true
+  return false
+}
+
 export function useInstallPWA() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [isInstalled, setIsInstalled]     = useState(false)
+
+  const [isInstalled, setIsInstalled] = useState<boolean>(() => {
+    if (checkStandalone()) return true
+    return localStorage.getItem(INSTALLED_KEY) === 'true'
+  })
+
+  const [isDismissed, setIsDismissed] = useState<boolean>(() =>
+    localStorage.getItem(DISMISSED_KEY) === 'true',
+  )
+
+  const platform = detectPlatform()
+  const needsIOSInstructions = platform === 'ios' && !isInstalled
 
   useEffect(() => {
-    // Already running as installed PWA
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (checkStandalone()) {
       setIsInstalled(true)
       return
     }
@@ -22,13 +51,19 @@ export function useInstallPWA() {
       setInstallPrompt(e as BeforeInstallPromptEvent)
     }
 
-    window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => {
+    const installedHandler = () => {
+      localStorage.setItem(INSTALLED_KEY, 'true')
       setIsInstalled(true)
       setInstallPrompt(null)
-    })
+    }
 
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', installedHandler)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener('appinstalled', installedHandler)
+    }
   }, [])
 
   const install = async (): Promise<boolean> => {
@@ -36,6 +71,7 @@ export function useInstallPWA() {
     await installPrompt.prompt()
     const { outcome } = await installPrompt.userChoice
     if (outcome === 'accepted') {
+      localStorage.setItem(INSTALLED_KEY, 'true')
       setInstallPrompt(null)
       setIsInstalled(true)
       return true
@@ -43,5 +79,24 @@ export function useInstallPWA() {
     return false
   }
 
-  return { canInstall: !!installPrompt && !isInstalled, isInstalled, install }
+  const dismiss = () => {
+    localStorage.setItem(DISMISSED_KEY, 'true')
+    setIsDismissed(true)
+  }
+
+  const resetDismiss = () => {
+    localStorage.removeItem(DISMISSED_KEY)
+    setIsDismissed(false)
+  }
+
+  return {
+    canInstall: !!installPrompt && !isInstalled,
+    isInstalled,
+    install,
+    isDismissed,
+    dismiss,
+    resetDismiss,
+    needsIOSInstructions,
+    platform,
+  }
 }

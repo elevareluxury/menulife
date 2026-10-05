@@ -1,12 +1,16 @@
-import { useState, useMemo, useRef, KeyboardEvent } from 'react'
+import { useState, useMemo, useRef, useCallback, KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Lightbulb, StickyNote, CheckSquare, Check, MoreHorizontal, Pencil, Archive, Trash2, Search, X, AlertTriangle } from 'lucide-react'
+import { Zap, Lightbulb, StickyNote, CheckSquare, Check, MoreHorizontal, Pencil, Archive, Trash2, Search, AlertTriangle } from 'lucide-react'
 import {
   LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
   colors, font, radius, stagger, fadeInUp, scaleIn,
 } from '../design-system'
 import { useBrain, type BrainItem, type BrainItemType } from '../hooks/useBrain'
+import { useBrainSearch } from '../hooks/useBrainSearch'
 import { BrainItemSheet } from '../components/BrainItemSheet'
+import { BrainSearchBar } from '../components/BrainSearchBar'
+import { BrainTypeFilters } from '../components/BrainTypeFilters'
+import { highlightTerm } from '../lib/highlight'
 
 // ── Design constants ──────────────────────────────────────────────────────────
 const TYPE_META = {
@@ -14,10 +18,6 @@ const TYPE_META = {
   note: { icon: StickyNote,  color: '#3B82F6', label: 'Nota'  },
   task: { icon: CheckSquare, color: '#22C55E', label: 'Tarea' },
 } as const
-
-const FILTERS = ['todo', 'idea', 'note', 'task'] as const
-type Filter = typeof FILTERS[number]
-const FILTER_LABELS: Record<Filter, string> = { todo: 'Todo', idea: 'Ideas', note: 'Notas', task: 'Tareas' }
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function BrainSkeleton() {
@@ -36,8 +36,9 @@ function BrainSkeleton() {
 }
 
 // ── Item Card ─────────────────────────────────────────────────────────────────
-function BrainCard({ item, onToggle, onEdit, onArchive, onDelete }: {
+function BrainCard({ item, searchTerm, onToggle, onEdit, onArchive, onDelete }: {
   item: BrainItem
+  searchTerm: string
   onToggle: () => void
   onEdit: () => void
   onArchive: () => void
@@ -108,7 +109,7 @@ function BrainCard({ item, onToggle, onEdit, onArchive, onDelete }: {
             textDecoration: item.is_completed ? 'line-through' : 'none',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
-            {item.title}
+            {highlightTerm(item.title, searchTerm) ?? item.title}
           </p>
           {item.content && (
             <p style={{
@@ -116,7 +117,7 @@ function BrainCard({ item, onToggle, onEdit, onArchive, onDelete }: {
               color: colors.text.tertiary, margin: 0,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
-              {item.content}
+              {highlightTerm(item.content, searchTerm)}
             </p>
           )}
         </div>
@@ -263,39 +264,42 @@ function QuickCapture({ onCapture }: { onCapture: (type: BrainItemType, title: s
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export function LifeBrainPage() {
+  // CRUD + total counts + error handling
   const {
-    items, loading, error, reload,
+    loading, error, reload,
     ideasCount, notesCount, tasksCount,
     createItem, updateItem, deleteItem, toggleComplete, archiveItem,
   } = useBrain()
 
-  const [filter, setFilter]         = useState<Filter>('todo')
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQ, setSearchQ]       = useState('')
-  const [editItem, setEditItem]     = useState<BrainItem | null>(null)
-  const [sheetOpen, setSheetOpen]   = useState(false)
+  const [searchTerm, setSearchTerm]     = useState('')
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [editItem, setEditItem]         = useState<BrainItem | null>(null)
+  const [sheetOpen, setSheetOpen]       = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<BrainItem | null>(null)
 
-  // Hooks ANTES de cualquier early return — Rules of Hooks
-  const visible = useMemo(() => {
-    let list = items
-    if (filter !== 'todo') list = list.filter(i => i.type === filter)
-    if (searchQ.trim()) {
-      const q = searchQ.toLowerCase()
-      list = list.filter(i =>
-        i.title.toLowerCase().includes(q) ||
-        (i.content ?? '').toLowerCase().includes(q)
-      )
-    }
-    return list
-  }, [items, filter, searchQ])
+  // FTS — debounced, con filtro por tipo
+  const {
+    items, term: activeTerm, refetch: refetchSearch,
+  } = useBrainSearch(searchTerm, {
+    types: selectedTypes.length > 0 ? selectedTypes : undefined,
+  })
 
+  // Contadores del resultado actual (para BrainTypeFilters)
+  const typeCounts = useMemo(() =>
+    items.reduce((acc, item) => {
+      acc[item.type] = (acc[item.type] ?? 0) + 1
+      return acc
+    }, {} as Record<string, number>),
+    [items]
+  )
+
+  // Agrupar por fecha
   const grouped = useMemo(() => {
     const today = new Date().toDateString()
     const yesterday = new Date(Date.now() - 86400000).toDateString()
     const map = new Map<string, BrainItem[]>()
 
-    for (const item of visible) {
+    for (const item of items) {
       const d = new Date(item.created_at)
       let label: string
       if (d.toDateString() === today) label = 'Hoy'
@@ -305,7 +309,33 @@ export function LifeBrainPage() {
       map.get(label)!.push(item)
     }
     return [...map.entries()]
-  }, [visible])
+  }, [items])
+
+  // Wrappers de mutación que refrescan la búsqueda
+  const handleCreate = useCallback(async (data: Parameters<typeof createItem>[0]) => {
+    await createItem(data)
+    refetchSearch()
+  }, [createItem, refetchSearch])
+
+  const handleUpdate = useCallback(async (id: string, data: Parameters<typeof updateItem>[1]) => {
+    await updateItem(id, data)
+    refetchSearch()
+  }, [updateItem, refetchSearch])
+
+  const handleDelete = useCallback(async (id: string) => {
+    await deleteItem(id)
+    refetchSearch()
+  }, [deleteItem, refetchSearch])
+
+  const handleToggle = useCallback(async (item: BrainItem) => {
+    await toggleComplete(item)
+    refetchSearch()
+  }, [toggleComplete, refetchSearch])
+
+  const handleArchive = useCallback(async (id: string) => {
+    await archiveItem(id)
+    refetchSearch()
+  }, [archiveItem, refetchSearch])
 
   if (loading) return <BrainSkeleton />
 
@@ -323,22 +353,12 @@ export function LifeBrainPage() {
     </LifeScreenContainer>
   )
 
-  const handleQuickCapture = async (type: BrainItemType, title: string) => {
-    await createItem({ type, title })
-  }
-
-  const emptyHint = filter === 'todo'
-    ? { title: 'Tu mente, externalizada', subtitle: 'Capturá ideas, notas y tareas en un solo lugar. Soltá lo que tenés en la cabeza.' }
-    : filter === 'idea'
-    ? { title: 'Sin ideas aún', subtitle: 'Guardá todo lo que se te ocurra. Las mejores ideas viven aquí.' }
-    : filter === 'note'
-    ? { title: 'Sin notas', subtitle: 'Escribí notas para capturar lo que importa.' }
-    : { title: 'Sin tareas', subtitle: 'Agregá tareas para no olvidar nada.' }
+  const hasActiveSearch = searchTerm.trim().length > 0 || selectedTypes.length > 0
 
   return (
     <LifeScreenContainer>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '24px', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', paddingTop: '24px', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.brain}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Zap size={20} style={{ color: colors.area.brain }} strokeWidth={2} />
@@ -347,18 +367,6 @@ export function LifeBrainPage() {
             Brain
           </h1>
         </div>
-        <button
-          onClick={() => { setSearchOpen(v => !v); if (searchOpen) setSearchQ('') }}
-          style={{
-            width: 36, height: 36, borderRadius: radius.full,
-            background: searchOpen ? colors.area.brain + '18' : 'transparent',
-            border: `1px solid ${searchOpen ? colors.area.brain + '40' : colors.border.subtle}`,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: searchOpen ? colors.area.brain : colors.text.tertiary, transition: 'all 0.18s',
-          }}
-        >
-          {searchOpen ? <X size={16} strokeWidth={2.5} /> : <Search size={16} strokeWidth={2} />}
-        </button>
       </div>
 
       {/* Counts row */}
@@ -378,65 +386,36 @@ export function LifeBrainPage() {
       )}
 
       {/* Quick capture */}
-      <QuickCapture onCapture={handleQuickCapture} />
+      <QuickCapture onCapture={(type, title) => handleCreate({ type, title })} />
 
-      {/* Search input */}
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            style={{ overflow: 'hidden', marginBottom: '10px' }}
-          >
-            <input
-              value={searchQ}
-              onChange={e => setSearchQ(e.target.value)}
-              placeholder="Buscar en Brain…"
-              // eslint-disable-next-line jsx-a11y/no-autofocus
-              autoFocus
-              style={{
-                width: '100%', padding: '10px 14px', boxSizing: 'border-box',
-                borderRadius: radius.md,
-                background: colors.surface.high,
-                border: `1px solid ${colors.border.medium}`,
-                color: colors.text.primary,
-                fontFamily: font, fontSize: '14px', outline: 'none',
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Búsqueda FTS con debounce */}
+      <BrainSearchBar value={searchTerm} onChange={setSearchTerm} />
 
-      {/* Filter tabs */}
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '2px' }}>
-        {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            style={{
-              padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
-              background: filter === f ? colors.area.brain : colors.surface.high,
-              border: `1px solid ${filter === f ? colors.area.brain : colors.border.subtle}`,
-              color: filter === f ? '#fff' : colors.text.secondary,
-              fontFamily: font, fontSize: '12px', fontWeight: 700,
-              cursor: 'pointer', transition: 'all 0.15s',
-            }}
-          >
-            {FILTER_LABELS[f]}
-          </button>
-        ))}
-      </div>
+      {/* Filtros por tipo (multi-select) */}
+      <BrainTypeFilters
+        selected={selectedTypes}
+        onChange={setSelectedTypes}
+        counts={typeCounts}
+      />
 
       {/* Item list */}
-      {visible.length === 0 ? (
+      {items.length === 0 ? (
         <LifeCard>
-          <LifeEmptyState
-            icon={Zap}
-            iconColor={colors.area.brain}
-            title={emptyHint.title}
-            subtitle={emptyHint.subtitle}
-          />
+          {hasActiveSearch ? (
+            <LifeEmptyState
+              icon={Search}
+              iconColor={colors.text.tertiary}
+              title={searchTerm ? `Sin resultados para "${searchTerm}"` : 'Sin items de ese tipo'}
+              subtitle="Probá con otro término o quitá los filtros activos"
+            />
+          ) : (
+            <LifeEmptyState
+              icon={Zap}
+              iconColor={colors.area.brain}
+              title="Tu mente, externalizada"
+              subtitle="Capturá ideas, notas y tareas en un solo lugar."
+            />
+          )}
         </LifeCard>
       ) : (
         <motion.div variants={stagger} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -448,9 +427,10 @@ export function LifeBrainPage() {
                   <BrainCard
                     key={item.id}
                     item={item}
-                    onToggle={() => toggleComplete(item)}
+                    searchTerm={activeTerm}
+                    onToggle={() => handleToggle(item)}
                     onEdit={() => { setEditItem(item); setSheetOpen(true) }}
-                    onArchive={() => archiveItem(item.id)}
+                    onArchive={() => handleArchive(item.id)}
                     onDelete={() => setDeleteTarget(item)}
                   />
                 ))}
@@ -466,8 +446,8 @@ export function LifeBrainPage() {
         onClose={() => setSheetOpen(false)}
         initial={editItem}
         onSave={async data => {
-          if (editItem) await updateItem(editItem.id, data)
-          else await createItem(data)
+          if (editItem) await handleUpdate(editItem.id, data)
+          else await handleCreate(data)
         }}
       />
 
@@ -478,7 +458,7 @@ export function LifeBrainPage() {
         message={`"${deleteTarget?.title}" será eliminado permanentemente.`}
         confirmLabel="Eliminar"
         onConfirm={async () => {
-          if (deleteTarget) await deleteItem(deleteTarget.id)
+          if (deleteTarget) await handleDelete(deleteTarget.id)
           setDeleteTarget(null)
         }}
         onCancel={() => setDeleteTarget(null)}

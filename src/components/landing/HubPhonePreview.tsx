@@ -6,7 +6,7 @@ export function HubPhonePreview() {
       width: '100%',
       height: '100%',
       background: '#080B10',
-      overflowY: 'auto',
+      overflowY: 'hidden',
       overflowX: 'hidden',
       fontFamily: 'var(--font-jakarta)',
       scrollbarWidth: 'none',
