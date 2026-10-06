@@ -1,5 +1,5 @@
-import { Check } from 'lucide-react'
-import * as Icons from 'lucide-react'
+import { Check, Sparkles } from 'lucide-react'
+import { getIcon } from '@/modules/hub/lib/iconMap'
 import type { HubTemplateId } from '@/modules/hub/lib/hubTemplates'
 import { HUB_TEMPLATES } from '@/modules/hub/lib/hubTemplates'
 
@@ -17,7 +17,7 @@ export function HubTypeSelector({ value, onChange }: HubTypeSelectorProps) {
     <div className="w-full">
       <div className="grid grid-cols-2 gap-3">
         {templates.map(template => {
-          const Icon = ((Icons as any)[template.icon] ?? Icons.Sparkles) as React.FC<{ size?: number; color?: string }>
+          const Icon = getIcon(template.icon, Sparkles)
           const isSelected = value === template.id
 
           return (

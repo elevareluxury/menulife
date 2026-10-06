@@ -10,7 +10,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Eye, EyeOff, Settings } from 'lucide-react'
-import * as LucideIcons from 'lucide-react'
+import { getIcon } from '../lib/iconMap'
 import { useHubBlocks } from '../hooks/useHubBlocks'
 import { BLOCK_DEFINITIONS } from '../lib/blocksConfig'
 import type { HubBlock, BlockType } from '../lib/blocksConfig'
@@ -152,7 +152,7 @@ function SortableBlockItem({ block, onToggle, onEdit }: SortableBlockItemProps) 
     useSortable({ id: block.id })
 
   const def = BLOCK_DEFINITIONS[block.block_type as BlockType]
-  const IconComponent = ((LucideIcons as any)[def.icon] ?? LucideIcons.Square) as React.FC<{ size?: number; color?: string }>
+  const IconComponent = getIcon(def.icon)
 
   const isNew = def.dataSource === 'jsonb'
 
