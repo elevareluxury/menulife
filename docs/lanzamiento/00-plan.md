@@ -52,8 +52,8 @@ dentro de la app. 64 E2E + 57 unitarios + tests de base.
 | **L1** ✅ | **Velocidad y base técnica** (perfil público: de ~800 KB a 217 KB gzip): GSAP/Splitting/Three sólo en la landing; separar el JS para que la página pública cargue lo mínimo; fuentes servidas por Mycen; imágenes redimensionadas y en WebP al subirlas (avatar, portada, módulos, proyectos); zoom permitido en toda la app; imagen para compartir de la landing; presupuesto de peso en CI para que no vuelva a crecer | — | — |
 | **L2** ✅ | **Buscadores**: `robots.txt`, `/sitemap.xml` con perfiles, Spaces y proyectos públicos (sin no listados, privados ni suspendidos) y el idioma real de cada perfil en el HTML que leen los buscadores. `hreflang` de la landing pasa a L3 (hace falta la landing por idioma) | Sí (RPC del sitemap) | Correr el SQL; dar de alta el sitemap en Google Search Console |
 | **L3** ✅ | **La puerta de entrada en 12 idiomas**: landing completa con detección de idioma, selector y `hreflang`; registro, login y recuperar contraseña; mails de Supabase con marca y en el idioma de la persona | — | Configurar un SMTP propio (te paso los pasos; p. ej. Resend) |
-| **L4** | **Legales mundiales**: términos y privacidad reescritos (GDPR, LGPD, CCPA: bases legales, transferencias, edad mínima, retención, derechos y cómo pedirlos), proceso por derechos de autor, lista de proveedores, en los 12 idiomas con el español como versión de referencia | — | **Revisión de un abogado** antes de publicar |
-| **L5** | **Confianza y operación**: aviso de errores, captcha invisible en el registro, más usernames reservados de marcas conocidas (suplantación), medición del recorrido sin cookies, ayuda y contacto | Sí (si los errores se guardan en una tabla propia) | Elegir entre Sentry y la tabla propia; crear la clave del captcha (Cloudflare Turnstile, gratis) |
+| **L4** ✅ (falta revisión de abogado) | **Legales mundiales**: términos y privacidad reescritos (GDPR, LGPD, CCPA: bases legales, transferencias, edad mínima, retención, derechos y cómo pedirlos), proceso por derechos de autor, lista de proveedores, en los 12 idiomas con el español como versión de referencia | — | **Revisión de un abogado** antes de publicar |
+| **L5** | **Confianza y operación**: aviso de errores ✅ (registro propio en /super-admin/errores), captcha (decidido: por ahora no), más usernames reservados de marcas conocidas (suplantación), medición del recorrido sin cookies, ayuda y contacto | Sí (si los errores se guardan en una tabla propia) | Elegir entre Sentry y la tabla propia; crear la clave del captcha (Cloudflare Turnstile, gratis) |
 | **L6** | **Life OS al máximo**: E2E de Life OS; recordatorios push con la app cerrada; tareas recurrentes; movimientos recurrentes y presupuesto | Sí | Generar las claves de notificaciones (te paso los pasos) |
 | **L7** | **Identity al máximo**: entrar con Google; username propio para Spaces de marca; plantillas de arranque | Sí | Crear el acceso de Google (OAuth) en Google Cloud |
 | **L8** | **Salida**: axe en todas las pantallas; pruebas en iPhone/Safari y Android de gama media; árabe (derecha a izquierda) revisado; revisión de seguridad de las RLS y RPC; prueba de carga de la página pública; beta cerrada y después apertura | — | Revisión nativa de las traducciones; elegir países de la beta |
@@ -61,14 +61,20 @@ dentro de la app. 64 E2E + 57 unitarios + tests de base.
 Orden pensado: L1 y L2 no dependen de nada tuyo y son lo que más se nota; L3 y L4 abren el mundo; L5 deja todo
 observable antes de recibir tráfico; L6 y L7 suman lo que la gente espera; L8 es la verificación final.
 
-## 4. Decisiones que necesito (fase L0)
+## 4. Decisiones (fase L0)
 
-1. **Idiomas de salida**: ¿los 12 desde el día uno, o empezar con español, inglés y portugués y sumar el resto en la beta?
-2. **Errores**: Sentry (más completo, cuenta gratis) o tabla propia en Supabase (sin terceros).
-3. **Entrar con Google**: ¿sí para el lanzamiento? (Apple pide cuenta de desarrollador paga).
-4. **Mails**: ¿qué remitente? (ej. `hola@mycen.id`) y qué proveedor de SMTP.
-5. **Legales**: ¿hay un abogado que los revise? ¿Qué razón social y país figuran como responsables?
-6. **Beta**: ¿países o comunidades para la beta cerrada?
+Tomadas por el dueño (4/10/2026):
+- **Idiomas**: los 12 desde el día uno (L3 ✅).
+- **Mails**: Resend, remitente y contacto `team@mycen.id`.
+- **Precios de Mycen Business**: en dólares (US$70 / US$150).
+- **Errores**: registro propio en Supabase visible para el super-admin, **sin proveedores externos** (L5).
+- **Captcha**: por ahora no.
+- **Legales**: responsable "Resilio", Argentina; todavía sin sociedad inscripta ni abogado → los textos de L4 salen
+  como borrador marcado para revisión y se actualizan cuando haya razón social.
+
+Pendientes:
+1. **Entrar con Google**: ¿sí para el lanzamiento? (Apple pide cuenta de desarrollador paga).
+2. **Beta**: ¿países o comunidades para la beta cerrada?
 
 ## 5. Fuera de este plan
 

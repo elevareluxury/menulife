@@ -144,7 +144,7 @@ const zh: LandingDict = {
       { q: '我可以导出我的数据吗？', a: '可以。在设置中随时导出属于你的所有数据，也可以随时删除你的账户和数据。' },
     ],
   },
-  footer: { product: '产品', pricing: '价格', faq: '常见问题', terms: '条款', privacy: '隐私', madeBy: '由 Resilio 打造' },
+  footer: { product: '产品', pricing: '价格', faq: '常见问题', contact: '联系我们', terms: '条款', privacy: '隐私', madeBy: '由 Resilio 打造' },
 }
 
 export default zh

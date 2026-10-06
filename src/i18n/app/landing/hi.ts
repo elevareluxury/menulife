@@ -144,7 +144,7 @@ const hi: LandingDict = {
       { q: 'क्या मैं अपना डेटा ले जा सकता/सकती हूँ?', a: 'हाँ। सेटिंग्स से आप जब चाहें अपना सारा डेटा एक्सपोर्ट कर सकते हैं, और कभी भी अपना अकाउंट और डेटा डिलीट कर सकते हैं।' },
     ],
   },
-  footer: { product: 'प्रोडक्ट', pricing: 'कीमतें', faq: 'सवाल', terms: 'शर्तें', privacy: 'गोपनीयता', madeBy: 'Resilio द्वारा बनाया गया' },
+  footer: { product: 'प्रोडक्ट', pricing: 'कीमतें', faq: 'सवाल', contact: 'संपर्क', terms: 'शर्तें', privacy: 'गोपनीयता', madeBy: 'Resilio द्वारा बनाया गया' },
 }
 
 export default hi

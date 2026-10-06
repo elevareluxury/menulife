@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
 
+const CONTACT_EMAIL = 'team@mycen.id'
+
 const linkStyle = { fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', transition: 'color 0.2s' }
 const hover = {
   onMouseEnter: (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.color = 'rgba(255,255,255,0.85)' },
@@ -13,6 +15,7 @@ export function Footer() {
     { label: t.product, href: '#soluciones' },
     { label: t.pricing, href: '#pricing' },
     { label: t.faq,     href: '#faq' },
+    { label: t.contact, href: `mailto:${CONTACT_EMAIL}` },
   ]
   const pages = [
     { label: t.terms,   to: '/terminos' },

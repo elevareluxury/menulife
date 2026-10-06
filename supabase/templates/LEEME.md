@@ -14,7 +14,7 @@ registro y se actualiza al cambiar el idioma en Ajustes. Sin `locale` (cuentas v
 
 ## 2. Supabase → Authentication → Emails → SMTP Settings
 - Enable custom SMTP: sí
-- Sender email: `hola@mycen.id` (o el que elijas) · Sender name: `Mycen`
+- Sender email: `team@mycen.id` · Sender name: `Mycen`
 - Host: `smtp.resend.com` · Port: `465` · Username: `resend` · Password: la API key de Resend
 - Guardar.
 
@@ -35,4 +35,4 @@ lanzamiento: 100 por hora; subilo según el plan de Resend.
 
 ## 5. Probar
 Registrate con un mail tuyo eligiendo otro idioma en `/register` (ej. English): el mail de confirmación tiene que llegar
-en inglés, desde `hola@mycen.id`. Después probá "¿Olvidaste tu contraseña?".
+en inglés, desde `team@mycen.id`. Después probá "¿Olvidaste tu contraseña?".

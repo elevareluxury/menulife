@@ -144,7 +144,7 @@ const it: LandingDict = {
       { q: 'Posso portare via i miei dati?', a: 'Sì. Da Impostazioni esporti tutto ciò che è tuo quando vuoi, e puoi eliminare il tuo account e i tuoi dati in qualsiasi momento.' },
     ],
   },
-  footer: { product: 'Prodotto', pricing: 'Prezzi', faq: 'Domande', terms: 'Termini', privacy: 'Privacy', madeBy: 'Realizzato da Resilio' },
+  footer: { product: 'Prodotto', pricing: 'Prezzi', faq: 'Domande', contact: 'Contatti', terms: 'Termini', privacy: 'Privacy', madeBy: 'Realizzato da Resilio' },
 }
 
 export default it
