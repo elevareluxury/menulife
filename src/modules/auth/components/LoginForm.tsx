@@ -1,10 +1,10 @@
 import { useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { ROUTES } from '@/lib/constants'
 import toast from 'react-hot-toast'
 import { authErrorMessage } from '@/lib/authErrors'
 import { useAuthT } from '@/i18n/app/auth'
+import { postLoginRoute } from '@/modules/auth/lib/postLoginRoute'
 
 const BASE_INPUT: React.CSSProperties = {
   width: '100%',
@@ -59,19 +59,7 @@ export function LoginForm() {
       if (signInError) throw signInError
 
       toast.success(t.login.welcome)
-
-      const [{ data: superAdmin }, { data: restaurant }] = await Promise.all([
-        supabase.from('super_admins').select('id').eq('user_id', data.user.id).maybeSingle(),
-        supabase.from('restaurants').select('plan').eq('owner_id', data.user.id).maybeSingle(),
-      ])
-
-      if (superAdmin) {
-        navigate(ROUTES.SUPER_ADMIN)
-      } else if (restaurant?.plan === 'hub_free') {
-        navigate('/studio')
-      } else {
-        navigate(ROUTES.DASHBOARD)
-      }
+      navigate(await postLoginRoute(data.user.id))
     } catch (err: unknown) {
       setError(authErrorMessage(err, t.errors, t.login.failed))
     } finally {

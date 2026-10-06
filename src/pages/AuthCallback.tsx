@@ -1,7 +1,7 @@
 import { useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { postLoginRoute } from '@/modules/auth/lib/postLoginRoute'
 import { useAuthT } from '@/i18n/app/auth'
 
 export function AuthCallback() {
@@ -29,23 +29,7 @@ export function AuthCallback() {
     async function redirectByRole(userId?: string) {
       const id = userId ?? (await supabase.auth.getUser()).data.user?.id
       if (!id) { navigate('/life', { replace: true }); return }
-      const [{ data: superAdmin }, { data: restaurant }] = await Promise.all([
-        supabase.from('super_admins').select('id').eq('user_id', id).maybeSingle(),
-        supabase.from('restaurants').select('plan').eq('owner_id', id).maybeSingle(),
-      ])
-      if (superAdmin) {
-        navigate('/super-admin', { replace: true })
-      } else if (!restaurant) {
-        // Sin negocio: si todavía no armó su identidad, va al onboarding de Studio
-        // profiles todavía no está en database.types.ts
-        const { data: profile } = await (supabase as unknown as SupabaseClient)
-          .from('profiles').select('id').eq('user_id', id).limit(1).maybeSingle()
-        navigate(profile ? '/life' : '/studio', { replace: true })
-      } else if (restaurant.plan === 'hub_free') {
-        navigate('/studio', { replace: true })
-      } else {
-        navigate('/dashboard', { replace: true })
-      }
+      navigate(await postLoginRoute(id), { replace: true })
     }
 
     async function handle() {

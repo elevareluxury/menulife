@@ -21,6 +21,7 @@ import { getHabitIcon } from '../lib/lifePalette'
 import { useInsights } from '../hooks/useInsights'
 import { InsightCard } from '../components/InsightCard'
 import { colors, font, radius, fadeInUp, stagger } from '../design-system'
+import { FEATURES } from '@/lib/features'
 
 // ── Deterministic starfield ───────────────────────────────────────────────────
 
@@ -554,22 +555,21 @@ export function LifePage() {
                 {firstName}
               </p>
             </div>
-            <button
-              onClick={() => {
-                const isPaid = restaurantPlan?.startsWith('os_') ?? false
-                if (isPaid) navigate('/dashboard')
-                else window.location.href = '/#pricing'
-              }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                padding: '5px 11px', borderRadius: radius.full,
-                background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
-                color: colors.text.tertiary, fontFamily: font, fontSize: '11px', fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              {t.home.myBusiness}
-            </button>
+            {(FEATURES.businessInLife || (restaurantPlan?.startsWith('os_') ?? false)) && (
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '4px',
+                  padding: '5px 11px', borderRadius: radius.full,
+                  background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+                  color: colors.text.tertiary, fontFamily: font, fontSize: '11px', fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {t.home.myBusiness}
+              </button>
+            )}
             <button type="button" onClick={() => setLangOpen(true)} aria-label={t.home.language} title={t.home.language}
               style={iconBtn}>
               <Globe size={16} aria-hidden="true" />
@@ -591,7 +591,7 @@ export function LifePage() {
           <motion.div variants={fadeInUp}><TodayHabitsCard /></motion.div>
           <motion.div variants={fadeInUp}><GoalsCard /></motion.div>
           <motion.div variants={fadeInUp}><MoneyCard /></motion.div>
-          <InsightTeaser />
+          {FEATURES.lifeInsights && <InsightTeaser />}
 
           {/* ── Mi identidad (Mycen Identity → Studio) ──────────────────────── */}
           <motion.div variants={fadeInUp}>
@@ -604,21 +604,23 @@ export function LifePage() {
           </motion.div>
 
           {/* ── Recap del mes ───────────────────────────────────────────────── */}
-          <motion.div variants={fadeInUp} style={{ display: 'flex', justifyContent: 'center', paddingTop: '4px' }}>
-            <button
-              type="button"
-              onClick={() => navigate('/life/replay')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                minHeight: 36, padding: '7px 16px', borderRadius: radius.full,
-                background: 'rgba(244,112,90,0.07)', border: `1px solid ${colors.accent.glow}`,
-                color: colors.accent.default, fontFamily: font, fontSize: '12px', fontWeight: 700,
-                cursor: 'pointer', letterSpacing: '0.01em',
-              }}
-            >
-              {t.home.recap}
-            </button>
-          </motion.div>
+          {FEATURES.lifeReplay && (
+            <motion.div variants={fadeInUp} style={{ display: 'flex', justifyContent: 'center', paddingTop: '4px' }}>
+              <button
+                type="button"
+                onClick={() => navigate('/life/replay')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  minHeight: 36, padding: '7px 16px', borderRadius: radius.full,
+                  background: 'rgba(244,112,90,0.07)', border: `1px solid ${colors.accent.glow}`,
+                  color: colors.accent.default, fontFamily: font, fontSize: '12px', fontWeight: 700,
+                  cursor: 'pointer', letterSpacing: '0.01em',
+                }}
+              >
+                {t.home.recap}
+              </button>
+            </motion.div>
+          )}
 
         </motion.div>
       </div>
