@@ -85,11 +85,15 @@ export function AuthCallback() {
         }
 
         // CASE 4: No explicit type — implicit hash tokens already consumed by Supabase.
-        // Give _initialize() a moment to finish, then use the existing session.
-        await new Promise(r => setTimeout(r, 800))
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
-          await redirectByRole(session.user.id)
+        // Poll until _initialize() finishes (max 5 × 300 ms — adapts to connection speed).
+        let session4 = null
+        for (let i = 0; i < 5 && !session4; i++) {
+          const { data } = await supabase.auth.getSession()
+          session4 = data.session
+          if (!session4 && i < 4) await new Promise(r => setTimeout(r, 300))
+        }
+        if (session4) {
+          await redirectByRole(session4.user.id)
         } else {
           navigate('/login', { replace: true })
         }
@@ -98,7 +102,16 @@ export function AuthCallback() {
       }
     }
 
+    // Safety net: if handle() hangs or throws outside its inner try/catch, redirect after 15 s
+    const timeoutId = setTimeout(() => {
+      navigate('/login?error=auth_failed', { replace: true })
+    }, 15_000)
+
     handle()
+      .catch(() => navigate('/login?error=auth_failed', { replace: true }))
+      .finally(() => clearTimeout(timeoutId))
+
+    return () => clearTimeout(timeoutId)
   }, [navigate, params])
 
   return (
