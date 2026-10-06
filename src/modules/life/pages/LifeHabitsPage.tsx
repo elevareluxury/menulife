@@ -41,7 +41,7 @@ function WeekDots({ habit, onToggle }: { habit: Habit; onToggle: (date: string, 
         return (
           <button key={d.date} type="button" onClick={() => onToggle(d.date, !d.done)}
             aria-pressed={d.done} aria-label={t.habits.dayToggle(habit.name, label, d.done)} title={label}
-            style={{ width: 22, height: 26, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ width: 32, height: 36, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span aria-hidden="true" style={{
               width: 9, height: 9, borderRadius: '50%',
               background: d.done ? habit.color : 'transparent',

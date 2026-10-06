@@ -498,7 +498,7 @@ function MoneyCard() {
 }
 
 const iconBtn: React.CSSProperties = {
-  width: 36, height: 36, borderRadius: radius.full, flexShrink: 0,
+  width: 44, height: 44, borderRadius: radius.full, flexShrink: 0,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
   color: colors.text.secondary, cursor: 'pointer',
