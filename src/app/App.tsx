@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { FEATURES } from '@/lib/features'
 import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
@@ -186,8 +187,8 @@ function App() {
             <Route path="habits" element={<LifeHabitsPage />} />
             <Route path="brain"  element={<LifeBrainPage />}  />
             <Route path="hub"    element={<Navigate to="/studio" replace />} />
-            <Route path="replay" element={<LifeReplayPage />} />
-            <Route path="insights" element={<LifeInsightsPage />} />
+            <Route path="replay"   element={FEATURES.lifeReplay   ? <LifeReplayPage />   : <Navigate to="/life" replace />} />
+            <Route path="insights" element={FEATURES.lifeInsights ? <LifeInsightsPage /> : <Navigate to="/life" replace />} />
             <Route path="settings" element={<LifeSettingsPage />} />
           </Route>
           {/* Portal del cliente */}
