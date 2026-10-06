@@ -182,7 +182,7 @@ export function useMoney() {
         .select('type,amount').eq('user_id', user.id).eq('currency', data.currency).gte('occurred_at', monthStart)
       const balance = (monthTxs ?? []).reduce((s: number, t: { type: string; amount: string }) =>
         s + (t.type === 'income' ? Number(t.amount) : -Number(t.amount)), 0)
-      if (balance > 0) void award(user.id, 'first_positive_month', 'Mes con superávit')
+      if (Math.round(balance * 100) > 0) void award(user.id, 'first_positive_month', 'Mes con superávit')
     })()
   }, [user, load])
 
