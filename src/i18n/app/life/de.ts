@@ -48,7 +48,7 @@ const de: LifeDict = {
     emptyTitle: 'Ziele geben Richtung', emptyText: 'Lege dein erstes Ziel an und teile es in machbare Schritte.',
     emptyAction: 'Erstes Ziel anlegen', completedList: n => `Erreicht (${n})`, options: 'Optionen für das Ziel',
     pause: 'Pausieren', resume: 'Fortsetzen', deleteTitle: 'Ziel löschen?',
-    deleteText: n => `„${n}“ und alle Schritte werden gelöscht. Das kann nicht rückgängig gemacht werden.`,
+    deleteText: n => `„${n}“ und alle Schritte werden gelöscht. Verknüpfte Gewohnheiten und Aufgaben bleiben erhalten. Das kann nicht rückgängig gemacht werden.`,
     open: n => `${n} öffnen`, targetDate: 'Zieldatum',
   },
   goalSheet: {

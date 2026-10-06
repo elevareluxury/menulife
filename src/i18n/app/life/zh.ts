@@ -48,7 +48,7 @@ const zh: LifeDict = {
     emptyTitle: '目标指引方向', emptyText: '创建你的第一个目标，并拆分成可完成的步骤。',
     emptyAction: '创建第一个目标', completedList: n => `已完成（${n}）`, options: '目标选项',
     pause: '暂停', resume: '继续', deleteTitle: '删除目标？',
-    deleteText: n => `"${n}"及其所有步骤都将被删除，且无法撤销。`,
+    deleteText: n => `"${n}"及其所有里程碑都将被删除。关联的习惯和任务将保留。无法撤销。`,
     open: n => `打开 ${n}`, targetDate: '目标日期',
   },
   goalSheet: {

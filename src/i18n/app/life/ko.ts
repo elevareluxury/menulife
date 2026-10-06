@@ -48,7 +48,7 @@ const ko: LifeDict = {
     emptyTitle: '목표가 방향을 알려줘요', emptyText: '첫 목표를 만들고 이룰 수 있는 단계로 나눠 보세요.',
     emptyAction: '첫 목표 만들기', completedList: n => `달성(${n})`, options: '목표 옵션',
     pause: '일시중지', resume: '다시 시작', deleteTitle: '목표를 삭제할까요?',
-    deleteText: n => `"${n}"과(와) 모든 단계가 삭제됩니다. 되돌릴 수 없어요.`,
+    deleteText: n => `"${n}"과(와) 모든 마일스톤이 삭제됩니다. 연결된 습관과 할 일은 유지됩니다. 되돌릴 수 없어요.`,
     open: n => `${n} 열기`, targetDate: '목표일',
   },
   goalSheet: {

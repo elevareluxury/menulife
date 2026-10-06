@@ -48,7 +48,7 @@ const fr: LifeDict = {
     emptyTitle: 'Les objectifs donnent une direction', emptyText: 'Créez votre premier objectif et découpez-le en étapes réalisables.',
     emptyAction: 'Créer un premier objectif', completedList: n => `Atteints (${n})`, options: 'Options de l’objectif',
     pause: 'Mettre en pause', resume: 'Reprendre', deleteTitle: 'Supprimer l’objectif ?',
-    deleteText: n => `« ${n} » et toutes ses étapes seront supprimés. C’est irréversible.`,
+    deleteText: n => `« ${n} » et tous ses jalons seront supprimés. Les habitudes et tâches liées sont conservées. C’est irréversible.`,
     open: n => `Ouvrir ${n}`, targetDate: 'Date cible',
   },
   goalSheet: {

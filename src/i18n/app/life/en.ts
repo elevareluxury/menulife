@@ -48,7 +48,7 @@ const en: LifeDict = {
     emptyTitle: 'Goals give you direction', emptyText: 'Create your first goal and break it into achievable steps.',
     emptyAction: 'Create first goal', completedList: n => `Completed (${n})`, options: 'Goal options',
     pause: 'Pause', resume: 'Resume', deleteTitle: 'Delete goal?',
-    deleteText: n => `"${n}" and all its steps will be deleted. This cannot be undone.`,
+    deleteText: n => `"${n}" and all its milestones will be deleted. Linked habits and tasks are kept. This cannot be undone.`,
     open: n => `Open ${n}`, targetDate: 'Target date',
   },
   goalSheet: {

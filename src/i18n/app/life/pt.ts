@@ -48,7 +48,7 @@ const pt: LifeDict = {
     emptyTitle: 'Metas dão direção', emptyText: 'Crie sua primeira meta e divida-a em passos alcançáveis.',
     emptyAction: 'Criar primeira meta', completedList: n => `Concluídas (${n})`, options: 'Opções da meta',
     pause: 'Pausar', resume: 'Retomar', deleteTitle: 'Excluir meta?',
-    deleteText: n => `"${n}" e todos os seus passos serão excluídos. Não dá para desfazer.`,
+    deleteText: n => `"${n}" e todos os seus marcos serão excluídos. Hábitos e tarefas vinculados são mantidos. Não dá para desfazer.`,
     open: n => `Abrir ${n}`, targetDate: 'Data-alvo',
   },
   goalSheet: {

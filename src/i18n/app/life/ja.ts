@@ -48,7 +48,7 @@ const ja: LifeDict = {
     emptyTitle: '目標が方向をくれる', emptyText: '最初の目標をつくって、達成できるステップに分けましょう。',
     emptyAction: '最初の目標をつくる', completedList: n => `達成（${n}）`, options: '目標のオプション',
     pause: '一時停止', resume: '再開', deleteTitle: '目標を削除しますか？',
-    deleteText: n => `「${n}」とすべてのステップが削除されます。元に戻せません。`,
+    deleteText: n => `「${n}」とすべてのマイルストーンが削除されます。関連する習慣とタスクは残ります。元に戻せません。`,
     open: n => `${n}を開く`, targetDate: '目標日',
   },
   goalSheet: {
