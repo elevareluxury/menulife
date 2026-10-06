@@ -144,7 +144,7 @@ const ko: LandingDict = {
       { q: '내 데이터를 가져갈 수 있나요?', a: '네. 설정에서 언제든 내 모든 데이터를 내보낼 수 있고, 계정과 데이터를 언제든 삭제할 수 있습니다.' },
     ],
   },
-  footer: { product: '제품', pricing: '요금', faq: '질문', terms: '약관', privacy: '개인정보', madeBy: 'Resilio 제작' },
+  footer: { product: '제품', pricing: '요금', faq: '질문', contact: '문의', terms: '약관', privacy: '개인정보', madeBy: 'Resilio 제작' },
 }
 
 export default ko

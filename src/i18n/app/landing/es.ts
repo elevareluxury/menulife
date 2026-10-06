@@ -161,6 +161,7 @@ const es = {
     product: 'Producto',
     pricing: 'Precios',
     faq: 'Preguntas',
+    contact: 'Contacto',
     terms: 'Términos',
     privacy: 'Privacidad',
     madeBy: 'Hecho por Resilio',

@@ -1,95 +1,83 @@
+import { Fragment, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useLegalT, type LegalBlock } from '@/i18n/app/legal'
+import { useAppLang } from '@/i18n/app/store'
+import { langLocale } from '@/i18n/app/languages'
+import { useLangDir } from '@/i18n/app/useLangDir'
+import { LanguageSelect } from '@/components/ui/LanguageSelect'
+
+// Términos y privacidad (Lanzamiento L4) en los 12 idiomas; el español es la versión de referencia.
 
 type Doc = 'terms' | 'privacy'
 
-const UPDATED = 'octubre de 2026'
+const h1: React.CSSProperties = { fontSize: 30, letterSpacing: '-0.02em', margin: '28px 0 8px' }
+const h2: React.CSSProperties = { fontSize: 18, margin: '32px 0 6px', scrollMarginTop: 16 }
+const muted: React.CSSProperties = { color: '#C9C9BF' }
+
+/** **negrita** dentro de un texto */
+function Rich({ text }: { text: string }) {
+  return <>{text.split(/(\*\*[^*]+\*\*)/).map((part, i) =>
+    part.startsWith('**') ? <strong key={i}>{part.slice(2, -2)}</strong> : <Fragment key={i}>{part}</Fragment>)}</>
+}
+
+function Block({ block }: { block: LegalBlock }) {
+  if (typeof block === 'string') return <p><Rich text={block} /></p>
+  return <ul style={{ paddingInlineStart: 22 }}>{block.list.map((item, i) => <li key={i} style={{ marginBottom: 6 }}><Rich text={item} /></li>)}</ul>
+}
 
 export function LegalPage({ doc }: { doc: Doc }) {
+  const t = useLegalT()
+  const lang = useAppLang(s => s.lang)
+  useLangDir()
+  const sections = doc === 'terms' ? t.terms : t.privacy
+  const title = doc === 'terms' ? t.ui.termsTitle : t.ui.privacyTitle
+  const updated = new Date(`${t.updated}T12:00:00`).toLocaleDateString(langLocale(lang), { dateStyle: 'long' })
+
+  useEffect(() => {
+    const prev = document.title
+    document.title = `${title} · Mycen`
+    return () => { document.title = prev }
+  }, [title])
+
+  // Los links con #ancla (ej. /terminos#reglas) bajan a la sección cuando ya cargó el idioma
+  useEffect(() => {
+    const id = window.location.hash.slice(1)
+    if (id) document.getElementById(id)?.scrollIntoView()
+  }, [sections])
+
   return (
     <main style={{ minHeight: '100svh', background: '#111311', color: '#F1F0E9', fontFamily: "'Geist', sans-serif" }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 20px 64px', lineHeight: 1.65, fontSize: 15.5 }}>
-        <Link to="/" style={{ color: '#F1F0E9', fontWeight: 700, textDecoration: 'none', fontSize: 18 }}>mycen.</Link>
-        {doc === 'terms' ? <Terms /> : <Privacy />}
-        <p style={{ color: '#B9B9AE', fontSize: 13, marginTop: 40 }}>
-          Última actualización: {UPDATED}. ·{' '}
-          <Link to={doc === 'terms' ? '/privacidad' : '/terminos'} style={{ color: '#F1F0E9' }}>
-            {doc === 'terms' ? 'Política de privacidad' : 'Términos y condiciones'}
-          </Link>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <Link to="/" aria-label={t.ui.back} style={{ color: '#F1F0E9', fontWeight: 700, textDecoration: 'none', fontSize: 18 }}>mycen.</Link>
+          <LanguageSelect label={t.ui.language} />
+        </div>
+
+        <h1 style={h1}>{title}</h1>
+        <p style={muted}>{doc === 'terms' ? t.ui.termsIntro : t.ui.privacyIntro}</p>
+        <p style={{ ...muted, fontSize: 13.5 }}>{t.ui.updated}: <time dateTime={t.updated}>{updated}</time></p>
+        {lang !== 'es' && <p style={{ ...muted, fontSize: 13.5, borderInlineStart: '3px solid #F4705A', paddingInlineStart: 10 }}>{t.ui.reference}</p>}
+
+        <nav aria-label={t.ui.contents} style={{ margin: '20px 0 8px', padding: '14px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.04)' }}>
+          <p style={{ margin: '0 0 6px', fontWeight: 600 }}>{t.ui.contents}</p>
+          <ol style={{ margin: 0, paddingInlineStart: 20 }}>
+            {sections.map(s => <li key={s.id}><a href={`#${s.id}`} style={{ color: '#F1F0E9' }}>{s.title}</a></li>)}
+          </ol>
+        </nav>
+
+        {sections.map(s => (
+          <section key={s.id} aria-labelledby={`h-${s.id}`}>
+            <h2 id={s.id} style={h2}><span id={`h-${s.id}`}>{s.title}</span></h2>
+            {s.body.map((b, i) => <Block key={i} block={b} />)}
+          </section>
+        ))}
+
+        <p style={{ ...muted, fontSize: 13.5, marginTop: 40 }}>
+          <Link to={doc === 'terms' ? '/privacidad' : '/terminos'} style={{ color: '#F1F0E9' }}>{t.ui.seeOther[doc]}</Link>
+          {' · '}
+          <a href="mailto:team@mycen.id" style={{ color: '#F1F0E9' }}>team@mycen.id</a>
         </p>
       </div>
     </main>
-  )
-}
-
-const h1: React.CSSProperties = { fontSize: 30, letterSpacing: '-0.02em', margin: '28px 0 8px' }
-const h2: React.CSSProperties = { fontSize: 18, margin: '28px 0 6px' }
-const muted: React.CSSProperties = { color: '#B9B9AE' }
-
-function Terms() {
-  return (
-    <>
-      <h1 style={h1}>Términos y condiciones</h1>
-      <p style={muted}>Al crear una cuenta en Mycen aceptás estas condiciones.</p>
-
-      <h2 style={h2}>Qué es Mycen</h2>
-      <p>Mycen te permite crear una identidad digital pública (Mycen Identity), administrarla desde Mycen Studio, organizar tu vida personal en Life OS y, si tenés un negocio, gestionarlo con Mycen Business.</p>
-
-      <h2 style={h2}>Tu cuenta</h2>
-      <p>Sos responsable de mantener segura tu contraseña y de la actividad de tu cuenta. Los datos que cargues tienen que ser verdaderos y te tienen que pertenecer o tenés que tener permiso para usarlos.</p>
-
-      <h2 style={h2}>Tu contenido</h2>
-      <p>Lo que publicás en tu perfil sigue siendo tuyo. Nos das permiso para mostrarlo en tu dirección pública mientras tu perfil esté publicado. Podés editarlo, ocultarlo, despublicarlo o eliminarlo cuando quieras.</p>
-      <p>Lo que publiques tiene que cumplir las reglas de contenido de abajo. Podemos suspender perfiles que no las cumplan.</p>
-
-      <h2 id="reglas" style={h2}>Reglas de contenido</h2>
-      <p>En Mycen no se permite publicar:</p>
-      <ul>
-        <li><strong>Spam o publicidad engañosa:</strong> promesas falsas, links que no llevan a donde dicen o reseñas inventadas.</li>
-        <li><strong>Estafas o fraude:</strong> pedir dinero o datos con engaños, vender lo que no existe.</li>
-        <li><strong>Suplantación:</strong> hacerse pasar por otra persona, empresa o marca.</li>
-        <li><strong>Odio o acoso:</strong> atacar a personas o grupos por lo que son, o acosar a alguien.</li>
-        <li><strong>Violencia o amenazas:</strong> amenazar, incitar a la violencia o mostrarla de forma gratuita.</li>
-        <li><strong>Contenido sexual explícito</strong> o cualquier contenido sexual que involucre a menores (se denuncia a las autoridades).</li>
-        <li><strong>Algo ilegal:</strong> venta de productos o servicios prohibidos, o contenido que infrinja derechos de terceros (marcas, fotos, textos).</li>
-        <li><strong>Links maliciosos:</strong> virus, phishing o sitios que engañan.</li>
-      </ul>
-      <p>Cualquier persona puede denunciar un perfil o un proyecto con el link "Denunciar" al pie de la página, sin cuenta y de forma anónima. El equipo de Mycen revisa cada denuncia. Si un perfil no cumple las reglas, lo suspendemos: deja de verse (página, proyectos y tarjeta de contacto) y su dueño ve el motivo en Studio. Si creés que tu perfil se suspendió por error, escribinos desde la cuenta con la que lo creaste.</p>
-
-      <h2 style={h2}>Nombres de usuario</h2>
-      <p>Algunos nombres están reservados por el sistema. Si cambiás tu username, la dirección anterior redirige a la nueva para que tus links y QR sigan funcionando.</p>
-
-      <h2 style={h2}>Disponibilidad</h2>
-      <p>Trabajamos para que el servicio funcione siempre, pero puede haber interrupciones o cambios. Las funciones pueden evolucionar con el tiempo.</p>
-
-      <h2 style={h2}>Baja</h2>
-      <p>Podés eliminar tu cuenta desde Studio → Ajustes. Las cuentas con un negocio activo en Mycen Business se dan de baja a través de soporte, porque involucran datos de clientes y ventas.</p>
-    </>
-  )
-}
-
-function Privacy() {
-  return (
-    <>
-      <h1 style={h1}>Política de privacidad</h1>
-      <p style={muted}>Qué datos usamos, para qué y qué control tenés.</p>
-
-      <h2 style={h2}>Datos de tu cuenta</h2>
-      <p>Tu nombre, email y contraseña (guardada de forma cifrada) para que puedas iniciar sesión. No se muestran en tu perfil público.</p>
-
-      <h2 style={h2}>Tu perfil público</h2>
-      <p>Solo se publica lo que cargás en tu perfil y decidís mostrar. Cargar un dato en Studio no lo hace público: los módulos ocultos y los borradores no se ven. La tarjeta "Guardar contacto" incluye únicamente los datos que escribas en ella.</p>
-
-      <h2 style={h2}>Estadísticas de visitas</h2>
-      <p>Para mostrarte cuántas visitas y clicks recibe tu perfil, registramos eventos anónimos. No guardamos direcciones IP ni datos del dispositivo: usamos un identificador que cambia todos los días y no permite saber quién visitó. No contamos bots ni tus propias visitas.</p>
-
-      <h2 style={h2}>Life OS</h2>
-      <p>Tus metas, hábitos, tareas, finanzas y notas son privados: solo vos podés verlos.</p>
-
-      <h2 style={h2}>Tus derechos</h2>
-      <p>Desde Studio podés editar, ocultar y despublicar tu información, descargar una copia de tus datos (Ajustes → Descargar mis datos) y eliminar tu cuenta.</p>
-
-      <h2 style={h2}>Proveedores</h2>
-      <p>Mycen se aloja en servicios de infraestructura de terceros (base de datos, almacenamiento y hosting) que procesan los datos solo para prestar el servicio.</p>
-    </>
   )
 }

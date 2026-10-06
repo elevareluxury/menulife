@@ -48,7 +48,7 @@ const it: LifeDict = {
     emptyTitle: 'Gli obiettivi danno una direzione', emptyText: 'Crea il tuo primo obiettivo e dividilo in passi raggiungibili.',
     emptyAction: 'Crea il primo obiettivo', completedList: n => `Raggiunti (${n})`, options: 'Opzioni dell’obiettivo',
     pause: 'Metti in pausa', resume: 'Riprendi', deleteTitle: 'Eliminare l’obiettivo?',
-    deleteText: n => `"${n}" e tutti i suoi passi verranno eliminati. Non si può annullare.`,
+    deleteText: n => `"${n}" e tutti i suoi traguardi verranno eliminati. Abitudini e attività collegate vengono mantenute. Non si può annullare.`,
     open: n => `Apri ${n}`, targetDate: 'Data obiettivo',
   },
   goalSheet: {

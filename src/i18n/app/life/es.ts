@@ -132,7 +132,7 @@ const es = {
     pause: 'Pausar',
     resume: 'Reanudar',
     deleteTitle: '¿Eliminar meta?',
-    deleteText: (name: string) => `"${name}" y todos sus pasos se van a eliminar. No se puede deshacer.`,
+    deleteText: (name: string) => `Se va a eliminar "${name}" junto con todos sus hitos. Los hábitos y tareas vinculados se conservan. No se puede deshacer.`,
     open: (name: string) => `Abrir ${name}`,
     targetDate: 'Fecha objetivo',
   },

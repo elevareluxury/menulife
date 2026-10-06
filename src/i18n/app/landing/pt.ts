@@ -144,7 +144,7 @@ const pt: LandingDict = {
       { q: 'Posso levar meus dados?', a: 'Sim. Em Configurações você exporta tudo o que é seu quando quiser, e pode excluir sua conta e seus dados a qualquer momento.' },
     ],
   },
-  footer: { product: 'Produto', pricing: 'Preços', faq: 'Perguntas', terms: 'Termos', privacy: 'Privacidade', madeBy: 'Feito por Resilio' },
+  footer: { product: 'Produto', pricing: 'Preços', faq: 'Perguntas', contact: 'Contato', terms: 'Termos', privacy: 'Privacidade', madeBy: 'Feito por Resilio' },
 }
 
 export default pt
