@@ -150,9 +150,13 @@ test('bloques de un proyecto: reordenar con el teclado y duplicar desde el menú
     .map(b => (b.data as { text: string }).text)
   await expect.poll(saved).toEqual(['Segundo', 'Primero'])
 
-  await page.getByRole('button', { name: 'Opciones de Texto · Bloque 2' }).focus()
+  const optsBtn = page.getByRole('button', { name: 'Opciones de Texto · Bloque 2' })
+  await expect(optsBtn).toBeVisible()  // wait for DOM to reflect new order before acting
+  await optsBtn.focus()
   await page.keyboard.press('Enter')
-  await page.getByRole('menuitem', { name: 'Duplicar' }).focus()
+  const blockMenu = page.getByRole('menu', { name: 'Opciones de Texto · Bloque 2' })
+  await expect(blockMenu.getByRole('menuitem', { name: 'Duplicar' })).toBeVisible()
+  await blockMenu.getByRole('menuitem', { name: 'Duplicar' }).focus()
   await page.keyboard.press('Enter')
   await expect.poll(saved).toEqual(['Segundo', 'Primero', 'Primero'])
 })
