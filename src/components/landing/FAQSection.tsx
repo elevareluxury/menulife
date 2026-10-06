@@ -36,7 +36,7 @@ export function FAQSection() {
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(32px,4.5vw,48px)', color: '#1a1a1a', lineHeight: 1.1, margin: 0 }} data-split>
             <SplitText text={t.title} />{' '}
-            <em data-word style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>{t.titleAccent}</em>
+            <em data-word style={{ color: 'var(--ml-salmon)', fontStyle: 'normal', display: 'inline-block' }}>{t.titleAccent}</em>
           </h2>
         </div>
 

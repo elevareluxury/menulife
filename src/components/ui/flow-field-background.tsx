@@ -98,7 +98,8 @@ export default function FlowFieldBackground({
     const particles: Particle[] = []
 
     const init = () => {
-      const dpr = window.devicePixelRatio || 1
+      // Tope de densidad: a 3x el canvas de pantalla completa pesa 9 veces más y no se nota la diferencia
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       canvas.width = width * dpr
       canvas.height = height * dpr
       ctx.scale(dpr, dpr)
@@ -120,8 +121,20 @@ export default function FlowFieldBackground({
         p.draw(ctx)
       }
 
-      animationFrameId = requestAnimationFrame(animate)
+      animationFrameId = running ? requestAnimationFrame(animate) : 0
     }
+
+    // Sólo se dibuja mientras se ve (y con la pestaña visible): fuera de pantalla no gasta nada al scrollear
+    let visible = true
+    let running = false
+    const sync = () => {
+      const next = visible && !document.hidden
+      if (next && !running) { running = true; animationFrameId = requestAnimationFrame(animate) }
+      if (!next && running) { running = false; cancelAnimationFrame(animationFrameId) }
+    }
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; sync() })
+    io.observe(container)
+    document.addEventListener('visibilitychange', sync)
 
     // On mobile reinit only on width change (not on height-only changes from URL bar show/hide)
     let lastWidth = width
@@ -142,7 +155,9 @@ export default function FlowFieldBackground({
     }
 
     init()
-    animate()
+    // Con "reducir movimiento" se queda quieto
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) visible = false
+    sync()
 
     window.addEventListener('resize', handleResize, { passive: true })
     if (!isTouchDevice) {
@@ -155,6 +170,8 @@ export default function FlowFieldBackground({
         window.removeEventListener('mousemove', handleMouseMove)
       }
       cancelAnimationFrame(animationFrameId)
+      io.disconnect()
+      document.removeEventListener('visibilitychange', sync)
     }
   }, [color, trailOpacity, particleCount, speed])
 

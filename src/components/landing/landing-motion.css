@@ -17,7 +17,7 @@
   opacity: 0; transition: opacity 0.35s ease;
 }
 [data-tilt]:hover .ml-spot { opacity: 1; }
-[data-tilt] { will-change: transform; }
+[data-tilt], [data-parallax] { will-change: transform; }
 
 /* Barra de progreso de lectura */
 .ml-progress {
@@ -38,18 +38,22 @@
 .ml-marquee-item::after { content: '✦'; color: #F4705A; font-size: 0.6em; }
 .ml-marquee:hover .ml-marquee-track { animation-play-state: paused; }
 
-/* Acentos de los títulos con brillo que recorre el texto (sólo en fondos oscuros) */
+/* Acentos de los títulos: misma familia que el título (Geist, sin cursiva falsa) con un degradé fijo.
+   Fijo a propósito: animar background-position repinta el texto en cada cuadro y traba el scroll. */
 .ml-shine {
-  background: linear-gradient(100deg, #F4705A 0%, #F4705A 35%, #FFC2AE 50%, #F4705A 65%, #F4705A 100%);
-  background-size: 250% 100%; background-position: 100% 0;
+  font-style: normal !important;
+  background: linear-gradient(100deg, #F4705A 10%, #FF9A7E 90%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
+  padding-inline-end: 0.04em;
 }
+
+/* Lo que no se ve no se anima (useLandingMotion pone .ml-paused en las secciones fuera de pantalla) */
+.ml-paused, .ml-paused * { animation-play-state: paused !important; }
 
 @media (prefers-reduced-motion: no-preference) {
   .ml-marquee-track { animation: ml-marquee 38s linear infinite; }
   [dir="rtl"] .ml-marquee-track { animation-direction: reverse; }
-  .ml-shine { animation: ml-shine 5s ease-in-out infinite; }
 
   /* Teléfono del hero: los links aparecen en cascada y el estado late */
   .ml-phone-live .ml-phone-link { animation: ml-phone-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
@@ -62,13 +66,9 @@
   .ml-sat-float { animation: ml-bob 5s ease-in-out infinite; }
   .ml-flow { animation: ml-flow 1.6s linear infinite; }
   .ml-orbit { animation: ml-spin 60s linear infinite; transform-origin: 50px 50px; }
-
-  /* Fondo con orbes que respiran */
-  .ml-orb { animation: ml-breathe 9s ease-in-out infinite; }
 }
 
 @keyframes ml-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@keyframes ml-shine { 0%, 15% { background-position: 100% 0; } 60%, 100% { background-position: 0% 0; } }
 @keyframes ml-phone-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes ml-pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 50% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); } }
 @keyframes ml-avatar-glow { 0%, 100% { box-shadow: 0 4px 20px rgba(244, 112, 90, 0.35); } 50% { box-shadow: 0 4px 34px rgba(244, 112, 90, 0.7); } }
@@ -76,4 +76,3 @@
 @keyframes ml-ring { from { transform: translate(-50%, -50%) scale(1); opacity: 0.6; } to { transform: translate(-50%, -50%) scale(2.4); opacity: 0; } }
 @keyframes ml-flow { to { stroke-dashoffset: -8; } }
 @keyframes ml-spin { to { transform: rotate(360deg); } }
-@keyframes ml-breathe { 0%, 100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.18); opacity: 0.9; } }

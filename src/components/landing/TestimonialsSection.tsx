@@ -63,7 +63,7 @@ export function TestimonialsSection() {
           fontSize: 'clamp(36px,5vw,56px)', color: '#fff', lineHeight: 1.1, margin: 0,
         }} data-split>
           <SplitText text={t.title} />{' '}
-          <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>
+          <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'normal', display: 'inline-block' }}>
             {t.titleAccent}
           </em>
         </h2>

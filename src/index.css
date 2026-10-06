@@ -381,9 +381,10 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   line-height: 1.0;
 }
 
+/* Con transform (no `left`) para no recalcular el layout en cada cuadro */
 @keyframes ml-shimmer {
-  0%   { left: -100%; }
-  100% { left: 200%; }
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(300%); }
 }
 @keyframes ml-marquee {
   0%   { transform: translateX(0); }
@@ -945,13 +946,22 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 
 .ch-line2 {
   display: block;
-  /* Acento editorial: Instrument Serif itálica */
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  font-size: clamp(2.75rem, 6.6vw, 5.5rem);
-  color: #F1F0E9;
-  font-style: italic;
+  /* Acento: la misma Geist que la primera línea, liviana y con degradé coral (sin cursiva: Geist no la trae y el
+     navegador la inclinaba a la fuerza) */
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-style: normal;
+  color: #FF9A7E;
+}
+/* El degradé va en cada palabra: el título entra palabra por palabra (SplitText) y un recorte de texto en el
+   contenedor no pinta a través de las palabras animadas */
+.ch-line2 [data-word] {
+  background: linear-gradient(100deg, #F4705A 0%, #FFB199 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .ch-subtitle {
