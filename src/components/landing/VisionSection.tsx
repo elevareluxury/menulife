@@ -47,7 +47,7 @@ export function VisionSection() {
           marginBottom: '28px', letterSpacing: '-0.02em',
         }}>
           <SplitText text={t.title} />{' '}
-          <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>{t.titleAccent}</em>
+          <em data-word className="ml-shine" style={{ color: 'var(--ml-salmon)', fontStyle: 'normal', display: 'inline-block' }}>{t.titleAccent}</em>
         </h2>
 
         <p data-vision-body style={{

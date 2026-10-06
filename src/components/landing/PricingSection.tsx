@@ -68,7 +68,7 @@ export function PricingSection() {
           </p>
           <h2 style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#1a1a1a', lineHeight: 1.1, margin: '0 0 12px' }} data-split>
             <SplitText text={t.title} />{' '}
-            <em data-word style={{ color: 'var(--ml-salmon)', fontStyle: 'italic', display: 'inline-block' }}>{t.titleAccent}</em>
+            <em data-word style={{ color: 'var(--ml-salmon)', fontStyle: 'normal', display: 'inline-block' }}>{t.titleAccent}</em>
           </h2>
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '15px', color: 'var(--ml-gray-500)', margin: '0 0 28px' }}>
             {t.freeNote}
@@ -190,7 +190,8 @@ function PricingCard({
         position: 'relative', padding: '36px 32px',
         ...(plan.featured ? {
           background: '#0F1115',
-          animation: 'ml-pulse-glow 3s ease-in-out infinite',
+          // Resplandor fijo: animar box-shadow repinta la tarjeta en cada cuadro y traba el scroll
+          boxShadow: '0 0 40px rgba(244,112,90,0.35), 0 0 80px rgba(244,112,90,0.12)',
           overflow: 'visible',
         } : {}),
       }}
@@ -250,7 +251,7 @@ function PricingCard({
           </span>
         </div>
         {plan.badgeNote && (
-          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'var(--ml-gray-500)', margin: '6px 0 0', fontStyle: 'italic' }}>
+          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'var(--ml-gray-500)', margin: '6px 0 0', fontStyle: 'normal' }}>
             {plan.badgeNote}
           </p>
         )}
@@ -295,7 +296,7 @@ function PricingCard({
       </Link>
 
       {plan.featured && plan.note && (
-        <p style={{ textAlign: 'center', marginTop: '12px', fontFamily: 'var(--font-jakarta)', fontSize: '12px', color: 'rgba(255,255,255,0.35)', fontStyle: 'italic' }}>
+        <p style={{ textAlign: 'center', marginTop: '12px', fontFamily: 'var(--font-jakarta)', fontSize: '12px', color: 'rgba(255,255,255,0.35)', fontStyle: 'normal' }}>
           {plan.note}
         </p>
       )}
