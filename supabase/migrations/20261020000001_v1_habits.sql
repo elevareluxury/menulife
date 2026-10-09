@@ -7,12 +7,58 @@
 --   · Los hábitos de antes ({ type: 'daily'|'weekly', days }) siguen igual. El check de frequency se agrega NOT VALID:
 --     valida lo nuevo sin frenar la migración por datos viejos raros.
 --   · La RLS de siempre (cada uno lo suyo) no cambia.
+--   · Si una base no tiene las tablas de hábitos (la migración de Life OS de junio se aplicó a medias), las crea con
+--     la misma definición y RLS que 20260615000001_create_life_os.sql.
 --
 -- Requiere 20260615000001_create_life_os.sql. Idempotente.
 -- Vuelta atrás: docs/v1/sql/10_rollback.sql
 -- =============================================================================
 
 begin;
+
+-- ─── 0. Tablas de hábitos (por si faltan) ────────────────────────────────────
+
+create table if not exists public.life_habits (
+  id         uuid        default gen_random_uuid() primary key,
+  user_id    uuid        not null references auth.users(id) on delete cascade,
+  name       text        not null,
+  icon       text        not null default 'CheckCircle',
+  color      text        not null default '#F4705A',
+  frequency  jsonb       not null default '{"type":"daily","days":[0,1,2,3,4,5,6]}',
+  is_active  boolean     not null default true,
+  sort_order int         not null default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.life_habits enable row level security;
+drop policy if exists "lh_owner" on public.life_habits;
+create policy "lh_owner" on public.life_habits
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create index if not exists idx_lh_user on public.life_habits(user_id, is_active, sort_order);
+
+create table if not exists public.life_habit_logs (
+  id             uuid        default gen_random_uuid() primary key,
+  habit_id       uuid        not null references public.life_habits(id) on delete cascade,
+  user_id        uuid        not null references auth.users(id) on delete cascade,
+  completed_date date        not null,
+  created_at     timestamptz not null default now(),
+  unique (habit_id, completed_date)
+);
+alter table public.life_habit_logs enable row level security;
+drop policy if exists "lhl_owner" on public.life_habit_logs;
+create policy "lhl_owner" on public.life_habit_logs
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create index if not exists idx_lhl_user_date on public.life_habit_logs(user_id, completed_date desc);
+create index if not exists idx_lhl_habit_date on public.life_habit_logs(habit_id, completed_date desc);
+
+-- Vínculo con metas (20261006000001), sólo si existe la tabla de metas
+do $$ begin
+  if to_regclass('public.life_goals') is not null then
+    alter table public.life_habits add column if not exists goal_id uuid references public.life_goals(id) on delete set null;
+    create index if not exists idx_life_habits_goal on public.life_habits(goal_id) where goal_id is not null;
+  end if;
+end $$;
+
+-- ─── 1. Cantidad, ancla, recordatorio y "X veces por semana" ─────────────────
 
 alter table public.life_habits
   add column if not exists target_value     numeric,
@@ -52,5 +98,8 @@ alter table public.life_habits add constraint life_habits_frequency_check
 
 alter table public.life_habit_logs drop constraint if exists life_habit_logs_value_check;
 alter table public.life_habit_logs add constraint life_habit_logs_value_check check (value > 0 and value <= 100000);
+
+-- Que la API vea enseguida las tablas y columnas nuevas
+notify pgrst, 'reload schema';
 
 commit;
