@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
 import { LIFE_DATA_UPDATED } from './useBrain'
+import { isValidRecurrence, nextOccurrence, type Recurrence } from '../lib/recurrence'
 
 // Las tareas viven en Brain (life_brain_items con type = 'task').
 // Las columnas de fecha/recordatorio todavía no están en database.types.ts
@@ -21,7 +22,17 @@ export interface LifeTask {
   goal_id: string | null
   is_focus: boolean
   created_at: string
+  /** Repetición (V1 · etapa 09); sólo con fecha */
+  recurrence: Recurrence | null
+  subtasks: Subtask[]
+  /** La ocurrencia que se creó al completarla (para no duplicarla si se destilda y se vuelve a tildar) */
+  next_occurrence_id: string | null
 }
+
+export interface Subtask { id: string; text: string; done: boolean }
+
+export const MAX_SUBTASKS = 20
+export const MAX_SUBTASK_TEXT = 200
 
 export interface TaskFormData {
   title: string
@@ -31,6 +42,8 @@ export interface TaskFormData {
   remind_minutes?: number | null
   goal_id?: string | null
   is_focus?: boolean
+  recurrence?: Recurrence | null
+  subtasks?: Subtask[]
 }
 
 interface BrainTaskRow {
@@ -46,9 +59,18 @@ interface BrainTaskRow {
   goal_id: string | null
   is_focus: boolean | null
   created_at: string
+  recurrence: unknown
+  subtasks: unknown
+  next_occurrence_id: string | null
 }
 
-const COLUMNS = 'id,title,content,due_date,due_time,remind_minutes,reminded_at,completed_at,is_completed,goal_id,is_focus,created_at'
+const COLUMNS = 'id,title,content,due_date,due_time,remind_minutes,reminded_at,completed_at,is_completed,goal_id,is_focus,created_at,recurrence,subtasks,next_occurrence_id'
+
+function subtasksOf(v: unknown): Subtask[] {
+  return Array.isArray(v)
+    ? v.filter((x): x is Subtask => !!x && typeof x.id === 'string' && typeof x.text === 'string').map(x => ({ id: x.id, text: x.text, done: !!x.done }))
+    : []
+}
 
 function fromRow(r: BrainTaskRow): LifeTask {
   return {
@@ -56,6 +78,9 @@ function fromRow(r: BrainTaskRow): LifeTask {
     due_date: r.due_date, due_time: r.due_time, remind_minutes: r.remind_minutes, reminded_at: r.reminded_at,
     completed_at: r.is_completed ? (r.completed_at ?? r.created_at) : null,
     goal_id: r.goal_id, is_focus: !!r.is_focus, created_at: r.created_at,
+    recurrence: isValidRecurrence(r.recurrence) ? r.recurrence : null,
+    subtasks: subtasksOf(r.subtasks),
+    next_occurrence_id: r.next_occurrence_id ?? null,
   }
 }
 
@@ -84,6 +109,22 @@ export function taskColumns(data: TaskFormData) {
     remind_minutes: data.due_date && data.remind_minutes != null ? data.remind_minutes : null,
     goal_id: data.goal_id || null,
     is_focus: !!data.is_focus,
+    // Sin fecha no hay "próxima": la base también lo exige
+    recurrence: data.due_date && data.recurrence ? data.recurrence : null,
+    subtasks: (data.subtasks ?? [])
+      .map(st => ({ id: st.id, text: st.text.trim().slice(0, MAX_SUBTASK_TEXT), done: !!st.done }))
+      .filter(st => st.text)
+      .slice(0, MAX_SUBTASKS),
+  }
+}
+
+/** La siguiente ocurrencia de una tarea que se repite: misma tarea, próxima fecha, subtareas sin hacer. */
+export function nextTaskData(task: LifeTask, today: string): TaskFormData | null {
+  if (!task.recurrence || !task.due_date) return null
+  return {
+    title: task.title, notes: task.notes, due_date: nextOccurrence(task.due_date, task.recurrence, today),
+    due_time: task.due_time, remind_minutes: task.remind_minutes, goal_id: task.goal_id, is_focus: false,
+    recurrence: task.recurrence, subtasks: task.subtasks.map(st => ({ ...st, done: false })),
   }
 }
 
@@ -149,6 +190,28 @@ export function useTasks() {
     setTasks(prev => prev.map(t => (t.id === id ? fromRow(row as BrainTaskRow) : t)))
   }, [])
 
+  /**
+   * Tarea que se repite (V1 · etapa 09): al completarla se crea la siguiente (con la fecha local de hoy como piso) y
+   * se anota en next_occurrence_id; al destildarla, la siguiente se borra si todavía no se hizo.
+   */
+  const rollRecurrence = useCallback(async (task: LifeTask, done: boolean) => {
+    if (!user) return
+    if (done) {
+      const next = task.next_occurrence_id ? null : nextTaskData(task, localDateKey())
+      if (!next) return
+      const created = await insertTask(user.id, next)
+      setTasks(prev => [...prev.map(t => (t.id === task.id ? { ...t, next_occurrence_id: created.id } : t)), created])
+      await db.from('life_brain_items').update({ next_occurrence_id: created.id }).eq('id', task.id)
+    } else if (task.next_occurrence_id) {
+      const nextId = task.next_occurrence_id
+      const { data: removed } = await db.from('life_brain_items').delete()
+        .eq('id', nextId).eq('is_completed', false).select('id')
+      if ((removed ?? []).length) setTasks(prev => prev.filter(t => t.id !== nextId))
+      setTasks(prev => prev.map(t => (t.id === task.id ? { ...t, next_occurrence_id: null } : t)))
+      await db.from('life_brain_items').update({ next_occurrence_id: null }).eq('id', task.id)
+    }
+  }, [user])
+
   const toggleTask = useCallback(async (task: LifeTask) => {
     const done = !task.completed_at
     const completed_at = done ? new Date().toISOString() : null
@@ -160,6 +223,7 @@ export function useTasks() {
       setTasks(prev => prev.map(t => (t.id === task.id ? task : t)))
       throw err
     }
+    if (user) await rollRecurrence(task, done)
     if (done && user) {
       void (async () => {
         const { count } = await db.from('life_brain_items').select('*', { count: 'exact', head: true })
@@ -168,7 +232,7 @@ export function useTasks() {
         if (count === 50) void award(user.id, 'tasks_50', '50 tareas completadas')
       })()
     }
-  }, [user])
+  }, [user, rollRecurrence])
 
   const setFocus = useCallback(async (task: LifeTask, value: boolean) => {
     setTasks(prev => prev.map(t => (t.id === task.id ? { ...t, is_focus: value } : t)))

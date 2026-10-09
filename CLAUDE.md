@@ -228,6 +228,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   → el onboarding preselecciona el tipo y llama a `record_referral` (tabla `referrals`: una por cuenta, sólo perfiles
   publicados de otra persona). "Tu semana" (`WeekCard`, `lib/weekly.ts`): visitas, acción principal, contactos y
   mensajes de 7 días y de dónde llegaron; la visita toma `?src=` o `utm_source`.
+- Tareas que se repiten (etapa 09): `life_brain_items.recurrence` (`{ freq, interval?, weekdays?, monthday? }`, sólo
+  tareas con fecha), `subtasks` (`[{ id, text, done }]`, ≤ 20 y ≤ 200 caracteres) y `next_occurrence_id`; la base valida
+  (`life_valid_recurrence` / `life_valid_subtasks`). `lib/recurrence.ts`: `nextOccurrence` (fechas locales; mensual con
+  el último día si no existe; atrasada → la primera desde hoy) y el selector (`repeatChoiceOf` / `recurrenceFor`). Al
+  completar, `useTasks` crea la siguiente (hora, aviso y subtareas sin hacer) y la anota; al destildar, la borra si no se
+  hizo. Ficha: `RepeatField` y `SubtasksField` (`TaskExtras.tsx`); lista con ícono y "3 de 5"; el calendario muestra las
+  próximas repeticiones. E2E en `tasks.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea
