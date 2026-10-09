@@ -22,6 +22,6 @@ describe('textos legales', () => {
 
   it('nombra a todos los proveedores que usa Mycen', () => {
     const providers = JSON.stringify(es.privacy.find(s => s.id === 'proveedores'))
-    for (const p of ['Supabase', 'Vercel', 'Resend', 'Anthropic', 'Mercado Pago']) expect(providers).toContain(p)
+    for (const p of ['Supabase', 'Vercel', 'Resend', 'Anthropic', 'Mercado Pago', 'YouTube', 'Vimeo', 'TikTok', 'Spotify', 'SoundCloud']) expect(providers).toContain(p)
   })
 })

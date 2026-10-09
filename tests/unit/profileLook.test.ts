@@ -47,6 +47,6 @@ describe('profileLook', () => {
   })
 
   it('cada tipo de módulo tiene su tamaño en Bento', () => {
-    for (const def of Object.values(PUBLIC_MODULES)) expect(['S', 'M', 'L']).toContain(def.bento)
+    for (const def of Object.values(PUBLIC_MODULES)) expect(typeof def.bento === 'function' || ['S', 'M', 'L'].includes(def.bento)).toBe(true)
   })
 })

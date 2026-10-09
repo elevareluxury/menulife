@@ -127,6 +127,21 @@ const ru: StudioDict = {
     realReviews: 'Используйте настоящие отзывы клиентов.', starsOf: n => `Звёзды отзыва ${n}`, stars: n => `Звёзд: ${n}`,
     removeReview: n => `Удалить отзыв ${n}`, reviewName: 'Имя', reviewText: 'Отзыв', addReview: 'Добавить отзыв',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: 'Ссылка на видео или трек',
+    help: 'Вставьте ссылку YouTube, Vimeo, TikTok, Spotify или SoundCloud.',
+    detected: 'Распознано: {provider}',
+    preview: 'Так это будет выглядеть в профиле. Плеер загружается только после нажатия на воспроизведение.',
+    video: 'Видео',
+    music: 'Музыка',
+    errors: {
+      empty: 'Вставьте ссылку на видео или трек.',
+      invalid: 'Не удаётся распознать ссылку. Скопируйте полную ссылку из приложения или сайта (например, Поделиться → Копировать ссылку).',
+      unsupported: 'Пока можно встроить YouTube, Vimeo, TikTok, Spotify и SoundCloud. Для других сайтов используйте модуль «Ссылка».',
+      short_link: 'Это короткая ссылка. Откройте её и скопируйте полную ссылку из адресной строки.',
+    },
+  },
   catalog: {
     styleHighlight: 'Выделенная (акцентный цвет)',
     styleButton: 'Кнопка (значок или миниатюра сбоку)', styleCard: 'Карточка с большим фото',
@@ -146,6 +161,7 @@ const ru: StudioDict = {
       testimonials: { label: 'Отзывы', description: 'Отзывы клиентов и ваш рейтинг Google.' },
       contact_card: { label: 'Карточка контакта', description: 'Настраивается в разделе «Поделиться».' },
       link_group: { label: 'Группа ссылок', description: 'Несколько ссылок под одним заголовком (например: Магазины, Пресса).' },
+      media: { label: 'Видео или музыка', description: 'YouTube, Vimeo, TikTok, Spotify или SoundCloud — воспроизведение прямо в профиле.' },
       project: { label: 'Избранный проект', description: 'Один из ваших проектов с обложкой и ссылкой на его страницу.' },
       portfolio: { label: 'Портфолио', description: 'Ваши опубликованные проекты сеткой.' },
     },

@@ -127,6 +127,21 @@ const ja: StudioDict = {
     realReviews: 'お客さまの実際の声を使ってください。', starsOf: n => `レビュー ${n} の星の数`, stars: n => `星 ${n} つ`,
     removeReview: n => `レビュー ${n} を削除`, reviewName: '名前', reviewText: 'レビュー', addReview: 'レビューを追加',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: '動画または曲のリンク',
+    help: 'YouTube、Vimeo、TikTok、Spotify、SoundCloud のリンクを貼り付けてください。',
+    detected: '{provider} を検出しました',
+    preview: 'プロフィールではこのように表示されます。プレーヤーは再生をタップしたときに読み込まれます。',
+    video: '動画',
+    music: '音楽',
+    errors: {
+      empty: '動画または曲のリンクを貼り付けてください。',
+      invalid: 'このリンクは認識できません。アプリやサイトから完全なリンクをコピーしてください（例：共有 → リンクをコピー）。',
+      unsupported: '現在埋め込めるのは YouTube、Vimeo、TikTok、Spotify、SoundCloud です。その他のサイトはリンクモジュールを使ってください。',
+      short_link: '短縮リンクです。開いてアドレスバーから完全なリンクをコピーしてください。',
+    },
+  },
   catalog: {
     styleHighlight: '強調（アクセントカラー）',
     styleButton: 'ボタン（横にアイコンかサムネイル）', styleCard: '大きな写真のカード',
@@ -146,6 +161,7 @@ const ja: StudioDict = {
       testimonials: { label: 'レビュー', description: 'お客さまの声と Google の評価。' },
       contact_card: { label: '連絡先カード', description: '「共有」で設定します。' },
       link_group: { label: 'リンクグループ', description: 'ひとつの見出しの下に複数のリンク（例：ショップ、掲載）。' },
+      media: { label: '動画・音楽', description: 'YouTube、Vimeo、TikTok、Spotify、SoundCloud をプロフィール上で再生できます。' },
       project: { label: '注目のプロジェクト', description: 'カバー画像とページへのリンク付きでプロジェクトを1つ表示します。' },
       portfolio: { label: 'ポートフォリオ', description: '公開済みのプロジェクトをグリッドで表示します。' },
     },

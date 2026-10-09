@@ -1,10 +1,13 @@
-import type { ComponentType } from 'react'
+import { lazy, type ComponentType } from 'react'
 import type { ModuleType, ProfileLang, ProfileModule } from '../lib/profileTypes'
 import {
   CardsModule, ContactModule, LinkGroupModule, FeaturedActionModule, GalleryModule, HoursModule, ImageModule, LinkModule,
   LocationModule, ProductModule, SocialRow, TestimonialsModule, TextModule, type ModuleProps,
 } from './ProfileModules'
 import { PortfolioModule, ProjectModule } from './ProjectModules'
+// Video y música en su propio chunk: sólo lo baja un perfil que lo usa (la huella de la fachada pesa)
+const MediaModule = lazy(() => import('./MediaModule').then(m => ({ default: m.MediaModule })))
+import { parseMediaUrl } from '../lib/media'
 
 export interface GroupProps {
   modules: ProfileModule[]
@@ -22,8 +25,9 @@ export interface PublicModuleDef {
   /** Los módulos consecutivos de este tipo se dibujan juntos (ej.: redes en una fila de íconos) */
   Group?: ComponentType<GroupProps>
   // Sin View ni Group: no es un bloque (contact_card se muestra como botón "Guardar contacto")
-  /** Tamaño en la estructura Bento (V1): S = media columna, M = ancho completo, L = ancho completo destacado */
-  bento: BentoSize
+  /** Tamaño en la estructura Bento (V1): S = media columna, M = ancho completo, L = ancho completo destacado.
+   *  Una función si depende del contenido (ej. video L, música M). */
+  bento: BentoSize | ((module: ProfileModule) => BentoSize)
 }
 
 export type BentoSize = 'S' | 'M' | 'L'
@@ -45,6 +49,12 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   project:         { View: ProjectModule, bento: 'L' },
   portfolio:       { View: PortfolioModule, bento: 'L' },
   link_group:      { View: LinkGroupModule, bento: 'M' },
+  media:           { View: MediaModule, bento: m => (parseMediaUrl(m.content.url)?.kind === 'music' ? 'M' : 'L') },
+}
+
+/** Tamaño Bento de un módulo */
+export function bentoSize(def: PublicModuleDef, module: ProfileModule): BentoSize {
+  return typeof def.bento === 'function' ? def.bento(module) : def.bento
 }
 
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */

@@ -127,6 +127,21 @@ const zh: StudioDict = {
     realReviews: '请使用客户的真实评价。', starsOf: n => `评价 ${n} 的星级`, stars: n => `${n} 星`,
     removeReview: n => `移除评价 ${n}`, reviewName: '姓名', reviewText: '评价', addReview: '添加评价',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: '视频或歌曲链接',
+    help: '粘贴 YouTube、Vimeo、TikTok、Spotify 或 SoundCloud 的链接。',
+    detected: '已识别：{provider}',
+    preview: '这是它在你主页上的样子。只有在有人点击播放时才会加载播放器。',
+    video: '视频',
+    music: '音乐',
+    errors: {
+      empty: '请粘贴视频或歌曲的链接。',
+      invalid: '无法识别这个链接。请从应用或网站复制完整链接（例如：分享 → 复制链接）。',
+      unsupported: '目前可以嵌入 YouTube、Vimeo、TikTok、Spotify 和 SoundCloud。其他网站请使用“链接”模块。',
+      short_link: '这是一个短链接。请打开它，然后从地址栏复制完整链接。',
+    },
+  },
   catalog: {
     styleHighlight: '突出显示（强调色）',
     styleButton: '按钮（侧边带图标或缩略图）', styleCard: '大图卡片',
@@ -146,6 +161,7 @@ const zh: StudioDict = {
       testimonials: { label: '评价', description: '客户评价和你的 Google 评分。' },
       contact_card: { label: '联系人卡片', description: '在"分享"中设置。' },
       link_group: { label: '链接组', description: '同一标题下的多个链接（如：商店、媒体）。' },
+      media: { label: '视频或音乐', description: 'YouTube、Vimeo、TikTok、Spotify 或 SoundCloud，直接在你的主页播放。' },
       project: { label: '精选项目', description: '你的一个项目，带封面和项目页面链接。' },
       portfolio: { label: '作品集', description: '以网格展示你已发布的项目。' },
     },

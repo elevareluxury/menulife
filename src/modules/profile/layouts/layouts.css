@@ -110,3 +110,28 @@
 
 /* La foto es un objeto sólido delante de la huella */
 .my-profile .mp-avatar { background: var(--my-tile); border-color: var(--my-bg); box-shadow: 0 0 0 1px var(--my-border); color: var(--my-muted); }
+
+/* ── Video y música (etapa 04): fachada liviana hasta que se toca "Reproducir" ── */
+.mp-media { padding: 0; }
+.mp-media-facade {
+  position: relative; display: flex; align-items: flex-end; gap: 14px; width: 100%; min-height: 112px;
+  padding: 18px; border: 0; border-radius: inherit; overflow: hidden; cursor: pointer; text-align: start;
+  background: var(--my-tile); color: var(--my-text); font: inherit;
+}
+.mp-media-music .mp-media-facade { align-items: center; }
+.mp-media-art {
+  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0.55; pointer-events: none;
+  /* La huella se apaga hacia abajo: el título y el proveedor se leen limpios */
+  -webkit-mask-image: linear-gradient(to top, transparent 15%, black 75%); mask-image: linear-gradient(to top, transparent 15%, black 75%);
+}
+.mp-media-art svg { width: 130% !important; height: auto !important; }
+.mp-media-music .mp-media-art svg { width: 60% !important; margin-inline-start: 50%; }
+.mp-media-play {
+  position: relative; flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
+  background: var(--my-accent); color: var(--my-on-accent); box-shadow: 0 12px 28px -12px var(--my-glow);
+}
+.mp-media-text { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mp-media-title { font-weight: 600; font-size: var(--my-fs-lead); overflow-wrap: anywhere; }
+.mp-media-provider { font-size: var(--my-fs-small); color: var(--my-muted); }
+.mp-media-frame { width: 100%; overflow: hidden; border-radius: inherit; background: var(--my-tile); }
+.mp-media-frame iframe { display: block; width: 100%; height: 100%; border: 0; }

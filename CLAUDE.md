@@ -194,6 +194,11 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (acento por tono). `ProfileView` arma las piezas y carga la estructura de `profile/layouts/` (un chunk por estructura);
   los módulos toman el tema por `lookVars` (--p-* → --my-*). Tamaño Bento por tipo en `moduleRegistry` (`bento`).
   Los objetos que se tocan no flotan (sólo la credencial); E2E en `profile-layouts.spec.ts`.
+- Video y música (etapa 04): módulo `media` (`content.url` + `provider`/`kind` de referencia). `profile/lib/media.ts`
+  (`inspectMediaUrl`/`parseMediaUrl`): lista cerrada (YouTube sin cookies, Vimeo, Spotify, SoundCloud, TikTok), links cortos
+  rechazados, el iframe se arma con el id validado. Fachada `MediaModule` (chunk propio, huella del perfil por
+  `ProfileHuellaContext`): nada de terceros hasta tocar "Reproducir" (lo verifica `media.spec.ts`). Bento: video L, música M
+  (`bento` puede ser función). Los proveedores están en privacidad (12 idiomas).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

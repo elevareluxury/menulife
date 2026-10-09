@@ -11,7 +11,8 @@ import { isOpenNow } from '../lib/schedule'
 import { downloadVCard } from '../lib/vcard'
 import { lookVars, profileLook, type ProfileLayout } from '../lib/profileLook'
 import { profileHandle, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
-import { publicModuleDef, type BentoSize, type GroupProps } from './moduleRegistry'
+import { bentoSize, publicModuleDef, type BentoSize, type GroupProps } from './moduleRegistry'
+import { ProfileHuellaContext } from './profileLookContext'
 import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
 import { ReportButton } from './ReportDialog'
@@ -42,9 +43,9 @@ function toBlocks(modules: ProfileModule[]): Block[] {
     const last = blocks[blocks.length - 1]
     if (def?.Group) {
       if (last?.kind === 'group' && last.Group === def.Group) last.modules.push(m)
-      else blocks.push({ kind: 'group', modules: [m], Group: def.Group, size: def.bento })
+      else blocks.push({ kind: 'group', modules: [m], Group: def.Group, size: bentoSize(def, m) })
     } else if (def?.View) {
-      blocks.push({ kind: 'module', module: m, View: def.View, size: def.bento })
+      blocks.push({ kind: 'module', module: m, View: def.View, size: bentoSize(def, m) })
     }
   }
   return blocks
@@ -200,9 +201,11 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
     return { key, size: b.size, node }
   })
 
+  const seed = huellaSeed(profile)
+  const huellaCtx = useMemo(() => ({ seed, variant: look.huellaVariant }), [seed, look.huellaVariant])
   const parts: LayoutParts = {
     look,
-    seed: huellaSeed(profile),
+    seed,
     name,
     descriptor,
     bio,
@@ -247,9 +250,11 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
       </header>
 
       <div className="mp-container">
-        <Suspense fallback={<div className="mp-layout-loading" aria-busy="true" />}>
-          <Layout {...parts} />
-        </Suspense>
+        <ProfileHuellaContext.Provider value={huellaCtx}>
+          <Suspense fallback={<div className="mp-layout-loading" aria-busy="true" />}>
+            <Layout {...parts} />
+          </Suspense>
+        </ProfileHuellaContext.Provider>
 
         <footer className="mp-footer">
           <Link to="/" className="mp-footer-brand">mycen</Link> · <Link to="/register">{t.createIdentity}</Link>

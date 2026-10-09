@@ -127,6 +127,21 @@ const de: StudioDict = {
     realReviews: 'Verwende echte Bewertungen deiner Kundschaft.', starsOf: n => `Sterne der Bewertung ${n}`, stars: n => `${n} Sterne`,
     removeReview: n => `Bewertung ${n} entfernen`, reviewName: 'Name', reviewText: 'Bewertung', addReview: 'Bewertung hinzufügen',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: 'Link zum Video oder Song',
+    help: 'Füge einen Link von YouTube, Vimeo, TikTok, Spotify oder SoundCloud ein.',
+    detected: '{provider} erkannt',
+    preview: 'So sieht es in deinem Profil aus. Der Player lädt erst, wenn jemand auf Abspielen tippt.',
+    video: 'Video',
+    music: 'Musik',
+    errors: {
+      empty: 'Füge den Link zum Video oder Song ein.',
+      invalid: 'Diesen Link erkennen wir nicht. Kopiere den vollständigen Link aus der App oder Website (z. B. Teilen → Link kopieren).',
+      unsupported: 'Derzeit lassen sich YouTube, Vimeo, TikTok, Spotify und SoundCloud einbetten. Für andere Seiten nutze ein Link-Modul.',
+      short_link: 'Das ist ein Kurzlink. Öffne ihn und kopiere den vollständigen Link aus der Adressleiste.',
+    },
+  },
   catalog: {
     styleHighlight: 'Hervorgehoben (Akzentfarbe)',
     styleButton: 'Button (Symbol oder Vorschaubild seitlich)', styleCard: 'Karte mit großem Foto',
@@ -146,6 +161,7 @@ const de: StudioDict = {
       testimonials: { label: 'Bewertungen', description: 'Kundenmeinungen und deine Google-Bewertung.' },
       contact_card: { label: 'Kontaktkarte', description: 'Wird unter Teilen eingerichtet.' },
       link_group: { label: 'Linkgruppe', description: 'Mehrere Links unter einem Titel (z. B. Shops, Presse).' },
+      media: { label: 'Video oder Musik', description: 'YouTube, Vimeo, TikTok, Spotify oder SoundCloud – direkt in deinem Profil abspielbar.' },
       project: { label: 'Hervorgehobenes Projekt', description: 'Eines deiner Projekte, mit Titelbild und Link zu seiner Seite.' },
       portfolio: { label: 'Portfolio', description: 'Deine veröffentlichten Projekte im Raster.' },
     },
