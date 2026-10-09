@@ -104,7 +104,8 @@ export interface SpaceVersion {
 
 export type ProfilePatch = Partial<Pick<StudioProfile,
   'display_name' | 'descriptor' | 'bio' | 'avatar_url' | 'cover_url' | 'purpose' | 'status' | 'tags' |
-  'theme' | 'primary_action' | 'contact_card' | 'default_locale' | 'translations' | 'onboarding_step' | 'visibility'>>
+  'theme' | 'primary_action' | 'contact_card' | 'default_locale' | 'translations' | 'onboarding_step' | 'visibility' |
+  'huella_salt' | 'status_text' | 'available'>>
 
 export interface DailyStat {
   day: string

@@ -1,0 +1,71 @@
+/* Apariencia V1 (etapa 06). Las miniaturas y los cielos usan las variables del sistema de diseño (--my-*). */
+
+.st-layouts { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.st-layout-option, .st-mode-option, .st-huella-option {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; text-align: start;
+  border: 1px solid var(--st-border); border-radius: 16px; background: var(--st-bg); color: inherit; font: inherit; cursor: pointer;
+}
+.st-layout-option[aria-checked='true'], .st-mode-option[aria-checked='true'], .st-huella-option[aria-checked='true'],
+.st-chip-option[aria-checked='true'] { border-color: var(--st-text); box-shadow: 0 0 0 1px var(--st-text); }
+.st-layout-name { font-weight: 600; }
+
+/* Miniatura: un celular de 112 × 150 con la composición de cada estructura */
+.st-thumb {
+  position: relative; display: block; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 12px;
+  background: var(--my-stars) 0 0 / 240px 240px repeat, var(--my-sky); background-color: var(--my-bg);
+}
+.st-thumb > span { position: absolute; display: block; }
+.st-thumb-huella { width: 70%; aspect-ratio: 1; left: 15%; top: 8%; }
+.st-thumb-card { display: none !important; }
+.st-thumb-name { left: 22%; right: 22%; top: 58%; height: 6%; border-radius: 4px; background: var(--my-text); opacity: 0.85; }
+.st-thumb-action { left: 14%; right: 14%; top: 70%; height: 9%; border-radius: 6px; background: var(--my-accent); }
+.st-thumb-row { left: 14%; right: 14%; height: 6%; border-radius: 5px; background: var(--my-glass-strong); border: 1px solid var(--my-border); }
+.st-thumb-row:nth-of-type(5) { top: 83%; }
+.st-thumb-row:nth-of-type(6) { top: 92%; }
+
+.st-thumb-credencial .st-thumb-card { display: block !important; left: 10%; right: 10%; top: 8%; height: 46%; border-radius: 10px;
+  background: var(--my-glass-strong); border: 1px solid var(--my-border); }
+.st-thumb-credencial .st-thumb-huella { width: 46%; left: auto; right: 4%; top: 4%; }
+.st-thumb-credencial .st-thumb-name { left: 18%; right: 40%; top: 40%; }
+
+.st-thumb-portada .st-thumb-huella { width: 110%; left: -5%; top: -6%; }
+.st-thumb-portada .st-thumb-name { left: 14%; right: 30%; top: 62%; height: 8%; }
+.st-thumb-portada .st-thumb-row { display: none !important; }
+.st-thumb-portada .st-thumb-action { top: 76%; }
+
+.st-thumb-editorial .st-thumb-huella { width: 60%; left: auto; right: -12%; top: 2%; opacity: 0.6; }
+.st-thumb-editorial .st-thumb-name { left: 10%; right: 25%; top: 18%; height: 12%; border-radius: 2px; }
+.st-thumb-editorial .st-thumb-action { top: 62%; }
+.st-thumb-editorial .st-thumb-row { background: transparent; border-width: 0 0 1px; border-radius: 0; }
+
+.st-thumb-bento .st-thumb-card { display: block !important; left: 8%; right: 8%; top: 6%; height: 30%; border-radius: 9px;
+  background: var(--my-glass-strong); border: 1px solid var(--my-border); }
+.st-thumb-bento .st-thumb-huella { width: 40%; left: auto; right: 6%; top: 10%; }
+.st-thumb-bento .st-thumb-name { left: 14%; right: 50%; top: 16%; }
+.st-thumb-bento .st-thumb-action { left: 8%; right: 8%; top: 40%; }
+.st-thumb-bento .st-thumb-row { display: none !important; }
+.st-thumb-grid { left: 8%; right: 8%; top: 54%; bottom: 6%; display: grid !important; grid-template-columns: 1fr 1fr; gap: 6%; }
+.st-thumb-grid i { border-radius: 7px; background: var(--my-glass-strong); border: 1px solid var(--my-border); }
+.st-thumb-grid i:last-child { grid-column: 1 / -1; }
+
+.st-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.st-mode-option { flex-direction: row; align-items: center; gap: 12px; }
+.st-mode-sky { flex: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--st-border);
+  background: var(--my-sky); background-color: var(--my-bg); }
+
+.st-accent-swatch { width: 44px; height: 44px; }
+
+.st-huellas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.st-huella-option { align-items: center; padding: 8px; font-size: 13px; }
+.st-huella-art { display: block; width: 100%; aspect-ratio: 1; border-radius: 10px; padding: 6px; box-sizing: border-box;
+  background: var(--my-sky); background-color: var(--my-bg); }
+@media (max-width: 420px) { .st-huellas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.st-chip-option { min-height: 44px; padding: 0 16px; border: 1px solid var(--st-border); border-radius: 999px;
+  background: var(--st-bg); color: inherit; font: inherit; cursor: pointer; }
+
+/* La vista previa en vivo ya está al costado en pantallas anchas: acá sólo en las demás */
+.st-appearance-preview { display: block; }
+.st-appearance-preview .st-phone { margin: 0 auto; }
+@media (min-width: 1280px) { .st-appearance-preview { display: none; } }
+.st-swatch[aria-checked='true'] { border-color: var(--st-text); box-shadow: 0 0 0 3px var(--st-bg) inset; }
