@@ -86,6 +86,7 @@ const de: LegalDict = {
         '**Mycen Business:** die Daten deines Unternehmens und was du über deine Kunden und Verkäufe einträgst.',
         '**Besuchsstatistiken:** anonyme Ereignisse (Besuche und Klicks auf deinem Profil) mit einer Kennung, die sich täglich ändert. Wir speichern weder IP-Adressen noch Gerätedaten und zählen keine Bots.',
         '**Meldungen:** Grund und Details der meldenden Person, mit einer täglichen anonymen Kennung gegen Missbrauch.',
+        '**Nachrichten aus dem Kontaktformular:** Name, Kontakt (E-Mail oder WhatsApp) und Nachricht, die eine besuchende Person hinterlässt. Nur die Person, der das Profil gehört, sieht sie in Studio; sie werden weder veröffentlicht noch per E-Mail verschickt. Gegen Missbrauch nutzen wir eine anonyme Kennung, die sich täglich ändert, ohne IP-Adresse oder Gerätedaten.',
         '**Technische Fehler:** Wenn etwas schiefgeht, speichern wir die Fehlermeldung, die Ansicht, die Mycen-Version und den Browser (zum Beispiel „Chrome 128 · Android“), ohne IP oder personenbezogene Daten, um ihn beheben zu können.',
       ] },
     ] },
@@ -121,6 +122,7 @@ const de: LegalDict = {
       { list: [
         'Die Daten deines Kontos, deines Profils und von Life OS, solange du das Konto hast. Löschst du es, löschen wir sie; Sicherungskopien der Dienstleister werden in ihren üblichen Zyklen überschrieben.',
         'Besuchsstatistiken werden zusammengefasst und anonym gespeichert.',
+        'Nachrichten aus dem Kontaktformular, bis die Person, der das Profil gehört, sie löscht oder ihr Konto löscht.',
         'Fehlerprotokolle werden bis zur Behebung gespeichert; die Zählung betroffener Personen 90 Tage.',
         'Was das Gesetz aufzubewahren verlangt (zum Beispiel Rechnungsdaten), für die dort festgelegte Frist.',
       ] },

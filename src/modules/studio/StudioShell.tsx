@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import {
-  BarChart3, Eye, FolderOpen, Home, Layers, LayoutGrid, LogOut, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound,
-} from 'lucide-react'
+import { BarChart3, Eye, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { StudioContext, type StudioContextValue } from './StudioContext'
 import {
@@ -23,6 +21,7 @@ import { useAppBackground } from '@/lib/useAppBackground'
 import { useStudioT, type StudioDict } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
 import { langDir } from '@/i18n/app/languages'
+import { useUnreadMessages } from './lib/useUnreadMessages'
 import './studio.css'
 
 type NavKey = keyof StudioDict['nav']
@@ -39,6 +38,7 @@ const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean; deskto
   { to: '/studio/projects',   label: 'projects',   icon: FolderOpen },
   { to: '/studio/appearance', label: 'appearance', icon: Palette },
   { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
+  { to: '/studio/messages',   label: 'messages',   icon: Inbox },
   { to: '/studio/analytics',  label: 'analytics',  icon: BarChart3 },
   { to: '/studio/settings',   label: 'settings',   icon: Settings },
   { to: '/studio/spaces',     label: 'spaces',     icon: Layers },
@@ -137,6 +137,14 @@ export function StudioShell() {
   return <StudioReady key={load.profile.id} userId={user.id} initial={load} switchSpace={switchSpace} />
 }
 
+/** Contador de mensajes sin leer junto a "Mensajes" (o "Más" en el celular) */
+function UnreadBadge({ count, label }: { count: number; label: string }) {
+  if (!count) return null
+  return (
+    <span className="st-unread" aria-label={label.replace('{n}', String(count))}>{count > 99 ? '99+' : count}</span>
+  )
+}
+
 function Centered({ children }: { children: React.ReactNode }) {
   const dir = langDir(useAppLang(s => s.lang))
   return <div className="st-root" data-scroll-root dir={dir}><div className="st-center">{children}</div></div>
@@ -174,6 +182,8 @@ function StudioReady({ userId, initial, switchSpace }: {
   const location = useLocation()
   const signOut = useAuthStore(s => s.signOut)
   const t = useStudioT()
+  // Mensajes sin leer del formulario de contacto (V1 · etapa 05): en la navegación y en el Inicio
+  const { count: unread } = useUnreadMessages()
   const dir = langDir(useAppLang(s => s.lang))
 
   const flush = useCallback(async () => {
@@ -382,6 +392,7 @@ function StudioReady({ userId, initial, switchSpace }: {
             {NAV.map(item => (
               <NavLink key={item.to} to={item.to} end={item.end} className={`st-nav-item${item.desktopOnly ? ' st-desktop-only' : ''}`}>
                 <item.icon size={18} aria-hidden="true" /> {t.nav[item.label]}
+                {item.label === 'messages' && <UnreadBadge count={unread} label={t.messages.unread} />}
               </NavLink>
             ))}
             <div className="st-sidebar-footer">
@@ -419,9 +430,12 @@ function StudioReady({ userId, initial, switchSpace }: {
         {/* En un portal a <body>: ningún contenedor puede alterar su position: fixed */}
         {createPortal(<nav className="st-bottom-nav" aria-label="Studio" dir={dir}>
           {MOBILE_NAV.map(item => (
-            <NavLink key={item.to} to={item.to} end={item.end} aria-label={t.nav[item.label]} title={t.nav[item.label]}>
+            <NavLink key={item.to} to={item.to} end={item.end} title={t.nav[item.label]}
+              aria-label={item.label === 'more' && unread ? `${t.nav.more}, ${t.messages.unread.replace('{n}', String(unread))}` : t.nav[item.label]}>
               <item.icon size={21} aria-hidden="true" />
               <span className="st-nav-label">{t.nav[item.label]}</span>
+              {/* En el celular, Mensajes está en "Más": el contador va ahí */}
+              {item.label === 'more' && <UnreadBadge count={unread} label={t.messages.unread} />}
             </NavLink>
           ))}
         </nav>, document.body)}

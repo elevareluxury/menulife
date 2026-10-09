@@ -77,3 +77,18 @@ export async function reportProfile(username: string, reason: string, details: s
   if (error) throw new Error(error.message)
   return data as ReportResult
 }
+
+/** Respuesta de submit_profile_message (V1 · etapa 05) */
+export type MessageResult = 'ok' | 'invalid' | 'too_many_links' | 'rate_limited' | 'not_found'
+
+/** Formulario de contacto: el mensaje queda en la bandeja de Studio del dueño (no se manda ningún email). */
+export async function submitProfileMessage(handle: string, input: {
+  name: string; contact: string; message: string; trap: string; elapsedMs: number
+}): Promise<MessageResult> {
+  const { data, error } = await rpc('submit_profile_message', {
+    p_handle: handle, p_name: input.name, p_contact: input.contact, p_message: input.message,
+    p_trap: input.trap || null, p_elapsed_ms: Math.round(input.elapsedMs),
+  })
+  if (error) throw new Error(error.message)
+  return data as MessageResult
+}

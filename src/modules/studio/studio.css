@@ -545,3 +545,23 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 }
 .st-inspector-foot [role='status'] { margin-inline-end: auto; }
 .st-inspector-empty { text-align: center; padding: 32px 8px; }
+
+/* ── Mensajes del formulario de contacto (V1 · etapa 05) ── */
+.st-unread {
+  display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; margin-inline-start: auto;
+  border-radius: 999px; background: var(--st-text); color: var(--st-bg); font-size: 11px; font-weight: 700; line-height: 1;
+}
+.st-bottom-nav a { position: relative; }
+.st-bottom-nav .st-unread { position: absolute; top: 4px; inset-inline-end: calc(50% - 22px); margin: 0; }
+.st-messages { list-style: none; margin: 0; padding: 0; }
+.st-message + .st-message { border-top: 1px solid var(--st-border); }
+.st-message-head {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; min-height: 56px; padding: 12px 10px;
+  border: 0; background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; border-radius: 10px;
+}
+.st-message-head:hover { background: var(--st-surface-2); }
+.st-message-dot { flex: none; width: 9px; height: 9px; margin-top: 7px; border-radius: 50%; background: var(--st-text); }
+.st-message-meta { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.st-message-snippet { flex-basis: 100%; color: var(--st-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st-message.is-unread .st-message-snippet { color: var(--st-text); }
+.st-message-body { padding: 0 10px 14px 29px; }

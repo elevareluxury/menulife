@@ -367,6 +367,15 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       }),
       summary: x => sm.links(count(x.items)),
     },
+    // V1 · etapa 05: formulario de contacto (los mensajes llegan a Studio → Mensajes; no se manda email)
+    contact_form: {
+      addable: true,
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80, placeholder: t.messages.titlePlaceholder },
+        { key: 'intro', label: t.messages.intro, kind: 'textarea', translatable: true, maxLength: 200, placeholder: t.messages.introPlaceholder },
+      ],
+      summary: () => t.messages.moduleSummary,
+    },
     // V1 · etapa 04: video y música integrados (fachada en la página; el reproductor se carga al tocar)
     media: {
       addable: true,

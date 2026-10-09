@@ -86,6 +86,7 @@ const pt: LegalDict = {
         '**Mycen Business:** os dados do seu negócio e o que você cadastrar sobre seus clientes e vendas.',
         '**Estatísticas de visitas:** eventos anônimos (visitas e cliques no seu perfil) com um identificador que muda todos os dias. Não guardamos endereços IP nem dados do dispositivo, e não contamos robôs.',
         '**Denúncias:** o motivo e o detalhe escritos por quem denuncia, com um identificador anônimo diário para evitar abusos.',
+        '**Mensagens do formulário de contato:** o nome, o contato (e-mail ou WhatsApp) e a mensagem que um visitante deixa. Só a pessoa dona do perfil as vê, no Studio; não são publicadas nem enviadas por e-mail. Para evitar abusos usamos um identificador anônimo que muda todos os dias, sem IP nem dados do dispositivo.',
         '**Erros técnicos:** quando algo falha, guardamos a mensagem de erro, a tela, a versão do Mycen e o navegador (por exemplo, "Chrome 128 · Android"), sem IP nem dados pessoais, para poder corrigir.',
       ] },
     ] },
@@ -121,6 +122,7 @@ const pt: LegalDict = {
       { list: [
         'Os dados da sua conta, do seu perfil e do Life OS, enquanto você tiver a conta. Se você a excluir, apagamos; as cópias de segurança dos fornecedores são sobrescritas em seus ciclos habituais.',
         'As estatísticas de visitas são guardadas agrupadas e anônimas.',
+        'As mensagens do formulário de contato, até que a pessoa dona do perfil as apague ou exclua a conta.',
         'Os registros de erros são guardados até serem resolvidos; a contagem de pessoas afetadas, 90 dias.',
         'O que a lei obrigar a conservar (por exemplo, dados de faturamento), pelo prazo que ela fixar.',
       ] },

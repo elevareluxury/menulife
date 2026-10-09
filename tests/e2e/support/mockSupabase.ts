@@ -72,7 +72,7 @@ export function createState(seed: Partial<MockState['tables']> = {}, usernameHis
   const state: MockState = {
     tables: {
       profiles: [], profile_modules: [], profile_stats_daily: [], profile_versions: [], content_objects: [], content_blocks: [],
-      profile_reports: [], super_admins: [],
+      profile_reports: [], super_admins: [], profile_messages: [],
       ...seed,
     },
     usernameHistory,
@@ -393,6 +393,23 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       return state.trafficSources ?? []
     }
     // ── Moderación (Fase 8) ──
+    // = submit_profile_message (V1 · etapa 05): mismas validaciones; en el mock todos los visitantes son "la misma persona"
+    case 'submit_profile_message': {
+      const { p } = findSpace(state, String(args.p_handle ?? ''))
+      if (!p || p.status !== 'published' || p.visibility === 'private' || spaceSuspended(state, p)) return 'not_found'
+      const snap = publishedSnapshot(state, p)
+      if (!((snap?.modules as Row[] | undefined) ?? []).some(m => m.type === 'contact_form')) return 'not_found'
+      const name = String(args.p_name ?? '').trim(), contact = String(args.p_contact ?? '').trim(), message = String(args.p_message ?? '').trim()
+      if (name.length < 1 || name.length > 80 || contact.length < 3 || contact.length > 120 || message.length < 1 || message.length > 2000) return 'invalid'
+      if ((message.match(/(https?:\/\/|www\.)/gi) ?? []).length > 3) return 'too_many_links'
+      if (String(args.p_trap ?? '').trim() || Number(args.p_elapsed_ms ?? 0) < 3000) return 'ok'
+      if (state.tables.profile_messages.filter(m => m.profile_id === p.id && m.sender_hash === 'mock-visitor').length >= 5) return 'rate_limited'
+      state.tables.profile_messages.push({
+        id: `msg-${Math.random().toString(36).slice(2, 8)}`, profile_id: p.id, name, contact, message,
+        sender_hash: 'mock-visitor', created_at: new Date().toISOString(), read_at: null,
+      })
+      return 'ok'
+    }
     case 'report_profile': {
       const reasons = ['spam', 'scam', 'impersonation', 'hate', 'violence', 'sexual', 'illegal', 'other']
       if (!reasons.includes(String(args.p_reason))) return 'invalid'

@@ -93,6 +93,7 @@ const es = {
         '**Mycen Business:** los datos de tu negocio y los que cargues sobre tus clientes y ventas.',
         '**Estadísticas de visitas:** eventos anónimos (visitas y clicks en tu perfil) con un identificador que cambia todos los días. No guardamos direcciones IP ni datos del dispositivo, y no contamos robots.',
         '**Denuncias:** el motivo y el detalle que escribe quien denuncia, con un identificador anónimo diario para evitar abusos.',
+        '**Mensajes del formulario de contacto:** el nombre, el contacto (email o WhatsApp) y el mensaje que deja un visitante. Los ve sólo la persona dueña del perfil, en Studio; no se publican ni se mandan por email. Para evitar abusos usamos un identificador anónimo que cambia todos los días, sin IP ni datos del dispositivo.',
         '**Errores técnicos:** cuando algo falla, guardamos el mensaje de error, la pantalla, la versión de Mycen y el navegador (por ejemplo, "Chrome 128 · Android"), sin IP ni datos personales, para poder arreglarlo.',
       ] },
     ] },
@@ -128,6 +129,7 @@ const es = {
       { list: [
         'Los datos de tu cuenta, tu perfil y Life OS, mientras tengas la cuenta. Si la eliminás, los borramos; las copias de seguridad de los proveedores se sobrescriben en sus ciclos habituales.',
         'Las estadísticas de visitas se guardan agrupadas y anónimas.',
+        'Los mensajes del formulario de contacto, hasta que la persona dueña del perfil los borra o elimina su cuenta.',
         'Los registros de errores se guardan hasta que se resuelven; el conteo de personas afectadas, 90 días.',
         'Lo que la ley obligue a conservar (por ejemplo, datos de facturación), por el plazo que fije.',
       ] },

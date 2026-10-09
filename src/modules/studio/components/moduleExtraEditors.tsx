@@ -13,7 +13,7 @@ import { useAppLang } from '@/i18n/app/store'
 import { inspectMediaUrl, MEDIA_PROVIDER_NAME } from '@/modules/profile/lib/media'
 import { lookVars, profileLook } from '@/modules/profile/lib/profileLook'
 import { MediaModule } from '@/modules/profile/components/MediaModule'
-import { ProfileHuellaContext } from '@/modules/profile/components/profileLookContext'
+import { ProfileModuleContext } from '@/modules/profile/components/profileModuleContext'
 import '@/modules/profile/profile.css'
 import '@/modules/profile/layouts/layouts.css'
 
@@ -326,10 +326,10 @@ export function MediaUrlEditor({ value: url, onChange }: ExtraEditorProps<string
           {/* Vista previa de la fachada con el tema y la huella del perfil (no carga nada del proveedor) */}
           <div className="mp-root my-profile st-media-preview" data-mycen-theme={look.mode} data-mycen-accent={look.accent}
             style={{ ...lookVars(look), minHeight: 0, padding: 12, borderRadius: 16 }} inert>
-            <ProfileHuellaContext.Provider value={{ seed: huellaSeed(profile), variant: look.huellaVariant }}>
+            <ProfileModuleContext.Provider value={{ seed: huellaSeed(profile), variant: look.huellaVariant, handle: '', preview: true }}>
               <MediaModule module={{ id: 'preview', type: 'media', title: null, content: { url }, config: {}, translations: {} }}
                 lang={lang} onAction={() => undefined} />
-            </ProfileHuellaContext.Provider>
+            </ProfileModuleContext.Provider>
           </div>
           <p className="st-help" style={{ margin: 0 }}>{t.preview}</p>
         </div>
