@@ -24,7 +24,8 @@ for m in \
   20261014000001_launch_errors \
   20261015000001_v1_profile_look \
   20261016000001_v1_media_module \
-  20261017000001_v1_profile_messages; do
+  20261017000001_v1_profile_messages \
+  20261018000001_v1_referrals; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

@@ -10,7 +10,7 @@ import { isExternal, safeHref } from '../lib/safeUrl'
 import { isOpenNow } from '../lib/schedule'
 import { downloadVCard } from '../lib/vcard'
 import { lookVars, profileLook, type ProfileLayout } from '../lib/profileLook'
-import { profileHandle, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
+import { profileHandle, signupLink, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
 import { bentoSize, publicModuleDef, type BentoSize, type GroupProps } from './moduleRegistry'
 import { ProfileModuleContext } from './profileModuleContext'
 import type { ModuleProps } from './ProfileModules'
@@ -258,7 +258,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
         </ProfileModuleContext.Provider>
 
         <footer className="mp-footer">
-          <Link to="/" className="mp-footer-brand">mycen</Link> · <Link to="/register">{t.createIdentity}</Link>
+          <Link to="/" className="mp-footer-brand">mycen</Link> · <Link to={signupLink(handle, profile.purpose)}>{t.createIdentity}</Link>
           {!preview && !profile.is_owner && profile.status === 'published' && (
             <div><ReportButton username={profileHandle(profile)} lang={lang} /></div>
           )}

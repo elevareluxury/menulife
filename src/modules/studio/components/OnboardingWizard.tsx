@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useEverywhereT } from '@/i18n/app/share/everywhere'
 import { ArrowLeft, Briefcase, Check, Copy, Palette, Share2, Store, UserRound } from 'lucide-react'
 import { ProfileView } from '@/modules/profile/components/ProfileView'
 import { Huella } from '@/design/components/Huella'
 import { huellaSeed } from '@/lib/huella'
 import { profileLook, type ProfileLayout } from '@/modules/profile/lib/profileLook'
-import { createModule, createProfile, friendlyError, loadProfile, publishSpace, updateProfile, uploadMedia } from '../lib/studioApi'
+import { createModule, createProfile, friendlyError, loadProfile, publishSpace, recordReferral, updateProfile, uploadMedia } from '../lib/studioApi'
+import type { Referral } from '@/lib/referral'
 import { socialUrl } from '../lib/moduleCatalog'
 import { toPublicProfile, publicBaseUrl } from '../lib/preview'
 import { normalizeUsername, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
@@ -34,6 +37,11 @@ const PURPOSES: { value: Purpose; icon: typeof UserRound; layout: ProfileLayout 
   { value: 'business', icon: Store, layout: 'bento' },
 ]
 
+/** Propósito del perfil que trajo a la persona (pie "Creá tu identidad") → la opción del onboarding */
+const REFERRAL_PURPOSE: Record<string, Purpose> = {
+  personal: 'personal', creator: 'creator', artist: 'creator', professional: 'professional', business: 'business', brand: 'business',
+}
+
 interface Draft { name?: string; username?: string; purpose?: Purpose }
 
 function readDraft(): Draft {
@@ -46,24 +54,29 @@ function writeDraft(d: Draft) {
 /** Paso desde donde se retoma un onboarding a medio hacer */
 const resumeStep = (p: StudioProfile | null | undefined) => (!p ? 1 : (p.onboarding_step ?? 3) >= 4 ? 6 : 4)
 
-export function OnboardingWizard({ userId, initialProfile, initialModules = [], suggestedName, onDone }: {
+export function OnboardingWizard({ userId, initialProfile, initialModules = [], suggestedName, referral, onDone }: {
   userId: string
   /** Perfil ya creado (se retoma) */
   initialProfile?: StudioProfile | null
   initialModules?: StudioModule[]
   suggestedName?: string
+  /** Llegó desde el pie de un perfil (V1 · etapa 08): preselecciona el tipo y se atribuye al crear el perfil */
+  referral?: Referral | null
   onDone: (profile: StudioProfile, modules: StudioModule[]) => void
 }) {
   const draft = readDraft()
   const t = useStudioT()
   const w = t.welcome
+  const everywhere = useEverywhereT()
+  const navigate = useNavigate()
   const lang = useAppLang(st => st.lang)
   const [step, setStep] = useState(() => resumeStep(initialProfile))
   const [name, setName] = useState(initialProfile?.display_name ?? draft.name ?? suggestedName ?? '')
   const [username, setUsername] = useState(initialProfile?.username ?? draft.username ?? '')
   const [touchedUsername, setTouchedUsername] = useState(!!draft.username)
   const [purpose, setPurpose] = useState<Purpose | undefined>(
-    (PURPOSES.some(p => p.value === initialProfile?.purpose) ? initialProfile?.purpose as Purpose : undefined) ?? draft.purpose)
+    (PURPOSES.some(p => p.value === initialProfile?.purpose) ? initialProfile?.purpose as Purpose : undefined) ?? draft.purpose
+    ?? (referral?.purpose ? REFERRAL_PURPOSE[referral.purpose] : undefined))
   const [profile, setProfile] = useState<StudioProfile | null>(initialProfile ?? null)
   const [modules, setModules] = useState<StudioModule[]>(initialModules)
   const [whatsapp, setWhatsapp] = useState('')
@@ -108,6 +121,8 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
           const form = await createModule({ profile_id: created.id, type: 'contact_form', title: w.formTitle, content: {}, translations: {}, position: 100 })
           setModules([form])
           setProfile(created)
+          // Atribución a quien lo trajo: si falla, el onboarding sigue igual
+          if (referral) void recordReferral(referral).catch(() => undefined)
           try { localStorage.removeItem(DRAFT_KEY) } catch { /* noop */ }
         }
         setStep(4)
@@ -249,6 +264,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
                     <Button onClick={() => { void share() }}><Share2 size={16} aria-hidden="true" /> {w.share}</Button>
                   </div>
                   <span role="status" className="st-sr-only">{copied ? w.copied : ''}</span>
+                  <Button onClick={() => { onDone(profile, modules); navigate('/studio/everywhere') }}>{everywhere.title}</Button>
                   <Button variant="ghost" onClick={() => onDone(profile, modules)}>{w.goStudio}</Button>
                 </>
               ) : (

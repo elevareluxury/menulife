@@ -1,32 +1,24 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Check, Circle, Copy, ExternalLink, Inbox, PenLine } from 'lucide-react'
+import { Check, Circle, Copy, ExternalLink, Globe2, Inbox, PenLine } from 'lucide-react'
 import { useStudio } from '../StudioContext'
 import { useUnreadMessages } from '../lib/useUnreadMessages'
-import { loadStats } from '../lib/studioApi'
-import type { DailyStat } from '../lib/studioTypes'
+import { WeekCard } from '../components/WeekCard'
 import { Button, PageHeader } from '../components/ui'
 import { StatusPill } from '../components/shared'
 import { useCopy } from '../lib/useCopy'
 import { useStudioT } from '@/i18n/app/studio'
+import { useEverywhereT } from '@/i18n/app/share/everywhere'
 
 export function OverviewPage() {
   const { profile, modules, publicUrl, publish, publishing } = useStudio()
-  const [stats, setStats] = useState<DailyStat[] | null | 'error'>(null)
   const { copied, copy } = useCopy()
   const t = useStudioT()
   const o = t.overview
+  const everywhere = useEverywhereT()
   // V1 · etapa 05: mensajes sin leer del formulario de contacto
   const { count: unread } = useUnreadMessages()
   const hasForm = modules.some(m => m.type === 'contact_form' && !m.deleted_at)
 
-  useEffect(() => {
-    let cancelled = false
-    loadStats(profile.id, 30)
-      .then(s => { if (!cancelled) setStats(s) })
-      .catch(() => { if (!cancelled) setStats('error') })
-    return () => { cancelled = true }
-  }, [profile.id])
 
   const activeModules = modules.filter(m => m.visibility === 'active')
   const checklist = [
@@ -37,10 +29,6 @@ export function OverviewPage() {
     { done: activeModules.length > 0, label: o.checkModule, to: '/studio/modules' },
   ]
   const pendingItems = checklist.filter(c => !c.done)
-  const views = Array.isArray(stats) ? stats.filter(s => s.event_type === 'view').reduce((a, s) => a + s.events, 0) : 0
-  const actions = Array.isArray(stats)
-    ? stats.filter(s => s.event_type === 'module_click' || s.event_type === 'primary_action_click').reduce((a, s) => a + s.events, 0)
-    : 0
   const isPublished = profile.status === 'published'
 
   return (
@@ -74,6 +62,9 @@ export function OverviewPage() {
           <Link to="/studio/identity" className="st-btn st-btn-secondary st-btn-sm"><PenLine size={15} aria-hidden="true" /> {o.editIdentity}</Link>
           <Link to="/studio/exchange" className="st-btn st-btn-ghost st-btn-sm">{o.shareQr}</Link>
         </div>
+        <div className="st-row" style={{ marginTop: 8 }}>
+          <Link to="/studio/everywhere" className="st-btn st-btn-secondary st-btn-sm"><Globe2 size={15} aria-hidden="true" /> {everywhere.title}</Link>
+        </div>
       </section>
 
       {(unread > 0 || hasForm) && (
@@ -86,26 +77,7 @@ export function OverviewPage() {
         </section>
       )}
 
-      <section className="st-card">
-        <h2 className="st-card-title">{o.last30}</h2>
-        {stats === null && <p className="st-help">{t.common.loading}</p>}
-        {stats === 'error' && <p className="st-error">{o.statsError}</p>}
-        {Array.isArray(stats) && (views === 0 && actions === 0
-          ? (
-            <div className="st-empty">
-              <strong>{o.noVisits}</strong>
-              {isPublished ? o.noVisitsPublished : o.noVisitsDraft}
-            </div>
-          ) : (
-            <div className="st-metrics">
-              <div className="st-metric"><b>{views}</b><span>{o.visits}</span></div>
-              <div className="st-metric"><b>{actions}</b><span>{o.actions}</span></div>
-            </div>
-          ))}
-        {Array.isArray(stats) && (views > 0 || actions > 0) && (
-          <Link to="/studio/analytics" className="st-btn st-btn-ghost st-btn-sm" style={{ marginTop: 10 }}>{o.seeAnalytics}</Link>
-        )}
-      </section>
+      <WeekCard />
 
       {pendingItems.length > 0 && (
         <section className="st-card">

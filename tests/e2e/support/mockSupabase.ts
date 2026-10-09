@@ -392,6 +392,17 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       if (!p || !isOwner) throw new Error('NOT_OWNER')
       return state.trafficSources ?? []
     }
+    // = record_referral (V1 · etapa 08): una por cuenta, sólo a perfiles publicados de otra persona
+    case 'record_referral': {
+      if (!isOwner) throw new Error('NOT_SIGNED_IN')
+      const referrals = (state.tables.referrals ??= [])
+      if (referrals.length) return 'already'
+      const { p } = findSpace(state, String(args.p_ref ?? ''))
+      if (!p || p.status !== 'published' || p.visibility === 'private' || spaceSuspended(state, p)) return 'not_found'
+      if (p.user_id === OWNER_ID) return 'self'
+      referrals.push({ user_id: OWNER_ID, referred_by: p.id, purpose: args.p_purpose ?? null })
+      return 'ok'
+    }
     // ── Moderación (Fase 8) ──
     // = submit_profile_message (V1 · etapa 05): mismas validaciones; en el mock todos los visitantes son "la misma persona"
     case 'submit_profile_message': {
@@ -538,12 +549,13 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
 
 // ── Instalación en el contexto del navegador ────────────────────────────────
 
-export async function installSupabaseMock(context: BrowserContext, state: MockState, opts: { signedIn?: boolean } = {}) {
+export async function installSupabaseMock(context: BrowserContext, state: MockState,
+  opts: { signedIn?: boolean; userMetadata?: Record<string, unknown> } = {}) {
   if (opts.signedIn) {
     const session = {
       access_token: 'mock-access-token', refresh_token: 'mock-refresh', token_type: 'bearer', expires_in: 3600,
       expires_at: Math.floor(Date.now() / 1000) + 86_400,
-      user: { id: OWNER_ID, email: 'ana@example.com', aud: 'authenticated', role: 'authenticated', user_metadata: { name: 'Ana Pérez' } },
+      user: { id: OWNER_ID, email: 'ana@example.com', aud: 'authenticated', role: 'authenticated', user_metadata: { name: 'Ana Pérez', ...opts.userMetadata } },
     }
     // supabase-js guarda la sesión en sb-<ref>-auth-token (ref = primer segmento del host)
     await context.addInitScript(s => localStorage.setItem('sb-mock-auth-token', s), JSON.stringify(session))

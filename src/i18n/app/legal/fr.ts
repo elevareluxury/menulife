@@ -87,6 +87,7 @@ const fr: LegalDict = {
         '**Statistiques de visites :** événements anonymes (visites et clics sur votre profil) avec un identifiant qui change chaque jour. Nous ne conservons ni adresses IP ni données de l’appareil, et nous ne comptons pas les robots.',
         '**Signalements :** le motif et le détail écrits par la personne qui signale, avec un identifiant anonyme quotidien pour éviter les abus.',
         '**Messages du formulaire de contact :** le nom, le contact (e-mail ou WhatsApp) et le message laissés par un visiteur. Seule la personne propriétaire du profil les voit, dans Studio ; ils ne sont ni publiés ni envoyés par e-mail. Pour éviter les abus, nous utilisons un identifiant anonyme qui change chaque jour, sans IP ni données de l’appareil.',
+        '**Invitations :** si tu crées ton compte depuis « Crée ton identité » sur le profil de quelqu’un d’autre, nous enregistrons quel profil t’a amené et son type, pour comprendre comment Mycen grandit. Cette personne ne voit pas tes données.',
         '**Erreurs techniques :** quand quelque chose échoue, nous conservons le message d’erreur, l’écran, la version de Mycen et le navigateur (par exemple « Chrome 128 · Android »), sans IP ni données personnelles, pour pouvoir corriger.',
       ] },
     ] },

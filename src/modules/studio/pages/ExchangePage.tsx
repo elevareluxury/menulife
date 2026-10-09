@@ -1,6 +1,6 @@
 import { useRef } from 'react'
-import { QRCodeSVG } from 'qrcode.react'
-import { Check, Copy, Download, ExternalLink, Share2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Check, Copy, Download, ExternalLink, Globe2, Share2 } from 'lucide-react'
 import { useStudio } from '../StudioContext'
 import type { ContactCardSettings } from '../lib/studioTypes'
 import { useCopy } from '../lib/useCopy'
@@ -8,19 +8,25 @@ import { Button, PageHeader, TextField, Toggle } from '../components/ui'
 import { ProfileSaveIndicator } from '../components/shared'
 import { IdentityCardSection, IntroSection } from '../components/ConnectSections'
 import { useStudioT } from '@/i18n/app/studio'
+import { huellaSeed } from '@/lib/huella'
+import { QR_COLORS } from '@/design/themes'
+import { profileLook } from '@/modules/profile/lib/profileLook'
+import { HuellaQr } from '../components/HuellaQr'
+import { HUELLA_QR_SIZE } from '../lib/huellaQr'
+import { useEverywhereT } from '@/i18n/app/share/everywhere'
 
-function svgToPng(svg: SVGSVGElement, size: number): Promise<string> {
+function svgToPng(svg: SVGSVGElement, width: number, height: number): Promise<string> {
   return new Promise((resolve, reject) => {
     const data = new XMLSerializer().serializeToString(svg)
     const img = new Image()
     img.onload = () => {
       const canvas = document.createElement('canvas')
-      canvas.width = size; canvas.height = size
+      canvas.width = width; canvas.height = height
       const ctx = canvas.getContext('2d')
       if (!ctx) { reject(new Error('canvas')); return }
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, size, size)
-      ctx.drawImage(img, 0, 0, size, size)
+      ctx.fillStyle = QR_COLORS.bg
+      ctx.fillRect(0, 0, width, height)
+      ctx.drawImage(img, 0, 0, width, height)
       resolve(canvas.toDataURL('image/png'))
     }
     img.onerror = reject
@@ -39,7 +45,9 @@ function download(href: string, filename: string) {
 
 export function ExchangePage() {
   const { profile, publicUrl, patchProfile, handle } = useStudio()
-  const qrRef = useRef<HTMLDivElement>(null)
+  const qrRef = useRef<SVGSVGElement>(null)
+  const everywhere = useEverywhereT()
+  const look = profileLook(profile.theme)
   const { copied, copy } = useCopy()
   const x = useStudioT().exchange
   // El QR lleva ?src=qr para medir cuántas visitas llegan por QR
@@ -57,12 +65,13 @@ export function ExchangePage() {
   }
 
   async function downloadPng() {
-    const svg = qrRef.current?.querySelector('svg')
-    if (svg) download(await svgToPng(svg, 1024), `mycen-${handle.replace('/', '-')}-qr.png`)
+    const svg = qrRef.current
+    // 2× el tamaño de la pieza: nítido para imprimir en tamaño tarjeta
+    if (svg) download(await svgToPng(svg, HUELLA_QR_SIZE.width * 2, HUELLA_QR_SIZE.height * 2), `mycen-${handle.replace('/', '-')}-qr.png`)
   }
 
   function downloadSvg() {
-    const svg = qrRef.current?.querySelector('svg')
+    const svg = qrRef.current
     if (!svg) return
     const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -94,13 +103,15 @@ export function ExchangePage() {
             <ExternalLink size={15} aria-hidden="true" /> {x.openProfile}
           </a>
         </div>
+        <Link to="/studio/everywhere" className="st-btn st-btn-secondary st-btn-sm" style={{ alignSelf: 'flex-start' }}>
+          <Globe2 size={15} aria-hidden="true" /> {everywhere.title}
+        </Link>
       </section>
 
       <section className="st-card st-stack" style={{ alignItems: 'center', textAlign: 'center' }}>
         <h2 className="st-card-title" style={{ margin: 0, alignSelf: 'flex-start' }}>{x.qr}</h2>
-        <div ref={qrRef} style={{ background: '#fff', padding: 16, borderRadius: 16 }}>
-          <QRCodeSVG value={qrUrl} size={200} level="M" marginSize={0} title={x.qrOf(profile.display_name)} />
-        </div>
+        <HuellaQr svgRef={qrRef} url={qrUrl} seed={huellaSeed(profile)} variant={look.huellaVariant} accent={look.accent}
+          label={publicUrl.replace(/^https?:\/\//, '')} title={x.qrOf(profile.display_name)} />
         <p className="st-help" style={{ margin: 0 }}>{x.leadsTo(publicUrl.replace(/^https?:\/\//, ''))}</p>
         <div className="st-row">
           <Button size="sm" onClick={downloadPng}><Download size={15} aria-hidden="true" /> PNG</Button>

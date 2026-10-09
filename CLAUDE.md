@@ -218,6 +218,16 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `THEME_BG`); las `--st-*` de `studio.css` sólo traducen a `--my-*` (estados nuevos `--my-danger/ok/warn`). Barra móvil:
   Inicio, Editar, Mis Spaces, Compartir, Más (la vista previa pasó a "Más"). Mis Spaces explica qué es un Space con
   ejemplos y el link que tendría; un Space nuevo sigue por Apariencia. axe en los dos temas: `studio-theme.spec.ts`.
+- Compartir y crecimiento (etapa 08): `/studio/everywhere` (`EverywherePage`, desde el Inicio, Compartir y "Perfil
+  publicado"): copiar el link y pasos generales por plataforma en un solo archivo `src/i18n/app/share/everywhere.ts`
+  (12 idiomas; cada plataforma copia su link con `?src=`). QR con huella (`HuellaQr`, sólo en Studio): blanco con
+  `QR_COLORS`, corrección H, zona de silencio, usuario debajo; PNG y SVG. Imagen al compartir: `api/og/[slug].tsx`
+  (cielo del tema, huella con `huellaToSvg`, nombre; fuentes en `public/fonts/og/`) y `api/og.ts` la pide con `?v=`
+  (cambia con el aspecto). `profileLook.ts` usa imports relativos porque también lo usa esa función Edge.
+  "Creá tu identidad": `/register?ref=<handle>&tipo=<propósito>` (`signupLink`, `src/lib/referral.ts`) → `user_metadata`
+  → el onboarding preselecciona el tipo y llama a `record_referral` (tabla `referrals`: una por cuenta, sólo perfiles
+  publicados de otra persona). "Tu semana" (`WeekCard`, `lib/weekly.ts`): visitas, acción principal, contactos y
+  mensajes de 7 días y de dónde llegaron; la visita toma `?src=` o `utm_source`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

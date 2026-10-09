@@ -87,6 +87,7 @@ const pt: LegalDict = {
         '**Estatísticas de visitas:** eventos anônimos (visitas e cliques no seu perfil) com um identificador que muda todos os dias. Não guardamos endereços IP nem dados do dispositivo, e não contamos robôs.',
         '**Denúncias:** o motivo e o detalhe escritos por quem denuncia, com um identificador anônimo diário para evitar abusos.',
         '**Mensagens do formulário de contato:** o nome, o contato (e-mail ou WhatsApp) e a mensagem que um visitante deixa. Só a pessoa dona do perfil as vê, no Studio; não são publicadas nem enviadas por e-mail. Para evitar abusos usamos um identificador anônimo que muda todos os dias, sem IP nem dados do dispositivo.',
+        '**Convites:** se você criar sua conta a partir de “Crie sua identidade” no perfil de outra pessoa, guardamos qual perfil trouxe você e o tipo dele, para entender como o Mycen cresce. Essa pessoa não vê seus dados.',
         '**Erros técnicos:** quando algo falha, guardamos a mensagem de erro, a tela, a versão do Mycen e o navegador (por exemplo, "Chrome 128 · Android"), sem IP nem dados pessoais, para poder corrigir.',
       ] },
     ] },
