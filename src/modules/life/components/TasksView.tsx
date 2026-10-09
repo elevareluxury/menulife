@@ -1,7 +1,7 @@
 import { useMemo, useState, type KeyboardEvent } from 'react'
 import {
   Bell, BellRing, CalendarPlus, Check, ChevronLeft, ChevronRight, ListTodo, Pencil, Plus, Star, StarOff, Trash2,
-  CalendarDays, List,
+  CalendarDays, List, Repeat,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { LifeCard, LifeEmptyState, colors, font, radius } from '../design-system'
@@ -9,6 +9,7 @@ import { useGoalOptions, type GoalOption } from '../hooks/useGoalOptions'
 import { localDateKey, useTasks, type LifeTask } from '../hooks/useTasks'
 import { useToday } from '../hooks/useToday'
 import { downloadTaskIcs } from '../lib/ics'
+import { upcomingOccurrences } from '../lib/recurrence'
 import { deleteWithUndo } from '../lib/undo'
 import { TaskSheet } from './TaskSheet'
 import { ActionMenu } from './ActionMenu'
@@ -84,6 +85,16 @@ export function TasksView() {
     tasks.forEach(x => { if (x.due_date) map.set(x.due_date, [...(map.get(x.due_date) ?? []), x]) })
     return map
   }, [tasks])
+  // Próximas repeticiones de las tareas pendientes (V1 · etapa 09): se ven en el calendario, no son tareas todavía
+  const projectedByDay = useMemo(() => {
+    const until = localDateKey(new Date(cursor.y, cursor.m + 1, 0))
+    const map = new Map<string, LifeTask[]>()
+    tasks.forEach(x => {
+      if (x.completed_at || !x.recurrence || !x.due_date) return
+      upcomingOccurrences(x.due_date, x.recurrence, until).forEach(day => map.set(day, [...(map.get(day) ?? []), x]))
+    })
+    return map
+  }, [tasks, cursor])
   const goalsByDay = useMemo(() => {
     const map = new Map<string, GoalOption[]>()
     goals.forEach(g => { if (g.target_date && g.status !== 'completed') map.set(g.target_date, [...(map.get(g.target_date) ?? []), g]) })
@@ -151,6 +162,7 @@ export function TasksView() {
   ]
 
   const dayTasks = byDay.get(selected) ?? []
+  const dayRepeats = projectedByDay.get(selected) ?? []
   const dayGoals = goalsByDay.get(selected) ?? []
 
   return (
@@ -263,12 +275,13 @@ export function TasksView() {
                 if (!date) return <div key={i} />
                 const key = localDateKey(date)
                 const pending = (byDay.get(key) ?? []).filter(x => !x.completed_at).length
+                const repeats = (projectedByDay.get(key) ?? []).length
                 const goalsHere = goalsByDay.get(key) ?? []
                 const isToday = key === todayKey
                 const isSelected = key === selected
                 return (
                   <button key={i} type="button" role="gridcell" aria-selected={isSelected}
-                    aria-label={`${longDate(key, locale)}${pending ? `, ${a.dayTasks(pending)}` : ''}${goalsHere.length ? `, ${a.goalDate}` : ''}`}
+                    aria-label={`${longDate(key, locale)}${pending ? `, ${a.dayTasks(pending)}` : ''}${repeats ? `, ${t.repeat.repeats}` : ''}${goalsHere.length ? `, ${a.goalDate}` : ''}`}
                     onClick={() => setSelected(key)}
                     style={{
                       aspectRatio: '1', minHeight: 40, borderRadius: radius.sm, cursor: 'pointer',
@@ -281,6 +294,7 @@ export function TasksView() {
                     {date.getDate()}
                     <span style={{ display: 'flex', gap: 3, height: 5 }} aria-hidden="true">
                       {pending > 0 && <span style={{ width: 5, height: 5, borderRadius: '50%', background: colors.accent.default }} />}
+                      {repeats > 0 && <span style={{ width: 5, height: 5, borderRadius: '50%', boxSizing: 'border-box', border: `1px solid ${colors.accent.default}` }} />}
                       {goalsHere.slice(0, 2).map(g => <span key={g.id} style={{ width: 5, height: 5, borderRadius: '50%', background: g.color }} />)}
                     </span>
                   </button>
@@ -305,9 +319,21 @@ export function TasksView() {
                 {a.goalTarget} <strong>{g.name}</strong>
               </p>
             ))}
-            {dayTasks.length === 0
+            {dayTasks.length === 0 && dayRepeats.length === 0
               ? <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: 0 }}>{a.noTasks}</p>
+              : dayTasks.length === 0 ? null
               : <TaskList tasks={[...dayTasks].sort((p, q) => Number(!!p.completed_at) - Number(!!q.completed_at) || byTime(p, q))} {...rowProps} />}
+            {dayRepeats.length > 0 && (
+              <ul aria-label={t.repeat.repeats} style={{ listStyle: 'none', margin: dayTasks.length ? '8px 0 0' : 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {dayRepeats.map(x => (
+                  <li key={x.id} style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 32, paddingInlineStart: 10, fontFamily: font, fontSize: '14px', color: colors.text.secondary }}>
+                    <Repeat size={14} aria-label={t.repeat.repeats} style={{ color: colors.accent.default, flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.title}</span>
+                    {x.due_time && <span style={{ fontSize: '11.5px', color: colors.text.tertiary }}>{x.due_time.slice(0, 5)}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
           </LifeCard>
         </>
       )}
@@ -370,11 +396,15 @@ export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete,
                 )}
                 {t.title}
               </span>
-              {(showDate && t.due_date) || t.due_time || t.remind_minutes != null || goal ? (
+              {(showDate && t.due_date) || t.due_time || t.remind_minutes != null || goal || t.recurrence || t.subtasks.length ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary, marginTop: 2 }}>
                   {showDate && t.due_date && <span>{new Date(`${t.due_date}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}</span>}
                   {t.due_time && <span>{t.due_time.slice(0, 5)}</span>}
                   {t.remind_minutes != null && !done && <Bell size={11} aria-label={a.withReminder} />}
+                  {t.recurrence && <Repeat size={11} aria-label={t0.repeat.repeats} />}
+                  {t.subtasks.length > 0 && (
+                    <span>{t0.repeat.progress(t.subtasks.filter(st => st.done).length, t.subtasks.length)}</span>
+                  )}
                   {goal && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: goal.color, flexShrink: 0 }} aria-hidden="true" />{goal.name}

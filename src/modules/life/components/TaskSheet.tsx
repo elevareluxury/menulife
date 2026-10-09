@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
 import { Star } from 'lucide-react'
 import { useGoalOptions } from '../hooks/useGoalOptions'
-import type { LifeTask, TaskFormData } from '../hooks/useTasks'
+import type { LifeTask, Subtask, TaskFormData } from '../hooks/useTasks'
+import { customOf, recurrenceFor, repeatChoiceOf, type CustomRepeat, type RepeatChoice } from '../lib/recurrence'
+import { RepeatField, SubtasksField } from './TaskExtras'
 import { useLifeT } from '@/i18n/app/life'
 
 const REMINDER_OPTIONS = [
@@ -37,6 +39,9 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
   const [remind, setRemind] = useState('')
   const [goalId, setGoalId] = useState('')
   const [focus, setFocus] = useState(false)
+  const [repeat, setRepeat] = useState<RepeatChoice>('none')
+  const [custom, setCustom] = useState<CustomRepeat>({ every: 2, unit: 'days', weekdays: [] })
+  const [subtasks, setSubtasks] = useState<Subtask[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const t = useLifeT()
@@ -53,6 +58,9 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
     setRemind(initial?.remind_minutes != null ? String(initial.remind_minutes) : '')
     setGoalId(initial?.goal_id ?? defaultGoalId ?? '')
     setFocus(initial?.is_focus ?? false)
+    setRepeat(repeatChoiceOf(initial?.recurrence ?? null, initial?.due_date ?? null))
+    setCustom(customOf(initial?.recurrence ?? null, initial?.due_date ?? defaultDate ?? null))
+    setSubtasks(initial?.subtasks ?? [])
     setError('')
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [open, initial, defaultDate, defaultGoalId])
@@ -66,6 +74,8 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
         title, notes, due_date: date || null, due_time: time || null,
         remind_minutes: remind === '' ? null : Number(remind), goal_id: goalId || null,
         is_focus: focus,
+        recurrence: date ? recurrenceFor(repeat, date, custom) : null,
+        subtasks,
       })
       onClose()
     } catch {
@@ -107,6 +117,8 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
             </p>
           )}
         </div>
+        <RepeatField date={date} choice={repeat} onChoice={setRepeat} custom={custom} onCustom={setCustom} />
+        <SubtasksField items={subtasks} onChange={setSubtasks} />
         {activeGoals.length > 0 && (
           <div>
             <label htmlFor="task-goal" style={labelStyle}>{s.goal}</label>

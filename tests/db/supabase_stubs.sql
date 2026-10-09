@@ -28,3 +28,14 @@ grant all on all tables in schema public to anon, authenticated;
 create table public.super_admins (
   id uuid primary key default gen_random_uuid(), user_id uuid not null unique references auth.users(id) on delete cascade,
   email text, created_at timestamptz default now(), updated_at timestamptz default now());
+-- Life OS: Brain (tareas, ideas y notas), como en producción (20260615000001 + 20261005000001)
+create table public.life_brain_items (
+  id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
+  type text not null check (type in ('idea','note','task')), title text not null, content text,
+  is_completed boolean not null default false, is_archived boolean not null default false,
+  created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
+  due_date date, due_time time, remind_minutes integer, reminded_at timestamptz, completed_at timestamptz,
+  goal_id uuid references public.life_goals(id) on delete set null, is_focus boolean not null default false);
+alter table public.life_brain_items enable row level security;
+create policy lbi_owner on public.life_brain_items for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+grant all on public.life_brain_items to authenticated;
