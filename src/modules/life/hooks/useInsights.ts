@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useLocaleStore } from '@/store/localeStore'
 import { computeInsights, type Insight } from '../lib/insights'
-import { shiftDate } from './useHabits'
+import { shiftDate } from '../lib/habitStreak'
 import { useToday } from './useToday'
 
 // Las tablas de Life OS todavía no están en database.types.ts

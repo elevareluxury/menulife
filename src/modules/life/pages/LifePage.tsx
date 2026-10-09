@@ -15,6 +15,8 @@ import { useLifeStore } from '@/store/lifeStore'
 import { useActiveGoals } from '../hooks/useActiveGoals'
 import { useTasks, localDateKey, type LifeTask } from '../hooks/useTasks'
 import { useHabits } from '../hooks/useHabits'
+import { HabitMeta, QuantityButton } from '../components/HabitControls'
+import { useStreakText } from '../hooks/useStreakText'
 import { useMoney } from '../hooks/useMoney'
 import { useToday } from '../hooks/useToday'
 import { getHabitIcon } from '../lib/lifePalette'
@@ -367,7 +369,8 @@ function TodayTasksCard() {
 function TodayHabitsCard() {
   const t = useLifeT()
   const navigate = useNavigate()
-  const { activeHabits, todayHabits, completedToday, error, toggleToday } = useHabits()
+  const { activeHabits, todayHabits, completedToday, error, toggleToday, addToday } = useHabits()
+  const streakText = useStreakText()
 
   return (
     <section style={cardStyle} aria-label={t.day.habitsTitle}>
@@ -397,9 +400,12 @@ function TodayHabitsCard() {
                     display: 'block', fontFamily: font, fontSize: '14px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     color: h.completedToday ? colors.text.secondary : colors.text.primary,
                   }}>{h.name}</span>
-                  {h.streak > 0 && <span style={{ display: 'block', fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary }}>{t.habits.streak(h.streak)}</span>}
+                  <HabitMeta habit={h} />
+                  {h.streak > 0 && <span style={{ display: 'block', fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary }}>{streakText(h)}</span>}
                 </span>
-                <button type="button" role="checkbox" aria-checked={h.completedToday}
+                {h.target_value != null ? (
+                  <QuantityButton habit={h} size={40} onAdd={() => { addToday(h.id, 1).catch(() => toast.error(t.common.saveError)) }} />
+                ) : <button type="button" role="checkbox" aria-checked={h.completedToday}
                   aria-label={h.completedToday ? t.habits.unmarkToday(h.name) : t.habits.markToday(h.name)}
                   onClick={() => { toggleToday(h.id, !h.completedToday).catch(() => toast.error(t.common.saveError)) }}
                   style={{ width: 44, height: 44, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
@@ -411,7 +417,7 @@ function TodayHabitsCard() {
                   }}>
                     {h.completedToday && <Check size={15} strokeWidth={3} style={{ color: '#fff' }} />}
                   </span>
-                </button>
+                </button>}
               </li>
             ))}
           </ul>

@@ -220,6 +220,12 @@ const DEFAULTS: Record<string, Row> = {
   profile_modules: { config: {}, translations: {}, visibility: 'active', deleted_at: null },
   content_objects: { status: 'draft', visibility: 'public', summary: null, cover_url: null, data: {}, translations: {}, published_snapshot: null, published_at: null },
   content_blocks: { data: {}, translations: {}, position: 0 },
+  // Life OS (V1 · etapas 09–10)
+  life_habits: {
+    is_active: true, goal_id: null, target_value: null, unit: null, anchor: null, reminder_time: null, reminder_enabled: false,
+    frequency: { type: 'daily', days: [0, 1, 2, 3, 4, 5, 6] },
+  },
+  life_habit_logs: { value: 1 },
 }
 
 const NON_FILTERS = new Set(['select', 'order', 'limit', 'offset', 'on_conflict', 'columns', 'or'])
@@ -608,7 +614,11 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
       // upsert (Prefer: resolution=merge-duplicates): actualiza la fila con el mismo id en vez de duplicarla
       const merge = (headers['prefer'] ?? '').includes('merge-duplicates')
       const created = list.map(r => {
-        const existing = merge && r.id != null ? rows.find(x => x.id === r.id) : undefined
+        // on_conflict=a,b: la fila con las mismas columnas (por ejemplo habit_id + completed_date); si no, el id
+        const conflict = params.get('on_conflict')?.split(',')
+        const existing = merge
+          ? (conflict ? rows.find(x => conflict.every(c => String(x[c]) === String(r[c]))) : r.id != null ? rows.find(x => x.id === r.id) : undefined)
+          : undefined
         if (existing) return Object.assign(existing, r, { updated_at: now })
         const row: Row = { id: `${table}-${Math.random().toString(36).slice(2, 8)}`, created_at: now, updated_at: now, ...DEFAULTS[table], ...r }
         if (table === 'profiles') {

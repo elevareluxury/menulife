@@ -26,7 +26,8 @@ for m in \
   20261016000001_v1_media_module \
   20261017000001_v1_profile_messages \
   20261018000001_v1_referrals \
-  20261019000001_v1_task_recurrence; do
+  20261019000001_v1_task_recurrence \
+  20261020000001_v1_habits; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

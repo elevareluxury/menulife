@@ -3,46 +3,21 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
 import { useToday } from './useToday'
+import { usePrefs } from '@/lib/prefs'
+import {
+  calculateStreak, doneInWeek, frequencyOf, isDone, isScheduledOn, shiftDate, type HabitFrequency,
+} from '../lib/habitStreak'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
-// ── Fechas locales ───────────────────────────────────────────────────────────
+// ── Fechas locales y rachas (V1 · etapa 10: lib/habitStreak.ts, funciones puras) ─────────────────────
 
-export function shiftDate(dateStr: string, days: number): string {
-  const [y, m, day] = dateStr.split('-').map(Number)
-  const d = new Date(y, m - 1, day + days)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-function weekdayOf(dateStr: string): number {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  return new Date(y, m - 1, d).getDay()
-}
-
-/**
- * Racha según los días programados: los días que no tocan no la cortan.
- * Hoy, si todavía no se hizo, tampoco la corta (el día no terminó).
- */
-export function calculateStreak(logSet: Set<string>, scheduled: number[], today: string): number {
-  const days = scheduled.length ? scheduled : [0, 1, 2, 3, 4, 5, 6]
-  let streak = 0
-  let cur = today
-  for (let i = 0; i < 400; i++) {
-    const isScheduled = days.includes(weekdayOf(cur))
-    if (logSet.has(cur)) streak++
-    else if (isScheduled && cur !== today) break
-    cur = shiftDate(cur, -1)
-  }
-  return streak
-}
+export { shiftDate }
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
-export interface HabitFrequency {
-  type: 'daily' | 'weekly'
-  days: number[]  // 0=domingo … 6=sábado
-}
+export type { HabitFrequency }
 
 export interface Habit {
   id: string
@@ -53,10 +28,23 @@ export interface Habit {
   is_active: boolean
   sort_order: number
   goal_id?: string | null
+  /** Hábito con cantidad (null = sí/no) */
+  target_value: number | null
+  unit: string | null
+  /** "Después de…" */
+  anchor: string | null
+  reminder_time: string | null
+  reminder_enabled: boolean
   // calculados
   completedToday: boolean
+  /** Lo hecho hoy (con cantidad) */
+  todayValue: number
+  /** Racha que perdona: días, o semanas si es "X veces por semana" */
   streak: number
-  week: { date: string; done: boolean; scheduled: boolean }[]   // últimos 7 días, del más viejo al de hoy
+  streakUnit: 'days' | 'weeks'
+  /** "X veces por semana": días cumplidos en esta semana */
+  weekCount: number
+  week: { date: string; done: boolean; scheduled: boolean; value: number }[]   // últimos 7 días, del más viejo al de hoy
   scheduledToday: boolean
 }
 
@@ -66,9 +54,21 @@ export interface HabitFormData {
   color: string
   frequency: HabitFrequency
   goal_id?: string | null
+  target_value?: number | null
+  unit?: string | null
+  anchor?: string | null
+  reminder_time?: string | null
+  reminder_enabled?: boolean
 }
 
-type RawHabit = Omit<Habit, 'completedToday' | 'streak' | 'week' | 'scheduledToday'>
+type RawHabit = Omit<Habit, 'completedToday' | 'todayValue' | 'streak' | 'streakUnit' | 'weekCount' | 'week' | 'scheduledToday'>
+
+/** Días cumplidos: con cantidad, los que llegaron a la meta; sin cantidad, los que tienen registro. */
+function doneSet(values: Map<string, number>, target: number | null): Set<string> {
+  const out = new Set<string>()
+  values.forEach((v, d) => { if (isDone(v, target)) out.add(d) })
+  return out
+}
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
@@ -76,7 +76,9 @@ export function useHabits() {
   const { user } = useAuthStore()
   const today = useToday()
   const [rawHabits, setRawHabits] = useState<RawHabit[]>([])
-  const [logMap, setLogMap] = useState<Map<string, Set<string>>>(new Map())
+  const weekStart = usePrefs(st => st.week_start)
+  // habit_id → (fecha → valor del día)
+  const [logMap, setLogMap] = useState<Map<string, Map<string, number>>>(new Map())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -85,15 +87,19 @@ export function useHabits() {
     const since = shiftDate(today, -400)  // historial suficiente para rachas largas
     const [habitsRes, logsRes] = await Promise.all([
       db.from('life_habits').select('*').eq('user_id', user.id).order('sort_order'),
-      db.from('life_habit_logs').select('habit_id,completed_date').eq('user_id', user.id).gte('completed_date', since),
+      db.from('life_habit_logs').select('habit_id,completed_date,value').eq('user_id', user.id).gte('completed_date', since),
     ])
     if (habitsRes.error || logsRes.error) { setError(true); setLoading(false); return }
     setError(false)
-    setRawHabits(habitsRes.data ?? [])
-    const map = new Map<string, Set<string>>()
+    setRawHabits(((habitsRes.data ?? []) as RawHabit[]).map(h => ({
+      ...h, frequency: frequencyOf(h.frequency),
+      target_value: h.target_value != null ? Number(h.target_value) : null,
+      reminder_enabled: !!h.reminder_enabled,
+    })))
+    const map = new Map<string, Map<string, number>>()
     for (const log of (logsRes.data ?? [])) {
-      if (!map.has(log.habit_id)) map.set(log.habit_id, new Set())
-      map.get(log.habit_id)!.add(log.completed_date)
+      if (!map.has(log.habit_id)) map.set(log.habit_id, new Map())
+      map.get(log.habit_id)!.set(log.completed_date, Number(log.value ?? 1))
     }
     setLogMap(map)
     setLoading(false)
@@ -106,21 +112,23 @@ export function useHabits() {
   }, [load])
 
   const habits: Habit[] = useMemo(() => rawHabits.map(h => {
-    const logs = logMap.get(h.id) ?? new Set<string>()
-    const freq = (h.frequency ?? { type: 'daily', days: [0, 1, 2, 3, 4, 5, 6] }) as HabitFrequency
-    const days = freq.days?.length ? freq.days : [0, 1, 2, 3, 4, 5, 6]
+    const values = logMap.get(h.id) ?? new Map<string, number>()
+    const done = doneSet(values, h.target_value)
+    const freq = h.frequency
     return {
       ...h,
-      frequency: { ...freq, days },
-      completedToday: logs.has(today),
-      streak: calculateStreak(logs, days, today),
+      todayValue: values.get(today) ?? 0,
+      completedToday: done.has(today),
+      streak: calculateStreak(done, freq, today, weekStart),
+      streakUnit: freq.type === 'times_per_week' ? 'weeks' : 'days',
+      weekCount: doneInWeek(done, today, weekStart),
       week: Array.from({ length: 7 }, (_, i) => {
         const date = shiftDate(today, i - 6)
-        return { date, done: logs.has(date), scheduled: days.includes(weekdayOf(date)) }
+        return { date, done: done.has(date), scheduled: isScheduledOn(freq, date), value: values.get(date) ?? 0 }
       }),
-      scheduledToday: days.includes(weekdayOf(today)),
+      scheduledToday: isScheduledOn(freq, today),
     }
-  }), [rawHabits, logMap, today])
+  }), [rawHabits, logMap, today, weekStart])
 
   const activeHabits   = useMemo(() => habits.filter(h => h.is_active), [habits])
   const inactiveHabits = useMemo(() => habits.filter(h => !h.is_active), [habits])
@@ -129,40 +137,59 @@ export function useHabits() {
 
   // ── Acciones ───────────────────────────────────────────────────────────────
 
-  const setLocal = (habitId: string, date: string, done: boolean) => setLogMap(prev => {
+  const setLocal = (habitId: string, date: string, value: number) => setLogMap(prev => {
     const next = new Map(prev)
-    const s = new Set(next.get(habitId) ?? [])
-    if (done) s.add(date); else s.delete(date)
-    next.set(habitId, s)
+    const m = new Map(next.get(habitId) ?? [])
+    if (value > 0) m.set(date, value); else m.delete(date)
+    next.set(habitId, m)
     return next
   })
 
-  /** Marca o desmarca un día (hoy o hasta 7 días atrás). Revierte si falla. */
-  const toggleDay = useCallback(async (habitId: string, date: string, done: boolean) => {
+  /**
+   * Guarda el valor de un día (hoy o hasta 7 días atrás): 0 borra el registro. Sí/no = 1; con cantidad, lo hecho.
+   * Revierte si falla.
+   */
+  const setDayValue = useCallback(async (habitId: string, date: string, value: number) => {
     if (!user) return
     if (date > today || date < shiftDate(today, -7)) return
-    setLocal(habitId, date, done)
-    const { error: err } = done
+    const prevValue = logMap.get(habitId)?.get(date) ?? 0
+    const v = Math.max(0, Math.min(100000, Math.round(value * 100) / 100))
+    setLocal(habitId, date, v)
+    const { error: err } = v > 0
       ? await db.from('life_habit_logs').upsert(
-          { habit_id: habitId, user_id: user.id, completed_date: date },
-          { onConflict: 'habit_id,completed_date', ignoreDuplicates: true })
+          { habit_id: habitId, user_id: user.id, completed_date: date, value: v },
+          { onConflict: 'habit_id,completed_date' })
       : await db.from('life_habit_logs').delete()
           .eq('habit_id', habitId).eq('user_id', user.id).eq('completed_date', date)
-    if (err) { setLocal(habitId, date, !done); throw err }
-    if (done) {
+    if (err) { setLocal(habitId, date, prevValue); throw err }
+    const habit = rawHabits.find(h => h.id === habitId)
+    if (habit && isDone(v, habit.target_value) && !isDone(prevValue || undefined, habit.target_value)) {
       void (async () => {
         const { count: totalLogs } = await db.from('life_habit_logs')
           .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
         if (totalLogs === 1) void award(user.id, 'first_habit_completed', 'Primer hábito completado')
-        const habit = habits.find(h => h.id === habitId)
-        const logs = new Set(logMap.get(habitId) ?? [])
-        logs.add(date)
-        const streak = calculateStreak(logs, habit?.frequency.days ?? [], today)
-        if (streak >= 7)  void award(user.id, 'habit_streak_7',  'Racha de 7 días')
-        if (streak >= 30) void award(user.id, 'habit_streak_30', 'Racha de 30 días')
+        const values = new Map(logMap.get(habitId) ?? [])
+        values.set(date, v)
+        const streak = calculateStreak(doneSet(values, habit.target_value), habit.frequency, today, weekStart)
+        if (habit.frequency.type !== 'times_per_week') {
+          if (streak >= 7)  void award(user.id, 'habit_streak_7',  'Racha de 7 días')
+          if (streak >= 30) void award(user.id, 'habit_streak_30', 'Racha de 30 días')
+        }
       })()
     }
-  }, [user, today, habits, logMap])
+  }, [user, today, rawHabits, logMap, weekStart])
+
+  /** Marca o desmarca un día: sí/no → 1; con cantidad → la meta completa (o borra). */
+  const toggleDay = useCallback(async (habitId: string, date: string, done: boolean) => {
+    const habit = rawHabits.find(h => h.id === habitId)
+    await setDayValue(habitId, date, done ? (habit?.target_value ?? 1) : 0)
+  }, [rawHabits, setDayValue])
+
+  /** "+1" (o el paso que sea) a lo hecho hoy en un hábito con cantidad. */
+  const addToday = useCallback(async (habitId: string, delta = 1) => {
+    const current = logMap.get(habitId)?.get(today) ?? 0
+    await setDayValue(habitId, today, current + delta)
+  }, [logMap, today, setDayValue])
 
   const toggleToday = useCallback((habitId: string, markDone: boolean) => toggleDay(habitId, today, markDone), [toggleDay, today])
 
@@ -198,6 +225,6 @@ export function useHabits() {
     habits, activeHabits, inactiveHabits, todayHabits, today,
     completedToday, totalToday: todayHabits.length,
     loading, error, reload: load,
-    toggleToday, toggleDay, createHabit, updateHabit, deleteHabit, toggleActive,
+    toggleToday, toggleDay, setDayValue, addToday, createHabit, updateHabit, deleteHabit, toggleActive,
   }
 }

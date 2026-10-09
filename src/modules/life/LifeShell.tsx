@@ -10,6 +10,7 @@ import { AchievementToast } from './components/AchievementToast'
 import { OfflineBanner } from './components/OfflineBanner'
 import { flushOutbox } from './lib/outbox'
 import { useTaskReminders } from './hooks/useTaskReminders'
+import { useHabitReminders } from './hooks/useHabitReminders'
 import { useAppBackground } from '@/lib/useAppBackground'
 import { useAppLang } from '@/i18n/app/store'
 import { langDir } from '@/i18n/app/languages'
@@ -22,6 +23,7 @@ export function LifeShell() {
   const { setHasRestaurant, setRestaurantName, setRestaurantSlug, setRestaurantPlan } = useLifeStore()
   const [timedOut, setTimedOut] = useState(false)
   useTaskReminders(user?.id)
+  useHabitReminders(user?.id)
   const dir = langDir(useAppLang(s => s.lang))
 
   // Fondo oscuro en html y body: sin flashes blancos ni franjas al llegar a los bordes

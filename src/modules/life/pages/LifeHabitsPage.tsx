@@ -1,7 +1,7 @@
 import { createElement, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { Flame, Plus, Check, Pencil, Trash2, Power, ChevronDown } from 'lucide-react'
+import { Flame, Plus, Check, Pencil, Trash2, Power, ChevronDown, Hash } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
@@ -13,6 +13,8 @@ import { useHabits, type Habit } from '../hooks/useHabits'
 import { getHabitIcon } from '../lib/lifePalette'
 import { HabitSheet } from '../components/HabitSheet'
 import { ActionMenu } from '../components/ActionMenu'
+import { HabitMeta, HabitValueSheet, QuantityButton } from '../components/HabitControls'
+import { useStreakText } from '../hooks/useStreakText'
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function HabitSkeleton() {
@@ -92,15 +94,19 @@ function HabitToggle({ habit, onToggle }: { habit: Habit; onToggle: () => void }
 }
 
 // ── Tarjeta ───────────────────────────────────────────────────────────────────
-function HabitCard({ habit, onToggleToday, onToggleDay, onEdit, onDelete, onToggleActive }: {
+function HabitCard({ habit, onToggleToday, onAdd, onEditValue, onToggleDay, onEdit, onDelete, onToggleActive }: {
   habit: Habit
   onToggleToday: () => void
+  onAdd: () => void
+  onEditValue: () => void
   onToggleDay: (date: string, done: boolean) => void
   onEdit: () => void
   onDelete: () => void
   onToggleActive: () => void
 }) {
   const t = useLifeT()
+  const streakText = useStreakText()
+  const qty = habit.target_value != null
   return (
     <LifeCard style={{ position: 'relative' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -116,12 +122,13 @@ function HabitCard({ habit, onToggleToday, onToggleDay, onEdit, onDelete, onTogg
           <p style={{ fontFamily: font, fontSize: '15px', fontWeight: 700, color: colors.text.primary, margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {habit.name}
           </p>
+          <HabitMeta habit={habit} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             {habit.streak > 0 && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }} title={t.habits.streak(habit.streak)}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }} title={streakText(habit)}>
                 <Flame size={11} style={{ color: habit.color }} strokeWidth={2} aria-hidden="true" />
                 <span style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: habit.color }}>
-                  {habit.streak}<span className="sr-only"> · {t.habits.streak(habit.streak)}</span>
+                  {habit.streak}<span className="sr-only"> · {streakText(habit)}</span>
                 </span>
               </span>
             )}
@@ -136,11 +143,12 @@ function HabitCard({ habit, onToggleToday, onToggleDay, onEdit, onDelete, onTogg
 
         <ActionMenu label={t.habits.options} actions={[
           { icon: Pencil, label: t.common.edit, onSelect: onEdit },
+          ...(qty ? [{ icon: Hash, label: t.habitPlus.editValue(habit.name), onSelect: onEditValue }] : []),
           { icon: Power, label: t.habits.deactivate, onSelect: onToggleActive },
           { icon: Trash2, label: t.common.delete, onSelect: onDelete, danger: true },
         ]} />
 
-        {habit.scheduledToday && <HabitToggle habit={habit} onToggle={onToggleToday} />}
+        {habit.scheduledToday && (qty ? <QuantityButton habit={habit} onAdd={onAdd} /> : <HabitToggle habit={habit} onToggle={onToggleToday} />)}
       </div>
     </LifeCard>
   )
@@ -152,13 +160,14 @@ export function LifeHabitsPage() {
   const t = useLifeT()
   const {
     activeHabits, inactiveHabits, completedToday, totalToday,
-    loading, toggleToday, toggleDay, createHabit, updateHabit, deleteHabit, toggleActive,
+    loading, toggleToday, toggleDay, addToday, setDayValue, today, createHabit, updateHabit, deleteHabit, toggleActive,
   } = useHabits()
 
   const [sheetOpen, setSheetOpen]       = useState(false)
   const [editHabit, setEditHabit]       = useState<Habit | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Habit | null>(null)
   const [showInactive, setShowInactive] = useState(false)
+  const [valueHabit, setValueHabit]     = useState<Habit | null>(null)
 
   if (loading) return <HabitSkeleton />
 
@@ -222,6 +231,8 @@ export function LifeHabitsPage() {
               <HabitCard
                 habit={habit}
                 onToggleToday={() => safely(toggleToday(habit.id, !habit.completedToday))}
+                onAdd={() => safely(addToday(habit.id, 1))}
+                onEditValue={() => setValueHabit(habit)}
                 onToggleDay={(date, done) => safely(toggleDay(habit.id, date, done))}
                 onEdit={() => { setEditHabit(habit); setSheetOpen(true) }}
                 onDelete={() => setDeleteTarget(habit)}
@@ -277,6 +288,9 @@ export function LifeHabitsPage() {
           else await createHabit(data)
         }}
       />
+
+      <HabitValueSheet habit={valueHabit} onClose={() => setValueHabit(null)}
+        onSave={async v => { if (valueHabit) await setDayValue(valueHabit.id, today, v).catch(() => { toast.error(t.common.saveError) }) }} />
 
       <LifeConfirmDialog
         open={!!deleteTarget}
