@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useLandingT } from '@/i18n/app/landing'
 import { useAppLang } from '@/i18n/app/store'
 import { supabase } from '@/lib/supabase'
-import { StaggerTestimonials, type Testimonial } from '@/components/ui/stagger-testimonials'
+import type { Testimonial } from '@/components/ui/stagger-testimonials'
+// framer-motion sólo se baja si hay testimonios reales para mostrar (rendimiento de la landing)
+const StaggerTestimonials = lazy(() => import('@/components/ui/stagger-testimonials').then(m => ({ default: m.StaggerTestimonials })))
 
 import { reducedMotion } from './motion'
 import { SplitText } from './SplitText'
@@ -69,7 +71,7 @@ export function TestimonialsSection() {
         </h2>
       </div>
 
-      <StaggerTestimonials testimonials={testimonials} lang={lang} />
+      <Suspense fallback={null}><StaggerTestimonials testimonials={testimonials} lang={lang} /></Suspense>
     </section>
   )
 }

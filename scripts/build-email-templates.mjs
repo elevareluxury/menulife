@@ -100,6 +100,14 @@ const EMAILS = {
   } },
 }
 
+/** Paleta Amanecer (sistema de diseño §3): fondo claro, que se ve bien en todos los clientes de correo */
+const C = {
+  bg: '#FBF4EE', card: '#FFFFFF', border: '#EADFD6', text: '#1A1530', muted: '#4E4866', subtle: '#6B6580',
+  accent: '#C8431F', onAccent: '#FFFFFF',
+}
+/** La huella de Mycen como PNG (los clientes de correo no muestran SVG). Se genera con scripts/landing-shots/brand.spec.ts */
+const HUELLA = 'https://mycen.id/email/huella.png'
+
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 // Las variables de Supabase ({{ .Email }}) se dejan tal cual dentro del texto ya escapado
 const html = s => esc(s).replace(/\{\{ \.(\w+) \}\}/g, '{{ .$1 }}')
@@ -115,15 +123,15 @@ function body(email, l) {
   const [, title, text, cta] = email.text[l]
   const c = COMMON[l]
   const action = email.kind === 'link'
-    ? `<p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8442F;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">${html(cta)}</a></p>
-<p style="margin:0 0 6px;font-size:13px;color:#5f6368">${html(c.fallback)}</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8442F">{{ .ConfirmationURL }}</a></p>`
-    : `<p style="margin:28px 0;font-size:32px;font-weight:700;letter-spacing:6px;color:#0F1115" dir="ltr">{{ .Token }}</p>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:${C.accent}"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:${C.accent};color:${C.onAccent};text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">${html(cta)}</a></td></tr></table>
+<p style="margin:0 0 6px;font-size:13px;color:${C.muted}">${html(c.fallback)}</p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:${C.accent}">{{ .ConfirmationURL }}</a></p>`
+    : `<p style="margin:28px 0;font-size:32px;font-weight:700;letter-spacing:6px;color:${C.text}" dir="ltr">{{ .Token }}</p>`
   return `
-<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0F1115">${html(title)}</h1>
-<p style="margin:0;font-size:15px;line-height:1.6;color:#3c4043">${html(text)}</p>
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:${C.text}">${html(title)}</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:${C.muted}">${html(text)}</p>
 ${action}
-<p style="margin:28px 0 0;font-size:12px;color:#80868b">${html(c.ignore)}</p>
+<p style="margin:28px 0 0;font-size:12px;color:${C.subtle}">${html(c.ignore)}</p>
 `
 }
 
@@ -131,14 +139,17 @@ function template(name, email) {
   return `{{/* Mycen — ${email.supabase} (${name}). Generado por scripts/build-email-templates.mjs: editar allá, no acá. */}}
 {{ $l := "es" }}{{ with .Data }}{{ with .locale }}{{ $l = . }}{{ end }}{{ end }}<!doctype html>
 <html lang="{{ $l }}" dir="{{ if eq $l "ar" }}rtl{{ else }}ltr{{ end }}">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"></head>
-<body style="margin:0;padding:0;background:#f4f3ef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,sans-serif">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f3ef;padding:32px 16px"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;padding:36px 32px;text-align:start">
-<tr><td style="padding-bottom:24px;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:#0F1115">Mycen</td></tr>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>
+<body style="margin:0;padding:0;background:${C.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.bg};padding:32px 16px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:${C.card};border:1px solid ${C.border};border-radius:20px;padding:32px;text-align:start">
+<tr><td style="padding-bottom:20px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>
+<td style="padding-inline-end:10px;vertical-align:middle"><img src="${HUELLA}" width="40" height="40" alt="" style="display:block;border:0;width:40px;height:40px"></td>
+<td style="vertical-align:middle;font-size:20px;font-weight:800;letter-spacing:-0.02em;color:${C.text}">Mycen</td>
+</tr></table></td></tr>
 <tr><td>${byLang(l => body(email, l))}</td></tr>
 </table>
-<p style="margin:16px 0 0;font-size:12px;color:#80868b">Mycen · <a href="https://mycen.id" style="color:#80868b">mycen.id</a></p>
+<p style="margin:16px 0 0;font-size:12px;color:${C.subtle}">Mycen · <a href="https://mycen.id" style="color:${C.subtle}">mycen.id</a></p>
 </td></tr></table>
 </body>
 </html>

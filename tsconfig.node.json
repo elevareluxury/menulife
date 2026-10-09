@@ -6,5 +6,5 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "scripts/heroShell.ts", "src/i18n/app/landing/es.ts", "src/i18n/app/landing/en.ts", "src/i18n/app/landing/pt.ts", "src/i18n/app/landing/fr.ts", "src/i18n/app/landing/de.ts", "src/i18n/app/landing/it.ts", "src/i18n/app/landing/zh.ts", "src/i18n/app/landing/ja.ts", "src/i18n/app/landing/ko.ts", "src/i18n/app/landing/hi.ts", "src/i18n/app/landing/ar.ts", "src/i18n/app/landing/ru.ts"]
 }

@@ -69,6 +69,30 @@ const ja: LandingDict = {
     brainCopy: '大切なアイデアを、もう逃さない。',
     cta: '無料でスペースをつくる →',
   },
+  /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  structures: {
+    label: 'あなたのプロフィール',
+    title: '5つの',
+    titleAccent: '見せ方。',
+    subtitle: '仕事に合う構成と、自分に合うテーマを選べます。いつでも変更でき、何も失われません。',
+    themes: 'サンプルのテーマ',
+    universo: 'ユニバース',
+    amanecer: '夜明け',
+    layouts: {
+      credencial: { name: 'カード', text: 'QR 付きのカードをいつでも手元に。' },
+      portada: { name: 'カバー', text: '名前を大きく、クリエイター向け。' },
+      editorial: { name: 'エディトリアル', text: '上品で落ち着いた、プロ向け。' },
+      bento: { name: 'ベントー', text: 'ひと目で全部、ビジネス向け。' },
+      clasica: { name: 'クラシック', text: 'シンプルで直接的、リンク優先。' },
+    },
+    alt: (name, theme) => `${theme}テーマの${name}プロフィールの例`,
+  },
+  myDay: {
+    title: '今日',
+    text: '毎朝、3つの優先事項。毎晩、できたことを1分で振り返り。',
+    points: ['優先事項は3つまで：少ないから終えられる。', '1日抜けても途切れない習慣。', 'まずできたことを見て、1日を締めくくる。'],
+    alt: 'Life OS の「今日」画面（サンプルの優先事項・タスク・習慣）',
+  },
   business: {
     label: 'MYCEN BUSINESS',
     title: 'あなたの業種に',

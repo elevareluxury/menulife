@@ -69,6 +69,30 @@ const zh: LandingDict = {
     brainCopy: '再也不会错过重要的想法。',
     cta: '免费创建我的空间 →',
   },
+  /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  structures: {
+    label: '你的主页',
+    title: '五种方式',
+    titleAccent: '展示你自己。',
+    subtitle: '选择适合你所做之事的结构，以及适合你的主题。随时可以更换，不会丢失任何内容。',
+    themes: '示例主题',
+    universo: '宇宙',
+    amanecer: '黎明',
+    layouts: {
+      credencial: { name: '名片', text: '带二维码的名片，随时出示。' },
+      portada: { name: '封面', text: '大字展示你的名字，适合创作者。' },
+      editorial: { name: '杂志', text: '优雅沉稳，适合专业人士。' },
+      bento: { name: '便当', text: '一眼看全，适合商家。' },
+      clasica: { name: '经典', text: '简单直接，链接优先。' },
+    },
+    alt: (name, theme) => `${theme}主题下的${name}主页示例`,
+  },
+  myDay: {
+    title: '我的一天',
+    text: '每天早上，3 个优先事项。每天晚上，花一分钟看看你完成了什么。',
+    points: ['最多 3 个优先事项：少一点，才能做完。', '错过一天也不会中断的习惯。', '收尾时先看到你完成了什么。'],
+    alt: 'Life OS 中“我的一天”页面，包含示例优先事项、任务和习惯',
+  },
   business: {
     label: 'MYCEN BUSINESS',
     title: '一个贴合',

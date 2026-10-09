@@ -69,6 +69,30 @@ const ar: LandingDict = {
     brainCopy: 'لا تُضِع فكرة مهمة بعد اليوم.',
     cta: 'أنشئ مساحتي مجانًا ←',
   },
+  /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  structures: {
+    label: 'ملفك الشخصي',
+    title: 'خمس طرق',
+    titleAccent: 'لتظهر.',
+    subtitle: 'اختر البنية التي تناسب ما تفعله والسمة التي تناسبك. غيّرها متى شئت دون أن تفقد شيئًا.',
+    themes: 'سمة الأمثلة',
+    universo: 'الكون',
+    amanecer: 'الفجر',
+    layouts: {
+      credencial: { name: 'بطاقة', text: 'بطاقتك مع رمز QR، دائمًا في متناولك.' },
+      portada: { name: 'غلاف', text: 'اسمك بخط كبير، لصنّاع المحتوى.' },
+      editorial: { name: 'تحريري', text: 'أنيق وهادئ، للمحترفين.' },
+      bento: { name: 'بينتو', text: 'كل شيء بنظرة واحدة، للأعمال.' },
+      clasica: { name: 'كلاسيكي', text: 'بسيط ومباشر، الروابط أولًا.' },
+    },
+    alt: (name, theme) => `مثال لملف ${name} بسمة ${theme}`,
+  },
+  myDay: {
+    title: 'يومي',
+    text: 'كل صباح، أولوياتك الثلاث. كل مساء، دقيقة لترى ما أنجزته.',
+    points: ['حتى 3 أولويات: قليلة لتنجزها.', 'عادات تسامح يومًا فائتًا.', 'اختم يومك برؤية ما أنجزته أولًا.'],
+    alt: 'شاشة يومي في Life OS مع أولويات ومهام وعادات للمثال',
+  },
   business: {
     label: 'MYCEN BUSINESS',
     title: 'منصة مصمّمة',

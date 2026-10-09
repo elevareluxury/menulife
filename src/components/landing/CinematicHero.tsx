@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import FlowFieldBackground from '@/components/ui/flow-field-background'
+import { Huella } from '@/design/components/Huella'
+import '@/design/motion.css'
 import { useLandingT } from '@/i18n/app/landing'
 import { SplitText } from './SplitText'
 
@@ -15,6 +16,9 @@ export function CinematicHero() {
   const cardRef    = useRef<HTMLDivElement>(null)
   const tlRef      = useRef<any>(null)
 
+  // Saca el esqueleto estático del hero (index.html, scripts/heroShell.ts): desde acá se ve el de React
+  useEffect(() => { document.getElementById('boot-hero')?.remove() }, [])
+
   /* ── ScrollTrigger pinned timeline ── */
   useEffect(() => {
     if (typeof gsap === 'undefined' || reducedMotion()) return
@@ -23,10 +27,7 @@ export function CinematicHero() {
     gsap.registerPlugin(ST)
 
     if (window.innerWidth <= 768) {
-      gsap.fromTo(introRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }
-      )
+      // El título y el texto se ven de entrada (sin animarlos): es lo primero que se lee y lo que mide la carga
       gsap.fromTo(cardRef.current,
         { opacity: 0, y: 50 },
         { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
@@ -62,38 +63,21 @@ export function CinematicHero() {
     }
   }, [])
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
-
   return (
     <section ref={sectionRef} className="ch-section">
 
-      {/* Fondo de partículas — solo cubre la primera pantalla */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: '100vh',
-        zIndex: 0,
-        overflow: 'hidden',
-        pointerEvents: 'none',
-      }}>
-        <FlowFieldBackground
-          color="#F4705A"
-          trailOpacity={0.08}
-          particleCount={isMobile ? 200 : 400}
-          speed={0.6}
-        />
-        <div style={{
-          position: 'absolute',
-          bottom: 0, left: 0, right: 0,
-          height: '35%',
-          background: 'linear-gradient(to bottom, transparent, #0F1115)',
-          pointerEvents: 'none',
-        }} />
+      {/* Fondo: el cielo de Universo con una huella grande (V1 · etapa 13). Sólo cubre la primera pantalla. La huella
+          gira lento con transform (sin "reducir movimiento"); nada de canvas. */}
+      <div aria-hidden="true" data-mycen-theme="universo" className="my-sky ch-sky">
+        <div className="ch-huella">
+          <Huella seed="mycen" variant="orbitas" spin draw />
+        </div>
+        <div className="ch-sky-fade" />
       </div>
 
       {/* FASE 1: Intro */}
       <div ref={introRef} className="ch-intro">
-        <h1 data-split>
+        <h1>
           <span className="ch-line1"><SplitText text={l.hero.line1} /></span>
           <span className="ch-line2"><SplitText text={l.hero.line2} /></span>
         </h1>

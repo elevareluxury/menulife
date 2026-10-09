@@ -18,7 +18,9 @@ const MODULES = [
 ] as const
 
 export function LifeOSSection() {
-  const t = useLandingT().life
+  const l = useLandingT()
+  const t = l.life
+  const md = l.myDay
   useEffect(() => {
     if (typeof gsap === 'undefined' || reducedMotion()) return
     const ST = (window as any).ScrollTrigger
@@ -70,6 +72,19 @@ export function LifeOSSection() {
             color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
             maxWidth: '520px', margin: '0 auto',
           }}>{t.subtitle}</p>
+        </div>
+
+        {/* "Mi día" (V1 · etapa 13): capturas de ejemplo en los dos temas */}
+        <div className="ml-myday">
+          <div className="ml-myday-shots">
+            <img src="/landing/mi-dia-universo.webp" alt={md.alt} width={260} height={520} loading="lazy" decoding="async" />
+            <img src="/landing/mi-dia-amanecer.webp" alt="" width={260} height={520} loading="lazy" decoding="async" />
+          </div>
+          <div>
+            <h3>{md.title}</h3>
+            <p>{md.text}</p>
+            <ul>{md.points.map(pt => <li key={pt}>{pt}</li>)}</ul>
+          </div>
         </div>
 
         {/* Module cards */}
