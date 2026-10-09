@@ -108,6 +108,7 @@ const zh: LegalDict = {
         '**Supabase：**数据库、登录和文件。',
         '**Vercel：**应用托管和页面分发。',
         '**Resend：**发送账户邮件。',
+        '**YouTube、Vimeo、TikTok、Spotify 和 SoundCloud：**仅当某个主页嵌入了视频或歌曲且你点击“播放”时。在此之前不会与它们连接；之后适用它们各自的政策。',
         '**Anthropic：**仅当企业使用"从 PDF 导入菜单"功能时，处理该文件。',
         '**Mercado Pago：**仅当企业设置其用于收款时；付款在 Mercado Pago 完成。',
       ] },

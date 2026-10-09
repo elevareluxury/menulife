@@ -127,6 +127,21 @@ const en: StudioDict = {
     realReviews: 'Use real reviews from your customers.', starsOf: n => `Stars for review ${n}`, stars: n => `${n} stars`,
     removeReview: n => `Remove review ${n}`, reviewName: 'Name', reviewText: 'Review', addReview: 'Add review',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: 'Video or song link',
+    help: 'Paste a YouTube, Vimeo, TikTok, Spotify or SoundCloud link.',
+    detected: '{provider} detected',
+    preview: 'This is how it looks on your profile. The player only loads when someone taps play.',
+    video: 'Video',
+    music: 'Music',
+    errors: {
+      empty: 'Paste the video or song link.',
+      invalid: 'We don\'t recognize that link. Copy the full link from the app or website (for example, Share → Copy link).',
+      unsupported: 'For now you can embed YouTube, Vimeo, TikTok, Spotify and SoundCloud. For other sites, use a Link module.',
+      short_link: 'That\'s a short link. Open it and copy the full link from the address bar.',
+    },
+  },
   catalog: {
     styleHighlight: 'Highlighted (accent color)',
     styleButton: 'Button (icon or thumbnail on the side)', styleCard: 'Card with a large photo',
@@ -146,6 +161,7 @@ const en: StudioDict = {
       testimonials: { label: 'Reviews', description: 'Customer reviews and your Google rating.' },
       contact_card: { label: 'Contact card', description: 'Set it up in Share.' },
       link_group: { label: 'Link group', description: 'Several links under one title (e.g. Shops, Press).' },
+      media: { label: 'Video or music', description: 'YouTube, Vimeo, TikTok, Spotify or SoundCloud, playing right on your profile.' },
       project: { label: 'Featured project', description: 'One of your projects, with its cover and a link to its page.' },
       portfolio: { label: 'Portfolio', description: 'Your published projects in a grid.' },
     },

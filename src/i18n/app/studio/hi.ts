@@ -127,6 +127,21 @@ const hi: StudioDict = {
     realReviews: 'अपने ग्राहकों की असली राय इस्तेमाल करें।', starsOf: n => `समीक्षा ${n} के सितारे`, stars: n => `${n} सितारे`,
     removeReview: n => `समीक्षा ${n} हटाएँ`, reviewName: 'नाम', reviewText: 'समीक्षा', addReview: 'समीक्षा जोड़ें',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: 'वीडियो या गाने का लिंक',
+    help: 'YouTube, Vimeo, TikTok, Spotify या SoundCloud का लिंक चिपकाएं।',
+    detected: '{provider} मिला',
+    preview: 'आपकी प्रोफ़ाइल पर यह ऐसा दिखेगा। प्लेयर तभी लोड होता है जब कोई चलाएं दबाता है।',
+    video: 'वीडियो',
+    music: 'संगीत',
+    errors: {
+      empty: 'वीडियो या गाने का लिंक चिपकाएं।',
+      invalid: 'हम यह लिंक नहीं पहचान पाए। ऐप या वेबसाइट से पूरा लिंक कॉपी करें (जैसे शेयर → लिंक कॉपी करें)।',
+      unsupported: 'फ़िलहाल YouTube, Vimeo, TikTok, Spotify और SoundCloud जोड़े जा सकते हैं। दूसरी साइटों के लिए लिंक मॉड्यूल इस्तेमाल करें।',
+      short_link: 'यह छोटा लिंक है। इसे खोलें और एड्रेस बार से पूरा लिंक कॉपी करें।',
+    },
+  },
   catalog: {
     styleHighlight: 'हाइलाइट (एक्सेंट रंग)',
     styleButton: 'बटन (बगल में आइकन या थंबनेल)', styleCard: 'बड़ी फ़ोटो वाला कार्ड',
@@ -146,6 +161,7 @@ const hi: StudioDict = {
       testimonials: { label: 'समीक्षाएँ', description: 'ग्राहकों की राय और आपकी Google रेटिंग।' },
       contact_card: { label: 'संपर्क कार्ड', description: 'शेयर करें में सेट होता है।' },
       link_group: { label: 'लिंक समूह', description: 'एक शीर्षक के नीचे कई लिंक (जैसे: दुकानें, प्रेस)।' },
+      media: { label: 'वीडियो या संगीत', description: 'YouTube, Vimeo, TikTok, Spotify या SoundCloud, सीधे आपकी प्रोफ़ाइल पर चलते हैं।' },
       project: { label: 'चुना हुआ प्रोजेक्ट', description: 'आपका एक प्रोजेक्ट, कवर और उसके पेज के लिंक के साथ।' },
       portfolio: { label: 'पोर्टफ़ोलियो', description: 'आपके प्रकाशित प्रोजेक्ट, ग्रिड में।' },
     },

@@ -6,7 +6,7 @@
 export type LegalBlock = string | { list: string[] }
 export interface LegalSection { id: string; title: string; body: LegalBlock[] }
 
-const UPDATED = '2026-10-04'
+const UPDATED = '2026-10-09'
 
 const es = {
   ui: {
@@ -115,6 +115,7 @@ const es = {
         '**Supabase:** base de datos, inicio de sesión y archivos.',
         '**Vercel:** alojamiento de la aplicación y entrega de las páginas.',
         '**Resend:** envío de los mails de tu cuenta.',
+        '**YouTube, Vimeo, TikTok, Spotify y SoundCloud:** sólo si un perfil integra un video o una canción y tocás "Reproducir". Antes de eso no nos conectamos con ellos; desde ese momento se aplican sus propias políticas.',
         '**Anthropic:** sólo si un negocio usa la importación de su menú desde un PDF; se procesa ese archivo.',
         '**Mercado Pago:** sólo si un negocio lo configura para cobrar; el pago se hace en Mercado Pago.',
       ] },

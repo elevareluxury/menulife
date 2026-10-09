@@ -2,11 +2,12 @@ import type { ComponentType } from 'react'
 import type { ModuleType, WeekSchedule } from '@/modules/profile/lib/profileTypes'
 import { WEEK_DAYS } from '@/modules/profile/lib/schedule'
 import { safeHref } from '@/modules/profile/lib/safeUrl'
+import { inspectMediaUrl, MEDIA_PROVIDER_NAME, parseMediaUrl } from '@/modules/profile/lib/media'
 import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import type { StudioDict } from '@/i18n/app/studio'
 import type { StudioModule } from './studioTypes'
 import {
-  CardsEditor, GalleryEditor, HoursEditor, LinkItemsEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
+  CardsEditor, GalleryEditor, HoursEditor, LinkItemsEditor, MediaUrlEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
   type ExtraEditorProps, type GalleryItem, type LinkItemInput, type ReviewsValue,
 } from '../components/moduleExtraEditors'
 
@@ -365,6 +366,30 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         Editor: LinkItemsEditor,
       }),
       summary: x => sm.links(count(x.items)),
+    },
+    // V1 · etapa 04: video y música integrados (fachada en la página; el reproductor se carga al tocar)
+    media: {
+      addable: true,
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
+      ],
+      extra: extra<string>({
+        init: m => text(m?.content.url),
+        validate: url => {
+          const r = inspectMediaUrl(url)
+          return 'error' in r ? t.media.errors[r.error] : null
+        },
+        apply: (url, content) => {
+          const embed = parseMediaUrl(url)
+          content.url = url.trim()
+          if (embed) { content.provider = embed.provider; content.kind = embed.kind }
+        },
+        Editor: MediaUrlEditor,
+      }),
+      summary: x => {
+        const embed = parseMediaUrl(x.url)
+        return embed ? `${MEDIA_PROVIDER_NAME[embed.provider]} · ${embed.kind === 'video' ? t.media.video : t.media.music}` : ''
+      },
     },
     // Se edita en Mi identidad → tarjeta de contacto; en la página es el botón "Guardar contacto"
     contact_card: { addable: false, fields: [], summary: () => '' },

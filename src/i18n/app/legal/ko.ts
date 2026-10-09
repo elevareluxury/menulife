@@ -108,6 +108,7 @@ const ko: LegalDict = {
         '**Supabase:** 데이터베이스, 로그인, 파일.',
         '**Vercel:** 애플리케이션 호스팅과 페이지 전송.',
         '**Resend:** 계정 관련 이메일 발송.',
+        '**YouTube, Vimeo, TikTok, Spotify, SoundCloud:** 프로필에 동영상이나 곡이 삽입되어 있고 "재생"을 누른 경우에만 해당합니다. 그 전에는 연결하지 않으며, 그 후에는 각 서비스의 정책이 적용됩니다.',
         '**Anthropic:** 사업체가 PDF 메뉴 가져오기를 사용하는 경우에만 해당 파일을 처리.',
         '**Mercado Pago:** 사업체가 결제 수단으로 설정한 경우에만. 결제는 Mercado Pago에서 이루어집니다.',
       ] },

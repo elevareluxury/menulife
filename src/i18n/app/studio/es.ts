@@ -277,6 +277,21 @@ const es = {
     reviewText: 'Reseña',
     addReview: 'Agregar reseña',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: 'Link del video o la canción',
+    help: 'Pegá el link de YouTube, Vimeo, TikTok, Spotify o SoundCloud.',
+    detected: 'Detectamos {provider}',
+    preview: 'Así se ve en tu perfil. El reproductor se carga recién cuando alguien toca reproducir.',
+    video: 'Video',
+    music: 'Música',
+    errors: {
+      empty: 'Pegá el link del video o la canción.',
+      invalid: 'No reconocemos ese link. Copiá el link completo desde la app o la web (por ejemplo, el botón Compartir → Copiar link).',
+      unsupported: 'Por ahora sólo se pueden integrar YouTube, Vimeo, TikTok, Spotify y SoundCloud. Para otro sitio, usá un módulo Link.',
+      short_link: 'Ese es un link corto. Abrilo y copiá el link completo de la barra de direcciones.',
+    },
+  },
   catalog: {
     styleHighlight: 'Destacado (con el color de acento)',
     styleButton: 'Botón (ícono o miniatura a la izquierda)',
@@ -298,6 +313,7 @@ const es = {
       testimonials: { label: 'Reseñas', description: 'Opiniones de clientes y tu puntaje de Google.' },
       contact_card: { label: 'Tarjeta de contacto', description: 'Se configura en Compartir.' },
       link_group: { label: 'Grupo de links', description: 'Varios links bajo un mismo título (ej.: Tiendas, Prensa).' },
+      media: { label: 'Video o música', description: 'YouTube, Vimeo, TikTok, Spotify o SoundCloud, que se reproducen sin salir de tu perfil.' },
       project: { label: 'Proyecto destacado', description: 'Uno de tus proyectos, con portada y link a su página.' },
       portfolio: { label: 'Portfolio', description: 'Tus proyectos publicados, en grilla.' },
     } as Record<string, { label: string; description: string }>,

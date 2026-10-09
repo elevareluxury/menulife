@@ -108,6 +108,7 @@ const it: LegalDict = {
         '**Supabase:** database, accesso e file.',
         '**Vercel:** hosting dell’applicazione e consegna delle pagine.',
         '**Resend:** invio delle email del tuo account.',
+        '**YouTube, Vimeo, TikTok, Spotify e SoundCloud:** solo se un profilo integra un video o un brano e tocchi "Riproduci". Prima non ci colleghiamo a loro; da quel momento valgono le loro politiche.',
         '**Anthropic:** solo se un’attività usa l’importazione del menu da un PDF; viene elaborato quel file.',
         '**Mercado Pago:** solo se un’attività lo configura per incassare; il pagamento avviene su Mercado Pago.',
       ] },

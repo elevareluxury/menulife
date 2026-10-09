@@ -36,6 +36,9 @@ export const MODULE_FIXTURES = [
   // Fase 7
   { label: 'Tiendas', row: moduleRow({ id: 'm-link-group', type: 'link_group', title: 'Tiendas', position: 150,
     content: { items: [{ title: 'Etsy', url: 'https://etsy.com/ana' }, { title: 'Behance', url: 'https://behance.net/ana', subtitle: 'Portfolio' }] } }) },
+  // V1 · etapa 04: video y música (fachada; el reproductor se carga al tocar)
+  { label: 'Videoclip', row: moduleRow({ id: 'm-media', type: 'media', title: 'Videoclip', position: 160,
+    content: { url: 'https://youtu.be/dQw4w9WgXcQ', provider: 'youtube', kind: 'video' } }) },
 ]
 
 /** Proyecto que muestran los módulos project/portfolio de arriba (hay que publicarlo con publishProjectRow) */

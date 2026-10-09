@@ -127,6 +127,21 @@ const ko: StudioDict = {
     realReviews: '실제 고객의 의견을 사용하세요.', starsOf: n => `리뷰 ${n}의 별점`, stars: n => `별 ${n}개`,
     removeReview: n => `리뷰 ${n} 삭제`, reviewName: '이름', reviewText: '리뷰', addReview: '리뷰 추가',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: '동영상 또는 곡 링크',
+    help: 'YouTube, Vimeo, TikTok, Spotify 또는 SoundCloud 링크를 붙여 넣으세요.',
+    detected: '{provider} 감지됨',
+    preview: '프로필에서는 이렇게 보입니다. 누군가 재생을 누를 때만 플레이어가 로드됩니다.',
+    video: '동영상',
+    music: '음악',
+    errors: {
+      empty: '동영상 또는 곡 링크를 붙여 넣으세요.',
+      invalid: '이 링크를 인식할 수 없습니다. 앱이나 웹사이트에서 전체 링크를 복사하세요(예: 공유 → 링크 복사).',
+      unsupported: '현재는 YouTube, Vimeo, TikTok, Spotify, SoundCloud만 삽입할 수 있습니다. 다른 사이트는 링크 모듈을 사용하세요.',
+      short_link: '단축 링크입니다. 링크를 연 다음 주소창에서 전체 링크를 복사하세요.',
+    },
+  },
   catalog: {
     styleHighlight: '강조(포인트 색상)',
     styleButton: '버튼(옆에 아이콘 또는 썸네일)', styleCard: '큰 사진 카드',
@@ -146,6 +161,7 @@ const ko: StudioDict = {
       testimonials: { label: '리뷰', description: '고객 리뷰와 Google 평점.' },
       contact_card: { label: '연락처 카드', description: '공유에서 설정합니다.' },
       link_group: { label: '링크 그룹', description: '하나의 제목 아래 여러 링크(예: 스토어, 언론).' },
+      media: { label: '동영상 또는 음악', description: 'YouTube, Vimeo, TikTok, Spotify, SoundCloud를 프로필에서 바로 재생합니다.' },
       project: { label: '추천 프로젝트', description: '커버와 페이지 링크가 있는 프로젝트 하나.' },
       portfolio: { label: '포트폴리오', description: '게시된 프로젝트를 그리드로 보여줍니다.' },
     },

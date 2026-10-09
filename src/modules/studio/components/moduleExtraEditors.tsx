@@ -8,6 +8,14 @@ import { uploadMedia } from '../lib/studioApi'
 import { useStudio } from '../StudioContext'
 import { Button, ImageField, SelectField, TextField, Toggle } from './ui'
 import { useStudioT } from '@/i18n/app/studio'
+import { huellaSeed } from '@/lib/huella'
+import { useAppLang } from '@/i18n/app/store'
+import { inspectMediaUrl, MEDIA_PROVIDER_NAME } from '@/modules/profile/lib/media'
+import { lookVars, profileLook } from '@/modules/profile/lib/profileLook'
+import { MediaModule } from '@/modules/profile/components/MediaModule'
+import { ProfileHuellaContext } from '@/modules/profile/components/profileLookContext'
+import '@/modules/profile/profile.css'
+import '@/modules/profile/layouts/layouts.css'
 
 // Editores propios de los tipos que no se arman sólo con campos simples. Cada uno se registra en
 // `lib/moduleCatalog.ts` (campo `extra`) junto con cómo se inicializa, se valida y se guarda.
@@ -291,6 +299,40 @@ export function LinkItemsEditor({ value: items, onChange }: ExtraEditorProps<Lin
       ))}
       {items.length < 20 && (
         <Button size="sm" onClick={() => onChange([...items, {}])}><Plus size={15} aria-hidden="true" /> {e.addLink}</Button>
+      )}
+    </div>
+  )
+}
+
+// ── Video y música (V1 · etapa 04): se pega el link, se detecta el proveedor y se ve la fachada ──
+
+export function MediaUrlEditor({ value: url, onChange }: ExtraEditorProps<string>) {
+  const t = useStudioT().media
+  const { profile } = useStudio()
+  const lang = useAppLang(st => st.lang)
+  const result = inspectMediaUrl(url)
+  const embed = 'embed' in result ? result.embed : null
+  const error = url.trim() && 'error' in result ? t.errors[result.error] : null
+  const look = profileLook(profile.theme)
+  return (
+    <div className="st-stack" style={{ gap: 12 }}>
+      <TextField label={t.url} type="url" value={url} placeholder="https://…" required help={t.help}
+        error={error} onChange={onChange} />
+      {embed && (
+        <div className="st-stack" style={{ gap: 8 }}>
+          <p className="st-help" role="status" style={{ margin: 0 }}>
+            {t.detected.replace('{provider}', MEDIA_PROVIDER_NAME[embed.provider])} · {embed.kind === 'video' ? t.video : t.music}
+          </p>
+          {/* Vista previa de la fachada con el tema y la huella del perfil (no carga nada del proveedor) */}
+          <div className="mp-root my-profile st-media-preview" data-mycen-theme={look.mode} data-mycen-accent={look.accent}
+            style={{ ...lookVars(look), minHeight: 0, padding: 12, borderRadius: 16 }} inert>
+            <ProfileHuellaContext.Provider value={{ seed: huellaSeed(profile), variant: look.huellaVariant }}>
+              <MediaModule module={{ id: 'preview', type: 'media', title: null, content: { url }, config: {}, translations: {} }}
+                lang={lang} onAction={() => undefined} />
+            </ProfileHuellaContext.Provider>
+          </div>
+          <p className="st-help" style={{ margin: 0 }}>{t.preview}</p>
+        </div>
       )}
     </div>
   )

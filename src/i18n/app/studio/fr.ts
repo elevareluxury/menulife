@@ -127,6 +127,21 @@ const fr: StudioDict = {
     realReviews: 'Utilisez de vrais avis de vos clients.', starsOf: n => `Étoiles de l’avis ${n}`, stars: n => `${n} étoiles`,
     removeReview: n => `Retirer l’avis ${n}`, reviewName: 'Nom', reviewText: 'Avis', addReview: 'Ajouter un avis',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: 'Lien de la vidéo ou du morceau',
+    help: 'Collez un lien YouTube, Vimeo, TikTok, Spotify ou SoundCloud.',
+    detected: '{provider} détecté',
+    preview: 'Voici l\'aperçu sur votre profil. Le lecteur ne se charge que lorsqu\'on appuie sur lecture.',
+    video: 'Vidéo',
+    music: 'Musique',
+    errors: {
+      empty: 'Collez le lien de la vidéo ou du morceau.',
+      invalid: 'Nous ne reconnaissons pas ce lien. Copiez le lien complet depuis l\'app ou le site (par exemple Partager → Copier le lien).',
+      unsupported: 'Pour l\'instant, vous pouvez intégrer YouTube, Vimeo, TikTok, Spotify et SoundCloud. Pour un autre site, utilisez un module Lien.',
+      short_link: 'C\'est un lien court. Ouvrez-le et copiez le lien complet depuis la barre d\'adresse.',
+    },
+  },
   catalog: {
     styleHighlight: 'Mis en avant (couleur d’accent)',
     styleButton: 'Bouton (icône ou miniature sur le côté)', styleCard: 'Carte avec grande photo',
@@ -146,6 +161,7 @@ const fr: StudioDict = {
       testimonials: { label: 'Avis', description: 'Avis de clients et votre note Google.' },
       contact_card: { label: 'Fiche contact', description: 'Se configure dans Partager.' },
       link_group: { label: 'Groupe de liens', description: 'Plusieurs liens sous un même titre (ex. : Boutiques, Presse).' },
+      media: { label: 'Vidéo ou musique', description: 'YouTube, Vimeo, TikTok, Spotify ou SoundCloud, lus directement sur votre profil.' },
       project: { label: 'Projet à la une', description: 'Un de vos projets, avec sa couverture et un lien vers sa page.' },
       portfolio: { label: 'Portfolio', description: 'Vos projets publiés, en grille.' },
     },

@@ -127,6 +127,21 @@ const ar: StudioDict = {
     realReviews: 'استخدم آراء حقيقية من عملائك.', starsOf: n => `نجوم التقييم ${n}`, stars: n => `${n} نجوم`,
     removeReview: n => `إزالة التقييم ${n}`, reviewName: 'الاسم', reviewText: 'التقييم', addReview: 'إضافة تقييم',
   },
+  /** Video y música (V1 · etapa 04) */
+  media: {
+    url: 'رابط الفيديو أو الأغنية',
+    help: 'الصق رابطًا من YouTube أو Vimeo أو TikTok أو Spotify أو SoundCloud.',
+    detected: 'تم التعرّف على {provider}',
+    preview: 'هكذا يظهر في ملفك. لا يُحمَّل المشغّل إلا عندما يضغط أحد على تشغيل.',
+    video: 'فيديو',
+    music: 'موسيقى',
+    errors: {
+      empty: 'الصق رابط الفيديو أو الأغنية.',
+      invalid: 'لا نتعرّف على هذا الرابط. انسخ الرابط الكامل من التطبيق أو الموقع (مثلًا: مشاركة ← نسخ الرابط).',
+      unsupported: 'حاليًا يمكن تضمين YouTube وVimeo وTikTok وSpotify وSoundCloud فقط. للمواقع الأخرى استخدم وحدة رابط.',
+      short_link: 'هذا رابط مختصر. افتحه وانسخ الرابط الكامل من شريط العنوان.',
+    },
+  },
   catalog: {
     styleHighlight: 'مميّز (لون التمييز)',
     styleButton: 'زر (أيقونة أو صورة مصغّرة بجانبه)', styleCard: 'بطاقة بصورة كبيرة',
@@ -146,6 +161,7 @@ const ar: StudioDict = {
       testimonials: { label: 'التقييمات', description: 'آراء العملاء وتقييمك على Google.' },
       contact_card: { label: 'بطاقة جهة الاتصال', description: 'تُضبط من قسم المشاركة.' },
       link_group: { label: 'مجموعة روابط', description: 'عدة روابط تحت عنوان واحد (مثل: المتاجر، الصحافة).' },
+      media: { label: 'فيديو أو موسيقى', description: 'YouTube وVimeo وTikTok وSpotify وSoundCloud، تُشغَّل داخل ملفك مباشرة.' },
       project: { label: 'مشروع مميز', description: 'أحد مشاريعك مع الغلاف ورابط لصفحته.' },
       portfolio: { label: 'معرض الأعمال', description: 'مشاريعك المنشورة في شبكة.' },
     },
