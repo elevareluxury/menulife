@@ -94,7 +94,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Life OS: borrar con "Deshacer" (`src/modules/life/lib/undo.tsx`), "hoy" que cambia a medianoche (`useToday`),
   rachas según los días programados del hábito, progreso de metas = pasos hechos/total (sin pasos, manual),
   Replay calculado con fechas reales del mes (sin Life Score). Menús "⋯" con `ActionMenu` (táctil).
-- Inicio de Life OS (`/life`) = "Tu día": tareas de hoy (foco + vencen hoy + hechas hoy), hábitos programados para hoy,
+- Inicio de Life OS (`/life`) = "Mi día" (etapa 11; antes "Tu día"): tareas de hoy (foco + vencen hoy + hechas hoy), hábitos programados para hoy,
   metas en curso y el mes en la moneda principal (las otras monedas aparte). Cada tarjeta usa el hook de su módulo.
   No hay Life Score (la tabla `life_score` es legado; no se escribe más).
 - Insights (`/life/insights`, `lib/insights.ts`): reglas sobre datos reales calculadas en el dispositivo; cada una exige
@@ -242,6 +242,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `useHabits`: `addToday` ("+1"), `setDayValue`, `weekCount`, `streakUnit`. UI: `QuantityButton` (anillo), `HabitMeta`,
   `HabitValueSheet` (`components/HabitControls.tsx`). Recordatorio por hábito: `useHabitReminders` (con Life OS abierto,
   una vez por día y hábito). E2E en `habits.spec.ts`.
+- "Mi día" (etapa 11): `/life` (`LifePage`) es "Mi día": `MyDaySection` (`components/MyDay.tsx`) arriba con hasta 3
+  prioridades (tareas o texto; una cuarta explica por qué son 3) y "Cerrar el día" (resaltado desde las 18 h). El cierre
+  (`DayReviewSheet`) muestra primero lo logrado (hábitos, tareas hechas hoy y prioridades, con celebración breve), después lo
+  que quedó (pasar a mañana, cambiar fecha o soltar; soltar una tarea que se repite salta a la próxima) y "¿Cómo te fue
+  hoy?". Datos: `life_daily_reviews` (una por persona y fecha local; `useDailyReview`). Debajo siguen tareas de hoy,
+  hábitos, la meta en foco y el mes. `LifeSheet` va en un portal (si no, quedaba bajo la barra). E2E en `my-day.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea
