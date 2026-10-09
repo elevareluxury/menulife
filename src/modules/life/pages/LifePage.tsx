@@ -1,4 +1,4 @@
-import { createElement, useMemo, useState } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -18,6 +18,7 @@ import { useHabits } from '../hooks/useHabits'
 import { MyDaySection } from '../components/MyDay'
 import { FreshStart, WelcomeBack } from '../components/KindMoments'
 import { useWelcomeBack } from '../hooks/useWelcomeBack'
+import { trackOncePerSession } from '@/lib/productEvents'
 import { HabitMeta, QuantityButton } from '../components/HabitControls'
 import { useStreakText } from '../hooks/useStreakText'
 import { useMoney } from '../hooks/useMoney'
@@ -434,6 +435,8 @@ export function LifePage() {
   const today = useToday()
   const [langOpen, setLangOpen] = useState(false)
   const [welcome, closeWelcome] = useWelcomeBack()
+  // Métricas (etapa 14): abrió "Mi día" (una vez por día y sesión)
+  useEffect(() => { trackOncePerSession(`myday-${today}`, 'life_my_day_opened') }, [today])
 
   const firstName = getFirstName(user)
   const initials  = getInitials(user)

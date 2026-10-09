@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEverywhereT } from '@/i18n/app/share/everywhere'
 import { ArrowLeft, Briefcase, Check, Copy, Palette, Share2, Store, UserRound } from 'lucide-react'
@@ -8,6 +8,7 @@ import { huellaSeed } from '@/lib/huella'
 import { profileLook, type ProfileLayout } from '@/modules/profile/lib/profileLook'
 import { createModule, createProfile, friendlyError, loadProfile, publishSpace, recordReferral, updateProfile, uploadMedia } from '../lib/studioApi'
 import type { Referral } from '@/lib/referral'
+import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { socialUrl } from '../lib/moduleCatalog'
 import { toPublicProfile, publicBaseUrl } from '../lib/preview'
 import { normalizeUsername, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
@@ -86,6 +87,15 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
   const [published, setPublished] = useState(false)
   const [copied, setCopied] = useState(false)
 
+  // Métricas (etapa 14): registro terminado (una vez por cuenta en este dispositivo) y cada paso del onboarding
+  useEffect(() => {
+    if (initialProfile) return
+    const key = `mycen.ev.signup.${userId}`
+    try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1') } catch { /* se manda igual */ }
+    trackEvent('signup_completed', { ref: referral?.ref, tipo: referral?.purpose ?? undefined })
+  }, [initialProfile, userId, referral])
+  useEffect(() => { trackEvent('onboarding_step', { step }) }, [step])
+
   const effectiveUsername = profile ? profile.username ?? '' : touchedUsername ? username : normalizeUsername(name)
   const status = useUsernameCheck(profile ? '' : effectiveUsername)
   const host = publicBaseUrl().replace(/^https?:\/\//, '')
@@ -161,6 +171,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
     try {
       await updateProfile(profile.id, { onboarding_step: 5 })
       await publishSpace(profile.id)
+      trackEvent('profile_published', { seconds: secondsSinceSignup() })
       setProfile(await loadProfile(profile.id))
       setPublished(true)
     } catch (e) { setError(friendlyError(e)) } finally { setBusy(false) }

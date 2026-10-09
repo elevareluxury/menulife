@@ -3,6 +3,7 @@ import { useStudio } from '../StudioContext'
 import { useCopy } from '../lib/useCopy'
 import { Button, PageHeader } from '../components/ui'
 import { PLATFORMS, PLATFORM_SRC, useEverywhereT, type Platform } from '@/i18n/app/share/everywhere'
+import { trackEvent } from '@/lib/productEvents'
 
 /**
  * "Poné tu Mycen en todos lados" (V1 · etapa 08): copiar el link y pasos breves por plataforma. Cada plataforma copia
@@ -38,7 +39,7 @@ export function EverywherePage() {
             <ol className="st-everywhere-steps">
               {t.steps[p].map(step => <li key={step}>{step}</li>)}
             </ol>
-            <CopyFor label={t.copyFor(t.names[p])} done={t.copied} url={linkFor(p)} />
+            <CopyFor label={t.copyFor(t.names[p])} done={t.copied} url={linkFor(p)} platform={p} />
           </li>
         ))}
       </ul>
@@ -46,10 +47,10 @@ export function EverywherePage() {
   )
 }
 
-function CopyFor({ label, done, url }: { label: string; done: string; url: string }) {
+function CopyFor({ label, done, url, platform }: { label: string; done: string; url: string; platform: string }) {
   const { copied, copy } = useCopy()
   return (
-    <Button size="sm" onClick={() => copy(url)} aria-label={copied ? done : label} style={{ alignSelf: 'flex-start' }}>
+    <Button size="sm" onClick={() => { trackEvent('share_tool_used', { platform }); void copy(url) }} aria-label={copied ? done : label} style={{ alignSelf: 'flex-start' }}>
       {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />} {copied ? done : label}
     </Button>
   )

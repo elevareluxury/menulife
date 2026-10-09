@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { celebrate } from '../lib/celebrate'
+import { trackEvent } from '@/lib/productEvents'
 
 // "Mi día" (V1 · etapa 11): una fila de life_daily_reviews por persona y fecha local.
 const db = supabase as unknown as SupabaseClient
@@ -69,12 +70,14 @@ export function useDailyReview(date: string) {
 
   const addTaskPriority = useCallback((taskId: string) => {
     if (review.priorities.length >= MAX_PRIORITIES || review.priorities.some(p => p.kind === 'task' && p.task_id === taskId)) return Promise.resolve()
+    trackEvent('life_priorities_set', { count: review.priorities.length + 1 })
     return save({ priorities: [...review.priorities, { id: newId(), kind: 'task', task_id: taskId }] })
   }, [review, save])
 
   const addTextPriority = useCallback((text: string) => {
     const clean = text.trim().slice(0, 200)
     if (!clean || review.priorities.length >= MAX_PRIORITIES) return Promise.resolve()
+    trackEvent('life_priorities_set', { count: review.priorities.length + 1 })
     return save({ priorities: [...review.priorities, { id: newId(), kind: 'text', text: clean, done: false }] })
   }, [review, save])
 
@@ -86,9 +89,10 @@ export function useDailyReview(date: string) {
     return save({ priorities: review.priorities.map(p => (p.id === id && p.kind === 'text' ? { ...p, done: !p.done } : p)) })
   }, [review, save])
 
-  const closeDay = useCallback((reflection: string | null) => save({
-    reflection: reflection?.trim().slice(0, 280) || null, closed_at: new Date().toISOString(),
-  }), [save])
+  const closeDay = useCallback((reflection: string | null) => {
+    trackEvent('life_day_closed')
+    return save({ reflection: reflection?.trim().slice(0, 280) || null, closed_at: new Date().toISOString() })
+  }, [save])
 
   return { review, loading, error, addTaskPriority, addTextPriority, removePriority, toggleTextPriority, closeDay }
 }

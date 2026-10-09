@@ -6,6 +6,7 @@ import { celebrate } from '../lib/celebrate'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import { useToday } from './useToday'
 import { usePrefs } from '@/lib/prefs'
+import { trackEvent } from '@/lib/productEvents'
 import {
   calculateStreak, doneInWeek, frequencyOf, isDone, isScheduledOn, shiftDate, type HabitFrequency,
 } from '../lib/habitStreak'
@@ -182,6 +183,7 @@ export function useHabits() {
     const habit = rawHabits.find(h => h.id === habitId)
     if (habit && isDone(v, habit.target_value) && !isDone(prevValue || undefined, habit.target_value)) {
       celebrate()
+      trackEvent('habit_logged')
       void (async () => {
         const { count: totalLogs } = await db.from('life_habit_logs')
           .select('*', { count: 'exact', head: true }).eq('user_id', user.id)

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
 import { celebrate } from '../lib/celebrate'
+import { trackEvent } from '@/lib/productEvents'
 
 export const LIFE_DATA_UPDATED = 'life-data-updated'
 
@@ -179,7 +180,7 @@ export function useBrain({ archived = false, query = '', types = null }: { archi
       setItems(prev => prev.map(i => (i.id === item.id ? { ...i, is_completed: item.is_completed } : i)))
       throw err
     }
-    if (newDone) celebrate()
+    if (newDone) { celebrate(); if (item.type === 'task') trackEvent('task_completed') }
     void loadCounts()
     if (newDone) {
       void (async () => {

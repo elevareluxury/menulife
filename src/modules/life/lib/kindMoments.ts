@@ -1,6 +1,7 @@
 // Momentos amables de Life OS (V1 · etapa 12): "Qué bueno verte de vuelta" después de 3 días o más sin entrar,
 // "nuevos comienzos" el primer día de la semana y del mes, y el progreso del mes comparado con uno mismo.
 // Las funciones de fechas son puras (las prueba tests/unit/kindMoments.test.ts); lo guardado vive en este dispositivo.
+import { trackEvent } from '@/lib/productEvents'
 
 /** Días sin entrar a partir de los cuales se da la bienvenida (sin mostrar rachas perdidas). */
 export const RETURN_AFTER_DAYS = 3
@@ -62,7 +63,10 @@ const freshKey = (uid: string) => `mycen.life.fresh.${uid}`
 export function registerVisit(uid: string, today: string): boolean {
   const last = get(seenKey(uid))
   if (last !== today) {
-    if (isReturning(last, today)) set(welcomeKey(uid), today)
+    if (isReturning(last, today)) {
+      set(welcomeKey(uid), today)
+      trackEvent('life_returned', { days: daysBetween(last!, today) })
+    }
     set(seenKey(uid), today)
   }
   return get(welcomeKey(uid)) === today
