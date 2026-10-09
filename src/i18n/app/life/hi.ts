@@ -70,7 +70,7 @@ const hi: LifeDict = {
     inactive: n => `निष्क्रिय (${n})`, inactiveHelp: 'ये आपके दिन में नहीं दिखतीं, पर इनका इतिहास बना रहता है।',
     markToday: n => `${n} को आज पूरा मार्क करें`, unmarkToday: n => `${n} को आज से हटाएँ`,
     dayToggle: (n, d, done) => `${n}, ${d}: ${done ? 'पूरा' : 'अधूरा'}। बदलने के लिए टैप करें`,
-    weekHelp: 'इस हफ़्ते भूले हुए दिन को मार्क करने के लिए किसी बिंदु पर टैप करें।',
+    weekHelp: 'इस हफ़्ते का कोई और दिन मार्क करने के लिए किसी बिंदु पर टैप करें।',
     deleteTitle: 'आदत हटाएँ?', deleteText: n => `"${n}" और उसका पूरा इतिहास हटा दिया जाएगा। सिर्फ़ रोकना है तो निष्क्रिय करें।`,
   },
   habitPlus: {
@@ -169,7 +169,7 @@ const hi: LifeDict = {
     detailPlaceholder: 'और कुछ याद रखना है?', save: 'सहेजें', update: 'बदलाव सहेजें',
   },
   agenda: {
-    loading: 'एजेंडा लोड हो रहा है…', loadError: 'आपके काम लोड नहीं हो सके।', prevMonth: 'पिछला महीना', nextMonth: 'अगला महीना',
+    loading: 'एजेंडा लोड हो रहा है…', loadError: 'आपके काम लोड नहीं हो सके। कनेक्शन जाँचें और फिर से कोशिश करें।', prevMonth: 'पिछला महीना', nextMonth: 'अगला महीना',
     calendarOf: m => `${m} का कैलेंडर`, weekdays: ['सो', 'मं', 'बु', 'गु', 'शु', 'श', 'र'],
     dayTasks: n => `${n} काम`, goalDate: 'लक्ष्य तारीख',
     enableTitle: 'Life OS खुला रहने पर रिमाइंडर पाने के लिए सूचनाएँ चालू करें।', enable: 'चालू करें',
@@ -227,14 +227,22 @@ const hi: LifeDict = {
     achievements: 'उपलब्धियाँ', achievementsTitle: 'इस महीने', unlocked: () => 'उपलब्धियाँ अनलॉक हुईं',
     keepGoing: 'बनाते रहें', keepGoingText: 'हर कदम मायने रखता है। आपका अगला सार और भी बेहतर कहानी कहेगा।',
   },
+  kind: {
+    welcomeTitle: 'आपको फिर से देखकर अच्छा लगा',
+    welcomeText: 'कुछ भी पूरा करने की जल्दी नहीं है। आज के लिए एक छोटी चीज़ काफ़ी है:',
+    welcomeNoHabit: 'आज के लिए एक छोटी प्राथमिकता चुनें, बस।',
+    gotIt: 'ठीक है',
+    freshWeek: 'नया हफ़्ता शुरू हो रहा है',
+    freshMonth: 'नया महीना शुरू हो रहा है',
+    freshText: 'अपने लक्ष्यों को देखने और यह चुनने का अच्छा समय कि ऊर्जा कहाँ लगाएँ।',
+    freshAction: 'मेरे लक्ष्य देखें',
+    dismiss: 'बंद करें',
+    monthTitle: 'इस महीने',
+    monthHabits: (n, more) => `इस महीने आपने ${n} दिन आदतें निभाईं${more > 0 ? `, पिछले महीने इसी समय से ${more} दिन ज़्यादा` : ''}।`,
+  },
   achievements: {
-    unlocked: 'उपलब्धि अनलॉक',
-    titles: {
-      first_brain_item: 'पहला नोट', ideas_10: '10 विचार सहेजे', ideas_50: '50 विचार सहेजे', tasks_10: '10 काम पूरे',
-      tasks_50: '50 काम पूरे', first_habit_completed: 'पहली आदत पूरी', habit_streak_7: '7 दिन लगातार',
-      habit_streak_30: '30 दिन लगातार', first_goal: 'पहला लक्ष्य तय', first_goal_completed: 'लक्ष्य पूरा', goals_5: 'पाँच लक्ष्य',
-      first_transaction: 'पहला लेन-देन', first_positive_month: 'बचत वाला महीना',
-    },
+    unlocked: 'आपकी प्रगति',
+    titles: { first_brain_item: 'आपने अपना पहला नोट सहेजा', ideas_10: 'आपने 10 आइडिया सहेजे', ideas_50: 'आपने 50 आइडिया सहेजे', tasks_10: 'आपने 10 काम पूरे किए', tasks_50: 'आपने 50 काम पूरे किए', first_habit_completed: 'आपने अपनी पहली आदत पूरी की', habit_streak_7: 'एक आदत के साथ लगातार 7 दिन', habit_streak_30: 'एक आदत के साथ लगातार 30 दिन', first_goal: 'आपने अपना पहला लक्ष्य तय किया', first_goal_completed: 'आपने एक लक्ष्य हासिल किया', goals_5: 'आपके 5 लक्ष्य हैं', first_transaction: 'आपने अपना पहला लेन-देन लिखा', first_positive_month: 'इस महीने खर्च से ज़्यादा आमदनी हुई' },
   },
   tasks: {
     views: { captures: 'नोट', tasks: 'काम', archive: 'संग्रह' },

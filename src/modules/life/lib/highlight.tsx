@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { tint, colors } from '../design-system'
 
 /**
  * Devuelve el texto con ocurrencias del término resaltadas como <mark>.
@@ -29,8 +30,8 @@ export function highlightTerm(text: string | null, term: string): ReactNode {
         <mark
           key={idx}
           style={{
-            background: 'rgba(129,140,248,0.30)',
-            color: '#fff',
+            background: tint(colors.area.brain, 30),
+            color: colors.text.primary,
             padding: '1px 2px',
             borderRadius: 3,
           }}

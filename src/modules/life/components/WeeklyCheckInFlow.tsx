@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { X, ArrowLeft, ArrowRight, Check, TrendingUp, TrendingDown, Zap } from 'lucide-react'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, ink, tint } from '../design-system'
 import { useGoalCheckins, type ProgressAnswer, type CheckinInput } from '../hooks/useGoalCheckins'
 
 interface Goal {
@@ -21,9 +21,9 @@ const PROGRESS_OPTIONS: {
   icon: React.ComponentType<{ size?: number }>
   color: string
 }[] = [
-  { value: 'si',      label: 'Sí, avancé bien', icon: TrendingUp,   color: '#22C55E' },
-  { value: 'un_poco', label: 'Un poco',          icon: Zap,          color: '#F59E0B' },
-  { value: 'no',      label: 'No avancé',        icon: TrendingDown, color: '#EF4444' },
+  { value: 'si',      label: 'Sí, avancé bien', icon: TrendingUp,   color: colors.semantic.success },
+  { value: 'un_poco', label: 'Un poco',          icon: Zap,          color: colors.area.habits },
+  { value: 'no',      label: 'No avancé',        icon: TrendingDown, color: colors.semantic.error },
 ]
 
 export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCheckInFlowProps) {
@@ -74,7 +74,7 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 200,
-      background: 'rgba(10,11,15,0.97)',
+      background: colors.bg,
       backdropFilter: 'blur(12px)',
       display: 'flex', flexDirection: 'column',
       padding: '16px 16px 16px',
@@ -91,8 +91,8 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
           onClick={onClose}
           style={{
             width: 36, height: 36, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: colors.surface.base,
+            border: `1px solid ${colors.border.glass}`,
             color: colors.text.secondary,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
@@ -115,13 +115,13 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
       {/* Progress bar */}
       <div style={{
         height: 4, borderRadius: 999,
-        background: 'rgba(255,255,255,0.05)',
+        background: colors.surface.base,
         marginBottom: 32, overflow: 'hidden',
       }}>
         <div style={{
           height: '100%',
           width: `${(step / 4) * 100}%`,
-          background: 'linear-gradient(90deg, #6366F1 0%, #818CF8 100%)',
+          background: colors.accent.default,
           transition: 'width 0.3s ease',
         }} />
       </div>
@@ -129,7 +129,7 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
       {/* Goal label */}
       <div style={{
         fontFamily: font, fontSize: 11, fontWeight: 700,
-        color: '#818CF8', letterSpacing: '0.08em',
+        color: colors.area.brain, letterSpacing: '0.08em',
         textTransform: 'uppercase', marginBottom: 8,
       }}>
         Check-in semanal
@@ -163,17 +163,17 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
                     style={{
                       display: 'flex', alignItems: 'center', gap: 14,
                       padding: '16px 18px', borderRadius: radius.lg,
-                      background: selected ? `${opt.color}18` : 'rgba(255,255,255,0.03)',
-                      border: `1.5px solid ${selected ? opt.color : 'rgba(255,255,255,0.08)'}`,
+                      background: selected ? `${tint(ink(opt.color), 9)}` : colors.surface.base,
+                      border: `1.5px solid ${selected ? ink(opt.color) : colors.border.medium}`,
                       cursor: 'pointer', textAlign: 'left',
                       transition: 'all 0.15s',
                     }}
                   >
                     <div style={{
                       width: 40, height: 40, borderRadius: '50%',
-                      background: `${opt.color}22`,
+                      background: `${tint(ink(opt.color), 13)}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: opt.color,
+                      color: ink(opt.color),
                     }}>
                       <Icon size={20} />
                     </div>
@@ -184,7 +184,7 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
                       {opt.label}
                     </span>
                     {selected && (
-                      <Check size={20} strokeWidth={2.5} style={{ color: opt.color }} />
+                      <Check size={20} strokeWidth={2.5} style={{ color: ink(opt.color) }} />
                     )}
                   </button>
                 )
@@ -226,7 +226,7 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
 
       {error && (
         <p style={{
-          fontFamily: font, fontSize: 13, color: '#F87171',
+          fontFamily: font, fontSize: 13, color: colors.semantic.error,
           margin: '12px 0 0', textAlign: 'center',
         }}>
           {error}
@@ -240,8 +240,8 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
             onClick={handleBack}
             style={{
               padding: '14px 20px', borderRadius: radius.full,
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.10)',
+              background: colors.surface.base,
+              border: `1px solid ${colors.border.glass}`,
               color: colors.text.secondary,
               fontFamily: font, fontSize: 15, fontWeight: 600,
               cursor: 'pointer',
@@ -258,10 +258,10 @@ export function WeeklyCheckInFlow({ goal, open, onClose, onCompleted }: WeeklyCh
           style={{
             flex: 1, padding: '14px 0', borderRadius: radius.full,
             background: canGoNext && !saving
-              ? 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)'
-              : 'rgba(255,255,255,0.05)',
+              ? colors.accent.default
+              : colors.surface.base,
             border: 'none',
-            color: canGoNext && !saving ? '#fff' : colors.text.tertiary,
+            color: canGoNext && !saving ? colors.accent.on : colors.text.tertiary,
             fontFamily: font, fontSize: 15, fontWeight: 700,
             cursor: canGoNext && !saving ? 'pointer' : 'not-allowed',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -306,8 +306,8 @@ function TextStep({
         rows={6}
         style={{
           width: '100%', padding: 14,
-          background: 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.10)',
+          background: colors.surface.base,
+          border: `1px solid ${colors.border.glass}`,
           borderRadius: radius.lg,
           color: colors.text.primary,
           fontFamily: font, fontSize: 15,
@@ -317,7 +317,7 @@ function TextStep({
       />
       <p style={{
         fontFamily: font, fontSize: 11,
-        color: value.length > 450 ? '#F87171' : colors.text.tertiary,
+        color: value.length > 450 ? colors.semantic.error : colors.text.tertiary,
         margin: '6px 0 0', textAlign: 'right',
       }}>
         {value.length}/500

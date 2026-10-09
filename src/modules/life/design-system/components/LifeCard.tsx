@@ -15,7 +15,7 @@ const variantStyles: Record<NonNullable<LifeCardProps['variant']>, CSSProperties
     border: `1px solid ${colors.border.subtle}`,
   },
   glass: {
-    background: 'rgba(19,22,28,0.65)',
+    background: colors.surface.base,
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
     border: `1px solid ${colors.border.glass}`,

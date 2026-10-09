@@ -6,10 +6,7 @@ import { Target, Plus, Pencil, Trash2, Pause, Play, CheckCircle2, CalendarDays }
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
-import {
-  LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog,
-  MiniProgressRing, colors, font, radius, stagger, fadeInUp,
-} from '../design-system'
+import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog, MiniProgressRing, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
 import { useGoals, type Goal } from '../hooks/useGoals'
 import { GoalSheet } from '../components/GoalSheet'
 import { GoalDetailSheet } from '../components/GoalDetailSheet'
@@ -56,12 +53,12 @@ function GoalCard({ goal, onOpen, onEdit, onDelete, onToggleStatus }: {
     <LifeCard style={{ opacity: isPaused ? 0.65 : 1, position: 'relative' }}>
       <div aria-hidden="true" style={{
         position: 'absolute', insetInlineStart: 0, top: 0, bottom: 0, width: 3,
-        borderStartStartRadius: radius.xl, borderEndStartRadius: radius.xl, background: goal.color,
+        borderStartStartRadius: radius.xl, borderEndStartRadius: radius.xl, background: ink(goal.color),
       }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingInlineStart: '10px' }}>
         <button type="button" onClick={onOpen} aria-label={t.goals.open(goal.name)}
           style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'start' }}>
-          <MiniProgressRing progress={goal.progress} color={goal.color} size={48} showLabel />
+          <MiniProgressRing progress={goal.progress} color={ink(goal.color)} size={48} showLabel />
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{
               display: 'block', fontFamily: font, fontSize: '15px', fontWeight: 700, color: colors.text.primary,
@@ -70,7 +67,7 @@ function GoalCard({ goal, onOpen, onEdit, onDelete, onToggleStatus }: {
               {goal.name}
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ padding: '2px 7px', borderRadius: radius.full, background: `${statusColor}14`, border: `1px solid ${statusColor}28`, fontFamily: font, fontSize: '10px', fontWeight: 700, color: statusColor }}>
+              <span style={{ padding: '2px 7px', borderRadius: radius.full, background: `${tint(ink(statusColor), 8)}`, border: `1px solid ${tint(ink(statusColor), 16)}`, fontFamily: font, fontSize: '10px', fontWeight: 700, color: statusColor }}>
                 {t.status[goal.status]}
               </span>
               {totalMs > 0 && (
@@ -129,7 +126,7 @@ export function LifeGoalsPage() {
     <LifeScreenContainer>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '24px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.goals}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${tint(colors.area.goals, 9)}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Target size={20} style={{ color: colors.area.goals }} strokeWidth={2} aria-hidden="true" />
           </div>
           <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>
@@ -142,7 +139,7 @@ export function LifeGoalsPage() {
             background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`,
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-          <Plus size={18} style={{ color: colors.accent.default }} strokeWidth={2.5} aria-hidden="true" />
+          <Plus size={18} style={{ color: colors.accent.ink }} strokeWidth={2.5} aria-hidden="true" />
         </button>
       </div>
 
@@ -151,7 +148,7 @@ export function LifeGoalsPage() {
           {[
             { label: t.goals.active,    value: String(activeCount),    color: colors.area.goals },
             { label: t.goals.completed, value: String(completedCount), color: colors.semantic.success },
-            { label: t.goals.progress,  value: `${avgProgress}%`,      color: colors.accent.default },
+            { label: t.goals.progress,  value: `${avgProgress}%`,      color: colors.accent.ink },
           ].map(({ label, value, color }) => (
             <LifeCard key={label} style={{ textAlign: 'center', padding: '12px 8px' }}>
               <p style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color, margin: '0 0 2px' }}>{value}</p>
@@ -194,7 +191,7 @@ export function LifeGoalsPage() {
                         display: 'flex', alignItems: 'center', gap: '10px', minHeight: 40, padding: '8px 4px',
                         background: 'none', border: 'none', cursor: 'pointer', textAlign: 'start', width: '100%', borderRadius: radius.sm,
                       }}>
-                      <CheckCircle2 size={18} style={{ color: goal.color, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />
+                      <CheckCircle2 size={18} style={{ color: ink(goal.color), flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />
                       <span style={{
                         fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.secondary, textDecoration: 'line-through',
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

@@ -5,7 +5,7 @@ import { BarChart2 } from 'lucide-react'
 import { colors, font, radius } from '../design-system'
 import { useGoalCheckins } from '../hooks/useGoalCheckins'
 
-const ACCENT = '#818CF8'
+const ACCENT = colors.area.brain
 
 function answerToScore(answer: string): number {
   if (answer === 'si') return 100
@@ -20,7 +20,7 @@ export function GoalProgressChart({ goalId }: { goalId: string }) {
     return (
       <div style={{
         padding: '28px 20px', textAlign: 'center',
-        background: 'rgba(255,255,255,0.03)',
+        background: colors.surface.base,
         border: `1px solid ${colors.border.subtle}`,
         borderRadius: radius.lg,
       }}>
@@ -45,7 +45,7 @@ export function GoalProgressChart({ goalId }: { goalId: string }) {
     <div style={{
       padding: '14px 14px 8px',
       borderRadius: radius.lg,
-      background: 'rgba(255,255,255,0.03)',
+      background: colors.surface.base,
       border: `1px solid ${colors.border.subtle}`,
     }}>
       <p style={{
@@ -57,7 +57,7 @@ export function GoalProgressChart({ goalId }: { goalId: string }) {
       </p>
       <ResponsiveContainer width="100%" height={160}>
         <LineChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -28 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <CartesianGrid strokeDasharray="3 3" stroke={colors.border.subtle} />
           <XAxis
             dataKey="week"
             tick={{ fill: colors.text.tertiary, fontSize: 10, fontFamily: font }}
@@ -74,8 +74,8 @@ export function GoalProgressChart({ goalId }: { goalId: string }) {
           />
           <Tooltip
             contentStyle={{
-              background: '#1F2937',
-              border: '1px solid rgba(255,255,255,0.10)',
+              background: colors.surface.elevated,
+              border: `1px solid ${colors.border.glass}`,
               borderRadius: 8,
               fontSize: 12,
               fontFamily: font,
@@ -90,7 +90,7 @@ export function GoalProgressChart({ goalId }: { goalId: string }) {
             stroke={ACCENT}
             strokeWidth={2.5}
             dot={{ r: 4, fill: ACCENT, strokeWidth: 0 }}
-            activeDot={{ r: 6, fill: '#fff', stroke: ACCENT, strokeWidth: 2 }}
+            activeDot={{ r: 6, fill: colors.accent.on, stroke: ACCENT, strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

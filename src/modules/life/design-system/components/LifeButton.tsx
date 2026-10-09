@@ -25,8 +25,8 @@ export function LifeButton({ variant = 'primary', size = 'md', children, style, 
 
   const variantStyles = {
     primary: {
-      background: `linear-gradient(135deg, ${colors.accent.default} 0%, #E05A45 100%)`,
-      color: '#fff',
+      background: colors.accent.default,
+      color: colors.accent.on,
       boxShadow: shadow.coralGlow,
     },
     secondary: {
@@ -36,7 +36,7 @@ export function LifeButton({ variant = 'primary', size = 'md', children, style, 
     },
     ghost: {
       background: 'transparent',
-      color: colors.accent.default,
+      color: colors.accent.ink,
     },
   }
 

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
+import { celebrate } from '../lib/celebrate'
+import { LIFE_DATA_UPDATED } from './useBrain'
 import { useToday } from './useToday'
 import { usePrefs } from '@/lib/prefs'
 import {
@@ -111,6 +113,15 @@ export function useHabits() {
     return () => { alive = false; window.clearTimeout(id) }
   }, [load])
 
+  // Recargar cuando otra parte de la pantalla cambia un hábito (por ejemplo, la bienvenida de "Mi día")
+  useEffect(() => {
+    const handler = (e: Event) => {
+      if ((e as CustomEvent<{ module: string }>).detail?.module === 'habits') void load()
+    }
+    window.addEventListener(LIFE_DATA_UPDATED, handler)
+    return () => window.removeEventListener(LIFE_DATA_UPDATED, handler)
+  }, [load])
+
   const habits: Habit[] = useMemo(() => rawHabits.map(h => {
     const values = logMap.get(h.id) ?? new Map<string, number>()
     const done = doneSet(values, h.target_value)
@@ -134,6 +145,12 @@ export function useHabits() {
   const inactiveHabits = useMemo(() => habits.filter(h => !h.is_active), [habits])
   const todayHabits    = useMemo(() => activeHabits.filter(h => h.scheduledToday), [activeHabits])
   const completedToday = useMemo(() => todayHabits.filter(h => h.completedToday).length, [todayHabits])
+  /** Fechas con al menos un hábito cumplido (para "Este mes…", lib/kindMoments.ts) */
+  const doneDates = useMemo(() => {
+    const out = new Set<string>()
+    rawHabits.forEach(h => { const v = logMap.get(h.id); if (v) doneSet(v, h.target_value).forEach(d => out.add(d)) })
+    return out
+  }, [rawHabits, logMap])
 
   // ── Acciones ───────────────────────────────────────────────────────────────
 
@@ -164,6 +181,7 @@ export function useHabits() {
     if (err) { setLocal(habitId, date, prevValue); throw err }
     const habit = rawHabits.find(h => h.id === habitId)
     if (habit && isDone(v, habit.target_value) && !isDone(prevValue || undefined, habit.target_value)) {
+      celebrate()
       void (async () => {
         const { count: totalLogs } = await db.from('life_habit_logs')
           .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
@@ -223,7 +241,7 @@ export function useHabits() {
 
   return {
     habits, activeHabits, inactiveHabits, todayHabits, today,
-    completedToday, totalToday: todayHabits.length,
+    completedToday, totalToday: todayHabits.length, doneDates,
     loading, error, reload: load,
     toggleToday, toggleDay, setDayValue, addToday, createHabit, updateHabit, deleteHabit, toggleActive,
   }

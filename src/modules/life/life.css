@@ -1,0 +1,26 @@
+/* Life OS (V1 · etapa 12): colores de cada área por tema. En Amanecer van más oscuros para que el texto llegue a AA
+   sobre el vidrio claro. --life-ink = cuánto queda del color que eligió la persona (hábito, meta, categoría) al
+   mezclarlo con el texto del tema (ink() en tokens.ts): así se lee en los dos. Lo mide tests/unit/lifeTokens.test.ts. */
+[data-mycen-theme='universo'] {
+  --life-money:  #4ADE80;
+  --life-goals:  #7DB8FF;
+  --life-habits: #FBBF24;
+  --life-brain:  #C4B5FD;
+  --life-ink: 85%;
+}
+[data-mycen-theme='amanecer'] {
+  --life-money:  #166534;
+  --life-goals:  #1D4ED8;
+  --life-habits: #A15C07;
+  --life-brain:  #6D28D9;
+  --life-ink: 55%;
+}
+
+/* Celebración al completar: el tilde aparece con un rebote corto. Apagada con "reducir movimiento". */
+@media (prefers-reduced-motion: no-preference) {
+  .life-pop { animation: life-pop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  @keyframes life-pop {
+    0%   { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+}

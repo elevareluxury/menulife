@@ -22,7 +22,7 @@ export function GoalSelect({ id, value, onChange, enabled = true }: {
         style={{
           width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: radius.md,
           background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
-          color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none', colorScheme: 'dark',
+          color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none', colorScheme: 'inherit',
         }}>
         <option value="">{t.taskSheet.noGoal}</option>
         {goals.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}

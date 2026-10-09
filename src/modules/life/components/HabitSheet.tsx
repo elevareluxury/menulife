@@ -3,7 +3,7 @@ import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { usePrefs } from '@/lib/prefs'
-import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
+import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import { LIFE_COLORS, HABIT_ICONS, getHabitIcon } from '../lib/lifePalette'
 import type { Habit, HabitFormData } from '../hooks/useHabits'
 import { GoalSelect } from './GoalSelect'
@@ -18,7 +18,7 @@ interface HabitSheetProps {
 const DEFAULT: HabitFormData = {
   name: '',
   icon: 'Star',
-  color: '#F4705A',
+  color: colors.accent.ink,
   frequency: { type: 'daily', days: [0, 1, 2, 3, 4, 5, 6] },
   target_value: null, unit: null, anchor: null, reminder_time: null, reminder_enabled: false,
 }
@@ -113,10 +113,10 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <div style={{
           width: 64, height: 64, borderRadius: radius.lg,
-          background: `${form.color}22`, border: `2px solid ${form.color}44`,
+          background: `${tint(ink(form.color), 13)}`, border: `2px solid ${tint(ink(form.color), 27)}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          {createElement(getHabitIcon(form.icon), { size: 28, style: { color: form.color }, strokeWidth: 2, 'aria-hidden': true })}
+          {createElement(getHabitIcon(form.icon), { size: 28, style: { color: ink(form.color) }, strokeWidth: 2, 'aria-hidden': true })}
         </div>
       </div>
 
@@ -140,11 +140,11 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
               onClick={() => setForm(f => ({ ...f, icon: name }))}
               style={{
                 aspectRatio: '1', minHeight: 36, borderRadius: radius.sm,
-                background: form.icon === name ? `${form.color}25` : colors.surface.high,
-                border: `1.5px solid ${form.icon === name ? form.color : 'transparent'}`,
+                background: form.icon === name ? `${tint(ink(form.color), 15)}` : colors.surface.high,
+                border: `1.5px solid ${form.icon === name ? ink(form.color) : 'transparent'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
               }}>
-              <Icon size={17} style={{ color: form.icon === name ? form.color : colors.text.tertiary }} strokeWidth={2} aria-hidden="true" />
+              <Icon size={17} style={{ color: form.icon === name ? ink(form.color) : colors.text.tertiary }} strokeWidth={2} aria-hidden="true" />
             </button>
           ))}
         </div>
@@ -173,8 +173,8 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
               <button key={m} type="button" role="radio" aria-checked={on} onClick={() => setMode(m)}
                 style={{
                   flex: 1, minHeight: 40, borderRadius: radius.full, cursor: 'pointer', fontFamily: font, fontSize: '13px', fontWeight: 700,
-                  background: on ? `${form.color}20` : colors.surface.high, border: `1.5px solid ${on ? form.color : 'transparent'}`,
-                  color: on ? form.color : colors.text.secondary,
+                  background: on ? `${tint(ink(form.color), 13)}` : colors.surface.high, border: `1.5px solid ${on ? ink(form.color) : 'transparent'}`,
+                  color: on ? ink(form.color) : colors.text.secondary,
                 }}>
                 {m === 'days' ? p.modeDays : p.modeTimes}
               </button>
@@ -196,9 +196,9 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
                   <button key={day} type="button" aria-pressed={active} aria-label={dayName(day, locale)} onClick={() => toggleDay(day)}
                     style={{
                       flex: 1, height: 40, borderRadius: radius.sm,
-                      background: active ? `${form.color}20` : colors.surface.high,
-                      border: `1.5px solid ${active ? form.color : 'transparent'}`,
-                      color: active ? form.color : colors.text.tertiary,
+                      background: active ? `${tint(ink(form.color), 13)}` : colors.surface.high,
+                      border: `1.5px solid ${active ? ink(form.color) : 'transparent'}`,
+                      color: active ? ink(form.color) : colors.text.tertiary,
                       fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase',
                     }}>
                     {dayInitial(day, locale)}
@@ -213,7 +213,7 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
       <div style={{ marginBottom: '20px' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', minHeight: 40 }}>
           <input type="checkbox" checked={withQty} onChange={e => setWithQty(e.target.checked)}
-            style={{ width: 20, height: 20, accentColor: form.color }} />
+            style={{ width: 20, height: 20, accentColor: ink(form.color) }} />
           <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary }}>{p.quantity}</span>
         </label>
         {withQty ? (
@@ -243,14 +243,14 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', minHeight: 40 }}>
           <input type="checkbox" checked={!!form.reminder_enabled}
             onChange={e => setForm(f => ({ ...f, reminder_enabled: e.target.checked, reminder_time: f.reminder_time ?? '09:00' }))}
-            style={{ width: 20, height: 20, accentColor: form.color }} />
+            style={{ width: 20, height: 20, accentColor: ink(form.color) }} />
           <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary }}>{p.reminder}</span>
         </label>
         {form.reminder_enabled && (
           <div style={{ marginTop: 8 }}>
             <label htmlFor="habit-reminder" style={label}>{p.reminderTime}</label>
             <input id="habit-reminder" type="time" value={form.reminder_time ?? ''}
-              onChange={e => setForm(f => ({ ...f, reminder_time: e.target.value || null }))} style={{ ...fieldStyle, colorScheme: 'dark' }} />
+              onChange={e => setForm(f => ({ ...f, reminder_time: e.target.value || null }))} style={{ ...fieldStyle, colorScheme: 'inherit' }} />
           </div>
         )}
         <p style={hintStyle}>{p.reminderHint}</p>

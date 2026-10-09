@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { celebrate } from '../lib/celebrate'
 
 // "Mi día" (V1 · etapa 11): una fila de life_daily_reviews por persona y fecha local.
 const db = supabase as unknown as SupabaseClient
@@ -79,9 +80,11 @@ export function useDailyReview(date: string) {
 
   const removePriority = useCallback((id: string) => save({ priorities: review.priorities.filter(p => p.id !== id) }), [review, save])
 
-  const toggleTextPriority = useCallback((id: string) => save({
-    priorities: review.priorities.map(p => (p.id === id && p.kind === 'text' ? { ...p, done: !p.done } : p)),
-  }), [review, save])
+  const toggleTextPriority = useCallback((id: string) => {
+    const target = review.priorities.find(p => p.id === id)
+    if (target?.kind === 'text' && !target.done) celebrate()
+    return save({ priorities: review.priorities.map(p => (p.id === id && p.kind === 'text' ? { ...p, done: !p.done } : p)) })
+  }, [review, save])
 
   const closeDay = useCallback((reflection: string | null) => save({
     reflection: reflection?.trim().slice(0, 280) || null, closed_at: new Date().toISOString(),

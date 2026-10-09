@@ -43,9 +43,9 @@ function CheckBox({ done, label, onClick }: { done: boolean; label: string; onCl
     <button type="button" role="checkbox" aria-checked={done} aria-label={label} onClick={onClick}
       style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
       <span aria-hidden="true" style={{
-        width: 22, height: 22, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+        width: 22, height: 22, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.accent.on,
         border: `2px solid ${done ? colors.semantic.success : colors.border.medium}`, background: done ? colors.semantic.success : 'transparent',
-      }}>{done && <Check size={13} strokeWidth={3} />}</span>
+      }}>{done && <Check className="life-pop" size={13} strokeWidth={3} />}</span>
     </button>
   )
 }
@@ -85,7 +85,7 @@ export function MyDaySection() {
       {firstDay && <MyDayEmpty onAddTask={() => navigate('/life/brain?vista=tareas')} />}
       <section style={card} aria-labelledby="myday-priorities">
         <h2 id="myday-priorities" style={{ ...title, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Star size={15} aria-hidden="true" style={{ color: colors.accent.default }} /> {m.prioritiesTitle}
+          <Star size={15} aria-hidden="true" style={{ color: colors.accent.ink }} /> {m.prioritiesTitle}
           <span style={{ marginInlineStart: 'auto', fontSize: '12px', fontWeight: 700, color: colors.text.tertiary }}>{review.priorities.length}/{MAX_PRIORITIES}</span>
         </h2>
         {!review.priorities.length && <p style={muted}>{m.prioritiesHint}</p>}
@@ -134,13 +134,13 @@ export function MyDaySection() {
 
       <section style={{ ...card, display: 'flex', alignItems: 'center', gap: 12, ...(evening && !review.closed_at ? { borderColor: colors.accent.default } : {}) }}
         aria-label={review.closed_at ? m.closed : m.closeDay}>
-        <Moon size={20} aria-hidden="true" style={{ color: evening ? colors.accent.default : colors.text.tertiary, flexShrink: 0 }} />
+        <Moon size={20} aria-hidden="true" style={{ color: evening ? colors.accent.ink : colors.text.tertiary, flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ ...title, fontSize: '14px' }}>{review.closed_at ? m.closed : m.closeDay}</p>
           <p style={{ ...muted, margin: '2px 0 0' }}>{review.closed_at ? m.closedText : m.closeHint}</p>
         </div>
         <button type="button" onClick={() => setReviewOpen(true)}
-          style={{ ...chipBtn, ...(evening && !review.closed_at ? { background: colors.accent.default, borderColor: colors.accent.default, color: '#fff' } : {}) }}>
+          style={{ ...chipBtn, ...(evening && !review.closed_at ? { background: colors.accent.default, borderColor: colors.accent.default, color: colors.accent.on } : {}) }}>
           {review.closed_at ? m.reopen : m.closeDay}
         </button>
       </section>
@@ -238,7 +238,7 @@ function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyRevie
               <p role="status" style={{ ...muted, display: 'flex', alignItems: 'center', gap: 8, color: colors.text.primary, fontWeight: 700, fontSize: '15px' }}>
                 <motion.span aria-hidden="true" initial={{ scale: 0.4, rotate: -20, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 420, damping: 14 }} style={{ display: 'inline-flex' }}>
-                  <Sparkles size={18} style={{ color: colors.accent.default }} />
+                  <Sparkles size={18} style={{ color: colors.accent.ink }} />
                 </motion.span>
                 {m.celebrate(achieved.length)}
               </p>
@@ -276,7 +276,7 @@ function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyRevie
                     </div>
                     {dateFor === item.key && (
                       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                        <input type="date" aria-label={m.changeDate} value={newDate} min={tomorrow} onChange={e => setNewDate(e.target.value)} style={{ ...input, colorScheme: 'dark' }} />
+                        <input type="date" aria-label={m.changeDate} value={newDate} min={tomorrow} onChange={e => setNewDate(e.target.value)} style={{ ...input, colorScheme: 'inherit' }} />
                         <button type="button" style={chipBtn} disabled={!newDate} onClick={() => { void move(item, newDate) }}>{t.common.save}</button>
                       </div>
                     )}

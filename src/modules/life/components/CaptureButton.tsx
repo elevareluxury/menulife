@@ -12,7 +12,7 @@ import { TaskSheet } from './TaskSheet'
 import { taskColumns, type TaskFormData } from '../hooks/useTasks'
 import { enqueue, isOfflineError, type OutboxItem } from '../lib/outbox'
 import toast from 'react-hot-toast'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, ink, tint, shadow } from '../design-system'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
 import { useLifeT } from '@/i18n/app/life'
 import type { BrainItemType } from '../hooks/useBrain'
@@ -24,9 +24,9 @@ const db = supabase as any
 
 // ── Actions config ────────────────────────────────────────────────────────────
 const ACTIONS = [
-  { id: 'idea',        icon: Lightbulb,   color: '#8B5CF6' },
-  { id: 'note',        icon: StickyNote,  color: '#3B82F6' },
-  { id: 'task',        icon: CheckSquare, color: '#22C55E' },
+  { id: 'idea',        icon: Lightbulb,   color: colors.area.brain },
+  { id: 'note',        icon: StickyNote,  color: colors.area.goals },
+  { id: 'task',        icon: CheckSquare, color: colors.semantic.success },
   { id: 'goal',        icon: Target,      color: colors.area.goals },
   { id: 'transaction', icon: TrendingUp,  color: colors.area.money },
 ] as const
@@ -140,7 +140,7 @@ export function CaptureButton() {
             onClick={() => setOpen(false)}
             style={{
               position: 'fixed', inset: 0, zIndex: 48,
-              background: 'rgba(0,0,0,0.45)',
+              background: 'var(--my-scrim)',
               backdropFilter: 'blur(3px)',
               WebkitBackdropFilter: 'blur(3px)',
             }}
@@ -172,12 +172,12 @@ export function CaptureButton() {
                   display: 'flex', alignItems: 'center', gap: '10px',
                   padding: '10px 16px 10px 12px',
                   borderRadius: radius.full,
-                  border: `1px solid rgba(255,255,255,0.07)`,
+                  border: `1px solid ${colors.border.glass}`,
                   cursor: 'pointer',
-                  background: 'rgba(19,22,28,0.97)',
+                  background: colors.surface.elevated,
                   backdropFilter: 'blur(20px)',
                   WebkitBackdropFilter: 'blur(20px)',
-                  boxShadow: `0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px ${action.color}20`,
+                  boxShadow: `0 4px 20px var(--my-scrim), 0 0 0 1px ${tint(ink(action.color), 13)}`,
                   fontFamily: font,
                   fontSize: '13px', fontWeight: 700,
                   color: colors.text.primary,
@@ -186,11 +186,11 @@ export function CaptureButton() {
               >
                 <div style={{
                   width: 28, height: 28, borderRadius: '8px',
-                  background: `${action.color}18`,
+                  background: `${tint(ink(action.color), 9)}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  <action.icon size={14} style={{ color: action.color }} strokeWidth={2.5} />
+                  <action.icon size={14} style={{ color: ink(action.color) }} strokeWidth={2.5} />
                 </div>
                 {t.capture[action.id]}
               </motion.button>
@@ -210,12 +210,12 @@ export function CaptureButton() {
           width: '52px', height: '52px',
           borderRadius: '9999px', border: 'none', cursor: 'pointer',
           background: open
-            ? 'rgba(60,62,72,0.97)'
-            : 'linear-gradient(135deg, #F4705A 0%, #E05A45 100%)',
-          color: '#fff',
+            ? colors.surface.elevated
+            : colors.accent.default,
+          color: colors.accent.on,
           boxShadow: open
-            ? '0 4px 16px rgba(0,0,0,0.4)'
-            : '0 4px 24px rgba(244,112,90,0.50)',
+            ? shadow.elevated
+            : shadow.coralGlow,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 49,
           transition: 'background 0.22s ease, box-shadow 0.22s ease',

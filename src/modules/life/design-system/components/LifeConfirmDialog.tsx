@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
-import { colors, font, radius, shadow } from '../tokens'
+import { colors, font, radius, shadow, tint } from '../tokens'
 import { useLifeT } from '@/i18n/app/life'
 
 interface LifeConfirmDialogProps {
@@ -36,7 +36,7 @@ export function LifeConfirmDialog({
             onClick={onCancel}
             style={{
               position: 'fixed', inset: 0, zIndex: 300,
-              background: 'rgba(0,0,0,0.7)',
+              background: 'var(--my-scrim)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
             }}
@@ -64,7 +64,7 @@ export function LifeConfirmDialog({
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
                 <div style={{
                   width: 44, height: 44, borderRadius: radius.md,
-                  background: 'rgba(239,68,68,0.1)',
+                  background: tint(colors.semantic.error, 10),
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <AlertTriangle size={20} style={{ color: colors.semantic.error }} strokeWidth={2} />
@@ -106,7 +106,7 @@ export function LifeConfirmDialog({
                   flex: 1, padding: '11px', borderRadius: radius.md,
                   background: danger ? colors.semantic.error : colors.accent.default,
                   border: 'none',
-                  color: '#fff',
+                  color: colors.accent.on,
                   fontFamily: font, fontSize: '14px', fontWeight: 700,
                   cursor: 'pointer', transition: 'opacity 0.15s',
                 }}

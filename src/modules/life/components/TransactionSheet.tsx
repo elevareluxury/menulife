@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
-import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
+import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import { useLocaleStore } from '@/store/localeStore'
 import { usePrefs } from '@/lib/prefs'
 import { currencySymbol } from '@/lib/currencies'
@@ -150,7 +150,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
               padding: '12px 14px 12px 48px', width: '220px',
               borderRadius: radius.md,
               background: colors.surface.high,
-              border: `1.5px solid ${error && !amountStr ? colors.semantic.error : isIncome ? colors.semantic.success + '40' : colors.semantic.error + '40'}`,
+              border: `1.5px solid ${error && !amountStr ? colors.semantic.error : isIncome ? tint(ink(colors.semantic.success), 25) : tint(ink(colors.semantic.error), 25)}`,
               color: isIncome ? colors.semantic.success : colors.semantic.error,
               fontFamily: font, fontSize: '28px', fontWeight: 800,
               textAlign: 'right', outline: 'none',
@@ -173,7 +173,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
                   minHeight: 36, padding: '6px 14px', borderRadius: radius.full, cursor: 'pointer',
                   background: form.currency === c ? colors.accent.soft : colors.surface.high,
                   border: `1px solid ${form.currency === c ? colors.accent.default : colors.border.subtle}`,
-                  color: form.currency === c ? colors.accent.default : colors.text.secondary,
+                  color: form.currency === c ? colors.accent.ink : colors.text.secondary,
                   fontFamily: font, fontSize: '13px', fontWeight: 700,
                 }}>
                 {c}
@@ -197,8 +197,8 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
               onClick={() => setForm(f => ({ ...f, category: cat }))}
               style={{
                 padding: '6px 12px', borderRadius: radius.full,
-                background: form.category === cat ? (isIncome ? colors.semantic.success + '20' : colors.semantic.error + '20') : colors.surface.high,
-                border: `1px solid ${form.category === cat ? (isIncome ? colors.semantic.success + '50' : colors.semantic.error + '50') : colors.border.subtle}`,
+                background: form.category === cat ? (isIncome ? tint(ink(colors.semantic.success), 13) : tint(ink(colors.semantic.error), 13)) : colors.surface.high,
+                border: `1px solid ${form.category === cat ? (isIncome ? tint(ink(colors.semantic.success), 31) : tint(ink(colors.semantic.error), 31)) : colors.border.subtle}`,
                 color: form.category === cat ? (isIncome ? colors.semantic.success : colors.semantic.error) : colors.text.secondary,
                 fontFamily: font, fontSize: '12px', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.15s',
@@ -249,7 +249,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
             border: `1px solid ${colors.border.subtle}`,
             color: colors.text.primary,
             fontFamily: font, fontSize: '14px', outline: 'none',
-            colorScheme: 'dark',
+            colorScheme: 'inherit',
           }}
         />
       </div>

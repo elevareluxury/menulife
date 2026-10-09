@@ -1,5 +1,5 @@
 import { Lightbulb, StickyNote, CheckSquare } from 'lucide-react'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, ink, tint } from '../design-system'
 
 interface Props {
   selected: string[]
@@ -8,9 +8,9 @@ interface Props {
 }
 
 const TYPES = [
-  { key: 'idea', label: 'Ideas',  icon: Lightbulb,    color: '#8B5CF6' },
-  { key: 'note', label: 'Notas',  icon: StickyNote,   color: '#3B82F6' },
-  { key: 'task', label: 'Tareas', icon: CheckSquare,  color: '#22C55E' },
+  { key: 'idea', label: 'Ideas',  icon: Lightbulb,    color: colors.area.brain },
+  { key: 'note', label: 'Notas',  icon: StickyNote,   color: colors.area.goals },
+  { key: 'task', label: 'Tareas', icon: CheckSquare,  color: colors.semantic.success },
 ] as const
 
 export function BrainTypeFilters({ selected, onChange, counts }: Props) {
@@ -35,9 +35,9 @@ export function BrainTypeFilters({ selected, onChange, counts }: Props) {
             style={{
               display: 'flex', alignItems: 'center', gap: 5,
               padding: '7px 13px', borderRadius: radius.full,
-              background: active ? `${t.color}20` : colors.surface.high,
-              border: `1px solid ${active ? t.color + '60' : colors.border.medium}`,
-              color: active ? t.color : colors.text.secondary,
+              background: active ? `${tint(ink(t.color), 13)}` : colors.surface.high,
+              border: `1px solid ${active ? tint(ink(t.color), 38) : colors.border.medium}`,
+              color: active ? ink(t.color) : colors.text.secondary,
               fontFamily: font, fontSize: 12, fontWeight: 700,
               cursor: 'pointer', whiteSpace: 'nowrap',
               flexShrink: 0, transition: 'all 0.15s',
@@ -48,8 +48,8 @@ export function BrainTypeFilters({ selected, onChange, counts }: Props) {
             {count !== undefined && count > 0 && (
               <span style={{
                 marginLeft: 2, padding: '1px 5px', borderRadius: 999,
-                background: active ? t.color : 'rgba(255,255,255,0.10)',
-                color: active ? '#0A0B0F' : colors.text.tertiary,
+                background: active ? ink(t.color) : colors.border.medium,
+                color: active ? colors.accent.on : colors.text.tertiary,
                 fontSize: 10, fontWeight: 800,
               }}>
                 {count}

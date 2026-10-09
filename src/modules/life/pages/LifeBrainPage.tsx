@@ -9,10 +9,7 @@ import {
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
-import {
-  LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState,
-  colors, font, radius, stagger, fadeInUp,
-} from '../design-system'
+import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
 import { useBrain, type BrainItem, type BrainItemType } from '../hooks/useBrain'
 import { BrainItemSheet } from '../components/BrainItemSheet'
 import { ActionMenu } from '../components/ActionMenu'
@@ -22,9 +19,9 @@ import { shiftDate } from '../lib/habitStreak'
 import { TasksView } from '../components/TasksView'
 
 const TYPE_META = {
-  idea: { icon: Lightbulb,   color: '#8B5CF6' },
-  note: { icon: StickyNote,  color: '#3B82F6' },
-  task: { icon: CheckSquare, color: '#22C55E' },
+  idea: { icon: Lightbulb,   color: colors.area.brain },
+  note: { icon: StickyNote,  color: colors.area.goals },
+  task: { icon: CheckSquare, color: colors.semantic.success },
 } as const
 
 const FILTERS = ['todo', 'idea', 'note'] as const
@@ -76,20 +73,20 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
             style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
             <span aria-hidden="true" style={{
               width: 22, height: 22, borderRadius: '50%',
-              border: `2px solid ${item.is_completed ? meta.color : colors.border.medium}`,
-              background: item.is_completed ? meta.color : 'transparent',
+              border: `2px solid ${item.is_completed ? ink(meta.color) : colors.border.medium}`,
+              background: item.is_completed ? ink(meta.color) : 'transparent',
               display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s',
             }}>
-              {item.is_completed && <Check size={12} strokeWidth={3} style={{ color: '#fff' }} />}
+              {item.is_completed && <Check className="life-pop" size={12} strokeWidth={3} style={{ color: colors.accent.on }} />}
             </span>
           </button>
         ) : (
           <span aria-label={t.brain.types[item.type]} style={{
             width: 32, height: 32, margin: 4, borderRadius: radius.sm, flexShrink: 0,
-            background: `${meta.color}14`, border: `1px solid ${meta.color}25`,
+            background: `${tint(ink(meta.color), 8)}`, border: `1px solid ${tint(ink(meta.color), 15)}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Icon size={15} style={{ color: meta.color }} strokeWidth={2} aria-hidden="true" />
+            <Icon size={15} style={{ color: ink(meta.color) }} strokeWidth={2} aria-hidden="true" />
           </span>
         )}
 
@@ -115,7 +112,7 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
           {isTask && (item.due_date || item.is_focus) && (
             <p style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary, margin: '2px 0 0' }}>
               {item.is_focus && !item.is_completed && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: colors.accent.default }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: colors.accent.ink }}>
                   <Star size={11} fill="currentColor" aria-hidden="true" />{t.tasks.focus}
                 </span>
               )}
@@ -130,7 +127,7 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
           )}
           {long && (
             <button type="button" onClick={() => setExpanded(v => !v)} aria-expanded={expanded}
-              style={{ marginTop: 4, padding: '4px 0', minHeight: 28, background: 'none', border: 'none', cursor: 'pointer', fontFamily: font, fontSize: 12, fontWeight: 700, color: meta.color }}>
+              style={{ marginTop: 4, padding: '4px 0', minHeight: 28, background: 'none', border: 'none', cursor: 'pointer', fontFamily: font, fontSize: 12, fontWeight: 700, color: ink(meta.color) }}>
               {expanded ? t.brain.readLess : t.brain.readMore}
             </button>
           )}
@@ -187,7 +184,7 @@ function QuickCapture({ onCapture }: { onCapture: (type: BrainItemType, title: s
             cursor: title.trim() ? 'pointer' : 'default',
             display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: !title.trim() ? 0.4 : 1,
           }}>
-          <Check size={16} strokeWidth={3} style={{ color: title.trim() ? '#fff' : colors.text.tertiary }} aria-hidden="true" />
+          <Check size={16} strokeWidth={3} style={{ color: title.trim() ? colors.accent.on : colors.text.tertiary }} aria-hidden="true" />
         </button>
       </div>
       <div role="radiogroup" aria-label={t.brain.captureType} style={{ display: 'flex', gap: '6px' }}>
@@ -197,9 +194,9 @@ function QuickCapture({ onCapture }: { onCapture: (type: BrainItemType, title: s
             <button key={k} type="button" role="radio" aria-checked={type === k} onClick={() => setType(k)}
               style={{
                 minHeight: 32, padding: '4px 12px', borderRadius: radius.full,
-                background: type === k ? `${meta.color}18` : 'transparent',
-                border: `1px solid ${type === k ? meta.color + '40' : colors.border.subtle}`,
-                color: type === k ? meta.color : colors.text.secondary,
+                background: type === k ? `${tint(ink(meta.color), 9)}` : 'transparent',
+                border: `1px solid ${type === k ? tint(ink(meta.color), 25) : colors.border.subtle}`,
+                color: type === k ? ink(meta.color) : colors.text.secondary,
                 fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: '4px',
               }}>
@@ -279,7 +276,7 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
             <button key={k} type="button" onClick={() => (k === 'task' ? onShowTasks() : setFilter(k))}
               style={{
                 textAlign: 'center', padding: '10px 6px', cursor: 'pointer', borderRadius: radius.xl,
-                background: colors.surface.base, border: `1px solid ${filter === k ? TYPE_META[k].color + '50' : colors.border.subtle}`,
+                background: colors.surface.base, border: `1px solid ${filter === k ? tint(ink(TYPE_META[k].color), 31) : colors.border.subtle}`,
               }}>
               <span style={{ display: 'block', fontFamily: font, fontSize: '20px', fontWeight: 800, color: TYPE_META[k].color, margin: '0 0 1px' }}>{value}</span>
               <span style={{ display: 'block', fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.tertiary, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
@@ -300,7 +297,7 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
                 minHeight: 36, padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
                 background: filter === f ? colors.area.brain : colors.surface.high,
                 border: `1px solid ${filter === f ? colors.area.brain : colors.border.subtle}`,
-                color: filter === f ? '#fff' : colors.text.secondary,
+                color: filter === f ? colors.accent.on : colors.text.secondary,
                 fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer',
               }}>
               {t.brain.filters[f]}
@@ -381,7 +378,7 @@ export function LifeBrainPage() {
     <LifeScreenContainer>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: '24px', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-          <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.brain}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${tint(colors.area.brain, 9)}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Zap size={20} style={{ color: colors.area.brain }} strokeWidth={2} aria-hidden="true" />
           </div>
           <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -393,8 +390,8 @@ export function LifeBrainPage() {
             aria-label={searchOpen ? t.brain.closeSearch : t.brain.search} aria-expanded={searchOpen}
             style={{
               width: 40, height: 40, borderRadius: radius.full, flexShrink: 0,
-              background: searchOpen ? colors.area.brain + '18' : 'transparent',
-              border: `1px solid ${searchOpen ? colors.area.brain + '40' : colors.border.subtle}`,
+              background: searchOpen ? tint(ink(colors.area.brain), 9) : 'transparent',
+              border: `1px solid ${searchOpen ? tint(ink(colors.area.brain), 25) : colors.border.subtle}`,
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: searchOpen ? colors.area.brain : colors.text.secondary,
             }}>
@@ -411,7 +408,7 @@ export function LifeBrainPage() {
           <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}
             style={{
               flex: 1, minHeight: 40, padding: '9px 8px', borderRadius: radius.full, border: 'none', cursor: 'pointer',
-              background: view === v ? `${colors.area.brain}22` : 'transparent',
+              background: view === v ? `${tint(colors.area.brain, 13)}` : 'transparent',
               color: view === v ? colors.area.brain : colors.text.secondary,
               fontFamily: font, fontSize: '13px', fontWeight: 700,
             }}>

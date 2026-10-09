@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { colors, font, radius } from '../tokens'
+import { colors, font, radius, tint } from '../tokens'
 
 interface LifeEmptyStateProps {
   icon: LucideIcon
@@ -47,11 +47,11 @@ export function LifeEmptyState({
             borderRadius: radius.full,
             background: colors.accent.soft,
             border: `1px solid ${colors.accent.soft}`,
-            color: colors.accent.default,
+            color: colors.accent.ink,
             fontFamily: font, fontSize: '12px', fontWeight: 700,
             cursor: 'pointer', transition: 'background 0.15s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,112,90,0.2)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = tint(colors.accent.default, 20) }}
           onMouseLeave={e => { e.currentTarget.style.background = colors.accent.soft }}
         >
           {action.label}

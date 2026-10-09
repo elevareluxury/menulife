@@ -97,7 +97,7 @@ export function LifeSettingsPage() {
           <h2 style={label}>{t.settings.currency}</h2>
           <button type="button" onClick={() => setPicker('main')}
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '10px 14px', borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`, color: colors.text.primary, fontFamily: font, cursor: 'pointer', textAlign: 'start' }}>
-            <span style={{ fontWeight: 800, color: colors.accent.default }}>{prefs.currency}</span>
+            <span style={{ fontWeight: 800, color: colors.accent.ink }}>{prefs.currency}</span>
             <span style={{ flex: 1, fontSize: 14 }}>{currencyName(prefs.currency, locale)}</span>
             <ChevronRight size={16} aria-hidden="true" className="flip-rtl" style={{ color: colors.text.tertiary }} />
           </button>
@@ -128,7 +128,7 @@ export function LifeSettingsPage() {
         <LifeCard>
           <h2 style={label}>{t.settings.timezone}</h2>
           <select value={prefs.timezone} onChange={e => save({ timezone: e.target.value })} aria-label={t.settings.timezone}
-            style={{ width: '100%', minHeight: 48, padding: '10px 12px', borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`, color: colors.text.primary, fontFamily: font, fontSize: 16, colorScheme: 'dark' }}>
+            style={{ width: '100%', minHeight: 48, padding: '10px 12px', borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`, color: colors.text.primary, fontFamily: font, fontSize: 16, colorScheme: 'inherit' }}>
             {zones.map(z => <option key={z} value={z}>{z.replace(/_/g, ' ')}</option>)}
           </select>
           <p style={help}>{t.settings.timezoneHelp}</p>
@@ -140,7 +140,7 @@ export function LifeSettingsPage() {
                 style={{ flex: 1, minHeight: 44, borderRadius: radius.md, cursor: 'pointer', fontFamily: font, fontSize: 14, fontWeight: 600,
                   background: prefs.week_start === v ? colors.accent.soft : colors.surface.high,
                   border: `1px solid ${prefs.week_start === v ? colors.accent.default : colors.border.subtle}`,
-                  color: prefs.week_start === v ? colors.accent.default : colors.text.primary }}>
+                  color: prefs.week_start === v ? colors.accent.ink : colors.text.primary }}>
                 {text}
               </button>
             ))}

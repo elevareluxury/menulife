@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
+import { celebrate } from '../lib/celebrate'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import { isValidRecurrence, nextOccurrence, type Recurrence } from '../lib/recurrence'
 
@@ -223,6 +224,7 @@ export function useTasks() {
       setTasks(prev => prev.map(t => (t.id === task.id ? task : t)))
       throw err
     }
+    if (done) celebrate()
     if (user) await rollRecurrence(task, done)
     if (done && user) {
       void (async () => {

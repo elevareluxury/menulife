@@ -70,7 +70,7 @@ const zh: LifeDict = {
     inactive: n => `已停用（${n}）`, inactiveHelp: '不会出现在你的每日列表中，但会保留历史记录。',
     markToday: n => `将"${n}"标记为今天已完成`, unmarkToday: n => `取消"${n}"今天的完成`,
     dayToggle: (n, d, done) => `${n}，${d}：${done ? '已完成' : '未完成'}。点按切换`,
-    weekHelp: '点按圆点，可补记本周忘记打卡的日子。',
+    weekHelp: '点按圆点，可标记本周的其他日子。',
     deleteTitle: '删除习惯？', deleteText: n => `"${n}"及其全部历史记录将被删除。如果只是想暂停，请停用它。`,
   },
   habitPlus: {
@@ -169,7 +169,7 @@ const zh: LifeDict = {
     detailPlaceholder: '还有什么想记住的？', save: '保存', update: '保存修改',
   },
   agenda: {
-    loading: '正在加载日程…', loadError: '无法加载你的任务。', prevMonth: '上个月', nextMonth: '下个月',
+    loading: '正在加载日程…', loadError: '无法加载你的任务。请检查网络后重试。', prevMonth: '上个月', nextMonth: '下个月',
     calendarOf: m => `${m}日历`, weekdays: ['一', '二', '三', '四', '五', '六', '日'],
     dayTasks: n => `${n} 个任务`, goalDate: '目标日期',
     enableTitle: '开启通知，在 Life OS 打开时接收提醒。', enable: '开启',
@@ -227,14 +227,22 @@ const zh: LifeDict = {
     achievements: '成就', achievementsTitle: '本月', unlocked: () => '个成就已解锁',
     keepGoing: '继续前进', keepGoingText: '每一次行动都算数。下一次回顾会讲出更好的故事。',
   },
+  kind: {
+    welcomeTitle: '很高兴再见到你',
+    welcomeText: '不用补上任何事。今天只要做一件小事就够了：',
+    welcomeNoHabit: '为今天选一个小小的优先事项就好。',
+    gotIt: '知道了',
+    freshWeek: '新的一周开始了',
+    freshMonth: '新的一个月开始了',
+    freshText: '正是回顾目标、决定把精力放在哪里的好时机。',
+    freshAction: '查看我的目标',
+    dismiss: '关闭',
+    monthTitle: '本月',
+    monthHabits: (n, more) => `本月你有 ${n} 天完成了习惯${more > 0 ? `，比上月同期多 ${more} 天` : ''}。`,
+  },
   achievements: {
-    unlocked: '成就解锁',
-    titles: {
-      first_brain_item: '第一次记录', ideas_10: '保存了 10 个想法', ideas_50: '保存了 50 个想法', tasks_10: '完成了 10 个任务',
-      tasks_50: '完成了 50 个任务', first_habit_completed: '首次完成习惯', habit_streak_7: '连续 7 天',
-      habit_streak_30: '连续 30 天', first_goal: '设定第一个目标', first_goal_completed: '目标达成', goals_5: '五个目标',
-      first_transaction: '第一笔收支', first_positive_month: '收支为正的月份',
-    },
+    unlocked: '你的进展',
+    titles: { first_brain_item: '你保存了第一条记录', ideas_10: '你已保存 10 个想法', ideas_50: '你已保存 50 个想法', tasks_10: '你完成了 10 项任务', tasks_50: '你完成了 50 项任务', first_habit_completed: '你完成了第一次习惯打卡', habit_streak_7: '连续 7 天坚持一个习惯', habit_streak_30: '连续 30 天坚持一个习惯', first_goal: '你设定了第一个目标', first_goal_completed: '你达成了一个目标', goals_5: '你有 5 个目标了', first_transaction: '你记下了第一笔收支', first_positive_month: '本月收入多于支出' },
   },
   tasks: {
     views: { captures: '记录', tasks: '任务', archive: '归档' },

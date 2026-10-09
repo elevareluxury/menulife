@@ -70,7 +70,7 @@ const ko: LifeDict = {
     inactive: n => `비활성화됨(${n})`, inactiveHelp: '오늘 목록에는 나오지 않지만 기록은 유지돼요.',
     markToday: n => `${n} 오늘 완료로 표시`, unmarkToday: n => `${n} 오늘 완료 취소`,
     dayToggle: (n, d, done) => `${n}, ${d}: ${done ? '완료' : '미완료'}. 눌러서 변경`,
-    weekHelp: '점을 눌러 이번 주에 깜빡한 날을 체크할 수 있어요.',
+    weekHelp: '점을 눌러 이번 주의 다른 날도 체크할 수 있어요.',
     deleteTitle: '습관을 삭제할까요?', deleteText: n => `"${n}"과(와) 모든 기록이 삭제됩니다. 잠시 멈추려면 비활성화하세요.`,
   },
   habitPlus: {
@@ -169,7 +169,7 @@ const ko: LifeDict = {
     detailPlaceholder: '더 기억하고 싶은 게 있나요?', save: '저장', update: '변경 사항 저장',
   },
   agenda: {
-    loading: '일정 불러오는 중…', loadError: '할 일을 불러오지 못했어요.', prevMonth: '이전 달', nextMonth: '다음 달',
+    loading: '일정 불러오는 중…', loadError: '할 일을 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요.', prevMonth: '이전 달', nextMonth: '다음 달',
     calendarOf: m => `${m} 달력`, weekdays: ['월', '화', '수', '목', '금', '토', '일'],
     dayTasks: n => `할 일 ${n}개`, goalDate: '목표일',
     enableTitle: '알림을 켜면 Life OS가 열려 있는 동안 리마인더를 받을 수 있어요.', enable: '켜기',
@@ -227,14 +227,22 @@ const ko: LifeDict = {
     achievements: '업적', achievementsTitle: '이번 달', unlocked: () => '개의 업적 달성',
     keepGoing: '계속 쌓아 가세요', keepGoingText: '모든 행동이 의미 있어요. 다음 돌아보기는 더 멋진 이야기가 될 거예요.',
   },
+  kind: {
+    welcomeTitle: '다시 만나서 반가워요',
+    welcomeText: '밀린 걸 따라잡을 필요는 없어요. 오늘은 딱 한 가지면 충분해요:',
+    welcomeNoHabit: '오늘의 작은 우선순위 하나만 골라 보세요.',
+    gotIt: '알겠어요',
+    freshWeek: '새로운 한 주가 시작돼요',
+    freshMonth: '새로운 달이 시작돼요',
+    freshText: '목표를 돌아보고 어디에 에너지를 쓸지 고르기 좋은 때예요.',
+    freshAction: '내 목표 보기',
+    dismiss: '닫기',
+    monthTitle: '이번 달',
+    monthHabits: (n, more) => `이번 달 ${n}일 동안 습관을 지켰어요${more > 0 ? `. 지난달 같은 시점보다 ${more}일 더 많아요` : ''}.`,
+  },
   achievements: {
-    unlocked: '업적 달성',
-    titles: {
-      first_brain_item: '첫 기록', ideas_10: '아이디어 10개 저장', ideas_50: '아이디어 50개 저장', tasks_10: '할 일 10개 완료',
-      tasks_50: '할 일 50개 완료', first_habit_completed: '첫 습관 완료', habit_streak_7: '7일 연속',
-      habit_streak_30: '30일 연속', first_goal: '첫 목표 설정', first_goal_completed: '목표 달성', goals_5: '목표 다섯 개',
-      first_transaction: '첫 거래 기록', first_positive_month: '흑자인 달',
-    },
+    unlocked: '나의 진행 상황',
+    titles: { first_brain_item: '첫 기록을 저장했어요', ideas_10: '아이디어 10개를 저장했어요', ideas_50: '아이디어 50개를 저장했어요', tasks_10: '할 일 10개를 완료했어요', tasks_50: '할 일 50개를 완료했어요', first_habit_completed: '첫 습관을 체크했어요', habit_streak_7: '습관을 7일 연속 지켰어요', habit_streak_30: '습관을 30일 연속 지켰어요', first_goal: '첫 목표를 정했어요', first_goal_completed: '목표를 달성했어요', goals_5: '목표가 5개가 되었어요', first_transaction: '첫 거래를 기록했어요', first_positive_month: '이번 달은 지출보다 수입이 많았어요' },
   },
   tasks: {
     views: { captures: '기록', tasks: '할 일', archive: '보관함' },

@@ -70,7 +70,7 @@ const ar: LifeDict = {
     inactive: n => `متوقفة (${n})`, inactiveHelp: 'لا تظهر في يومك، لكنها تحتفظ بسجلها.',
     markToday: n => `تحديد ${n} كمنجزة اليوم`, unmarkToday: n => `إلغاء إنجاز ${n} اليوم`,
     dayToggle: (n, d, done) => `${n}، ${d}: ${done ? 'منجزة' : 'غير منجزة'}. اضغط للتغيير`,
-    weekHelp: 'اضغط على نقطة لتسجيل يوم نسيته هذا الأسبوع.',
+    weekHelp: 'اضغط على نقطة لتسجيل يوم آخر من هذا الأسبوع.',
     deleteTitle: 'حذف العادة؟', deleteText: n => `سيُحذف "${n}" وكامل سجله. إذا كنت تريد إيقافها مؤقتًا فقط، أوقفها.`,
   },
   habitPlus: {
@@ -169,7 +169,7 @@ const ar: LifeDict = {
     detailPlaceholder: 'هل هناك شيء آخر تريد تذكّره؟', save: 'حفظ', update: 'حفظ التغييرات',
   },
   agenda: {
-    loading: 'جارٍ تحميل الأجندة…', loadError: 'تعذّر تحميل مهامك.', prevMonth: 'الشهر السابق', nextMonth: 'الشهر التالي',
+    loading: 'جارٍ تحميل الأجندة…', loadError: 'تعذّر تحميل مهامك. تحقّق من الاتصال وحاول مرة أخرى.', prevMonth: 'الشهر السابق', nextMonth: 'الشهر التالي',
     calendarOf: m => `تقويم ${m}`, weekdays: ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح'],
     dayTasks: n => `${n} مهام`, goalDate: 'تاريخ هدف',
     enableTitle: 'فعّل الإشعارات لتصلك التذكيرات أثناء فتح Life OS.', enable: 'تفعيل',
@@ -227,14 +227,22 @@ const ar: LifeDict = {
     achievements: 'الإنجازات', achievementsTitle: 'هذا الشهر', unlocked: () => 'إنجازات مفتوحة',
     keepGoing: 'واصل البناء', keepGoingText: 'كل خطوة تهم. ملخصك القادم سيروي قصة أفضل.',
   },
+  kind: {
+    welcomeTitle: 'سعداء برؤيتك من جديد',
+    welcomeText: 'لا داعي لتعويض أي شيء. لليوم، يكفي شيء واحد صغير:',
+    welcomeNoHabit: 'اختر أولوية صغيرة واحدة لليوم، وهذا يكفي.',
+    gotIt: 'حسنًا',
+    freshWeek: 'يبدأ أسبوع جديد',
+    freshMonth: 'يبدأ شهر جديد',
+    freshText: 'وقت مناسب لمراجعة أهدافك واختيار أين تضع طاقتك.',
+    freshAction: 'عرض أهدافي',
+    dismiss: 'إغلاق',
+    monthTitle: 'هذا الشهر',
+    monthHabits: (n, more) => `هذا الشهر التزمت بعاداتك في ${n} ${n === 1 ? 'يوم' : 'أيام'}${more > 0 ? `، أي ${more} أكثر من الفترة نفسها في الشهر الماضي` : ''}.`,
+  },
   achievements: {
-    unlocked: 'إنجاز جديد',
-    titles: {
-      first_brain_item: 'أول تدوينة', ideas_10: '10 أفكار محفوظة', ideas_50: '50 فكرة محفوظة', tasks_10: '10 مهام منجزة',
-      tasks_50: '50 مهمة منجزة', first_habit_completed: 'أول عادة منجزة', habit_streak_7: '7 أيام متتالية',
-      habit_streak_30: '30 يومًا متتاليًا', first_goal: 'أول هدف محدد', first_goal_completed: 'هدف محقق', goals_5: 'خمسة أهداف',
-      first_transaction: 'أول معاملة', first_positive_month: 'شهر برصيد إيجابي',
-    },
+    unlocked: 'تقدّمك',
+    titles: { first_brain_item: 'حفظت أول ملاحظة لك', ideas_10: 'حفظت 10 أفكار', ideas_50: 'حفظت 50 فكرة', tasks_10: 'أنجزت 10 مهام', tasks_50: 'أنجزت 50 مهمة', first_habit_completed: 'سجّلت أول عادة لك', habit_streak_7: '7 أيام متتالية مع عادة', habit_streak_30: '30 يومًا متتاليًا مع عادة', first_goal: 'حدّدت هدفك الأول', first_goal_completed: 'حقّقت هدفًا', goals_5: 'لديك 5 أهداف', first_transaction: 'سجّلت أول معاملة لك', first_positive_month: 'هذا الشهر كان الدخل أكثر من المصروف' },
   },
   tasks: {
     views: { captures: 'التدوينات', tasks: 'المهام', archive: 'الأرشيف' },

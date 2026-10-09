@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MoreHorizontal, type LucideIcon } from 'lucide-react'
-import { colors, font, radius, scaleIn } from '../design-system'
+import { colors, font, radius, scaleIn, shadow } from '../design-system'
 
 export interface MenuAction {
   icon: LucideIcon
@@ -41,7 +41,7 @@ export function ActionMenu({ label, actions }: { label: string; actions: MenuAct
             style={{
               position: 'absolute', insetInlineEnd: 0, top: 42, zIndex: 20, minWidth: 160, overflow: 'hidden',
               background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
-              borderRadius: radius.md, boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              borderRadius: radius.md, boxShadow: shadow.elevated,
             }}>
             {actions.map(({ icon: Icon, label: text, onSelect, danger }) => (
               <button key={text} type="button" role="menuitem"

@@ -53,9 +53,9 @@ export function CurrencySheet({ open, title, selected, exclude = [], onClose, on
                 background: active ? colors.accent.soft : 'transparent', border: 'none',
                 color: colors.text.primary, fontFamily: font,
               }}>
-              <span style={{ width: 44, fontWeight: 800, fontSize: 13, color: active ? colors.accent.default : colors.text.secondary }}>{c.code}</span>
+              <span style={{ width: 44, fontWeight: 800, fontSize: 13, color: active ? colors.accent.ink : colors.text.secondary }}>{c.code}</span>
               <span style={{ flex: 1, fontSize: 14 }}>{c.name}</span>
-              {active && <Check size={16} aria-hidden="true" style={{ color: colors.accent.default }} />}
+              {active && <Check size={16} aria-hidden="true" style={{ color: colors.accent.ink }} />}
             </button>
           )
         })}
