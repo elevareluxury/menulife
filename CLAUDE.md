@@ -183,6 +183,9 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
 - `installLowFx()` marca `<html data-mycen-lowfx>` (reducir transparencia o ≤ 4 núcleos): el vidrio pasa a `--my-glass-solid`.
 - Componentes en `@/design`: `GlassPanel`, `PrimaryAction`, `IconButton` (exige `label`), `Chip`, `StatusChip`, `Field`, `Sheet`
   (portal que copia tema y acento, foco atrapado, Escape). Sin textos propios: los traduce quien los usa.
+- Huella (etapa 02): `src/lib/huella/` (copia exacta de `docs/design/huella.ts`, sin DOM; un test lo verifica) +
+  `huellaSeed(profile)` = `id:huella_salt` (nunca el nombre). Componente `<Huella seed variant spin draw />` en `@/design`
+  (decorativa, ids únicos por instancia; `draw` anima una máscara para no perder el punteado). Tests en `tests/unit/huella.test.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

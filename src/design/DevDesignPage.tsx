@@ -2,7 +2,8 @@
 // App.tsx la importa detrás de import.meta.env.DEV, así que no entra en el build de producción. Textos fijos en
 // español a propósito: es una herramienta interna, no una pantalla para usuarios.
 import { useState } from 'react'
-import { Chip, Field, GlassPanel, IconButton, MYCEN_ACCENTS, MYCEN_THEMES, PrimaryAction, Sheet, StatusChip } from '@/design'
+import { HUELLA_VARIANTS, huellaSeed } from '@/lib/huella'
+import { Chip, Field, GlassPanel, Huella, IconButton, MYCEN_ACCENTS, MYCEN_THEMES, PrimaryAction, Sheet, StatusChip } from '@/design'
 import type { MycenAccent, MycenTheme } from '@/design'
 
 function Sample({ theme, accent }: { theme: MycenTheme; accent: MycenAccent }) {
@@ -38,10 +39,34 @@ function Sample({ theme, accent }: { theme: MycenTheme; accent: MycenAccent }) {
   )
 }
 
+function Huellas({ theme }: { theme: MycenTheme }) {
+  const [salt, setSalt] = useState(0)
+  const seed = huellaSeed({ id: '7f3c2a10-0000-4000-8000-000000000001', huella_salt: salt ? String(salt) : null })
+  return (
+    <section data-mycen-theme={theme} className="my-sky" style={{ padding: 20, borderRadius: 'var(--my-r-card)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <p style={{ margin: 0, color: 'var(--my-muted)' }}>Huellas · {theme}</p>
+        <Chip onClick={() => setSalt(s => s + 1)}>Generar otra</Chip>
+      </div>
+      <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginTop: 12 }}>
+        {HUELLA_VARIANTS.map((variant, i) => (
+          <figure key={variant} style={{ margin: 0, textAlign: 'center' }}>
+            <Huella key={seed} seed={seed} variant={variant} spin={i % 2 === 0} draw />
+            <figcaption style={{ fontSize: 'var(--my-fs-small)', color: 'var(--my-muted)' }}>{variant}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export default function DevDesignPage() {
   return (
     <main style={{ padding: 16, background: '#000', minHeight: '100vh' }}>
       <h1 style={{ color: '#fff', fontFamily: 'Unbounded, sans-serif', fontWeight: 700 }}>Sistema de diseño Mycen</h1>
+      <div style={{ display: 'grid', gap: 16, marginBottom: 24 }}>
+        {MYCEN_THEMES.map(theme => <Huellas key={theme} theme={theme} />)}
+      </div>
       {MYCEN_THEMES.map(theme => (
         <div key={theme} style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', marginBottom: 24 }}>
           {MYCEN_ACCENTS.map(accent => <Sample key={accent} theme={theme} accent={accent} />)}

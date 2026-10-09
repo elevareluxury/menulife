@@ -7,7 +7,7 @@ En Claude Code en la web todas las etapas usan la rama asignada a la sesión (un
 |---|---|---|---|---|---|
 | 00 | Reglas y documentos | Mergeada | [#38](https://github.com/elevareluxury/menulife/pull/38) | — | Contradicción corregida en 16: el formulario no manda email. |
 | 01 | Sistema de diseño base | Mergeada | [#39](https://github.com/elevareluxury/menulife/pull/39) | — | Tokens globales: +1 KB gzip por página (perfil 223, proyecto 214, landing 292). |
-| 02 | Huella | Pendiente | — | — | |
+| 02 | Huella | Mergeada | [#40](https://github.com/elevareluxury/menulife/pull/40) | — | Sin cambios de peso (todavía no se usa en páginas públicas). |
 | 03 | Perfil: estructuras, temas y perfil vivo | Pendiente | — | — | |
 | 04 | Video y música | Pendiente | — | — | Sumar los proveedores a privacidad (12 idiomas). |
 | 05 | Formulario y bandeja | Pendiente | — | — | |
