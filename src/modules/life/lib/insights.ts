@@ -1,4 +1,4 @@
-import { shiftDate } from '../hooks/useHabits'
+import { shiftDate } from '../lib/habitStreak'
 import { dayKey } from '../hooks/useToday'
 
 // Insights: patrones calculados sólo con los datos reales del usuario.

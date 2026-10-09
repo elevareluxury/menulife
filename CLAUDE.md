@@ -235,6 +235,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   completar, `useTasks` crea la siguiente (hora, aviso y subtareas sin hacer) y la anota; al destildar, la borra si no se
   hizo. Ficha: `RepeatField` y `SubtasksField` (`TaskExtras.tsx`); lista con ícono y "3 de 5"; el calendario muestra las
   próximas repeticiones. E2E en `tasks.spec.ts`.
+- Hábitos (etapa 10): `life_habits` suma `target_value` (null = sí/no), `unit`, `anchor` ("después de…"),
+  `reminder_time`/`reminder_enabled`; `frequency` admite `{ type: 'times_per_week', times }`; `life_habit_logs.value`
+  (con cantidad, el día se cumple con `value >= target_value`). Rachas que perdonan en `lib/habitStreak.ts` (un día
+  programado perdido no corta, dos seguidos sí; por semana igual con semanas; hoy nunca cuenta como perdido).
+  `useHabits`: `addToday` ("+1"), `setDayValue`, `weekCount`, `streakUnit`. UI: `QuantityButton` (anillo), `HabitMeta`,
+  `HabitValueSheet` (`components/HabitControls.tsx`). Recordatorio por hábito: `useHabitReminders` (con Life OS abierto,
+  una vez por día y hábito). E2E en `habits.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

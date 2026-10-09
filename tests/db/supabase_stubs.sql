@@ -39,3 +39,19 @@ create table public.life_brain_items (
 alter table public.life_brain_items enable row level security;
 create policy lbi_owner on public.life_brain_items for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 grant all on public.life_brain_items to authenticated;
+-- Life OS: hábitos (20260615000001 + goal_id de 20261006000001)
+create table public.life_habits (
+  id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null, icon text not null default 'CheckCircle', color text not null default '#F4705A',
+  frequency jsonb not null default '{"type":"daily","days":[0,1,2,3,4,5,6]}', is_active boolean not null default true,
+  sort_order int not null default 0, created_at timestamptz not null default now(),
+  goal_id uuid references public.life_goals(id) on delete set null);
+create table public.life_habit_logs (
+  id uuid primary key default gen_random_uuid(), habit_id uuid not null references public.life_habits(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade, completed_date date not null,
+  created_at timestamptz not null default now(), unique (habit_id, completed_date));
+alter table public.life_habits enable row level security;
+alter table public.life_habit_logs enable row level security;
+create policy lh_owner on public.life_habits for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy lhl_owner on public.life_habit_logs for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+grant all on public.life_habits, public.life_habit_logs to authenticated;

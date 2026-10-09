@@ -20,7 +20,15 @@ const DEFAULT: HabitFormData = {
   icon: 'Star',
   color: '#F4705A',
   frequency: { type: 'daily', days: [0, 1, 2, 3, 4, 5, 6] },
+  target_value: null, unit: null, anchor: null, reminder_time: null, reminder_enabled: false,
 }
+
+const fieldStyle: React.CSSProperties = {
+  width: '100%', padding: '12px 14px', boxSizing: 'border-box', borderRadius: radius.md,
+  background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
+  color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
+}
+const hintStyle: React.CSSProperties = { fontFamily: font, fontSize: '12px', color: colors.text.tertiary, margin: '6px 0 0', lineHeight: 1.45 }
 
 const label: React.CSSProperties = {
   fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary,
@@ -42,6 +50,11 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
   const weekStart = usePrefs(s => s.week_start)
   const order = weekStart === 1 ? [1, 2, 3, 4, 5, 6, 0] : [0, 1, 2, 3, 4, 5, 6]
   const [form, setForm]     = useState<HabitFormData>(DEFAULT)
+  // Días elegidos cuando el modo es "Ciertos días" (se recuerdan si se pasa a "Veces por semana" y se vuelve)
+  const [days, setDays]     = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
+  const [times, setTimes]   = useState(3)
+  const [withQty, setWithQty] = useState(false)
+  const p = t.habitPlus
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState('')
 
@@ -49,33 +62,51 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
     if (!open) return
     /* eslint-disable react-hooks/set-state-in-effect */
     setForm(initial
-      ? { name: initial.name, icon: initial.icon, color: initial.color, frequency: initial.frequency, goal_id: initial.goal_id ?? null }
+      ? {
+          name: initial.name, icon: initial.icon, color: initial.color, frequency: initial.frequency, goal_id: initial.goal_id ?? null,
+          target_value: initial.target_value, unit: initial.unit, anchor: initial.anchor,
+          reminder_time: initial.reminder_time?.slice(0, 5) ?? null, reminder_enabled: initial.reminder_enabled,
+        }
       : DEFAULT)
+    const f = initial?.frequency
+    setDays(f && f.type !== 'times_per_week' ? f.days : [0, 1, 2, 3, 4, 5, 6])
+    setTimes(f?.type === 'times_per_week' ? f.times : 3)
+    setWithQty(initial?.target_value != null)
     setError('')
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [open, initial])
 
+  const byTimes = form.frequency.type === 'times_per_week'
   const toggleDay = (day: number) => {
-    setForm(f => {
-      const days = f.frequency.days.includes(day)
-        ? f.frequency.days.filter(d => d !== day)
-        : [...f.frequency.days, day].sort((a, b) => a - b)
-      return { ...f, frequency: { type: days.length === 7 ? 'daily' : 'weekly', days } }
-    })
+    const next = days.includes(day) ? days.filter(d => d !== day) : [...days, day].sort((a, b) => a - b)
+    setDays(next)
+    setForm(f => ({ ...f, frequency: { type: next.length === 7 ? 'daily' : 'weekly', days: next } }))
   }
+  const setMode = (mode: 'days' | 'times') => setForm(f => ({
+    ...f, frequency: mode === 'times' ? { type: 'times_per_week', times } : { type: days.length === 7 ? 'daily' : 'weekly', days },
+  }))
 
   const handleSave = async () => {
     if (!form.name.trim()) { setError(t.habitSheet.nameRequired); return }
-    if (form.frequency.days.length === 0) { setError(t.habitSheet.daysRequired); return }
+    if (!byTimes && days.length === 0) { setError(t.habitSheet.daysRequired); return }
+    if (withQty && !(Number(form.target_value) > 0)) { setError(p.targetRequired); return }
+    if (form.reminder_enabled && !form.reminder_time) { setError(p.reminderNeedTime); return }
     setSaving(true)
     try {
-      await onSave({ ...form, name: form.name.trim() })
+      await onSave({
+        ...form,
+        name: form.name.trim(),
+        target_value: withQty ? Number(form.target_value) : null,
+        unit: withQty ? form.unit?.trim() || null : null,
+        anchor: form.anchor?.trim() || null,
+        reminder_time: form.reminder_enabled ? form.reminder_time : form.reminder_time || null,
+      })
       onClose()
     } catch { setError(t.common.saveError) }
     finally { setSaving(false) }
   }
 
-  const everyDay = form.frequency.days.length === 7
+  const everyDay = !byTimes && days.length === 7
 
   return (
     <LifeSheet open={open} onClose={onClose} title={initial ? t.habitSheet.editTitle : t.habitSheet.newTitle}>
@@ -133,25 +164,96 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
         </div>
       </div>
 
-      <div style={{ marginBottom: '24px' }}>
-        <span style={label}>{t.habitSheet.days}{everyDay ? ` · ${t.habitSheet.every}` : ''}</span>
-        <div role="group" aria-label={t.habitSheet.days} style={{ display: 'flex', gap: '6px' }}>
-          {order.map(day => {
-            const active = form.frequency.days.includes(day)
+      <div style={{ marginBottom: '20px' }}>
+        <span style={label}>{p.when}</span>
+        <div role="radiogroup" aria-label={p.when} style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          {(['days', 'times'] as const).map(m => {
+            const on = (m === 'times') === byTimes
             return (
-              <button key={day} type="button" aria-pressed={active} aria-label={dayName(day, locale)} onClick={() => toggleDay(day)}
+              <button key={m} type="button" role="radio" aria-checked={on} onClick={() => setMode(m)}
                 style={{
-                  flex: 1, height: 40, borderRadius: radius.sm,
-                  background: active ? `${form.color}20` : colors.surface.high,
-                  border: `1.5px solid ${active ? form.color : 'transparent'}`,
-                  color: active ? form.color : colors.text.tertiary,
-                  fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase',
+                  flex: 1, minHeight: 40, borderRadius: radius.full, cursor: 'pointer', fontFamily: font, fontSize: '13px', fontWeight: 700,
+                  background: on ? `${form.color}20` : colors.surface.high, border: `1.5px solid ${on ? form.color : 'transparent'}`,
+                  color: on ? form.color : colors.text.secondary,
                 }}>
-                {dayInitial(day, locale)}
+                {m === 'days' ? p.modeDays : p.modeTimes}
               </button>
             )
           })}
         </div>
+        {byTimes ? (
+          <select aria-label={p.modeTimes} value={times} style={fieldStyle}
+            onChange={e => { const n = Number(e.target.value); setTimes(n); setForm(f => ({ ...f, frequency: { type: 'times_per_week', times: n } })) }}>
+            {[1, 2, 3, 4, 5, 6, 7].map(n => <option key={n} value={n}>{p.timesValue(n)}</option>)}
+          </select>
+        ) : (
+          <>
+            <span style={{ ...label, marginBottom: 6 }}>{t.habitSheet.days}{everyDay ? ` · ${t.habitSheet.every}` : ''}</span>
+            <div role="group" aria-label={t.habitSheet.days} style={{ display: 'flex', gap: '6px' }}>
+              {order.map(day => {
+                const active = days.includes(day)
+                return (
+                  <button key={day} type="button" aria-pressed={active} aria-label={dayName(day, locale)} onClick={() => toggleDay(day)}
+                    style={{
+                      flex: 1, height: 40, borderRadius: radius.sm,
+                      background: active ? `${form.color}20` : colors.surface.high,
+                      border: `1.5px solid ${active ? form.color : 'transparent'}`,
+                      color: active ? form.color : colors.text.tertiary,
+                      fontFamily: font, fontSize: '12px', fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase',
+                    }}>
+                    {dayInitial(day, locale)}
+                  </button>
+                )
+              })}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', minHeight: 40 }}>
+          <input type="checkbox" checked={withQty} onChange={e => setWithQty(e.target.checked)}
+            style={{ width: 20, height: 20, accentColor: form.color }} />
+          <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary }}>{p.quantity}</span>
+        </label>
+        {withQty ? (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 8 }}>
+            <div>
+              <label htmlFor="habit-target" style={label}>{p.target}</label>
+              <input id="habit-target" type="number" inputMode="decimal" min={1} max={100000} value={form.target_value ?? ''}
+                onChange={e => setForm(f => ({ ...f, target_value: e.target.value === '' ? null : Number(e.target.value) }))} style={fieldStyle} />
+            </div>
+            <div>
+              <label htmlFor="habit-unit" style={label}>{p.unit}</label>
+              <input id="habit-unit" maxLength={20} value={form.unit ?? ''} placeholder={p.unitPlaceholder}
+                onChange={e => setForm(f => ({ ...f, unit: e.target.value }))} style={fieldStyle} />
+            </div>
+          </div>
+        ) : <p style={hintStyle}>{p.quantityHint}</p>}
+      </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <label htmlFor="habit-anchor" style={label}>{p.anchor}</label>
+        <input id="habit-anchor" maxLength={60} value={form.anchor ?? ''} placeholder={p.anchorPlaceholder}
+          onChange={e => setForm(f => ({ ...f, anchor: e.target.value }))} style={fieldStyle} />
+        <p style={hintStyle}>{p.anchorHint}</p>
+      </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', minHeight: 40 }}>
+          <input type="checkbox" checked={!!form.reminder_enabled}
+            onChange={e => setForm(f => ({ ...f, reminder_enabled: e.target.checked, reminder_time: f.reminder_time ?? '09:00' }))}
+            style={{ width: 20, height: 20, accentColor: form.color }} />
+          <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary }}>{p.reminder}</span>
+        </label>
+        {form.reminder_enabled && (
+          <div style={{ marginTop: 8 }}>
+            <label htmlFor="habit-reminder" style={label}>{p.reminderTime}</label>
+            <input id="habit-reminder" type="time" value={form.reminder_time ?? ''}
+              onChange={e => setForm(f => ({ ...f, reminder_time: e.target.value || null }))} style={{ ...fieldStyle, colorScheme: 'dark' }} />
+          </div>
+        )}
+        <p style={hintStyle}>{p.reminderHint}</p>
       </div>
 
       <GoalSelect id="habit-goal" enabled={open} value={form.goal_id} onChange={goal_id => setForm(f => ({ ...f, goal_id }))} />

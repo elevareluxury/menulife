@@ -18,7 +18,7 @@ import { BrainItemSheet } from '../components/BrainItemSheet'
 import { ActionMenu } from '../components/ActionMenu'
 import { deleteWithUndo } from '../lib/undo'
 import { dayKey, useToday } from '../hooks/useToday'
-import { shiftDate } from '../hooks/useHabits'
+import { shiftDate } from '../lib/habitStreak'
 import { TasksView } from '../components/TasksView'
 
 const TYPE_META = {

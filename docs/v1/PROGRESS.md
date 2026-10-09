@@ -15,7 +15,7 @@ En Claude Code en la web todas las etapas usan la rama asignada a la sesión (un
 | 07 | Onboarding, Spaces y Studio | Mergeada | 07a [#45](https://github.com/elevareluxury/menulife/pull/45), 07b [#46](https://github.com/elevareluxury/menulife/pull/46) | — | Studio sigue el tema del celular (incluye el punto 4 de la 06). |
 | 08 | Compartir y crecimiento | Mergeada | [#47](https://github.com/elevareluxury/menulife/pull/47) | `20261018000001_v1_referrals.sql` (aplicada) | Registro en `/register` (la app no tiene `/registro`). Probar QR y vista previa en WhatsApp con un perfil real. |
 | 09 | Life OS: tareas que se repiten y subtareas | Mergeada | [#48](https://github.com/elevareluxury/menulife/pull/48) | `20261019000001_v1_task_recurrence.sql` (aplicada) | `life_tasks` confirmada sin uso (sólo export/borrado de datos). |
-| 10 | Life OS: hábitos | Pendiente | — | — | |
+| 10 | Life OS: hábitos | En curso | — | `20261020000001_v1_habits.sql` (pendiente) | Insights, metas y Replay leen "X veces por semana" como diario (constancia aproximada). |
 | 11 | Life OS: Mi día | Pendiente | — | — | |
 | 12 | Life OS: tono y diseño | Pendiente | — | — | |
 | 13 | Marca: landing, emails, íconos | Pendiente | — | — | |
