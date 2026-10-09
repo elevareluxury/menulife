@@ -36,26 +36,62 @@ for (const theme of THEMES) {
 // (ahora son estructura, tema Universo / Amanecer y acento). Los perfiles con esos valores se siguen viendo bien:
 // lo verifican el axe de arriba y "perfiles de antes" en profile-layouts.spec.ts. Studio → Apariencia cambia en la 06.
 
-test('Studio: elegir apariencia y ver el contraste verificado', async ({ page, context }) => {
+test('Studio: estructura, tema, acento y huella se ven en la vista previa, se guardan y se publican', async ({ page, context }) => {
   const state = createState({ profiles: [profileRow()] })
   await installSupabaseMock(context, state, { signedIn: true })
+  await page.setViewportSize({ width: 1400, height: 900 })
   await page.goto('/studio/appearance')
+  const preview = page.locator('.st-preview-pane main.mp-root')
 
-  await page.getByRole('group', { name: 'Tema' }).getByRole('button', { name: 'Automático' }).click()
-  await page.getByRole('group', { name: 'Esquinas' }).getByRole('button', { name: 'Redondeadas' }).click()
-  await page.getByRole('group', { name: 'Fondo' }).getByRole('button', { name: 'Teñido' }).click()
-  await page.getByRole('group', { name: 'Tarjetas' }).getByRole('button', { name: 'Con borde' }).click()
+  await page.getByRole('radiogroup', { name: 'Estructura' }).getByRole('radio', { name: /Portada/ }).click()
+  await expect(preview).toHaveClass(/mp-layout-portada/)
+  await page.getByRole('radiogroup', { name: 'Tema' }).getByRole('radio', { name: /Amanecer/ }).click()
+  await expect(preview).toHaveAttribute('data-mycen-theme', 'amanecer')
+  await page.getByRole('radiogroup', { name: 'Acento' }).getByRole('radio', { name: 'Aurora' }).click()
+  await expect(preview).toHaveAttribute('data-mycen-accent', 'aurora')
+  await page.getByRole('radiogroup', { name: 'Huella' }).getByRole('radio', { name: 'Pulso' }).click()
   await expect.poll(() => state.tables.profiles[0].theme)
-    .toMatchObject({ mode: 'auto', corners: 'round', background: 'tint', card_style: 'outline' })
+    .toMatchObject({ layout: 'portada', mode: 'amanecer', accent: 'aurora', huella_variant: 'pulso' })
 
-  // Con "automático" se revisan los dos modos, y todo cumple
-  const contrast = page.getByRole('region', { name: 'Contraste' })
-  await expect(contrast.getByRole('list', { name: 'En modo claro' }).getByRole('listitem')).toHaveCount(4)
-  await expect(contrast.getByRole('list', { name: 'En modo oscuro' }).getByRole('listitem')).toHaveCount(4)
-  await expect(contrast.getByText('No cumple')).toHaveCount(0)
+  // "Generar otra" cambia la sal; se puede volver a la anterior mientras no se publique
+  await page.getByRole('button', { name: 'Generar otra' }).click()
+  await expect.poll(() => state.tables.profiles[0].huella_salt).toMatch(/^[A-Za-z0-9]{9}$/)
+  await page.getByRole('button', { name: 'Volver a la anterior' }).click()
+  await expect.poll(() => state.tables.profiles[0].huella_salt).toBeNull()
+  await page.getByRole('button', { name: 'Generar otra' }).click()
+  await expect.poll(() => state.tables.profiles[0].huella_salt).toMatch(/^[A-Za-z0-9]{9}$/)
+  const salt = state.tables.profiles[0].huella_salt
 
-  // Un acento ilegible se avisa y se reemplaza (el panel sigue cumpliendo)
-  await page.locator('input[type="color"]').fill('#151715')
-  await expect(page.getByText(/Tu color de acento no se lee bien/)).toBeVisible()
-  await expect(contrast.getByText('No cumple')).toHaveCount(0)
+  // Perfil vivo
+  await page.getByRole('textbox', { name: 'Estado actual' }).fill('De gira por Chile')
+  await page.getByRole('switch', { name: /Disponible/ }).click()
+  await expect.poll(() => state.tables.profiles[0].status_text).toBe('De gira por Chile')
+  await expect.poll(() => state.tables.profiles[0].available).toBe(true)
+
+  await page.getByRole('button', { name: 'Publicar cambios' }).click()
+  await expect.poll(() => state.tables.profile_versions.length).toBeGreaterThan(1)
+
+  // El perfil público muestra lo publicado
+  const visitor = await page.context().browser()!.newContext()
+  await installSupabaseMock(visitor, state)
+  const pub = await visitor.newPage()
+  await pub.goto('/ana')
+  const root = pub.locator('main.mp-root')
+  await expect(root).toHaveClass(/mp-layout-portada/)
+  await expect(root).toHaveAttribute('data-mycen-theme', 'amanecer')
+  await expect(root).toHaveAttribute('data-mycen-accent', 'aurora')
+  await expect(pub.getByText('De gira por Chile')).toBeVisible()
+  const published = state.tables.profile_versions.find(v => v.id === state.tables.profiles[0].published_version_id)!
+  expect((published.snapshot as { huella_salt: string }).huella_salt).toBe(salt)
+  await visitor.close()
+})
+
+test('Studio: en pantallas angostas la vista previa en vivo está en la misma página', async ({ page, context }) => {
+  const state = createState({ profiles: [profileRow()] })
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/studio/appearance')
+  const preview = page.getByRole('region', { name: 'Vista previa' }).locator('main.mp-root')
+  await page.getByRole('radiogroup', { name: 'Estructura' }).getByRole('radio', { name: /Bento/ }).click()
+  await expect(preview).toHaveClass(/mp-layout-bento/)
 })
