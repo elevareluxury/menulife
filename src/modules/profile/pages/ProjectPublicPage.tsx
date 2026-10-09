@@ -5,8 +5,7 @@ import { useAppLang } from '@/i18n/app/store'
 import { setLocalLanguage } from '@/lib/prefs'
 import { fetchPublicProject } from '../lib/profileApi'
 import { tr, ui } from '../lib/profileI18n'
-import { themeVars } from '../lib/profileTheme'
-import { usePrefersLight } from '../lib/usePrefersLight'
+import { LOOK_PAGE_BG, lookVars, profileLook } from '../lib/profileLook'
 import type { ProjectLookup } from '../lib/projectTypes'
 import { ProjectView } from '../components/ProjectView'
 import '../profile.css'
@@ -70,9 +69,11 @@ export function ProjectPublicPage() {
     return () => { document.querySelector('meta[name="robots"]')?.remove() }
   }, [noindex])
 
-  const prefersLight = usePrefersLight()
-  const vars = themeVars(project?.space.theme, prefersLight)
-  const pageBg = String((vars as Record<string, string>)['--p-bg'])
+  // Tema del Space dueño del proyecto (V1: Universo / Amanecer)
+  const look = profileLook(project?.space.theme)
+  const vars = lookVars(look)
+  const lookAttrs = { 'data-mycen-theme': look.mode, 'data-mycen-accent': look.accent, style: vars }
+  const pageBg = LOOK_PAGE_BG[look.mode]
 
   useEffect(() => {
     const prev = document.body.style.background
@@ -89,7 +90,7 @@ export function ProjectPublicPage() {
 
   if (state.kind === 'loading') {
     return (
-      <main className="mp-root" style={vars} aria-busy="true">
+      <main className="mp-root my-profile" {...lookAttrs} aria-busy="true">
         <div className="mp-container" style={{ paddingTop: 72 }}>
           <div className="mp-skeleton" style={{ aspectRatio: '16 / 9', marginBottom: 18 }} />
           <div className="mp-skeleton" style={{ width: '70%', height: 34, marginBottom: 12 }} />
@@ -105,7 +106,7 @@ export function ProjectPublicPage() {
         ? { title: t.errorTitle, text: t.errorText }
         : { title: t.projectNotFoundTitle, text: t.projectNotFoundText }
     return (
-      <main className="mp-root" style={vars}>
+      <main className="mp-root my-profile" {...lookAttrs}>
         <div className="mp-state">
           <h1>{copy.title}</h1>
           <p>{copy.text}</p>
@@ -117,5 +118,5 @@ export function ProjectPublicPage() {
     )
   }
 
-  return <ProjectView project={project} lang={lang} onLang={setLocalLanguage} style={vars} onToast={showToast} toast={toast} />
+  return <ProjectView project={project} lang={lang} onLang={setLocalLanguage} look={look} onToast={showToast} toast={toast} />
 }

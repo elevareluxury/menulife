@@ -31,6 +31,9 @@
   --my-r-pill: 999px;
 
   --my-blur: 14px;
+  /* QR: siempre oscuro sobre claro (muchos lectores no leen un QR invertido) */
+  --my-qr-bg: #FFFFFF;
+  --my-qr-fg: #04050D;
   --my-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 
   /* Movimiento (§7) */

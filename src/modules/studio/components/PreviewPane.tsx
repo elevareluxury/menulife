@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ExternalLink, Maximize2, Monitor, Smartphone, X } from 'lucide-react'
 import { ProfileView } from '@/modules/profile/components/ProfileView'
-import { themeVars } from '@/modules/profile/lib/profileTheme'
-import { usePrefersLight } from '@/modules/profile/lib/usePrefersLight'
 import type { ProfileLang } from '@/modules/profile/lib/profileTypes'
 import type { PreviewSelect } from '@/modules/profile/components/ProfileView'
 import { useStudio } from '../StudioContext'
@@ -16,7 +14,6 @@ import { useAppLang } from '@/i18n/app/store'
  */
 export function LivePreview({ device = 'mobile', select }: { device?: 'mobile' | 'desktop'; select?: PreviewSelect }) {
   const { previewProfile } = useStudio()
-  const prefersLight = usePrefersLight()
   const appLang = useAppLang(s => s.lang)
   // La vista previa arranca en el idioma de Studio y se puede cambiar sin afectar la cuenta
   const [picked, setLang] = useState<ProfileLang | null>(null)
@@ -30,8 +27,7 @@ export function LivePreview({ device = 'mobile', select }: { device?: 'mobile' |
   return (
     <div className={device === 'mobile' ? 'st-phone' : 'st-desktop-frame'}>
       <div className="st-phone-scroll" ref={frame}>
-        <ProfileView profile={previewProfile} lang={lang} onLang={setLang}
-          style={themeVars(previewProfile.theme, prefersLight)} onToast={() => undefined} toast={null} preview select={select} />
+        <ProfileView profile={previewProfile} lang={lang} onLang={setLang} onToast={() => undefined} toast={null} preview select={select} />
       </div>
     </div>
   )
@@ -98,7 +94,6 @@ export function FullscreenPreviewButton({ compact = false }: { compact?: boolean
 
 function FullscreenPreview({ onClose }: { onClose: () => void }) {
   const { previewProfile } = useStudio()
-  const prefersLight = usePrefersLight()
   const appLang = useAppLang(s => s.lang)
   const [picked, setLang] = useState<ProfileLang | null>(null)
   const close = useRef<HTMLButtonElement>(null)
@@ -118,8 +113,7 @@ function FullscreenPreview({ onClose }: { onClose: () => void }) {
       <button ref={close} type="button" className="st-fullscreen-close" onClick={onClose} aria-label={t.exitFullscreen}>
         <X size={20} aria-hidden="true" />
       </button>
-      <ProfileView profile={previewProfile} lang={picked ?? appLang} onLang={setLang}
-        style={themeVars(previewProfile.theme, prefersLight)} onToast={() => undefined} toast={null} preview />
+      <ProfileView profile={previewProfile} lang={picked ?? appLang} onLang={setLang} onToast={() => undefined} toast={null} preview />
     </div>,
     document.body,
   )

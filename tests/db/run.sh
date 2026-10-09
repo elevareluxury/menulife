@@ -21,7 +21,8 @@ for m in \
   20261011000001_identity_moderation \
   20261012000001_identity_spaces \
   20261013000001_launch_sitemap \
-  20261014000001_launch_errors; do
+  20261014000001_launch_errors \
+  20261015000001_v1_profile_look; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

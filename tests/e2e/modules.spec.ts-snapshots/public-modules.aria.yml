@@ -1,7 +1,7 @@
 - main:
   - link "Mycen":
     - /url: /
-    - text: mycen.
+    - text: mycen
   - combobox "Idioma":
     - option "Español" [selected]
     - option "English"
@@ -18,8 +18,9 @@
   - button "Compartir"
   - heading "Ana Pérez" [level=1]
   - paragraph: Diseñadora
+  - list:
+    - listitem: Cerrado ahora
   - paragraph: Hago marcas.
-  - text: Cerrado ahora
   - button "Guardar contacto"
   - link /Mi portfolio Trabajos \d+/:
     - /url: https://ana.design
@@ -96,7 +97,9 @@
       - /url: https://etsy.com/ana
     - link "Behance Portfolio":
       - /url: https://behance.net/ana
-  - text: Una identidad Mycen ·
-  - link "Creá tu Mycen":
+  - link "mycen":
+    - /url: /
+  - text: ·
+  - link "Creá tu identidad":
     - /url: /register
   - button "Denunciar"

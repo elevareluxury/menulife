@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ArrowLeft, Briefcase, CalendarHeart, Check, Sparkles, Store, UserRound } from 'lucide-react'
 import { ProfileView } from '@/modules/profile/components/ProfileView'
-import { QUIET, themeVars } from '@/modules/profile/lib/profileTheme'
+import { QUIET } from '@/modules/profile/lib/profileTheme'
 import { createModule, createProfile, friendlyError, loadProfile, publishSpace, updateProfile, uploadMedia } from '../lib/studioApi'
 import { socialUrl } from '../lib/moduleCatalog'
 import { toPublicProfile, publicBaseUrl } from '../lib/preview'
@@ -268,8 +268,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
             </div>
             <div className="st-phone" style={{ height: 520, width: '100%', maxWidth: 340 }} aria-label={ob.preview}>
               <div className="st-phone-scroll">
-                <ProfileView profile={toPublicProfile(profile, modules, null)} lang={lang} onLang={() => undefined}
-                  style={themeVars(profile.theme)} onToast={() => undefined} toast={null} preview />
+                <ProfileView profile={toPublicProfile(profile, modules, null)} lang={lang} onLang={() => undefined} onToast={() => undefined} toast={null} preview />
               </div>
             </div>
           </div>

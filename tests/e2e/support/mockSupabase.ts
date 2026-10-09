@@ -30,6 +30,7 @@ export function profileRow(overrides: Row = {}): Row {
     theme: {}, primary_action: null, contact_card: { enabled: false }, default_locale: 'es', translations: {},
     tags: [], onboarding_step: 5, username_changed_at: null, published_at: now, created_at: now, updated_at: now,
     visibility: 'public', revision: 0, published_version_id: null, suspended_at: null, suspension_reason: null,
+    huella_salt: null, status_text: null, available: false,
     ...overrides,
   }
 }
@@ -97,7 +98,8 @@ function snapshotOf(state: MockState, p: Row): Row {
   return JSON.parse(JSON.stringify({
     id: p.id, username: p.username, display_name: p.display_name, descriptor: p.descriptor, bio: p.bio,
     avatar_url: p.avatar_url, cover_url: p.cover_url, purpose: p.purpose, tags: p.tags,
-    theme: p.theme, primary_action: p.primary_action, default_locale: p.default_locale, translations: p.translations,
+    theme: p.theme, huella_salt: p.huella_salt ?? null,
+    primary_action: p.primary_action, default_locale: p.default_locale, translations: p.translations,
     has_contact_card: !!card?.enabled, contact_card: card, modules,
   }))
 }
@@ -312,6 +314,8 @@ function publicProfile(state: MockState, handle: string, isOwner: boolean): unkn
   return {
     ...base, id: p.id, username, handle: h, space_slug: p.space_slug ?? null, status: p.status, visibility: p.visibility,
     is_owner: isOwner, business: null,
+    // V1: perfil vivo (de la fila, sin volver a publicar)
+    status_text: p.status_text ?? null, available: !!p.available,
     modules: resolveModules(state, { ...p, username }, base.modules as Row[]),
   }
 }

@@ -1,23 +1,24 @@
-import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Globe, Share2 } from 'lucide-react'
 import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
 import { tr, ui } from '../lib/profileI18n'
 import { safeHref } from '../lib/safeUrl'
-import { ensureProfileFont } from '../lib/profileTheme'
+import { lookVars, type ProfileLook } from '../lib/profileLook'
 import type { ProfileLang } from '../lib/profileTypes'
 import type { PublicProject } from '../lib/projectTypes'
 import { ProjectBlocks } from './ProjectBlocks'
 import { SafeImage } from './SafeImage'
 import { ReportButton } from './ReportDialog'
 import '../profile.css'
+import '../layouts/layouts.css'
 
 /** Página de un proyecto: /{username}/projects/{slug}. */
-export function ProjectView({ project, lang, onLang, style, onToast, toast }: {
+export function ProjectView({ project, lang, onLang, look, onToast, toast }: {
   project: PublicProject
   lang: ProfileLang
   onLang: (l: ProfileLang) => void
-  style: React.CSSProperties
+  /** Aspecto del Space dueño (tema y acento) */
+  look: ProfileLook
   onToast: (msg: string) => void
   toast: string | null
 }) {
@@ -28,7 +29,6 @@ export function ProjectView({ project, lang, onLang, style, onToast, toast }: {
   const summary = tr(project.summary, project.translations, 'summary', lang)
   const cover = safeHref(project.cover_url)
   const url = `${window.location.origin}/${space.username}/projects/${project.slug}`
-  useEffect(() => { ensureProfileFont(space.theme?.title_font) }, [space.theme?.title_font])
 
   async function share() {
     if (navigator.share) {
@@ -42,7 +42,8 @@ export function ProjectView({ project, lang, onLang, style, onToast, toast }: {
   }
 
   return (
-    <main className="mp-root" style={style} lang={lang} dir={langDir(lang)}>
+    <main className="mp-root my-profile" data-mycen-theme={look.mode} data-mycen-accent={look.accent} style={lookVars(look)}
+      lang={lang} dir={langDir(lang)}>
       {project.status !== 'published' && <div className="mp-banner" role="status">{t.projectDraftBanner}</div>}
 
       <header className="mp-topbar">
