@@ -78,6 +78,30 @@ const es = {
     brainCopy: 'Nunca más pierdas una idea importante.',
     cta: 'Crear mi espacio gratis →',
   },
+  /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  structures: {
+    label: 'TU PERFIL',
+    title: 'Cinco formas de',
+    titleAccent: 'mostrarte.',
+    subtitle: 'Elegí la estructura que va con lo que hacés y el tema que va con vos. Lo cambiás cuando quieras, sin perder nada.',
+    themes: 'Tema de las muestras',
+    universo: 'Universo',
+    amanecer: 'Amanecer',
+    layouts: {
+      credencial: { name: 'Credencial', text: 'Tu tarjeta, con QR, siempre a mano.' },
+      portada: { name: 'Portada', text: 'Tu nombre en grande, para creadores.' },
+      editorial: { name: 'Editorial', text: 'Elegante y sobria, para profesionales.' },
+      bento: { name: 'Bento', text: 'Todo de un vistazo, para negocios.' },
+      clasica: { name: 'Clásica', text: 'Simple y directa, links primero.' },
+    },
+    alt: (name: string, theme: string) => `Ejemplo de perfil ${name} en tema ${theme}`,
+  },
+  myDay: {
+    title: 'Mi día',
+    text: 'Cada mañana, tus 3 prioridades. Cada noche, un minuto para ver lo que lograste.',
+    points: ['Hasta 3 prioridades: pocas, para terminarlas.', 'Hábitos que perdonan un día perdido.', 'Cerrá el día viendo primero lo que lograste.'],
+    alt: 'Pantalla de Mi día en Life OS con prioridades, tareas y hábitos de ejemplo',
+  },
   business: {
     label: 'MYCEN BUSINESS',
     title: 'Una plataforma adaptada',

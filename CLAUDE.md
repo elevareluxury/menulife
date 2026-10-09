@@ -259,6 +259,17 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   primer día de la semana (`week_start`) y el 1 del mes (una vez por fecha), "Este mes…" en Hábitos (sólo se compara con
   uno mismo y sólo si fue mejor). Logros = avisos de progreso real ("Tu progreso"). Al completar: `celebrate()`
   (vibración de 15 ms) + `.life-pop` (sin "reducir movimiento"). Anillos: `MiniProgressRing` (hoy y semana).
+- Marca (etapa 13): hero de la landing con el cielo de Universo y la huella de la marca (semilla "mycen", sin canvas);
+  `StructuresSection` (las 5 estructuras × 2 temas) y "Mi día" en `LifeOSSection` son imágenes WebP de ejemplo en
+  `public/landing/`, generadas con `npx playwright test --config scripts/landing-shots/playwright.config.ts` (la app
+  servida como mycen.id; no corre en CI). `brand.spec.ts` (mismo config) genera el SVG maestro del ícono
+  (`design/app-icon/mycen-app-icon.svg`), favicon (svg/ico/png), apple-touch, íconos del manifest y
+  `public/email/huella.png`. `theme-color` según el tema del celular. Mails en paleta Amanecer con la huella en PNG
+  (`scripts/build-email-templates.mjs`). Rendimiento de la landing: esqueleto del hero en `index.html`
+  (`scripts/heroShell.ts`, textos de los diccionarios al compilar; `CinematicHero` lo saca al montar), secciones que se
+  montan de a una (`LandingPage`, `shown`; los efectos de `useLandingMotion` se enganchan al final), framer-motion sólo
+  si hay testimonios, `Geist Fallback` con `size-adjust` para no saltar al cargar la fuente. Lighthouse celular: 74
+  (antes 42); llegar a 85 pide pre-render o sacar Supabase del arranque (V1.1).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

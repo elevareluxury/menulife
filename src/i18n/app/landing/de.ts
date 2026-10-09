@@ -69,6 +69,30 @@ const de: LandingDict = {
     brainCopy: 'Verlier nie wieder eine wichtige Idee.',
     cta: 'Meinen Bereich gratis erstellen →',
   },
+  /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  structures: {
+    label: 'DEIN PROFIL',
+    title: 'Fünf Arten, dich',
+    titleAccent: 'zu zeigen.',
+    subtitle: 'Wähle die Struktur, die zu deiner Arbeit passt, und das Theme, das zu dir passt. Jederzeit änderbar, ohne etwas zu verlieren.',
+    themes: 'Theme der Beispiele',
+    universo: 'Universum',
+    amanecer: 'Morgenrot',
+    layouts: {
+      credencial: { name: 'Ausweis', text: 'Deine Karte mit QR-Code, immer zur Hand.' },
+      portada: { name: 'Titelseite', text: 'Dein Name groß, für Creator.' },
+      editorial: { name: 'Editorial', text: 'Elegant und ruhig, für Profis.' },
+      bento: { name: 'Bento', text: 'Alles auf einen Blick, für Unternehmen.' },
+      clasica: { name: 'Klassisch', text: 'Einfach und direkt, Links zuerst.' },
+    },
+    alt: (name, theme) => `Beispielprofil ${name} im Theme ${theme}`,
+  },
+  myDay: {
+    title: 'Mein Tag',
+    text: 'Jeden Morgen deine 3 Prioritäten. Jeden Abend eine Minute, um zu sehen, was du geschafft hast.',
+    points: ['Bis zu 3 Prioritäten: wenige, damit du sie schaffst.', 'Gewohnheiten, die einen verpassten Tag verzeihen.', 'Schließ den Tag ab und sieh zuerst, was du geschafft hast.'],
+    alt: 'Ansicht „Mein Tag“ in Life OS mit Beispiel-Prioritäten, -Aufgaben und -Gewohnheiten',
+  },
   business: {
     label: 'MYCEN BUSINESS',
     title: 'Eine Plattform, zugeschnitten',

@@ -69,6 +69,30 @@ const ko: LandingDict = {
     brainCopy: '중요한 아이디어를 다시는 놓치지 마세요.',
     cta: '무료로 내 공간 만들기 →',
   },
+  /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  structures: {
+    label: '나의 프로필',
+    title: '나를 보여주는',
+    titleAccent: '다섯 가지 방법.',
+    subtitle: '하는 일에 맞는 구성과 나에게 맞는 테마를 고르세요. 언제든 바꿀 수 있고 아무것도 사라지지 않아요.',
+    themes: '예시 테마',
+    universo: '유니버스',
+    amanecer: '새벽',
+    layouts: {
+      credencial: { name: '카드', text: 'QR이 담긴 카드, 언제나 손안에.' },
+      portada: { name: '커버', text: '이름을 크게, 크리에이터용.' },
+      editorial: { name: '에디토리얼', text: '우아하고 차분하게, 전문가용.' },
+      bento: { name: '벤토', text: '한눈에 모두, 비즈니스용.' },
+      clasica: { name: '클래식', text: '간단하고 직관적으로, 링크 먼저.' },
+    },
+    alt: (name, theme) => `${theme} 테마의 ${name} 프로필 예시`,
+  },
+  myDay: {
+    title: '나의 하루',
+    text: '매일 아침 3가지 우선순위. 매일 밤 1분 동안 해낸 일을 돌아보세요.',
+    points: ['우선순위는 최대 3개: 적어야 끝낼 수 있어요.', '하루 놓쳐도 끊기지 않는 습관.', '해낸 일을 먼저 보며 하루를 마무리하세요.'],
+    alt: 'Life OS의 나의 하루 화면 (예시 우선순위, 할 일, 습관)',
+  },
   business: {
     label: 'MYCEN BUSINESS',
     title: '업종에 맞춘',

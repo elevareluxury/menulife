@@ -36,3 +36,9 @@ lanzamiento: 100 por hora; subilo según el plan de Resend.
 ## 5. Probar
 Registrate con un mail tuyo eligiendo otro idioma en `/register` (ej. English): el mail de confirmación tiene que llegar
 en inglés, desde `team@mycen.id`. Después probá "¿Olvidaste tu contraseña?".
+
+## Diseño (V1 · etapa 13)
+Paleta Amanecer (fondo claro: los fondos oscuros fallan en muchos clientes de correo) y la huella de Mycen como imagen
+desde `https://mycen.id/email/huella.png` (`public/email/huella.png`, generada con
+`scripts/landing-shots/brand.spec.ts`). Antes de abrir al público, mandar un mail de prueba y mirarlo en Gmail (web y
+app) y Apple Mail.

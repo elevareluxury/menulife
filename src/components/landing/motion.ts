@@ -16,12 +16,13 @@ export function reducedMotion(): boolean {
 
 const finePointer = () => typeof window !== 'undefined' && !!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches
 
-/** Activa los efectos por atributo dentro de `root`. Se vuelve a enganchar cuando cambia `key` (ej. el idioma). */
+/** Activa los efectos por atributo dentro de `root`. Se vuelve a enganchar cuando cambia `key` (ej. el idioma).
+ *  Con `key === null` todavía no hace nada (la página se sigue dibujando). */
 export function useLandingMotion(root: React.RefObject<HTMLElement | null>, key: unknown) {
   // Pausa las animaciones CSS de las secciones que no se ven (corre también con "reducir movimiento": no molesta)
   useEffect(() => {
     const el = root.current
-    if (!el || typeof IntersectionObserver === 'undefined') return
+    if (key === null || !el || typeof IntersectionObserver === 'undefined') return
     const io = new IntersectionObserver(entries => {
       for (const e of entries) e.target.classList.toggle('ml-paused', !e.isIntersecting)
     }, { rootMargin: '200px 0px' })
@@ -31,7 +32,7 @@ export function useLandingMotion(root: React.RefObject<HTMLElement | null>, key:
 
   useEffect(() => {
     const el = root.current
-    if (!el || reducedMotion()) return
+    if (key === null || !el || reducedMotion()) return
     gsap.registerPlugin(ScrollTrigger)
     const cleanups: Array<() => void> = []
 

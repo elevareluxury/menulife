@@ -69,6 +69,30 @@ const en: LandingDict = {
     brainCopy: 'Never lose an important idea again.',
     cta: 'Create my free space →',
   },
+  /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  structures: {
+    label: 'YOUR PROFILE',
+    title: 'Five ways to',
+    titleAccent: 'show up.',
+    subtitle: 'Pick the layout that fits what you do and the theme that fits you. Change it anytime without losing anything.',
+    themes: 'Theme of the examples',
+    universo: 'Universe',
+    amanecer: 'Dawn',
+    layouts: {
+      credencial: { name: 'Card', text: 'Your card, with a QR code, always at hand.' },
+      portada: { name: 'Cover', text: 'Your name in big type, for creators.' },
+      editorial: { name: 'Editorial', text: 'Elegant and calm, for professionals.' },
+      bento: { name: 'Bento', text: 'Everything at a glance, for businesses.' },
+      clasica: { name: 'Classic', text: 'Simple and direct, links first.' },
+    },
+    alt: (name, theme) => `Example ${name} profile in the ${theme} theme`,
+  },
+  myDay: {
+    title: 'My day',
+    text: 'Every morning, your 3 priorities. Every evening, one minute to see what you got done.',
+    points: ['Up to 3 priorities: few, so you finish them.', 'Habits that forgive a missed day.', 'Close the day seeing what you achieved first.'],
+    alt: 'My day screen in Life OS with example priorities, tasks and habits',
+  },
   business: {
     label: 'MYCEN BUSINESS',
     title: 'A platform tailored',

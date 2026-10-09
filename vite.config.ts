@@ -3,11 +3,13 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
+import { heroShellPlugin } from './scripts/heroShell'
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    heroShellPlugin(),
     VitePWA({
       // Use our custom service worker — VitePWA injects the precache manifest
       strategies: 'injectManifest',
@@ -29,8 +31,8 @@ export default defineConfig({
         name: 'Mycen — Tu mundo digital',
         short_name: 'Mycen',
         description: 'Construye tu identidad digital, organiza tu vida y potencia tu negocio.',
-        theme_color: '#0A0B0F',
-        background_color: '#0A0B0F',
+        theme_color: '#04050D',
+        background_color: '#04050D',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',

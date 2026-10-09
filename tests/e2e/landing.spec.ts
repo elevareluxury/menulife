@@ -99,3 +99,34 @@ test.describe('animaciones', () => {
     await context.close()
   })
 })
+
+test.describe('marca (V1 · etapa 13)', () => {
+  test('el hero muestra la huella, y las cinco estructuras cambian de tema', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('.ch-sky[data-mycen-theme="universo"] svg')).toBeAttached()
+    const section = page.getByRole('region', { name: /Cinco formas de/ })
+    await section.scrollIntoViewIfNeeded()
+    const imgs = section.getByRole('img')
+    await expect(imgs).toHaveCount(5)
+    await expect(imgs.first()).toHaveAttribute('src', '/landing/perfil-credencial-universo.webp')
+    await section.getByRole('radio', { name: 'Amanecer' }).click()
+    await expect(section.getByRole('radio', { name: 'Amanecer' })).toHaveAttribute('aria-checked', 'true')
+    await expect(imgs.first()).toHaveAttribute('src', '/landing/perfil-credencial-amanecer.webp')
+    // Las imágenes existen y cargan
+    for (const src of await imgs.evaluateAll(els => els.map(e => (e as HTMLImageElement).src))) {
+      expect((await page.request.get(src)).ok(), src).toBe(true)
+    }
+    await expect(page.getByRole('heading', { name: 'Mi día' })).toBeAttached()
+  })
+
+  test('ningún contenedor con scroll interno ni captura de gestos', async ({ page }) => {
+    await page.goto('/')
+    await page.mouse.wheel(0, 4000)
+    const offenders = await page.evaluate(() => [...document.querySelectorAll('main *')].filter(el => {
+      const cs = getComputedStyle(el)
+      const scrolls = /(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 1
+      return scrolls || cs.touchAction === 'none'
+    }).map(el => `${el.tagName.toLowerCase()}.${(el as HTMLElement).className}`))
+    expect(offenders).toEqual([])
+  })
+})
