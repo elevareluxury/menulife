@@ -48,7 +48,7 @@ for (const layout of LAYOUTS) {
 
     // Pie "mycen · Creá tu identidad"
     const footer = page.locator('footer.mp-footer')
-    await expect(footer.getByRole('link', { name: 'Creá tu identidad' })).toHaveAttribute('href', '/register')
+    await expect(footer.getByRole('link', { name: 'Creá tu identidad' })).toHaveAttribute('href', /^\/register\?ref=/)
 
     // Sin contenedores con scroll interno (atrapan el gesto en iOS)
     const traps = await page.evaluate(() => [...document.querySelectorAll('main *')].filter(el => {

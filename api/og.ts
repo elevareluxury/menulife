@@ -25,6 +25,9 @@ interface PublicProject {
 }
 
 interface PublicProfile {
+  id?: string
+  theme?: Record<string, unknown> | null
+  huella_salt?: string | null
   /** Idioma en que el dueño escribe (va al <html lang>, Lanzamiento L2) */
   default_locale?: string | null
   username: string
@@ -157,13 +160,26 @@ function projectBody(p: PublicProject, url: string, profileUrl: string, owner: s
   return { html: parts.join('\n'), jsonLd: JSON.stringify(ld).replace(/</g, '\\u003c') }
 }
 
+/** Hash corto (FNV-1a) para que WhatsApp y compañía pidan la imagen de nuevo cuando cambia el aspecto o el nombre */
+function shortHash(v: string): string {
+  let h = 0x811c9dc5
+  for (let i = 0; i < v.length; i++) { h ^= v.charCodeAt(i); h = Math.imul(h, 0x01000193) }
+  return (h >>> 0).toString(36)
+}
+
+/** Imagen al compartir del perfil (V1 · etapa 08): cielo del tema, huella y nombre (api/og/[slug].tsx) */
+function ogImage(origin: string, p: PublicProfile, space: string | null): string {
+  const v = shortHash(JSON.stringify([p.display_name, p.descriptor, p.avatar_url, p.theme ?? null, p.huella_salt ?? null]))
+  return `${origin}/api/og/${encodeURIComponent(p.username)}?${space ? `space=${encodeURIComponent(space)}&` : ''}v=${v}`
+}
+
 /** Código de idioma seguro para <html lang> (ej. "es", "pt", "zh"); si no hay o no es válido, español */
 function htmlLang(v: string | null | undefined): string {
   return v && /^[a-z]{2}(-[A-Za-z]{2})?$/.test(v) ? v : 'es'
 }
 
 function page(origin: string, path: string, title: string, description: string, image: string | null,
-  extra: { body?: string; jsonLd?: string; noindex?: boolean; type?: 'profile' | 'article'; lang?: string | null } = {}): Response {
+  extra: { body?: string; jsonLd?: string; noindex?: boolean; type?: 'profile' | 'article'; lang?: string | null; imageAlt?: string } = {}): Response {
   const url = `${origin}${path}`
   // Sin foto ni portada: la imagen de marca (1200×630)
   const img = image ?? `${origin}/og-image.png`
@@ -178,7 +194,10 @@ function page(origin: string, path: string, title: string, description: string, 
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(url)}">
-<meta property="og:image" content="${esc(img)}">
+<meta property="og:image" content="${esc(img)}">${extra.imageAlt ? `
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${esc(extra.imageAlt)}">` : ''}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
@@ -247,8 +266,8 @@ export default async function handler(req: Request): Promise<Response> {
     const description = (data.bio ?? data.descriptor ?? 'Mi identidad en Mycen.').slice(0, 200)
     const path = `/${data.handle ?? data.username}`
     const { html, jsonLd } = profileBody(data, `${origin}${path}`)
-    return page(origin, path, title, description, data.cover_url ?? data.avatar_url,
-      { body: html, jsonLd, noindex: data.visibility === 'unlisted', lang: data.default_locale })
+    return page(origin, path, title, description, ogImage(origin, data, space),
+      { body: html, jsonLd, noindex: data.visibility === 'unlisted', lang: data.default_locale, imageAlt: data.display_name })
   } catch {
     return generic()
   }

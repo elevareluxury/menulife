@@ -7,6 +7,7 @@ import { LanguageSelect } from '@/components/ui/LanguageSelect'
 import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
 import { useLangDir } from '@/i18n/app/useLangDir'
+import { parseReferral } from '@/lib/referral'
 
 const CORAL = '#F4705A'
 
@@ -58,6 +59,8 @@ export function RegisterPage() {
   const r = t.register
   useLangDir()
   const navigate = useNavigate()
+  // Llegó desde el pie de un perfil ("Creá tu identidad"): se guarda con la cuenta y se atribuye en el onboarding
+  const [referral] = useState(() => parseReferral(window.location.search))
   const [name,     setName]     = useState('')
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
@@ -82,7 +85,10 @@ export function RegisterPage() {
         password,
         options: {
           // locale: el idioma de los mails de Supabase (plantillas en supabase/templates)
-          data: { name: name.trim(), terms_accepted_at: new Date().toISOString(), locale: useAppLang.getState().lang },
+          data: {
+            name: name.trim(), terms_accepted_at: new Date().toISOString(), locale: useAppLang.getState().lang,
+            ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
+          },
           emailRedirectTo: window.location.origin + '/auth/callback',
         },
       })

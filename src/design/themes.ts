@@ -19,3 +19,13 @@ export const SECONDARY_COLORS: Record<MycenTheme, string> = { universo: '#7DD3FC
 
 /** Fondo de cada tema (--my-bg; un test verifica que coincidan): pinta html y body detrás de la app */
 export const THEME_BG: Record<MycenTheme, string> = { universo: '#04050D', amanecer: '#FBF4EE' }
+
+/** Texto principal y secundario de cada tema (--my-text / --my-muted; un test verifica que coincidan): para la imagen
+ *  al compartir (api/og), donde no hay CSS */
+export const THEME_TEXT: Record<MycenTheme, { text: string; muted: string }> = {
+  universo: { text: '#EEF0FF', muted: '#B7BCD6' },
+  amanecer: { text: '#1A1530', muted: '#4E4866' },
+}
+
+/** QR: siempre oscuro sobre claro (--my-qr-bg / --my-qr-fg; un test verifica que coincidan) */
+export const QR_COLORS = { bg: '#FFFFFF', fg: '#04050D' } as const

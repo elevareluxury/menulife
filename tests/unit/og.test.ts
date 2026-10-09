@@ -23,8 +23,20 @@ describe('api/og', () => {
     const html = await (await handler(req('ana'))).text()
     expect(html).toContain('<title>Ana &lt;Pérez&gt; · Diseño &amp; marca</title>')
     expect(html).toContain('content="Hola &quot;mundo&quot;"')
-    expect(html).toContain('<meta property="og:image" content="https://cdn/x.jpg">')
+    // La imagen es la de Mycen (cielo, huella y nombre), con una versión que cambia si cambia el aspecto
+    expect(html).toMatch(/<meta property="og:image" content="https:\/\/mycen\.id\/api\/og\/ana\?v=[a-z0-9]+">/)
+    expect(html).toContain('<meta property="og:image:alt" content="Ana &lt;Pérez&gt;">')
     expect(html).toContain('<link rel="canonical" href="https://mycen.id/ana">')
+  })
+
+  it('la imagen de un Space secundario lleva el Space y cambia de versión al cambiar el aspecto', async () => {
+    const base = { username: 'ana', handle: 'ana/estudio', display_name: 'Estudio', descriptor: null, bio: null, avatar_url: null, cover_url: null, status: 'published' }
+    mockRpc({ ...base, theme: { mode: 'universo' } })
+    const a = /og:image" content="([^"]+)"/.exec(await (await handler(new Request('https://mycen.id/api/og?slug=ana&space=estudio'))).text())![1]
+    mockRpc({ ...base, theme: { mode: 'amanecer' } })
+    const b = /og:image" content="([^"]+)"/.exec(await (await handler(new Request('https://mycen.id/api/og?slug=ana&space=estudio'))).text())![1]
+    expect(a).toMatch(/^https:\/\/mycen\.id\/api\/og\/ana\?space=estudio&amp;v=/)
+    expect(a).not.toBe(b)
   })
 
   it('redirige (301) un username anterior', async () => {

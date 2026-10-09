@@ -1,5 +1,11 @@
 import type { StudioDict } from './es'
 
+/** 1 визит, 2 визита, 5 визитов */
+function ruPlural(n: number, one: string, few: string, many: string): string {
+  const d = n % 10, h = n % 100
+  return d === 1 && h !== 11 ? one : d >= 2 && d <= 4 && (h < 12 || h > 14) ? few : many
+}
+
 const ru: StudioDict = {
   nav: {
     editor: 'Редактор',
@@ -357,6 +363,20 @@ const ru: StudioDict = {
     saveContactHelp: 'Позволяет сохранить ваш контакт в телефон. Включает только данные, которые вы укажете здесь.',
     name: 'Имя', jobTitle: 'Должность', company: 'Компания', email: 'E-mail', phone: 'Телефон', whatsapp: 'WhatsApp', web: 'Сайт',
     privacyNote: 'Ничего не добавляется автоматически: e-mail и телефон вашего аккаунта не передаются, если вы не укажете их здесь.',
+  },
+  week: {
+    title: 'Ваша неделя',
+    help: 'Последние 7 дней, реальные анонимные данные.',
+    visits: 'Визиты',
+    primary: 'Нажатия на главное действие',
+    contacts: 'Сохранённые контакты',
+    messages: 'Сообщения',
+    from: 'Откуда пришли',
+    topSource: (name: string, n: number) => `Ваша ссылка в ${name} принесла ${n} ${ruPlural(n, 'визит', 'визита', 'визитов')} на этой неделе.`,
+    topScan: (n: number) => `Ваш QR отсканировали ${n} ${ruPlural(n, 'раз', 'раза', 'раз')} на этой неделе.`,
+    total: (n: number) => `У вашего профиля ${n} ${ruPlural(n, 'визит', 'визита', 'визитов')} на этой неделе.`,
+    empty: 'На этой неделе визитов пока нет. Разместите ссылку в соцсетях — здесь будет видно, откуда приходят.',
+    seeAll: 'Вся аналитика',
   },
   analytics: {
     sources: 'Откуда приходят',

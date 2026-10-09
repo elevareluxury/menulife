@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { THEME_BG } from '../../src/design/themes'
+import { QR_COLORS, THEME_BG, THEME_TEXT } from '../../src/design/themes'
 
 const css = readFileSync(join(__dirname, '../../src/design/tokens.css'), 'utf8')
 
@@ -79,6 +79,15 @@ function worstBackgrounds(theme: keyof typeof THEMES): RGBA[] {
   return stops.flatMap(s => [s, over(sun, s)])
 }
 
+describe('sistema de diseño: valores para donde no hay CSS', () => {
+  it('QR_COLORS coincide con --my-qr-bg / --my-qr-fg y tiene contraste alto para escanear', () => {
+    const v = block('[data-mycen-theme]')
+    expect(QR_COLORS.bg.toLowerCase()).toBe(v['--my-qr-bg'].toLowerCase())
+    expect(QR_COLORS.fg.toLowerCase()).toBe(v['--my-qr-fg'].toLowerCase())
+    expect(contrast(parse(QR_COLORS.fg), parse(QR_COLORS.bg))).toBeGreaterThanOrEqual(15)
+  })
+})
+
 describe('sistema de diseño: contraste (AA)', () => {
   for (const theme of ['universo', 'amanecer'] as const) {
     const v = THEMES[theme]
@@ -109,6 +118,8 @@ describe('sistema de diseño: contraste (AA)', () => {
 
     it(`${theme}: THEME_BG coincide con --my-bg`, () => {
       expect(THEME_BG[theme].toLowerCase()).toBe(v['--my-bg'].toLowerCase())
+      expect(THEME_TEXT[theme].text.toLowerCase()).toBe(v['--my-text'].toLowerCase())
+      expect(THEME_TEXT[theme].muted.toLowerCase()).toBe(v['--my-muted'].toLowerCase())
     })
 
     it(`${theme}: los estados (error, listo, sin publicar) se leen sobre el vidrio`, () => {

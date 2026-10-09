@@ -122,3 +122,10 @@ export type WeekSchedule = Partial<Record<
   'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday',
   DaySchedule
 >>
+
+/** "Creá tu identidad" (V1 · etapa 08): el registro sabe de qué perfil llegó y con qué propósito */
+export function signupLink(handle: string, purpose: string | null | undefined): string {
+  const q = new URLSearchParams({ ref: handle })
+  if (purpose) q.set('tipo', purpose)
+  return `/register?${q.toString()}`
+}

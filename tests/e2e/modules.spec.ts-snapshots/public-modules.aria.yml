@@ -97,9 +97,11 @@
       - /url: https://etsy.com/ana
     - link "Behance Portfolio":
       - /url: https://behance.net/ana
+  - region "Videoclip":
+    - button "Videoclip Reproducir en YouTube"
   - link "mycen":
     - /url: /
   - text: ·
   - link "Creá tu identidad":
-    - /url: /register
+    - /url: /register?ref=ana&tipo=professional
   - button "Denunciar"

@@ -353,3 +353,18 @@ export async function deleteMessage(id: string): Promise<void> {
   const { error } = await db.from('profile_messages').delete().eq('id', id)
   if (error) throw error
 }
+
+/** Atribuye la cuenta al perfil que la trajo ("Creá tu identidad", V1 · etapa 08). Una sola vez por cuenta. */
+export async function recordReferral(r: { ref: string; purpose: string | null }): Promise<string> {
+  const { data, error } = await db.rpc('record_referral', { p_ref: r.ref, p_purpose: r.purpose })
+  if (error) throw error
+  return data as string
+}
+
+/** Mensajes recibidos por un Space desde una fecha (resultados de la semana, V1 · etapa 08) */
+export async function countMessagesSince(profileId: string, since: Date): Promise<number> {
+  const { count, error } = await db.from('profile_messages').select('id', { count: 'exact', head: true })
+    .eq('profile_id', profileId).gte('created_at', since.toISOString())
+  if (error) throw error
+  return count ?? 0
+}

@@ -23,7 +23,9 @@ export async function fetchPublicProfile(handle: string): Promise<ProfileLookup>
 /** Fuente de la visita: ?src=qr|ig|wa… (se guarda acotada en la base) */
 export function visitSource(): string | null {
   if (typeof window === 'undefined') return null
-  return new URLSearchParams(window.location.search).get('src')
+  // ?src= (lo pone Mycen en sus links) o, si no, el utm_source de las campañas (V1 · etapa 08). Sólo el canal: nada personal.
+  const q = new URLSearchParams(window.location.search)
+  return q.get('src') || q.get('utm_source')?.toLowerCase() || null
 }
 
 /** Registro anónimo de eventos. Nunca bloquea ni rompe la UI. */

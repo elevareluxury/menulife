@@ -1,9 +1,10 @@
 // Aspecto del perfil (V1 · etapa 03): estructura, tema Universo / Amanecer, acento de la paleta, estilo de huella
 // y portada. Lee también los valores de antes (modo dark/light/auto y un color libre), con la misma regla que la
 // migración 20261015000001_v1_profile_look.sql: las versiones ya publicadas no se tocan y se interpretan acá.
+// Imports relativos (sin @/): también la usa la función Edge de api/og/[slug].tsx.
 import type { CSSProperties } from 'react'
-import { MYCEN_ACCENTS, MYCEN_THEMES, type MycenAccent, type MycenTheme } from '@/design/themes'
-import { HUELLA_VARIANTS, type HuellaVariant } from '@/lib/huella'
+import { MYCEN_ACCENTS, MYCEN_THEMES, type MycenAccent, type MycenTheme } from '../../../design/themes'
+import { HUELLA_VARIANTS, type HuellaVariant } from '../../../lib/huella'
 import type { ProfileTheme } from './profileTypes'
 
 export const PROFILE_LAYOUTS = ['credencial', 'portada', 'editorial', 'bento', 'clasica'] as const

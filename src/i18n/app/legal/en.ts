@@ -87,6 +87,7 @@ const en: LegalDict = {
         '**Visit statistics:** anonymous events (visits and clicks on your profile) with an identifier that changes every day. We don’t store IP addresses or device data, and we don’t count bots.',
         '**Reports:** the reason and details written by the person reporting, with a daily anonymous identifier to prevent abuse.',
         '**Contact form messages:** the name, contact (email or WhatsApp) and message a visitor leaves. Only the profile owner sees them, in Studio; they are not published or emailed. To prevent abuse we use an anonymous identifier that changes every day, with no IP or device data.',
+        '**Invitations:** if you create your account from “Create your identity” on someone else’s profile, we save which profile brought you and its type, to understand how Mycen grows. That person can’t see your data.',
         '**Technical errors:** when something fails, we store the error message, the screen, the Mycen version and the browser (for example, "Chrome 128 · Android"), without IP or personal data, so we can fix it.',
       ] },
     ] },

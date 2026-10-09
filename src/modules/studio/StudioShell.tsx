@@ -22,6 +22,7 @@ import { useStudioT, type StudioDict } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
 import { langDir } from '@/i18n/app/languages'
 import { useUnreadMessages } from './lib/useUnreadMessages'
+import { referralFromMetadata } from '@/lib/referral'
 import './studio.css'
 
 type NavKey = keyof StudioDict['nav']
@@ -124,6 +125,7 @@ export function StudioShell() {
           initialProfile={load.kind === 'ready' ? load.profile : null}
           initialModules={load.kind === 'ready' ? load.modules : []}
           suggestedName={suggestedName}
+          referral={referralFromMetadata(user.user_metadata as Record<string, unknown> | undefined)}
           onDone={(profile, modules) => setLoad({
             kind: 'ready', profile, modules,
             business: load.kind === 'ready' ? load.business : null,
