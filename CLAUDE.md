@@ -26,7 +26,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Cambios de username quedan en `profile_username_history` (redirección).
 - Usernames reservados: tabla `reserved_usernames` y `src/lib/reservedUsernames.ts` (mantener sincronizados).
 - El visitante anónimo **nunca** lee tablas: usa las RPC `get_public_profile`, `get_public_project`, `get_profile_contact_card`,
-  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`.
+  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`, `submit_profile_message`.
 - Proyectos (Fase 5): `content_objects` (type='project') + `content_blocks`. Son de la identidad y se publican por su cuenta
   (`publish_project` → `published_snapshot`; Studio no puede escribir el snapshot ni pasar a "publicado" directo).
   Los módulos `project`/`portfolio` guardan sólo ids en `content`; `get_public_profile` les agrega `projects` (tarjetas de lo
@@ -199,6 +199,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   rechazados, el iframe se arma con el id validado. Fachada `MediaModule` (chunk propio, huella del perfil por
   `ProfileHuellaContext`): nada de terceros hasta tocar "Reproducir" (lo verifica `media.spec.ts`). Bento: video L, música M
   (`bento` puede ser función). Los proveedores están en privacidad (12 idiomas).
+- Formulario de contacto (etapa 05): módulo `contact_form` (`ContactFormModule`, chunk propio con sus textos en
+  `profile/lib/contactFormI18n.ts`) → RPC `submit_profile_message` → `profile_messages` (RLS: el dueño lee, marca `read_at` y
+  borra; nadie inserta directo). Sin email. Límites en la base: largos, ≤ 3 links, 5 por visitante/perfil/día (hash diario,
+  sin IP), 200 por perfil/día; bots (trampa, < 3 s, agente) reciben "ok" sin guardar. Studio → Mensajes (`/studio/messages`)
+  y `useUnreadMessages` (contador en la navegación, "Más" en el celular y el Inicio; servirá para el push nativo).
+  `ProfileModuleContext` da a los módulos huella, handle y si es vista previa (en la vista previa no se envía).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

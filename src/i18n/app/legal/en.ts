@@ -86,6 +86,7 @@ const en: LegalDict = {
         '**Mycen Business:** your business data and what you add about your customers and sales.',
         '**Visit statistics:** anonymous events (visits and clicks on your profile) with an identifier that changes every day. We don’t store IP addresses or device data, and we don’t count bots.',
         '**Reports:** the reason and details written by the person reporting, with a daily anonymous identifier to prevent abuse.',
+        '**Contact form messages:** the name, contact (email or WhatsApp) and message a visitor leaves. Only the profile owner sees them, in Studio; they are not published or emailed. To prevent abuse we use an anonymous identifier that changes every day, with no IP or device data.',
         '**Technical errors:** when something fails, we store the error message, the screen, the Mycen version and the browser (for example, "Chrome 128 · Android"), without IP or personal data, so we can fix it.',
       ] },
     ] },
@@ -121,6 +122,7 @@ const en: LegalDict = {
       { list: [
         'Your account, profile and Life OS data, for as long as you have the account. If you delete it, we erase it; providers’ backups are overwritten in their usual cycles.',
         'Visit statistics are kept aggregated and anonymous.',
+        'Contact form messages, until the profile owner deletes them or deletes their account.',
         'Error records are kept until they are resolved; the count of affected people, 90 days.',
         'Whatever the law requires us to keep (for example, billing data), for the period it sets.',
       ] },

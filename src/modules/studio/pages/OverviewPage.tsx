@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Check, Circle, Copy, ExternalLink, PenLine } from 'lucide-react'
+import { Check, Circle, Copy, ExternalLink, Inbox, PenLine } from 'lucide-react'
 import { useStudio } from '../StudioContext'
+import { useUnreadMessages } from '../lib/useUnreadMessages'
 import { loadStats } from '../lib/studioApi'
 import type { DailyStat } from '../lib/studioTypes'
 import { Button, PageHeader } from '../components/ui'
@@ -15,6 +16,9 @@ export function OverviewPage() {
   const { copied, copy } = useCopy()
   const t = useStudioT()
   const o = t.overview
+  // V1 · etapa 05: mensajes sin leer del formulario de contacto
+  const { count: unread } = useUnreadMessages()
+  const hasForm = modules.some(m => m.type === 'contact_form' && !m.deleted_at)
 
   useEffect(() => {
     let cancelled = false
@@ -71,6 +75,16 @@ export function OverviewPage() {
           <Link to="/studio/exchange" className="st-btn st-btn-ghost st-btn-sm">{o.shareQr}</Link>
         </div>
       </section>
+
+      {(unread > 0 || hasForm) && (
+        <section className="st-card st-row" style={{ justifyContent: 'space-between' }} aria-label={t.messages.title}>
+          <span className="st-row">
+            <Inbox size={18} aria-hidden="true" />
+            {unread > 0 ? <strong>{t.messages.homeUnread.replace('{n}', String(unread))}</strong> : <span className="st-help">{t.messages.homeNone}</span>}
+          </span>
+          <Link to="/studio/messages" className="st-btn st-btn-secondary st-btn-sm">{t.messages.title}</Link>
+        </section>
+      )}
 
       <section className="st-card">
         <h2 className="st-card-title">{o.last30}</h2>

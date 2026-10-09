@@ -4,7 +4,7 @@ import { Huella } from '@/design/components/Huella'
 import { MEDIA_PROVIDER_NAME, parseMediaUrl } from '../lib/media'
 import { tr, ui } from '../lib/profileI18n'
 import type { ModuleProps } from './ProfileModules'
-import { useProfileHuella } from './profileLookContext'
+import { useProfileModule } from './profileModuleContext'
 
 /**
  * Video y música (V1 · etapa 04) con fachada: al abrir el perfil sólo se dibuja una tarjeta liviana con la huella del
@@ -13,7 +13,7 @@ import { useProfileHuella } from './profileLookContext'
  */
 export function MediaModule({ module, lang, onAction }: ModuleProps) {
   const t = ui(lang)
-  const huella = useProfileHuella()
+  const huella = useProfileModule()
   const [playing, setPlaying] = useState(false)
   const embed = parseMediaUrl(module.content.url)
   if (!embed) return null

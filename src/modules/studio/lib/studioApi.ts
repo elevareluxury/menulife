@@ -269,6 +269,10 @@ export async function exportMyData(userId: string, email: string | undefined): P
   if (profileIds.length) {
     const { data } = await db.from('profile_versions').select('*').in('profile_id', profileIds)
     identity.profile_versions = data ?? []
+    // Mensajes recibidos por el formulario de contacto (sin el hash anti-abuso, que no le sirve a nadie)
+    const { data: messages } = await db.from('profile_messages')
+      .select('profile_id, name, contact, message, created_at, read_at').in('profile_id', profileIds)
+    identity.profile_messages = messages ?? []
   }
   if (identityIds.length) {
     const { data: objects } = await db.from('content_objects').select('*').in('identity_id', identityIds)
@@ -308,4 +312,42 @@ export async function loadTrafficSources(profileId: string, days: number): Promi
   const { data, error } = await db.rpc('profile_traffic_sources', { p_profile_id: profileId, p_days: days })
   if (error) throw error
   return ((data ?? []) as SourceRow[]).map(r => ({ ...r, visits: Number(r.visits), visitors: Number(r.visitors) }))
+}
+
+// ── Mensajes del formulario de contacto (V1 · etapa 05) ─────────────────────
+// La RLS deja ver sólo los mensajes de los Spaces de la cuenta; el dueño sólo puede cambiar read_at.
+
+export interface ProfileMessage {
+  id: string
+  profile_id: string
+  name: string
+  contact: string
+  message: string
+  created_at: string
+  read_at: string | null
+}
+
+export async function loadMessages(): Promise<ProfileMessage[]> {
+  const { data, error } = await db.from('profile_messages')
+    .select('id, profile_id, name, contact, message, created_at, read_at')
+    .order('created_at', { ascending: false })
+    .limit(300)
+  if (error) throw error
+  return (data ?? []) as ProfileMessage[]
+}
+
+export async function countUnreadMessages(): Promise<number> {
+  const { count, error } = await db.from('profile_messages').select('id', { count: 'exact', head: true }).is('read_at', null)
+  if (error) throw error
+  return count ?? 0
+}
+
+export async function setMessageRead(id: string, read: boolean): Promise<void> {
+  const { error } = await db.from('profile_messages').update({ read_at: read ? new Date().toISOString() : null }).eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteMessage(id: string): Promise<void> {
+  const { error } = await db.from('profile_messages').delete().eq('id', id)
+  if (error) throw error
 }

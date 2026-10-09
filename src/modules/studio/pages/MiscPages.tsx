@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
-import { BarChart3, ChevronRight, FolderOpen, Layers, LayoutGrid, LogOut, Palette, Settings, UserRound } from 'lucide-react'
+import { BarChart3, ChevronRight, FolderOpen, Inbox, Layers, LayoutGrid, LogOut, Palette, Settings, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
+import { useUnreadMessages } from '../lib/useUnreadMessages'
 import { FullscreenPreviewButton, PreviewSwitcher } from '../components/PreviewPane'
 import { PageHeader } from '../components/ui'
 import { useStudioT } from '@/i18n/app/studio'
@@ -23,9 +24,11 @@ export function PreviewPage() {
 
 export function MorePage() {
   const { business } = useStudio()
+  const { count: unread } = useUnreadMessages()
   const signOut = useAuthStore(s => s.signOut)
   const t = useStudioT()
   const items = [
+    { to: '/studio/messages', label: t.nav.messages, icon: Inbox },
     { to: '/studio/modules', label: t.nav.modules, icon: LayoutGrid },
     { to: '/studio/projects', label: t.nav.projects, icon: FolderOpen },
     { to: '/studio/appearance', label: t.nav.appearance, icon: Palette },
@@ -39,7 +42,11 @@ export function MorePage() {
       <nav className="st-card" style={{ padding: 6 }} aria-label={t.more.options}>
         {items.map(i => (
           <Link key={i.to} to={i.to} className="st-nav-item" style={{ justifyContent: 'space-between' }}>
-            <span className="st-row"><i.icon size={18} aria-hidden="true" /> {i.label}</span>
+            <span className="st-row"><i.icon size={18} aria-hidden="true" /> {i.label}
+              {i.to === '/studio/messages' && unread > 0 && (
+                <span className="st-unread" aria-label={t.messages.unread.replace('{n}', String(unread))}>{unread > 99 ? '99+' : unread}</span>
+              )}
+            </span>
             <ChevronRight size={16} aria-hidden="true" className="flip-rtl" />
           </Link>
         ))}

@@ -12,7 +12,7 @@ import { downloadVCard } from '../lib/vcard'
 import { lookVars, profileLook, type ProfileLayout } from '../lib/profileLook'
 import { profileHandle, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
 import { bentoSize, publicModuleDef, type BentoSize, type GroupProps } from './moduleRegistry'
-import { ProfileHuellaContext } from './profileLookContext'
+import { ProfileModuleContext } from './profileModuleContext'
 import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
 import { ReportButton } from './ReportDialog'
@@ -202,7 +202,8 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   })
 
   const seed = huellaSeed(profile)
-  const huellaCtx = useMemo(() => ({ seed, variant: look.huellaVariant }), [seed, look.huellaVariant])
+  const handle = profileHandle(profile)
+  const moduleCtx = useMemo(() => ({ seed, variant: look.huellaVariant, handle, preview }), [seed, look.huellaVariant, handle, preview])
   const parts: LayoutParts = {
     look,
     seed,
@@ -250,11 +251,11 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
       </header>
 
       <div className="mp-container">
-        <ProfileHuellaContext.Provider value={huellaCtx}>
+        <ProfileModuleContext.Provider value={moduleCtx}>
           <Suspense fallback={<div className="mp-layout-loading" aria-busy="true" />}>
             <Layout {...parts} />
           </Suspense>
-        </ProfileHuellaContext.Provider>
+        </ProfileModuleContext.Provider>
 
         <footer className="mp-footer">
           <Link to="/" className="mp-footer-brand">mycen</Link> · <Link to="/register">{t.createIdentity}</Link>

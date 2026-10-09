@@ -10,7 +10,7 @@ En Claude Code en la web todas las etapas usan la rama asignada a la sesión (un
 | 02 | Huella | Mergeada | [#40](https://github.com/elevareluxury/menulife/pull/40) | — | Sin cambios de peso (todavía no se usa en páginas públicas). |
 | 03 | Perfil: estructuras, temas y perfil vivo | Mergeada | [#41](https://github.com/elevareluxury/menulife/pull/41) | `20261015000001_v1_profile_look.sql` (aplicada) | Perfiles claros → Amanecer (el prompt decía todo Universo). Studio → Apariencia vieja sigue hasta la 06. |
 | 04 | Video y música | Mergeada | [#42](https://github.com/elevareluxury/menulife/pull/42) | `20261016000001_v1_media_module.sql` (aplicada) | Proveedores sumados a privacidad (12 idiomas). |
-| 05 | Formulario y bandeja | Pendiente | — | — | |
+| 05 | Formulario y bandeja | PR abierto | — | `20261017000001_v1_profile_messages.sql` (pendiente de aplicar) | Sin email (ver 16). Privacidad actualizada (12 idiomas). |
 | 06 | Apariencia con vista previa | Pendiente | — | — | |
 | 07 | Onboarding, Spaces y Studio | Pendiente | — | — | |
 | 08 | Compartir y crecimiento | Pendiente | — | — | El registro está en `/register` (no `/registro`). |

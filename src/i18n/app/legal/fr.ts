@@ -86,6 +86,7 @@ const fr: LegalDict = {
         '**Mycen Business :** les données de votre entreprise et ce que vous ajoutez sur vos clients et ventes.',
         '**Statistiques de visites :** événements anonymes (visites et clics sur votre profil) avec un identifiant qui change chaque jour. Nous ne conservons ni adresses IP ni données de l’appareil, et nous ne comptons pas les robots.',
         '**Signalements :** le motif et le détail écrits par la personne qui signale, avec un identifiant anonyme quotidien pour éviter les abus.',
+        '**Messages du formulaire de contact :** le nom, le contact (e-mail ou WhatsApp) et le message laissés par un visiteur. Seule la personne propriétaire du profil les voit, dans Studio ; ils ne sont ni publiés ni envoyés par e-mail. Pour éviter les abus, nous utilisons un identifiant anonyme qui change chaque jour, sans IP ni données de l’appareil.',
         '**Erreurs techniques :** quand quelque chose échoue, nous conservons le message d’erreur, l’écran, la version de Mycen et le navigateur (par exemple « Chrome 128 · Android »), sans IP ni données personnelles, pour pouvoir corriger.',
       ] },
     ] },
@@ -121,6 +122,7 @@ const fr: LegalDict = {
       { list: [
         'Les données de votre compte, de votre profil et de Life OS, tant que vous avez le compte. Si vous le supprimez, nous les effaçons ; les sauvegardes des prestataires sont écrasées selon leurs cycles habituels.',
         'Les statistiques de visites sont conservées agrégées et anonymes.',
+        'Les messages du formulaire de contact, jusqu’à ce que la personne propriétaire du profil les supprime ou supprime son compte.',
         'Les journaux d’erreurs sont conservés jusqu’à leur résolution ; le décompte des personnes concernées, 90 jours.',
         'Ce que la loi oblige à conserver (par exemple, les données de facturation), pendant la durée qu’elle fixe.',
       ] },
