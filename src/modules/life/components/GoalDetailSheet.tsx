@@ -4,7 +4,7 @@ import { CalendarDays, Check, CheckCircle2, Plus, Trash2, Edit3, Pause, Play, Ro
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
-import { LifeSheet, MiniProgressRing, colors, font, radius } from '../design-system'
+import { LifeSheet, MiniProgressRing, colors, font, radius, tint, ink } from '../design-system'
 import type { Goal, Milestone } from '../hooks/useGoals'
 import { useTasks } from '../hooks/useTasks'
 import { TaskList } from './TasksView'
@@ -91,18 +91,18 @@ export function GoalDetailSheet({
           {celebrating && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} aria-hidden="true"
               style={{
-                position: 'absolute', inset: 0, zIndex: 10, background: `${goal.color}18`, borderRadius: radius.xl,
+                position: 'absolute', inset: 0, zIndex: 10, background: `${tint(ink(goal.color), 9)}`, borderRadius: radius.xl,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
               }}>
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 280, damping: 20 }}>
-                <CheckCircle2 size={80} style={{ color: goal.color }} strokeWidth={1.5} />
+                <CheckCircle2 size={80} style={{ color: ink(goal.color) }} strokeWidth={1.5} />
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div aria-hidden="true" style={{ height: 4, borderRadius: radius.full, background: goal.color, marginBottom: '18px' }} />
+        <div aria-hidden="true" style={{ height: 4, borderRadius: radius.full, background: ink(goal.color), marginBottom: '18px' }} />
 
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: '16px' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -112,7 +112,7 @@ export function GoalDetailSheet({
               </p>
             )}
             <div style={{ display: 'flex', gap: '8px', marginTop: goal.description ? 12 : 0, flexWrap: 'wrap' }}>
-              <span style={{ padding: '4px 10px', borderRadius: radius.full, background: `${statusColor}14`, border: `1px solid ${statusColor}28`, fontFamily: font, fontSize: '11px', fontWeight: 700, color: statusColor }}>
+              <span style={{ padding: '4px 10px', borderRadius: radius.full, background: `${tint(ink(statusColor), 8)}`, border: `1px solid ${tint(ink(statusColor), 16)}`, fontFamily: font, fontSize: '11px', fontWeight: 700, color: statusColor }}>
                 {t.status[goal.status]}
               </span>
               {goal.target_date && (
@@ -123,7 +123,7 @@ export function GoalDetailSheet({
               )}
             </div>
           </div>
-          <MiniProgressRing progress={goal.progress} color={goal.color} size={56} showLabel />
+          <MiniProgressRing progress={goal.progress} color={ink(goal.color)} size={56} showLabel />
         </div>
 
         {/* Pasos */}
@@ -137,18 +137,18 @@ export function GoalDetailSheet({
             {goal.milestones.map(ms => (
               <li key={ms.id} style={{
                 display: 'flex', alignItems: 'center', gap: '10px', padding: '4px 6px', borderRadius: radius.sm,
-                background: ms.is_completed ? `${goal.color}0A` : 'transparent',
+                background: ms.is_completed ? `${tint(ink(goal.color), 4)}` : 'transparent',
               }}>
                 <button type="button" role="checkbox" aria-checked={ms.is_completed} aria-label={d.completeStep(ms.title)}
                   onClick={() => onToggleMilestone(ms)}
                   style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   <span aria-hidden="true" style={{
                     width: 22, height: 22, borderRadius: '50%',
-                    border: `2px solid ${ms.is_completed ? goal.color : colors.border.medium}`,
-                    background: ms.is_completed ? goal.color : 'transparent',
+                    border: `2px solid ${ms.is_completed ? ink(goal.color) : colors.border.medium}`,
+                    background: ms.is_completed ? ink(goal.color) : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    {ms.is_completed && <Check size={13} style={{ color: '#fff' }} strokeWidth={3} />}
+                    {ms.is_completed && <Check className="life-pop" size={13} style={{ color: colors.accent.on }} strokeWidth={3} />}
                   </span>
                 </button>
                 <span style={{
@@ -177,10 +177,10 @@ export function GoalDetailSheet({
               }} />
             <button type="button" onClick={() => void handleAddMs()} disabled={addingMs || !newMsTitle.trim()} aria-label={d.addStepButton}
               style={{
-                width: 44, height: 44, borderRadius: radius.sm, background: goal.color, border: 'none', cursor: 'pointer',
+                width: 44, height: 44, borderRadius: radius.sm, background: ink(goal.color), border: 'none', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: !newMsTitle.trim() ? 0.4 : 1, flexShrink: 0,
               }}>
-              <Plus size={18} style={{ color: '#fff' }} strokeWidth={2.5} aria-hidden="true" />
+              <Plus size={18} style={{ color: colors.accent.on }} strokeWidth={2.5} aria-hidden="true" />
             </button>
           </div>
           {addError && <p role="alert" style={{ fontFamily: font, fontSize: '12px', color: colors.semantic.error, margin: '6px 0 0' }}>{t.common.saveError}</p>}
@@ -195,11 +195,11 @@ export function GoalDetailSheet({
           <div style={{ marginBottom: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <label htmlFor="goal-progress" style={{ ...sectionLabel, margin: 0 }}>{d.manualProgress}</label>
-              <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 800, color: goal.color }}>{goal.progress}%</span>
+              <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 800, color: ink(goal.color) }}>{goal.progress}%</span>
             </div>
             <input id="goal-progress" type="range" min={0} max={100} value={goal.progress}
               onChange={e => onUpdateProgress(goal.id, Number(e.target.value))}
-              style={{ width: '100%', accentColor: goal.color, cursor: 'pointer', minHeight: 32 }} />
+              style={{ width: '100%', accentColor: ink(goal.color), cursor: 'pointer', minHeight: 32 }} />
           </div>
         )}
 
@@ -220,7 +220,7 @@ export function GoalDetailSheet({
             </button>
           ) : (
             <button type="button" onClick={() => onUpdateStatus(goal.id, 'completed')}
-              style={{ ...actionBtn, color: goal.color, border: `1px solid ${goal.color}40` }}>
+              style={{ ...actionBtn, color: ink(goal.color), border: `1px solid ${tint(ink(goal.color), 25)}` }}>
               <CheckCircle2 size={14} aria-hidden="true" /> {d.complete}
             </button>
           )}
@@ -229,7 +229,7 @@ export function GoalDetailSheet({
         <button type="button" onClick={() => onDelete(goal)}
           style={{
             width: '100%', marginTop: '12px', minHeight: 44, padding: '10px', borderRadius: radius.md,
-            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)',
+            background: tint(colors.semantic.error, 6), border: `1px solid ${tint(colors.semantic.error, 20)}`,
             color: colors.semantic.error, fontFamily: font, fontSize: '13px', fontWeight: 600, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
           }}>
@@ -281,10 +281,10 @@ function GoalTasks({ goal }: { goal: Goal }) {
           }} />
         <button type="button" onClick={() => void add()} disabled={adding || !title.trim()} aria-label={t.agenda.addTask}
           style={{
-            width: 44, height: 44, borderRadius: radius.sm, background: goal.color, border: 'none', cursor: 'pointer',
+            width: 44, height: 44, borderRadius: radius.sm, background: ink(goal.color), border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: !title.trim() ? 0.4 : 1, flexShrink: 0,
           }}>
-          <Plus size={18} style={{ color: '#fff' }} strokeWidth={2.5} aria-hidden="true" />
+          <Plus size={18} style={{ color: colors.accent.on }} strokeWidth={2.5} aria-hidden="true" />
         </button>
       </div>
       {failed && <p role="alert" style={{ fontFamily: font, fontSize: '12px', color: colors.semantic.error, margin: '6px 0 0' }}>{t.common.saveError}</p>}
@@ -319,8 +319,8 @@ function GoalLinks({ goal }: { goal: Goal }) {
           <p style={sectionLabel}>{c.habits}</p>
           {habits.map(h => (
             <div key={h.id} style={row}>
-              <span aria-hidden="true" style={{ width: 30, height: 30, borderRadius: 9, flexShrink: 0, background: `${h.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {createElement(getHabitIcon(h.icon), { size: 14, style: { color: h.color }, strokeWidth: 2.2 })}
+              <span aria-hidden="true" style={{ width: 30, height: 30, borderRadius: 9, flexShrink: 0, background: `${tint(ink(h.color), 9)}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {createElement(getHabitIcon(h.icon), { size: 14, style: { color: ink(h.color) }, strokeWidth: 2.2 })}
               </span>
               <span style={name}>{h.name}</span>
               {h.scheduled > 0 && <span style={meta}>{c.habitRate(h.done, h.scheduled)}</span>}
@@ -347,8 +347,8 @@ function GoalLinks({ goal }: { goal: Goal }) {
           {notes.map(n => (
             <div key={n.id} style={row}>
               {n.type === 'idea'
-                ? <Lightbulb size={15} aria-label={t.brain.types.idea} style={{ color: '#8B5CF6', flexShrink: 0 }} />
-                : <StickyNote size={15} aria-label={t.brain.types.note} style={{ color: '#3B82F6', flexShrink: 0 }} />}
+                ? <Lightbulb size={15} aria-label={t.brain.types.idea} style={{ color: colors.area.brain, flexShrink: 0 }} />
+                : <StickyNote size={15} aria-label={t.brain.types.note} style={{ color: colors.area.goals, flexShrink: 0 }} />}
               <span style={name}>{n.title}</span>
             </div>
           ))}

@@ -1,5 +1,5 @@
 import { TrendingUp, TrendingDown, Zap, Calendar } from 'lucide-react'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, ink, tint } from '../design-system'
 import { useGoalCheckins, type GoalCheckin } from '../hooks/useGoalCheckins'
 
 const ANSWER_META: Record<string, {
@@ -7,9 +7,9 @@ const ANSWER_META: Record<string, {
   icon: React.ComponentType<{ size?: number }>
   color: string
 }> = {
-  si:      { label: 'Avancé bien', icon: TrendingUp,   color: '#22C55E' },
-  un_poco: { label: 'Un poco',     icon: Zap,          color: '#F59E0B' },
-  no:      { label: 'No avancé',   icon: TrendingDown, color: '#EF4444' },
+  si:      { label: 'Avancé bien', icon: TrendingUp,   color: colors.semantic.success },
+  un_poco: { label: 'Un poco',     icon: Zap,          color: colors.area.habits },
+  no:      { label: 'No avancé',   icon: TrendingDown, color: colors.semantic.error },
 }
 
 function formatWeekLabel(weekStart: string): string {
@@ -35,7 +35,7 @@ export function GoalCheckinHistory({ goalId }: { goalId: string }) {
     return (
       <div style={{
         padding: '20px', textAlign: 'center',
-        background: 'rgba(255,255,255,0.03)',
+        background: colors.surface.base,
         border: `1px solid ${colors.border.subtle}`,
         borderRadius: radius.lg,
       }}>
@@ -64,15 +64,15 @@ function CheckinRow({ checkin }: { checkin: GoalCheckin }) {
   return (
     <div style={{
       padding: 14, borderRadius: radius.lg,
-      background: 'rgba(255,255,255,0.03)',
+      background: colors.surface.base,
       border: `1px solid ${colors.border.subtle}`,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: checkin.did_text || checkin.obstacle_text || checkin.next_text ? 10 : 0 }}>
         <div style={{
           width: 32, height: 32, borderRadius: 10,
-          background: `${meta.color}22`,
+          background: `${tint(ink(meta.color), 13)}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: meta.color, flexShrink: 0,
+          color: ink(meta.color), flexShrink: 0,
         }}>
           <Icon size={16} />
         </div>

@@ -248,6 +248,17 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   que quedó (pasar a mañana, cambiar fecha o soltar; soltar una tarea que se repite salta a la próxima) y "¿Cómo te fue
   hoy?". Datos: `life_daily_reviews` (una por persona y fecha local; `useDailyReview`). Debajo siguen tareas de hoy,
   hábitos, la meta en foco y el mes. `LifeSheet` va en un portal (si no, quedaba bajo la barra). E2E en `my-day.spec.ts`.
+- Life OS con el sistema de diseño y tono sin culpa (etapa 12): `LifeShell` pone `data-mycen-theme` en `<html>` según el
+  celular (también lo heredan las hojas en portal) y `MotionConfig reducedMotion="user"`. Los tokens de
+  `life/design-system/tokens.ts` apuntan a `--my-*` y a `life.css` (`--life-money|goals|habits|brain` por tema y
+  `--life-ink`); `tint(color, %)` para transparencias (sirve con variables) e `ink(color)` para los colores que elige la
+  persona (hábito, meta, categoría): se mezclan con el texto del tema para leerse en los dos. Texto con acento:
+  `colors.accent.ink`. Nada de hex sueltos en Life OS. Contraste en `tests/unit/lifeTokens.test.ts`, axe en
+  `life-theme.spec.ts`. Momentos amables (`lib/kindMoments.ts`, `components/KindMoments.tsx`): "Qué bueno verte de
+  vuelta" tras 3 días o más sin entrar (un solo hábito sugerido, sin rachas en Mi día ese día), "nuevos comienzos" el
+  primer día de la semana (`week_start`) y el 1 del mes (una vez por fecha), "Este mes…" en Hábitos (sólo se compara con
+  uno mismo y sólo si fue mejor). Logros = avisos de progreso real ("Tu progreso"). Al completar: `celebrate()`
+  (vibración de 15 ms) + `.life-pop` (sin "reducir movimiento"). Anillos: `MiniProgressRing` (hoy y semana).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

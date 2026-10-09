@@ -17,7 +17,7 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: radius.md,
   background: colors.surface.elevated, border: `1px solid ${colors.border.medium}`,
-  color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none', colorScheme: 'dark',
+  color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none', colorScheme: 'inherit',
 }
 const hint: React.CSSProperties = { fontFamily: font, fontSize: '12px', color: colors.text.tertiary, margin: '6px 0 0' }
 const iconBtn: React.CSSProperties = {
@@ -82,7 +82,7 @@ export function RepeatField({ date, choice, onChoice, custom, onCustom }: {
                     style={{
                       width: 40, height: 40, borderRadius: radius.full, cursor: 'pointer', fontFamily: font, fontSize: '13px', fontWeight: 700,
                       border: `1px solid ${on ? colors.accent.default : colors.border.medium}`,
-                      background: on ? colors.accent.soft : 'transparent', color: on ? colors.accent.default : colors.text.secondary,
+                      background: on ? colors.accent.soft : 'transparent', color: on ? colors.accent.ink : colors.text.secondary,
                     }}>
                     {dayLabel(d, 'narrow')}
                   </button>
@@ -132,9 +132,9 @@ export function SubtasksField({ items, onChange }: { items: Subtask[]; onChange:
               <button type="button" role="checkbox" aria-checked={s.done} aria-label={r.done(s.text)}
                 onClick={() => onChange(items.map(x => (x.id === s.id ? { ...x, done: !x.done } : x)))} style={iconBtn}>
                 <span aria-hidden="true" style={{
-                  width: 20, height: 20, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+                  width: 20, height: 20, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.accent.on,
                   border: `2px solid ${s.done ? colors.semantic.success : colors.border.medium}`, background: s.done ? colors.semantic.success : 'transparent',
-                }}>{s.done && <Check size={12} strokeWidth={3} />}</span>
+                }}>{s.done && <Check className="life-pop" size={12} strokeWidth={3} />}</span>
               </button>
               <input value={s.text} maxLength={MAX_SUBTASK_TEXT} aria-label={s.text}
                 onChange={e => onChange(items.map(x => (x.id === s.id ? { ...x, text: e.target.value } : x)))}

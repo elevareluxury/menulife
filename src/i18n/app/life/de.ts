@@ -70,7 +70,7 @@ const de: LifeDict = {
     inactive: n => `Deaktiviert (${n})`, inactiveHelp: 'Sie erscheinen nicht in deinem Tag, behalten aber ihren Verlauf.',
     markToday: n => `${n} heute als erledigt markieren`, unmarkToday: n => `${n} für heute zurücksetzen`,
     dayToggle: (n, d, done) => `${n}, ${d}: ${done ? 'erledigt' : 'nicht erledigt'}. Tippen zum Ändern`,
-    weekHelp: 'Tippe auf einen Punkt, um einen vergessenen Tag dieser Woche abzuhaken.',
+    weekHelp: 'Tippe auf einen Punkt, um einen anderen Tag dieser Woche abzuhaken.',
     deleteTitle: 'Gewohnheit löschen?', deleteText: n => `„${n}“ und der gesamte Verlauf werden gelöscht. Zum Pausieren lieber deaktivieren.`,
   },
   habitPlus: {
@@ -169,7 +169,7 @@ const de: LifeDict = {
     detailPlaceholder: 'Noch etwas, das du dir merken willst?', save: 'Speichern', update: 'Änderungen speichern',
   },
   agenda: {
-    loading: 'Agenda wird geladen…', loadError: 'Deine Aufgaben konnten nicht geladen werden.', prevMonth: 'Vorheriger Monat', nextMonth: 'Nächster Monat',
+    loading: 'Agenda wird geladen…', loadError: 'Deine Aufgaben konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.', prevMonth: 'Vorheriger Monat', nextMonth: 'Nächster Monat',
     calendarOf: m => `Kalender ${m}`, weekdays: ['M', 'D', 'M', 'D', 'F', 'S', 'S'],
     dayTasks: n => `${n} ${n === 1 ? 'Aufgabe' : 'Aufgaben'}`, goalDate: 'Zieldatum',
     enableTitle: 'Aktiviere Benachrichtigungen, um Erinnerungen zu erhalten, solange Life OS geöffnet ist.', enable: 'Aktivieren',
@@ -227,14 +227,22 @@ const de: LifeDict = {
     achievements: 'Erfolge', achievementsTitle: 'Diesen Monat', unlocked: n => `${n === 1 ? 'Erfolg freigeschaltet' : 'Erfolge freigeschaltet'}`,
     keepGoing: 'Bleib dran', keepGoingText: 'Jede Handlung zählt. Dein nächster Rückblick erzählt eine noch bessere Geschichte.',
   },
+  kind: {
+    welcomeTitle: 'Schön, dich wiederzusehen',
+    welcomeText: 'Du musst nichts nachholen. Für heute reicht eine einzige Sache:',
+    welcomeNoHabit: 'Wähle eine kleine Priorität für heute, das reicht.',
+    gotIt: 'Verstanden',
+    freshWeek: 'Eine neue Woche beginnt',
+    freshMonth: 'Ein neuer Monat beginnt',
+    freshText: 'Ein guter Moment, um auf deine Ziele zu schauen und zu entscheiden, wohin deine Energie geht.',
+    freshAction: 'Meine Ziele ansehen',
+    dismiss: 'Schließen',
+    monthTitle: 'Diesen Monat',
+    monthHabits: (n, more) => `Diesen Monat hast du an ${n} ${n === 1 ? 'Tag' : 'Tagen'} Gewohnheiten erfüllt${more > 0 ? `, ${more} mehr als zum gleichen Zeitpunkt im Vormonat` : ''}.`,
+  },
   achievements: {
-    unlocked: 'Erfolg freigeschaltet',
-    titles: {
-      first_brain_item: 'Erster Eintrag', ideas_10: '10 Ideen gespeichert', ideas_50: '50 Ideen gespeichert', tasks_10: '10 Aufgaben erledigt',
-      tasks_50: '50 Aufgaben erledigt', first_habit_completed: 'Erste Gewohnheit erledigt', habit_streak_7: '7-Tage-Serie',
-      habit_streak_30: '30-Tage-Serie', first_goal: 'Erstes Ziel gesetzt', first_goal_completed: 'Ziel erreicht', goals_5: 'Fünf Ziele',
-      first_transaction: 'Erste Buchung', first_positive_month: 'Monat im Plus',
-    },
+    unlocked: 'Dein Fortschritt',
+    titles: { first_brain_item: 'Du hast deine erste Notiz gespeichert', ideas_10: 'Du hast 10 Ideen gespeichert', ideas_50: 'Du hast 50 Ideen gespeichert', tasks_10: 'Du hast 10 Aufgaben erledigt', tasks_50: 'Du hast 50 Aufgaben erledigt', first_habit_completed: 'Du hast deine erste Gewohnheit abgehakt', habit_streak_7: '7 Tage am Stück mit einer Gewohnheit', habit_streak_30: '30 Tage am Stück mit einer Gewohnheit', first_goal: 'Du hast dein erstes Ziel festgelegt', first_goal_completed: 'Du hast ein Ziel erreicht', goals_5: 'Du hast 5 Ziele', first_transaction: 'Du hast deine erste Buchung eingetragen', first_positive_month: 'Diesen Monat kam mehr rein als raus' },
   },
   tasks: {
     views: { captures: 'Notizen', tasks: 'Aufgaben', archive: 'Archiv' },

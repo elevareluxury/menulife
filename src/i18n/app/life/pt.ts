@@ -70,7 +70,7 @@ const pt: LifeDict = {
     inactive: n => `Desativados (${n})`, inactiveHelp: 'Não aparecem no seu dia, mas mantêm o histórico.',
     markToday: n => `Marcar ${n} como feito hoje`, unmarkToday: n => `Desmarcar ${n} de hoje`,
     dayToggle: (n, d, done) => `${n}, ${d}: ${done ? 'feito' : 'não feito'}. Toque para mudar`,
-    weekHelp: 'Toque em um ponto para marcar um dia desta semana que você esqueceu.',
+    weekHelp: 'Toque em um ponto para marcar outro dia desta semana.',
     deleteTitle: 'Excluir hábito?', deleteText: n => `"${n}" e todo o seu histórico serão excluídos. Se só quiser pausá-lo, desative-o.`,
   },
   habitPlus: {
@@ -169,7 +169,7 @@ const pt: LifeDict = {
     detailPlaceholder: 'Algo mais que queira lembrar?', save: 'Salvar', update: 'Salvar alterações',
   },
   agenda: {
-    loading: 'Carregando agenda…', loadError: 'Não foi possível carregar suas tarefas.', prevMonth: 'Mês anterior', nextMonth: 'Próximo mês',
+    loading: 'Carregando agenda…', loadError: 'Não conseguimos carregar suas tarefas. Verifique sua conexão e tente de novo.', prevMonth: 'Mês anterior', nextMonth: 'Próximo mês',
     calendarOf: m => `Calendário de ${m}`, weekdays: ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
     dayTasks: n => `${n} ${n === 1 ? 'tarefa' : 'tarefas'}`, goalDate: 'data de meta',
     enableTitle: 'Ative os avisos para receber seus lembretes enquanto o Life OS está aberto.', enable: 'Ativar',
@@ -227,14 +227,22 @@ const pt: LifeDict = {
     achievements: 'Conquistas', achievementsTitle: 'Neste mês', unlocked: n => `${n === 1 ? 'conquista desbloqueada' : 'conquistas desbloqueadas'}`,
     keepGoing: 'Continue construindo', keepGoingText: 'Cada ação conta. Seu próximo resumo vai contar uma história ainda melhor.',
   },
+  kind: {
+    welcomeTitle: 'Que bom ver você de novo',
+    welcomeText: 'Não precisa colocar nada em dia. Para hoje, basta uma coisa só:',
+    welcomeNoHabit: 'Escolha uma prioridade pequena para hoje e pronto.',
+    gotIt: 'Entendi',
+    freshWeek: 'Começa uma nova semana',
+    freshMonth: 'Começa um novo mês',
+    freshText: 'Bom momento para olhar suas metas e escolher onde colocar sua energia.',
+    freshAction: 'Ver minhas metas',
+    dismiss: 'Fechar',
+    monthTitle: 'Este mês',
+    monthHabits: (n, more) => `Este mês você cumpriu hábitos em ${n} ${n === 1 ? 'dia' : 'dias'}${more > 0 ? `, ${more} a mais que nesta altura do mês passado` : ''}.`,
+  },
   achievements: {
-    unlocked: 'Conquista desbloqueada',
-    titles: {
-      first_brain_item: 'Primeira captura', ideas_10: '10 ideias salvas', ideas_50: '50 ideias salvas', tasks_10: '10 tarefas concluídas',
-      tasks_50: '50 tarefas concluídas', first_habit_completed: 'Primeiro hábito concluído', habit_streak_7: 'Sequência de 7 dias',
-      habit_streak_30: 'Sequência de 30 dias', first_goal: 'Primeira meta definida', first_goal_completed: 'Meta alcançada', goals_5: 'Cinco metas',
-      first_transaction: 'Primeira movimentação', first_positive_month: 'Mês no azul',
-    },
+    unlocked: 'Seu progresso',
+    titles: { first_brain_item: 'Você salvou sua primeira captura', ideas_10: 'Você já salvou 10 ideias', ideas_50: 'Você já salvou 50 ideias', tasks_10: 'Você concluiu 10 tarefas', tasks_50: 'Você concluiu 50 tarefas', first_habit_completed: 'Você marcou seu primeiro hábito', habit_streak_7: '7 dias seguidos com um hábito', habit_streak_30: '30 dias seguidos com um hábito', first_goal: 'Você definiu sua primeira meta', first_goal_completed: 'Você alcançou uma meta', goals_5: 'Você já tem 5 metas', first_transaction: 'Você anotou sua primeira movimentação', first_positive_month: 'Este mês entrou mais do que saiu' },
   },
   tasks: {
     views: { captures: 'Capturas', tasks: 'Tarefas', archive: 'Arquivo' },

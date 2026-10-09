@@ -43,7 +43,7 @@ export function LifeSectionHeader({ title, action }: LifeSectionHeaderProps) {
             fontFamily: font,
             fontSize: '11px',
             fontWeight: 600,
-            color: colors.accent.default,
+            color: colors.accent.ink,
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
             opacity: 0.85,
             transition: 'opacity 0.15s',

@@ -5,7 +5,7 @@ import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { formatMoney } from '@/lib/currencies'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, ink, tint } from '../design-system'
 import type { Insight } from '../lib/insights'
 
 interface View { title: string; text: string; icon: LucideIcon; color: string; route: string }
@@ -54,7 +54,7 @@ export function InsightCard({ insight, compact }: { insight: Insight; compact?: 
         border: compact ? 'none' : `1px solid ${colors.border.subtle}`,
       }}>
       <span aria-hidden="true" style={{
-        width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: `${v.color}18`,
+        width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: `${tint(ink(v.color), 9)}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <Icon size={16} style={{ color: v.color }} strokeWidth={2.2} />

@@ -1,5 +1,5 @@
 import { Sparkles, ArrowRight } from 'lucide-react'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, tint } from '../design-system'
 import { isCheckinDay } from '../hooks/useGoalCheckins'
 
 interface Props {
@@ -21,19 +21,19 @@ export function GoalCheckinBanner({ pendingCount, onCheckIn }: Props) {
         display: 'flex', alignItems: 'center', gap: 12,
         padding: '14px 16px', margin: '0 0 16px',
         borderRadius: radius.xl, width: '100%',
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(129,140,248,0.10) 100%)',
-        border: '1px solid rgba(99,102,241,0.35)',
+        background: tint(colors.accent.default, 10),
+        border: `1px solid ${tint(colors.accent.default, 35)}`,
         cursor: 'pointer', textAlign: 'left',
         boxSizing: 'border-box',
       }}
     >
       <div style={{
         width: 40, height: 40, borderRadius: 12,
-        background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+        background: colors.accent.default,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
       }}>
-        <Sparkles size={18} color="#fff" />
+        <Sparkles size={18} color={colors.accent.on} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{
@@ -49,7 +49,7 @@ export function GoalCheckinBanner({ pendingCount, onCheckIn }: Props) {
           {label}
         </p>
       </div>
-      <ArrowRight size={18} style={{ color: '#818CF8', flexShrink: 0 }} />
+      <ArrowRight size={18} style={{ color: colors.area.brain, flexShrink: 0 }} />
     </button>
   )
 }

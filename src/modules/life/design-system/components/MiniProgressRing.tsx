@@ -8,7 +8,7 @@ interface MiniProgressRingProps {
   showLabel?: boolean
 }
 
-/** Small circular progress ring — same DNA as LifeScoreRing, reusable in Goals, Widgets, etc. */
+/** Anillo de progreso (metas, hábitos con cantidad y la semana). */
 export function MiniProgressRing({ progress, color, size = 44, showLabel = true }: MiniProgressRingProps) {
   const sw = 4  // stroke width
   const r = (size - sw * 2) / 2
@@ -19,6 +19,12 @@ export function MiniProgressRing({ progress, color, size = 44, showLabel = true 
   useEffect(() => {
     const el = arcRef.current
     if (!el) return
+    // Con "reducir movimiento", el anillo queda directo en su valor
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      el.style.transition = 'none'
+      el.style.strokeDashoffset = String(circ * (1 - clamped / 100))
+      return
+    }
     el.style.transition = 'none'
     el.style.strokeDashoffset = String(circ)
     const raf = requestAnimationFrame(() => {

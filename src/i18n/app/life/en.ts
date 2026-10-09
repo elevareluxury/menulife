@@ -70,7 +70,7 @@ const en: LifeDict = {
     inactive: n => `Deactivated (${n})`, inactiveHelp: 'They don’t show up in your day, but they keep their history.',
     markToday: n => `Mark ${n} as done today`, unmarkToday: n => `Unmark ${n} for today`,
     dayToggle: (n, d, done) => `${n}, ${d}: ${done ? 'done' : 'not done'}. Tap to change`,
-    weekHelp: 'Tap a dot to mark a day this week you forgot.',
+    weekHelp: 'Tap a dot to mark another day this week.',
     deleteTitle: 'Delete habit?', deleteText: n => `"${n}" and its whole history will be deleted. If you just want to pause it, deactivate it.`,
   },
   habitPlus: {
@@ -169,7 +169,7 @@ const en: LifeDict = {
     detailPlaceholder: 'Anything else you want to remember?', save: 'Save', update: 'Save changes',
   },
   agenda: {
-    loading: 'Loading agenda…', loadError: 'We could not load your tasks.', prevMonth: 'Previous month', nextMonth: 'Next month',
+    loading: 'Loading agenda…', loadError: 'We could not load your tasks. Check your connection and try again.', prevMonth: 'Previous month', nextMonth: 'Next month',
     calendarOf: m => `Calendar for ${m}`, weekdays: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
     dayTasks: n => `${n} ${n === 1 ? 'task' : 'tasks'}`, goalDate: 'goal date',
     enableTitle: 'Turn on notifications to get your reminders while Life OS is open.', enable: 'Turn on',
@@ -227,14 +227,22 @@ const en: LifeDict = {
     achievements: 'Achievements', achievementsTitle: 'This month', unlocked: n => `${n === 1 ? 'achievement unlocked' : 'achievements unlocked'}`,
     keepGoing: 'Keep building', keepGoingText: 'Every action counts. Your next recap will tell an even better story.',
   },
+  kind: {
+    welcomeTitle: 'Good to see you again',
+    welcomeText: 'No need to catch up on anything. For today, one small thing is enough:',
+    welcomeNoHabit: 'Pick one small priority for today, and that is it.',
+    gotIt: 'Got it',
+    freshWeek: 'A new week begins',
+    freshMonth: 'A new month begins',
+    freshText: 'A good moment to look at your goals and choose where to put your energy.',
+    freshAction: 'See my goals',
+    dismiss: 'Close',
+    monthTitle: 'This month',
+    monthHabits: (n, more) => `This month you kept up your habits on ${n} ${n === 1 ? 'day' : 'days'}${more > 0 ? `, ${more} more than at this point last month` : ''}.`,
+  },
   achievements: {
-    unlocked: 'Achievement unlocked',
-    titles: {
-      first_brain_item: 'First capture', ideas_10: '10 ideas saved', ideas_50: '50 ideas saved', tasks_10: '10 tasks completed',
-      tasks_50: '50 tasks completed', first_habit_completed: 'First habit completed', habit_streak_7: '7-day streak',
-      habit_streak_30: '30-day streak', first_goal: 'First goal set', first_goal_completed: 'Goal achieved', goals_5: 'Five goals',
-      first_transaction: 'First transaction', first_positive_month: 'Month in the green',
-    },
+    unlocked: 'Your progress',
+    titles: { first_brain_item: 'You saved your first capture', ideas_10: 'You have saved 10 ideas', ideas_50: 'You have saved 50 ideas', tasks_10: 'You completed 10 tasks', tasks_50: 'You completed 50 tasks', first_habit_completed: 'You checked off your first habit', habit_streak_7: '7 days in a row with a habit', habit_streak_30: '30 days in a row with a habit', first_goal: 'You set your first goal', first_goal_completed: 'You reached a goal', goals_5: 'You have 5 goals', first_transaction: 'You logged your first transaction', first_positive_month: 'This month more came in than went out' },
   },
   tasks: {
     views: { captures: 'Captures', tasks: 'Tasks', archive: 'Archive' },

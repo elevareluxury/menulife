@@ -4,7 +4,7 @@ import {
   CalendarDays, List, Repeat,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { LifeCard, LifeEmptyState, colors, font, radius } from '../design-system'
+import { LifeCard, LifeEmptyState, colors, font, radius, ink } from '../design-system'
 import { useGoalOptions, type GoalOption } from '../hooks/useGoalOptions'
 import { localDateKey, useTasks, type LifeTask } from '../hooks/useTasks'
 import { useToday } from '../hooks/useToday'
@@ -154,7 +154,7 @@ export function TasksView() {
   }
 
   const listSections: { id: string; title: string; color: string; items: LifeTask[]; showDate: boolean; hint?: string }[] = [
-    { id: 'focus', title: k.focus, color: colors.accent.default, items: sections.focus, showDate: true, hint: k.focusHint },
+    { id: 'focus', title: k.focus, color: colors.accent.ink, items: sections.focus, showDate: true, hint: k.focusHint },
     { id: 'overdue', title: k.overdue, color: colors.semantic.error, items: sections.overdue, showDate: true },
     { id: 'today', title: k.today, color: colors.text.primary, items: sections.today, showDate: false },
     { id: 'upcoming', title: k.upcoming, color: colors.text.tertiary, items: sections.upcoming, showDate: true },
@@ -179,7 +179,7 @@ export function TasksView() {
               style={{
                 flex: 1, minHeight: 36, padding: '6px 10px', borderRadius: radius.full, border: 'none', cursor: 'pointer',
                 background: mode === id ? colors.accent.soft : 'transparent',
-                color: mode === id ? colors.accent.default : colors.text.secondary,
+                color: mode === id ? colors.accent.ink : colors.text.secondary,
                 fontFamily: font, fontSize: '13px', fontWeight: 700,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               }}>
@@ -188,18 +188,18 @@ export function TasksView() {
           ))}
         </div>
         <button type="button" onClick={() => openNew(mode === 'calendar' ? selected : null)} aria-label={a.addTask} title={a.addTask}
-          style={{ ...navBtn, background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`, color: colors.accent.default }}>
+          style={{ ...navBtn, background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`, color: colors.accent.ink }}>
           <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
         </button>
       </div>
 
       {hasReminders && permission === 'default' && (
         <LifeCard style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <BellRing size={18} style={{ color: colors.accent.default, flexShrink: 0 }} aria-hidden="true" />
+          <BellRing size={18} style={{ color: colors.accent.ink, flexShrink: 0 }} aria-hidden="true" />
           <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: 0, flex: 1 }}>{a.enableTitle}</p>
           <button type="button" onClick={askPermission} style={{
             minHeight: 36, padding: '8px 12px', borderRadius: radius.full, border: 'none', cursor: 'pointer',
-            background: colors.accent.default, color: '#fff', fontFamily: font, fontSize: '12px', fontWeight: 700,
+            background: colors.accent.default, color: colors.accent.on, fontFamily: font, fontSize: '12px', fontWeight: 700,
           }}>{a.enable}</button>
         </LifeCard>
       )}
@@ -222,7 +222,7 @@ export function TasksView() {
                 cursor: quick.trim() ? 'pointer' : 'default', opacity: quick.trim() ? 1 : 0.4,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-              <Check size={16} strokeWidth={3} style={{ color: quick.trim() ? '#fff' : colors.text.tertiary }} aria-hidden="true" />
+              <Check size={16} strokeWidth={3} style={{ color: quick.trim() ? colors.accent.on : colors.text.tertiary }} aria-hidden="true" />
             </button>
           </LifeCard>
 
@@ -239,7 +239,7 @@ export function TasksView() {
               )}
               {listSections.filter(sec => sec.items.length > 0).map(sec => (
                 <LifeCard key={sec.id} style={{ padding: '12px 14px' }}>
-                  <h2 style={{ ...sectionTitle, color: sec.color, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <h2 style={{ ...sectionTitle, color: ink(sec.color), display: 'flex', alignItems: 'center', gap: 6 }}>
                     {sec.id === 'focus' && <Star size={12} fill="currentColor" aria-hidden="true" />}
                     {sec.title} · {sec.items.length}
                   </h2>
@@ -288,14 +288,14 @@ export function TasksView() {
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
                       background: isSelected ? colors.accent.soft : 'transparent',
                       border: isSelected ? `1px solid ${colors.accent.default}` : isToday ? `1px solid ${colors.border.medium}` : '1px solid transparent',
-                      color: isToday ? colors.accent.default : colors.text.secondary,
+                      color: isToday ? colors.accent.ink : colors.text.secondary,
                       fontFamily: font, fontSize: '13px', fontWeight: isToday || isSelected ? 800 : 500,
                     }}>
                     {date.getDate()}
                     <span style={{ display: 'flex', gap: 3, height: 5 }} aria-hidden="true">
                       {pending > 0 && <span style={{ width: 5, height: 5, borderRadius: '50%', background: colors.accent.default }} />}
                       {repeats > 0 && <span style={{ width: 5, height: 5, borderRadius: '50%', boxSizing: 'border-box', border: `1px solid ${colors.accent.default}` }} />}
-                      {goalsHere.slice(0, 2).map(g => <span key={g.id} style={{ width: 5, height: 5, borderRadius: '50%', background: g.color }} />)}
+                      {goalsHere.slice(0, 2).map(g => <span key={g.id} style={{ width: 5, height: 5, borderRadius: '50%', background: ink(g.color) }} />)}
                     </span>
                   </button>
                 )
@@ -309,13 +309,13 @@ export function TasksView() {
                 {selected === todayKey ? a.today : longDate(selected, locale)}
               </h2>
               <button type="button" onClick={() => openNew(selected)} aria-label={a.addTask}
-                style={{ ...navBtn, background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`, color: colors.accent.default }}>
+                style={{ ...navBtn, background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`, color: colors.accent.ink }}>
                 <Plus size={17} strokeWidth={2.5} aria-hidden="true" />
               </button>
             </div>
             {dayGoals.map(g => (
               <p key={g.id} style={{ fontFamily: font, fontSize: '12.5px', color: colors.text.secondary, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: g.color }} aria-hidden="true" />
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: ink(g.color) }} aria-hidden="true" />
                 {a.goalTarget} <strong>{g.name}</strong>
               </p>
             ))}
@@ -327,7 +327,7 @@ export function TasksView() {
               <ul aria-label={t.repeat.repeats} style={{ listStyle: 'none', margin: dayTasks.length ? '8px 0 0' : 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {dayRepeats.map(x => (
                   <li key={x.id} style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 32, paddingInlineStart: 10, fontFamily: font, fontSize: '14px', color: colors.text.secondary }}>
-                    <Repeat size={14} aria-label={t.repeat.repeats} style={{ color: colors.accent.default, flexShrink: 0 }} />
+                    <Repeat size={14} aria-label={t.repeat.repeats} style={{ color: colors.accent.ink, flexShrink: 0 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.title}</span>
                     {x.due_time && <span style={{ fontSize: '11.5px', color: colors.text.tertiary }}>{x.due_time.slice(0, 5)}</span>}
                   </li>
@@ -378,9 +378,9 @@ export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete,
                 width: 22, height: 22, borderRadius: 7,
                 border: `2px solid ${done ? colors.semantic.success : colors.border.medium}`,
                 background: done ? colors.semantic.success : 'transparent',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.accent.on,
               }}>
-                {done && <Check size={13} strokeWidth={3} />}
+                {done && <Check className="life-pop" size={13} strokeWidth={3} />}
               </span>
             </button>
             <button type="button" onClick={() => onEdit?.(t)} aria-label={onEdit ? a.edit(t.title) : undefined} disabled={!onEdit}
@@ -392,7 +392,7 @@ export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete,
               }}>
                 {markFocus && t.is_focus && !done && (
                   <Star size={12} fill="currentColor" aria-label={t0.tasks.focus}
-                    style={{ display: 'inline-block', color: colors.accent.default, marginInlineEnd: 6, verticalAlign: '-1px' }} />
+                    style={{ display: 'inline-block', color: colors.accent.ink, marginInlineEnd: 6, verticalAlign: '-1px' }} />
                 )}
                 {t.title}
               </span>
@@ -407,7 +407,7 @@ export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete,
                   )}
                   {goal && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: goal.color, flexShrink: 0 }} aria-hidden="true" />{goal.name}
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: ink(goal.color), flexShrink: 0 }} aria-hidden="true" />{goal.name}
                     </span>
                   )}
                 </span>

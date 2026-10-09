@@ -19,7 +19,7 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: radius.md,
   background: colors.surface.elevated, border: `1px solid ${colors.border.medium}`,
-  color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none', colorScheme: 'dark',
+  color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none', colorScheme: 'inherit',
 }
 
 interface Props {
@@ -135,7 +135,7 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
             border: `1px solid ${focus ? colors.accent.default : colors.border.medium}`, textAlign: 'start',
           }}>
           <Star size={18} aria-hidden="true" fill={focus ? colors.accent.default : 'none'}
-            style={{ color: focus ? colors.accent.default : colors.text.tertiary, flexShrink: 0 }} />
+            style={{ color: focus ? colors.accent.ink : colors.text.tertiary, flexShrink: 0 }} />
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: 'block', fontFamily: font, fontSize: '14px', fontWeight: 700, color: colors.text.primary }}>{t.tasks.sheetFocus}</span>
             <span style={{ display: 'block', fontFamily: font, fontSize: '12px', color: colors.text.tertiary, marginTop: 2 }}>{t.tasks.sheetFocusHint}</span>

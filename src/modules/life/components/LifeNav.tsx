@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useLifeT, type LifeDict } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langDir } from '@/i18n/app/languages'
+import { tint, colors, shadow } from '../design-system'
 
 interface Tab {
   to: string
@@ -42,12 +43,12 @@ export function LifeNav() {
       alignItems: 'center',
       gap: '2px',
       padding: '6px 8px',
-      background: 'rgba(13,15,20,0.88)',
+      background: colors.surface.elevated,
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
-      border: '1px solid rgba(255,255,255,0.07)',
+      border: `1px solid ${colors.border.glass}`,
       borderRadius: '9999px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
+      boxShadow: shadow.elevated,
       zIndex: 50,
       userSelect: 'none',
     }}>
@@ -68,7 +69,7 @@ export function LifeNav() {
               padding: '11px 14px',
               borderRadius: '9999px',
               textDecoration: 'none',
-              background: active ? 'rgba(244,112,90,0.13)' : 'transparent',
+              background: active ? tint(colors.accent.default, 13) : 'transparent',
               transition: 'background 0.18s ease',
               minWidth: '48px',
               minHeight: '44px',
@@ -78,7 +79,7 @@ export function LifeNav() {
               aria-hidden="true"
               size={20}
               style={{
-                color: active ? '#F4705A' : 'rgba(255,255,255,0.32)',
+                color: active ? colors.accent.ink : colors.text.secondary,
                 transition: 'color 0.18s',
                 strokeWidth: active ? 2.2 : 1.8,
               }}

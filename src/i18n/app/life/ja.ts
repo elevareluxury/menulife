@@ -70,7 +70,7 @@ const ja: LifeDict = {
     inactive: n => `無効（${n}）`, inactiveHelp: '今日の一覧には出ませんが、記録は残ります。',
     markToday: n => `「${n}」を今日完了にする`, unmarkToday: n => `「${n}」の今日の完了を取り消す`,
     dayToggle: (n, d, done) => `${n}、${d}：${done ? '完了' : '未完了'}。タップで切り替え`,
-    weekHelp: '点をタップすると、今週つけ忘れた日を記録できます。',
+    weekHelp: '点をタップすると、今週のほかの日も記録できます。',
     deleteTitle: '習慣を削除しますか？', deleteText: n => `「${n}」とその記録がすべて削除されます。休止したいだけなら無効にしてください。`,
   },
   habitPlus: {
@@ -169,7 +169,7 @@ const ja: LifeDict = {
     detailPlaceholder: 'ほかに覚えておきたいことは？', save: '保存', update: '変更を保存',
   },
   agenda: {
-    loading: 'アジェンダを読み込み中…', loadError: 'タスクを読み込めませんでした。', prevMonth: '前の月', nextMonth: '次の月',
+    loading: 'アジェンダを読み込み中…', loadError: 'タスクを読み込めませんでした。接続を確認して、もう一度お試しください。', prevMonth: '前の月', nextMonth: '次の月',
     calendarOf: m => `${m}のカレンダー`, weekdays: ['月', '火', '水', '木', '金', '土', '日'],
     dayTasks: n => `タスク ${n} 件`, goalDate: '目標日',
     enableTitle: '通知をオンにすると、Life OS を開いている間にリマインダーを受け取れます。', enable: 'オンにする',
@@ -227,14 +227,22 @@ const ja: LifeDict = {
     achievements: '実績', achievementsTitle: '今月', unlocked: () => '件の実績を解除',
     keepGoing: 'この調子で', keepGoingText: '一つひとつの行動が大切です。次の振り返りはもっといいストーリーになります。',
   },
+  kind: {
+    welcomeTitle: 'おかえりなさい',
+    welcomeText: '取り戻す必要はありません。今日はひとつだけで十分です：',
+    welcomeNoHabit: '今日の小さな優先事項をひとつ選べば十分です。',
+    gotIt: 'わかりました',
+    freshWeek: '新しい週のはじまり',
+    freshMonth: '新しい月のはじまり',
+    freshText: '目標を見直して、どこにエネルギーを注ぐか選ぶのにいいタイミングです。',
+    freshAction: '目標を見る',
+    dismiss: '閉じる',
+    monthTitle: '今月',
+    monthHabits: (n, more) => `今月は ${n} 日、習慣を続けました${more > 0 ? `（先月の同じ時期より ${more} 日多い）` : ''}。`,
+  },
   achievements: {
-    unlocked: '実績解除',
-    titles: {
-      first_brain_item: '初めての記録', ideas_10: 'アイデア 10 件', ideas_50: 'アイデア 50 件', tasks_10: 'タスク 10 件完了',
-      tasks_50: 'タスク 50 件完了', first_habit_completed: '初めての習慣達成', habit_streak_7: '7 日連続',
-      habit_streak_30: '30 日連続', first_goal: '最初の目標を設定', first_goal_completed: '目標達成', goals_5: '目標 5 つ',
-      first_transaction: '初めての収支記録', first_positive_month: 'プラス収支の月',
-    },
+    unlocked: 'あなたの歩み',
+    titles: { first_brain_item: '最初のメモを保存しました', ideas_10: 'アイデアを10件保存しました', ideas_50: 'アイデアを50件保存しました', tasks_10: 'タスクを10件完了しました', tasks_50: 'タスクを50件完了しました', first_habit_completed: 'はじめて習慣を記録しました', habit_streak_7: '習慣を7日続けました', habit_streak_30: '習慣を30日続けました', first_goal: '最初の目標を決めました', first_goal_completed: '目標を達成しました', goals_5: '目標が5つになりました', first_transaction: '最初の入出金を記録しました', first_positive_month: '今月は収入が支出を上回りました' },
   },
   tasks: {
     views: { captures: 'キャプチャ', tasks: 'タスク', archive: 'アーカイブ' },

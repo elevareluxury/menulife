@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2 } from 'lucide-react'
-import {
-  LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState,
-  colors, font, radius, stagger, fadeInUp,
-} from '../design-system'
+import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint } from '../design-system'
 import { useMoney, type Transaction } from '../hooks/useMoney'
 import { TransactionSheet } from '../components/TransactionSheet'
 import { ActionMenu } from '../components/ActionMenu'
@@ -88,7 +85,7 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}` }}>
       <div style={{
         width: 34, height: 34, borderRadius: radius.sm, flexShrink: 0,
-        background: isIncome ? `${colors.semantic.success}14` : `${colors.semantic.error}14`,
+        background: isIncome ? `${tint(colors.semantic.success, 8)}` : `${tint(colors.semantic.error, 8)}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         {isIncome
@@ -151,7 +148,7 @@ export function LifeMoneyPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '24px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${colors.area.money}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '14px', background: `${tint(colors.area.money, 9)}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Wallet size={20} style={{ color: colors.area.money }} strokeWidth={2} aria-hidden="true" />
           </div>
           <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>
@@ -164,7 +161,7 @@ export function LifeMoneyPage() {
             background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`,
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-          <Plus size={18} style={{ color: colors.accent.default }} strokeWidth={2.5} aria-hidden="true" />
+          <Plus size={18} style={{ color: colors.accent.ink }} strokeWidth={2.5} aria-hidden="true" />
         </button>
       </div>
 

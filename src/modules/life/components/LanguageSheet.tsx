@@ -39,7 +39,7 @@ export function LanguageList({ current, onChoose }: { current: AppLang; onChoose
               minHeight: 48, padding: '10px 14px', borderRadius: radius.md, cursor: 'pointer',
               background: active ? colors.accent.soft : colors.surface.high,
               border: `1px solid ${active ? colors.accent.default : colors.border.subtle}`,
-              color: active ? colors.accent.default : colors.text.primary,
+              color: active ? colors.accent.ink : colors.text.primary,
               fontFamily: font, fontSize: 15, fontWeight: 600, textAlign: 'start',
             }}>
             <span>{LANG_INFO[code].native}</span>

@@ -8,7 +8,7 @@ import { useLocaleStore } from '@/store/localeStore'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, tint } from '../design-system'
 import { dayKey } from '../hooks/useToday'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,7 +141,7 @@ function StoryCard({ gradient, children, index, total }: { gradient: string; chi
     >
       <div style={{ display: 'flex', gap: '5px', marginBottom: '8px' }} aria-hidden="true">
         {Array.from({ length: total }).map((_, i) => (
-          <div key={i} style={{ flex: 1, height: 2.5, borderRadius: '2px', background: i <= index ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)' }} />
+          <div key={i} style={{ flex: 1, height: 2.5, borderRadius: '2px', background: i <= index ? colors.text.secondary : colors.border.medium }} />
         ))}
       </div>
       {children}
@@ -152,17 +152,17 @@ function StoryCard({ gradient, children, index, total }: { gradient: string; chi
 function BigStat({ value, label }: { value: string; label: string }) {
   return (
     <div style={{ marginBottom: '4px' }}>
-      <p dir="ltr" style={{ fontFamily: font, fontSize: 'clamp(40px, 14vw, 64px)', fontWeight: 800, color: '#fff', margin: 0, lineHeight: 1, textAlign: 'start' }}>{value}</p>
-      <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 600, color: 'rgba(255,255,255,0.75)', margin: '8px 0 0' }}>{label}</p>
+      <p dir="ltr" style={{ fontFamily: font, fontSize: 'clamp(40px, 14vw, 64px)', fontWeight: 800, color: colors.text.primary, margin: 0, lineHeight: 1, textAlign: 'start' }}>{value}</p>
+      <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 600, color: colors.text.secondary, margin: '8px 0 0' }}>{label}</p>
     </div>
   )
 }
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-      <span style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>{label}</span>
-      <span style={{ fontFamily: font, fontSize: '14px', color: '#fff', fontWeight: 700, textAlign: 'end' }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: `1px solid ${colors.border.glass}` }}>
+      <span style={{ fontFamily: font, fontSize: '13px', color: colors.text.secondary, fontWeight: 500 }}>{label}</span>
+      <span style={{ fontFamily: font, fontSize: '14px', color: colors.text.primary, fontWeight: 700, textAlign: 'end' }}>{value}</span>
     </div>
   )
 }
@@ -170,12 +170,12 @@ function StatRow({ label, value }: { label: string; value: string | number }) {
 function CardHeader({ icon: Icon, kicker, title }: { icon: typeof Flame; kicker: string; title: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-      <div style={{ width: 52, height: 52, borderRadius: '18px', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Icon size={26} style={{ color: '#fff' }} strokeWidth={1.8} aria-hidden="true" />
+      <div style={{ width: 52, height: 52, borderRadius: '18px', background: colors.border.medium, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Icon size={26} style={{ color: colors.text.primary }} strokeWidth={1.8} aria-hidden="true" />
       </div>
       <div>
-        <p style={{ fontFamily: font, fontSize: '11px', color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: '0.08em', margin: 0, textTransform: 'uppercase' }}>{kicker}</p>
-        <h2 style={{ fontFamily: font, fontSize: '20px', color: '#fff', fontWeight: 800, margin: 0 }}>{title}</h2>
+        <p style={{ fontFamily: font, fontSize: '11px', color: colors.text.secondary, fontWeight: 700, letterSpacing: '0.08em', margin: 0, textTransform: 'uppercase' }}>{kicker}</p>
+        <h2 style={{ fontFamily: font, fontSize: '20px', color: colors.text.primary, fontWeight: 800, margin: 0 }}>{title}</h2>
       </div>
     </div>
   )
@@ -248,7 +248,7 @@ export function LifeReplayPage() {
           <button type="button" onClick={() => navigate('/life')}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px', minHeight: 40, padding: '8px 12px', borderRadius: radius.full,
-              background: 'rgba(255,255,255,0.05)', border: `1px solid ${colors.border.subtle}`,
+              background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
               color: colors.text.secondary, fontFamily: font, fontSize: '13px', fontWeight: 600, cursor: 'pointer',
             }}>
             <ArrowLeft size={14} strokeWidth={2.5} aria-hidden="true" className="flip-rtl" /> {r.back}
@@ -271,27 +271,27 @@ export function LifeReplayPage() {
           </div>
         ) : !hasData ? (
           <div style={{ minHeight: '60dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 24px' }}>
-            <div style={{ width: 72, height: 72, borderRadius: '24px', background: `${colors.accent.default}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
-              <Star size={32} style={{ color: colors.accent.default }} strokeWidth={1.5} aria-hidden="true" />
+            <div style={{ width: 72, height: 72, borderRadius: '24px', background: `${tint(colors.accent.default, 8)}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+              <Star size={32} style={{ color: colors.accent.ink }} strokeWidth={1.5} aria-hidden="true" />
             </div>
             <h2 style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color: colors.text.primary, margin: '0 0 10px' }}>{r.emptyTitle}</h2>
             <p style={{ fontFamily: font, fontSize: '14px', color: colors.text.secondary, lineHeight: 1.7, margin: 0 }}>{r.emptyText}</p>
           </div>
         ) : (
           <>
-            <StoryCard gradient="linear-gradient(145deg, #1A0D2E 0%, #2D1B4E 50%, #1E1040 100%)" index={0} total={TOTAL}>
+            <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.area.brain, 26)} 0%, ${colors.surface.elevated} 100%)`} index={0} total={TOTAL}>
               <div>
-                <p style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', margin: '0 0 8px', textTransform: 'uppercase' }}>{r.cover}</p>
-                <h1 style={{ fontFamily: font, fontSize: '36px', fontWeight: 800, color: '#fff', margin: 0 }}>{monthLabel}</h1>
+                <p style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: colors.text.secondary, letterSpacing: '0.1em', margin: '0 0 8px', textTransform: 'uppercase' }}>{r.cover}</p>
+                <h1 style={{ fontFamily: font, fontSize: '36px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>{monthLabel}</h1>
               </div>
-              <p style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>{r.swipe}</p>
+              <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: 0 }}>{r.swipe}</p>
             </StoryCard>
 
-            <StoryCard gradient="linear-gradient(145deg, #1A1000 0%, #3D2600 50%, #291A00 100%)" index={1} total={TOTAL}>
+            <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.area.habits, 26)} 0%, ${colors.surface.elevated} 100%)`} index={1} total={TOTAL}>
               <CardHeader icon={Flame} kicker={r.habits} title={r.habitsTitle} />
               <div>
                 <BigStat value={summary.habitsScheduled > 0 ? `${Math.round((summary.habitsDone / summary.habitsScheduled) * 100)}%` : '—'} label={r.habitsRate} />
-                <p style={{ fontFamily: font, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: '12px 0 0' }}>{r.habitsDone(summary.habitsDone)}</p>
+                <p style={{ fontFamily: font, fontSize: 14, color: colors.text.secondary, margin: '12px 0 0' }}>{r.habitsDone(summary.habitsDone)}</p>
                 {summary.topHabitName && (
                   <div style={{ marginTop: '24px' }}>
                     <StatRow label={r.mostConsistent} value={summary.topHabitName} />
@@ -301,7 +301,7 @@ export function LifeReplayPage() {
               </div>
             </StoryCard>
 
-            <StoryCard gradient="linear-gradient(145deg, #001020 0%, #001D3D 50%, #00142B 100%)" index={2} total={TOTAL}>
+            <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.area.goals, 26)} 0%, ${colors.surface.elevated} 100%)`} index={2} total={TOTAL}>
               <CardHeader icon={Target} kicker={r.goals} title={r.goalsTitle} />
               <div>
                 <BigStat value={String(summary.stepsDone)} label={r.stepsDone(summary.stepsDone)} />
@@ -313,8 +313,8 @@ export function LifeReplayPage() {
 
             <StoryCard
               gradient={balance >= 0
-                ? 'linear-gradient(145deg, #001A0A 0%, #00381A 50%, #002610 100%)'
-                : 'linear-gradient(145deg, #1A0000 0%, #380000 50%, #260000 100%)'}
+                ? `linear-gradient(145deg, ${tint(colors.area.money, 26)} 0%, ${colors.surface.elevated} 100%)`
+                : `linear-gradient(145deg, ${tint(colors.semantic.error, 22)} 0%, ${colors.surface.elevated} 100%)`}
               index={3} total={TOTAL}>
               <CardHeader icon={Wallet} kicker={r.money} title={r.moneyTitle} />
               <div>
@@ -324,14 +324,14 @@ export function LifeReplayPage() {
                   <StatRow label={r.expense} value={money(summary.expense)} />
                 </div>
                 {summary.otherCurrencies.length > 0 && (
-                  <p style={{ fontFamily: font, fontSize: 12.5, color: 'rgba(255,255,255,0.6)', margin: '14px 0 0' }}>
+                  <p style={{ fontFamily: font, fontSize: 12.5, color: colors.text.secondary, margin: '14px 0 0' }}>
                     {r.otherCurrencies(summary.otherCurrencies.join(', '))}
                   </p>
                 )}
               </div>
             </StoryCard>
 
-            <StoryCard gradient="linear-gradient(145deg, #0A0014 0%, #1E0038 50%, #140020 100%)" index={4} total={TOTAL}>
+            <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.accent.default, 26)} 0%, ${colors.surface.elevated} 100%)`} index={4} total={TOTAL}>
               <CardHeader icon={Zap} kicker={r.brain} title={r.brainTitle} />
               <div>
                 <BigStat value={String(summary.ideasCount + summary.notesCount)} label={r.captures} />
@@ -343,13 +343,13 @@ export function LifeReplayPage() {
               </div>
             </StoryCard>
 
-            <StoryCard gradient="linear-gradient(145deg, #1A0F00 0%, #3D2600 40%, #2B1E00 100%)" index={5} total={TOTAL}>
+            <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.area.habits, 26)} 0%, ${colors.surface.elevated} 100%)`} index={5} total={TOTAL}>
               <CardHeader icon={Trophy} kicker={r.achievements} title={r.achievementsTitle} />
               <div>
                 <BigStat value={String(summary.achievementsCount)} label={r.unlocked(summary.achievementsCount)} />
-                <div style={{ marginTop: '32px', padding: '20px', borderRadius: radius.lg, background: 'rgba(255,255,255,0.06)', textAlign: 'center' }}>
-                  <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>{r.keepGoing}</p>
-                  <p style={{ fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>{r.keepGoingText}</p>
+                <div style={{ marginTop: '32px', padding: '20px', borderRadius: radius.lg, background: colors.surface.base, textAlign: 'center' }}>
+                  <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 700, color: colors.text.primary, margin: '0 0 6px' }}>{r.keepGoing}</p>
+                  <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: 0, lineHeight: 1.6 }}>{r.keepGoingText}</p>
                 </div>
               </div>
             </StoryCard>

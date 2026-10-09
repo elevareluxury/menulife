@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLifeT } from '@/i18n/app/life'
-import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
+import { LifeSheet, LifeButton, colors, font, radius, ink } from '../design-system'
 import { LIFE_COLORS } from '../lib/lifePalette'
 import type { Goal, GoalFormData } from '../hooks/useGoals'
 
@@ -11,7 +11,7 @@ interface GoalSheetProps {
   initial?: Goal | null
 }
 
-const DEFAULT: GoalFormData = { name: '', description: '', target_date: '', color: '#3B82F6' }
+const DEFAULT: GoalFormData = { name: '', description: '', target_date: '', color: colors.area.goals }
 
 const label: React.CSSProperties = {
   fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary,
@@ -57,7 +57,7 @@ export function GoalSheet({ open, onClose, onSave, initial }: GoalSheetProps) {
 
   return (
     <LifeSheet open={open} onClose={onClose} title={initial ? t.goalSheet.editTitle : t.goalSheet.newTitle}>
-      <div aria-hidden="true" style={{ height: 4, borderRadius: radius.full, background: form.color, marginBottom: '20px' }} />
+      <div aria-hidden="true" style={{ height: 4, borderRadius: radius.full, background: ink(form.color), marginBottom: '20px' }} />
 
       <div style={{ marginBottom: '16px' }}>
         <label htmlFor="goal-name" style={label}>{t.goalSheet.name}</label>
@@ -76,7 +76,7 @@ export function GoalSheet({ open, onClose, onSave, initial }: GoalSheetProps) {
       <div style={{ marginBottom: '20px' }}>
         <label htmlFor="goal-date" style={label}>{t.goalSheet.targetDate}</label>
         <input id="goal-date" type="date" value={form.target_date} onChange={e => setForm(f => ({ ...f, target_date: e.target.value }))}
-          style={{ ...field, color: form.target_date ? colors.text.primary : colors.text.tertiary, colorScheme: 'dark' }} />
+          style={{ ...field, color: form.target_date ? colors.text.primary : colors.text.tertiary, colorScheme: 'inherit' }} />
       </div>
 
       <div style={{ marginBottom: '24px' }}>

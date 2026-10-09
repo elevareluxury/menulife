@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Share } from 'lucide-react'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, tint } from '../design-system'
 
 interface InstallAppModalIOSProps {
   open: boolean
@@ -17,7 +17,7 @@ export function InstallAppModalIOS({ open, onClose }: InstallAppModalIOSProps) {
           exit={{ opacity: 0 }}
           style={{
             position: 'fixed', inset: 0, zIndex: 310,
-            background: 'rgba(0,0,0,0.72)',
+            background: 'var(--my-scrim)',
             display: 'flex', alignItems: 'flex-end',
           }}
           onClick={onClose}
@@ -33,12 +33,12 @@ export function InstallAppModalIOS({ open, onClose }: InstallAppModalIOSProps) {
               background: colors.surface.high,
               borderRadius: `${radius.xl} ${radius.xl} 0 0`,
               padding: `24px 22px calc(34px + env(safe-area-inset-bottom))`,
-              border: '1px solid rgba(255,255,255,0.07)',
+              border: `1px solid ${colors.border.glass}`,
               borderBottom: 'none',
             }}
           >
             {/* Handle */}
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.10)', margin: '0 auto 22px' }} />
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: colors.border.medium, margin: '0 auto 22px' }} />
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
               <h2 style={{ fontFamily: font, fontSize: '18px', fontWeight: 800, color: colors.text.primary, margin: 0 }}>
@@ -54,9 +54,9 @@ export function InstallAppModalIOS({ open, onClose }: InstallAppModalIOSProps) {
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                  background: 'rgba(99,102,241,0.14)', border: '1px solid rgba(99,102,241,0.28)',
+                  background: tint(colors.area.brain, 14), border: `1px solid ${tint(colors.area.brain, 28)}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: font, fontSize: '14px', fontWeight: 800, color: '#818CF8',
+                  fontFamily: font, fontSize: '14px', fontWeight: 800, color: colors.area.brain,
                 }}>1</div>
                 <div style={{ paddingTop: 2 }}>
                   <p style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: colors.text.primary, margin: '0 0 6px' }}>
@@ -65,10 +65,10 @@ export function InstallAppModalIOS({ open, onClose }: InstallAppModalIOSProps) {
                   <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: '5px',
                     padding: '4px 10px', borderRadius: 8,
-                    background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.20)',
+                    background: tint(colors.area.brain, 10), border: `1px solid ${tint(colors.area.brain, 20)}`,
                   }}>
-                    <Share size={12} style={{ color: '#818CF8' }} strokeWidth={2.5} />
-                    <span style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: '#818CF8' }}>
+                    <Share size={12} style={{ color: colors.area.brain }} strokeWidth={2.5} />
+                    <span style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.area.brain }}>
                       Compartir
                     </span>
                   </div>
@@ -78,15 +78,15 @@ export function InstallAppModalIOS({ open, onClose }: InstallAppModalIOSProps) {
                 </div>
               </div>
 
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginLeft: 46 }} />
+              <div style={{ height: 1, background: colors.surface.base, marginLeft: 46 }} />
 
               {/* Step 2 */}
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                  background: 'rgba(99,102,241,0.14)', border: '1px solid rgba(99,102,241,0.28)',
+                  background: tint(colors.area.brain, 14), border: `1px solid ${tint(colors.area.brain, 28)}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: font, fontSize: '14px', fontWeight: 800, color: '#818CF8',
+                  fontFamily: font, fontSize: '14px', fontWeight: 800, color: colors.area.brain,
                 }}>2</div>
                 <div style={{ paddingTop: 2 }}>
                   <p style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: colors.text.primary, margin: '0 0 4px' }}>
@@ -104,7 +104,7 @@ export function InstallAppModalIOS({ open, onClose }: InstallAppModalIOSProps) {
               style={{
                 width: '100%', marginTop: '28px', padding: '13px',
                 borderRadius: radius.full,
-                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+                background: colors.surface.base, border: `1px solid ${colors.border.glass}`,
                 color: colors.text.secondary,
                 fontFamily: font, fontSize: '14px', fontWeight: 700, cursor: 'pointer',
               }}

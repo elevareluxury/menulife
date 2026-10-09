@@ -3,23 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, Flame, Target, Star, CheckCircle2, Lightbulb, Wallet } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useLifeStore } from '@/store/lifeStore'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, ink, tint } from '../design-system'
 import { useLifeT } from '@/i18n/app/life'
 
 const ICON_MAP: Record<string, { icon: LucideIcon; color: string }> = {
-  first_brain_item:      { icon: Lightbulb,    color: '#8B5CF6' },
-  ideas_10:              { icon: Lightbulb,    color: '#8B5CF6' },
-  ideas_50:              { icon: Lightbulb,    color: '#8B5CF6' },
-  tasks_10:              { icon: CheckCircle2, color: '#22C55E' },
-  tasks_50:              { icon: CheckCircle2, color: '#22C55E' },
-  first_habit_completed: { icon: Flame,        color: '#F59E0B' },
-  habit_streak_7:        { icon: Flame,        color: '#F59E0B' },
-  habit_streak_30:       { icon: Flame,        color: '#FF6B2C' },
-  first_goal:            { icon: Target,       color: '#3B82F6' },
-  first_goal_completed:  { icon: Target,       color: '#3B82F6' },
-  goals_5:               { icon: Star,         color: '#3B82F6' },
-  first_transaction:     { icon: Wallet,       color: '#22C55E' },
-  first_positive_month:  { icon: Wallet,       color: '#22C55E' },
+  first_brain_item:      { icon: Lightbulb,    color: colors.area.brain },
+  ideas_10:              { icon: Lightbulb,    color: colors.area.brain },
+  ideas_50:              { icon: Lightbulb,    color: colors.area.brain },
+  tasks_10:              { icon: CheckCircle2, color: colors.semantic.success },
+  tasks_50:              { icon: CheckCircle2, color: colors.semantic.success },
+  first_habit_completed: { icon: Flame,        color: colors.area.habits },
+  habit_streak_7:        { icon: Flame,        color: colors.area.habits },
+  habit_streak_30:       { icon: Flame,        color: colors.area.habits },
+  first_goal:            { icon: Target,       color: colors.area.goals },
+  first_goal_completed:  { icon: Target,       color: colors.area.goals },
+  goals_5:               { icon: Star,         color: colors.area.goals },
+  first_transaction:     { icon: Wallet,       color: colors.semantic.success },
+  first_positive_month:  { icon: Wallet,       color: colors.semantic.success },
 }
 
 export function AchievementToast() {
@@ -35,7 +35,7 @@ export function AchievementToast() {
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [achievementToast, clearAchievement])
 
-  const meta = achievementToast ? (ICON_MAP[achievementToast.type] ?? { icon: Trophy, color: '#F59E0B' }) : null
+  const meta = achievementToast ? (ICON_MAP[achievementToast.type] ?? { icon: Trophy, color: colors.area.habits }) : null
 
   return (
     <AnimatePresence>
@@ -60,9 +60,9 @@ export function AchievementToast() {
             gap: '12px',
             padding: '12px 18px 12px 14px',
             borderRadius: radius.xl,
-            background: 'rgba(15,17,21,0.96)',
-            border: `1px solid ${meta.color}30`,
-            boxShadow: `0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px ${meta.color}15`,
+            background: colors.surface.elevated,
+            border: `1px solid ${tint(ink(meta.color), 19)}`,
+            boxShadow: `0 8px 32px var(--my-scrim), 0 0 0 1px ${tint(ink(meta.color), 8)}`,
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             cursor: 'pointer',
@@ -73,16 +73,16 @@ export function AchievementToast() {
           {/* Icon */}
           <div style={{
             width: 40, height: 40, borderRadius: radius.md, flexShrink: 0,
-            background: `${meta.color}18`,
-            border: `1px solid ${meta.color}30`,
+            background: `${tint(ink(meta.color), 9)}`,
+            border: `1px solid ${tint(ink(meta.color), 19)}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <meta.icon size={20} style={{ color: meta.color }} strokeWidth={2} />
+            <meta.icon size={20} style={{ color: ink(meta.color) }} strokeWidth={2} />
           </div>
 
           {/* Text */}
           <div>
-            <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 700, color: meta.color, margin: '0 0 2px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: font, fontSize: '10px', fontWeight: 700, color: ink(meta.color), margin: '0 0 2px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               {t.achievements.unlocked}
             </p>
             <p style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: colors.text.primary, margin: 0 }}>

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Download, Share, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, tint } from '../design-system'
 import { useInstallPWA } from '@/hooks/useInstallPWA'
 
 interface LifeSettingsModalProps {
@@ -52,7 +52,7 @@ export function LifeSettingsModal({ open, onClose, onShowIOSInstructions }: Life
           exit={{ opacity: 0 }}
           style={{
             position: 'fixed', inset: 0, zIndex: 300,
-            background: 'rgba(0,0,0,0.60)',
+            background: 'var(--my-scrim)',
             display: 'flex', alignItems: 'flex-end',
           }}
           onClick={onClose}
@@ -65,15 +65,15 @@ export function LifeSettingsModal({ open, onClose, onShowIOSInstructions }: Life
             onClick={e => e.stopPropagation()}
             style={{
               width: '100%', maxWidth: 480, margin: '0 auto',
-              background: '#16171C',
+              background: colors.surface.elevated,
               borderRadius: `${radius.xl} ${radius.xl} 0 0`,
               padding: `20px 16px calc(28px + env(safe-area-inset-bottom))`,
-              border: '1px solid rgba(255,255,255,0.07)',
+              border: `1px solid ${colors.border.glass}`,
               borderBottom: 'none',
             }}
           >
             {/* Handle */}
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.10)', margin: '0 auto 18px' }} />
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: colors.border.medium, margin: '0 auto 18px' }} />
 
             {/* Title */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', padding: '0 4px' }}>
@@ -90,7 +90,7 @@ export function LifeSettingsModal({ open, onClose, onShowIOSInstructions }: Life
               <button
                 onClick={handleInstall}
                 style={rowStyle}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = colors.surface.base }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
               >
                 {needsIOSInstructions
@@ -109,13 +109,13 @@ export function LifeSettingsModal({ open, onClose, onShowIOSInstructions }: Life
             )}
 
             {/* Divider */}
-            <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '6px 10px' }} />
+            <div style={{ height: 1, background: colors.surface.base, margin: '6px 10px' }} />
 
             {/* Sign out */}
             <button
               onClick={handleSignOut}
               style={rowStyle}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.06)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = tint(colors.semantic.error, 6) }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
             >
               <LogOut size={18} strokeWidth={2} style={{ color: colors.semantic.error, flexShrink: 0 }} />

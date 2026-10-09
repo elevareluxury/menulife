@@ -1,5 +1,5 @@
 import { Download, Share, X } from 'lucide-react'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, tint } from '../design-system'
 
 interface InstallAppBannerProps {
   needsIOSInstructions: boolean
@@ -15,18 +15,18 @@ export function InstallAppBanner({
     <div style={{
       display: 'flex', alignItems: 'center', gap: '12px',
       padding: '12px 14px',
-      background: 'linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%)',
-      border: '1px solid rgba(99,102,241,0.22)',
+      background: tint(colors.accent.default, 10),
+      border: `1px solid ${tint(colors.accent.default, 25)}`,
       borderRadius: radius.lg,
     }}>
       <div style={{
         width: 38, height: 38, borderRadius: '11px', flexShrink: 0,
-        background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+        background: colors.accent.default,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         {needsIOSInstructions
-          ? <Share size={17} style={{ color: '#fff' }} strokeWidth={2.5} />
-          : <Download size={17} style={{ color: '#fff' }} strokeWidth={2.5} />
+          ? <Share size={17} style={{ color: colors.accent.on }} strokeWidth={2.5} />
+          : <Download size={17} style={{ color: colors.accent.on }} strokeWidth={2.5} />
         }
       </div>
 
@@ -45,7 +45,7 @@ export function InstallAppBanner({
         onClick={needsIOSInstructions ? onShowIOSInstructions : onInstall}
         style={{
           padding: '6px 13px', borderRadius: radius.full,
-          background: '#6366F1', border: 'none', color: '#fff',
+          background: colors.area.brain, border: 'none', color: colors.accent.on,
           fontFamily: font, fontSize: '12px', fontWeight: 700,
           cursor: 'pointer', flexShrink: 0,
         }}

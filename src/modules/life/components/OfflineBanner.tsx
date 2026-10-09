@@ -15,7 +15,7 @@ export function OfflineBanner() {
     }}>
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: radius.full,
-        background: 'rgba(19,22,28,0.95)', border: `1px solid ${colors.border.medium}`,
+        background: colors.surface.elevated, border: `1px solid ${colors.border.medium}`,
         fontFamily: font, fontSize: '12px', fontWeight: 600, color: colors.text.secondary,
       }}>
         <UploadCloud size={13} aria-hidden="true" />

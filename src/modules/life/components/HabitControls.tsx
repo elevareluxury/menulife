@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
+import { LifeSheet, LifeButton, colors, font, radius, ink } from '../design-system'
 import type { Habit } from '../hooks/useHabits'
 import { useLifeT } from '@/i18n/app/life'
 
@@ -20,13 +20,13 @@ export function QuantityButton({ habit, onAdd, size = 44 }: { habit: Habit; onAd
     <button type="button" onClick={onAdd} aria-label={`${p.plusOne(habit.name)} · ${p.progress(habit.todayValue, target, habit.unit ?? '')}`}
       style={{ position: 'relative', width: size, height: size, flexShrink: 0, padding: 0, border: 'none', background: 'none', cursor: 'pointer' }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill={done ? habit.color : 'none'} stroke={colors.border.medium} strokeWidth={3} />
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={habit.color} strokeWidth={3} strokeLinecap="round"
+        <circle cx={size / 2} cy={size / 2} r={r} fill={done ? ink(habit.color) : 'none'} stroke={colors.border.medium} strokeWidth={3} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={ink(habit.color)} strokeWidth={3} strokeLinecap="round"
           strokeDasharray={c} strokeDashoffset={c * (1 - ratio)} style={{ transition: 'stroke-dashoffset 0.3s ease' }} />
       </svg>
       <span aria-hidden="true" style={{
         position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: done ? '#fff' : habit.color,
+        color: done ? colors.accent.on : ink(habit.color),
       }}>
         <Plus size={size > 40 ? 18 : 15} strokeWidth={3} />
       </span>

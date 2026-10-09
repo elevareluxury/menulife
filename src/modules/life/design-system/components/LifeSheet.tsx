@@ -45,7 +45,7 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }
             onClick={onClose}
             style={{
               position: 'fixed', inset: 0, zIndex: 200,
-              background: 'rgba(0,0,0,0.65)',
+              background: 'var(--my-scrim)',
               backdropFilter: 'blur(6px)',
               WebkitBackdropFilter: 'blur(6px)',
             }}

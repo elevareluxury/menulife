@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Lightbulb, StickyNote, CheckSquare } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
-import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
+import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import type { BrainItem, BrainFormData, BrainItemType } from '../hooks/useBrain'
 import { GoalSelect } from './GoalSelect'
 
@@ -14,9 +14,9 @@ interface BrainItemSheetProps {
 }
 
 const TYPE_OPTIONS: { type: BrainItemType; icon: typeof Lightbulb; color: string }[] = [
-  { type: 'idea', icon: Lightbulb,   color: '#8B5CF6' },
-  { type: 'note', icon: StickyNote,  color: '#3B82F6' },
-  { type: 'task', icon: CheckSquare, color: '#22C55E' },
+  { type: 'idea', icon: Lightbulb,   color: colors.area.brain },
+  { type: 'note', icon: StickyNote,  color: colors.area.goals },
+  { type: 'task', icon: CheckSquare, color: colors.semantic.success },
 ]
 
 const DEFAULT: BrainFormData = { type: 'idea', title: '', content: '' }
@@ -53,7 +53,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
     finally { setSaving(false) }
   }
 
-  const accentColor = TYPE_OPTIONS.find(o => o.type === form.type)?.color ?? '#8B5CF6'
+  const accentColor = TYPE_OPTIONS.find(o => o.type === form.type)?.color ?? colors.area.brain
   const titleLabel = form.type === 'task' ? s.labelTask : form.type === 'note' ? s.labelNote : s.labelIdea
   const titlePlaceholder = form.type === 'idea' ? s.placeholderIdea : form.type === 'note' ? s.placeholderNote : s.placeholderTask
 
@@ -69,7 +69,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
             style={{
               minHeight: 40, padding: '9px 6px', borderRadius: radius.sm,
               background: form.type === type ? colors.surface.elevated : 'transparent',
-              border: `1.5px solid ${form.type === type ? color + '50' : 'transparent'}`,
+              border: `1.5px solid ${form.type === type ? tint(ink(color), 31) : 'transparent'}`,
               color: form.type === type ? color : colors.text.secondary,
               fontFamily: font, fontSize: '13px', fontWeight: 700, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
@@ -88,7 +88,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
           style={{
             width: '100%', padding: '12px 14px', boxSizing: 'border-box', borderRadius: radius.md,
             background: colors.surface.high,
-            border: `1px solid ${error && !form.title.trim() ? colors.semantic.error : `${accentColor}30`}`,
+            border: `1px solid ${error && !form.title.trim() ? colors.semantic.error : `${tint(ink(accentColor), 19)}`}`,
             color: colors.text.primary, fontFamily: font, fontSize: '16px', fontWeight: 600, outline: 'none',
           }} />
       </div>

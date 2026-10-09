@@ -16,6 +16,8 @@ import { useActiveGoals } from '../hooks/useActiveGoals'
 import { useTasks, localDateKey, type LifeTask } from '../hooks/useTasks'
 import { useHabits } from '../hooks/useHabits'
 import { MyDaySection } from '../components/MyDay'
+import { FreshStart, WelcomeBack } from '../components/KindMoments'
+import { useWelcomeBack } from '../hooks/useWelcomeBack'
 import { HabitMeta, QuantityButton } from '../components/HabitControls'
 import { useStreakText } from '../hooks/useStreakText'
 import { useMoney } from '../hooks/useMoney'
@@ -23,25 +25,8 @@ import { useToday } from '../hooks/useToday'
 import { getHabitIcon } from '../lib/lifePalette'
 import { useInsights } from '../hooks/useInsights'
 import { InsightCard } from '../components/InsightCard'
-import { colors, font, radius, fadeInUp, stagger } from '../design-system'
+import { colors, font, fontDisplay, radius, shadow, fadeInUp, stagger, tint, ink } from '../design-system'
 import { FEATURES } from '@/lib/features'
-
-// ── Deterministic starfield ───────────────────────────────────────────────────
-
-function lcg(s: number) { return ((s * 1664525 + 1013904223) & 0xffffffff) >>> 0 }
-
-const STARS = (() => {
-  const out: { x: number; y: number; r: number; o: number }[] = []
-  let s = 0x2a3b4c5d
-  for (let i = 0; i < 72; i++) {
-    s = lcg(s); const x = (s % 1000) / 10
-    s = lcg(s); const y = (s % 1000) / 10
-    s = lcg(s); const r = 0.5 + (s % 16) / 16
-    s = lcg(s); const o = 0.07 + (s % 36) / 100
-    out.push({ x, y, r, o })
-  }
-  return out
-})()
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -92,28 +77,8 @@ function InsightTeaser() {
 // ── StarfieldBackground ───────────────────────────────────────────────────────
 
 function StarfieldBackground() {
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden',
-      background: 'radial-gradient(ellipse 110% 60% at 50% 0%, rgba(99,102,241,0.09) 0%, transparent 65%), #0A0B0F',
-    }}>
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="xMidYMid slice"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-      >
-        {STARS.map((st, i) => (
-          <circle key={i} cx={st.x} cy={st.y} r={st.r * 0.11} fill="white" opacity={st.o} />
-        ))}
-      </svg>
-      <div style={{
-        position: 'absolute',
-        top: '42%', left: '50%', transform: 'translate(-50%, -50%)',
-        width: '420px', height: '320px', borderRadius: '50%',
-        background: 'radial-gradient(ellipse, rgba(244,112,90,0.05) 0%, transparent 68%)',
-      }} />
-    </div>
-  )
+  // Cielo del tema (Universo con estrellas, Amanecer con el degradé del amanecer), igual que el resto de Mycen
+  return <div aria-hidden="true" className="my-sky" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />
 }
 
 // ── HubSection ────────────────────────────────────────────────────────────────
@@ -132,80 +97,25 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: '16px',
-      background: 'rgba(99,102,241,0.04)',
-      border: '1px solid rgba(99,102,241,0.11)',
+      background: tint(colors.area.brain, 4),
+      border: `1px solid ${colors.border.glass}`,
       borderRadius: radius.xl,
       padding: '14px 16px 14px 14px',
     }}>
 
-      {/* LEFT — orb with profile photo */}
-      <motion.div
-        animate={{ scale: [1, 1.016, 1] }}
-        transition={{ duration: 5.0, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          position: 'relative',
-          width: 130, height: 130,
-          borderRadius: '50%',
-          flexShrink: 0,
-          background: 'radial-gradient(circle at 36% 32%, #5C60C0 0%, #3730A3 32%, #1E1B4B 65%, #0E0D1F 100%)',
-          boxShadow: '0 0 38px rgba(99,102,241,0.30), 0 0 88px rgba(99,102,241,0.09), 0 14px 36px rgba(0,0,0,0.52)',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Rotating shimmer */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 26, repeat: Infinity, ease: 'linear' }}
-          style={{
-            position: 'absolute', inset: 0, borderRadius: '50%', zIndex: 1,
-            background: 'conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.024) 20%, transparent 40%, rgba(255,255,255,0.013) 65%, transparent 80%)',
-          }}
-        />
-        {/* Specular highlight */}
-        <div style={{
-          position: 'absolute', top: '8%', left: '12%',
-          width: '44%', height: '42%', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(255,255,255,0.11) 0%, transparent 70%)',
-          zIndex: 2, pointerEvents: 'none',
-        }} />
-        {/* Bottom inner glow */}
-        <div style={{
-          position: 'absolute', bottom: '-6%', left: '20%',
-          width: '58%', height: '46%', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(99,102,241,0.24) 0%, transparent 70%)',
-          zIndex: 2, pointerEvents: 'none',
-        }} />
-        {/* Profile photo / initials */}
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 3,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt=""
-              style={{
-                width: '68%', height: '68%',
-                borderRadius: '50%', objectFit: 'cover',
-                border: '2.5px solid rgba(255,255,255,0.18)',
-                boxShadow: '0 2px 14px rgba(0,0,0,0.45)',
-              }}
-            />
-          ) : (
-            <div style={{
-              width: '64%', height: '64%',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(244,112,90,0.85) 0%, rgba(139,92,246,0.85) 100%)',
-              border: '2.5px solid rgba(255,255,255,0.14)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: font, fontSize: '22px', fontWeight: 800, color: '#fff',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.38)',
-            }}>
-              {initials}
-            </div>
-          )}
-        </div>
-      </motion.div>
+      {/* Foto (o iniciales) en un círculo de vidrio con el brillo del acento */}
+      <div style={{
+        position: 'relative', width: 96, height: 96, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+        background: `radial-gradient(circle at 36% 32%, ${tint(colors.accent.default, 40)} 0%, ${tint(colors.accent.default, 12)} 55%, ${colors.surface.high} 100%)`,
+        border: `1px solid ${colors.border.glass}`, boxShadow: shadow.coralGlow,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" style={{ width: '78%', height: '78%', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${colors.border.glass}` }} />
+        ) : (
+          <span style={{ fontFamily: fontDisplay, fontSize: '22px', fontWeight: 700, color: colors.text.primary }}>{initials}</span>
+        )}
+      </div>
 
       {/* RIGHT — title + subtitle + buttons */}
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -230,8 +140,8 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '5px',
               padding: '8px 14px', borderRadius: radius.full,
-              background: '#F1F0E9', border: '1px solid #F1F0E9',
-              color: '#111311', fontFamily: font, fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+              background: colors.accent.default, border: `1px solid ${colors.accent.default}`,
+              color: colors.accent.on, fontFamily: font, fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
             }}
           >
             <Settings2 size={12} strokeWidth={2.5} />
@@ -244,7 +154,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '4px',
                 padding: '8px 12px', borderRadius: radius.full,
-                background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+                background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
                 color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
               }}
             >
@@ -262,9 +172,9 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
 
 const cardStyle: React.CSSProperties = {
   position: 'relative', overflow: 'hidden',
-  background: 'rgba(255,255,255,0.028)',
+  background: colors.surface.base,
   backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-  border: '1px solid rgba(255,255,255,0.07)',
+  border: `1px solid ${colors.border.glass}`,
   borderRadius: radius.xl,
   padding: '12px 14px',
 }
@@ -337,7 +247,7 @@ function TodayTasksCard() {
           <button type="button" onClick={() => setSheet({ open: true, task: null })} aria-label={t.day.addTask} title={t.day.addTask}
             style={{
               width: 36, height: 36, borderRadius: radius.full, border: `1px solid ${colors.accent.soft}`, cursor: 'pointer',
-              background: colors.accent.soft, color: colors.accent.default,
+              background: colors.accent.soft, color: colors.accent.ink,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
             <Plus size={16} strokeWidth={2.5} aria-hidden="true" />
@@ -367,7 +277,8 @@ function TodayTasksCard() {
 }
 
 /** Hábitos programados para hoy, para tildar desde el inicio. */
-function TodayHabitsCard() {
+/** hideStreaks: el día que alguien vuelve después de unos días, no se muestran rachas (V1 · etapa 12) */
+function TodayHabitsCard({ hideStreaks = false }: { hideStreaks?: boolean }) {
   const t = useLifeT()
   const navigate = useNavigate()
   const { activeHabits, todayHabits, completedToday, error, toggleToday, addToday } = useHabits()
@@ -391,10 +302,10 @@ function TodayHabitsCard() {
             {todayHabits.map((h, i) => (
               <li key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0', borderTop: i ? `1px solid ${colors.border.subtle}` : 'none' }}>
                 <span aria-hidden="true" style={{
-                  width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: `${h.color}18`,
+                  width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: `${tint(ink(h.color), 9)}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  {createElement(getHabitIcon(h.icon), { size: 15, style: { color: h.color }, strokeWidth: 2.2 })}
+                  {createElement(getHabitIcon(h.icon), { size: 15, style: { color: ink(h.color) }, strokeWidth: 2.2 })}
                 </span>
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{
@@ -402,7 +313,7 @@ function TodayHabitsCard() {
                     color: h.completedToday ? colors.text.secondary : colors.text.primary,
                   }}>{h.name}</span>
                   <HabitMeta habit={h} />
-                  {h.streak > 0 && <span style={{ display: 'block', fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary }}>{streakText(h)}</span>}
+                  {h.streak > 0 && !hideStreaks && <span style={{ display: 'block', fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary }}>{streakText(h)}</span>}
                 </span>
                 {h.target_value != null ? (
                   <QuantityButton habit={h} size={40} onAdd={() => { addToday(h.id, 1).catch(() => toast.error(t.common.saveError)) }} />
@@ -412,11 +323,11 @@ function TodayHabitsCard() {
                   style={{ width: 44, height: 44, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
                   <span aria-hidden="true" style={{
                     width: 28, height: 28, borderRadius: '50%',
-                    border: `2px solid ${h.completedToday ? h.color : colors.border.medium}`,
-                    background: h.completedToday ? h.color : 'transparent',
+                    border: `2px solid ${h.completedToday ? ink(h.color) : colors.border.medium}`,
+                    background: h.completedToday ? ink(h.color) : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s',
                   }}>
-                    {h.completedToday && <Check size={15} strokeWidth={3} style={{ color: '#fff' }} />}
+                    {h.completedToday && <Check className="life-pop" size={15} strokeWidth={3} style={{ color: colors.accent.on }} />}
                   </span>
                 </button>}
               </li>
@@ -450,11 +361,11 @@ function GoalsCard() {
                 <li key={g.id} onClick={() => navigate('/life/goals')} style={{ cursor: 'pointer' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
                     <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.name}</span>
-                    <span style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: g.color, flexShrink: 0 }}>{g.progress}%</span>
+                    <span style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: ink(g.color), flexShrink: 0 }}>{g.progress}%</span>
                   </div>
                   <div role="progressbar" aria-label={g.name} aria-valuemin={0} aria-valuemax={100} aria-valuenow={g.progress}
-                    style={{ height: 6, borderRadius: radius.full, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                    <div style={{ width: `${g.progress}%`, height: '100%', borderRadius: radius.full, background: g.color }} />
+                    style={{ height: 6, borderRadius: radius.full, background: colors.surface.base, overflow: 'hidden' }}>
+                    <div style={{ width: `${g.progress}%`, height: '100%', borderRadius: radius.full, background: ink(g.color) }} />
                   </div>
                 </li>
               ))}
@@ -508,7 +419,7 @@ function MoneyCard() {
 const iconBtn: React.CSSProperties = {
   width: 44, height: 44, borderRadius: radius.full, flexShrink: 0,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+  background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
   color: colors.text.secondary, cursor: 'pointer',
 }
 
@@ -522,6 +433,7 @@ export function LifePage() {
   const locale = langLocale(useAppLang(s => s.lang))
   const today = useToday()
   const [langOpen, setLangOpen] = useState(false)
+  const [welcome, closeWelcome] = useWelcomeBack()
 
   const firstName = getFirstName(user)
   const initials  = getInitials(user)
@@ -570,7 +482,7 @@ export function LifePage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '4px',
                   padding: '5px 11px', borderRadius: radius.full,
-                  background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border.subtle}`,
+                  background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
                   color: colors.text.tertiary, fontFamily: font, fontSize: '11px', fontWeight: 600,
                   cursor: 'pointer',
                 }}
@@ -595,9 +507,10 @@ export function LifePage() {
             </h1>
             <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.tertiary, margin: '2px 0 0' }}>{dateLabel}</p>
           </motion.div>
+          {welcome ? <WelcomeBack onClose={closeWelcome} /> : <FreshStart />}
           <MyDaySection />
           <motion.div variants={fadeInUp}><TodayTasksCard /></motion.div>
-          <motion.div variants={fadeInUp}><TodayHabitsCard /></motion.div>
+          <motion.div variants={fadeInUp}><TodayHabitsCard hideStreaks={welcome} /></motion.div>
           <motion.div variants={fadeInUp}><GoalsCard /></motion.div>
           <motion.div variants={fadeInUp}><MoneyCard /></motion.div>
           {FEATURES.lifeInsights && <InsightTeaser />}
@@ -621,8 +534,8 @@ export function LifePage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '6px',
                   minHeight: 36, padding: '7px 16px', borderRadius: radius.full,
-                  background: 'rgba(244,112,90,0.07)', border: `1px solid ${colors.accent.glow}`,
-                  color: colors.accent.default, fontFamily: font, fontSize: '12px', fontWeight: 700,
+                  background: tint(colors.accent.default, 7), border: `1px solid ${colors.accent.glow}`,
+                  color: colors.accent.ink, fontFamily: font, fontSize: '12px', fontWeight: 700,
                   cursor: 'pointer', letterSpacing: '0.01em',
                 }}
               >

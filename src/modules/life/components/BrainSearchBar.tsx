@@ -1,5 +1,5 @@
 import { Search, X } from 'lucide-react'
-import { colors, font, radius } from '../design-system'
+import { colors, font, radius, tint } from '../design-system'
 
 interface Props {
   value: string
@@ -17,7 +17,7 @@ export function BrainSearchBar({
       display: 'flex', alignItems: 'center', gap: 10,
       padding: '11px 14px',
       background: colors.surface.high,
-      border: `1px solid ${value ? 'rgba(99,102,241,0.4)' : colors.border.medium}`,
+      border: `1px solid ${value ? tint(colors.area.brain, 40) : colors.border.medium}`,
       borderRadius: radius.lg,
       marginBottom: 12,
       transition: 'border-color 0.15s',
@@ -38,7 +38,7 @@ export function BrainSearchBar({
           onClick={() => onChange('')}
           style={{
             width: 20, height: 20, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.10)',
+            background: colors.border.medium,
             border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: colors.text.secondary,

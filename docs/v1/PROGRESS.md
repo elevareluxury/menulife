@@ -17,7 +17,7 @@ En Claude Code en la web todas las etapas usan la rama asignada a la sesión (un
 | 09 | Life OS: tareas que se repiten y subtareas | Mergeada | [#48](https://github.com/elevareluxury/menulife/pull/48) | `20261019000001_v1_task_recurrence.sql` (aplicada) | `life_tasks` confirmada sin uso (sólo export/borrado de datos). |
 | 10 | Life OS: hábitos | Mergeada | [#49](https://github.com/elevareluxury/menulife/pull/49) | `20261020000001_v1_habits.sql` (aplicada; crea las tablas de hábitos que faltaban en producción) | Insights, metas y Replay leen "X veces por semana" como diario (constancia aproximada). |
 | 11 | Life OS: Mi día | Mergeada | [#50](https://github.com/elevareluxury/menulife/pull/50) | `20261021000001_v1_daily_review.sql` (aplicada) | "Mi día" reemplaza a "Tu día" en `/life` (mismas tarjetas debajo; la de metas muestra la meta en foco). |
-| 12 | Life OS: tono y diseño | Pendiente | — | — | |
+| 12 | Life OS: tono y diseño | Mergeada | [#51](https://github.com/elevareluxury/menulife/pull/51) | — | Sin SQL: la bienvenida y "nuevos comienzos" se recuerdan en el dispositivo. "Bienvenido de vuelta" quedó "Qué bueno verte de vuelta" (sin género). |
 | 13 | Marca: landing, emails, íconos | Pendiente | — | — | |
 | 14 | Métricas propias | Pendiente | — | — | |
 | 15 | Tests de la V1 | Pendiente | — | — | |
