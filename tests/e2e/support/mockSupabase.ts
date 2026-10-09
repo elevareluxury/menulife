@@ -525,6 +525,25 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       const errors = state.tables.app_errors ?? []
       return { open: errors.filter(e => e.status === 'open').length, new_today: errors.length, affected_today: errors.reduce((n, e) => n + Number(e.affected_today ?? 0), 0) }
     }
+    // ── Métricas de producto (V1 · etapa 14) ──
+    case 'track_product_event': {
+      const events = state.tables.product_events ?? (state.tables.product_events = [])
+      if (!isOwner && args.p_event !== 'signup_started') return 'invalid'
+      events.push({ user_id: isOwner ? OWNER_ID : null, event: args.p_event, props: args.p_props ?? {}, created_at: new Date().toISOString() })
+      return 'ok'
+    }
+    case 'admin_product_metrics': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      // Un resumen armado en el test (state.tables.product_metrics[0]) o uno mínimo con los eventos guardados
+      if (state.tables.product_metrics?.[0]) return state.tables.product_metrics[0]
+      const events = state.tables.product_events ?? []
+      const users = (e: string) => new Set(events.filter(x => x.event === e).map(x => x.user_id)).size
+      return {
+        days: args.p_days, events_total: events.length, signups: users('signup_completed'), published: users('profile_published'),
+        publish_median_seconds: null, retention: [], week_life_users: 0, habit4_users: 0, period_life_users: 0,
+        returned_users: users('life_returned'), return_median_days: null, referral_signups: 0, referrals: [],
+      }
+    }
     // ── Spaces (Fase 10) ──
     case 'duplicate_space': {
       const src = state.tables.profiles.find(x => x.id === args.p_profile_id)

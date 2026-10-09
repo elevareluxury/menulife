@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
@@ -8,6 +8,7 @@ import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
 import { useLangDir } from '@/i18n/app/useLangDir'
 import { parseReferral } from '@/lib/referral'
+import { trackOncePerSession } from '@/lib/productEvents'
 
 const CORAL = '#F4705A'
 
@@ -61,6 +62,8 @@ export function RegisterPage() {
   const navigate = useNavigate()
   // Llegó desde el pie de un perfil ("Creá tu identidad"): se guarda con la cuenta y se atribuye en el onboarding
   const [referral] = useState(() => parseReferral(window.location.search))
+  // Métricas (etapa 14): alguien abrió el registro (una vez por sesión del navegador)
+  useEffect(() => { trackOncePerSession('signup_started', 'signup_started', { ref: referral?.ref }) }, [referral])
   const [name,     setName]     = useState('')
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')

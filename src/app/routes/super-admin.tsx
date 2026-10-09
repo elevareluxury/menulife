@@ -15,6 +15,7 @@ import { TestimonialsTab }   from '@/modules/super-admin/pages/TestimonialsTab'
 import { TesterTab }         from '@/modules/super-admin/pages/TesterTab'
 import { ReportsTab }        from '@/modules/super-admin/pages/ReportsTab'
 import { ErrorsTab }         from '@/modules/super-admin/pages/ErrorsTab'
+import { ProductTab }        from '@/modules/super-admin/pages/ProductTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
@@ -44,6 +45,7 @@ export function SuperAdminPage() {
         <Route path="solicitudes"       element={<AccessRequestsTab />} />
         <Route path="denuncias"         element={<ReportsTab />} />
         <Route path="errores"           element={<ErrorsTab />} />
+        <Route path="producto"          element={<ProductTab />} />
         <Route path="negocios"          element={<RestaurantsTab />} />
         <Route path="metricas"          element={<MetricasTab />} />
         <Route path="planes"            element={<PlanesTab />} />

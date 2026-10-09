@@ -14,6 +14,7 @@ import { profileLook } from '@/modules/profile/lib/profileLook'
 import { HuellaQr } from '../components/HuellaQr'
 import { HUELLA_QR_SIZE } from '../lib/huellaQr'
 import { useEverywhereT } from '@/i18n/app/share/everywhere'
+import { trackEvent } from '@/lib/productEvents'
 
 function svgToPng(svg: SVGSVGElement, width: number, height: number): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -66,6 +67,7 @@ export function ExchangePage() {
 
   async function downloadPng() {
     const svg = qrRef.current
+    trackEvent('qr_downloaded', { format: 'png' })
     // 2× el tamaño de la pieza: nítido para imprimir en tamaño tarjeta
     if (svg) download(await svgToPng(svg, HUELLA_QR_SIZE.width * 2, HUELLA_QR_SIZE.height * 2), `mycen-${handle.replace('/', '-')}-qr.png`)
   }
@@ -73,6 +75,7 @@ export function ExchangePage() {
   function downloadSvg() {
     const svg = qrRef.current
     if (!svg) return
+    trackEvent('qr_downloaded', { format: 'svg' })
     const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     download(url, `mycen-${handle.replace('/', '-')}-qr.svg`)

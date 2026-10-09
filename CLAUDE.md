@@ -26,7 +26,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Cambios de username quedan en `profile_username_history` (redirección).
 - Usernames reservados: tabla `reserved_usernames` y `src/lib/reservedUsernames.ts` (mantener sincronizados).
 - El visitante anónimo **nunca** lee tablas: usa las RPC `get_public_profile`, `get_public_project`, `get_profile_contact_card`,
-  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`, `submit_profile_message`.
+  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`, `submit_profile_message`
+  y `track_product_event` (sin sesión, sólo `signup_started`).
 - Proyectos (Fase 5): `content_objects` (type='project') + `content_blocks`. Son de la identidad y se publican por su cuenta
   (`publish_project` → `published_snapshot`; Studio no puede escribir el snapshot ni pasar a "publicado" directo).
   Los módulos `project`/`portfolio` guardan sólo ids en `content`; `get_public_profile` les agrega `projects` (tarjetas de lo
@@ -270,6 +271,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   montan de a una (`LandingPage`, `shown`; los efectos de `useLandingMotion` se enganchan al final), framer-motion sólo
   si hay testimonios, `Geist Fallback` con `size-adjust` para no saltar al cargar la fuente. Lighthouse celular: 74
   (antes 42); llegar a 85 pide pre-render o sacar Supabase del arranque (V1.1).
+- Métricas propias (etapa 14): `product_events` (RLS sin políticas) ← `track_product_event(event, props)` (lista cerrada
+  de 13 eventos, props planas con claves conocidas y textos ≤ 64, sin contenido; 300 por cuenta y hora, sin sesión sólo
+  `signup_started`). En la app: `trackEvent` / `trackOncePerSession` (`src/lib/productEvents.ts`, en segundo plano, si
+  falla se ignora). Panel `/super-admin/producto` (`ProductTab`) con `admin_product_metrics(days)`: mediana hasta
+  publicar, % publicadas, retención de Life OS por cohorte semanal (día 1, días 7–13, días 30–36), hábito 4+ días por
+  semana, tasa de regreso y registros por referido. Privacidad: "Uso de la app" (12 idiomas). E2E en `metrics.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

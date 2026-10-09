@@ -6,6 +6,7 @@ import { award } from '../lib/checkMilestone'
 import { celebrate } from '../lib/celebrate'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import { isValidRecurrence, nextOccurrence, type Recurrence } from '../lib/recurrence'
+import { trackEvent } from '@/lib/productEvents'
 
 // Las tareas viven en Brain (life_brain_items con type = 'task').
 // Las columnas de fecha/recordatorio todavía no están en database.types.ts
@@ -224,7 +225,7 @@ export function useTasks() {
       setTasks(prev => prev.map(t => (t.id === task.id ? task : t)))
       throw err
     }
-    if (done) celebrate()
+    if (done) { celebrate(); trackEvent('task_completed') }
     if (user) await rollRecurrence(task, done)
     if (done && user) {
       void (async () => {

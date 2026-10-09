@@ -12,6 +12,7 @@ import { LivePreview } from '../components/PreviewPane'
 import { uploadMedia } from '../lib/studioApi'
 import { useStudioT } from '@/i18n/app/studio'
 import '../appearance.css'
+import { trackEvent } from '@/lib/productEvents'
 
 /** Sal nueva para "Generar otra" (la base acepta letras, números, _ y -, hasta 40) */
 function newSalt(): string {
@@ -53,9 +54,11 @@ export function AppearancePage({ embedded = false }: { embedded?: boolean }) {
   const [canUndoHuella, setCanUndoHuella] = useState(false)
 
   // Siempre se guardan los valores nuevos (aunque el perfil viniera con los de antes)
-  const setLook = (patch: Partial<ProfileTheme>) => patchProfile({
-    theme: { ...theme, layout: look.layout, mode: look.mode, accent: look.accent, ...patch },
-  })
+  const setLook = (patch: Partial<ProfileTheme>) => {
+    patchProfile({ theme: { ...theme, layout: look.layout, mode: look.mode, accent: look.accent, ...patch } })
+    // Métricas (etapa 14): qué estructura y tema eligen (sólo al cambiar de estructura o de tema)
+    if (patch.layout || patch.mode) trackEvent('appearance_changed', { layout: patch.layout ?? look.layout, mode: patch.mode ?? look.mode })
+  }
 
   function generateHuella() {
     if (previousSalt.current === undefined) previousSalt.current = profile.huella_salt ?? null

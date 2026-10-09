@@ -24,6 +24,7 @@ import { langDir } from '@/i18n/app/languages'
 import { useUnreadMessages } from './lib/useUnreadMessages'
 import { referralFromMetadata } from '@/lib/referral'
 import './studio.css'
+import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 
 type NavKey = keyof StudioDict['nav']
 
@@ -290,6 +291,7 @@ function StudioReady({ userId, initial, switchSpace }: {
       await flush()
       if (Object.keys(pending.current).length) throw new Error(saveError ?? 'SAVE_FAILED')
       await publishSpace(initial.profile.id)
+      if (initial.profile.status !== 'published') trackEvent('profile_published', { seconds: secondsSinceSignup() })
       const fresh = await loadProfile(initial.profile.id)
       revision.current = fresh.revision
       setProfile(p => ({ ...p, status: fresh.status, published_at: fresh.published_at, published_version_id: fresh.published_version_id }))
@@ -297,7 +299,7 @@ function StudioReady({ userId, initial, switchSpace }: {
     } catch (e) {
       setPublishError(friendlyError(e))
     } finally { setPublishing(false) }
-  }, [flush, initial.profile.id, refreshPublishState, saveError])
+  }, [flush, initial.profile.id, initial.profile.status, refreshPublishState, saveError])
 
   const restoreVersion = useCallback(async (versionId: string) => {
     const res = await restoreSpaceVersion(versionId)
