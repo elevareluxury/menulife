@@ -20,6 +20,6 @@ En Claude Code en la web todas las etapas usan la rama asignada a la sesión (un
 | 12 | Life OS: tono y diseño | Mergeada | [#51](https://github.com/elevareluxury/menulife/pull/51) | — | Sin SQL: la bienvenida y "nuevos comienzos" se recuerdan en el dispositivo. "Bienvenido de vuelta" quedó "Qué bueno verte de vuelta" (sin género). |
 | 13 | Marca: landing, emails, íconos | Mergeada | [#52](https://github.com/elevareluxury/menulife/pull/52) | — | Lighthouse celular: accesibilidad 100, rendimiento 74 (main daba 42; llegar a 85 pide pre-render → V1.1). Mails: falta probar un envío real en Gmail y Apple Mail. La bienvenida es el mail de confirmar cuenta. |
 | 14 | Métricas propias | Mergeada | [#53](https://github.com/elevareluxury/menulife/pull/53) | `20261022000001_v1_product_events.sql` (aplicada) | Panel en `/super-admin/producto` (el de `/super-admin/metricas` es de Business). 100.000 eventos: el panel responde en ~0,2 s. |
-| 15 | Tests de la V1 | Pendiente | — | — | |
+| 15 | Tests de la V1 | Mergeada | [#54](https://github.com/elevareluxury/menulife/pull/54) | — | 185 E2E (login por tipo de cuenta, axe del onboarding, 26 capturas de referencia). 3 corridas seguidas sin tests inestables. |
 | 16 | Pruebas manuales (usuario) | — | — | — | No la ejecuta Claude. |
 | 17 | Freeze | — | — | — | Pide confirmación antes de crear `release/v1`. |
