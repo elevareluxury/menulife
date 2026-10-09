@@ -15,6 +15,7 @@ import { useLifeStore } from '@/store/lifeStore'
 import { useActiveGoals } from '../hooks/useActiveGoals'
 import { useTasks, localDateKey, type LifeTask } from '../hooks/useTasks'
 import { useHabits } from '../hooks/useHabits'
+import { MyDaySection } from '../components/MyDay'
 import { HabitMeta, QuantityButton } from '../components/HabitControls'
 import { useStreakText } from '../hooks/useStreakText'
 import { useMoney } from '../hooks/useMoney'
@@ -430,11 +431,12 @@ function TodayHabitsCard() {
 function GoalsCard() {
   const t = useLifeT()
   const navigate = useNavigate()
-  const { goals, total, error } = useActiveGoals(3)
+  // "Mi día": el objetivo en foco (la meta en curso más cercana); el resto, en Metas
+  const { goals, error } = useActiveGoals(1)
 
   return (
-    <section style={cardStyle} aria-label={t.day.goalsTitle}>
-      <CardHeader title={total > 0 ? `${t.day.goalsTitle} · ${total}` : t.day.goalsTitle} color={colors.area.goals} />
+    <section style={cardStyle} aria-label={t.myDay.focusGoal}>
+      <CardHeader title={t.myDay.focusGoal} color={colors.area.goals} />
       {error ? <p role="alert" style={{ ...mutedText, color: colors.semantic.error }}>{t.day.loadError}</p>
         : goals.length === 0 ? (
           <>
@@ -445,7 +447,7 @@ function GoalsCard() {
           <>
             <ul style={{ listStyle: 'none', margin: '6px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {goals.map(g => (
-                <li key={g.id}>
+                <li key={g.id} onClick={() => navigate('/life/goals')} style={{ cursor: 'pointer' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
                     <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.name}</span>
                     <span style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: g.color, flexShrink: 0 }}>{g.progress}%</span>
@@ -589,10 +591,11 @@ export function LifePage() {
           {/* ── Tu día ─────────────────────────────────────────────────────── */}
           <motion.div variants={fadeInUp} style={{ padding: '6px 2px 0' }}>
             <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0, letterSpacing: '-0.02em' }}>
-              {t.day.yourDay}
+              {t.myDay.title}
             </h1>
             <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.tertiary, margin: '2px 0 0' }}>{dateLabel}</p>
           </motion.div>
+          <MyDaySection />
           <motion.div variants={fadeInUp}><TodayTasksCard /></motion.div>
           <motion.div variants={fadeInUp}><TodayHabitsCard /></motion.div>
           <motion.div variants={fadeInUp}><GoalsCard /></motion.div>

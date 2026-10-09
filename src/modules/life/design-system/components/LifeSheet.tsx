@@ -1,4 +1,5 @@
 import { useEffect, useId, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { colors, font, radius, shadow } from '../tokens'
@@ -28,7 +29,9 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }
     }
   }, [open, onClose])
 
-  return (
+  // En un portal a <body>: si no, una página con su propio apilado (z-index) la dejaba debajo de la barra de abajo
+  if (typeof document === 'undefined') return null
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -110,6 +113,7 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
