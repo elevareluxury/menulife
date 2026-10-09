@@ -13,7 +13,7 @@ En Claude Code en la web todas las etapas usan la rama asignada a la sesión (un
 | 05 | Formulario y bandeja | Mergeada | [#43](https://github.com/elevareluxury/menulife/pull/43) | `20261017000001_v1_profile_messages.sql` (aplicada) | Sin email (ver 16). Privacidad actualizada (12 idiomas). |
 | 06 | Apariencia con vista previa | Mergeada | [#44](https://github.com/elevareluxury/menulife/pull/44) | — | Studio en el tema del celular (punto 4) va con el rediseño de Studio en la 07. |
 | 07 | Onboarding, Spaces y Studio | Mergeada | 07a [#45](https://github.com/elevareluxury/menulife/pull/45), 07b [#46](https://github.com/elevareluxury/menulife/pull/46) | — | Studio sigue el tema del celular (incluye el punto 4 de la 06). |
-| 08 | Compartir y crecimiento | En curso | — | `20261018000001_v1_referrals.sql` (pendiente) | Registro en `/register` (la app no tiene `/registro`). Probar QR y vista previa en WhatsApp con un perfil real. |
+| 08 | Compartir y crecimiento | Mergeada | [#47](https://github.com/elevareluxury/menulife/pull/47) | `20261018000001_v1_referrals.sql` (aplicada) | Registro en `/register` (la app no tiene `/registro`). Probar QR y vista previa en WhatsApp con un perfil real. |
 | 09 | Life OS: tareas | Pendiente | — | — | |
 | 10 | Life OS: hábitos | Pendiente | — | — | |
 | 11 | Life OS: Mi día | Pendiente | — | — | |
