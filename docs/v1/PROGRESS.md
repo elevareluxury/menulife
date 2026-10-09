@@ -12,7 +12,7 @@ En Claude Code en la web todas las etapas usan la rama asignada a la sesión (un
 | 04 | Video y música | Mergeada | [#42](https://github.com/elevareluxury/menulife/pull/42) | `20261016000001_v1_media_module.sql` (aplicada) | Proveedores sumados a privacidad (12 idiomas). |
 | 05 | Formulario y bandeja | Mergeada | [#43](https://github.com/elevareluxury/menulife/pull/43) | `20261017000001_v1_profile_messages.sql` (aplicada) | Sin email (ver 16). Privacidad actualizada (12 idiomas). |
 | 06 | Apariencia con vista previa | Mergeada | [#44](https://github.com/elevareluxury/menulife/pull/44) | — | Studio en el tema del celular (punto 4) va con el rediseño de Studio en la 07. |
-| 07 | Onboarding, Spaces y Studio | Pendiente | — | — | |
+| 07 | Onboarding, Spaces y Studio | En curso | 07a: PR del onboarding | — | Va en dos PR: 07a onboarding; 07b Spaces visibles y Studio con el sistema de diseño. |
 | 08 | Compartir y crecimiento | Pendiente | — | — | El registro está en `/register` (no `/registro`). |
 | 09 | Life OS: tareas | Pendiente | — | — | |
 | 10 | Life OS: hábitos | Pendiente | — | — | |
