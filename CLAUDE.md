@@ -165,6 +165,11 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
   no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), registro de errores (`errors.spec.ts`), landing en 12 idiomas con axe (`landing.spec.ts`), legales (`legal.spec.ts`), acceso en otros idiomas con axe (`auth.spec.ts`), Mis Spaces (`spaces.spec.ts`), onboarding (`onboarding.spec.ts`), Studio en los dos temas con axe (`studio-theme.spec.ts`), editor de escritorio (`desktop-editor.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
   (`modules.spec.ts`: si un cambio de módulo es deliberado, regenerar con `--update-snapshots` y revisar el diff).
+- Red de seguridad de la V1 (etapa 15): destino después del login por tipo de cuenta (`login-routes.spec.ts`), axe en
+  cada pantalla del onboarding en los dos temas (`a11y.spec.ts`, cero violaciones serias o críticas) y capturas de
+  referencia (`visual.spec.ts`: 5 estructuras × 2 temas × 390/1280 px, "Mi día", Hábitos e Inicio de Studio en los dos
+  temas; fecha, hora y zona fijas, sin animaciones ni avisos flotantes, tolerancia 2 % por el suavizado entre versiones
+  de Chromium). Cambio de diseño deliberado → `npx playwright test tests/e2e/visual.spec.ts --update-snapshots` y revisar.
 
 ## Reglas
 - No simular funcionalidades sin datos reales; no inventar métricas.
