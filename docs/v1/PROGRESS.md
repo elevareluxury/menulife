@@ -18,7 +18,7 @@ En Claude Code en la web todas las etapas usan la rama asignada a la sesión (un
 | 10 | Life OS: hábitos | Mergeada | [#49](https://github.com/elevareluxury/menulife/pull/49) | `20261020000001_v1_habits.sql` (aplicada; crea las tablas de hábitos que faltaban en producción) | Insights, metas y Replay leen "X veces por semana" como diario (constancia aproximada). |
 | 11 | Life OS: Mi día | Mergeada | [#50](https://github.com/elevareluxury/menulife/pull/50) | `20261021000001_v1_daily_review.sql` (aplicada) | "Mi día" reemplaza a "Tu día" en `/life` (mismas tarjetas debajo; la de metas muestra la meta en foco). |
 | 12 | Life OS: tono y diseño | Mergeada | [#51](https://github.com/elevareluxury/menulife/pull/51) | — | Sin SQL: la bienvenida y "nuevos comienzos" se recuerdan en el dispositivo. "Bienvenido de vuelta" quedó "Qué bueno verte de vuelta" (sin género). |
-| 13 | Marca: landing, emails, íconos | PR abierto | — | — | Lighthouse celular: accesibilidad 100, rendimiento 74 (main daba 42; llegar a 85 pide pre-render → V1.1). Mails: falta probar un envío real en Gmail y Apple Mail. La bienvenida es el mail de confirmar cuenta. |
+| 13 | Marca: landing, emails, íconos | Mergeada | [#52](https://github.com/elevareluxury/menulife/pull/52) | — | Lighthouse celular: accesibilidad 100, rendimiento 74 (main daba 42; llegar a 85 pide pre-render → V1.1). Mails: falta probar un envío real en Gmail y Apple Mail. La bienvenida es el mail de confirmar cuenta. |
 | 14 | Métricas propias | Pendiente | — | — | |
 | 15 | Tests de la V1 | Pendiente | — | — | |
 | 16 | Pruebas manuales (usuario) | — | — | — | No la ejecuta Claude. |
