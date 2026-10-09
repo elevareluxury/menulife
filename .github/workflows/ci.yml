@@ -19,8 +19,8 @@ jobs:
 
       # El resto del repo (Mycen Business) todavía tiene errores de lint previos:
       # se exige lint limpio en Identity, Studio, Life OS y los tests.
-      - name: Lint (Identity, Studio, Life OS, tests)
-        run: npx eslint src/modules/profile src/modules/studio src/modules/life src/i18n/app src/lib/reservedUsernames.ts api tests vitest.config.ts playwright.config.ts
+      - name: Lint (Identity, Studio, Life OS, diseño, tests)
+        run: npx eslint src/modules/profile src/modules/studio src/modules/life src/i18n/app src/lib/reservedUsernames.ts src/lib/huella src/design api tests vitest.config.ts playwright.config.ts
 
       - name: Tests unitarios (+ tipos de los tests)
         run: npm test
