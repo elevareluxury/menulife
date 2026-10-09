@@ -26,7 +26,9 @@ function ogReserved(): Set<string> {
 }
 
 function appTopLevelRoutes(): string[] {
+  // Las rutas sólo de desarrollo (`{DevXxx && <Route …>}`, detrás de import.meta.env.DEV) no existen en producción
   const src = readFileSync(join(root, 'src', 'app', 'App.tsx'), 'utf8')
+    .split('\n').filter(line => !/\{Dev\w+ && <Route/.test(line)).join('\n')
   return [...new Set([...src.matchAll(/<Route path="\/([a-z0-9-]+)/g)].map(m => m[1]))]
 }
 

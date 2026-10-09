@@ -1,2 +1,20 @@
-// Sistema de diseño Mycen (V1, prompt 01): tokens y componentes llegan en la etapa siguiente.
-export {}
+// Sistema de diseño Mycen (docs/design/DESIGN_SYSTEM.md). Las variables (tokens.css) se cargan una sola vez de forma
+// global desde main.tsx; los estilos de los componentes y el movimiento vienen con el que los importa.
+import './motion.css'
+import './components/design.css'
+
+export { GlassPanel } from './components/GlassPanel'
+export type { GlassPanelProps } from './components/GlassPanel'
+export { PrimaryAction } from './components/PrimaryAction'
+export type { PrimaryActionProps } from './components/PrimaryAction'
+export { IconButton } from './components/IconButton'
+export type { IconButtonProps } from './components/IconButton'
+export { Chip, StatusChip } from './components/Chip'
+export type { ChipProps, StatusChipProps } from './components/Chip'
+export { Field } from './components/Field'
+export type { FieldProps } from './components/Field'
+export { Sheet } from './components/Sheet'
+export type { SheetProps } from './components/Sheet'
+export { MYCEN_THEMES, MYCEN_ACCENTS } from './themes'
+export type { MycenTheme, MycenAccent } from './themes'
+export { prefersLowFx, installLowFx } from './lowfx'
