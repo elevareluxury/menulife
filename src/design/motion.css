@@ -1,0 +1,35 @@
+/* Movimiento del sistema de diseño (docs/design/DESIGN_SYSTEM.md §7). Lento y con sentido: sólo transform y
+   opacity (no repinta) y todo dentro de prefers-reduced-motion: no-preference. Con "reducir movimiento" queda
+   quieto y visible. */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Flotación: ±5 px en 7 s. Máximo 6 objetos flotando por pantalla, cada uno con su retraso. */
+  .my-float { animation: my-float 7s ease-in-out infinite; }
+  .my-float-1 { animation-delay: -1.1s; }
+  .my-float-2 { animation-delay: -2.3s; }
+  .my-float-3 { animation-delay: -3.4s; }
+  .my-float-4 { animation-delay: -4.6s; }
+  .my-float-5 { animation-delay: -5.7s; }
+  .my-float-6 { animation-delay: -6.5s; }
+
+  /* Huella que gira: una vuelta en 120 s */
+  .my-spin { animation: my-spin 120s linear infinite; transform-origin: 50% 50%; }
+
+  /* Estado en vivo: punto que late */
+  .my-pulse { animation: my-pulse 2.4s ease-in-out infinite; }
+
+  /* Entrada del perfil: una sola secuencia de ≤ 900 ms. La huella se dibuja en 600 ms (.my-draw, en cada trazo
+     con pathLength="1") y el contenido aparece en cascada: 300 ms cada elemento, 40 ms entre uno y otro
+     (--my-i = posición; a partir del sexto entran juntos para no pasar de 900 ms). */
+  .my-draw { stroke-dashoffset: 1; animation: my-draw 600ms var(--my-ease, ease-out) forwards; }
+  .my-enter > .my-enter-item, .my-enter-item {
+    animation: my-enter 300ms var(--my-ease, ease-out) both;
+    animation-delay: calc(400ms + min(var(--my-i, 0), 5) * 40ms);
+  }
+}
+
+@keyframes my-float { 0%, 100% { transform: translateY(-5px); } 50% { transform: translateY(5px); } }
+@keyframes my-spin { to { transform: rotate(360deg); } }
+@keyframes my-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes my-draw { to { stroke-dashoffset: 0; } }
+@keyframes my-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

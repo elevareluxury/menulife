@@ -57,6 +57,8 @@ const DriverDashboard  = lazy(() => import('@/modules/delivery/pages/DriverDashb
 const KitchenDisplay   = lazy(() => import('@/modules/kitchen/pages/KitchenDisplay').then(m => ({ default: m.KitchenDisplay })))
 const CRMPage          = lazy(() => import('@/modules/crm/pages/CRMPage').then(m => ({ default: m.CRMPage })))
 const EstadisticasPage = lazy(() => import('@/modules/stats/pages/EstadisticasPage').then(m => ({ default: m.EstadisticasPage })))
+// Muestra del sistema de diseño (V1): sólo en desarrollo, no entra en el build de producción
+const DevDesignPage = import.meta.env.DEV ? lazy(() => import('@/design/DevDesignPage')) : null
 const NotificacionesPage = lazy(() => import('@/modules/dashboard/pages/NotificacionesPage').then(m => ({ default: m.NotificacionesPage })))
 const CajaPage         = lazy(() => import('@/modules/pos/pages/CajaPage').then(m => ({ default: m.CajaPage })))
 const TicketsPage      = lazy(() => import('@/modules/pos/pages/TicketsPage').then(m => ({ default: m.TicketsPage })))
@@ -120,6 +122,7 @@ function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          {DevDesignPage && <Route path="/dev/design" element={<DevDesignPage />} />}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback"    element={<AuthCallback />} />

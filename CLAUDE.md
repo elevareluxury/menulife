@@ -174,6 +174,17 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y huella), `docs/v1/ROADMAP.md` (alcance),
 `docs/v1/prompts/00…17` (una etapa por prompt), `docs/v1/PROGRESS.md` (avance del piloto automático).
 
+### Sistema de diseño en el código (etapa 01)
+- `src/design/tokens.css` (global, en `main.tsx`): variables `--my-*` sólo dentro de `[data-mycen-theme="universo|amanecer"]`
+  y acento con `[data-mycen-accent="plasma|ion|nebulosa|aurora"]` (sin atributo = Plasma); `.my-sky` = cielo + estrellas
+  (`public/design/stars-*.svg`, de `scripts/generate-starfield.mjs`). Unbounded en `src/design/fonts.css` (latin y latin-ext).
+- `src/design/motion.css`: `.my-float(-1…6)`, `.my-spin`, `.my-pulse`, `.my-draw`, `.my-enter` / `.my-enter-item` (`--my-i`),
+  todo dentro de `prefers-reduced-motion: no-preference`.
+- `installLowFx()` marca `<html data-mycen-lowfx>` (reducir transparencia o ≤ 4 núcleos): el vidrio pasa a `--my-glass-solid`.
+- Componentes en `@/design`: `GlassPanel`, `PrimaryAction`, `IconButton` (exige `label`), `Chip`, `StatusChip`, `Field`, `Sheet`
+  (portal que copia tema y acento, foco atrapado, Escape). Sin textos propios: los traduce quien los usa.
+- Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
+
 ### Antes de cada tarea
 - Leer `docs/design/DESIGN_SYSTEM.md` y `docs/v1/ROADMAP.md`.
 - Si la tarea pide algo fuera del alcance del ROADMAP, avisar antes de hacerlo (va a la sección V1.1).

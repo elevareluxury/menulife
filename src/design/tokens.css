@@ -1,0 +1,137 @@
+/* Sistema de diseño Mycen — variables (docs/design/DESIGN_SYSTEM.md §3–§5).
+   Sólo aplican dentro de [data-mycen-theme]: las pantallas que todavía no lo usan no cambian.
+   Ningún componente usa colores sueltos: todo sale de acá. tests/unit/designTokens.test.ts mide el contraste. */
+
+[data-mycen-theme] {
+  /* Tipografía (§4). Unbounded y Geist no cubren árabe, devanagari, CJK ni (Unbounded) cirílico:
+     la pila sigue con la fuente del sistema de cada alfabeto, así ningún nombre queda con letras faltantes. */
+  --my-font-script: 'Noto Sans Arabic', 'Geeza Pro', 'Noto Sans Devanagari', 'Kohinoor Devanagari',
+    'Hiragino Sans', 'Yu Gothic', 'Apple SD Gothic Neo', 'Malgun Gothic', 'PingFang SC', 'Microsoft YaHei',
+    'Noto Sans CJK SC', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --my-font-display: 'Unbounded', var(--my-font-script);
+  --my-font-ui: 'Geist', var(--my-font-script);
+  --my-font-editorial: 'Instrument Serif', Georgia, 'Times New Roman', var(--my-font-script);
+
+  --my-fs-cover: 46px;
+  --my-fs-name: 28px;
+  --my-fs-section: 22px;
+  --my-fs-lead: 17px;
+  --my-fs-body: 15px;
+  --my-fs-small: 13px;
+  --my-fs-meta: 11px;
+  --my-lh-title: 1.1;
+  --my-lh-body: 1.45;
+
+  /* Radios por jerarquía (§5) */
+  --my-r-hero: 30px;
+  --my-r-card: 24px;
+  --my-r-bento: 26px;
+  --my-r-action: 20px;
+  --my-r-field: 14px;
+  --my-r-pill: 999px;
+
+  --my-blur: 14px;
+  --my-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+  /* Movimiento (§7) */
+  --my-dur-fast: 150ms;
+  --my-dur: 220ms;
+  --my-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color: var(--my-text);
+  font-family: var(--my-font-ui);
+  font-size: var(--my-fs-body);
+  line-height: var(--my-lh-body);
+}
+
+/* ── Universo (oscuro) ─────────────────────────────────────────────── */
+[data-mycen-theme='universo'] {
+  color-scheme: dark;
+  --my-bg: #04050D;
+  --my-text: #EEF0FF;
+  --my-muted: #B7BCD6;
+  --my-subtle: #A3A8C3;
+  --my-glass: rgba(255, 255, 255, 0.06);
+  --my-glass-strong: rgba(255, 255, 255, 0.09);
+  --my-border: rgba(255, 255, 255, 0.14);
+  --my-field: rgba(4, 5, 13, 0.6);
+  --my-tile: #0A0C1F;
+  --my-track: rgba(255, 255, 255, 0.12);
+  --my-shadow-float: 0 30px 60px -28px rgba(0, 0, 0, 0.9);
+  --my-star: #FFFFFF;
+  --my-scrim: rgba(4, 5, 13, 0.6);
+  --my-verified: #7DD3FC;
+  --my-secondary: #7DD3FC;
+  /* Vidrio sin desenfoque (reducir transparencia / equipos lentos): el color que se ve con el vidrio encima */
+  --my-glass-solid: #12142A;
+  --my-glass-strong-solid: #181A31;
+  --my-sky:
+    radial-gradient(60% 30% at 88% 6%, rgba(255, 122, 89, 0.20), transparent 70%),
+    radial-gradient(75% 35% at 6% 30%, rgba(99, 76, 224, 0.30), transparent 70%),
+    radial-gradient(70% 30% at 90% 70%, rgba(56, 152, 236, 0.16), transparent 70%),
+    #04050D;
+  --my-stars: url('/design/stars-universo.svg');
+}
+
+/* ── Amanecer (claro) ──────────────────────────────────────────────── */
+[data-mycen-theme='amanecer'] {
+  color-scheme: light;
+  --my-bg: #FBF4EE;
+  --my-text: #1A1530;
+  --my-muted: #4E4866;
+  --my-subtle: #5B5672;
+  --my-glass: rgba(255, 255, 255, 0.55);
+  --my-glass-strong: rgba(255, 255, 255, 0.70);
+  --my-border: rgba(255, 255, 255, 0.85);
+  --my-field: rgba(255, 255, 255, 0.75);
+  --my-tile: #F3E8F0;
+  --my-track: rgba(26, 21, 48, 0.12);
+  --my-shadow-float: 0 28px 56px -30px rgba(70, 45, 120, 0.35);
+  --my-star: #3A2E6E;
+  --my-scrim: rgba(26, 21, 48, 0.35);
+  --my-verified: #4B3BC4;
+  --my-secondary: #5B3FD1;
+  --my-glass-solid: #FBF3F2;
+  --my-glass-strong-solid: #FDF8F6;
+  --my-sky:
+    radial-gradient(60% 22% at 72% 24%, rgba(255, 170, 120, 0.55), transparent 70%),
+    linear-gradient(180deg, #E9E3F7 0%, #F6DDD6 32%, #FFE9DA 52%, #FFF6EE 70%, #FBF4EE 100%);
+  --my-stars: url('/design/stars-amanecer.svg');
+}
+
+/* ── Acento personal (§3.3): paleta cerrada, una versión por tema ─────
+   Sin data-mycen-accent vale Plasma (el acento por defecto). */
+[data-mycen-theme='universo'], [data-mycen-theme='universo'] [data-mycen-accent='plasma'], [data-mycen-theme='universo'][data-mycen-accent='plasma'] {
+  --my-accent: #FF7A59; --my-on-accent: #05060F; --my-glow: rgba(255, 122, 89, 0.55);
+}
+[data-mycen-theme='universo'][data-mycen-accent='ion'], [data-mycen-theme='universo'] [data-mycen-accent='ion'] {
+  --my-accent: #7DD3FC; --my-on-accent: #05060F; --my-glow: rgba(125, 211, 252, 0.55);
+}
+[data-mycen-theme='universo'][data-mycen-accent='nebulosa'], [data-mycen-theme='universo'] [data-mycen-accent='nebulosa'] {
+  --my-accent: #C4B5FD; --my-on-accent: #05060F; --my-glow: rgba(196, 181, 253, 0.55);
+}
+[data-mycen-theme='universo'][data-mycen-accent='aurora'], [data-mycen-theme='universo'] [data-mycen-accent='aurora'] {
+  --my-accent: #5EEAD4; --my-on-accent: #05060F; --my-glow: rgba(94, 234, 212, 0.55);
+}
+[data-mycen-theme='amanecer'], [data-mycen-theme='amanecer'] [data-mycen-accent='plasma'], [data-mycen-theme='amanecer'][data-mycen-accent='plasma'] {
+  --my-accent: #C8431F; --my-on-accent: #FFFFFF; --my-glow: rgba(200, 67, 31, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='ion'], [data-mycen-theme='amanecer'] [data-mycen-accent='ion'] {
+  --my-accent: #1D6FA5; --my-on-accent: #FFFFFF; --my-glow: rgba(29, 111, 165, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='nebulosa'], [data-mycen-theme='amanecer'] [data-mycen-accent='nebulosa'] {
+  --my-accent: #6D4AD1; --my-on-accent: #FFFFFF; --my-glow: rgba(109, 74, 209, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='aurora'], [data-mycen-theme='amanecer'] [data-mycen-accent='aurora'] {
+  --my-accent: #0F7C6E; --my-on-accent: #FFFFFF; --my-glow: rgba(15, 124, 110, 0.40);
+}
+
+/* ── Cielo (§6): nebulosas o amanecer + estrellas como imagen (nunca elementos del DOM) ── */
+.my-sky {
+  background: var(--my-stars) top center / 480px auto repeat-x, var(--my-sky);
+  background-color: var(--my-bg);
+  color: var(--my-text);
+}
+[data-mycen-theme='universo'] .my-sky, .my-sky[data-mycen-theme='universo'] {
+  background: var(--my-stars) 0 0 / 480px 480px repeat, var(--my-sky);
+}
