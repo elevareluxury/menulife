@@ -578,6 +578,11 @@ const ko: StudioDict = {
     slugIssue: { invalid: '소문자, 숫자, 하이픈을 사용해 2~40자로 입력하세요.', reserved: '예약된 주소입니다.', taken: '이미 그 주소의 Space가 있습니다.' },
     manage: '내 Spaces',
     switcher: '편집 중인 Space',
+    explainTitle: 'Space란?',
+    explainText: '메인 프로필과 별도로, 자체 링크를 가진 페이지예요. 예를 들어:',
+    examples: ['내 밴드', '내 사업', '내 이벤트'],
+    exampleSlug: 'name',
+    exampleLink: '링크는',
   },
   editor3: {
     open: '데스크톱 에디터',

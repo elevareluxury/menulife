@@ -65,7 +65,18 @@ export function SpacesPage() {
           </Button>
         )} />
 
-      <p className="st-help" role="status" style={{ marginTop: 0 }}>
+      <section className="st-card st-space-explain" aria-labelledby="st-space-explain">
+        <h2 id="st-space-explain" className="st-card-title" style={{ margin: 0 }}>{s.explainTitle}</h2>
+        <p style={{ margin: 0 }}>{s.explainText}</p>
+        <ul className="st-space-examples">
+          {s.examples.map(ex => <li key={ex}>{ex}</li>)}
+        </ul>
+        <p className="st-help" style={{ margin: 0 }}>
+          {s.exampleLink} <span className="st-space-example-url" dir="ltr">{host}/{primaryUsername || '…'}/<strong>{s.exampleSlug}</strong></span>
+        </p>
+      </section>
+
+      <p className="st-help" role="status">
         {s.count(live.length, MAX_SPACES)}{full ? ` · ${s.limitReached(MAX_SPACES)}` : ''}
       </p>
       {error && <p className="st-error" role="alert">{error}</p>}
@@ -131,7 +142,8 @@ export function SpacesPage() {
               ? (await createSpace(userId, { ...input, locale: useAppLang.getState().lang })).id
               : await duplicateSpace(form.from.id, input.slug, input.name)
             setForm(null)
-            navigate('/studio/identity')
+            // Un Space nuevo sigue por Apariencia (estructura, tema, acento y huella propios); la copia ya los tiene
+            navigate(form.kind === 'new' ? '/studio/appearance' : '/studio/identity')
             switchSpace(id)
           }} />
       )}

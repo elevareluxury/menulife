@@ -65,6 +65,10 @@
   --my-scrim: rgba(4, 5, 13, 0.6);
   --my-verified: #7DD3FC;
   --my-secondary: #7DD3FC;
+  /* Estados (Studio y avisos): error, listo, cambios sin publicar */
+  --my-danger: #FCA5A5;
+  --my-ok: #86EFAC;
+  --my-warn: #FCD34D;
   /* Vidrio sin desenfoque (reducir transparencia / equipos lentos): el color que se ve con el vidrio encima */
   --my-glass-solid: #12142A;
   --my-glass-strong-solid: #181A31;
@@ -94,6 +98,9 @@
   --my-scrim: rgba(26, 21, 48, 0.35);
   --my-verified: #4B3BC4;
   --my-secondary: #5B3FD1;
+  --my-danger: #B42318;
+  --my-ok: #15803D;
+  --my-warn: #B45309;
   --my-glass-solid: #FBF3F2;
   --my-glass-strong-solid: #FDF8F6;
   --my-sky:

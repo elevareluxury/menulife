@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { BarChart3, Eye, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
+import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { StudioContext, type StudioContextValue } from './StudioContext'
 import {
@@ -17,7 +17,7 @@ import { PreviewPane } from './components/PreviewPane'
 import { OnboardingWizard } from './components/OnboardingWizard'
 import { Button } from './components/ui'
 import { PublishBar } from './components/PublishBar'
-import { useAppBackground } from '@/lib/useAppBackground'
+import { useStudioSurface, useStudioTheme } from './lib/useStudioTheme'
 import { useStudioT, type StudioDict } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
 import { langDir } from '@/i18n/app/languages'
@@ -47,7 +47,7 @@ const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean; deskto
 const MOBILE_NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
   { to: '/studio',          label: 'home',     icon: Home, end: true },
   { to: '/studio/identity', label: 'edit',     icon: PenLine },
-  { to: '/studio/preview',  label: 'preview',  icon: Eye },
+  { to: '/studio/spaces',   label: 'spaces',   icon: Layers },
   { to: '/studio/exchange', label: 'exchange', icon: Share2 },
   { to: '/studio/more',     label: 'more',     icon: MoreHorizontal },
 ]
@@ -96,8 +96,8 @@ export function StudioShell() {
     setAttempt(a => a + 1)
   }, [userId])
 
-  // Fondo oscuro sin flashes
-  useAppBackground('#0E100E')
+  // Tema del celular (Universo / Amanecer) y su fondo sin flashes
+  const theme = useStudioSurface()
 
   if (!initialized || loading) return <Centered><span className="st-spinner" aria-label={t.nav.loading} /></Centered>
   if (!user) return <Navigate to="/login" replace />
@@ -118,7 +118,7 @@ export function StudioShell() {
   if (load.kind === 'empty' || resuming) {
     const suggestedName = (user.user_metadata as { name?: string } | undefined)?.name
     return (
-      <div className="st-root" data-scroll-root dir={dir}>
+      <div className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}>
         <OnboardingWizard
           userId={user.id}
           initialProfile={load.kind === 'ready' ? load.profile : null}
@@ -147,7 +147,8 @@ function UnreadBadge({ count, label }: { count: number; label: string }) {
 
 function Centered({ children }: { children: React.ReactNode }) {
   const dir = langDir(useAppLang(s => s.lang))
-  return <div className="st-root" data-scroll-root dir={dir}><div className="st-center">{children}</div></div>
+  const theme = useStudioTheme()
+  return <div className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}><div className="st-center">{children}</div></div>
 }
 
 function StudioReady({ userId, initial, switchSpace }: {
@@ -377,6 +378,7 @@ function StudioReady({ userId, initial, switchSpace }: {
       conflict, publishState, publishing, publishError, publish, restoreVersion, undo, redo, historyCounts,
       spaces, handle, primaryUsername, switchSpace, reloadSpaces])
 
+  const theme = useStudioTheme()
   // El editor de escritorio (Fase 11) tiene su propia vista previa y usa todo el ancho
   const inDesktopEditor = location.pathname === '/studio/editor'
   const showPane = location.pathname !== '/studio/preview' && !inDesktopEditor
@@ -385,7 +387,7 @@ function StudioReady({ userId, initial, switchSpace }: {
 
   return (
     <StudioContext.Provider value={value}>
-      <div className="st-root" data-scroll-root dir={dir}>
+      <div className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}>
         <div className="st-layout">
           <nav className="st-sidebar" aria-label="Studio">
             <a className="st-logo" href="/studio">mycen.<small>Studio</small></a>
@@ -428,7 +430,7 @@ function StudioReady({ userId, initial, switchSpace }: {
         </div>
 
         {/* En un portal a <body>: ningún contenedor puede alterar su position: fixed */}
-        {createPortal(<nav className="st-bottom-nav" aria-label="Studio" dir={dir}>
+        {createPortal(<nav className="st-bottom-nav" aria-label="Studio" data-mycen-theme={theme} dir={dir}>
           {MOBILE_NAV.map(item => (
             <NavLink key={item.to} to={item.to} end={item.end} title={t.nav[item.label]}
               aria-label={item.label === 'more' && unread ? `${t.nav.more}, ${t.messages.unread.replace('{n}', String(unread))}` : t.nav[item.label]}>

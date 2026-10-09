@@ -172,7 +172,7 @@ export function ReviewsEditor({ value, onChange: onValue }: ExtraEditorProps<Rev
               <div className="st-row" role="radiogroup" aria-label={e.starsOf(i + 1)} style={{ gap: 2 }}>
                 {[1, 2, 3, 4, 5].map(n => (
                   <button key={n} type="button" role="radio" aria-checked={(r.rating ?? 5) === n} aria-label={e.stars(n)}
-                    className="st-icon-btn" style={{ width: 32, height: 32, color: n <= (r.rating ?? 5) ? '#F5B83D' : 'var(--st-faint)' }}
+                    className="st-icon-btn" style={{ width: 32, height: 32, color: n <= (r.rating ?? 5) ? 'var(--my-warn)' : 'var(--st-faint)' }}
                     onClick={() => update(i, { rating: n })}>
                     <Star size={16} fill={n <= (r.rating ?? 5) ? 'currentColor' : 'none'} />
                   </button>

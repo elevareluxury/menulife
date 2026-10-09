@@ -6,6 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { THEME_BG } from '../../src/design/themes'
 
 const css = readFileSync(join(__dirname, '../../src/design/tokens.css'), 'utf8')
 
@@ -102,6 +103,20 @@ describe('sistema de diseño: contraste (AA)', () => {
         const surface = parse(v[token])
         for (const text of ['--my-text', '--my-muted', '--my-subtle']) {
           expect(contrast(parse(v[text]), surface), `${text} sobre ${token}`).toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    })
+
+    it(`${theme}: THEME_BG coincide con --my-bg`, () => {
+      expect(THEME_BG[theme].toLowerCase()).toBe(v['--my-bg'].toLowerCase())
+    })
+
+    it(`${theme}: los estados (error, listo, sin publicar) se leen sobre el vidrio`, () => {
+      for (const bg of worstBackgrounds(theme)) {
+        const surface = over(parse(v['--my-glass']), bg)
+        expect(contrast(parse(v['--my-danger']), surface), `--my-danger en ${theme}`).toBeGreaterThanOrEqual(4.5)
+        for (const token of ['--my-ok', '--my-warn']) {
+          expect(contrast(parse(v[token]), surface), `${token} en ${theme}`).toBeGreaterThanOrEqual(3)
         }
       }
     })

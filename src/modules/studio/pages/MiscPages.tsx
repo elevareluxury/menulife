@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { BarChart3, ChevronRight, FolderOpen, Inbox, Layers, LayoutGrid, LogOut, Palette, Settings, UserRound } from 'lucide-react'
+import { BarChart3, ChevronRight, Eye, FolderOpen, Inbox, LayoutGrid, LogOut, Palette, Settings, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
 import { useUnreadMessages } from '../lib/useUnreadMessages'
@@ -28,13 +28,13 @@ export function MorePage() {
   const signOut = useAuthStore(s => s.signOut)
   const t = useStudioT()
   const items = [
+    { to: '/studio/preview', label: t.nav.preview, icon: Eye },
     { to: '/studio/messages', label: t.nav.messages, icon: Inbox },
     { to: '/studio/modules', label: t.nav.modules, icon: LayoutGrid },
     { to: '/studio/projects', label: t.nav.projects, icon: FolderOpen },
     { to: '/studio/appearance', label: t.nav.appearance, icon: Palette },
     { to: '/studio/analytics', label: t.nav.analytics, icon: BarChart3 },
     { to: '/studio/settings', label: t.nav.settings, icon: Settings },
-    { to: '/studio/spaces', label: t.nav.spaces, icon: Layers },
   ]
   return (
     <>

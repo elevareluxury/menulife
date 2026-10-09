@@ -107,13 +107,13 @@ export function AnalyticsPage() {
               aria-label={an.chartLabel(days, summary.views)}>
               <ResponsiveContainer>
                 <AreaChart data={summary.series} margin={{ top: 6, right: 6, bottom: 0, left: -24 }}>
-                  <CartesianGrid stroke="rgba(241,240,233,0.06)" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fill: '#7D7F76', fontSize: 11 }} axisLine={false} tickLine={false}
+                  <CartesianGrid stroke="var(--st-border)" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: 'var(--st-faint)', fontSize: 11 }} axisLine={false} tickLine={false}
                     interval={Math.max(0, Math.floor(days / 7) - 1)} />
-                  <YAxis allowDecimals={false} tick={{ fill: '#7D7F76', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ background: '#20221F', border: '1px solid rgba(241,240,233,0.12)', borderRadius: 10, fontSize: 12 }}
-                    labelStyle={{ color: '#B9B9AE' }} itemStyle={{ color: '#F1F0E9' }} />
-                  <Area type="monotone" dataKey="visitas" name={an.visits} stroke="#F1F0E9" strokeWidth={2} fill="rgba(241,240,233,0.10)" />
+                  <YAxis allowDecimals={false} tick={{ fill: 'var(--st-faint)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: 'var(--my-glass-strong-solid)', border: '1px solid var(--st-border)', borderRadius: 10, fontSize: 12 }}
+                    labelStyle={{ color: 'var(--st-muted)' }} itemStyle={{ color: 'var(--st-text)' }} />
+                  <Area type="monotone" dataKey="visitas" name={an.visits} stroke="var(--my-accent)" strokeWidth={2} fill="var(--my-glow)" fillOpacity={0.35} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

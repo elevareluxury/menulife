@@ -578,6 +578,11 @@ const ja: StudioDict = {
     slugIssue: { invalid: '小文字・数字・ハイフンを 2〜40 文字で入力してください。', reserved: 'そのアドレスは予約されています。', taken: 'そのアドレスの Space はすでにあります。' },
     manage: 'マイ Spaces',
     switcher: '編集中の Space',
+    explainTitle: 'Space とは？',
+    explainText: 'メインのプロフィールとは別の、専用リンク付きのページです。たとえば：',
+    examples: ['あなたのバンド', 'あなたのビジネス', 'あなたのイベント'],
+    exampleSlug: 'name',
+    exampleLink: 'リンクは',
   },
   editor3: {
     open: 'デスクトップエディター',
