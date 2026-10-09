@@ -40,12 +40,19 @@ export interface PrimaryAction {
 }
 
 export interface ProfileTheme {
-  /** 'auto' = sigue al dispositivo del visitante (Fase 9) */
-  mode?: 'dark' | 'light' | 'auto'
+  /** V1: estructura del perfil (ver profileLook.ts). Sin valor = Clásica. */
+  layout?: 'credencial' | 'portada' | 'editorial' | 'bento' | 'clasica'
+  /** V1: 'universo' | 'amanecer'. Los de antes ('dark' | 'light' | 'auto') se leen con profileLook(). */
+  mode?: 'universo' | 'amanecer' | 'dark' | 'light' | 'auto'
+  /** V1: estilo de la huella */
+  huella_variant?: 'orbitas' | 'hilos' | 'constelacion' | 'pulso'
+  /** V1: portada de la estructura Portada (huella o imagen propia) */
+  cover?: { type: 'huella' | 'imagen'; url?: string } | null
   /** Fase 9 — valores en profileTheme.ts (CORNERS, BACKGROUNDS, CARD_STYLES) */
   corners?: 'sharp' | 'soft' | 'round'
   background?: 'plain' | 'glow' | 'tint'
   card_style?: 'filled' | 'outline' | 'flat'
+  /** V1: 'plasma' | 'ion' | 'nebulosa' | 'aurora'. Antes, un color #RRGGBB (se lee el acento más cercano). */
   accent?: string
   surface?: string
   title_font?: string
@@ -72,6 +79,11 @@ export interface PublicProfile {
   /** Etiquetas de categoría (ej. Pizza · Vinos) */
   tags?: string[]
   theme: ProfileTheme
+  /** Cambia con "Generar otra": semilla de la huella junto con el id (huellaSeed) */
+  huella_salt?: string | null
+  /** Perfil vivo (V1): estado actual (≤ 60) y "Disponible". Se ven sin volver a publicar. */
+  status_text?: string | null
+  available?: boolean
   primary_action: PrimaryAction | null
   default_locale: string
   translations: Translations

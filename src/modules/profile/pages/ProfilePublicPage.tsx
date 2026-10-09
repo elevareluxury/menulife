@@ -5,8 +5,7 @@ import { fetchPublicProfile, trackProfileEvent } from '../lib/profileApi'
 import { tr, ui } from '../lib/profileI18n'
 import { useAppLang } from '@/i18n/app/store'
 import { setLocalLanguage } from '@/lib/prefs'
-import { themeVars } from '../lib/profileTheme'
-import { usePrefersLight } from '../lib/usePrefersLight'
+import { LOOK_PAGE_BG, lookVars, profileLook, type ProfileLook } from '../lib/profileLook'
 import type { ProfileLang, ProfileLookup } from '../lib/profileTypes'
 import { ProfileView } from '../components/ProfileView'
 import '../profile.css'
@@ -78,10 +77,9 @@ export function ProfilePublicPage() {
     return () => { document.querySelector('meta[name="robots"]')?.remove() }
   }, [profile?.visibility])
 
-  // Tema: "automático" sigue al dispositivo del visitante (Fase 9)
-  const prefersLight = usePrefersLight()
-  const vars = themeVars(profile?.theme, prefersLight)
-  const pageBg = String((vars as Record<string, string>)['--p-bg'])
+  // Tema del perfil (V1: Universo / Amanecer). Mientras carga, Universo.
+  const look = profileLook(profile?.theme)
+  const pageBg = LOOK_PAGE_BG[look.mode]
 
   // Fondo del body acorde al tema (evita bordes blancos al hacer scroll)
   useEffect(() => {
@@ -99,7 +97,7 @@ export function ProfilePublicPage() {
 
   const t = ui(lang)
 
-  if (state.kind === 'loading') return <ProfileSkeleton style={vars} />
+  if (state.kind === 'loading') return <ProfileSkeleton look={look} />
   if (state.kind !== 'found' || !profile) {
     const copy = state.kind === 'unavailable'
       ? { title: t.unavailableTitle, text: t.unavailableText }
@@ -107,7 +105,7 @@ export function ProfilePublicPage() {
         ? { title: t.errorTitle, text: t.errorText }
         : { title: t.notFoundTitle, text: t.notFoundText }
     return (
-      <main className="mp-root" style={vars}>
+      <main className="mp-root my-profile" {...lookAttrs(look)}>
         <div className="mp-state">
           <h1>{copy.title}</h1>
           <p>{copy.text}</p>
@@ -121,15 +119,20 @@ export function ProfilePublicPage() {
 
   return (
     <ProfileView
-      profile={profile} lang={lang} onLang={changeLang} style={vars}
+      profile={profile} lang={lang} onLang={changeLang}
       onToast={showToast} toast={toast}
     />
   )
 }
 
-function ProfileSkeleton({ style }: { style: React.CSSProperties }) {
+/** Tema y acento del sistema de diseño en la raíz (las pantallas de carga y de error usan el mismo aspecto) */
+function lookAttrs(look: ProfileLook) {
+  return { 'data-mycen-theme': look.mode, 'data-mycen-accent': look.accent, style: lookVars(look) }
+}
+
+function ProfileSkeleton({ look }: { look: ProfileLook }) {
   return (
-    <main className="mp-root" style={style} aria-busy="true">
+    <main className="mp-root my-profile" {...lookAttrs(look)} aria-busy="true">
       <div className="mp-container" style={{ paddingTop: 72 }}>
         <div className="mp-skeleton" style={{ width: 104, height: 104, borderRadius: '50%', margin: '0 auto 18px' }} />
         <div className="mp-skeleton" style={{ width: '60%', height: 34, margin: '0 auto 10px' }} />

@@ -99,9 +99,10 @@
 /* ── Acciones ───────────────────────────────────────────────────── */
 .mp-primary {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; min-height: 56px; padding: 0 20px; border-radius: calc(16px * var(--p-rs, 1));
+  width: 100%; min-height: 58px; padding: 0 20px; border-radius: var(--my-r-action, calc(16px * var(--p-rs, 1)));
   background: var(--p-accent); color: var(--p-on-accent);
   font: 600 16px var(--p-body-font); text-decoration: none; border: 0; cursor: pointer;
+  box-shadow: 0 18px 36px -18px var(--my-glow, transparent);
   transition: transform 0.15s, opacity 0.15s;
 }
 .mp-primary:hover { opacity: 0.92; }

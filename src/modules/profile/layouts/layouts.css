@@ -1,0 +1,112 @@
+/* Estructuras del perfil (V1 · sistema de diseño §9). Colores, radios y tipografías sólo desde --my-* (tokens.css);
+   los módulos siguen usando --p-*, que lookVars() apunta a las mismas variables. */
+
+/* ── Base común ───────────────────────────────────────────────── */
+.mp-root.my-profile {
+  background: var(--my-stars) 0 0 / 480px 480px repeat, var(--my-sky);
+  background-color: var(--my-bg);
+  color: var(--my-text);
+  font-family: var(--my-font-ui);
+  line-height: var(--my-lh-body);
+}
+.mp-root.my-profile[data-mycen-theme='amanecer'] {
+  background: var(--my-stars) top center / 480px 360px repeat-x, var(--my-sky);
+  background-color: var(--my-bg);
+}
+.my-profile .mp-brand, .my-profile .mp-footer-brand {
+  font-family: var(--my-font-display); font-weight: 700; letter-spacing: -0.01em; color: var(--my-text); text-decoration: none;
+}
+.my-profile .mp-name { font-family: var(--my-font-display); font-weight: 700; font-size: var(--my-fs-name); line-height: var(--my-lh-title); }
+.my-profile .mp-descriptor { color: var(--my-muted); font-size: var(--my-fs-body); }
+.my-profile .mp-layout-loading { min-height: 60svh; }
+
+.mp-chips { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 0; margin: 4px 0 16px; }
+.mp-chips .mp-status { margin: 0; color: var(--my-text); border-color: var(--my-border); }
+.mp-chips .mp-status-dot { background: var(--my-subtle); }
+.mp-chips .mp-status.is-open .mp-status-dot { background: var(--my-accent); }
+
+.mp-actions { display: grid; gap: 10px; margin-top: 8px; }
+.mp-actions .mp-secondary-row { margin-top: 0; }
+
+.my-profile .mp-footer { text-align: center; color: var(--my-muted); font-size: var(--my-fs-small); padding: 36px 0 12px; }
+.my-profile .mp-footer a { color: var(--my-text); }
+
+/* ── Clásica: foto con la huella orbitando ───────────────────── */
+.mp-cl-orbit { position: relative; width: 176px; height: 176px; margin: 0 auto 12px; }
+.mp-cl-huella { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mp-cl-orbit .mp-avatar { position: absolute; inset: 36px; width: auto; height: auto; margin: 0; }
+.mp-cl-header.has-cover { margin-top: -72px; }
+
+/* ── Credencial: tarjeta de identidad flotante ───────────────── */
+.mp-cred {
+  position: relative; overflow: hidden; text-align: start;
+  margin-top: 20px; padding: 22px; border-radius: var(--my-r-hero);
+}
+.mp-cred-huella { position: absolute; width: 260px !important; height: 260px !important; inset-inline-end: -70px; top: -70px; opacity: 0.85; pointer-events: none; }
+.mp-cred-top { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.mp-cred .mp-avatar.mp-cred-avatar { width: 76px; height: 76px; margin: 0; font-size: 28px; }
+.mp-cred-qr {
+  width: 88px; height: 88px; flex: none; padding: 6px; box-sizing: border-box;
+  border-radius: 14px; background: var(--my-qr-bg); color: var(--my-qr-fg);
+}
+.mp-cred-qr svg { display: block; width: 100%; height: 100%; }
+.mp-cred-name { position: relative; margin-bottom: 6px; }
+.mp-cred .mp-chips { justify-content: flex-start; margin-bottom: 8px; }
+.mp-cred .mp-tags { justify-content: flex-start; }
+.mp-cred-handle { position: relative; margin: 6px 0 0; font-size: var(--my-fs-meta); color: var(--my-subtle); letter-spacing: 0.02em; }
+.mp-cred-bio { margin-top: 18px; }
+
+/* ── Portada: la primera pantalla es la tapa ─────────────────── */
+.mp-layout-portada .mp-container { padding-top: 0; }
+.mp-cover-hero {
+  position: relative; display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: calc(100svh - 64px); margin: 0 -20px; padding: 0; overflow: hidden;
+}
+.mp-cover-art { position: absolute; inset: 0; display: grid; place-items: center; background: var(--my-tile); }
+.mp-cover-art img { width: 100%; height: 100%; object-fit: cover; }
+.mp-cover-huella { width: min(118vw, 640px) !important; height: min(118vw, 640px) !important; margin-top: -18svh; }
+.mp-cover-fade { position: absolute; inset: 0; background: linear-gradient(to top, var(--my-bg) 22%, transparent 72%); pointer-events: none; }
+.mp-cover-body { position: relative; padding: 0 20px 22px; }
+.mp-cover-name { font-size: var(--my-fs-cover) !important; margin-bottom: 8px; }
+.mp-cover-avatar { width: 72px !important; height: 72px !important; margin-bottom: 14px !important; font-size: 26px; }
+.mp-more {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 14px; padding: 0 16px;
+  border-radius: var(--my-r-pill); border: 1px solid var(--my-border); background: var(--my-glass);
+  color: var(--my-text); font-weight: 500; text-decoration: none;
+}
+.mp-cover-rest { padding-top: 28px; text-align: center; scroll-margin-top: 64px; }
+
+/* ── Editorial: tipografía protagonista, menos vidrio ────────── */
+.mp-ed-header { position: relative; text-align: start; padding-top: 36px; }
+.mp-ed-huella { position: absolute; width: 300px !important; height: 300px !important; inset-inline-end: -90px; top: -30px; opacity: 0.55; pointer-events: none; }
+.mp-ed-avatar { position: relative; width: 64px !important; height: 64px !important; margin: 0 0 18px !important; font-size: 24px; }
+.mp-editorial .mp-name.mp-ed-name {
+  position: relative; font-family: var(--my-font-editorial); font-weight: 400;
+  font-size: clamp(var(--my-fs-cover), 13vw, 76px); line-height: 1; letter-spacing: -0.02em; margin-bottom: 12px;
+}
+.mp-ed-descriptor { position: relative; margin: 0 0 16px; font-size: var(--my-fs-lead); color: var(--my-muted); }
+.mp-editorial .mp-chips, .mp-editorial .mp-tags { justify-content: flex-start; }
+.mp-ed-bio { margin: 24px 0; font-size: var(--my-fs-lead); line-height: 1.6; white-space: pre-line; }
+.mp-ed-modules { gap: 20px; }
+.mp-editorial .mp-card, .mp-editorial .mp-link { background: transparent; }
+.mp-editorial .mp-card-title { font-size: var(--my-fs-section); letter-spacing: -0.01em; text-transform: none; font-family: var(--my-font-editorial); font-weight: 400; color: var(--my-text); }
+
+/* ── Bento: grilla de 2 columnas ──────────────────────────────── */
+.mp-bento-hero { position: relative; overflow: hidden; margin-top: 20px; padding: 20px; text-align: start; border-radius: var(--my-r-bento); }
+.mp-bento-huella { position: absolute; width: 220px !important; height: 220px !important; inset-inline-end: -60px; bottom: -70px; opacity: 0.8; pointer-events: none; }
+.mp-bento-id { position: relative; display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.mp-bento-avatar { width: 64px !important; height: 64px !important; margin: 0 !important; flex: none; font-size: 24px; }
+.mp-bento-name { margin: 0 0 2px; }
+.mp-bento-id .mp-descriptor { margin: 0; }
+.mp-bento .mp-chips, .mp-bento .mp-tags { justify-content: flex-start; position: relative; }
+.mp-bento-bio { position: relative; margin: 8px 0 0; text-align: start; }
+.mp-bento-actions { margin-top: 12px; }
+.mp-bento-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row dense; gap: 12px; margin-top: 12px; }
+.mp-b-S { grid-column: span 1; }
+.mp-b-M, .mp-b-L { grid-column: 1 / -1; }
+.mp-b-S > *, .mp-b-S .mp-link { height: 100%; }
+.mp-bento .mp-card, .mp-bento .mp-link { border-radius: var(--my-r-bento); }
+.mp-b-S .mp-link { flex-direction: column; align-items: flex-start; justify-content: space-between; min-height: 112px; }
+
+/* La foto es un objeto sólido delante de la huella */
+.my-profile .mp-avatar { background: var(--my-tile); border-color: var(--my-bg); box-shadow: 0 0 0 1px var(--my-border); color: var(--my-muted); }

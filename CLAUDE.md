@@ -53,7 +53,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   dos registros `Record<ModuleType, …>`: el público (`profile/components/moduleRegistry.ts`, cómo se dibuja; lo usan la página y la
   vista previa) y el de Studio (`studio/lib/moduleCatalog.ts`: campos, validación, valores iniciales, qué se guarda, resumen y editor
   propio en `moduleExtraEditors.tsx`). Nada de `if (type === …)` sueltos: un tipo nuevo se agrega en esos dos lugares.
-- Apariencia (Fase 9): `profiles.theme` = modo (`dark`/`light`/`auto`, este sigue al dispositivo con `usePrefersLight`),
+- Apariencia (Fase 9, reemplazada en la página pública por el perfil V1 de la etapa 03; Studio la cambia en la 06): `profiles.theme` = modo (`dark`/`light`/`auto`, este sigue al dispositivo con `usePrefersLight`),
   `corners`, `background` (liso/brillo/teñido con el acento), `card_style`, acento y tipografía. `profileTheme.ts` arma la paleta
   (`themePalette`) y garantiza WCAG AA: el acento se usa sólo si llega a 3:1 y deja texto legible encima (si no, color de texto);
   el texto secundario se ajusta si hace falta. `contrastReport` se muestra en Studio → Apariencia. Toda la app permite
@@ -186,6 +186,14 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
 - Huella (etapa 02): `src/lib/huella/` (copia exacta de `docs/design/huella.ts`, sin DOM; un test lo verifica) +
   `huellaSeed(profile)` = `id:huella_salt` (nunca el nombre). Componente `<Huella seed variant spin draw />` en `@/design`
   (decorativa, ids únicos por instancia; `draw` anima una máscara para no perder el punteado). Tests en `tests/unit/huella.test.ts`.
+- Perfil V1 (etapa 03): `profiles.theme` suma `layout` (credencial|portada|editorial|bento|clasica), `mode` (universo|amanecer),
+  `accent` (plasma|ion|nebulosa|aurora), `huella_variant` y `cover`; columnas `huella_salt` (va con la versión publicada),
+  `status_text` (≤ 60) y `available` (perfil vivo: `get_public_profile` los lee de la fila, sin volver a publicar). La base valida
+  todo (`mycen_valid_profile_look`) y todavía acepta los valores viejos (dark/light/auto y #RRGGBB) hasta la etapa 06.
+  `profileLook()` (`profile/lib/profileLook.ts`) interpreta lo viejo igual que `mycen_upgrade_theme` / `mycen_nearest_accent`
+  (acento por tono). `ProfileView` arma las piezas y carga la estructura de `profile/layouts/` (un chunk por estructura);
+  los módulos toman el tema por `lookVars` (--p-* → --my-*). Tamaño Bento por tipo en `moduleRegistry` (`bento`).
+  Los objetos que se tocan no flotan (sólo la credencial); E2E en `profile-layouts.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
+import { createState, installSupabaseMock, profileRow } from './support/mockSupabase'
 import { MODULE_FIXTURES } from './support/moduleFixtures'
 
-// Apariencia (Identity Fase 9): modo automático, esquinas, fondos y tarjetas, siempre legibles.
+// Apariencia (Identity Fase 9): los perfiles guardados con las opciones de antes siguen siendo legibles (V1).
 
 const rows = () => MODULE_FIXTURES.map(f => structuredClone(f.row))
 
@@ -32,33 +32,9 @@ for (const theme of THEMES) {
   })
 }
 
-test('modo automático: sigue al dispositivo del visitante', async ({ page, context }) => {
-  const state = createState({ profiles: [profileRow({ theme: { mode: 'auto' } })] })
-  await installSupabaseMock(context, state)
-  const bg = () => page.locator('.mp-root').evaluate(el => getComputedStyle(el).backgroundColor)
-
-  await page.emulateMedia({ colorScheme: 'light' })
-  await page.goto('/ana')
-  await expect.poll(bg).toBe('rgb(241, 240, 233)')
-
-  await page.emulateMedia({ colorScheme: 'dark' })
-  await expect.poll(bg).toBe('rgb(17, 19, 17)')
-})
-
-test('esquinas, fondo y tarjetas cambian la página', async ({ page, context }) => {
-  const state = createState({
-    profiles: [profileRow({ theme: { corners: 'round', background: 'glow', card_style: 'outline', accent: '#F4705A' } })],
-    profile_modules: [moduleRow({ id: 'm-1', title: 'Portfolio' })],
-  })
-  await installSupabaseMock(context, state)
-  await page.goto('/ana')
-  const link = page.getByRole('link', { name: /Portfolio/ })
-  await expect(link).toBeVisible()
-  // .mp-link: 18px × 1.45 (redondeadas)
-  expect(await link.evaluate(el => getComputedStyle(el).borderTopLeftRadius)).toBe('26.1px')
-  expect(await link.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgba(0, 0, 0, 0)')
-  expect(await page.locator('.mp-root').evaluate(el => getComputedStyle(el).backgroundImage)).toContain('radial-gradient')
-})
+// V1 (etapa 03): el modo automático, las esquinas, el fondo y las tarjetas dejaron de cambiar la página pública
+// (ahora son estructura, tema Universo / Amanecer y acento). Los perfiles con esos valores se siguen viendo bien:
+// lo verifican el axe de arriba y "perfiles de antes" en profile-layouts.spec.ts. Studio → Apariencia cambia en la 06.
 
 test('Studio: elegir apariencia y ver el contraste verificado', async ({ page, context }) => {
   const state = createState({ profiles: [profileRow()] })

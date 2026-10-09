@@ -41,6 +41,12 @@ export interface UiStrings {
   createYours: string
   draftBanner: string
   footer: string
+  /** Perfil vivo (V1): la persona está disponible */
+  available: string
+  /** Portada: señal de que hay más abajo */
+  moreAboutMe: string
+  /** Pie de todos los perfiles: "mycen · Creá tu identidad" */
+  createIdentity: string
   days: Days
   languageLabel: string
   socials: string
@@ -87,6 +93,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'No pudimos cargar el perfil', errorText: 'Revisá tu conexión e intentá de nuevo.',
     retry: 'Reintentar', createYours: 'Creá tu Mycen', draftBanner: 'Vista previa: este perfil todavía no es público.',
     footer: 'Una identidad Mycen',
+    available: 'Disponible', moreAboutMe: 'Más sobre mí', createIdentity: 'Creá tu identidad',
     days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mié', thursday: 'Jue', friday: 'Vie', saturday: 'Sáb', sunday: 'Dom' },
     languageLabel: 'Idioma', socials: 'Redes sociales', close: 'Cerrar', cards: 'Tarjetas',
     swipeHint: 'deslizá para ver más', tags: 'Categorías',
@@ -105,6 +112,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'We could not load this profile', errorText: 'Check your connection and try again.',
     retry: 'Try again', createYours: 'Create your Mycen', draftBanner: 'Preview: this profile is not public yet.',
     footer: 'A Mycen identity',
+    available: 'Available', moreAboutMe: 'More about me', createIdentity: 'Create your identity',
     days: { monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu', friday: 'Fri', saturday: 'Sat', sunday: 'Sun' },
     languageLabel: 'Language', socials: 'Social networks', close: 'Close', cards: 'Cards',
     swipeHint: 'swipe to see more', tags: 'Categories',
@@ -123,6 +131,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'Não conseguimos carregar o perfil', errorText: 'Verifique sua conexão e tente novamente.',
     retry: 'Tentar novamente', createYours: 'Crie seu Mycen', draftBanner: 'Prévia: este perfil ainda não é público.',
     footer: 'Uma identidade Mycen',
+    available: 'Disponível', moreAboutMe: 'Mais sobre mim', createIdentity: 'Crie sua identidade',
     days: { monday: 'Seg', tuesday: 'Ter', wednesday: 'Qua', thursday: 'Qui', friday: 'Sex', saturday: 'Sáb', sunday: 'Dom' },
     languageLabel: 'Idioma', socials: 'Redes sociais', close: 'Fechar', cards: 'Cartões',
     swipeHint: 'deslize para ver mais', tags: 'Categorias',
@@ -141,6 +150,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'Impossible de charger le profil', errorText: 'Vérifiez votre connexion et réessayez.',
     retry: 'Réessayer', createYours: 'Créez votre Mycen', draftBanner: 'Aperçu : ce profil n’est pas encore public.',
     footer: 'Une identité Mycen',
+    available: 'Disponible', moreAboutMe: 'En savoir plus', createIdentity: 'Créez votre identité',
     days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mer', thursday: 'Jeu', friday: 'Ven', saturday: 'Sam', sunday: 'Dim' },
     languageLabel: 'Langue', socials: 'Réseaux sociaux', close: 'Fermer', cards: 'Cartes',
     swipeHint: 'faites glisser pour voir plus', tags: 'Catégories',
@@ -159,6 +169,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'Das Profil konnte nicht geladen werden', errorText: 'Prüfe deine Verbindung und versuche es erneut.',
     retry: 'Erneut versuchen', createYours: 'Erstelle dein Mycen', draftBanner: 'Vorschau: Dieses Profil ist noch nicht öffentlich.',
     footer: 'Eine Mycen-Identität',
+    available: 'Verfügbar', moreAboutMe: 'Mehr über mich', createIdentity: 'Erstelle deine Identität',
     days: { monday: 'Mo', tuesday: 'Di', wednesday: 'Mi', thursday: 'Do', friday: 'Fr', saturday: 'Sa', sunday: 'So' },
     languageLabel: 'Sprache', socials: 'Soziale Netzwerke', close: 'Schließen', cards: 'Karten',
     swipeHint: 'wischen für mehr', tags: 'Kategorien',
@@ -177,6 +188,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'Impossibile caricare il profilo', errorText: 'Controlla la connessione e riprova.',
     retry: 'Riprova', createYours: 'Crea il tuo Mycen', draftBanner: 'Anteprima: questo profilo non è ancora pubblico.',
     footer: 'Un’identità Mycen',
+    available: 'Disponibile', moreAboutMe: 'Di più su di me', createIdentity: 'Crea la tua identità',
     days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mer', thursday: 'Gio', friday: 'Ven', saturday: 'Sab', sunday: 'Dom' },
     languageLabel: 'Lingua', socials: 'Social network', close: 'Chiudi', cards: 'Schede',
     swipeHint: 'scorri per vedere altro', tags: 'Categorie',
@@ -195,6 +207,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: '无法加载主页', errorText: '请检查网络连接后重试。',
     retry: '重试', createYours: '创建你的 Mycen', draftBanner: '预览：此主页尚未公开。',
     footer: 'Mycen 身份主页',
+    available: '可接洽', moreAboutMe: '了解更多', createIdentity: '创建你的身份',
     days: { monday: '周一', tuesday: '周二', wednesday: '周三', thursday: '周四', friday: '周五', saturday: '周六', sunday: '周日' },
     languageLabel: '语言', socials: '社交媒体', close: '关闭', cards: '卡片',
     swipeHint: '滑动查看更多', tags: '分类',
@@ -213,6 +226,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'プロフィールを読み込めませんでした', errorText: '接続を確認して、もう一度お試しください。',
     retry: '再試行', createYours: 'Mycen をつくる', draftBanner: 'プレビュー：このプロフィールはまだ公開されていません。',
     footer: 'Mycen のプロフィール',
+    available: '対応可能', moreAboutMe: 'もっと見る', createIdentity: 'あなたのアイデンティティをつくる',
     days: { monday: '月', tuesday: '火', wednesday: '水', thursday: '木', friday: '金', saturday: '土', sunday: '日' },
     languageLabel: '言語', socials: 'SNS', close: '閉じる', cards: 'カード',
     swipeHint: 'スワイプしてもっと見る', tags: 'カテゴリー',
@@ -231,6 +245,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: '프로필을 불러오지 못했습니다', errorText: '연결 상태를 확인하고 다시 시도해 주세요.',
     retry: '다시 시도', createYours: '나의 Mycen 만들기', draftBanner: '미리보기: 이 프로필은 아직 공개되지 않았습니다.',
     footer: 'Mycen 아이덴티티',
+    available: '연락 가능', moreAboutMe: '더 알아보기', createIdentity: '나의 아이덴티티 만들기',
     days: { monday: '월', tuesday: '화', wednesday: '수', thursday: '목', friday: '금', saturday: '토', sunday: '일' },
     languageLabel: '언어', socials: '소셜 미디어', close: '닫기', cards: '카드',
     swipeHint: '밀어서 더 보기', tags: '카테고리',
@@ -249,6 +264,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'प्रोफ़ाइल लोड नहीं हो सकी', errorText: 'अपना कनेक्शन जाँचें और फिर से कोशिश करें।',
     retry: 'फिर से कोशिश करें', createYours: 'अपना Mycen बनाएँ', draftBanner: 'पूर्वावलोकन: यह प्रोफ़ाइल अभी सार्वजनिक नहीं है।',
     footer: 'एक Mycen पहचान',
+    available: 'उपलब्ध', moreAboutMe: 'मेरे बारे में और', createIdentity: 'अपनी पहचान बनाएं',
     days: { monday: 'सोम', tuesday: 'मंगल', wednesday: 'बुध', thursday: 'गुरु', friday: 'शुक्र', saturday: 'शनि', sunday: 'रवि' },
     languageLabel: 'भाषा', socials: 'सोशल मीडिया', close: 'बंद करें', cards: 'कार्ड',
     swipeHint: 'और देखने के लिए स्वाइप करें', tags: 'श्रेणियाँ',
@@ -267,6 +283,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'تعذّر تحميل الملف', errorText: 'تحقّق من اتصالك وحاول مرة أخرى.',
     retry: 'إعادة المحاولة', createYours: 'أنشئ Mycen الخاص بك', draftBanner: 'معاينة: هذا الملف ليس عامًا بعد.',
     footer: 'هوية Mycen',
+    available: 'متاح', moreAboutMe: 'المزيد عني', createIdentity: 'أنشئ هويتك',
     days: { monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد' },
     languageLabel: 'اللغة', socials: 'وسائل التواصل', close: 'إغلاق', cards: 'بطاقات',
     swipeHint: 'اسحب لرؤية المزيد', tags: 'الفئات',
@@ -285,6 +302,7 @@ const UI: Record<ProfileLang, UiStrings> = {
     errorTitle: 'Не удалось загрузить профиль', errorText: 'Проверьте подключение и попробуйте снова.',
     retry: 'Повторить', createYours: 'Создайте свой Mycen', draftBanner: 'Предпросмотр: профиль ещё не опубликован.',
     footer: 'Профиль Mycen',
+    available: 'На связи', moreAboutMe: 'Подробнее обо мне', createIdentity: 'Создайте свою идентичность',
     days: { monday: 'Пн', tuesday: 'Вт', wednesday: 'Ср', thursday: 'Чт', friday: 'Пт', saturday: 'Сб', sunday: 'Вс' },
     languageLabel: 'Язык', socials: 'Соцсети', close: 'Закрыть', cards: 'Карточки',
     swipeHint: 'листайте, чтобы увидеть больше', tags: 'Категории',

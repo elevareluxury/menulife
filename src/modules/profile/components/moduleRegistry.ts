@@ -22,25 +22,29 @@ export interface PublicModuleDef {
   /** Los módulos consecutivos de este tipo se dibujan juntos (ej.: redes en una fila de íconos) */
   Group?: ComponentType<GroupProps>
   // Sin View ni Group: no es un bloque (contact_card se muestra como botón "Guardar contacto")
+  /** Tamaño en la estructura Bento (V1): S = media columna, M = ancho completo, L = ancho completo destacado */
+  bento: BentoSize
 }
 
+export type BentoSize = 'S' | 'M' | 'L'
+
 export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
-  link:            { View: LinkModule },
-  social:          { Group: SocialRow },
-  contact:         { View: ContactModule },
-  location:        { View: LocationModule },
-  image:           { View: ImageModule },
-  text:            { View: TextModule },
-  featured_action: { View: FeaturedActionModule },
-  contact_card:    {},
-  gallery:         { View: GalleryModule },
-  product:         { View: ProductModule },
-  testimonials:    { View: TestimonialsModule },
-  hours:           { View: HoursModule },
-  cards:           { View: CardsModule },
-  project:         { View: ProjectModule },
-  portfolio:       { View: PortfolioModule },
-  link_group:      { View: LinkGroupModule },
+  link:            { View: LinkModule, bento: 'S' },
+  social:          { Group: SocialRow, bento: 'M' },
+  contact:         { View: ContactModule, bento: 'M' },
+  location:        { View: LocationModule, bento: 'M' },
+  image:           { View: ImageModule, bento: 'L' },
+  text:            { View: TextModule, bento: 'M' },
+  featured_action: { View: FeaturedActionModule, bento: 'M' },
+  contact_card:    { bento: 'S' },
+  gallery:         { View: GalleryModule, bento: 'L' },
+  product:         { View: ProductModule, bento: 'M' },
+  testimonials:    { View: TestimonialsModule, bento: 'M' },
+  hours:           { View: HoursModule, bento: 'S' },
+  cards:           { View: CardsModule, bento: 'L' },
+  project:         { View: ProjectModule, bento: 'L' },
+  portfolio:       { View: PortfolioModule, bento: 'L' },
+  link_group:      { View: LinkGroupModule, bento: 'M' },
 }
 
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */

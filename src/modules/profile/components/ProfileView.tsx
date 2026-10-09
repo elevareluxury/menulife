@@ -1,24 +1,39 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { lazy, Suspense, useMemo, useRef } from 'react'
+import type { ComponentType, LazyExoticComponent } from 'react'
 import { Link } from 'react-router-dom'
 import { Calendar, Globe, Share2, UserPlus } from 'lucide-react'
+import { huellaSeed } from '@/lib/huella'
 import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
 import { fetchContactCard, trackProfileEvent } from '../lib/profileApi'
 import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref } from '../lib/safeUrl'
 import { isOpenNow } from '../lib/schedule'
 import { downloadVCard } from '../lib/vcard'
-import { ensureProfileFont } from '../lib/profileTheme'
+import { lookVars, profileLook, type ProfileLayout } from '../lib/profileLook'
 import { profileHandle, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
-import { publicModuleDef, type GroupProps } from './moduleRegistry'
+import { publicModuleDef, type BentoSize, type GroupProps } from './moduleRegistry'
 import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
 import { ReportButton } from './ReportDialog'
+import type { LayoutParts, RenderedBlock } from '../layouts/types'
+import '@/design/motion.css'
+import '@/design/components/design.css'
 import '../profile.css'
+import '../layouts/layouts.css'
+
+// Cada estructura (V1 · sistema de diseño §9) en su propio chunk: el perfil baja sólo la que usa
+const LAYOUTS: Record<ProfileLayout, LazyExoticComponent<ComponentType<LayoutParts>>> = {
+  credencial: lazy(() => import('../layouts/Credencial')),
+  portada: lazy(() => import('../layouts/Portada')),
+  editorial: lazy(() => import('../layouts/Editorial')),
+  bento: lazy(() => import('../layouts/Bento')),
+  clasica: lazy(() => import('../layouts/Clasica')),
+}
 
 /** Bloques a dibujar: los tipos con `Group` (ej.: redes) se juntan si son consecutivos. */
 type Block =
-  | { kind: 'module'; module: ProfileModule; View: React.ComponentType<ModuleProps> }
-  | { kind: 'group'; modules: ProfileModule[]; Group: React.ComponentType<GroupProps> }
+  | { kind: 'module'; module: ProfileModule; View: React.ComponentType<ModuleProps>; size: BentoSize }
+  | { kind: 'group'; modules: ProfileModule[]; Group: React.ComponentType<GroupProps>; size: BentoSize }
 
 function toBlocks(modules: ProfileModule[]): Block[] {
   const blocks: Block[] = []
@@ -27,9 +42,9 @@ function toBlocks(modules: ProfileModule[]): Block[] {
     const last = blocks[blocks.length - 1]
     if (def?.Group) {
       if (last?.kind === 'group' && last.Group === def.Group) last.modules.push(m)
-      else blocks.push({ kind: 'group', modules: [m], Group: def.Group })
+      else blocks.push({ kind: 'group', modules: [m], Group: def.Group, size: def.bento })
     } else if (def?.View) {
-      blocks.push({ kind: 'module', module: m, View: def.View })
+      blocks.push({ kind: 'module', module: m, View: def.View, size: def.bento })
     }
   }
   return blocks
@@ -71,11 +86,10 @@ function Selectable({ id, select, pickedRef, children }: {
   )
 }
 
-export function ProfileView({ profile, lang, onLang, style, onToast, toast, preview = false, select }: {
+export function ProfileView({ profile, lang, onLang, onToast, toast, preview = false, select }: {
   profile: PublicProfile
   lang: ProfileLang
   onLang: (l: ProfileLang) => void
-  style: React.CSSProperties
   onToast: (msg: string) => void
   toast: string | null
   /** Vista previa en Studio: no registra eventos */
@@ -91,7 +105,8 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
   const bio = tr(profile.bio, profile.translations, 'bio', lang)
   const blocks = useMemo(() => toBlocks(profile.modules), [profile.modules])
   const coverSrc = safeHref(profile.cover_url)
-  useEffect(() => { ensureProfileFont(profile.theme?.title_font) }, [profile.theme?.title_font])
+  const look = useMemo(() => profileLook(profile.theme), [profile.theme])
+  const Layout = LAYOUTS[look.layout]
 
   const hours = profile.modules.find(m => m.type === 'hours')
   const open = hours && profile.theme.show_open_status !== false
@@ -129,59 +144,94 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
     track(profile.id, 'vcard_download')
   }
 
-  // Encabezado: foto, nombre, bio y acciones (en el editor de escritorio se elige como un solo bloque)
-  const identityBlock = (<>
-    <section className={`mp-header${coverSrc ? ' has-cover' : ''}`}>
-      <div className="mp-avatar">
-        <SafeImage src={safeHref(profile.avatar_url) ?? undefined} alt={name}
-          fallback={<span aria-hidden="true">{name.trim()[0]?.toUpperCase() ?? '·'}</span>} />
-      </div>
-      <h1 className="mp-name">{name}</h1>
-      {descriptor && <p className="mp-descriptor">{descriptor}</p>}
-      {!!profile.tags?.length && (
-        <ul className="mp-tags" aria-label={t.tags}>
-          {profile.tags.map(tag => <li key={tag}>{tag}</li>)}
-        </ul>
-      )}
-      {bio && <p className="mp-bio">{bio}</p>}
+  const avatarSrc = safeHref(profile.avatar_url)
+  const statusText = profile.status_text?.trim()
+  const chips = (statusText || profile.available || open != null) ? (
+    <ul className="mp-chips">
+      {statusText && <li className="my-chip"><span className="my-status-dot my-pulse" aria-hidden="true" />{statusText}</li>}
+      {profile.available && <li className="my-chip mp-chip-available"><span className="my-status-dot my-pulse" aria-hidden="true" />{t.available}</li>}
       {open != null && (
-        <div className={`mp-status${open ? ' is-open' : ''}`}>
-          <span className="mp-status-dot" aria-hidden="true" />
-          {open ? t.openNow : t.closedNow}
-        </div>
+        <li className={`my-chip mp-status${open ? ' is-open' : ''}`}>
+          <span className="mp-status-dot" aria-hidden="true" />{open ? t.openNow : t.closedNow}
+        </li>
       )}
-    </section>
+    </ul>
+  ) : null
 
-    {primary && primaryHref && (
-      <a className="mp-primary" href={primaryHref}
-        {...(isExternal(primaryHref) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        onClick={() => track(profile.id, 'primary_action_click')}>
-        {tr(null, profile.translations, 'primary_action_label', lang) || trLabel(primary.label, lang)}
-      </a>
-    )}
+  const primaryNode = primary && primaryHref ? (
+    <a className="mp-primary" href={primaryHref}
+      {...(isExternal(primaryHref) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      onClick={() => track(profile.id, 'primary_action_click')}>
+      {tr(null, profile.translations, 'primary_action_label', lang) || trLabel(primary.label, lang)}
+    </a>
+  ) : null
 
-    {(reserveHref || profile.has_contact_card) && (
-      <div className="mp-secondary-row">
-        {reserveHref && (
-          <a className="mp-btn-ghost" href={reserveHref} onClick={() => track(profile.id, 'primary_action_click')}>
-            <Calendar size={17} aria-hidden="true" /> {trLabel('Reservar', lang)}
-          </a>
-        )}
-        {profile.has_contact_card && (
-          <button type="button" className="mp-btn-ghost" onClick={saveContact}>
-            <UserPlus size={17} aria-hidden="true" /> {t.saveContact}
-          </button>
-        )}
-      </div>
-    )}
-  </>)
+  const secondaryNode = (reserveHref || profile.has_contact_card) ? (
+    <div className="mp-secondary-row">
+      {reserveHref && (
+        <a className="mp-btn-ghost" href={reserveHref} onClick={() => track(profile.id, 'primary_action_click')}>
+          <Calendar size={17} aria-hidden="true" /> {trLabel('Reservar', lang)}
+        </a>
+      )}
+      {profile.has_contact_card && (
+        <button type="button" className="mp-btn-ghost" onClick={saveContact}>
+          <UserPlus size={17} aria-hidden="true" /> {t.saveContact}
+        </button>
+      )}
+    </div>
+  ) : null
+
+  const rendered: RenderedBlock[] = blocks.map(b => {
+    const key = b.kind === 'group' ? b.modules[0].id : b.module.id
+    let node: React.ReactNode
+    if (!select) {
+      node = b.kind === 'group'
+        ? <b.Group lang={lang} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
+        : <b.View module={b.module} lang={lang} onAction={onModuleAction} />
+    } else {
+      node = b.kind === 'group'
+        ? <Selectable id={key} select={select} pickedRef={groupPickedRef}>
+            <b.Group lang={lang} modules={b.modules} onAction={id => { groupPickedRef.current = true; select.onSelect(id) }} />
+          </Selectable>
+        : <Selectable id={key} select={select}>
+            <b.View module={b.module} lang={lang} onAction={() => undefined} />
+          </Selectable>
+    }
+    return { key, size: b.size, node }
+  })
+
+  const parts: LayoutParts = {
+    look,
+    seed: huellaSeed(profile),
+    name,
+    descriptor,
+    bio,
+    avatar: <SafeImage src={avatarSrc ?? undefined} alt={name}
+      fallback={<span aria-hidden="true">{name.trim()[0]?.toUpperCase() ?? '·'}</span>} />,
+    hasAvatar: !!avatarSrc,
+    coverUrl: coverSrc,
+    tags: profile.tags?.length ? (
+      <ul className="mp-tags" aria-label={t.tags}>
+        {profile.tags.map(tag => <li key={tag}>{tag}</li>)}
+      </ul>
+    ) : null,
+    chips,
+    primary: primaryNode,
+    secondary: secondaryNode,
+    blocks: rendered,
+    identity: node => select ? <Selectable id={IDENTITY_TARGET} select={select}>{node}</Selectable> : node,
+    profileUrl,
+    t,
+    preview,
+  }
 
   return (
-    <main className="mp-root" style={style} lang={lang} dir={langDir(lang)}>
+    <main className={`mp-root my-profile mp-layout-${look.layout}`} data-mycen-theme={look.mode} data-mycen-accent={look.accent}
+      style={lookVars(look)} lang={lang} dir={langDir(lang)}>
       {profile.status !== 'published' && <div className="mp-banner" role="status">{t.draftBanner}</div>}
 
       <header className="mp-topbar">
-        <Link to="/" className="mp-brand" aria-label="Mycen">mycen.</Link>
+        <Link to="/" className="mp-brand" aria-label="Mycen">mycen</Link>
         <div className="mp-topbar-actions">
           <label className="mp-lang-select" title={t.languageLabel}>
             <Globe size={15} aria-hidden="true" />
@@ -196,32 +246,13 @@ export function ProfileView({ profile, lang, onLang, style, onToast, toast, prev
         </div>
       </header>
 
-      {coverSrc && (
-        <div className="mp-cover"><SafeImage src={coverSrc} alt="" /></div>
-      )}
-
       <div className="mp-container">
-        {select ? <Selectable id={IDENTITY_TARGET} select={select}>{identityBlock}</Selectable> : identityBlock}
-
-        <div className="mp-modules">
-          {blocks.map(b => {
-            if (!select) {
-              return b.kind === 'group'
-                ? <b.Group lang={lang} key={b.modules[0].id} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
-                : <b.View key={b.module.id} module={b.module} lang={lang} onAction={onModuleAction} />
-            }
-            return b.kind === 'group'
-              ? <Selectable key={b.modules[0].id} id={b.modules[0].id} select={select} pickedRef={groupPickedRef}>
-                  <b.Group lang={lang} modules={b.modules} onAction={id => { groupPickedRef.current = true; select.onSelect(id) }} />
-                </Selectable>
-              : <Selectable key={b.module.id} id={b.module.id} select={select}>
-                  <b.View module={b.module} lang={lang} onAction={() => undefined} />
-                </Selectable>
-          })}
-        </div>
+        <Suspense fallback={<div className="mp-layout-loading" aria-busy="true" />}>
+          <Layout {...parts} />
+        </Suspense>
 
         <footer className="mp-footer">
-          {t.footer} · <Link to="/register">{t.createYours}</Link>
+          <Link to="/" className="mp-footer-brand">mycen</Link> · <Link to="/register">{t.createIdentity}</Link>
           {!preview && !profile.is_owner && profile.status === 'published' && (
             <div><ReportButton username={profileHandle(profile)} lang={lang} /></div>
           )}

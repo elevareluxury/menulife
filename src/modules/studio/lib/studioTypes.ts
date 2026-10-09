@@ -29,6 +29,11 @@ export interface StudioProfile {
   tags: string[]
   is_primary: boolean
   theme: ProfileTheme
+  /** V1: semilla extra de la huella ("Generar otra") */
+  huella_salt?: string | null
+  /** V1, perfil vivo: estado actual (≤ 60) y "Disponible" (se ven sin volver a publicar) */
+  status_text?: string | null
+  available?: boolean
   primary_action: PrimaryAction | null
   contact_card: ContactCardSettings
   default_locale: string
