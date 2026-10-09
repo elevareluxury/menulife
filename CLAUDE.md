@@ -169,3 +169,42 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - No simular funcionalidades sin datos reales; no inventar métricas.
 - Validar con `npx tsc -b`, `npm test`, `npm run build` (y `npm run test:e2e` si se toca Identity/Studio) antes de commitear; no sumar errores de lint nuevos.
 - Sin `console.log` de debug en código público.
+
+## Mycen V1 — reglas de trabajo
+Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y huella), `docs/v1/ROADMAP.md` (alcance),
+`docs/v1/prompts/00…17` (una etapa por prompt), `docs/v1/PROGRESS.md` (avance del piloto automático).
+
+### Antes de cada tarea
+- Leer `docs/design/DESIGN_SYSTEM.md` y `docs/v1/ROADMAP.md`.
+- Si la tarea pide algo fuera del alcance del ROADMAP, avisar antes de hacerlo (va a la sección V1.1).
+
+### Flujo
+- Nunca pushear a `main`. Cada prompt va en su propia rama, partiendo de `main` actualizada: la que indica el prompt o,
+  en Claude Code en la web, la rama asignada a la sesión (un PR por etapa).
+- Sin `gh`: pushear la rama y dar el link `https://github.com/elevareluxury/menulife/pull/new/<rama>`.
+- No mergear: lo hace el usuario después de probar el preview.
+  **Excepción:** en modo piloto automático (`docs/v1/prompts/PILOTO-AUTOMATICO.md`), con acceso a GitHub (`gh` o la
+  integración de GitHub de Claude Code), se crea el PR, se espera el CI y se mergea (merge commit) siguiendo ese archivo.
+- Una migración se aplica en Supabase (el usuario la pega y confirma) **antes** de mergear.
+
+### Verificación obligatoria antes de pushear (los mismos pasos del CI)
+- `npx eslint` con la lista de carpetas de `.github/workflows/ci.yml`
+- `npm test`
+- `npm run build` (incluye `tsc -b`)
+- `node scripts/check-bundle-budget.mjs`
+- `npm run test:e2e`
+- `npm run test:db` si hay migraciones
+Reportar el resultado de cada uno. Si algo falla, arreglarlo antes de pushear.
+
+### Código
+- Colores, radios, sombras y tipografías solo desde las variables del sistema de diseño (`src/design`).
+- Todo texto visible al usuario va por i18n, en los 12 idiomas (`es` es la fuente).
+- Migraciones: nombre `YYYYMMDDHHMMSS_descripcion.sql`, idempotentes, con RLS, y con tests en `tests/db/`.
+  Avisar en el resumen que hay que aplicarlas en Supabase.
+- Funciones fuera de la V1 van detrás de `src/lib/features.ts`.
+- No sumar dependencias sin justificarlo en el resumen (peso, mantenimiento, alternativa).
+- Nada de contenedores con scroll interno ni `touch-action: none` en páginas públicas.
+- Terceros nuevos (por ejemplo, reproductores embebidos) se suman a la política de privacidad en los 12 idiomas.
+
+### Resumen al terminar
+Rama y link del PR, commits, migraciones a aplicar, resultado de cada verificación, y qué probar en el celular.
