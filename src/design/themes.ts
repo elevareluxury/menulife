@@ -16,3 +16,6 @@ export const ACCENT_COLORS: Record<MycenAccent, Record<MycenTheme, { accent: str
 
 /** Segundo color de la huella por tema (--my-secondary) */
 export const SECONDARY_COLORS: Record<MycenTheme, string> = { universo: '#7DD3FC', amanecer: '#5B3FD1' }
+
+/** Fondo de cada tema (--my-bg; un test verifica que coincidan): pinta html y body detrás de la app */
+export const THEME_BG: Record<MycenTheme, string> = { universo: '#04050D', amanecer: '#FBF4EE' }

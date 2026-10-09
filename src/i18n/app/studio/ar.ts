@@ -578,6 +578,11 @@ const ar: StudioDict = {
     slugIssue: { invalid: 'استخدم من 2 إلى 40 حرفًا صغيرًا أو رقمًا أو شرطة.', reserved: 'هذا العنوان محجوز.', taken: 'لديك بالفعل مساحة بهذا العنوان.' },
     manage: 'مساحاتي',
     switcher: 'المساحة التي تعدّلها',
+    explainTitle: 'ما هي المساحة (Space)؟',
+    explainText: 'صفحة منفصلة برابط خاص بها، لشيء غير ملفك الرئيسي. مثلًا:',
+    examples: ['فرقتك', 'مشروعك', 'فعاليتك'],
+    exampleSlug: 'name',
+    exampleLink: 'سيكون رابطها',
   },
   editor3: {
     open: 'محرر سطح المكتب',

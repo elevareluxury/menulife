@@ -578,6 +578,11 @@ const zh: StudioDict = {
     slugIssue: { invalid: '请使用 2 到 40 个小写字母、数字或连字符。', reserved: '该地址已被保留。', taken: '你已有使用该地址的 Space。' },
     manage: '我的 Spaces',
     switcher: '正在编辑的 Space',
+    explainTitle: '什么是 Space？',
+    explainText: '一个独立页面，有自己的链接，用于主页之外的内容。例如：',
+    examples: ['你的乐队', '你的小生意', '你的活动'],
+    exampleSlug: 'name',
+    exampleLink: '链接会是',
   },
   editor3: {
     open: '桌面编辑器',

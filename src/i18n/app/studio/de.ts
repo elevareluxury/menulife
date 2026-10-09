@@ -578,6 +578,11 @@ const de: StudioDict = {
     slugIssue: { invalid: 'Verwende 2 bis 40 Kleinbuchstaben, Zahlen oder Bindestriche.', reserved: 'Diese Adresse ist reserviert.', taken: 'Du hast schon einen Space mit dieser Adresse.' },
     manage: 'Meine Spaces',
     switcher: 'Space, den du bearbeitest',
+    explainTitle: 'Was ist ein Space?',
+    explainText: 'Eine eigene Seite mit eigenem Link für etwas, das nicht dein Hauptprofil ist. Zum Beispiel:',
+    examples: ['deine Band', 'dein Business', 'dein Event'],
+    exampleSlug: 'name',
+    exampleLink: 'Der Link wäre',
   },
   editor3: {
     open: 'Desktop-Editor',

@@ -578,6 +578,11 @@ const it: StudioDict = {
     slugIssue: { invalid: 'Usa da 2 a 40 lettere minuscole, numeri o trattini.', reserved: 'Questo indirizzo è riservato.', taken: 'Hai già uno Space con questo indirizzo.' },
     manage: 'I miei Spaces',
     switcher: 'Space che stai modificando',
+    explainTitle: 'Cos’è uno Space?',
+    explainText: 'Una pagina a parte, con il suo link, per qualcosa che non è il tuo profilo principale. Per esempio:',
+    examples: ['la tua band', 'la tua attività', 'il tuo evento'],
+    exampleSlug: 'nome',
+    exampleLink: 'Il link sarebbe',
   },
   editor3: {
     open: 'Editor per computer',

@@ -578,6 +578,11 @@ const pt: StudioDict = {
     slugIssue: { invalid: 'Use de 2 a 40 letras minúsculas, números ou hifens.', reserved: 'Esse endereço está reservado.', taken: 'Você já tem um Space com esse endereço.' },
     manage: 'Meus Spaces',
     switcher: 'Space que você está editando',
+    explainTitle: 'O que é um Space?',
+    explainText: 'Uma página à parte, com link próprio, para algo que não é o seu perfil principal. Por exemplo:',
+    examples: ['sua banda', 'seu negócio', 'seu evento'],
+    exampleSlug: 'nome',
+    exampleLink: 'O link seria',
   },
   editor3: {
     open: 'Editor de computador',

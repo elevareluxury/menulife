@@ -578,6 +578,11 @@ const hi: StudioDict = {
     slugIssue: { invalid: '2 से 40 छोटे अक्षर, अंक या हाइफ़न इस्तेमाल करें।', reserved: 'यह पता आरक्षित है।', taken: 'इस पते वाला Space आपके पास पहले से है।' },
     manage: 'मेरे Spaces',
     switcher: 'जिस Space को आप संपादित कर रहे हैं',
+    explainTitle: 'Space क्या है?',
+    explainText: 'आपकी मुख्य प्रोफ़ाइल से अलग, अपने लिंक वाला एक पेज। उदाहरण के लिए:',
+    examples: ['आपका बैंड', 'आपका व्यवसाय', 'आपका इवेंट'],
+    exampleSlug: 'name',
+    exampleLink: 'इसका लिंक होगा',
   },
   editor3: {
     open: 'डेस्कटॉप एडिटर',

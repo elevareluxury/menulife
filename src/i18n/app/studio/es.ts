@@ -852,6 +852,11 @@ const es = {
     slugIssue: { invalid: 'Usá entre 2 y 40 letras minúsculas, números o guiones.', reserved: 'Esa dirección está reservada.', taken: 'Ya tenés un Space con esa dirección.' },
     manage: 'Mis Spaces',
     switcher: 'Space que estás editando',
+    explainTitle: '¿Qué es un Space?',
+    explainText: 'Una página aparte, con su propio link, para algo que no es tu perfil principal. Por ejemplo:',
+    examples: ['tu banda', 'tu emprendimiento', 'tu evento'],
+    exampleSlug: 'nombre',
+    exampleLink: 'Su link sería',
   },
   editor3: {
     open: 'Editor de escritorio',

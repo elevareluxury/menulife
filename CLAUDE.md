@@ -85,7 +85,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `SortableList`), vista previa con selección directa (`ProfileView` con `select`: un clic elige el bloque sin abrir links;
   `IDENTITY_TARGET` = encabezado) y Propiedades (`ModuleEditor inline`, `IdentityPage embedded`, `AppearancePage embedded`).
   Las acciones de módulos son `useModuleActions` (las comparten Módulos y el editor); íconos y badges en `lib/moduleUi.ts`.
-- Corte hecho: `/dashboard/hub` y `/life/hub` redirigen a `/studio`. Usuarios sin perfil ven el onboarding de 5 pasos (`OnboardingWizard`).
+- Corte hecho: `/dashboard/hub` y `/life/hub` redirigen a `/studio`. Usuarios sin perfil ven el onboarding de 7 pantallas (`OnboardingWizard`, etapa 07a).
 - Tareas: viven en Brain (`life_brain_items` con `type='task'`: fecha, hora, recordatorio, meta, "foco de hoy").
   Brain tiene 3 vistas: Capturas (ideas y notas), Tareas (lista por vencimiento o calendario; `?vista=tareas`) y Archivo.
   Recordatorios con la app abierta + `.ics` para el calendario del celular. `life_tasks` es legado (ya copiada a Brain).
@@ -162,7 +162,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - `npm run test:db`: migraciones de Identity + `tests/db/*.test.sql` en un Postgres real (necesita PGHOST/PGUSER).
 - CI (`.github/workflows/ci.yml`): lint de Identity/Studio/Life OS/tests, unitarios, build, E2E y base de datos en cada PR.
 - Los E2E cubren lo que la migración de Identity no puede romper: URL pública, redirección de usernames viejos, perfil
-  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), registro de errores (`errors.spec.ts`), landing en 12 idiomas con axe (`landing.spec.ts`), legales (`legal.spec.ts`), acceso en otros idiomas con axe (`auth.spec.ts`), Mis Spaces (`spaces.spec.ts`), editor de escritorio (`desktop-editor.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
+  no publicado, módulos ocultos, vCard, autosave, QR con `?src=qr`, proyectos (`projects.spec.ts`), editor sin mouse (`editor.spec.ts`), links y Connect (`links-connect.spec.ts`), moderación (`moderation.spec.ts`), registro de errores (`errors.spec.ts`), landing en 12 idiomas con axe (`landing.spec.ts`), legales (`legal.spec.ts`), acceso en otros idiomas con axe (`auth.spec.ts`), Mis Spaces (`spaces.spec.ts`), onboarding (`onboarding.spec.ts`), Studio en los dos temas con axe (`studio-theme.spec.ts`), editor de escritorio (`desktop-editor.spec.ts`), apariencia y accesibilidad con axe (`appearance.spec.ts`), y cómo se ve y se guarda cada tipo de módulo
   (`modules.spec.ts`: si un cambio de módulo es deliberado, regenerar con `--update-snapshots` y revisar el diff).
 
 ## Reglas
@@ -213,6 +213,11 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   creador→portada, profesional→editorial, negocio→bento; crea el perfil con un `contact_form` y `onboarding_step` 3), foto
   (se puede saltar), WhatsApp/Instagram (red social + acción principal; paso 4), el momento de la huella (Universo) y vista
   previa → "Publicar perfil" (paso 5 + `publishSpace`). Si se corta, sigue donde quedó. E2E en `onboarding.spec.ts`.
+- Studio con el sistema de diseño (etapa 07b): `.st-root` (y los portales: barra móvil, pantalla completa) llevan
+  `data-mycen-theme` según el celular (`useStudioTheme` / `useStudioSurface` en `studio/lib/useStudioTheme.ts`, fondo con
+  `THEME_BG`); las `--st-*` de `studio.css` sólo traducen a `--my-*` (estados nuevos `--my-danger/ok/warn`). Barra móvil:
+  Inicio, Editar, Mis Spaces, Compartir, Más (la vista previa pasó a "Más"). Mis Spaces explica qué es un Space con
+  ejemplos y el link que tendría; un Space nuevo sigue por Apariencia. axe en los dos temas: `studio-theme.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

@@ -53,6 +53,11 @@ test('crear un Space desde Studio, editarlo y volver al principal', async ({ pag
   await installSupabaseMock(context, state, { signedIn: true })
   await page.goto('/studio/spaces')
 
+  // Qué es un Space, con ejemplos y el link que tendría
+  const explain = page.getByRole('region', { name: '¿Qué es un Space?' })
+  await expect(explain.getByRole('listitem')).toHaveText(['tu banda', 'tu emprendimiento', 'tu evento'])
+  await expect(explain.getByText(/\/ana\/nombre$/)).toBeVisible()
+
   await expect(page.getByRole('status').filter({ hasText: '1 de 5 Spaces' })).toBeVisible()
   await page.getByRole('button', { name: 'Nuevo Space' }).click()
   const drawer = page.getByRole('dialog', { name: 'Nuevo Space' })
@@ -65,12 +70,16 @@ test('crear un Space desde Studio, editarlo y volver al principal', async ({ pag
   await drawer.getByRole('combobox', { name: 'Tipo' }).selectOption('brand')
   await drawer.getByRole('button', { name: 'Crear Space' }).click()
 
-  await expect(page).toHaveURL(/\/studio\/identity$/)
+  // Un Space nuevo sigue por Apariencia
+  await expect(page).toHaveURL(/\/studio\/appearance$/)
+  await expect(page.getByRole('radiogroup', { name: 'Estructura' })).toBeVisible()
   const created = state.tables.profiles.find(p => p.space_slug === 'cafe-luna')
   expect(created).toMatchObject({ username: null, is_primary: false, display_name: 'Café Luna Estudio', purpose: 'brand', status: 'draft' })
 
   // Studio queda editando el Space nuevo, con su dirección
   const switcher = page.getByRole('combobox', { name: 'Space que estás editando' })
+  await expect(switcher).toHaveValue(String(created!.id))
+  await page.goto('/studio/identity')
   await expect(switcher).toHaveValue(String(created!.id))
   await page.getByRole('textbox', { name: 'Nombre' }).fill('Café Luna')
   await expect.poll(() => state.tables.profiles.find(p => p.id === created!.id)?.display_name).toBe('Café Luna')
@@ -148,4 +157,17 @@ test('cambiar la dirección de un Space secundario desde Ajustes', async ({ page
   // La analítica es la del Space abierto
   await page.goto('/studio/analytics')
   await expect.poll(() => state.rpcCalls.filter(c => c.fn === 'profile_traffic_sources').pop()?.args.p_profile_id).toBe('p-estudio')
+})
+
+test('en el celular, Mis Spaces está a un toque en la barra de abajo', async ({ page, context }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await installSupabaseMock(context, createState({ profiles: [profileRow()] }), { signedIn: true })
+  await page.goto('/studio')
+  const nav = page.getByRole('navigation', { name: 'Studio' }).last()
+  await nav.getByRole('link', { name: 'Mis Spaces' }).click()
+  await expect(page).toHaveURL(/\/studio\/spaces$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Mis Spaces' })).toBeVisible()
+  // La vista previa pasó a "Más"
+  await nav.getByRole('link', { name: 'Más' }).click()
+  await expect(page.getByRole('link', { name: 'Vista previa' })).toBeVisible()
 })

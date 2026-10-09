@@ -7,6 +7,7 @@ import type { PreviewSelect } from '@/modules/profile/components/ProfileView'
 import { useStudio } from '../StudioContext'
 import { useStudioT } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
+import { useStudioTheme } from '../lib/useStudioTheme'
 
 /**
  * Vista previa en vivo: se actualiza mientras se edita (no registra visitas).
@@ -98,6 +99,7 @@ function FullscreenPreview({ onClose }: { onClose: () => void }) {
   const [picked, setLang] = useState<ProfileLang | null>(null)
   const close = useRef<HTMLButtonElement>(null)
   const t = useStudioT().preview
+  const theme = useStudioTheme()
 
   useEffect(() => {
     close.current?.focus()
@@ -109,7 +111,7 @@ function FullscreenPreview({ onClose }: { onClose: () => void }) {
   }, [onClose])
 
   return createPortal(
-    <div className="st-fullscreen" role="dialog" aria-modal="true" aria-label={t.title}>
+    <div className="st-fullscreen" data-mycen-theme={theme} role="dialog" aria-modal="true" aria-label={t.title}>
       <button ref={close} type="button" className="st-fullscreen-close" onClick={onClose} aria-label={t.exitFullscreen}>
         <X size={20} aria-hidden="true" />
       </button>

@@ -578,6 +578,11 @@ const en: StudioDict = {
     slugIssue: { invalid: 'Use 2 to 40 lowercase letters, numbers or hyphens.', reserved: 'That address is reserved.', taken: 'You already have a Space with that address.' },
     manage: 'My Spaces',
     switcher: 'Space you are editing',
+    explainTitle: 'What is a Space?',
+    explainText: 'A separate page, with its own link, for something that isn\'t your main profile. For example:',
+    examples: ['your band', 'your small business', 'your event'],
+    exampleSlug: 'name',
+    exampleLink: 'Its link would be',
   },
   editor3: {
     open: 'Desktop editor',

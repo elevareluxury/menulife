@@ -72,6 +72,12 @@ test('registro → onboarding completo → perfil publicado (camino mínimo, cro
   await page.getByRole('button', { name: 'Ir a Studio' }).click()
   await expect(page).toHaveURL(/\/studio/)
   await expect(page.getByRole('heading', { level: 1, name: 'Ir a Studio' })).toHaveCount(0)
+  // Un usuario nuevo (sin negocio) nunca ve Mycen Business
+  await expect(page.getByRole('navigation', { name: 'Studio' }).last()).toBeVisible()
+  await expect(page.locator('a[href^="/dashboard"]')).toHaveCount(0)
+  await page.goto('/studio/more')
+  await expect(page.getByRole('link', { name: 'Vista previa' })).toBeVisible()
+  await expect(page.locator('a[href^="/dashboard"]')).toHaveCount(0)
 })
 
 test('se retoma donde quedó: un perfil creado sin terminar vuelve a la foto', async ({ page, context }) => {
