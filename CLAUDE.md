@@ -209,6 +209,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   "Generar otra" → `huella_salt`, con "Volver a la anterior" hasta publicar), portada (sólo Portada) y perfil vivo
   (`status_text`, `available`). Guarda siempre los valores nuevos del tema; vista previa en vivo al costado (≥ 1280 px) o
   en la misma página. Las opciones viejas (esquinas, fondo, tarjetas, tipografía, contraste) ya no están en la interfaz.
+- Onboarding (etapa 07a): `OnboardingWizard` en 7 pantallas — nombre, username, para qué (personal→credencial,
+  creador→portada, profesional→editorial, negocio→bento; crea el perfil con un `contact_form` y `onboarding_step` 3), foto
+  (se puede saltar), WhatsApp/Instagram (red social + acción principal; paso 4), el momento de la huella (Universo) y vista
+  previa → "Publicar perfil" (paso 5 + `publishSpace`). Si se corta, sigue donde quedó. E2E en `onboarding.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

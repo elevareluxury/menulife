@@ -63,7 +63,8 @@ export async function createSpace(userId: string, input: { slug: string; name: s
     default_locale: input.locale,
     status: 'draft',
     onboarding_step: 5,
-    theme: { mode: 'dark', accent: '#F1F0E9', title_font: 'geist' },
+    // V1: tema Universo, acento Plasma; la estructura la elige el onboarding según para qué es el perfil
+    theme: { layout: 'credencial', mode: 'universo', accent: 'plasma' },
   }).select('*').single()
   if (error) throw error
   return data as StudioProfile
@@ -111,7 +112,8 @@ export async function createProfile(userId: string, username: string, displayNam
     purpose: 'personal',
     status: 'draft',
     is_primary: true,
-    theme: { mode: 'dark', accent: '#F1F0E9', title_font: 'geist' },
+    // V1: tema Universo, acento Plasma; la estructura la elige el onboarding según para qué es el perfil
+    theme: { layout: 'credencial', mode: 'universo', accent: 'plasma' },
   }).select('*').single()
   if (error) throw error
   return data as StudioProfile
