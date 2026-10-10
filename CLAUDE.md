@@ -292,6 +292,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
 - Inicio de Studio con el perfil arriba (después de la etapa 15): tarjeta `.st-profile-hero` en `OverviewPage` (foto o
   huella, nombre, descriptor y dirección sobre la huella del perfil, con su acento), "Abrir perfil" (si está publicado) y
   "Editar identidad"; debajo siguen estado, link, Tu semana y pendientes.
+- Seguridad (auditoría V1, `docs/seguridad/auditoria-v1.md`): `super_admins` y `site_config` sólo para admins (sin
+  escritura desde la app), fotos sin listado público (cada cuenta lista su carpeta), CSP mínima en `vercel.json`.
+  Migración `20261023000001_security_hardening.sql`, tests en `tests/db/security.test.sql`.
+- Landing: las tarjetas de Business dicen "Próximamente" y no llevan a ningún lado (Business no está abierto en la V1).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

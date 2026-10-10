@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { UtensilsCrossed, ShoppingBag, CalendarDays } from 'lucide-react'
 import { useLandingT } from '@/i18n/app/landing'
 
@@ -12,7 +11,6 @@ const VERTICALS = [
   {
     Icon: UtensilsCrossed,
     key: 'food',
-    href: '/register',
     color: '#F4705A',
     bg: 'rgba(244,112,90,0.05)',
     border: 'rgba(244,112,90,0.18)',
@@ -20,7 +18,6 @@ const VERTICALS = [
   {
     Icon: ShoppingBag,
     key: 'retail',
-    href: '/register',
     color: '#3B82F6',
     bg: 'rgba(59,130,246,0.05)',
     border: 'rgba(59,130,246,0.18)',
@@ -28,7 +25,6 @@ const VERTICALS = [
   {
     Icon: CalendarDays,
     key: 'services',
-    href: '/register',
     color: '#8B5CF6',
     bg: 'rgba(139,92,246,0.05)',
     border: 'rgba(139,92,246,0.18)',
@@ -85,7 +81,7 @@ export function BusinessSection() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '24px',
         }}>
-          {VERTICALS.map(({ Icon, key, href, color, bg, border }) => ({ ...t[key], Icon, key, href, color, bg, border })).map(({ Icon, key, tag, title, features, cta, href, color, bg, border }) => (
+          {VERTICALS.map(({ Icon, key, color, bg, border }) => ({ ...t[key], Icon, key, color, bg, border })).map(({ Icon, key, tag, title, features, cta, color, bg, border }) => (
             <div
               key={key}
               data-biz-card
@@ -139,32 +135,14 @@ export function BusinessSection() {
                 ))}
               </div>
 
-              {/* CTA */}
-              <Link to={href} style={{ textDecoration: 'none' }}>
-                <button style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: '12px',
-                  border: `1px solid ${color}40`,
-                  background: `${color}10`,
-                  color,
-                  fontSize: '13px', fontWeight: 600,
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font-jakarta)',
-                  transition: 'all 0.2s',
-                }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = `${color}20`
-                    e.currentTarget.style.borderColor = `${color}80`
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = `${color}10`
-                    e.currentTarget.style.borderColor = `${color}40`
-                  }}
-                >
-                  {cta} →
-                </button>
-              </Link>
+              {/* Business todavía no está abierto en la V1: sólo se anuncia */}
+              <p style={{
+                width: '100%', padding: '12px', borderRadius: '12px', margin: 0, textAlign: 'center',
+                border: `1px dashed ${color}40`, color, fontSize: '13px', fontWeight: 600,
+                fontFamily: 'var(--font-jakarta)',
+              }}>
+                {cta}
+              </p>
             </div>
           ))}
         </div>
