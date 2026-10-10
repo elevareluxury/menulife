@@ -156,15 +156,32 @@ function template(name, email) {
 `
 }
 
+/** Supabase no acepta asuntos de más de 255 caracteres (se usa 250 por las dudas) */
+const SUBJECT_MAX = 250  // con un margen
+/** Idiomas del asunto por prioridad: español (sin locale), inglés (los que no entran) y después los demás */
+const SUBJECT_ORDER = ['es', 'en', 'pt', 'fr', 'it', 'de', 'ru', 'ar', 'hi', 'zh', 'ja', 'ko']
+
+/**
+ * Asunto con la misma regla de idioma que el cuerpo (Supabase también lo procesa como plantilla), pero compacto: entra
+ * cada idioma que quepa en 255 caracteres, en el orden de SUBJECT_ORDER; los que no entran reciben el asunto en inglés.
+ * El cuerpo del mail sigue en los 12 idiomas.
+ */
 function subject(email) {
-  // El asunto usa la misma regla (Supabase también procesa el asunto como plantilla)
-  return `{{ $l := "es" }}{{ with .Data }}{{ with .locale }}{{ $l = . }}{{ end }}{{ end }}` + byLang(l => email.text[l][0])
+  const head = '{{$l := "es"}}{{with .Data}}{{with .locale}}{{$l = .}}{{end}}{{end}}'
+  const build = langs => head + langs.map((l, i) => `{{${i ? 'else if' : 'if'} eq $l "${l}"}}${email.text[l][0]}`).join('')
+    + `{{else}}${email.text.en[0]}{{end}}`
+  // Español siempre (es el valor sin locale); el inglés va en el {{else}}
+  let langs = ['es']
+  for (const l of SUBJECT_ORDER.slice(2)) if (build([...langs, l]).length <= SUBJECT_MAX) langs = [...langs, l]
+  return build(langs)
 }
 
 const OUT = process.env.OUT_DIR || 'supabase/templates'
 mkdirSync(OUT, { recursive: true })
 const subjects = ['# Asuntos de los mails (Supabase → Authentication → Emails → Templates → Subject)', '',
-  'Generado por `scripts/build-email-templates.mjs`. Pegar cada línea en el campo "Subject" de su plantilla.', '']
+  'Generado por `scripts/build-email-templates.mjs`. Pegar cada línea en el campo "Subject" de su plantilla.',
+  'Supabase acepta hasta 255 caracteres: cada asunto lleva los idiomas que entran (español, inglés y los que alcancen);',
+  'el resto recibe el asunto en inglés. El cuerpo del mail sí está en los 12 idiomas.', '']
 for (const [name, email] of Object.entries(EMAILS)) {
   for (const l of LANGS) if (!email.text[l]) throw new Error(`${name}: falta ${l}`)
   writeFileSync(`${OUT}/${name}.html`, template(name, email))

@@ -30,4 +30,16 @@ describe('plantillas de mail', () => {
     const ends = (src.match(/\{\{ end \}\}/g) ?? []).length
     expect(ends).toBe(opens)
   })
+
+  it('los asuntos entran en el límite de Supabase (255) y caen en inglés para los idiomas que no entran', () => {
+    const md = readFileSync(join(DIR, 'asuntos.md'), 'utf8')
+    const subjects = md.split('```').filter((_, i) => i % 2).map(b => b.trim())
+    expect(subjects).toHaveLength(htmlFiles.length)
+    for (const s of subjects) {
+      expect(s.length).toBeLessThanOrEqual(255)
+      expect(s).toContain('{{with .Data}}{{with .locale}}')
+      expect(s).toContain('{{if eq $l "es"}}')
+      expect(s).toMatch(/\{\{else\}\}[^{]+\{\{end\}\}$/)   // los que no entran: inglés
+    }
+  })
 })
