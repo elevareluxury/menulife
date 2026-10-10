@@ -289,6 +289,9 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   Inicio de Studio, textos en `src/i18n/app/install.ts` (12 idiomas). Con la ventana del navegador (Chrome, Edge,
   Android) instala directo; en iPhone/iPad o Android sin esa ventana muestra los pasos; instalada, no aparece
   (`useInstallPWA`, `installMode`). E2E en `install.spec.ts`; `visual.spec.ts` la marca como instalada.
+- Inicio de Studio con el perfil arriba (después de la etapa 15): tarjeta `.st-profile-hero` en `OverviewPage` (foto o
+  huella, nombre, descriptor y dirección sobre la huella del perfil, con su acento), "Abrir perfil" (si está publicado) y
+  "Editar identidad"; debajo siguen estado, link, Tu semana y pendientes.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

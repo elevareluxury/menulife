@@ -10,9 +10,12 @@ import { useStudioT } from '@/i18n/app/studio'
 import { useEverywhereT } from '@/i18n/app/share/everywhere'
 import { InstallAppButton } from '@/components/ui/InstallAppButton'
 import { useCanAddToHome } from '@/hooks/useInstallPWA'
+import { Huella } from '@/design'
+import { huellaSeed } from '@/lib/huella'
+import { profileLook } from '@/modules/profile/lib/profileLook'
 
 export function OverviewPage() {
-  const { profile, modules, publicUrl, publish, publishing } = useStudio()
+  const { profile, modules, publicUrl, publish, publishing, handle } = useStudio()
   const { copied, copy } = useCopy()
   const t = useStudioT()
   const o = t.overview
@@ -33,12 +36,38 @@ export function OverviewPage() {
   ]
   const pendingItems = checklist.filter(c => !c.done)
   const isPublished = profile.status === 'published'
+  const look = profileLook(profile.theme)
+  const name = profile.display_name || handle
 
   return (
     <>
       <PageHeader title={o.title} subtitle={o.subtitle} actions={canAddToHome ? <InstallAppButton className="st-btn st-btn-ghost st-btn-sm" /> : undefined} />
 
       <section className="st-card">
+        {/* El perfil arriba de todo: foto (o la huella), nombre, qué hace y su dirección, sobre su huella */}
+        <div className="st-profile-hero" data-mycen-accent={look.accent}>
+          <div className="st-profile-hero-huella" aria-hidden="true">
+            <Huella seed={huellaSeed(profile)} variant={look.huellaVariant} />
+          </div>
+          <div className="st-profile-hero-avatar">
+            {profile.avatar_url
+              ? <img src={profile.avatar_url} alt="" width={72} height={72} />
+              : <Huella seed={huellaSeed(profile)} variant={look.huellaVariant} />}
+          </div>
+          <div className="st-profile-hero-text">
+            <h2>{name}</h2>
+            {profile.descriptor && <p>{profile.descriptor}</p>}
+            <p className="st-profile-hero-handle" dir="ltr">/{handle}</p>
+          </div>
+        </div>
+        <div className="st-row" style={{ marginBottom: 14 }}>
+          {isPublished && (
+            <a className="st-btn st-btn-primary st-btn-sm" href={publicUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink size={15} aria-hidden="true" /> {t.exchange.openProfile}
+            </a>
+          )}
+          <Link to="/studio/identity" className="st-btn st-btn-secondary st-btn-sm"><PenLine size={15} aria-hidden="true" /> {o.editIdentity}</Link>
+        </div>
         <div className="st-row" style={{ justifyContent: 'space-between', marginBottom: 14 }}>
           <StatusPill status={profile.status} />
           {!isPublished && (
@@ -62,7 +91,6 @@ export function OverviewPage() {
           </a>
         </div>
         <div className="st-row" style={{ marginTop: 14 }}>
-          <Link to="/studio/identity" className="st-btn st-btn-secondary st-btn-sm"><PenLine size={15} aria-hidden="true" /> {o.editIdentity}</Link>
           <Link to="/studio/exchange" className="st-btn st-btn-ghost st-btn-sm">{o.shareQr}</Link>
         </div>
         <div className="st-row" style={{ marginTop: 8 }}>
