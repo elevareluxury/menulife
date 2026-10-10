@@ -12,8 +12,6 @@ const ja: LandingDict = {
     subtitle: 'あなたを表すひとつのアドレス。あなたが誰で、何をしていて、どう連絡すればいいかを、リンクや QR コードですぐに共有できます。',
     cta: 'Mycen をつくる →',
     how: '使い方',
-    cardTitle: 'デジタルアイデンティティ、ビジネス、そして暮らし。すべてをひとつに。',
-    cardText: 'は公開プロフィール、パーソナルシステム、ビジネスプラットフォームをまとめます。アプリのインストールも、散らばったリンクも不要です。',
     badgePublished: '✨ プロフィールを公開',
     badgeUrl: 'mycen.id/your-name',
     badgeGoal: '🎯 目標達成',

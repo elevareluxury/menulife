@@ -20,8 +20,6 @@ const es = {
     subtitle: 'Una dirección que te representa: quién sos, lo que hacés y cómo contactarte, lista para compartir con un link o un QR.',
     cta: 'Creá tu Mycen →',
     how: 'Cómo funciona',
-    cardTitle: 'Tu identidad digital, tu negocio y tu vida. Todo en uno.',
-    cardText: 'reúne tu perfil público, tu sistema personal y tu plataforma de negocio, sin apps que instalar ni links dispersos.',
     badgePublished: '✨ Perfil publicado',
     badgeUrl: 'mycen.id/tu-nombre',
     badgeGoal: '🎯 Meta alcanzada',

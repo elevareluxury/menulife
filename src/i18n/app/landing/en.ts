@@ -12,8 +12,6 @@ const en: LandingDict = {
     subtitle: 'One address that represents you: who you are, what you do and how to reach you, ready to share with a link or a QR code.',
     cta: 'Create your Mycen →',
     how: 'How it works',
-    cardTitle: 'Your digital identity, your business and your life. All in one.',
-    cardText: 'brings together your public profile, your personal system and your business platform, with no apps to install and no scattered links.',
     badgePublished: '✨ Profile published',
     badgeUrl: 'mycen.id/your-name',
     badgeGoal: '🎯 Goal reached',
