@@ -29,7 +29,9 @@ for m in \
   20261019000001_v1_task_recurrence \
   20261020000001_v1_habits \
   20261021000001_v1_daily_review \
-  20261022000001_v1_product_events; do
+  20261022000001_v1_product_events \
+  20261023000001_security_hardening \
+  20261023000002_access_requests_admin; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

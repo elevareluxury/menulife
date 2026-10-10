@@ -14,6 +14,10 @@ grant execute on function auth.uid() to anon, authenticated;
 create schema storage;
 create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
 create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text, owner uuid);
+-- Como en Supabase: RLS activo y los roles de la API con permisos sobre la tabla (las políticas deciden)
+alter table storage.objects enable row level security;
+grant usage on schema storage to anon, authenticated;
+grant select, insert, update, delete on storage.objects to anon, authenticated;
 create function storage.foldername(name text) returns text[] language sql as $$ select string_to_array(name, '/') $$;
 -- Tablas de Mycen Business / Life OS que las migraciones de Identity referencian
 create table public.restaurants (
@@ -28,6 +32,22 @@ grant all on all tables in schema public to anon, authenticated;
 create table public.super_admins (
   id uuid primary key default gen_random_uuid(), user_id uuid not null unique references auth.users(id) on delete cascade,
   email text, created_at timestamptz default now(), updated_at timestamptz default now());
+-- Configuración de la landing (existe en producción; 20260601000004)
+create table public.site_config (
+  id uuid primary key default gen_random_uuid(), demo_link text not null default 'mailto:x', contact_link text not null default 'mailto:x',
+  created_at timestamptz default now(), updated_at timestamptz default now());
+alter table public.site_config enable row level security;
+create policy "Super admins manage site_config" on public.site_config for all to authenticated using (true) with check (true);
+insert into public.site_config default values;
+-- Solicitudes de acceso a Business (existe en producción; políticas de 20260609000002)
+create table public.access_requests (
+  id uuid primary key default gen_random_uuid(), name text not null, email text not null unique, business_name text not null,
+  phone text, city text, message text, status text not null default 'pending', reviewed_at timestamptz,
+  created_at timestamptz default now());
+alter table public.access_requests enable row level security;
+create policy authenticated_read_access_requests on public.access_requests for select to authenticated using (true);
+create policy authenticated_update_access_requests on public.access_requests for update to authenticated using (true) with check (true);
+create policy anon_insert_access_requests on public.access_requests for insert to anon with check (true);
 -- Life OS: Brain (tareas, ideas y notas), como en producción (20260615000001 + 20261005000001)
 create table public.life_brain_items (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,

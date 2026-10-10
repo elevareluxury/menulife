@@ -108,19 +108,19 @@ const es = {
       tag: 'Gastronomía',
       title: 'Digitalizá la experiencia de tus clientes.',
       features: ['Menú digital con QR, sin app', 'Pedidos y mesas', 'Pantalla de cocina', 'Delivery y take away'],
-      cta: 'Explorar Gastronomía',
+      cta: 'Próximamente',
     },
     retail: {
       tag: 'Comercio',
       title: 'Mostrá tus productos y vendé más.',
       features: ['Catálogo digital con fotos', 'Inventario', 'Punto de venta integrado', 'Estadísticas de ventas'],
-      cta: 'Explorar Comercio',
+      cta: 'Próximamente',
     },
     services: {
       tag: 'Servicios',
       title: 'Convertí visitas en clientes.',
       features: ['Agenda y turnos', 'Clientes', 'Membresías y paquetes', 'Presupuestos'],
-      cta: 'Explorar Servicios',
+      cta: 'Próximamente',
     },
   },
   testimonials: {
