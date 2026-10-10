@@ -52,7 +52,7 @@ export interface ProfileTheme {
   corners?: 'sharp' | 'soft' | 'round'
   background?: 'plain' | 'glow' | 'tint'
   card_style?: 'filled' | 'outline' | 'flat'
-  /** V1: 'plasma' | 'ion' | 'nebulosa' | 'aurora'. Antes, un color #RRGGBB (se lee el acento más cercano). */
+  /** V1: un nombre de MYCEN_ACCENTS (plasma, ion, nebulosa, aurora, sol, rosa, lima, luna, mono, grafito, pizarra, arena). Antes, un color #RRGGBB (se lee el acento más cercano). */
   accent?: string
   surface?: string
   title_font?: string

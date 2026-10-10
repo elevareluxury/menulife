@@ -193,7 +193,7 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `huellaSeed(profile)` = `id:huella_salt` (nunca el nombre). Componente `<Huella seed variant spin draw />` en `@/design`
   (decorativa, ids únicos por instancia; `draw` anima una máscara para no perder el punteado). Tests en `tests/unit/huella.test.ts`.
 - Perfil V1 (etapa 03): `profiles.theme` suma `layout` (credencial|portada|editorial|bento|clasica), `mode` (universo|amanecer),
-  `accent` (plasma|ion|nebulosa|aurora), `huella_variant` y `cover`; columnas `huella_salt` (va con la versión publicada),
+  `accent` (plasma|ion|nebulosa|aurora; después, 8 más), `huella_variant` y `cover`; columnas `huella_salt` (va con la versión publicada),
   `status_text` (≤ 60) y `available` (perfil vivo: `get_public_profile` los lee de la fila, sin volver a publicar). La base valida
   todo (`mycen_valid_profile_look`) y todavía acepta los valores viejos (dark/light/auto y #RRGGBB) hasta la etapa 06.
   `profileLook()` (`profile/lib/profileLook.ts`) interpreta lo viejo igual que `mycen_upgrade_theme` / `mycen_nearest_accent`
@@ -298,6 +298,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   Migraciones `20261023000001_security_hardening.sql` y `20261023000002_access_requests_admin.sql`, tests en
   `tests/db/security.test.sql`.
 - Landing: las tarjetas de Business dicen "Próximamente" y no llevan a ningún lado (Business no está abierto en la V1).
+- Acentos (después de la etapa 15): 12 (`MYCEN_ACCENTS` en `design/themes.ts` = `tokens.css`, un test compara): los 4
+  originales + sol, rosa, lima y los sobrios luna, mono, grafito, pizarra y arena. La base valida los nombres
+  (`20261024000001_v1_more_accents.sql`); la conversión de colores viejos sigue eligiendo entre los 4 originales.
+- "Poné tu Mycen en todos lados": sólo botones de copiar (general y uno por plataforma con `?src=`), sin pasos por app.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

@@ -2,7 +2,11 @@
 export const MYCEN_THEMES = ['universo', 'amanecer'] as const
 export type MycenTheme = (typeof MYCEN_THEMES)[number]
 
-export const MYCEN_ACCENTS = ['plasma', 'ion', 'nebulosa', 'aurora'] as const
+export const MYCEN_ACCENTS = [
+  'plasma', 'ion', 'nebulosa', 'aurora',
+  // Sumados después de la etapa 15: con color (sol, rosa, lima) y sobrios (luna, mono, grafito, pizarra, arena)
+  'sol', 'rosa', 'lima', 'luna', 'mono', 'grafito', 'pizarra', 'arena',
+] as const
 export type MycenAccent = (typeof MYCEN_ACCENTS)[number]
 
 /** Valores de cada acento por tema (los mismos de tokens.css; un test verifica que coincidan). Sirven donde no hay
@@ -12,6 +16,14 @@ export const ACCENT_COLORS: Record<MycenAccent, Record<MycenTheme, { accent: str
   ion:      { universo: { accent: '#7DD3FC', onAccent: '#05060F' }, amanecer: { accent: '#1D6FA5', onAccent: '#FFFFFF' } },
   nebulosa: { universo: { accent: '#C4B5FD', onAccent: '#05060F' }, amanecer: { accent: '#6D4AD1', onAccent: '#FFFFFF' } },
   aurora:   { universo: { accent: '#5EEAD4', onAccent: '#05060F' }, amanecer: { accent: '#0F7C6E', onAccent: '#FFFFFF' } },
+  sol:      { universo: { accent: '#FBBF24', onAccent: '#05060F' }, amanecer: { accent: '#9A5B05', onAccent: '#FFFFFF' } },
+  rosa:     { universo: { accent: '#F9A8D4', onAccent: '#05060F' }, amanecer: { accent: '#B0306E', onAccent: '#FFFFFF' } },
+  lima:     { universo: { accent: '#A3E635', onAccent: '#05060F' }, amanecer: { accent: '#4D7C0F', onAccent: '#FFFFFF' } },
+  luna:     { universo: { accent: '#E5E7EB', onAccent: '#05060F' }, amanecer: { accent: '#3F3F46', onAccent: '#FFFFFF' } },
+  mono:     { universo: { accent: '#F5F5F4', onAccent: '#05060F' }, amanecer: { accent: '#111111', onAccent: '#FFFFFF' } },
+  grafito:  { universo: { accent: '#A8A29E', onAccent: '#05060F' }, amanecer: { accent: '#57534E', onAccent: '#FFFFFF' } },
+  pizarra:  { universo: { accent: '#94A3B8', onAccent: '#05060F' }, amanecer: { accent: '#475569', onAccent: '#FFFFFF' } },
+  arena:    { universo: { accent: '#D6C7A1', onAccent: '#05060F' }, amanecer: { accent: '#6B5B3E', onAccent: '#FFFFFF' } },
 }
 
 /** Segundo color de la huella por tema (--my-secondary) */
