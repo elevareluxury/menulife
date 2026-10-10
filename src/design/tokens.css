@@ -123,6 +123,30 @@
 [data-mycen-theme='universo'][data-mycen-accent='aurora'], [data-mycen-theme='universo'] [data-mycen-accent='aurora'] {
   --my-accent: #5EEAD4; --my-on-accent: #05060F; --my-glow: rgba(94, 234, 212, 0.55);
 }
+[data-mycen-theme='universo'][data-mycen-accent='sol'], [data-mycen-theme='universo'] [data-mycen-accent='sol'] {
+  --my-accent: #FBBF24; --my-on-accent: #05060F; --my-glow: rgba(251,191,36, 0.55);
+}
+[data-mycen-theme='universo'][data-mycen-accent='rosa'], [data-mycen-theme='universo'] [data-mycen-accent='rosa'] {
+  --my-accent: #F9A8D4; --my-on-accent: #05060F; --my-glow: rgba(249,168,212, 0.55);
+}
+[data-mycen-theme='universo'][data-mycen-accent='lima'], [data-mycen-theme='universo'] [data-mycen-accent='lima'] {
+  --my-accent: #A3E635; --my-on-accent: #05060F; --my-glow: rgba(163,230,53, 0.55);
+}
+[data-mycen-theme='universo'][data-mycen-accent='luna'], [data-mycen-theme='universo'] [data-mycen-accent='luna'] {
+  --my-accent: #E5E7EB; --my-on-accent: #05060F; --my-glow: rgba(229,231,235, 0.35);
+}
+[data-mycen-theme='universo'][data-mycen-accent='mono'], [data-mycen-theme='universo'] [data-mycen-accent='mono'] {
+  --my-accent: #F5F5F4; --my-on-accent: #05060F; --my-glow: rgba(245,245,244, 0.35);
+}
+[data-mycen-theme='universo'][data-mycen-accent='grafito'], [data-mycen-theme='universo'] [data-mycen-accent='grafito'] {
+  --my-accent: #A8A29E; --my-on-accent: #05060F; --my-glow: rgba(168,162,158, 0.35);
+}
+[data-mycen-theme='universo'][data-mycen-accent='pizarra'], [data-mycen-theme='universo'] [data-mycen-accent='pizarra'] {
+  --my-accent: #94A3B8; --my-on-accent: #05060F; --my-glow: rgba(148,163,184, 0.35);
+}
+[data-mycen-theme='universo'][data-mycen-accent='arena'], [data-mycen-theme='universo'] [data-mycen-accent='arena'] {
+  --my-accent: #D6C7A1; --my-on-accent: #05060F; --my-glow: rgba(214,199,161, 0.35);
+}
 [data-mycen-theme='amanecer'], [data-mycen-theme='amanecer'] [data-mycen-accent='plasma'], [data-mycen-theme='amanecer'][data-mycen-accent='plasma'] {
   --my-accent: #C8431F; --my-on-accent: #FFFFFF; --my-glow: rgba(200, 67, 31, 0.40);
 }
@@ -134,6 +158,31 @@
 }
 [data-mycen-theme='amanecer'][data-mycen-accent='aurora'], [data-mycen-theme='amanecer'] [data-mycen-accent='aurora'] {
   --my-accent: #0F7C6E; --my-on-accent: #FFFFFF; --my-glow: rgba(15, 124, 110, 0.40);
+}
+
+[data-mycen-theme='amanecer'][data-mycen-accent='sol'], [data-mycen-theme='amanecer'] [data-mycen-accent='sol'] {
+  --my-accent: #9A5B05; --my-on-accent: #FFFFFF; --my-glow: rgba(154,91,5, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='rosa'], [data-mycen-theme='amanecer'] [data-mycen-accent='rosa'] {
+  --my-accent: #B0306E; --my-on-accent: #FFFFFF; --my-glow: rgba(176,48,110, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='lima'], [data-mycen-theme='amanecer'] [data-mycen-accent='lima'] {
+  --my-accent: #4D7C0F; --my-on-accent: #FFFFFF; --my-glow: rgba(77,124,15, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='luna'], [data-mycen-theme='amanecer'] [data-mycen-accent='luna'] {
+  --my-accent: #3F3F46; --my-on-accent: #FFFFFF; --my-glow: rgba(63,63,70, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='mono'], [data-mycen-theme='amanecer'] [data-mycen-accent='mono'] {
+  --my-accent: #111111; --my-on-accent: #FFFFFF; --my-glow: rgba(17,17,17, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='grafito'], [data-mycen-theme='amanecer'] [data-mycen-accent='grafito'] {
+  --my-accent: #57534E; --my-on-accent: #FFFFFF; --my-glow: rgba(87,83,78, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='pizarra'], [data-mycen-theme='amanecer'] [data-mycen-accent='pizarra'] {
+  --my-accent: #475569; --my-on-accent: #FFFFFF; --my-glow: rgba(71,85,105, 0.40);
+}
+[data-mycen-theme='amanecer'][data-mycen-accent='arena'], [data-mycen-theme='amanecer'] [data-mycen-accent='arena'] {
+  --my-accent: #6B5B3E; --my-on-accent: #FFFFFF; --my-glow: rgba(107,91,62, 0.40);
 }
 
 /* ── Cielo (§6): nebulosas o amanecer + estrellas como imagen (nunca elementos del DOM) ── */

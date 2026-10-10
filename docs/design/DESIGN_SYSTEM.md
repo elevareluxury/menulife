@@ -105,6 +105,17 @@ tema, calculada para que el texto del botón principal cumpla contraste AA.
 | Ion | `#7DD3FC` | `#05060F` | `#1D6FA5` | `#FFFFFF` |
 | Nebulosa | `#C4B5FD` | `#05060F` | `#6D4AD1` | `#FFFFFF` |
 | Aurora | `#5EEAD4` | `#05060F` | `#0F7C6E` | `#FFFFFF` |
+| Sol | `#FBBF24` | `#05060F` | `#9A5B05` | `#FFFFFF` |
+| Rosa | `#F9A8D4` | `#05060F` | `#B0306E` | `#FFFFFF` |
+| Lima | `#A3E635` | `#05060F` | `#4D7C0F` | `#FFFFFF` |
+| Luna (sobrio) | `#E5E7EB` | `#05060F` | `#3F3F46` | `#FFFFFF` |
+| Mono (sobrio) | `#F5F5F4` | `#05060F` | `#111111` | `#FFFFFF` |
+| Grafito (sobrio) | `#A8A29E` | `#05060F` | `#57534E` | `#FFFFFF` |
+| Pizarra (sobrio) | `#94A3B8` | `#05060F` | `#475569` | `#FFFFFF` |
+| Arena (sobrio) | `#D6C7A1` | `#05060F` | `#6B5B3E` | `#FFFFFF` |
+
+Sol a Arena se sumaron después de la etapa 15 (migración `20261024000001_v1_more_accents.sql`). En los sobrios el brillo
+de Universo baja al 35 %.
 
 `--my-on-accent` = texto sobre acento. `--my-glow` = el acento al 55 % (universo) o 40 %
 (amanecer), usado en el brillo bajo el botón principal y la credencial.

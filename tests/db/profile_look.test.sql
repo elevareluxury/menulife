@@ -26,6 +26,11 @@ do $$ begin
   assert mycen_upgrade_theme('{"mode": "auto"}') ->> 'mode' = 'universo';
   assert mycen_upgrade_theme('{"layout": "bento", "mode": "universo", "accent": "aurora"}')
        = '{"layout": "bento", "mode": "universo", "accent": "aurora"}', 'lo nuevo no cambia';
+  assert mycen_upgrade_theme('{"layout": "editorial", "mode": "amanecer", "accent": "mono"}')
+       = '{"layout": "editorial", "mode": "amanecer", "accent": "mono"}', 'los acentos sumados después tampoco';
+  assert mycen_valid_profile_look('{"accent": "arena"}') and mycen_valid_profile_look('{"accent": "sol"}'),
+    'los acentos nuevos son válidos';
+  assert not mycen_valid_profile_look('{"accent": "dorado"}'), 'un nombre desconocido no';
 end $$;
 
 -- ── Validación en la base ────────────────────────────────────────────────────

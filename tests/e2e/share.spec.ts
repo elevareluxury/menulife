@@ -36,7 +36,9 @@ test('Inicio sin visitas: invita a poner el link en las redes, sin inventar núm
   await expect(page).toHaveURL(/\/studio\/everywhere$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Poné tu Mycen en todos lados' })).toBeVisible()
   const platforms = page.getByRole('list', { name: 'Poné tu Mycen en todos lados' })
-  await expect(platforms.getByRole('heading', { level: 2 })).toHaveText(['Instagram', 'TikTok', 'LinkedIn', 'WhatsApp Business', 'WhatsApp', 'Firma de email'])
+  // Sólo botones de copiar, uno por plataforma (sin pasos por app)
+  await expect(platforms.getByRole('button')).toHaveText(['Instagram', 'TikTok', 'LinkedIn', 'WhatsApp Business', 'WhatsApp', 'Firma de email']
+    .map(n => `Copiar link para ${n}`))
 
   // Cada plataforma copia su link con ?src=, así se mide de dónde llegan
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])

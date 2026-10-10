@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { QR_COLORS, THEME_BG, THEME_TEXT } from '../../src/design/themes'
+import { ACCENT_COLORS, MYCEN_ACCENTS, QR_COLORS, THEME_BG, THEME_TEXT } from '../../src/design/themes'
 
 const css = readFileSync(join(__dirname, '../../src/design/tokens.css'), 'utf8')
 
@@ -139,10 +139,15 @@ describe('sistema de diseño: contraste (AA)', () => {
       }
     })
 
-    for (const name of ['plasma', 'ion', 'nebulosa', 'aurora']) {
+    for (const name of MYCEN_ACCENTS) {
       it(`${theme}/${name}: el texto de la acción principal se lee sobre el acento`, () => {
         const a = accent(theme, name)
         expect(contrast(parse(a.on), parse(a.accent))).toBeGreaterThanOrEqual(4.5)
+      })
+      it(`${theme}/${name}: themes.ts tiene los mismos valores que tokens.css`, () => {
+        const a = accent(theme, name)
+        const t = ACCENT_COLORS[name][theme as 'universo' | 'amanecer']
+        expect([t.accent, t.onAccent].map(x => x.toUpperCase())).toEqual([a.accent, a.on].map(x => x.trim().toUpperCase()))
       })
     }
   }

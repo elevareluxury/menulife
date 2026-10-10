@@ -4,15 +4,15 @@ import { APP_LANGS } from '../../src/i18n/app/languages'
 import { classifySource } from '../../src/modules/studio/lib/trafficSources'
 
 // "Poné tu Mycen en todos lados" (V1 · etapa 08): un archivo con los 12 idiomas, misma estructura que el español.
-describe('pasos por plataforma', () => {
-  it('cada idioma tiene todas las plataformas, con la misma cantidad de pasos que el español', () => {
+describe('copiar el link por plataforma', () => {
+  it('cada idioma nombra todas las plataformas y arma el texto de cada botón', () => {
     for (const lang of APP_LANGS) {
       const d = EVERYWHERE[lang]
       for (const p of PLATFORMS) {
         expect(d.names[p], `${lang}/${p}`).toBeTruthy()
-        expect(d.steps[p].length, `${lang}/${p}`).toBe(EVERYWHERE.es.steps[p].length)
-        for (const step of d.steps[p]) expect(step.trim().length, `${lang}/${p}`).toBeGreaterThan(5)
+        expect(d.copyFor(d.names[p]), `${lang}/${p}`).toContain(d.names[p])
       }
+      expect(d.note.trim(), lang).not.toBe('')
     }
   })
 
