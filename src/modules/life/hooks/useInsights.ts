@@ -4,19 +4,19 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useLocaleStore } from '@/store/localeStore'
 import { computeInsights, type Insight } from '../lib/insights'
-import { shiftDate } from '../lib/habitStreak'
+import { ALL_DAYS, frequencyOf, isDone, shiftDate } from '../lib/habitStreak'
+import { usePrefs } from '@/lib/prefs'
 import { useToday } from './useToday'
 
 // Las tablas de Life OS todavía no están en database.types.ts
 const db = supabase as unknown as SupabaseClient
-
-const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6]
 
 /** Lee los datos necesarios y calcula los insights en el dispositivo. */
 export function useInsights() {
   const { user } = useAuthStore()
   const mainCurrency = useLocaleStore(s => s.currency)
   const today = useToday()
+  const weekStart = usePrefs(st => st.week_start)
   const [insights, setInsights] = useState<Insight[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -30,8 +30,8 @@ export function useInsights() {
     const q = (table: string, cols: string) => db.from(table).select(cols).eq('user_id', user.id)
 
     void Promise.all([
-      q('life_habits', 'id,name,frequency,created_at').eq('is_active', true),
-      q('life_habit_logs', 'habit_id,completed_date').gte('completed_date', shiftDate(today, -55)),
+      q('life_habits', 'id,name,frequency,target_value,created_at').eq('is_active', true),
+      q('life_habit_logs', 'habit_id,completed_date,value').gte('completed_date', shiftDate(today, -55)),
       q('life_transactions', 'amount,currency,category,occurred_at').eq('type', 'expense').gte('occurred_at', prevMonthStart),
       q('life_goals', 'id,name,created_at').eq('status', 'in_progress'),
       q('life_goal_milestones', 'goal_id,is_completed,completed_at'),
@@ -42,14 +42,20 @@ export function useInsights() {
       if (cancelled) return
       const failed = [habits, logs, txs, goals, milestones, tasksDone, overdue].find(r => r.error)
       if (failed) { setError(true); setLoading(false); return }
-      type HabitRow = { id: string; name: string; frequency: { days?: number[] } | null; created_at: string }
+      type HabitRow = { id: string; name: string; frequency: unknown; target_value: number | null; created_at: string }
+      const habitRows = (habits.data ?? []) as unknown as HabitRow[]
+      // Con cantidad, el día cuenta sólo si llegó a la meta
+      const target = new Map(habitRows.map(h => [h.id, h.target_value]))
       setInsights(computeInsights({
-        today, mainCurrency,
-        habits: ((habits.data ?? []) as unknown as HabitRow[]).map(h => ({
-          id: h.id, name: h.name, created_at: h.created_at,
-          days: h.frequency?.days?.length ? h.frequency.days : ALL_DAYS,
-        })),
-        habitLogs: (logs.data ?? []) as unknown as { habit_id: string; completed_date: string }[],
+        today, mainCurrency, weekStart,
+        habits: habitRows.map(h => {
+          const f = frequencyOf(h.frequency)
+          return f.type === 'times_per_week'
+            ? { id: h.id, name: h.name, created_at: h.created_at, days: ALL_DAYS, times: f.times }
+            : { id: h.id, name: h.name, created_at: h.created_at, days: f.days }
+        }),
+        habitLogs: ((logs.data ?? []) as unknown as { habit_id: string; completed_date: string; value: number | null }[])
+          .filter(l => isDone(Number(l.value ?? 1), target.get(l.habit_id))),
         expenses: ((txs.data ?? []) as unknown as { amount: string; currency: string; category: string; occurred_at: string }[])
           .map(x => ({ ...x, amount: Number(x.amount) })),
         goals: (goals.data ?? []) as unknown as { id: string; name: string; created_at: string }[],
@@ -61,7 +67,7 @@ export function useInsights() {
       setLoading(false)
     }).catch(() => { if (!cancelled) { setError(true); setLoading(false) } })
     return () => { cancelled = true }
-  }, [user, today, mainCurrency])
+  }, [user, today, mainCurrency, weekStart])
 
   return { insights, loading, error }
 }

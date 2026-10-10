@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateStreak, doneInWeek, frequencyOf, isDone, isScheduledOn, shiftDate } from '../../src/modules/life/lib/habitStreak'
+import { calculateStreak, doneInWeek, frequencyOf, habitConsistency, isDone, isScheduledOn, shiftDate } from '../../src/modules/life/lib/habitStreak'
 
 // Rachas que perdonan (V1 · etapa 10). 2026-10-09 es viernes.
 const TODAY = '2026-10-09'
@@ -87,5 +87,27 @@ describe('cantidad y frecuencia', () => {
     expect(frequencyOf({ type: 'times_per_week', times: 9 })).toEqual(daily)
     expect(isScheduledOn({ type: 'times_per_week', times: 2 }, TODAY)).toBe(true)
     expect(isScheduledOn({ type: 'weekly', days: [1] }, TODAY)).toBe(false)
+  })
+})
+
+describe('constancia (Metas, Insights y Replay)', () => {
+  const set = (...d: string[]) => new Set(d)
+
+  it('"X veces por semana" espera X por semana, cuenta hasta X y la semana en curso sólo suma lo hecho', () => {
+    // Jueves 15/10/2026; semanas desde el lunes 28/9
+    const done = set('2026-09-28', '2026-09-29', '2026-09-30', '2026-10-01', '2026-10-06', '2026-10-13')
+    expect(habitConsistency(done, { type: 'times_per_week', times: 3 }, '2026-09-28', '2026-09-28', '2026-10-15', 1))
+      .toEqual({ done: 5, expected: 7 })
+  })
+
+  it('días programados: sólo los días que tocan, y hoy sin hacer no cuenta', () => {
+    const done = set('2026-10-12', '2026-10-14')
+    expect(habitConsistency(done, { type: 'weekly', days: [1, 2, 3, 4, 5] }, '2026-10-12', '2026-10-01', '2026-10-15'))
+      .toEqual({ done: 2, expected: 3 })
+  })
+
+  it('un mes pasado se mide hasta su último día, con la semana partida según los días que entran', () => {
+    expect(habitConsistency(set(), { type: 'times_per_week', times: 2 }, '2026-01-01', '2026-09-01', '2026-10-15', 1, '2026-09-30'))
+      .toEqual({ done: 0, expected: 10 })
   })
 })

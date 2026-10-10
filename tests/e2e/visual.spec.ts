@@ -87,8 +87,10 @@ for (const [scheme, theme] of [['dark', 'universo'], ['light', 'amanecer']] as c
       await page.clock.setFixedTime(NOW)
       await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' })
       await page.setViewportSize({ width: 390, height: 844 })
-      // Sin "bienvenida" ni "nuevos comienzos": la visita de ayer ya está anotada y el lunes ya se cerró
+      // Sin "bienvenida" ni "nuevos comienzos": la visita de ayer ya está anotada y el lunes ya se cerró. Sin
+      // "Agregar a inicio" (como si ya estuviera instalada): aparece o no según cuándo avisa el navegador
       await context.addInitScript(([uid, day]) => {
+        localStorage.setItem('mycen_pwa_installed', 'true')
         localStorage.setItem(`mycen.life.seen.${uid}`, day)
         localStorage.setItem(`mycen.life.fresh.${uid}`, day)
       }, [OWNER_ID, TODAY])

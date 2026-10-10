@@ -75,6 +75,46 @@ export function calculateStreak(done: Set<string>, frequency: HabitFrequency, to
   return streak
 }
 
+/**
+ * Constancia entre `from` y `end` (por defecto hoy; desde que existe el hábito): cumplidos sobre esperados.
+ *  · Días programados: cada día programado espera uno; hoy sin hacer no cuenta (el día no terminó).
+ *  · "X veces por semana": cada semana espera X (o los días que entren en el período, si son menos) y cuenta
+ *    hasta X cumplidos; la semana en curso sólo suma lo hecho, porque todavía hay tiempo.
+ */
+export function habitConsistency(
+  done: Set<string>, frequency: HabitFrequency, created: string, from: string, today: string, weekStart: 0 | 1 = 1,
+  end: string = today,
+): { done: number; expected: number } {
+  const start = created > from ? created : from
+  const last = end < today ? end : today
+  let n = 0
+  let expected = 0
+  if (frequency.type === 'times_per_week') {
+    const times = Math.min(7, Math.max(1, frequency.times))
+    const current = weekStartOf(today, weekStart)
+    for (let week = weekStartOf(start, weekStart); week <= last; week = shiftDate(week, 7)) {
+      let days = 0
+      let hits = 0
+      for (let i = 0; i < 7; i++) {
+        const d = shiftDate(week, i)
+        if (d < start || d > last) continue
+        days++
+        if (done.has(d)) hits++
+      }
+      const got = Math.min(times, days, hits)
+      n += got
+      expected += week === current ? got : Math.min(times, days)
+    }
+    return { done: n, expected }
+  }
+  for (let d = start; d <= last; d = shiftDate(d, 1)) {
+    if (!isScheduledOn(frequency, d)) continue
+    if (done.has(d)) { n++; expected++ }
+    else if (d !== today) expected++
+  }
+  return { done: n, expected }
+}
+
 /** ¿Le toca hoy? Los de "X veces por semana" se pueden hacer cualquier día. */
 export function isScheduledOn(frequency: HabitFrequency, key: string): boolean {
   if (frequency.type === 'times_per_week') return true

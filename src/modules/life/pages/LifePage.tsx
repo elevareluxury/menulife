@@ -25,6 +25,7 @@ import { useMoney } from '../hooks/useMoney'
 import { useToday } from '../hooks/useToday'
 import { getHabitIcon } from '../lib/lifePalette'
 import { useInsights } from '../hooks/useInsights'
+import { InstallAppButton } from '@/components/ui/InstallAppButton'
 import { InsightCard } from '../components/InsightCard'
 import { colors, font, fontDisplay, radius, shadow, fadeInUp, stagger, tint, ink } from '../design-system'
 import { FEATURES } from '@/lib/features'
@@ -493,6 +494,7 @@ export function LifePage() {
                 {t.home.myBusiness}
               </button>
             )}
+            <InstallAppButton iconOnly style={iconBtn} />
             <button type="button" onClick={() => setLangOpen(true)} aria-label={t.home.language} title={t.home.language}
               style={iconBtn}>
               <Globe size={16} aria-hidden="true" />

@@ -8,6 +8,8 @@ import { StatusPill } from '../components/shared'
 import { useCopy } from '../lib/useCopy'
 import { useStudioT } from '@/i18n/app/studio'
 import { useEverywhereT } from '@/i18n/app/share/everywhere'
+import { InstallAppButton } from '@/components/ui/InstallAppButton'
+import { useCanAddToHome } from '@/hooks/useInstallPWA'
 
 export function OverviewPage() {
   const { profile, modules, publicUrl, publish, publishing } = useStudio()
@@ -18,6 +20,7 @@ export function OverviewPage() {
   // V1 · etapa 05: mensajes sin leer del formulario de contacto
   const { count: unread } = useUnreadMessages()
   const hasForm = modules.some(m => m.type === 'contact_form' && !m.deleted_at)
+  const canAddToHome = useCanAddToHome()
 
 
   const activeModules = modules.filter(m => m.visibility === 'active')
@@ -33,7 +36,7 @@ export function OverviewPage() {
 
   return (
     <>
-      <PageHeader title={o.title} subtitle={o.subtitle} />
+      <PageHeader title={o.title} subtitle={o.subtitle} actions={canAddToHome ? <InstallAppButton className="st-btn st-btn-ghost st-btn-sm" /> : undefined} />
 
       <section className="st-card">
         <div className="st-row" style={{ justifyContent: 'space-between', marginBottom: 14 }}>
