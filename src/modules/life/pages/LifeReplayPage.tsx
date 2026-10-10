@@ -10,13 +10,15 @@ import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { colors, font, radius, tint } from '../design-system'
 import { dayKey } from '../hooks/useToday'
+import { frequencyOf, habitConsistency, isDone, isScheduledOn } from '../lib/habitStreak'
+import { usePrefs } from '@/lib/prefs'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
 
 // ── Datos del mes (todo con fechas reales del período) ───────────────────────
 
-interface HabitRow { id: string; name: string; frequency: { days?: number[] } | null; created_at: string }
+interface HabitRow { id: string; name: string; frequency: unknown; target_value: number | null; created_at: string }
 
 interface ReplaySummary {
   habitsScheduled: number
@@ -45,9 +47,7 @@ function daysOfMonth(year: number, month: number, until: string): string[] {
   return out
 }
 
-const weekday = (k: string) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d).getDay() }
-
-async function generateReplay(userId: string, year: number, month: number, mainCurrency: string): Promise<ReplaySummary> {
+async function generateReplay(userId: string, year: number, month: number, mainCurrency: string, weekStart: 0 | 1): Promise<ReplaySummary> {
   const pad = (n: number) => String(n).padStart(2, '0')
   const firstDay = `${year}-${pad(month)}-01`
   const nextFirst = new Date(year, month, 1)
@@ -58,8 +58,8 @@ async function generateReplay(userId: string, year: number, month: number, mainC
 
   const q = (table: string, cols: string) => db.from(table).select(cols).eq('user_id', userId)
   const [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, tasksRes, achRes] = await Promise.all([
-    q('life_habits', 'id,name,frequency,created_at').eq('is_active', true),
-    q('life_habit_logs', 'habit_id,completed_date').gte('completed_date', firstDay).lte('completed_date', lastDay),
+    q('life_habits', 'id,name,frequency,target_value,created_at').eq('is_active', true),
+    q('life_habit_logs', 'habit_id,completed_date,value').gte('completed_date', firstDay).lte('completed_date', lastDay),
     q('life_goal_milestones', 'id').gte('completed_at', fromIso).lt('completed_at', toIso),
     q('life_goals', 'id').eq('status', 'in_progress'),
     q('life_transactions', 'type,amount,currency').gte('occurred_at', fromIso).lt('occurred_at', toIso),
@@ -70,33 +70,29 @@ async function generateReplay(userId: string, year: number, month: number, mainC
   const failed = [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, achRes].find(r => r.error)
   if (failed) throw failed.error
 
-  // Hábitos: días programados del mes (desde que existe el hábito y hasta hoy) vs. días cumplidos
+  // Hábitos: lo cumplido sobre lo esperado en el mes (desde que existe el hábito y hasta hoy), con la misma regla que
+  // Hábitos: días programados o "X veces por semana", y con cantidad sólo los días que llegaron a la meta
   const habits: HabitRow[] = habitsRes.data ?? []
-  const logs: { habit_id: string; completed_date: string }[] = logsRes.data ?? []
+  const logs: { habit_id: string; completed_date: string; value: number | null }[] = logsRes.data ?? []
   const days = daysOfMonth(year, month, today)
   let scheduledTotal = 0
   let doneTotal = 0
   let top: { name: string; rate: number; done: number } | null = null
   let longestStreak = 0
   for (const h of habits) {
-    const sched = h.frequency?.days?.length ? h.frequency.days : [0, 1, 2, 3, 4, 5, 6]
-    const since = dayKey(new Date(h.created_at))
-    const done = new Set(logs.filter(l => l.habit_id === h.id).map(l => l.completed_date))
-    let scheduled = 0
+    const freq = frequencyOf(h.frequency)
+    const done = new Set(logs.filter(l => l.habit_id === h.id && isDone(Number(l.value ?? 1), h.target_value)).map(l => l.completed_date))
+    const c = habitConsistency(done, freq, dayKey(new Date(h.created_at)), firstDay, today, weekStart, lastDay)
     let streak = 0
     for (const d of days) {
-      if (d < since && !done.has(d)) continue
-      const isSched = sched.includes(weekday(d))
-      if (isSched) scheduled++
       if (done.has(d)) { streak++; longestStreak = Math.max(longestStreak, streak) }
-      else if (isSched && d !== today) streak = 0
+      else if (d !== today && freq.type !== 'times_per_week' && isScheduledOn(freq, d)) streak = 0
     }
-    const doneCount = days.filter(d => done.has(d)).length
-    scheduledTotal += scheduled
-    doneTotal += Math.min(doneCount, scheduled || doneCount)
-    if (doneCount > 0) {
-      const rate = scheduled ? doneCount / scheduled : 1
-      if (!top || rate > top.rate || (rate === top.rate && doneCount > top.done)) top = { name: h.name, rate, done: doneCount }
+    scheduledTotal += c.expected
+    doneTotal += c.done
+    if (c.done > 0) {
+      const rate = c.expected ? c.done / c.expected : 1
+      if (!top || rate > top.rate || (rate === top.rate && c.done > top.done)) top = { name: h.name, rate, done: c.done }
     }
   }
 
@@ -197,21 +193,22 @@ export function LifeReplayPage() {
   const r = t.replay
   const locale = langLocale(useAppLang(s => s.lang))
   const currency = useLocaleStore(s => s.currency)
+  const weekStart = usePrefs(st => st.week_start)
   const { user } = useAuthStore()
   const now = new Date()
   const [cursor, setCursor] = useState({ y: now.getFullYear(), m: now.getMonth() + 1 })
   const [attempt, setAttempt] = useState(0)
-  const key = `${cursor.y}-${cursor.m}-${currency}-${attempt}`
+  const key = `${cursor.y}-${cursor.m}-${currency}-${weekStart}-${attempt}`
   const [result, setResult] = useState<{ key: string; summary: ReplaySummary | null; error: boolean } | null>(null)
 
   useEffect(() => {
     if (!user) return
     let alive = true
-    generateReplay(user.id, cursor.y, cursor.m, currency)
+    generateReplay(user.id, cursor.y, cursor.m, currency, weekStart)
       .then(summary => { if (alive) setResult({ key, summary, error: false }) })
       .catch(() => { if (alive) setResult({ key, summary: null, error: true }) })
     return () => { alive = false }
-  }, [user, cursor, currency, key])
+  }, [user, cursor, currency, weekStart, key])
 
   const loading = result?.key !== key
   const summary = result?.summary ?? null

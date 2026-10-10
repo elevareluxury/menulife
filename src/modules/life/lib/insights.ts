@@ -1,4 +1,4 @@
-import { shiftDate } from '../lib/habitStreak'
+import { habitConsistency, shiftDate } from '../lib/habitStreak'
 import { dayKey } from '../hooks/useToday'
 
 // Insights: patrones calculados sólo con los datos reales del usuario.
@@ -7,8 +7,10 @@ import { dayKey } from '../hooks/useToday'
 export interface InsightData {
   today: string                 // YYYY-MM-DD local
   mainCurrency: string
-  habits: { id: string; name: string; days: number[]; created_at: string }[]
-  habitLogs: { habit_id: string; completed_date: string }[]   // últimos 56 días
+  /** `times` = hábito de "X veces por semana" (entonces `days` no se usa) */
+  habits: { id: string; name: string; days: number[]; times?: number; created_at: string }[]
+  habitLogs: { habit_id: string; completed_date: string }[]   // últimos 56 días, sólo los días cumplidos
+  weekStart?: 0 | 1
   expenses: { amount: number; currency: string; category: string; occurred_at: string }[] // desde el 1° del mes anterior
   goals: { id: string; name: string; created_at: string }[]   // en curso
   milestones: { goal_id: string; is_completed: boolean; completed_at: string | null }[]
@@ -48,9 +50,22 @@ export function scheduledRows(
     .filter(r => r.date !== today || r.done)
 }
 
+/** Sólo hábitos con días programados: los de "X veces por semana" no tienen días que comparar */
 function scheduledDays(data: InsightData, windowDays: number) {
   const logs = new Set(data.habitLogs.map(l => `${l.habit_id}|${l.completed_date}`))
-  return data.habits.map(h => ({ habit: h, rows: scheduledRows(h, d => logs.has(`${h.id}|${d}`), data.today, windowDays) }))
+  return data.habits.filter(h => !h.times)
+    .map(h => ({ habit: h, rows: scheduledRows(h, d => logs.has(`${h.id}|${d}`), data.today, windowDays) }))
+}
+
+/** Constancia de los últimos 30 días de cada hábito (cumplidos sobre esperados, misma regla que Hábitos) */
+function last30Days(data: InsightData) {
+  const from = shiftDate(data.today, -29)
+  return data.habits.map(h => {
+    const done = new Set(data.habitLogs.filter(l => l.habit_id === h.id).map(l => l.completed_date))
+    const freq = h.times ? { type: 'times_per_week' as const, times: h.times } : { type: 'weekly' as const, days: h.days }
+    const c = habitConsistency(done, freq, dayKey(new Date(h.created_at)), from, data.today, data.weekStart ?? 1)
+    return { name: h.name, done: c.done, scheduled: c.expected }
+  })
 }
 
 export function computeInsights(data: InsightData): Insight[] {
@@ -69,9 +84,8 @@ export function computeInsights(data: InsightData): Insight[] {
     if (days >= 14) out.push({ kind: 'goalStalled', goalId: g.id, name: g.name, days })
   }
 
-  // Hábitos: últimos 30 días (al menos 8 días programados)
-  const last30 = scheduledDays(data, 30).filter(x => x.rows.length >= 8)
-    .map(x => ({ name: x.habit.name, done: x.rows.filter(r => r.done).length, scheduled: x.rows.length }))
+  // Hábitos: últimos 30 días (al menos 8 cumplimientos esperados)
+  const last30 = last30Days(data).filter(x => x.scheduled >= 8)
   const low = last30.filter(x => x.done / x.scheduled < 0.5).sort((a, b) => a.done / a.scheduled - b.done / b.scheduled)[0]
   if (low) out.push({ kind: 'habitLow', ...low })
 

@@ -282,6 +282,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   falla se ignora). Panel `/super-admin/producto` (`ProductTab`) con `admin_product_metrics(days)`: mediana hasta
   publicar, % publicadas, retención de Life OS por cohorte semanal (día 1, días 7–13, días 30–36), hábito 4+ días por
   semana, tasa de regreso y registros por referido. Privacidad: "Uso de la app" (12 idiomas). E2E en `metrics.spec.ts`.
+- Constancia de hábitos (Metas, Insights, Replay): `habitConsistency` (`lib/habitStreak.ts`), la misma regla que Hábitos:
+  días programados, o "X veces por semana" por semana (hasta X; la semana en curso sólo suma lo hecho), y con cantidad sólo
+  los días que llegaron a la meta (`isDone`).
+- "Agregar a inicio" (después de la etapa 15): `InstallAppButton` (`src/components/ui/`) en el encabezado de Mi día y del
+  Inicio de Studio, textos en `src/i18n/app/install.ts` (12 idiomas). Con la ventana del navegador (Chrome, Edge,
+  Android) instala directo; en iPhone/iPad o Android sin esa ventana muestra los pasos; instalada, no aparece
+  (`useInstallPWA`, `installMode`). E2E en `install.spec.ts`; `visual.spec.ts` la marca como instalada.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea
