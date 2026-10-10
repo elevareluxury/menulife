@@ -12,8 +12,6 @@ const ko: LandingDict = {
     subtitle: '나를 보여주는 하나의 주소. 내가 누구인지, 무엇을 하는지, 어떻게 연락하면 되는지 링크나 QR 코드로 바로 공유하세요.',
     cta: '나의 Mycen 만들기 →',
     how: '이용 방법',
-    cardTitle: '디지털 아이덴티티, 비즈니스, 그리고 일상. 모두 하나로.',
-    cardText: '는 공개 프로필, 개인 시스템, 비즈니스 플랫폼을 하나로 모읍니다. 설치할 앱도, 흩어진 링크도 없습니다.',
     badgePublished: '✨ 프로필 게시됨',
     badgeUrl: 'mycen.id/your-name',
     badgeGoal: '🎯 목표 달성',

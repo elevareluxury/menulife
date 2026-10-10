@@ -12,8 +12,6 @@ const zh: LandingDict = {
     subtitle: '一个代表你的地址：你是谁、你做什么、怎么联系你，用一个链接或二维码就能分享。',
     cta: '创建你的 Mycen →',
     how: '如何使用',
-    cardTitle: '你的数字身份、你的生意和你的生活，合而为一。',
-    cardText: '把你的公开主页、个人系统和商业平台整合在一起，无需安装应用，也不再有零散的链接。',
     badgePublished: '✨ 主页已发布',
     badgeUrl: 'mycen.id/your-name',
     badgeGoal: '🎯 目标达成',

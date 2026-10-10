@@ -12,8 +12,6 @@ const pt: LandingDict = {
     subtitle: 'Um endereço que representa você: quem você é, o que faz e como falar com você, pronto para compartilhar com um link ou um QR code.',
     cta: 'Crie seu Mycen →',
     how: 'Como funciona',
-    cardTitle: 'Sua identidade digital, seu negócio e sua vida. Tudo em um.',
-    cardText: 'reúne seu perfil público, seu sistema pessoal e sua plataforma de negócios, sem apps para instalar nem links espalhados.',
     badgePublished: '✨ Perfil publicado',
     badgeUrl: 'mycen.id/seu-nome',
     badgeGoal: '🎯 Meta alcançada',

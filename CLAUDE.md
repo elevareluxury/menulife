@@ -115,7 +115,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   keyframes sólo dentro de `prefers-reduced-motion: no-preference`); lo verifica `landing.spec.ts`.
   Rendimiento del scroll: animar sólo `transform`/`opacity` (nada de `box-shadow`, `left`, `background-position` o `filter`
   en bucle), las secciones fuera de pantalla quedan en pausa (`.ml-paused`), el canvas del hero se detiene cuando no se ve
-  y no usar `scroll-behavior: smooth` en `<html>` (traba el hero fijado por ScrollTrigger; las anclas se mueven por JS).
+  y no usar `scroll-behavior: smooth` en `<html>` (las anclas se mueven por JS). El hero es una sola pantalla (sin tarjeta fijada).
   Acentos de títulos: Geist sin cursiva (no hay cursiva cargada) con degradé fijo (`.ml-shine`, `.ch-line2`).
 - `manualChunks` sólo agrupa supabase y react: agrupar recharts/framer a mano arrastraba dependencias a todas las páginas.
 - Presupuesto de peso: `npm run check:budget` (después de `npm run build`, también en CI) mide JS+CSS gzip de perfil,

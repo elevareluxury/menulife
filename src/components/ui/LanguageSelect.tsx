@@ -14,7 +14,8 @@ export function LanguageSelect({ label }: { label: string }) {
     }}>
       <span aria-hidden="true">{lang.toUpperCase()}</span>
       <select value={lang} aria-label={label} onChange={e => setLocalLanguage(e.target.value as AppLang)}
-        style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%' }}>
+        // La lista que abre el navegador hereda el color del texto: sin esto, quedaba blanco sobre blanco
+        style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', color: 'CanvasText', backgroundColor: 'Canvas' }}>
         {APP_LANGS.map(code => <option key={code} value={code} lang={code}>{LANG_INFO[code].native}</option>)}
       </select>
     </label>
