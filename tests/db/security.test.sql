@@ -5,6 +5,7 @@ insert into auth.users values
   ('aaaaaaaa-0000-0000-0000-000000000001', 'ana@x'),
   ('cccccccc-0000-0000-0000-000000000003', 'admin@x');
 insert into public.super_admins (user_id, email) values ('cccccccc-0000-0000-0000-000000000003', 'admin@x');
+insert into public.access_requests (name, email, business_name, phone) values ('Beto', 'beto@x', 'Bar', '+54 9 11');
 insert into storage.objects (bucket_id, name) values
   ('profile-media', 'aaaaaaaa-0000-0000-0000-000000000001/a.webp'),
   ('profile-media', 'cccccccc-0000-0000-0000-000000000003/c.webp');
@@ -25,6 +26,14 @@ do $$ begin
     insert into site_config (demo_link) values ('https://malo.example');
     assert false, 'una cuenta común no agrega site_config';
   exception when insufficient_privilege then null; end;
+  assert (select count(*) from access_requests) = 0, 'una cuenta común no lee las solicitudes de acceso';
+  update access_requests set status = 'approved';
+  assert not found, 'una cuenta común no aprueba solicitudes';
+  insert into access_requests (name, email, business_name) values ('Ana', 'ana@x', 'Estudio');
+  begin
+    insert into access_requests (name, email, business_name, status) values ('Ana', 'ana2@x', 'Estudio', 'approved');
+    assert false, 'nadie se manda una solicitud ya aprobada';
+  exception when insufficient_privilege then null; end;
   assert (select count(*) from storage.objects where bucket_id = 'profile-media') = 1, 'sólo lista sus fotos';
   assert (select name from storage.objects where bucket_id = 'profile-media') like 'aaaaaaaa-%', 'y son las suyas';
 end $$;
@@ -39,6 +48,7 @@ do $$ begin
     assert false, 'el visitante no lee super_admins';
   exception when insufficient_privilege then null; end;
   assert (select count(*) from storage.objects where bucket_id = 'profile-media') = 0, 'el visitante no lista fotos';
+  insert into access_requests (name, email, business_name) values ('Caro', 'caro@x', 'Tienda');
 end $$;
 reset role;
 
@@ -49,6 +59,9 @@ do $$ begin
   assert (select count(*) from super_admins) = 1, 'el admin ve la lista';
   update site_config set demo_link = 'https://mycen.id/demo';
   assert found, 'el admin cambia site_config';
+  assert (select count(*) from access_requests) = 3, 'el admin ve las solicitudes';
+  update access_requests set status = 'approved' where email = 'beto@x';
+  assert found, 'el admin aprueba';
 end $$;
 reset role;
 

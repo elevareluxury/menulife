@@ -294,7 +294,9 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   "Editar identidad"; debajo siguen estado, link, Tu semana y pendientes.
 - Seguridad (auditoría V1, `docs/seguridad/auditoria-v1.md`): `super_admins` y `site_config` sólo para admins (sin
   escritura desde la app), fotos sin listado público (cada cuenta lista su carpeta), CSP mínima en `vercel.json`.
-  Migración `20261023000001_security_hardening.sql`, tests en `tests/db/security.test.sql`.
+  `access_requests`: el formulario público sólo crea solicitudes nuevas; leerlas y aprobarlas, sólo admins.
+  Migraciones `20261023000001_security_hardening.sql` y `20261023000002_access_requests_admin.sql`, tests en
+  `tests/db/security.test.sql`.
 - Landing: las tarjetas de Business dicen "Próximamente" y no llevan a ningún lado (Business no está abierto en la V1).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 

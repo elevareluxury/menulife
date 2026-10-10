@@ -39,6 +39,15 @@ create table public.site_config (
 alter table public.site_config enable row level security;
 create policy "Super admins manage site_config" on public.site_config for all to authenticated using (true) with check (true);
 insert into public.site_config default values;
+-- Solicitudes de acceso a Business (existe en producción; políticas de 20260609000002)
+create table public.access_requests (
+  id uuid primary key default gen_random_uuid(), name text not null, email text not null unique, business_name text not null,
+  phone text, city text, message text, status text not null default 'pending', reviewed_at timestamptz,
+  created_at timestamptz default now());
+alter table public.access_requests enable row level security;
+create policy authenticated_read_access_requests on public.access_requests for select to authenticated using (true);
+create policy authenticated_update_access_requests on public.access_requests for update to authenticated using (true) with check (true);
+create policy anon_insert_access_requests on public.access_requests for insert to anon with check (true);
 -- Life OS: Brain (tareas, ideas y notas), como en producción (20260615000001 + 20261005000001)
 create table public.life_brain_items (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,

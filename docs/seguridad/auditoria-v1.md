@@ -3,10 +3,11 @@
 Fecha: octubre de 2026. Alcance: base de datos (RLS, funciones RPC, almacenamiento), página pública, Studio, Life OS,
 funciones Edge de Vercel (`api/`) y configuración de la web. Business queda afuera (sólo se anotan cosas vistas al pasar).
 
-## Arreglado en esta revisión (migración `20261023000001_security_hardening.sql`)
+## Arreglado en esta revisión (migraciones `20261023000001_security_hardening.sql` y `20261023000002_access_requests_admin.sql`)
 
 | Gravedad | Hallazgo | Arreglo |
 |---|---|---|
+| Alta | `access_requests` (solicitudes de acceso a Business): cualquier cuenta podía **leer todas** (nombre, email, teléfono, ciudad) y aprobarlas o rechazarlas; la pantalla de admin sólo se escondía en la app. | Leer, cambiar y borrar: sólo super-admins (`20261023000002_access_requests_admin.sql`). El formulario público sigue enviando, sólo solicitudes nuevas. |
 | Alta | `site_config`: la política "Super admins manage site_config" era `using (true)`. Cualquier cuenta podía leer y cambiar los links de demo/contacto y el negocio de prueba. | Sólo super-admins (`mycen_is_admin()`). |
 | Alta (a confirmar en producción) | `super_admins` se creó desde el panel de Supabase: no hay migración que garantice RLS. Si alguna cuenta pudiera escribirla, podría hacerse admin. | RLS activo, sin escritura desde la app, cada cuenta ve sólo su fila (los admins, la lista). |
 | Media | Fotos (`profile-media`): la lectura pública permitía **listar** los archivos de todas las cuentas. | El bucket sigue público por URL; listar, sólo la carpeta propia. |
