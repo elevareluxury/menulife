@@ -61,13 +61,16 @@ end $$;
 reset role;
 
 -- ── Datos de una cohorte para el panel ──────────────────────────────────────
+-- Hace 50 días (y no 40): el panel muestra el "mes 1" recién cuando toda la semana de la cohorte llegó al día 36,
+-- así que con 40 días el resultado dependía del día de la semana en que corre el test.
 delete from product_events where user_id = 'bbbbbbbb-0000-0000-0000-000000000002';
 insert into product_events (user_id, event, props, created_at) values
-  ('bbbbbbbb-0000-0000-0000-000000000002', 'signup_completed', '{}', now() - interval '40 days'),
-  ('bbbbbbbb-0000-0000-0000-000000000002', 'profile_published', '{"seconds": 600}', now() - interval '40 days'),
-  ('bbbbbbbb-0000-0000-0000-000000000002', 'life_my_day_opened', '{}', now() - interval '40 days'),
-  ('bbbbbbbb-0000-0000-0000-000000000002', 'life_my_day_opened', '{}', now() - interval '39 days'),
-  ('bbbbbbbb-0000-0000-0000-000000000002', 'habit_logged', '{}', now() - interval '32 days');
+  ('bbbbbbbb-0000-0000-0000-000000000002', 'signup_completed', '{}', now() - interval '50 days'),
+  ('bbbbbbbb-0000-0000-0000-000000000002', 'profile_published', '{"seconds": 600}', now() - interval '50 days'),
+  ('bbbbbbbb-0000-0000-0000-000000000002', 'life_my_day_opened', '{}', now() - interval '50 days'),
+  ('bbbbbbbb-0000-0000-0000-000000000002', 'life_my_day_opened', '{}', now() - interval '49 days'),   -- día 1
+  ('bbbbbbbb-0000-0000-0000-000000000002', 'habit_logged', '{}', now() - interval '42 days'),         -- día 8
+  ('bbbbbbbb-0000-0000-0000-000000000002', 'habit_logged', '{}', now() - interval '17 days');         -- día 33
 insert into product_events (user_id, event, created_at)
   select 'bbbbbbbb-0000-0000-0000-000000000002', 'habit_logged', now() - make_interval(days => d) from generate_series(0, 4) d;
 
@@ -82,11 +85,11 @@ do $$ declare m jsonb; c jsonb; begin
   assert (m ->> 'returned_users')::int = 1, 'una persona volvió';
   assert (m ->> 'referral_signups')::int = 1 and m -> 'referrals' -> 0 ->> 'ref' = 'beto', 'registros por referido';
   select x into c from jsonb_array_elements(m -> 'retention') x
-   where (x ->> 'week')::date = date_trunc('week', (now() - interval '40 days')::date)::date;
-  assert (c ->> 'users')::int = 1, 'cohorte de hace 40 días';
+   where (x ->> 'week')::date = date_trunc('week', (now() - interval '50 days')::date)::date;
+  assert (c ->> 'users')::int = 1, 'cohorte de hace 50 días';
   assert (c ->> 'd1')::int = 1, 'volvió al día siguiente';
   assert (c ->> 'd7')::int = 1, 'y en la primera semana (día 8)';
-  assert (c ->> 'd30')::int = 1, 'y al mes (día 40)';
+  assert (c ->> 'd30')::int = 1, 'y al mes (día 33)';
 end $$;
 reset role;
 
