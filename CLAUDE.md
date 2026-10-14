@@ -101,6 +101,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   No hay Life Score (la tabla `life_score` es legado; no se escribe más).
 - Insights (`/life/insights`, `lib/insights.ts`): reglas sobre datos reales calculadas en el dispositivo; cada una exige
   un mínimo de datos y si no alcanza no se muestra. El inicio destaca uno (no repite las vencidas).
+  Insights y "Tu mes" (`/life/replay`) están prendidos desde antes del freeze (`FEATURES` en `src/lib/features.ts`);
+  E2E en `insights-replay.spec.ts`. "Tu mes" no muestra un 0 de logros (sin culpa).
 - Datos de Life OS (Ajustes → Tus datos, `lib/lifeData.ts`): exportar JSON completo y CSV de Dinero; borrar sólo Life OS
   (cuenta, perfil y ajustes quedan). La cuenta entera se exporta/borra desde Studio → Ajustes.
 - Sin conexión: el + guarda en una cola local (`lib/outbox.ts`, id generado en el cliente, upsert sin duplicar) y se sube
