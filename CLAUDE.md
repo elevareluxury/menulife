@@ -298,6 +298,9 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `access_requests`: el formulario público sólo crea solicitudes nuevas; leerlas y aprobarlas, sólo admins.
   Migraciones `20261023000001_security_hardening.sql` y `20261023000002_access_requests_admin.sql`, tests en
   `tests/db/security.test.sql`.
+  Auditoría total (antes del freeze): metas sólo propias en Life OS (trigger `life_check_goal_owner`,
+  `20261026000001_life_goal_owner.sql`), aviso de "sin conexión" en 12 idiomas (`src/i18n/app/offline.ts`) y recorrido de
+  todas las pantallas en `smoke-routes.spec.ts` (sin errores, sin pantalla de error, sin scroll de costado).
 - Landing: las tarjetas de Business dicen "Próximamente" y no llevan a ningún lado (Business no está abierto en la V1).
 - Acentos (después de la etapa 15): 12 (`MYCEN_ACCENTS` en `design/themes.ts` = `tokens.css`, un test compara): los 4
   originales + sol, rosa, lima y los sobrios luna, mono, grafito, pizarra y arena. La base valida los nombres

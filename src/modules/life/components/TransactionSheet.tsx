@@ -77,7 +77,8 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
         ...form,
         amount,
         description: form.description?.trim() || undefined,
-        occurred_at: new Date(form.occurred_at + 'T12:00:00').toISOString(),
+        // Fecha vacía o inválida (se borró el campo): hoy
+        occurred_at: new Date(`${/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO()}T12:00:00`).toISOString(),
       })
       onClose()
     } catch { setError(t.common.saveError) }

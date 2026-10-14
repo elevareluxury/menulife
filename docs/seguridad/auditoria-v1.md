@@ -38,11 +38,31 @@ Tests: `tests/db/security.test.sql`. Vuelta atrás: `docs/v1/sql/seguridad_rollb
 3. **Security Advisor** (Advisors → Security): correrlo después de aplicar la migración y revisar lo que marque.
 4. Confirmar que no queden tablas sin RLS ni políticas abiertas (consulta en el resumen del PR).
 
-## Bajo riesgo, anotado (V1.1)
+## Auditoría total previa al freeze (octubre de 2026)
 
-- Life OS: una tarea, hábito o movimiento podría apuntar con `goal_id` a una meta de otra cuenta (no se puede leer ni
-  cambiar esa meta; el id es un UUID imposible de adivinar). Agregar el chequeo como en `life_tasks`.
-- `profile_messages`: el dueño puede editar el texto de los mensajes que recibió (sólo los suyos). Limitar a `read_at`.
+Recorrido automático de 35 pantallas (Studio, Life OS, perfil público, proyecto, landing, acceso y legales) con datos
+variados y sin datos, en 390 y 1280 px y en los dos temas: sin errores, sin pantalla de "Algo salió mal" y sin
+desplazamiento de costado. Queda como prueba permanente en `tests/e2e/smoke-routes.spec.ts`.
+
+| Gravedad | Hallazgo | Arreglo |
+|---|---|---|
+| Alta | Después de cada publicación, la app abierta pedía partes de la versión anterior: abrir Analítica (u otra pantalla no cargada) caía en "Algo salió mal". | Se recarga sola una vez (`src/lib/staleChunk.ts`), PR #62. |
+| Media | `react-router` 7.15 con avisos de seguridad (redirección abierta con `\`, entre otros). | Actualizado a 7.18.4. |
+| Baja | Life OS: se podía vincular una tarea, idea, hábito, movimiento, paso o check-in a una meta de otra cuenta. | Trigger `life_check_goal_owner` (`20261026000001_life_goal_owner.sql`), tests en `tests/db/life_goal_owner.test.sql`. |
+| Baja | El aviso de "sin conexión" estaba sólo en español (también en perfiles públicos) y aparecía dos veces. | 12 idiomas (`src/i18n/app/offline.ts`), un solo aviso. `offline.spec.ts`. |
+| Baja | Dinero: borrar la fecha de un movimiento daba "No se pudo guardar". | Fecha vacía = hoy. |
+| Baja | Analítica: dos módulos borrados repetían la clave de React. | Una sola fila "Módulo eliminado" (PR #62). |
+| — | 16 archivos viejos sin uso (check-in semanal, filtros y buscador de Brain, banners de instalación, etc.). | Borrados. |
+
+Revisado y bien: `profile_messages` ya limitaba al dueño a cambiar sólo `read_at` (permiso por columna); todas las
+funciones `security definer` fijan `search_path`; todas las tablas nuevas tienen RLS; no hay `console.log` ni secretos
+en el código; el almacenamiento local siempre está protegido con `try`.
+
+## Pendiente (fuera de la V1)
+
+- `@vercel/og` trae `sharp` con avisos de seguridad. La imagen al compartir corre en Edge y no usa `sharp`; pasar a
+  `@vercel/og` 1.x (cambio grande) en la V1.1.
+- `pdfjs-dist` (importar el menú en PDF, sólo Business): actualizar a la 6.x antes de abrir Business.
 
 ## Business (fuera de alcance, para revisar aparte)
 
