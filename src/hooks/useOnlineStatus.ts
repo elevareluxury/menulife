@@ -1,35 +1,23 @@
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 
-export function useOnlineStatus() {
-  const [isOnline, setIsOnline]   = useState(navigator.onLine)
-  const [wasOffline, setWasOffline] = useState(false)
+/** Sigue la conexión del dispositivo. Con `backMessage`, al volver muestra un aviso breve. */
+export function useOnlineStatus(backMessage?: string) {
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
     const goOnline = () => {
       setIsOnline(true)
-      if (wasOffline) {
-        toast.success('✅ Conexión restaurada', { id: 'online-status' })
-        setWasOffline(false)
-      }
+      if (backMessage) toast.success(backMessage, { id: 'online-status' })
     }
-
-    const goOffline = () => {
-      setIsOnline(false)
-      setWasOffline(true)
-      toast.error('📡 Sin conexión — modo offline', {
-        id: 'online-status',
-        duration: Infinity,
-      })
-    }
-
-    window.addEventListener('online',  goOnline)
+    const goOffline = () => setIsOnline(false)
+    window.addEventListener('online', goOnline)
     window.addEventListener('offline', goOffline)
     return () => {
-      window.removeEventListener('online',  goOnline)
+      window.removeEventListener('online', goOnline)
       window.removeEventListener('offline', goOffline)
     }
-  }, [wasOffline])
+  }, [backMessage])
 
-  return { isOnline, wasOffline }
+  return { isOnline }
 }
