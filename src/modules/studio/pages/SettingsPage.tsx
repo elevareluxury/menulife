@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Download, History, Trash2 } from 'lucide-react'
+import { BadgeCheck, Download, History, Trash2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
 import { deleteMyAccount, exportMyData, friendlyError, loadVersions, updateProfile } from '../lib/studioApi'
@@ -14,6 +14,7 @@ import { useStudioT } from '@/i18n/app/studio'
 import { APP_LANGS, LANG_INFO, isAppLang, langLocale, type AppLang } from '@/i18n/app/languages'
 import { useAppLang } from '@/i18n/app/store'
 import { savePrefs, usePrefs } from '@/lib/prefs'
+import { useVerification } from '../lib/useVerification'
 
 export function SettingsPage() {
   const { profile, patchProfile, userId, business, publish, publishing } = useStudio()
@@ -67,6 +68,8 @@ export function SettingsPage() {
         <p className="st-help" style={{ margin: 0 }}>{st.profileLanguageHelp}</p>
       </section>
 
+      <VerificationSection userId={userId} />
+
       <PrivacySection userId={userId} hasBusiness={!!business} />
 
       {confirmPause && (
@@ -78,6 +81,59 @@ export function SettingsPage() {
           onCancel={() => setConfirmPause(false)} />
       )}
     </>
+  )
+}
+
+// ── Verificación ──────────────────────────────────────────────────────────
+
+/** Pedir el tilde de cuenta verificada: lo revisa un super-admin (/super-admin/verificaciones) */
+function VerificationSection({ userId }: { userId: string }) {
+  const v = useStudioT().settings.verification
+  const { verified, last, loaded, request } = useVerification(userId)
+  const [message, setMessage] = useState('')
+  const [link, setLink] = useState('')
+  const [sending, setSending] = useState(false)
+  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
+
+  if (!loaded) return null
+  const pending = !verified && last?.status === 'pending'
+  const canRequest = !verified && !pending
+
+  async function send() {
+    setSending(true)
+    const r = await request(message, link)
+    setSending(false)
+    if (r === 'ok') { setMessage(''); setLink(''); setNotice({ ok: true, text: v.sent }); return }
+    setNotice({ ok: false, text: r === 'limited' ? v.limited : r === 'pending' ? v.pending : r === 'verified' ? v.verified : v.invalid })
+  }
+
+  return (
+    <section className="st-card st-stack" aria-labelledby="st-verification-title">
+      <h2 id="st-verification-title" className="st-card-title" style={{ margin: 0 }}>{v.title}</h2>
+      {verified ? (
+        <p className="st-row" style={{ margin: 0 }}><BadgeCheck size={18} aria-hidden="true" style={{ color: 'var(--my-accent)' }} /> {v.verified}</p>
+      ) : pending ? (
+        <p style={{ margin: 0 }} role="status">{v.pending}</p>
+      ) : (
+        <>
+          <p className="st-help" style={{ margin: 0 }}>{v.help}</p>
+          {last?.status === 'rejected' && (
+            <p style={{ margin: 0 }}>{v.rejected}{last.admin_note && <> <strong>{v.note}</strong> {last.admin_note}</>}</p>
+          )}
+        </>
+      )}
+      {canRequest && (
+        <>
+          <TextField label={v.message} value={message} onChange={setMessage} multiline maxLength={1000} required
+            placeholder={v.placeholder} />
+          <TextField label={v.link} value={link} onChange={setLink} type="url" inputMode="url" maxLength={300}
+            help={v.linkHelp} placeholder="https://" />
+          <Button variant="primary" loading={sending} disabled={message.trim().length < 10} onClick={() => { void send() }}
+            style={{ alignSelf: 'flex-start' }}>{v.send}</Button>
+        </>
+      )}
+      {notice && <p role="status" style={{ margin: 0, color: notice.ok ? 'var(--my-ok)' : 'var(--my-danger)' }}>{notice.text}</p>}
+    </section>
   )
 }
 

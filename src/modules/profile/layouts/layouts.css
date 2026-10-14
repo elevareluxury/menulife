@@ -144,3 +144,7 @@
 .mp-form-error { margin: 0; font-weight: 600; color: var(--my-text); }
 .mp-form-note { margin: 0; font-size: var(--my-fs-small); color: var(--my-muted); text-align: center; }
 .mp-form-done { margin: 8px 0 14px; font-size: var(--my-fs-lead); }
+
+/* Tilde de cuenta verificada junto al nombre (después de la etapa 15): acento del perfil, mismo alto que el texto */
+.my-profile .mp-verified { display: inline-flex; vertical-align: -0.08em; margin-inline-start: 0.22em; color: var(--my-accent); }
+.my-profile .mp-verified svg { width: 0.72em; height: 0.72em; }

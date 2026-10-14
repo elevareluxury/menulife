@@ -84,6 +84,8 @@ export interface PublicProfile {
   /** Perfil vivo (V1): estado actual (≤ 60) y "Disponible". Se ven sin volver a publicar. */
   status_text?: string | null
   available?: boolean
+  /** Cuenta verificada por Mycen (get_public_profile; todos los Spaces de la identidad) */
+  verified?: boolean
   primary_action: PrimaryAction | null
   default_locale: string
   translations: Translations

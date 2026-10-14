@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo, useRef } from 'react'
 import type { ComponentType, LazyExoticComponent } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, Globe, Share2, UserPlus } from 'lucide-react'
+import { BadgeCheck, Calendar, Globe, Share2, UserPlus } from 'lucide-react'
 import { huellaSeed } from '@/lib/huella'
 import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
 import { fetchContactCard, trackProfileEvent } from '../lib/profileApi'
@@ -146,6 +146,11 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   }
 
   const avatarSrc = safeHref(profile.avatar_url)
+  const verifiedBadge = profile.verified ? (
+    <span className="mp-verified" role="img" aria-label={t.verified} title={t.verified}>
+      <BadgeCheck aria-hidden="true" />
+    </span>
+  ) : null
   const statusText = profile.status_text?.trim()
   const chips = (statusText || profile.available || open != null) ? (
     <ul className="mp-chips">
@@ -220,6 +225,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
       </ul>
     ) : null,
     chips,
+    verifiedBadge,
     primary: primaryNode,
     secondary: secondaryNode,
     blocks: rendered,

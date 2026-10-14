@@ -22,7 +22,7 @@ export default function Portada(p: LayoutParts) {
           <div className="mp-cover-fade" aria-hidden="true" />
           <div className="mp-cover-body">
             {p.hasAvatar && <div className="mp-avatar mp-cover-avatar my-enter-item" style={{ '--my-i': 0 } as React.CSSProperties}>{p.avatar}</div>}
-            <h1 className="mp-name mp-cover-name my-enter-item" style={{ '--my-i': 1 } as React.CSSProperties}>{p.name}</h1>
+            <h1 className="mp-name mp-cover-name my-enter-item" style={{ '--my-i': 1 } as React.CSSProperties}>{p.name}{p.verifiedBadge}</h1>
             {p.descriptor && <p className="mp-descriptor">{p.descriptor}</p>}
             {p.chips}
             <div className="mp-actions my-enter-item" style={{ '--my-i': 2 } as React.CSSProperties}>

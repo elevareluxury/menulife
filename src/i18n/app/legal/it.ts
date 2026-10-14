@@ -89,6 +89,7 @@ const it: LegalDict = {
         '**Messaggi del modulo di contatto:** il nome, il contatto (email o WhatsApp) e il messaggio lasciati da un visitatore. Li vede solo la persona proprietaria del profilo, in Studio; non vengono pubblicati né inviati per email. Per evitare abusi usiamo un identificatore anonimo che cambia ogni giorno, senza IP né dati del dispositivo.',
         '**Inviti:** se crei il tuo account da “Crea la tua identità” sul profilo di un’altra persona, salviamo quale profilo ti ha portato e il suo tipo, per capire come cresce Mycen. Quella persona non vede i tuoi dati.',
         '**Uso dell’app:** per capire se Mycen funziona, salviamo eventi d’uso (per esempio, che hai pubblicato il profilo, aperto “La mia giornata” o segnato un’abitudine) con il tuo account, la data e dati brevi come la struttura scelta o un numero di giorni. Non salviamo mai il contenuto di attività, abitudini, note o messaggi. Non usiamo servizi di analisi di terze parti.',
+        '**Verifica dell’account:** se richiedi la spunta di account verificato, conserviamo il tuo messaggio, il link che ci indichi e la risposta. Li vede solo il team di Mycen per esaminare la richiesta; se viene approvata, il tuo profilo mostra la spunta.',
         '**Errori tecnici:** quando qualcosa non funziona, conserviamo il messaggio di errore, la schermata, la versione di Mycen e il browser (per esempio "Chrome 128 · Android"), senza IP né dati personali, per poterlo correggere.',
       ] },
     ] },

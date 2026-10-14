@@ -33,7 +33,7 @@ export default function Credencial(p: LayoutParts) {
             <div className="mp-avatar mp-cred-avatar">{p.avatar}</div>
             <CredentialQr url={`${p.profileUrl}?src=qr`} />
           </div>
-          <h1 className="mp-name mp-cred-name">{p.name}</h1>
+          <h1 className="mp-name mp-cred-name">{p.name}{p.verifiedBadge}</h1>
           {p.descriptor && <p className="mp-descriptor">{p.descriptor}</p>}
           {p.chips}
           {p.tags}

@@ -16,6 +16,7 @@ import { TesterTab }         from '@/modules/super-admin/pages/TesterTab'
 import { ReportsTab }        from '@/modules/super-admin/pages/ReportsTab'
 import { ErrorsTab }         from '@/modules/super-admin/pages/ErrorsTab'
 import { ProductTab }        from '@/modules/super-admin/pages/ProductTab'
+import { VerificationsTab }  from '@/modules/super-admin/pages/VerificationsTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
@@ -44,6 +45,7 @@ export function SuperAdminPage() {
         <Route index                    element={<SuperDashboard />} />
         <Route path="solicitudes"       element={<AccessRequestsTab />} />
         <Route path="denuncias"         element={<ReportsTab />} />
+        <Route path="verificaciones"    element={<VerificationsTab />} />
         <Route path="errores"           element={<ErrorsTab />} />
         <Route path="producto"          element={<ProductTab />} />
         <Route path="negocios"          element={<RestaurantsTab />} />

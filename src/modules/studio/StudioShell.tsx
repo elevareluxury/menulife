@@ -25,6 +25,7 @@ import { useUnreadMessages } from './lib/useUnreadMessages'
 import { referralFromMetadata } from '@/lib/referral'
 import './studio.css'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
+import { useVerification } from './lib/useVerification'
 
 type NavKey = keyof StudioDict['nav']
 
@@ -346,6 +347,8 @@ function StudioReady({ userId, initial, switchSpace }: {
     profile.username, profile.space_slug])
   const primaryUsername = primarySpace(spaces)?.username ?? profile.username ?? ''
   const handle = spaceHandle(profile, primaryUsername)
+  // Tilde de cuenta verificada en la vista previa (igual que en la página pública)
+  const { verified } = useVerification(userId)
   const reloadSpaces = useCallback(async () => { setSpaceList(await loadMySpaces(userId)) }, [userId])
 
   const value = useMemo<StudioContextValue>(() => ({
@@ -372,7 +375,7 @@ function StudioReady({ userId, initial, switchSpace }: {
     projects,
     setProjects,
     publicUrl: `${publicBaseUrl()}/${handle}`,
-    previewProfile: toPublicProfile(profile, modules, initial.business, projects, handle),
+    previewProfile: { ...toPublicProfile(profile, modules, initial.business, projects, handle), verified },
     spaces,
     handle,
     primaryUsername,
@@ -380,7 +383,7 @@ function StudioReady({ userId, initial, switchSpace }: {
     reloadSpaces,
   }), [userId, profile, modules, projects, setProjects, initial.business, saveState, saveError, patchProfile, flush, setModules,
       conflict, publishState, publishing, publishError, publish, restoreVersion, undo, redo, historyCounts,
-      spaces, handle, primaryUsername, switchSpace, reloadSpaces])
+      spaces, handle, primaryUsername, switchSpace, reloadSpaces, verified])
 
   const theme = useStudioTheme()
   // El editor de escritorio (Fase 11) tiene su propia vista previa y usa todo el ancho

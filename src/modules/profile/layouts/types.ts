@@ -19,6 +19,8 @@ export interface LayoutParts {
   /** Semilla de la huella (huellaSeed) */
   seed: string
   name: string
+  /** Tilde de cuenta verificada, para poner junto al nombre (null si no está verificada) */
+  verifiedBadge: ReactNode | null
   descriptor: string
   bio: string
   /** Foto (o la inicial del nombre si no hay) */

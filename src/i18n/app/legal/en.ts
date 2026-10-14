@@ -89,6 +89,7 @@ const en: LegalDict = {
         '**Contact form messages:** the name, contact (email or WhatsApp) and message a visitor leaves. Only the profile owner sees them, in Studio; they are not published or emailed. To prevent abuse we use an anonymous identifier that changes every day, with no IP or device data.',
         '**Invitations:** if you create your account from “Create your identity” on someone else’s profile, we save which profile brought you and its type, to understand how Mycen grows. That person can’t see your data.',
         '**App usage:** to know whether Mycen works, we save usage events (for example, that you published your profile, opened “My day” or checked off a habit) with your account, the date and short details such as the layout you chose or a number of days. We never save the content of your tasks, habits, notes or messages. We don’t use third-party analytics services.',
+        '**Account verification:** if you request the verified-account check mark, we store your message, the link you give us and our reply. Only the Mycen team sees them, to review the request; if it’s approved, your profile shows the check mark.',
         '**Technical errors:** when something fails, we store the error message, the screen, the Mycen version and the browser (for example, "Chrome 128 · Android"), without IP or personal data, so we can fix it.',
       ] },
     ] },
