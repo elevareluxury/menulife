@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { LifeSheet, LifeButton, colors, font, radius, ink } from '../design-system'
 import type { Habit } from '../hooks/useHabits'
 import { useLifeT } from '@/i18n/app/life'
+import { anchorLabel } from '../lib/habitAnchor'
 
 // Hábitos con cantidad, "X veces por semana" y ancla (V1 · etapa 10). Los usan Hábitos y "Tu día".
 
@@ -38,7 +39,7 @@ export function QuantityButton({ habit, onAdd, size = 44 }: { habit: Habit; onAd
 export function HabitMeta({ habit }: { habit: Habit }) {
   const p = useLifeT().habitPlus
   const items: string[] = []
-  if (habit.anchor) items.push(p.afterAnchor(habit.anchor))
+  if (habit.anchor) items.push(anchorLabel(habit.anchor, p.afterAnchor))
   if (habit.target_value != null) items.push(p.progress(habit.todayValue, habit.target_value, habit.unit ?? ''))
   if (habit.frequency.type === 'times_per_week') items.push(p.weekProgress(habit.weekCount, habit.frequency.times))
   if (!items.length) return null

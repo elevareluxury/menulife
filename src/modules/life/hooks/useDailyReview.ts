@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -30,8 +30,12 @@ function prioritiesOf(v: unknown): Priority[] {
     .slice(0, MAX_PRIORITIES)
 }
 
-/** "Mi día" de una fecha local: prioridades, reflexión y si ya se cerró. */
-export function useDailyReview(date: string) {
+/**
+ * "Mi día" de una fecha local: prioridades, reflexión y si ya se cerró.
+ * `liveTaskIds` (las tareas que existen, cuando ya cargaron): una prioridad cuya tarea se borró o archivó no ocupa
+ * lugar entre las 3 y se descarta al agregar otra.
+ */
+export function useDailyReview(date: string, liveTaskIds?: ReadonlySet<string> | null) {
   const { user } = useAuthStore()
   const [review, setReview] = useState<DailyReview>({ date, priorities: [], reflection: null, closed_at: null })
   const [loading, setLoading] = useState(true)
@@ -68,18 +72,22 @@ export function useDailyReview(date: string) {
     if (err) { setReview(prev); throw err }
   }, [user, date, review])
 
+  const livePriorities = useMemo(
+    () => (liveTaskIds ? review.priorities.filter(p => p.kind === 'text' || liveTaskIds.has(p.task_id)) : review.priorities),
+    [review.priorities, liveTaskIds])
+
   const addTaskPriority = useCallback((taskId: string) => {
-    if (review.priorities.length >= MAX_PRIORITIES || review.priorities.some(p => p.kind === 'task' && p.task_id === taskId)) return Promise.resolve()
-    trackEvent('life_priorities_set', { count: review.priorities.length + 1 })
-    return save({ priorities: [...review.priorities, { id: newId(), kind: 'task', task_id: taskId }] })
-  }, [review, save])
+    if (livePriorities.length >= MAX_PRIORITIES || livePriorities.some(p => p.kind === 'task' && p.task_id === taskId)) return Promise.resolve()
+    trackEvent('life_priorities_set', { count: livePriorities.length + 1 })
+    return save({ priorities: [...livePriorities, { id: newId(), kind: 'task', task_id: taskId }] })
+  }, [livePriorities, save])
 
   const addTextPriority = useCallback((text: string) => {
     const clean = text.trim().slice(0, 200)
-    if (!clean || review.priorities.length >= MAX_PRIORITIES) return Promise.resolve()
-    trackEvent('life_priorities_set', { count: review.priorities.length + 1 })
-    return save({ priorities: [...review.priorities, { id: newId(), kind: 'text', text: clean, done: false }] })
-  }, [review, save])
+    if (!clean || livePriorities.length >= MAX_PRIORITIES) return Promise.resolve()
+    trackEvent('life_priorities_set', { count: livePriorities.length + 1 })
+    return save({ priorities: [...livePriorities, { id: newId(), kind: 'text', text: clean, done: false }] })
+  }, [livePriorities, save])
 
   const removePriority = useCallback((id: string) => save({ priorities: review.priorities.filter(p => p.id !== id) }), [review, save])
 
@@ -94,5 +102,5 @@ export function useDailyReview(date: string) {
     return save({ reflection: reflection?.trim().slice(0, 280) || null, closed_at: new Date().toISOString() })
   }, [save])
 
-  return { review, loading, error, addTaskPriority, addTextPriority, removePriority, toggleTextPriority, closeDay }
+  return { review, livePriorities, loading, error, addTaskPriority, addTextPriority, removePriority, toggleTextPriority, closeDay }
 }
