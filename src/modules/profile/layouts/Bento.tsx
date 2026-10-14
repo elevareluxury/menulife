@@ -11,7 +11,7 @@ export default function Bento(p: LayoutParts) {
           <div className="mp-bento-id">
             <div className="mp-avatar mp-bento-avatar">{p.avatar}</div>
             <div>
-              <h1 className="mp-name mp-bento-name">{p.name}</h1>
+              <h1 className="mp-name mp-bento-name">{p.name}{p.verifiedBadge}</h1>
               {p.descriptor && <p className="mp-descriptor">{p.descriptor}</p>}
             </div>
           </div>

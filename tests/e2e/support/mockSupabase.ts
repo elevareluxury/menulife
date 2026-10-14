@@ -322,6 +322,8 @@ function publicProfile(state: MockState, handle: string, isOwner: boolean): unkn
     is_owner: isOwner, business: null,
     // V1: perfil vivo (de la fila, sin volver a publicar)
     status_text: p.status_text ?? null, available: !!p.available,
+    // Verificación de cuenta: en el mock se marca en la fila del perfil (en la base, identities.verified_at)
+    verified: !!p.verified,
     modules: resolveModules(state, { ...p, username }, base.modules as Row[]),
   }
 }
@@ -524,6 +526,18 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
       const errors = state.tables.app_errors ?? []
       return { open: errors.filter(e => e.status === 'open').length, new_today: errors.length, affected_today: errors.reduce((n, e) => n + Number(e.affected_today ?? 0), 0) }
+    }
+    // ── Verificación de cuenta ──
+    case 'request_verification': {
+      if (!isOwner) throw new Error('NOT_AUTHENTICATED')
+      const list = state.tables.verification_requests ?? (state.tables.verification_requests = [])
+      const message = String(args.p_message ?? '').trim()
+      const link = args.p_link == null ? null : String(args.p_link)
+      if (message.length < 10 || message.length > 1000 || (link && !/^https:\/\//.test(link))) return 'invalid'
+      if ((state.tables.identities ?? []).some(i => i.user_id === OWNER_ID && i.verified_at)) return 'verified'
+      if (list.some(r => r.user_id === OWNER_ID && r.status === 'pending')) return 'pending'
+      list.push({ id: `v${list.length + 1}`, user_id: OWNER_ID, message, link, status: 'pending', admin_note: null, created_at: new Date().toISOString() })
+      return 'ok'
     }
     // ── Métricas de producto (V1 · etapa 14) ──
     case 'track_product_event': {

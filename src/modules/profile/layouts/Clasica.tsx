@@ -14,7 +14,7 @@ export default function Clasica(p: LayoutParts) {
             <Huella seed={p.seed} variant={p.look.huellaVariant} spin draw className="mp-cl-huella" />
             <div className="mp-avatar">{p.avatar}</div>
           </div>
-          <h1 className="mp-name my-enter-item" style={{ '--my-i': 1 } as React.CSSProperties}>{p.name}</h1>
+          <h1 className="mp-name my-enter-item" style={{ '--my-i': 1 } as React.CSSProperties}>{p.name}{p.verifiedBadge}</h1>
           {p.descriptor && <p className="mp-descriptor my-enter-item" style={{ '--my-i': 2 } as React.CSSProperties}>{p.descriptor}</p>}
           {p.chips}
           {p.tags}

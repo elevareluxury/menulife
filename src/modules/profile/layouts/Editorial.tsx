@@ -10,7 +10,7 @@ export default function Editorial(p: LayoutParts) {
         <section className="mp-header mp-ed-header">
           <Huella seed={p.seed} variant={p.look.huellaVariant} spin draw className="mp-ed-huella" />
           {p.hasAvatar && <div className="mp-avatar mp-ed-avatar">{p.avatar}</div>}
-          <h1 className="mp-name mp-ed-name my-enter-item" style={{ '--my-i': 0 } as React.CSSProperties}>{p.name}</h1>
+          <h1 className="mp-name mp-ed-name my-enter-item" style={{ '--my-i': 0 } as React.CSSProperties}>{p.name}{p.verifiedBadge}</h1>
           {p.descriptor && <p className="mp-ed-descriptor my-enter-item" style={{ '--my-i': 1 } as React.CSSProperties}>{p.descriptor}</p>}
           {p.chips}
           {p.tags}

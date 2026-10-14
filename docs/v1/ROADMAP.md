@@ -53,7 +53,7 @@ desarrolla ahora. Durante el freeze solo entran arreglos de errores críticos.
 | Business (restaurante, servicios, retail) | Oculto con flag; los 2 clientes `os_full` actuales siguen funcionando en la web | V1.1 |
 | Insights y Replay | Ocultos con flag | V1.1 |
 | Check-ins semanales de objetivos (Fase 2B) | Sin conectar | V1.1 (revisión semanal guiada) |
-| Verificación de identidad (tilde) | No se muestra | V1.1 |
+| Verificación de identidad (tilde) | Sumada antes del freeze: pedido desde Studio, revisión en super-admin y tilde en el perfil | V1 |
 | Personas (red de contactos) | — | V1.1 |
 | Planes de vida compartibles | — | V1.1 |
 | Diario y estado de ánimo | — | V1.1 |

@@ -6,11 +6,14 @@ import type { AuthDict } from '@/i18n/app/auth'
 export function authErrorMessage(err: unknown, errors: AuthDict['errors'], fallback: string): string {
   const raw = ((err as { message?: string })?.message ?? '').toLowerCase()
   const status = (err as { status?: number })?.status
+  const code = (err as { code?: string })?.code
   if (raw.includes('already registered') || raw.includes('already been registered') || raw.includes('user already exists'))
     return errors.alreadyRegistered
   if (raw.includes('invalid login credentials')) return errors.invalidCredentials
   if (raw.includes('email not confirmed')) return errors.notConfirmed
-  if (raw.includes('password should be') || raw.includes('weak password')) return errors.weakPassword
+  // Supabase rechaza la contraseña por sus reglas (largo, tipos de caracteres) o por estar filtrada: code weak_password
+  if (code === 'weak_password' || raw.includes('password should') || raw.includes('weak password') || raw.includes('known to be weak'))
+    return errors.weakPassword
   if (raw.includes('invalid email') || raw.includes('unable to validate email')) return errors.invalidEmail
   if (raw.includes('banned') || raw.includes('disabled')) return errors.disabled
   if (raw.includes('rate limit') || raw.includes('too many') || status === 429) return errors.rateLimit

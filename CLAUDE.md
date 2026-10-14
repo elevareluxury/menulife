@@ -302,6 +302,14 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   originales + sol, rosa, lima y los sobrios luna, mono, grafito, pizarra y arena. La base valida los nombres
   (`20261024000001_v1_more_accents.sql`); la conversión de colores viejos sigue eligiendo entre los 4 originales.
 - "Poné tu Mycen en todos lados": sólo botones de copiar (general y uno por plataforma con `?src=`), sin pasos por app.
+- Verificación de cuenta (antes V1.1, sumada antes del freeze): Studio → Ajustes → "Verificación" (`useVerification`,
+  RPC `request_verification`: mensaje 10–1000, link https opcional, uno pendiente por vez, 3 cada 30 días) →
+  `verification_requests` (el dueño lee el suyo) → `/super-admin/verificaciones` (`admin_list_verifications`,
+  `admin_resolve_verification`, `admin_set_verified`). `identities.verified_at` sólo lo cambian esas RPC (trigger) y
+  `get_public_profile` devuelve `verified` para todos los Spaces: tilde `.mp-verified` junto al nombre en las 5
+  estructuras (también en la vista previa de Studio). Migración `20261025000001_v1_verification.sql`, tests en
+  `tests/db/verification.test.sql` y `verification.spec.ts`. Privacidad actualizada (12 idiomas).
+- Errores de contraseña de Supabase (`code: weak_password`, reglas o contraseña filtrada) muestran `weakPassword`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

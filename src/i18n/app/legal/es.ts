@@ -96,6 +96,7 @@ const es = {
         '**Mensajes del formulario de contacto:** el nombre, el contacto (email o WhatsApp) y el mensaje que deja un visitante. Los ve sólo la persona dueña del perfil, en Studio; no se publican ni se mandan por email. Para evitar abusos usamos un identificador anónimo que cambia todos los días, sin IP ni datos del dispositivo.',
         '**Invitaciones:** si creás tu cuenta desde “Creá tu identidad” en el perfil de otra persona, guardamos qué perfil te trajo y su tipo, para saber cómo crece Mycen. Esa persona no ve tus datos.',
         '**Uso de la app:** para saber si Mycen funciona, guardamos eventos de uso (por ejemplo, que publicaste tu perfil, que abriste “Mi día” o que marcaste un hábito) con tu cuenta, la fecha y datos cortos como la estructura elegida o la cantidad de días. Nunca guardamos el contenido de tus tareas, hábitos, notas ni mensajes. No usamos servicios de analítica de terceros.',
+        '**Verificación de cuenta:** si pedís el tilde de cuenta verificada, guardamos tu mensaje, el link que nos pases y la respuesta. Los ve sólo el equipo de Mycen para revisarlo; si se aprueba, tu perfil muestra el tilde.',
         '**Errores técnicos:** cuando algo falla, guardamos el mensaje de error, la pantalla, la versión de Mycen y el navegador (por ejemplo, "Chrome 128 · Android"), sin IP ni datos personales, para poder arreglarlo.',
       ] },
     ] },

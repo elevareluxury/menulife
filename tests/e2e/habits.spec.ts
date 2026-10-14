@@ -73,7 +73,8 @@ test('"3 veces por semana" muestra el avance semanal y la racha que perdona un d
   // Racha de Leer: 4 días, aunque ayer se perdió (un día perdido no la corta)
   await expect(page.getByTitle('Racha de 4 días')).toBeVisible()
   // Un segundo día perdido sí la corta: sin el registro de anteayer, la racha queda en 0
-  state.tables.life_habit_logs = state.tables.life_habit_logs.filter(l => l.completed_date !== daysAgo(2))
+  // (sólo el de Leer: los miércoles, anteayer es también el lunes en que se corrió)
+  state.tables.life_habit_logs = state.tables.life_habit_logs.filter(l => !(l.habit_id === 'h-read' && l.completed_date === daysAgo(2)))
   await page.reload()
   await expect(page.getByText('1 de 3 esta semana')).toBeVisible()
   await expect(page.getByTitle(/^Racha de/)).toHaveCount(0)
