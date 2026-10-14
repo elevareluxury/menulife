@@ -343,8 +343,9 @@ export function LifeReplayPage() {
             <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.area.habits, 26)} 0%, ${colors.surface.elevated} 100%)`} index={5} total={TOTAL}>
               <CardHeader icon={Trophy} kicker={r.achievements} title={r.achievementsTitle} />
               <div>
-                <BigStat value={String(summary.achievementsCount)} label={r.unlocked(summary.achievementsCount)} />
-                <div style={{ marginTop: '32px', padding: '20px', borderRadius: radius.lg, background: colors.surface.base, textAlign: 'center' }}>
+                {/* Sin culpa: si no hubo logros, no se muestra un "0" grande, sólo el cierre */}
+                {summary.achievementsCount > 0 && <BigStat value={String(summary.achievementsCount)} label={r.unlocked(summary.achievementsCount)} />}
+                <div style={{ marginTop: summary.achievementsCount > 0 ? '32px' : 0, padding: '20px', borderRadius: radius.lg, background: colors.surface.base, textAlign: 'center' }}>
                   <p style={{ fontFamily: font, fontSize: '16px', fontWeight: 700, color: colors.text.primary, margin: '0 0 6px' }}>{r.keepGoing}</p>
                   <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: 0, lineHeight: 1.6 }}>{r.keepGoingText}</p>
                 </div>

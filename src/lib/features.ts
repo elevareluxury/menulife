@@ -1,6 +1,6 @@
-// V1 = Identity + Life OS. These flags are enabled in V1.1.
+// Funciones que se prenden por etapas. Insights y "Tu mes" (Replay) entraron antes del freeze de la V1.
 export const FEATURES = {
-  lifeInsights:   false,
-  lifeReplay:     false,
+  lifeInsights:   true,
+  lifeReplay:     true,
   businessInLife: false,
 } as const
