@@ -33,13 +33,19 @@ export function currencySymbol(code: string, locale: string): string {
   } catch { return code }
 }
 
-export function formatMoney(amount: number, currency: string, locale: string, decimals = 0): string {
+/**
+ * Importe con su moneda. Sin `decimals`: enteros sin decimales y, si hay centavos, con 2 (un café de 3,50 no se
+ * muestra como 4). Monedas sin centavos (yen, won…) siguen sin decimales.
+ */
+export function formatMoney(amount: number, currency: string, locale: string, decimals?: number): string {
+  const cents = Math.round(Math.abs(amount) * 100) % 100 !== 0
   try {
+    const max = decimals ?? (cents ? Math.min(2, new Intl.NumberFormat(locale, { style: 'currency', currency }).resolvedOptions().maximumFractionDigits ?? 2) : 0)
     return new Intl.NumberFormat(locale, {
-      style: 'currency', currency, minimumFractionDigits: decimals, maximumFractionDigits: decimals,
+      style: 'currency', currency, minimumFractionDigits: max, maximumFractionDigits: max,
     }).format(amount)
   } catch {
-    return `${currency} ${amount.toFixed(decimals)}`
+    return `${currency} ${amount.toFixed(decimals ?? (cents ? 2 : 0))}`
   }
 }
 

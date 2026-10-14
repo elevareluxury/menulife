@@ -76,6 +76,34 @@ test('elegir 3 prioridades, completar una, cerrar el día y ver lo logrado prime
   await expect(page.getByText('Día cerrado')).toBeVisible()
 })
 
+test('una prioridad cuya tarea se borró no ocupa lugar: se puede sumar otra', async ({ page, context }) => {
+  const state = createState()
+  state.tables.life_brain_items = [task('10000000-0000-4000-8000-000000000001', 'Ir al banco')]
+  state.tables.life_habits = []
+  state.tables.life_habit_logs = []
+  state.tables.life_daily_reviews = [{
+    id: 'r1', user_id: OWNER_ID, date: today, reflection: null, closed_at: null,
+    priorities: [
+      { id: 'p1', kind: 'task', task_id: '10000000-0000-4000-8000-000000000001' },
+      { id: 'p2', kind: 'task', task_id: '10000000-0000-4000-8000-0000000000ff' },
+      { id: 'p3', kind: 'text', text: 'Llamar a mamá', done: false },
+    ],
+  }]
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/life')
+
+  const priorities = page.getByRole('region', { name: 'Tus 3 prioridades' })
+  await expect(priorities.getByRole('list').getByRole('listitem')).toHaveCount(2)
+  await expect(priorities.getByText('2/3')).toBeVisible()
+
+  await priorities.getByRole('textbox', { name: 'O escribí una…' }).fill('Pagar la luz')
+  await priorities.getByRole('button', { name: 'Agregar', exact: true }).click()
+  await expect(priorities.getByRole('list').getByRole('listitem')).toHaveCount(3)
+  // La de la tarea borrada se descarta al guardar
+  await expect.poll(() => (state.tables.life_daily_reviews[0].priorities as { id: string }[]).map(p => p.id).includes('p2')).toBe(false)
+})
+
 test('el primer día sin datos invita a crear un hábito o una tarea', async ({ page, context }) => {
   const state = createState()
   state.tables.life_brain_items = []

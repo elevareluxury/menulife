@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { localDateKey } from './useTasks'
 import { frequencyOf, isDone, isScheduledOn } from '../lib/habitStreak'
 import { lifeT } from '@/i18n/app/life'
+import { anchorHasPrefix, anchorLabel } from '../lib/habitAnchor'
 
 const db = supabase as unknown as SupabaseClient
 const CHECK_EVERY_MS = 30_000
@@ -56,7 +57,9 @@ export function useHabitReminders(userId: string | undefined) {
       for (const h of due) {
         markReminded(h.id, today)
         if (isDone(todayValue.get(h.id), h.target_value)) continue
-        const text = h.anchor ? p.reminderBody(h.anchor, h.name) : h.name
+        const text = h.anchor
+          ? (anchorHasPrefix(h.anchor, p.afterAnchor) ? `${anchorLabel(h.anchor, p.afterAnchor)}: ${h.name}` : p.reminderBody(h.anchor, h.name))
+          : h.name
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
           new Notification(text, { tag: `life-habit-${h.id}-${today}` })
         } else {

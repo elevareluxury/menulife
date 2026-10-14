@@ -56,15 +56,17 @@ export function MyDaySection() {
   const m = t.myDay
   const navigate = useNavigate()
   const today = localDateKey()
-  const day = useDailyReview(today)
-  const { review, loading, addTaskPriority, addTextPriority, removePriority, toggleTextPriority } = day
-  const { tasks, loading: tasksLoading, toggleTask } = useTasks()
+  const { tasks, loading: tasksLoading, error: tasksError, toggleTask } = useTasks()
+  // Sólo con las tareas cargadas se sabe si una prioridad quedó apuntando a una tarea borrada
+  const liveTaskIds = useMemo(() => (tasksLoading || tasksError ? null : new Set(tasks.map(x => x.id))), [tasks, tasksLoading, tasksError])
+  const day = useDailyReview(today, liveTaskIds)
+  const { review, livePriorities, loading, addTaskPriority, addTextPriority, removePriority, toggleTextPriority } = day
   const { activeHabits, loading: habitsLoading } = useHabits()
   const [draft, setDraft] = useState('')
   const [picking, setPicking] = useState(false)
   const [why, setWhy] = useState(false)
   const [reviewOpen, setReviewOpen] = useState(false)
-  const full = review.priorities.length >= MAX_PRIORITIES
+  const full = livePriorities.length >= MAX_PRIORITIES
   const evening = new Date().getHours() >= 18
   const taskById = useMemo(() => new Map(tasks.map(x => [x.id, x])), [tasks])
   const fail = () => toast.error(t.common.saveError)
@@ -86,10 +88,10 @@ export function MyDaySection() {
       <section style={card} aria-labelledby="myday-priorities">
         <h2 id="myday-priorities" style={{ ...title, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Star size={15} aria-hidden="true" style={{ color: colors.accent.ink }} /> {m.prioritiesTitle}
-          <span style={{ marginInlineStart: 'auto', fontSize: '12px', fontWeight: 700, color: colors.text.tertiary }}>{review.priorities.length}/{MAX_PRIORITIES}</span>
+          <span style={{ marginInlineStart: 'auto', fontSize: '12px', fontWeight: 700, color: colors.text.tertiary }}>{livePriorities.length}/{MAX_PRIORITIES}</span>
         </h2>
-        {!review.priorities.length && <p style={muted}>{m.prioritiesHint}</p>}
-        {!loading && review.priorities.length > 0 && (
+        {!livePriorities.length && <p style={muted}>{m.prioritiesHint}</p>}
+        {!loading && livePriorities.length > 0 && (
           <ul aria-label={m.prioritiesTitle} style={{ listStyle: 'none', margin: '8px 0 0', padding: 0 }}>
             {review.priorities.filter(p => label(p)).map(p => {
               const done = isDone(p)
