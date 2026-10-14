@@ -43,7 +43,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Errores (Lanzamiento L5, sin proveedores externos): `app_errors` (agrupados por huella: zona + mensaje + primer frame del
   stack) y `app_error_hits` (personas afectadas con hash diario anónimo, 90 días). La app reporta con `report_client_error`
   (`src/lib/errorReporter.ts`: errores sin atrapar + `ErrorBoundary`; sólo en producción o con `VITE_REPORT_ERRORS=1`,
-  sin bots, con topes) y el super-admin los ve y resuelve en `/super-admin/errores` (`admin_list_errors`,
+  sin bots, con topes; una pantalla de la versión anterior que ya no existe tras publicar recarga la página una vez,
+  `src/lib/staleChunk.ts`, sin reportarse) y el super-admin los ve y resuelve en `/super-admin/errores` (`admin_list_errors`,
   `admin_set_error_status`, `admin_error_summary`). Un error resuelto que vuelve a pasar se reabre solo.
 - Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()` y se retiran cuando Studio reemplace al editor viejo.
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
