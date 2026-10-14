@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import { useLocaleStore } from '@/store/localeStore'
+import { materializeRecurring } from './useRecurring'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -19,6 +20,8 @@ export interface Transaction {
   currency: string
   occurred_at: string
   goal_id?: string | null
+  /** Generado por un fijo que se repite cada mes */
+  recurring_id?: string | null
 }
 
 export interface TransactionFormData {
@@ -103,6 +106,8 @@ export function useMoney() {
   const load = useCallback(async () => {
     if (!user) return
     setLoading(true)
+    // Los fijos que ya vencieron se cargan antes de leer (una vez por día; si falla, se sigue igual)
+    await materializeRecurring().catch(() => 0)
     // Last 3 months for history; filter month in JS for stats
     const since = (() => {
       const d = new Date()

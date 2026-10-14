@@ -156,6 +156,12 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Preferencias de la cuenta en `user_settings` (idioma, moneda principal, monedas extra, zona horaria, inicio de semana):
   `src/lib/prefs.ts` (`usePrefs`, `savePrefs`), se cargan en `PrefsInit`. Ajustes en `/life/settings` y Studio → Ajustes.
 - Dinero: nunca sumar monedas distintas; cada movimiento guarda su `currency`.
+- Fijos que se repiten cada mes (Dinero): `life_recurring_transactions` (día del mes, desde, `last_period`, pausa) y
+  `life_transactions.recurring_id`/`recurring_period` (único por mes). La base carga lo vencido con
+  `life_materialize_recurring(p_today, p_tz)` (lo llama `useMoney` una vez por día; sin duplicar, día 31 = último día,
+  lo borrado no vuelve, al reanudar no se cargan los meses en pausa). App: `hooks/useRecurring.ts`, "Repetir todos los
+  meses" en `TransactionSheet` y tarjeta "Fijos del mes". Migración `20261027000001_life_recurring_transactions.sql`,
+  tests en `tests/db/life_recurring.test.sql` y `recurring.spec.ts`.
 - El contenido que escribe el dueño se muestra en su idioma original (`default_locale`) o en la traducción guardada en `translations`;
   la traducción automática con Claude está pendiente (Fase 7).
 - Interfaz en español (rioplatense) primero.

@@ -79,7 +79,8 @@ grant all on public.life_habits, public.life_habit_logs to authenticated;
 -- Life OS: movimientos de dinero (lo mínimo para el chequeo de metas propias)
 create table public.life_transactions (
   id uuid primary key default gen_random_uuid(), user_id uuid not null default auth.uid(), type text not null default 'expense',
-  amount numeric not null default 1, currency text not null default 'ARS',
+  amount numeric(12,2) not null default 1 check (amount > 0), category text, description text, currency text not null default 'ARS',
+  occurred_at timestamptz not null default now(), created_at timestamptz not null default now(),
   goal_id uuid references public.life_goals(id) on delete set null);
 alter table public.life_transactions enable row level security;
 create policy ltx_owner on public.life_transactions for all using (user_id = auth.uid()) with check (user_id = auth.uid());
