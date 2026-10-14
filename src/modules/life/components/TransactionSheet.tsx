@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown } from 'lucide-react'
+import { TrendingUp, TrendingDown, Repeat } from 'lucide-react'
 import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import { useLocaleStore } from '@/store/localeStore'
 import { usePrefs } from '@/lib/prefs'
@@ -14,8 +14,13 @@ import { GoalSelect } from './GoalSelect'
 interface TransactionSheetProps {
   open: boolean
   onClose: () => void
-  onSave: (data: TransactionFormData) => Promise<void>
+  /** `repeat`: el usuario pidió que se repita todos los meses (sólo al crear con `repeatable`) */
+  onSave: (data: TransactionFormData, repeat: boolean) => Promise<void>
   initial?: Transaction | null
+  /** Ofrece "Repetir todos los meses" al crear */
+  repeatable?: boolean
+  /** Edita un fijo: la fecha es la próxima y los cambios valen de acá en adelante */
+  template?: boolean
 }
 
 function todayISO(): string {
@@ -23,7 +28,7 @@ function todayISO(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function TransactionSheet({ open, onClose, onSave, initial }: TransactionSheetProps) {
+export function TransactionSheet({ open, onClose, onSave, initial, repeatable, template }: TransactionSheetProps) {
   const { currency } = useLocaleStore()  // moneda principal de la cuenta
   const extra = usePrefs(st => st.extra_currencies)
   const t = useLifeT()
@@ -42,6 +47,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
   const [amountStr, setAmountStr] = useState('')
   const [saving, setSaving]       = useState(false)
   const [error, setError]         = useState('')
+  const [repeat, setRepeat]       = useState(false)
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
@@ -56,6 +62,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
         setAmountStr('')
       }
       setError('')
+      setRepeat(false)
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,8 +85,11 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
         amount,
         description: form.description?.trim() || undefined,
         // Fecha vacía o inválida (se borró el campo): hoy
-        occurred_at: new Date(`${/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO()}T12:00:00`).toISOString(),
-      })
+        occurred_at: template || (repeatable && repeat && !initial)
+          // Un fijo guarda la fecha tal cual (el día del mes); un movimiento, el mediodía local de esa fecha
+          ? (/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO())
+          : new Date(`${/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO()}T12:00:00`).toISOString(),
+      }, !!(repeatable && repeat && !initial))
       onClose()
     } catch { setError(t.common.saveError) }
     finally { setSaving(false) }
@@ -90,7 +100,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
   const currencyOptions = [...new Set([currency, ...extra, form.currency].filter(Boolean))]
 
   return (
-    <LifeSheet open={open} onClose={onClose} title={initial ? t.tx.editTitle : t.tx.newTitle}>
+    <LifeSheet open={open} onClose={onClose} title={template ? t.recurring.editTitle : initial ? t.tx.editTitle : t.tx.newTitle}>
 
       {/* Type toggle */}
       <div style={{
@@ -236,7 +246,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
       {/* Date */}
       <div style={{ marginBottom: '24px' }}>
         <label style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-          {t.tx.date}
+          {template ? t.recurring.nextDate : t.tx.date}
         </label>
         <input
           type="date"
@@ -255,6 +265,31 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
         />
       </div>
 
+      {repeatable && !initial && (
+        <label style={{
+          display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: '16px', padding: '12px 14px', cursor: 'pointer',
+          borderRadius: radius.md, background: repeat ? colors.accent.soft : colors.surface.high,
+          border: `1px solid ${repeat ? colors.accent.default : colors.border.subtle}`,
+        }}>
+          <input type="checkbox" checked={repeat} onChange={e => setRepeat(e.target.checked)}
+            style={{ width: 18, height: 18, marginTop: 2, accentColor: colors.accent.default }} />
+          <span style={{ fontFamily: font }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: colors.text.primary }}>
+              <Repeat size={14} aria-hidden="true" /> {t.recurring.repeat}
+            </span>
+            {repeat && (
+              <span style={{ display: 'block', fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
+                {t.recurring.repeatHint(Number((form.occurred_at || todayISO()).slice(8, 10)) || new Date().getDate())}
+              </span>
+            )}
+          </span>
+        </label>
+      )}
+
+      {template && (
+        <p style={{ fontFamily: font, fontSize: 12, color: colors.text.secondary, margin: '0 0 16px', lineHeight: 1.5 }}>{t.recurring.editHint}</p>
+      )}
+
       <GoalSelect id="tx-goal" enabled={open} value={form.goal_id} onChange={goal_id => setForm(f => ({ ...f, goal_id }))} />
 
       {error && (
@@ -264,7 +299,7 @@ export function TransactionSheet({ open, onClose, onSave, initial }: Transaction
       )}
 
       <LifeButton onClick={handleSave} disabled={saving} style={{ width: '100%' }}>
-        {saving ? t.common.saving : initial ? t.tx.update : t.tx.create}
+        {saving ? t.common.saving : initial || template ? t.tx.update : t.tx.create}
       </LifeButton>
     </LifeSheet>
   )

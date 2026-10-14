@@ -577,6 +577,35 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       }
       return row.id
     }
+    case 'life_materialize_recurring': {
+      // = supabase/migrations/20261027000001: carga lo vencido de cada fijo activo, sin duplicar ni volver atrás
+      if (!isOwner) return 0
+      const today = String(args.p_today)
+      const nextMonth = (ym: string) => { const [y, m] = ym.split('-').map(Number); return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}` }
+      state.tables.life_transactions ??= []
+      let n = 0
+      for (const r of (state.tables.life_recurring_transactions ?? []).filter(x => x.active !== false)) {
+        let month = r.last_period ? nextMonth(String(r.last_period)) : String(r.starts_on).slice(0, 7)
+        let last: string | null = null
+        while (month <= today.slice(0, 7)) {
+          const [y, m] = month.split('-').map(Number)
+          const due = `${month}-${String(Math.min(Number(r.day_of_month), new Date(Date.UTC(y, m, 0)).getUTCDate())).padStart(2, '0')}`
+          if (due > today) break
+          if (due >= String(r.starts_on) && !state.tables.life_transactions.some(t => t.recurring_id === r.id && t.recurring_period === month)) {
+            state.tables.life_transactions.push({
+              id: `tx-${Math.random().toString(36).slice(2, 10)}`, user_id: r.user_id ?? OWNER_ID, type: r.type, amount: r.amount,
+              category: r.category ?? null, description: r.description ?? null, currency: r.currency, goal_id: r.goal_id ?? null,
+              occurred_at: `${due}T12:00:00.000Z`, recurring_id: r.id, recurring_period: month, created_at: new Date().toISOString(),
+            })
+            n++
+          }
+          last = month
+          month = nextMonth(month)
+        }
+        if (last) r.last_period = last
+      }
+      return n
+    }
     case 'check_username': {
       const u = String(args.p_username ?? '')
       if (!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(u)) return 'invalid'

@@ -6,7 +6,7 @@ const db = supabase as unknown as SupabaseClient
 
 // Hijas antes que madres (aunque las FK borran en cascada, así no depende de eso)
 const LIFE_TABLES = [
-  'life_habit_logs', 'life_goal_milestones', 'life_brain_items', 'life_transactions',
+  'life_habit_logs', 'life_goal_milestones', 'life_brain_items', 'life_transactions', 'life_recurring_transactions',
   'life_habits', 'life_goals', 'life_tasks', 'life_achievements', 'life_score', 'life_snapshots',
 ] as const
 

@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2 } from 'lucide-react'
+import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play } from 'lucide-react'
 import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint } from '../design-system'
 import { useMoney, type Transaction } from '../hooks/useMoney'
 import { TransactionSheet } from '../components/TransactionSheet'
+import { nextDue, useRecurring, type RecurringTx } from '../hooks/useRecurring'
 import { ActionMenu } from '../components/ActionMenu'
 import { deleteWithUndo } from '../lib/undo'
 import { useLifeT, type LifeDict } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { formatMoney } from '@/lib/currencies'
+import toast from 'react-hot-toast'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
@@ -98,6 +100,7 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
           fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.text.primary,
           margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
+          {tx.recurring_id && <Repeat size={11} aria-label={t.recurring.badge} style={{ display: 'inline', marginInlineEnd: 5, verticalAlign: '-1px', color: colors.text.tertiary }} />}
           {tx.description || category}
         </p>
         {tx.description && (
@@ -119,6 +122,55 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
   )
 }
 
+// ── Fijos del mes (se repiten cada mes) ─────────────────────────────────────
+function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
+  items: RecurringTx[]
+  locale: string
+  onEdit: (r: RecurringTx) => void
+  onToggle: (r: RecurringTx) => void
+  onDelete: (r: RecurringTx) => void
+}) {
+  const t = useLifeT()
+  const r = t.recurring
+  const dateLabel = (key: string) => new Date(`${key}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })
+  return (
+    <LifeCard style={{ marginBottom: '12px' }}>
+      <section aria-labelledby="fixed-title">
+        <h2 id="fixed-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', margin: '0 0 2px', textTransform: 'uppercase' }}>
+          <Repeat size={12} aria-hidden="true" /> {r.title}
+        </h2>
+        <p style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '0 0 6px' }}>{r.subtitle}</p>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          {items.map(item => {
+            const isIncome = item.type === 'income'
+            const name = item.description || categoryLabel(t, item.category ?? 'Otros')
+            return (
+              <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}`, opacity: item.active ? 1 : 0.6 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: font, fontSize: 13, fontWeight: 600, color: colors.text.primary, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</p>
+                  <p style={{ fontFamily: font, fontSize: 11, color: colors.text.tertiary, margin: 0 }}>
+                    {item.active ? `${r.schedule(item.day_of_month)} · ${r.next(dateLabel(nextDue(item)))}` : r.paused}
+                  </p>
+                </div>
+                <span dir="ltr" style={{ fontFamily: font, fontSize: 14, fontWeight: 800, flexShrink: 0, color: isIncome ? colors.semantic.success : colors.semantic.error }}>
+                  {isIncome ? '+' : '-'}{formatMoney(item.amount, item.currency, locale)}
+                </span>
+                <ActionMenu label={`${r.options}: ${name}`} actions={[
+                  { icon: Pencil, label: t.common.edit, onSelect: () => onEdit(item) },
+                  item.active
+                    ? { icon: Pause, label: r.pause, onSelect: () => onToggle(item) }
+                    : { icon: Play, label: r.resume, onSelect: () => onToggle(item) },
+                  { icon: Trash2, label: t.common.delete, onSelect: () => onDelete(item), danger: true },
+                ]} />
+              </li>
+            )
+          })}
+        </ul>
+      </section>
+    </LifeCard>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export function LifeMoneyPage() {
   const t = useLifeT()
@@ -129,14 +181,26 @@ export function LifeMoneyPage() {
     hasData, reload, createTransaction, updateTransaction, deleteTransaction, hideTransaction,
   } = useMoney()
 
+  const fixed = useRecurring()
   const [sheetOpen, setSheetOpen]       = useState(false)
   const [editTx, setEditTx]             = useState<Transaction | null>(null)
+  const [editFixed, setEditFixed]       = useState<RecurringTx | null>(null)
 
   if (loading) return <MoneySkeleton />
 
   const balanceColor = monthBalance >= 0 ? colors.semantic.success : colors.semantic.error
   const monthName = new Date().toLocaleDateString(locale, { month: 'long' })
-  const openNew = () => { setEditTx(null); setSheetOpen(true) }
+  const openNew = () => { setEditTx(null); setEditFixed(null); setSheetOpen(true) }
+  const fail = () => toast.error(t.common.saveError)
+  const fixedAsTx = (r: RecurringTx): Transaction => ({
+    id: r.id, type: r.type, amount: r.amount, category: r.category ?? 'Otros', description: r.description,
+    currency: r.currency, occurred_at: nextDue(r), goal_id: r.goal_id,
+  })
+  const removeFixed = (r: RecurringTx) => {
+    fixed.hide(r.id)
+    const what = r.description || categoryLabel(t, r.category ?? 'Otros')
+    deleteWithUndo({ message: t.recurring.removed(what), commit: () => fixed.remove(r.id), restore: () => void fixed.reload() })
+  }
   const remove = (tx: Transaction) => {
     hideTransaction(tx.id)
     const what = `${tx.description || categoryLabel(t, tx.category)} · ${formatMoney(Number(tx.amount), tx.currency || mainCurrency, locale)}`
@@ -209,6 +273,13 @@ export function LifeMoneyPage() {
         </LifeCard>
       )}
 
+      {fixed.items.length > 0 && (
+        <FixedCard items={fixed.items} locale={locale}
+          onEdit={r => { setEditTx(null); setEditFixed(r); setSheetOpen(true) }}
+          onToggle={r => { fixed.setActive(r, !r.active).catch(fail) }}
+          onDelete={removeFixed} />
+      )}
+
       {!hasData ? (
         <LifeCard>
           <LifeEmptyState
@@ -232,7 +303,7 @@ export function LifeMoneyPage() {
                   <div>
                     {group.items.map(tx => (
                       <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale}
-                        onEdit={() => { setEditTx(tx); setSheetOpen(true) }}
+                        onEdit={() => { setEditFixed(null); setEditTx(tx); setSheetOpen(true) }}
                         onDelete={() => remove(tx)} />
                     ))}
                   </div>
@@ -253,9 +324,13 @@ export function LifeMoneyPage() {
       <TransactionSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        initial={editTx}
-        onSave={async data => {
-          if (editTx) await updateTransaction(editTx.id, data)
+        initial={editFixed ? fixedAsTx(editFixed) : editTx}
+        repeatable
+        template={!!editFixed}
+        onSave={async (data, repeat) => {
+          if (editFixed) await fixed.update(editFixed.id, data)
+          else if (editTx) await updateTransaction(editTx.id, data)
+          else if (repeat) await fixed.create(data)
           else await createTransaction(data)
         }}
       />
