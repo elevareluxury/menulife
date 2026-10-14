@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { reportError, type ErrorArea } from '@/lib/errorReporter'
+import { isStaleChunkError, reloadForStaleChunk } from '@/lib/staleChunk'
 import { useAppLang } from '@/i18n/app/store'
 import type { AppLang } from '@/i18n/app/languages'
 
@@ -21,20 +22,26 @@ const TEXT: Record<AppLang, [title: string, body: string, reload: string]> = {
 
 class ErrorBoundary extends Component<
   { children: ReactNode; label?: string; area?: ErrorArea },
-  { hasError: boolean; error: Error | null }
+  { hasError: boolean; error: Error | null; reloading: boolean }
 > {
-  state = { hasError: false, error: null as Error | null }
+  state = { hasError: false, error: null as Error | null, reloading: false }
 
   static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error }
+    return { hasError: true, error, reloading: isStaleChunkError(error) }
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    // Una pantalla de la versión anterior que ya no existe (se publicó una nueva): recargar, sin avisar del error
+    if (isStaleChunkError(error)) {
+      if (reloadForStaleChunk()) return
+      this.setState({ reloading: false })
+    }
     reportError(error, { area: this.props.area, componentStack: info.componentStack ?? undefined })
   }
 
   render() {
     if (!this.state.hasError) return this.props.children
+    if (this.state.reloading) return null
     const [title, body, reload] = TEXT[useAppLang.getState().lang] ?? TEXT.es
     return (
       <div role="alert" style={{
