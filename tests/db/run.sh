@@ -39,7 +39,8 @@ for m in \
   20261028000001_life_calendar_feed \
   20261029000001_life_custom_categories \
   20261029000002_life_installments \
-  20261029000003_life_shared_expenses; do
+  20261029000003_life_shared_expenses \
+  20261030000001_life_budgets; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 
