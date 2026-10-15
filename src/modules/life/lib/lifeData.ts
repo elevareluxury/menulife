@@ -7,7 +7,7 @@ const db = supabase as unknown as SupabaseClient
 // Hijas antes que madres (aunque las FK borran en cascada, así no depende de eso)
 const LIFE_TABLES = [
   'life_habit_logs', 'life_goal_milestones', 'life_brain_items', 'life_transactions', 'life_recurring_transactions',
-  'life_habits', 'life_goals', 'life_tasks', 'life_achievements', 'life_score', 'life_snapshots',
+  'life_categories', 'life_habits', 'life_goals', 'life_tasks', 'life_achievements', 'life_score', 'life_snapshots',
 ] as const
 
 const PAGE = 1000
@@ -42,6 +42,9 @@ function csvCell(v: unknown): string {
 export async function exportMoneyCsv(userId: string): Promise<Blob> {
   const rows = await readAll('life_transactions', userId)
   rows.sort((a, b) => String(a.occurred_at).localeCompare(String(b.occurred_at)))
+  // Categorías propias ('c:<id>'): en la planilla va su nombre
+  const custom = new Map((await readAll('life_categories', userId)).map(c => [`c:${String(c.id)}`, String(c.name)]))
+  for (const r of rows) if (typeof r.category === 'string' && custom.has(r.category)) r.category = custom.get(r.category)
   const cols = ['occurred_at', 'type', 'amount', 'currency', 'category', 'description'] as const
   const lines = [cols.join(','), ...rows.map(r => cols.map(c => csvCell(c === 'occurred_at' ? String(r[c]).slice(0, 10) : r[c])).join(','))]
   // BOM para que Excel lea bien los acentos

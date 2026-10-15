@@ -1,11 +1,11 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp, ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
 import { localDay, useMoney, type Transaction } from '../hooks/useMoney'
 import { useMoneySearch } from '../hooks/useMoneySearch'
 import { categoryBreakdown, monthKeyOf, shiftMonth, type CategoryShare } from '../lib/moneyInsights'
-import { CATEGORY_COLORS, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../lib/lifePalette'
+import { useCategoryLabels } from '../hooks/useCategories'
 import { TransactionSheet } from '../components/TransactionSheet'
 import { nextDue, useRecurring, type RecurringTx } from '../hooks/useRecurring'
 import { ActionMenu } from '../components/ActionMenu'
@@ -30,8 +30,6 @@ function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
     ...(d.getFullYear() !== today.getFullYear() ? { year: 'numeric' as const } : {}) })
 }
 
-const categoryLabel = (t: LifeDict, cat: string) => t.categories[cat] ?? cat
-const ALL_CATEGORIES = [...new Set([...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES])]
 
 function monthLabel(key: string, locale: string): string {
   const [y, m] = key.split('-').map(Number)
@@ -83,6 +81,7 @@ function CategoryCard({ items, currency, locale, prevMonthName, active, onPick }
   active: string | null; onPick: (cat: string) => void
 }) {
   const t = useLifeT()
+  const { labelOf, colorOf } = useCategoryLabels()
   return (
     <LifeCard style={{ marginBottom: '12px' }}>
       <section aria-labelledby="money-by-category">
@@ -91,8 +90,8 @@ function CategoryCard({ items, currency, locale, prevMonthName, active, onPick }
       </h2>
       <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {items.map(c => {
-          const label = categoryLabel(t, c.category)
-          const color = ink(CATEGORY_COLORS[c.category] ?? CATEGORY_COLORS.Otros)
+          const label = labelOf(c.category)
+          const color = ink(colorOf(c.category))
           const pct = Math.round(c.share * 100)
           return (
             <li key={c.category}>
@@ -197,7 +196,8 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
   const t = useLifeT()
   const isIncome = tx.type === 'income'
   const amountColor = isIncome ? colors.semantic.success : colors.semantic.error
-  const category = categoryLabel(t, tx.category)
+  const { labelOf } = useCategoryLabels()
+  const category = labelOf(tx.category)
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}` }}>
@@ -248,6 +248,7 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
 }) {
   const t = useLifeT()
   const r = t.recurring
+  const { labelOf } = useCategoryLabels()
   const dateLabel = (key: string) => new Date(`${key}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })
   return (
     <LifeCard style={{ marginBottom: '12px' }}>
@@ -259,7 +260,7 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
         <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {items.map(item => {
             const isIncome = item.type === 'income'
-            const name = item.description || categoryLabel(t, item.category ?? 'Otros')
+            const name = item.description || labelOf(item.category)
             return (
               <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}`, opacity: item.active ? 1 : 0.6 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -300,8 +301,8 @@ export function LifeMoneyPage() {
   const [query, setQuery] = useState('')
   const [kind, setKind] = useState<Kind>('all')
   const [cat, setCat] = useState<string | null>(null)
-  const labelOf = useCallback((c: string) => categoryLabel(t, c), [t])
-  const search = useMoneySearch(query, labelOf, ALL_CATEGORIES)
+  const { labelOf, allKeys } = useCategoryLabels()
+  const search = useMoneySearch(query, labelOf, allKeys)
   const searchingAll = search.results !== null || search.searching
   const breakdown = useMemo(() => categoryBreakdown(transactions, previous, mainCurrency), [transactions, previous, mainCurrency])
   const shown = useMemo(() => (search.results ?? transactions)
@@ -331,12 +332,12 @@ export function LifeMoneyPage() {
   })
   const removeFixed = (r: RecurringTx) => {
     fixed.hide(r.id)
-    const what = r.description || categoryLabel(t, r.category ?? 'Otros')
+    const what = r.description || labelOf(r.category)
     deleteWithUndo({ message: t.recurring.removed(what), commit: () => fixed.remove(r.id), restore: () => void fixed.reload() })
   }
   const remove = (tx: Transaction) => {
     hideTransaction(tx.id)
-    const what = `${tx.description || categoryLabel(t, tx.category)} · ${formatMoney(Number(tx.amount), tx.currency || mainCurrency, locale)}`
+    const what = `${tx.description || labelOf(tx.category)} · ${formatMoney(Number(tx.amount), tx.currency || mainCurrency, locale)}`
     deleteWithUndo({ message: t.undo.deleted(what), commit: () => deleteTransaction(tx.id), restore: () => void reload() })
   }
 
@@ -451,8 +452,8 @@ export function LifeMoneyPage() {
             <Chip pressed={kind === 'income'} onClick={() => setKind('income')}>{t.money.income}</Chip>
             <Chip pressed={kind === 'expense'} onClick={() => setKind('expense')}>{t.money.expense}</Chip>
             {cat && (
-              <Chip pressed onClick={() => setCat(null)} label={t.money.clearCategory(categoryLabel(t, cat))}>
-                {categoryLabel(t, cat)} <X size={12} aria-hidden="true" />
+              <Chip pressed onClick={() => setCat(null)} label={t.money.clearCategory(labelOf(cat))}>
+                {labelOf(cat)} <X size={12} aria-hidden="true" />
               </Chip>
             )}
           </div>

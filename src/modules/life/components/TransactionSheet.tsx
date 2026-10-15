@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, Repeat } from 'lucide-react'
+import { TrendingUp, TrendingDown, Repeat, Plus } from 'lucide-react'
 import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import { useLocaleStore } from '@/store/localeStore'
 import { usePrefs } from '@/lib/prefs'
@@ -7,11 +7,13 @@ import { currencySymbol } from '@/lib/currencies'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
-import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../lib/lifePalette'
 import { useCategoryMemory } from '../hooks/useCategoryMemory'
 import { suggestCategory } from '../lib/moneyInsights'
 import type { Transaction, TransactionFormData } from '../hooks/useMoney'
 import { GoalSelect } from './GoalSelect'
+import { CategoryForm } from './CategoryForm'
+import { useCategories, useCategoryLabels } from '../hooks/useCategories'
+import { isCustomKey, suggestColor } from '../lib/moneyCategories'
 
 interface TransactionSheetProps {
   open: boolean
@@ -53,6 +55,10 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
   // Movimiento nuevo: la categoría se sugiere por la descripción (lo que ya ordenaste) hasta que elegís una a mano
   const [catTouched, setCatTouched] = useState(false)
   const memory = useCategoryMemory(open && !initial)
+  // Categorías propias: se crean acá mismo ("+ Nueva") y quedan elegidas
+  const { labelOf, colorOf, keysFor, items: customCats } = useCategoryLabels()
+  const { createCategory } = useCategories()
+  const [newCatOpen, setNewCatOpen] = useState(false)
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
@@ -69,16 +75,20 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
       setError('')
       setRepeat(false)
       setCatTouched(false)
+      setNewCatOpen(false)
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  const categories = form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES
+  const typeKeys = keysFor(form.type)
+  // Una propia archivada sigue apareciendo en el movimiento que ya la tenía
+  const categories = isCustomKey(form.category) && !typeKeys.includes(form.category) ? [...typeKeys, form.category] : typeKeys
 
   const handleTypeChange = (type: 'income' | 'expense') => {
     const defaultCat = type === 'income' ? 'Sueldo' : 'Comida'
     setForm(f => ({ ...f, type, category: defaultCat }))
+    setNewCatOpen(false)
   }
 
   const handleSave = async () => {
@@ -219,12 +229,35 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
                 color: form.category === cat ? (isIncome ? colors.semantic.success : colors.semantic.error) : colors.text.secondary,
                 fontFamily: font, fontSize: '12px', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.15s',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
               }}
             >
-              {t.categories[cat] ?? cat}
+              {isCustomKey(cat) && <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: radius.full, background: ink(colorOf(cat)) }} />}
+              {labelOf(cat)}
             </button>
           ))}
+          <button type="button" aria-expanded={newCatOpen} aria-label={t.categoriesUi.newTitle} onClick={() => setNewCatOpen(v => !v)}
+            style={{
+              padding: '6px 12px', borderRadius: radius.full, background: 'transparent', border: `1px dashed ${colors.border.medium}`,
+              color: colors.text.secondary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+            }}>
+            <Plus size={12} aria-hidden="true" /> {t.categoriesUi.newChip}
+          </button>
         </div>
+        {newCatOpen && (
+          <div style={{ marginTop: 10 }}>
+            <CategoryForm type={form.type} items={customCats} defaultColor={suggestColor(form.type, customCats)}
+              submitLabel={t.categoriesUi.create}
+              onCancel={() => setNewCatOpen(false)}
+              onSubmit={async (name, color) => {
+                const key = await createCategory(form.type, name, color)
+                setCatTouched(true)
+                setForm(f => ({ ...f, category: key }))
+                setNewCatOpen(false)
+              }} />
+          </div>
+        )}
       </div>
 
       {/* Description */}
@@ -238,7 +271,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
             const description = e.target.value
             setForm(f => {
               const suggested = !initial && !catTouched && memory ? suggestCategory(memory, f.type, description) : null
-              const list: readonly string[] = f.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES
+              const list = keysFor(f.type)
               return { ...f, description, ...(suggested && list.includes(suggested) ? { category: suggested } : {}) }
             })
           }}
