@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID, profileRow } from './support/mockSupabase'
 
 // Life OS: ánimo de 5 segundos en el cierre del día (y su insight con datos reales) y la revisión semanal guiada.
@@ -53,7 +53,7 @@ async function quiet(page: Page, day: string) {
 }
 
 async function axe(page: Page) {
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => `${n.html} — ${n.failureSummary}`).join(' | ')}`)).toEqual([])
 }
 

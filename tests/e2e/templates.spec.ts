@@ -1,12 +1,12 @@
 import { expect, test, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
 
 // Plantillas de Identity: suman módulos VACÍOS y OCULTOS ("Completá esto"). Nada inventado llega a la página:
 // sólo se muestra lo que la persona completó y guardó. Nunca borra ni repite los únicos que ya están.
 
 async function noSerious(page: Page, where: string) {
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   const bad = results.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')
   expect(bad.map(v => `${where} · ${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
 }

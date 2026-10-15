@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID, profileRow, type MockState } from './support/mockSupabase'
 
 // Life OS · Diario privado: escribir, editar, borrar con "Deshacer", buscar; bloqueo con PIN (en el dispositivo) que
@@ -21,7 +21,7 @@ function seed(): MockState {
 }
 
 async function axe(page: Page) {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const r = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(r.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
 }
 

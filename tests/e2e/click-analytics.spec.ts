@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
 
 // Analítica → "Lo que más tocan": cada botón del perfil manda módulo + clave corta (nada del visitante) y Studio
@@ -59,7 +59,7 @@ test('un visitante toca un link y un medio de "Apoyame"; la dueña lo ve en Anal
 
   for (const scheme of ['dark', 'light'] as const) {
     await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' })
-    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+    const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
     expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
   }
 })

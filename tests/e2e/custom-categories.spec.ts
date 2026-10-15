@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID, profileRow, type MockState } from './support/mockSupabase'
 
 // Life OS · Dinero: categorías propias. Se crean desde el formulario, se ven en "En qué se fue" y en la búsqueda, se
@@ -38,7 +38,7 @@ test('crear una categoría propia desde el movimiento, usarla, cambiarla en Ajus
   await sheet.getByRole('radio', { name: 'Azul' }).click()
   await expect(sheet.getByRole('radio', { name: 'Azul' })).toHaveAttribute('aria-checked', 'true')
 
-  const axe = await new AxeBuilder({ page }).include('[role="dialog"]').withTags(['wcag2a', 'wcag2aa']).analyze()
+  const axe = await (await settledAxe(page)).include('[role="dialog"]').withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(axe.violations.map(v => `${v.id}: ${v.nodes.map(x => x.target.join(' ')).join(', ')}`)).toEqual([])
 
   await sheet.getByRole('button', { name: 'Crear', exact: true }).click()
@@ -102,6 +102,6 @@ test('Ajustes: restaurar una archivada', async ({ page, context }) => {
   await expect(section.getByRole('button', { name: 'Opciones de Alquileres' })).toBeVisible()
   await expect.poll(() => state.tables.life_categories[0].archived_at).toBeNull()
 
-  const axe = await new AxeBuilder({ page }).include('#life-categories-title').withTags(['wcag2a', 'wcag2aa']).analyze()
+  const axe = await (await settledAxe(page)).include('#life-categories-title').withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(axe.violations).toEqual([])
 })

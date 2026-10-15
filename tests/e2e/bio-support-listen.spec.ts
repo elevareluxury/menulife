@@ -1,5 +1,5 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, moduleRow, profileRow, type MockState } from './support/mockSupabase'
 
 // Módulos de bio (V1.1): "Apoyame" (support) y "Escuchá en" (listen_on). Son links comunes y textos para copiar:
@@ -51,7 +51,7 @@ async function settled(page: Page) {
 
 async function axe(page: Page) {
   await settled(page)
-  const results = await new AxeBuilder({ page })
+  const results = await (await settledAxe(page))
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .exclude('img')
     .analyze()

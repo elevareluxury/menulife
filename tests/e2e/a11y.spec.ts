@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock } from './support/mockSupabase'
 
 // V1 · etapa 15: accesibilidad automática del onboarding (cada pantalla) en los dos temas del celular.
@@ -7,7 +7,7 @@ import { createState, installSupabaseMock } from './support/mockSupabase'
 // Se exige cero violaciones serias o críticas.
 
 async function noSerious(page: Page, where: string) {
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   const bad = results.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')
   expect(bad.map(v => `${where} · ${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
 }

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID, profileRow, type MockState } from './support/mockSupabase'
 
 // Life OS · Dinero: movimientos con fecha futura, editar un gasto compartido y el + de Dinero sin conexión.
@@ -55,7 +55,7 @@ test('fecha futura: se ve marcada, cuenta en el balance recién ese día, va en 
 
   await expect.poll(() => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[style*="opacity"]')]
     .filter(e => e.tagName !== 'BUTTON').every(e => getComputedStyle(e).opacity === '1'))).toBe(true)
-  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const axe = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(axe.violations.map(v => `${v.id}: ${v.nodes.map(x => x.target.join(' ')).join(', ')}`)).toEqual([])
 
   // Hay algo en noviembre: se puede avanzar hasta ahí y no más

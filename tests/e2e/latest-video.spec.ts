@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
 import { installYoutubeLatestMock } from './support/mockYoutubeLatest'
 
@@ -64,7 +64,7 @@ test('Studio: se pega el @ del canal, se prueba, se guarda y se publica; el visi
   await expect(v.locator('img[src*="ytimg"]')).toHaveCount(0)
   expect(seen).toEqual([])
 
-  const axe = await new AxeBuilder({ page: v }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).exclude('img').analyze()
+  const axe = await (await settledAxe(v)).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).exclude('img').analyze()
   expect(axe.violations.map(x => `${x.id}: ${x.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
 
   await play.click()

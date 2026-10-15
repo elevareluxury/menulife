@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID, profileRow, type MockState } from './support/mockSupabase'
 
 // Life OS · Dinero: meses anteriores, en qué se fue, buscar y filtrar, y categorías que se ordenan solas.
@@ -49,7 +49,7 @@ test('en qué se fue: gastos por categoría, comparados con el mes anterior, y f
   // La lista entra con un fundido (opacity): medir el contraste recién cuando todo terminó de aparecer
   await expect.poll(() => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[style*="opacity"]')]
     .filter(e => e.tagName !== 'BUTTON').every(e => getComputedStyle(e).opacity === '1'))).toBe(true)
-  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const axe = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(axe.violations.map(v => `${v.id}: ${v.nodes.map(x => x.target.join(' ')).join(', ')}`)).toEqual([])
 })
 

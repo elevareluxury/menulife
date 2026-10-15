@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock } from './support/mockSupabase'
 
 // "Agregar a inicio": en el iPhone muestra los pasos; si Mycen ya está instalado, no aparece.
@@ -25,7 +25,7 @@ test.describe('en el iPhone', () => {
     const sheet = page.getByRole('dialog', { name: 'Tené Mycen en tu inicio' })
     await expect(sheet.getByRole('listitem')).toHaveCount(3)
     await expect(sheet).toContainText('Agregar a inicio')
-    const axe = await new AxeBuilder({ page }).include('[role="dialog"]').analyze()
+    const axe = await (await settledAxe(page)).include('[role="dialog"]').analyze()
     expect(axe.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')).toEqual([])
     await page.keyboard.press('Escape')
     await expect(sheet).toBeHidden()

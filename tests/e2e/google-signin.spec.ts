@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID } from './support/mockSupabase'
 
 // Entrar con Google (V1.1): el botón manda a Google por Supabase y, al volver, la cuenta queda con el idioma,
@@ -77,7 +77,7 @@ test('una cuenta nueva con Google desde el login acepta los términos una sola v
   await page.goto('/auth/callback')
   await expect(page).toHaveURL(/\/auth\/terms$/)
   await expect(page.getByRole('heading', { name: 'Un paso más' })).toBeVisible()
-  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const axe = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(axe.violations.map(v => v.id)).toEqual([])
 
   await page.getByRole('button', { name: 'Continuar', exact: true }).click()

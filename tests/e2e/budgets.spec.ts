@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID, profileRow, type MockState } from './support/mockSupabase'
 
 // Life OS · Dinero: presupuestos amables (life_budgets). Lo gastado sale de los movimientos del mes en la misma moneda;
@@ -58,7 +58,7 @@ test('crear un presupuesto, ver lo que queda, editarlo y borrarlo con deshacer',
 
   // Sin el mouse encima del botón (LifeButton baja la opacidad al pasar el mouse)
   await page.mouse.move(0, 0)
-  const axe = await new AxeBuilder({ page }).include('[role="dialog"]').withTags(['wcag2a', 'wcag2aa']).analyze()
+  const axe = await (await settledAxe(page)).include('[role="dialog"]').withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(axe.violations.map(v => `${v.id}: ${v.nodes.map(x => x.target.join(' ')).join(', ')}`)).toEqual([])
 
   await sheet.getByRole('button', { name: 'Guardar presupuesto' }).click()
@@ -81,7 +81,7 @@ test('crear un presupuesto, ver lo que queda, editarlo y borrarlo con deshacer',
   await expect.poll(() => Number(state.tables.life_budgets[0].amount)).toBe(500)
   await expect(card.getByText(leftText('200'))).toBeVisible()
 
-  const pageAxe = await new AxeBuilder({ page }).include('#budgets-title').withTags(['wcag2a', 'wcag2aa']).analyze()
+  const pageAxe = await (await settledAxe(page)).include('#budgets-title').withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(pageAxe.violations).toEqual([])
 
   // Borrar con "Deshacer": vuelve
@@ -119,7 +119,7 @@ test('pasarse: tono amable en Dinero y una línea en Mi día; el mes pasado mues
   // Lo más pasado arriba
   await expect(card.getByRole('listitem').first()).toContainText('Comida')
 
-  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const axe = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(axe.violations.map(v => `${v.id}: ${v.nodes.map(x => x.target.join(' ')).join(', ')}`)).toEqual([])
 
   // Mes anterior: sólo el resultado
