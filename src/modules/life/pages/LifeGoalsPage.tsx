@@ -6,11 +6,12 @@ import { Target, Plus, Pencil, Trash2, Pause, Play, CheckCircle2, CalendarDays }
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
-import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog, MiniProgressRing, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
+import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, MiniProgressRing, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
 import { useGoals, type Goal } from '../hooks/useGoals'
 import { GoalSheet } from '../components/GoalSheet'
 import { GoalDetailSheet } from '../components/GoalDetailSheet'
 import { ActionMenu } from '../components/ActionMenu'
+import { LetGoDialog, WhyQuote } from '../components/Why'
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function GoalSkeleton() {
@@ -82,6 +83,7 @@ function GoalCard({ goal, onOpen, onEdit, onDelete, onToggleStatus }: {
                 </span>
               )}
             </span>
+            {goal.why && <WhyQuote as="span" why={goal.why} color={ink(goal.color)} lines={1} style={{ marginTop: 4 }} />}
           </span>
         </button>
 
@@ -230,8 +232,9 @@ export function LifeGoalsPage() {
         onUpdateStatus={(id, status) => { updateGoal(id, { status }).catch(fail) }}
       />
 
-      <LifeConfirmDialog
+      <LetGoDialog
         open={!!deleteTarget}
+        why={deleteTarget?.why}
         title={t.goals.deleteTitle}
         message={deleteTarget ? t.goals.deleteText(deleteTarget.name) : ''}
         confirmLabel={t.common.delete}

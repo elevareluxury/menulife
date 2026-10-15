@@ -7,6 +7,8 @@ import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../desig
 import { LIFE_COLORS, HABIT_ICONS, getHabitIcon } from '../lib/lifePalette'
 import type { Habit, HabitFormData } from '../hooks/useHabits'
 import { GoalSelect } from './GoalSelect'
+import { WhyField } from './Why'
+import { whyValue } from '../lib/why'
 
 interface HabitSheetProps {
   open: boolean
@@ -20,7 +22,7 @@ const DEFAULT: HabitFormData = {
   icon: 'Star',
   color: colors.accent.ink,
   frequency: { type: 'daily', days: [0, 1, 2, 3, 4, 5, 6] },
-  target_value: null, unit: null, anchor: null, reminder_time: null, reminder_enabled: false,
+  target_value: null, unit: null, anchor: null, reminder_time: null, reminder_enabled: false, why: null,
 }
 
 const fieldStyle: React.CSSProperties = {
@@ -66,6 +68,7 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
           name: initial.name, icon: initial.icon, color: initial.color, frequency: initial.frequency, goal_id: initial.goal_id ?? null,
           target_value: initial.target_value, unit: initial.unit, anchor: initial.anchor,
           reminder_time: initial.reminder_time?.slice(0, 5) ?? null, reminder_enabled: initial.reminder_enabled,
+          why: initial.why ?? null,
         }
       : DEFAULT)
     const f = initial?.frequency
@@ -99,6 +102,7 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
         target_value: withQty ? Number(form.target_value) : null,
         unit: withQty ? form.unit?.trim() || null : null,
         anchor: form.anchor?.trim() || null,
+        why: whyValue(form.why),
         reminder_time: form.reminder_enabled ? form.reminder_time : form.reminder_time || null,
       })
       onClose()
@@ -131,6 +135,8 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
             color: colors.text.primary, fontFamily: font, fontSize: '16px', outline: 'none',
           }} />
       </div>
+
+      <WhyField id="habit-why" value={form.why ?? ''} onChange={why => setForm(f => ({ ...f, why }))} />
 
       <div style={{ marginBottom: '20px' }}>
         <span style={label}>{t.habitSheet.icon}</span>

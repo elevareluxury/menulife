@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import { colors, font, radius, shadow, tint } from '../tokens'
@@ -13,13 +13,15 @@ interface LifeConfirmDialogProps {
   onConfirm: () => void
   onCancel: () => void
   danger?: boolean
+  /** Algo más entre el texto y los botones (por ejemplo, el "¿Por qué lo hago?" antes de soltar) */
+  children?: ReactNode
 }
 
 export function LifeConfirmDialog({
   open, title, message,
   confirmLabel,
   cancelLabel,
-  onConfirm, onCancel, danger = false,
+  onConfirm, onCancel, danger = false, children,
 }: LifeConfirmDialogProps) {
   const t = useLifeT()
   const titleId = useId()
@@ -91,6 +93,7 @@ export function LifeConfirmDialog({
             }}>
               {message}
             </p>
+            {children}
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={onCancel}
