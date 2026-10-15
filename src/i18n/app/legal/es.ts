@@ -123,6 +123,7 @@ const es = {
         '**Anthropic:** sólo si un negocio usa la importación de su menú desde un PDF; se procesa ese archivo.',
         '**Mercado Pago:** sólo si un negocio lo configura para cobrar; el pago se hace en Mercado Pago.',
         '**Google Calendar, Apple u otro calendario:** sólo si activás el link de calendario de Life OS; ese servicio descarga tus tareas pendientes con fecha (título, fecha, hora y aviso). Lo podés apagar o cambiar cuando quieras.',
+        '**Reconocimiento de voz de tu navegador:** sólo si usás "Dictar" en Life OS. Tu navegador convierte la voz en texto (en Chrome lo hace el servicio de voz de Google; en Safari, Apple). Mycen recibe sólo el texto.',
       ] },
       'Fuera de eso, sólo compartimos datos si la ley nos obliga o para proteger los derechos y la seguridad de las personas.',
     ] },

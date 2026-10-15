@@ -116,6 +116,7 @@ const fr: LegalDict = {
         '**Anthropic :** uniquement si une entreprise utilise l’import de son menu depuis un PDF ; ce fichier est traité.',
         '**Mercado Pago :** uniquement si une entreprise le configure pour encaisser ; le paiement se fait sur Mercado Pago.',
         '**Google Agenda, Apple ou un autre calendrier :** seulement si vous activez le lien de calendrier de Life OS ; ce service télécharge vos tâches en attente avec une date (titre, date, heure et rappel). Vous pouvez le désactiver ou le changer à tout moment.',
+        '**La reconnaissance vocale de votre navigateur :** seulement si vous utilisez « Dicter » dans Life OS. Votre navigateur transforme la voix en texte (dans Chrome, c’est le service vocal de Google ; dans Safari, Apple). Mycen ne reçoit que le texte.',
       ] },
       'En dehors de cela, nous ne partageons des données que si la loi l’exige ou pour protéger les droits et la sécurité des personnes.',
     ] },

@@ -177,6 +177,12 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   "cal" reservado como username. Privacidad: el calendario elegido descarga las tareas (12 idiomas). Migración
   `20261028000001_life_calendar_feed.sql`, tests en `life_calendar.test.sql`, `calendarFeed.test.ts` y
   `calendar-feed.spec.ts`.
+- Cargar con la voz (V1.1, beta `voiceCapture`): "Dictar" en el + (sólo si el navegador tiene reconocimiento de voz).
+  `hooks/useSpeech.ts` (Web Speech API, idioma de la app) → `lib/voiceParse.ts` (reglas por idioma, en el dispositivo:
+  tipo por palabras clave, primer número como monto con "mil/thousand…", hoy/mañana/día de la semana y hora) →
+  `VoiceCaptureSheet` (se revisa y corrige antes de guardar; gasto/ingreso en "Otros", tarea con fecha y hora, idea).
+  Privacidad: el reconocimiento del navegador (Google en Chrome, Apple en Safari), 12 idiomas. Tests en
+  `voiceParse.test.ts` y `voice.spec.ts` (reconocimiento simulado).
 - El contenido que escribe el dueño se muestra en su idioma original (`default_locale`) o en la traducción guardada en `translations`;
   la traducción automática con Claude está pendiente (Fase 7).
 - Interfaz en español (rioplatense) primero.

@@ -116,6 +116,7 @@ const pt: LegalDict = {
         '**Anthropic:** só se um negócio usa a importação do cardápio a partir de um PDF; esse arquivo é processado.',
         '**Mercado Pago:** só se um negócio o configura para receber pagamentos; o pagamento é feito no Mercado Pago.',
         '**Google Agenda, Apple ou outra agenda:** só se você ativar o link de agenda do Life OS; esse serviço baixa suas tarefas pendentes com data (título, data, horário e lembrete). Você pode desativar ou trocar quando quiser.',
+        '**Reconhecimento de voz do seu navegador:** só se você usar "Ditar" no Life OS. Seu navegador converte a voz em texto (no Chrome, quem faz isso é o serviço de voz do Google; no Safari, a Apple). O Mycen recebe só o texto.',
       ] },
       'Fora isso, só compartilhamos dados se a lei exigir ou para proteger os direitos e a segurança das pessoas.',
     ] },

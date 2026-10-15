@@ -116,6 +116,7 @@ const de: LegalDict = {
         '**Anthropic:** nur wenn ein Unternehmen den Import seiner Speisekarte aus einem PDF nutzt; diese Datei wird verarbeitet.',
         '**Mercado Pago:** nur wenn ein Unternehmen es für Zahlungen einrichtet; die Zahlung erfolgt bei Mercado Pago.',
         '**Google Kalender, Apple oder ein anderer Kalender:** nur wenn du den Kalender-Link von Life OS einschaltest; dieser Dienst lädt deine offenen Aufgaben mit Datum (Titel, Datum, Uhrzeit und Erinnerung). Du kannst ihn jederzeit ausschalten oder ändern.',
+        '**Die Spracherkennung deines Browsers:** nur wenn du in Life OS „Diktieren“ nutzt. Dein Browser wandelt die Stimme in Text um (in Chrome übernimmt das der Sprachdienst von Google, in Safari Apple). Mycen erhält nur den Text.',
       ] },
       'Darüber hinaus teilen wir Daten nur, wenn das Gesetz es verlangt oder um die Rechte und die Sicherheit von Menschen zu schützen.',
     ] },

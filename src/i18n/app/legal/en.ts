@@ -116,6 +116,7 @@ const en: LegalDict = {
         '**Anthropic:** only if a business uses the menu import from a PDF; that file is processed.',
         '**Mercado Pago:** only if a business sets it up to get paid; the payment happens on Mercado Pago.',
         '**Google Calendar, Apple or another calendar:** only if you turn on the Life OS calendar link; that service downloads your pending tasks with a date (title, date, time and reminder). You can turn it off or change it at any time.',
+        '**Your browser’s speech recognition:** only if you use "Dictate" in Life OS. Your browser turns your voice into text (in Chrome, Google’s speech service does it; in Safari, Apple). Mycen only receives the text.',
       ] },
       'Beyond that, we only share data if the law requires it or to protect people’s rights and safety.',
     ] },
