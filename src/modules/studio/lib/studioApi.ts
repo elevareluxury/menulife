@@ -275,7 +275,7 @@ export async function exportMyData(userId: string, email: string | undefined): P
     identity.profile_versions = data ?? []
     // Mensajes recibidos por el formulario de contacto (sin el hash anti-abuso, que no le sirve a nadie)
     const { data: messages } = await db.from('profile_messages')
-      .select('profile_id, name, contact, message, created_at, read_at').in('profile_id', profileIds)
+      .select('profile_id, kind, name, contact, message, details, created_at, read_at').in('profile_id', profileIds)
     identity.profile_messages = messages ?? []
   }
   if (identityIds.length) {
@@ -329,11 +329,15 @@ export interface ProfileMessage {
   message: string
   created_at: string
   read_at: string | null
+  /** 'collab' = propuesta de colaboración (V1.1); sin valor = mensaje del formulario de contacto */
+  kind?: 'message' | 'collab'
+  /** Sólo en 'collab': { company, website?, deliverable, budget?, deadline? } (se lee con readCollabDetails) */
+  details?: unknown
 }
 
 export async function loadMessages(): Promise<ProfileMessage[]> {
   const { data, error } = await db.from('profile_messages')
-    .select('id, profile_id, name, contact, message, created_at, read_at')
+    .select('id, profile_id, kind, name, contact, message, details, created_at, read_at')
     .order('created_at', { ascending: false })
     .limit(300)
   if (error) throw error

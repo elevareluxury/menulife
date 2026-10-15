@@ -560,6 +560,13 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 .st-message-snippet { flex-basis: 100%; color: var(--st-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .st-message.is-unread .st-message-snippet { color: var(--st-text); }
 .st-message-body { padding: 0 10px 14px 29px; }
+/* Colaboraciones (V1.1): insignia y detalles de la propuesta */
+.st-badge-collab { display: inline-flex; align-items: center; gap: 4px; color: var(--st-text); }
+.st-collab-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; margin: 12px 0 0; }
+.st-collab-details div { min-width: 0; }
+.st-collab-details dt { font-size: 12px; color: var(--st-muted); }
+.st-collab-details dd { margin: 2px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.st-collab-details a { color: inherit; text-decoration: underline; }
 .st-bottom-nav a[aria-current='page'] .st-unread { background: var(--my-on-accent); color: var(--my-accent); }
 
 /* Mis Spaces visibles (V1 · etapa 07): qué es un Space, con ejemplos y el link que tendría */

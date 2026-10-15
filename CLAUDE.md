@@ -305,6 +305,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   sin IP), 200 por perfil/día; bots (trampa, < 3 s, agente) reciben "ok" sin guardar. Studio → Mensajes (`/studio/messages`)
   y `useUnreadMessages` (contador en la navegación, "Más" en el celular y el Inicio; servirá para el push nativo).
   `ProfileModuleContext` da a los módulos huella, handle y si es vista previa (en la vista previa no se envía).
+- Colaboraciones (V1.1, `FEATURES.bioModules`): módulo `collab` (`CollabModule`, chunk propio, textos en
+  `profile/lib/collabI18n.ts`; título, invitación, "Tarifas desde…" y texto del botón) → RPC `submit_profile_collab`
+  (sólo con un `collab` publicado; mismos controles que el formulario y los límites cuentan juntos) → `profile_messages`
+  con `kind 'collab'` y `details` (empresa, web https, formato de `COLLAB_DELIVERABLES` en `profile/lib/collab.ts`,
+  presupuesto y fecha límite; la base valida con `mycen_valid_collab_details`). Studio → Mensajes filtra Todos /
+  Mensajes / Colaboraciones y muestra los detalles. Migración `20261031000002_profile_collab_messages.sql`, tests en
+  `tests/db/collab.test.sql` y `collab.spec.ts`.
 - Apariencia (etapa 06): `AppearancePage` = estructura (miniaturas con la huella real), tema, acento, huella (estilos +
   "Generar otra" → `huella_salt`, con "Volver a la anterior" hasta publicar), portada (sólo Portada) y perfil vivo
   (`status_text`, `available`). Guarda siempre los valores nuevos del tema; vista previa en vivo al costado (≥ 1280 px) o

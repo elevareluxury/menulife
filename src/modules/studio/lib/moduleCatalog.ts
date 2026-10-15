@@ -5,6 +5,7 @@ import { safeHref } from '@/modules/profile/lib/safeUrl'
 import { inspectMediaUrl, MEDIA_PROVIDER_NAME, parseMediaUrl } from '@/modules/profile/lib/media'
 import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import type { StudioDict } from '@/i18n/app/studio'
+import { featureOn } from '@/lib/features'
 import type { StudioModule } from './studioTypes'
 import {
   CardsEditor, GalleryEditor, HoursEditor, LinkItemsEditor, MediaUrlEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
@@ -375,6 +376,17 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         { key: 'intro', label: t.messages.intro, kind: 'textarea', translatable: true, maxLength: 200, placeholder: t.messages.introPlaceholder },
       ],
       summary: () => t.messages.moduleSummary,
+    },
+    // V1.1 · módulos de bio: Colaboraciones (las propuestas llegan a Studio → Mensajes, filtro "Colaboraciones")
+    collab: {
+      addable: featureOn('bioModules'),
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80, placeholder: t.collab.titlePlaceholder },
+        { key: 'intro', label: t.collab.intro, kind: 'textarea', translatable: true, maxLength: 200, placeholder: t.collab.introPlaceholder },
+        { key: 'rates', label: t.collab.rates, kind: 'text', translatable: true, maxLength: 80, placeholder: t.collab.ratesPlaceholder },
+        { key: 'button', label: t.collab.button, kind: 'text', translatable: true, maxLength: 40, placeholder: t.collab.buttonPlaceholder },
+      ],
+      summary: x => text(x.rates) || t.collab.moduleSummary,
     },
     // V1 · etapa 04: video y música integrados (fachada en la página; el reproductor se carga al tocar)
     media: {

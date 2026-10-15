@@ -94,3 +94,18 @@ export async function submitProfileMessage(handle: string, input: {
   if (error) throw new Error(error.message)
   return data as MessageResult
 }
+
+/** Colaboraciones (módulo 'collab', V1.1): la propuesta llega a Studio → Mensajes, separada de los mensajes. */
+export async function submitProfileCollab(handle: string, input: {
+  name: string; email: string; company: string; website: string; deliverable: string; budget: string; deadline: string
+  message: string; trap: string; elapsedMs: number
+}): Promise<MessageResult> {
+  const { data, error } = await rpc('submit_profile_collab', {
+    p_handle: handle, p_name: input.name, p_email: input.email, p_company: input.company,
+    p_website: input.website || null, p_deliverable: input.deliverable, p_budget: input.budget || null,
+    p_deadline: input.deadline || null, p_message: input.message,
+    p_trap: input.trap || null, p_elapsed_ms: Math.round(input.elapsedMs),
+  })
+  if (error) throw new Error(error.message)
+  return data as MessageResult
+}
