@@ -12,6 +12,8 @@ export const FEATURES = {
   googleSignIn:   true,
   // Diario privado con bloqueo en el dispositivo (Life OS → Brain → Diario)
   journal:        true,
+  // Ánimo del día y revisión semanal guiada en Life OS (V1.1, pedido directo; prendido para todos)
+  lifeReflection: true,
 } as const
 
 export type FeatureName = keyof typeof FEATURES

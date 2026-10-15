@@ -355,6 +355,16 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   hábitos, la meta en foco y el mes. `LifeSheet` va en un portal (si no, quedaba bajo la barra). E2E en `my-day.spec.ts`.
   La tarjeta "Mi identidad" (`HubSection`, → Studio) va arriba de Mi día; se oculta o se muestra en Life OS → Ajustes
   ("Mi día", `useHomePrefs` en `lib/homePrefs.ts`, guardado en el dispositivo).
+- Ánimo y revisión semanal (V1.1, `FEATURES.lifeReflection`, prendido): en el cierre del día 5 caritas (`MoodPicker`,
+  botones con nombre y `aria-pressed`; un toque guarda, tocar otra vez borra) → `life_daily_reviews.mood` (1–5, null =
+  no contestó). `lib/mood.ts`: Insights `moodHabits` (sólo si fue más alto) y `moodSpend` con ≥ 14 días con ánimo, ≥ 5 de
+  cada lado y ½ punto de diferencia; textos en condicional, sin causas. "Tu mes" suma "Cómo te sentiste" si hay datos.
+  "Tu semana en 5 minutos" (`components/WeeklyReview.tsx`): tarjeta en Mi día el último día de la semana (`week_start`;
+  "Ahora no" la guarda en el dispositivo) y en Insights → "Tus semanas" (revisar cuando quieras + semanas anteriores).
+  3 pasos: lo que salió bien (tareas, hábitos y ánimo reales + texto), qué soltar (atrasadas: semana que viene, fecha o
+  soltar) y hasta 3 focos (texto o tarea con fecha al empezar la semana) → `life_weekly_reviews` (una por semana; `wins`/
+  `let_go` ≤ 500, `next_focus` como las prioridades). Migración `20261030000002_life_reflection.sql`, tests en
+  `life_reflection.test.sql`, `reflection.test.ts` y `reflection.spec.ts`.
 - Life OS con el sistema de diseño y tono sin culpa (etapa 12): `LifeShell` pone `data-mycen-theme` en `<html>` según el
   celular (también lo heredan las hojas en portal) y `MotionConfig reducedMotion="user"`. Los tokens de
   `life/design-system/tokens.ts` apuntan a `--my-*` y a `life.css` (`--life-money|goals|habits|brain` por tema y

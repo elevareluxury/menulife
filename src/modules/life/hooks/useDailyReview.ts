@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { celebrate } from '../lib/celebrate'
 import { trackEvent } from '@/lib/productEvents'
+import { isMood, type Mood } from '../lib/mood'
 
 // "Mi día" (V1 · etapa 11): una fila de life_daily_reviews por persona y fecha local.
 const db = supabase as unknown as SupabaseClient
@@ -19,11 +20,13 @@ export interface DailyReview {
   priorities: Priority[]
   reflection: string | null
   closed_at: string | null
+  /** Ánimo del cierre (1–5); null = no contestó */
+  mood: Mood | null
 }
 
 const newId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `p-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`)
 
-function prioritiesOf(v: unknown): Priority[] {
+export function prioritiesOf(v: unknown): Priority[] {
   if (!Array.isArray(v)) return []
   return v.filter((p): p is Priority => !!p && typeof p.id === 'string'
     && ((p.kind === 'task' && typeof p.task_id === 'string') || (p.kind === 'text' && typeof p.text === 'string')))
@@ -37,14 +40,14 @@ function prioritiesOf(v: unknown): Priority[] {
  */
 export function useDailyReview(date: string, liveTaskIds?: ReadonlySet<string> | null) {
   const { user } = useAuthStore()
-  const [review, setReview] = useState<DailyReview>({ date, priorities: [], reflection: null, closed_at: null })
+  const [review, setReview] = useState<DailyReview>({ date, priorities: [], reflection: null, closed_at: null, mood: null })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
   useEffect(() => {
     if (!user) return
     let cancelled = false
-    db.from('life_daily_reviews').select('date,priorities,reflection,closed_at')
+    db.from('life_daily_reviews').select('date,priorities,reflection,closed_at,mood')
       .eq('user_id', user.id).eq('date', date).maybeSingle()
       .then(({ data, error: err }) => {
         if (cancelled) return
@@ -52,8 +55,8 @@ export function useDailyReview(date: string, liveTaskIds?: ReadonlySet<string> |
         else {
           setError(false)
           setReview(data
-            ? { date, priorities: prioritiesOf(data.priorities), reflection: data.reflection ?? null, closed_at: data.closed_at ?? null }
-            : { date, priorities: [], reflection: null, closed_at: null })
+            ? { date, priorities: prioritiesOf(data.priorities), reflection: data.reflection ?? null, closed_at: data.closed_at ?? null, mood: isMood(data.mood) ? data.mood : null }
+            : { date, priorities: [], reflection: null, closed_at: null, mood: null })
         }
         setLoading(false)
       })
@@ -67,7 +70,7 @@ export function useDailyReview(date: string, liveTaskIds?: ReadonlySet<string> |
     const next = { ...review, ...patch }
     setReview(next)
     const { error: err } = await db.from('life_daily_reviews').upsert(
-      { user_id: user.id, date, priorities: next.priorities, reflection: next.reflection, closed_at: next.closed_at, updated_at: new Date().toISOString() },
+      { user_id: user.id, date, priorities: next.priorities, reflection: next.reflection, closed_at: next.closed_at, mood: next.mood, updated_at: new Date().toISOString() },
       { onConflict: 'user_id,date' })
     if (err) { setReview(prev); throw err }
   }, [user, date, review])
@@ -102,5 +105,8 @@ export function useDailyReview(date: string, liveTaskIds?: ReadonlySet<string> |
     return save({ reflection: reflection?.trim().slice(0, 280) || null, closed_at: new Date().toISOString() })
   }, [save])
 
-  return { review, livePriorities, loading, error, addTaskPriority, addTextPriority, removePriority, toggleTextPriority, closeDay }
+  /** Ánimo de un toque (tocar la misma carita otra vez lo borra). */
+  const setMood = useCallback((mood: Mood | null) => save({ mood }), [save])
+
+  return { review, livePriorities, loading, error, addTaskPriority, addTextPriority, removePriority, toggleTextPriority, closeDay, setMood }
 }

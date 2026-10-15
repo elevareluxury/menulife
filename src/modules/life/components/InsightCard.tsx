@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, CalendarDays, ChevronRight, Flame, ListChecks, PieChart, Target, TrendingDown, TrendingUp, type LucideIcon } from 'lucide-react'
+import { AlertCircle, CalendarDays, ChevronRight, Flame, ListChecks, PieChart, Smile, Target, TrendingDown, TrendingUp, type LucideIcon } from 'lucide-react'
 import type { LifeDict } from '@/i18n/app/life'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
@@ -37,6 +37,16 @@ function insightView(i: Insight, t: LifeDict, locale: string, labelOf: (category
       return { ...it.tasksWeek, text: it.tasksWeek.text(i.now, i.prev), icon: ListChecks, color: colors.area.brain, route: '/life/brain?vista=tareas' }
     case 'habitStrong':
       return { ...it.habitStrong, text: it.habitStrong.text(i.name, i.pct), icon: Flame, color: colors.semantic.success, route: '/life/habits' }
+    // Ánimo: coincidencias, sin causas (los textos lo dicen en condicional)
+    case 'moodHabits': {
+      const avg = (n: number) => n.toLocaleString(locale, { maximumFractionDigits: 1 })
+      return { title: t.mood.habitsTitle, text: t.mood.habitsText(avg(i.withAvg), avg(i.withoutAvg), i.days), icon: Smile, color: colors.area.habits, route: '/life/habits' }
+    }
+    case 'moodSpend': {
+      const avg = (n: number) => n.toLocaleString(locale, { maximumFractionDigits: 1 })
+      const text = i.higher ? t.mood.spendHigherText : t.mood.spendLowerText
+      return { title: t.mood.spendTitle, text: text(avg(i.withAvg), avg(i.withoutAvg), i.days), icon: Smile, color: colors.area.money, route: '/life/money' }
+    }
   }
 }
 
