@@ -299,6 +299,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   rechazados, el iframe se arma con el id validado. Fachada `MediaModule` (chunk propio, huella del perfil por
   `ProfileHuellaContext`): nada de terceros hasta tocar "Reproducir" (lo verifica `media.spec.ts`). Bento: video L, música M
   (`bento` puede ser función). Los proveedores están en privacidad (12 idiomas).
+- Último video (bio, `FEATURES.bioModules`): módulo `latest_video` (`content`: `url`, `channel_id` UC… o `handle` @…,
+  `show_title`, `count` 1|3). Reglas puras en `profile/lib/latestVideo.ts` (link del canal, feed y respuesta; imports
+  relativos porque también las usa la función Edge). `api/youtube-latest.ts` (`?channel=` o `?handle=`): con un @ lee la
+  página del canal para saber el id, después el feed público; caché 30 min en la CDN, errores con códigos fijos. Sin volver
+  a publicar. `LatestVideoModule` (chunk propio): fachada con la huella, sin miniaturas de ytimg, YouTube sin cookies al
+  tocar; con error o sin videos no se muestra (en la vista previa, un aviso). Studio: `LatestVideoEditor` con "Probar".
+  E2E en `latest-video.spec.ts` (mock en `support/mockYoutubeLatest.ts`), unitarios en `latestVideo.test.ts`.
 - Formulario de contacto (etapa 05): módulo `contact_form` (`ContactFormModule`, chunk propio con sus textos en
   `profile/lib/contactFormI18n.ts`) → RPC `submit_profile_message` → `profile_messages` (RLS: el dueño lee, marca `read_at` y
   borra; nadie inserta directo). Sin email. Límites en la base: largos, ≤ 3 links, 5 por visitante/perfil/día (hash diario,

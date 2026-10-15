@@ -113,7 +113,7 @@ const en: LegalDict = {
         '**Supabase:** database, sign-in and files.',
         '**Vercel:** hosting the application and delivering the pages.',
         '**Resend:** sending your account emails.',
-        '**YouTube, Vimeo, TikTok, Spotify and SoundCloud:** only if a profile embeds a video or a song and you tap "Play". Nothing connects to them before that; from then on, their own policies apply.',
+        '**YouTube, Vimeo, TikTok, Spotify and SoundCloud:** only if a profile embeds a video or a song and you tap "Play". Nothing connects to them before that; from then on, their own policies apply. If a profile shows its "Latest video", the Mycen server checks the public video list of the YouTube channel chosen by the owner, without sending any of your data.',
         '**Anthropic:** only if a business uses the menu import from a PDF; that file is processed.',
         '**Mercado Pago:** only if a business sets it up to get paid; the payment happens on Mercado Pago.',
         '**Google (sign-in):** only if you choose "Continue with Google". Google confirms your name, email and photo to us; we never get your Google password or access anything else in your account.',

@@ -3,15 +3,16 @@ import type { ModuleType, WeekSchedule } from '@/modules/profile/lib/profileType
 import { WEEK_DAYS } from '@/modules/profile/lib/schedule'
 import { safeHref } from '@/modules/profile/lib/safeUrl'
 import { inspectMediaUrl, MEDIA_PROVIDER_NAME, parseMediaUrl } from '@/modules/profile/lib/media'
+import { inspectChannelUrl, parseChannelUrl } from '@/modules/profile/lib/latestVideo'
+import { featureOn } from '@/lib/features'
 import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import type { StudioDict } from '@/i18n/app/studio'
-import { featureOn } from '@/lib/features'
 import type { StudioModule } from './studioTypes'
-import { featureOn } from '@/lib/features'
 import {
   CardsEditor, GalleryEditor, HoursEditor, LinkItemsEditor, MediaUrlEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
   type ExtraEditorProps, type GalleryItem, type LinkItemInput, type ReviewsValue,
 } from '../components/moduleExtraEditors'
+import { LatestVideoEditor, type LatestVideoValue } from '../components/LatestVideoEditor'
 
 export type FieldKind = 'text' | 'textarea' | 'url' | 'email' | 'tel' | 'number' | 'select' | 'image'
 
@@ -428,6 +429,33 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       prefill: (x, content) => { x.ask_name = content?.ask_name === true ? 'yes' : 'no' },
       finalize: (content, x) => { content.ask_name = x.ask_name === 'yes' },
       summary: () => t.subscribers.moduleSummary,
+    },
+    // Bio: el video más nuevo de un canal de YouTube (lo trae /api/youtube-latest; no hace falta volver a publicar)
+    latest_video: {
+      addable: featureOn('bioModules'),
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
+      ],
+      extra: extra<LatestVideoValue>({
+        init: m => ({ url: text(m?.content.url), showTitle: m?.content.show_title !== false, count: m?.content.count === 3 ? 3 : 1 }),
+        validate: v => {
+          const r = inspectChannelUrl(v.url)
+          return 'error' in r ? t.latestVideo.errors[r.error] : null
+        },
+        apply: (v, content) => {
+          delete content.channel_id
+          delete content.handle
+          content.url = v.url.trim()
+          Object.assign(content, parseChannelUrl(v.url) ?? {})
+          content.show_title = v.showTitle
+          content.count = v.count
+        },
+        Editor: LatestVideoEditor,
+      }),
+      summary: x => {
+        const ref = parseChannelUrl(x.url)
+        return ref ? `YouTube · ${'handle' in ref ? ref.handle : ref.channel_id}` : ''
+      },
     },
     // Se edita en Mi identidad → tarjeta de contacto; en la página es el botón "Guardar contacto"
     contact_card: { addable: false, fields: [], summary: () => '' },

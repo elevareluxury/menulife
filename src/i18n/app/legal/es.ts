@@ -120,7 +120,7 @@ const es = {
         '**Supabase:** base de datos, inicio de sesión y archivos.',
         '**Vercel:** alojamiento de la aplicación y entrega de las páginas.',
         '**Resend:** envío de los mails de tu cuenta.',
-        '**YouTube, Vimeo, TikTok, Spotify y SoundCloud:** sólo si un perfil integra un video o una canción y tocás "Reproducir". Antes de eso no nos conectamos con ellos; desde ese momento se aplican sus propias políticas.',
+        '**YouTube, Vimeo, TikTok, Spotify y SoundCloud:** sólo si un perfil integra un video o una canción y tocás "Reproducir". Antes de eso no nos conectamos con ellos; desde ese momento se aplican sus propias políticas. Si un perfil muestra su "Último video", el servidor de Mycen consulta el listado público de videos del canal de YouTube que eligió su dueño, sin enviar ningún dato tuyo.',
         '**Anthropic:** sólo si un negocio usa la importación de su menú desde un PDF; se procesa ese archivo.',
         '**Mercado Pago:** sólo si un negocio lo configura para cobrar; el pago se hace en Mercado Pago.',
         '**Google (inicio de sesión):** sólo si elegís "Continuar con Google". Google nos confirma tu nombre, tu email y tu foto; no recibimos tu contraseña de Google ni accedemos a nada más de tu cuenta.',
