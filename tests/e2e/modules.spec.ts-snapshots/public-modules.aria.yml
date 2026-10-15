@@ -99,6 +99,13 @@
       - /url: https://behance.net/ana
   - region "Videoclip":
     - button "Videoclip Reproducir en YouTube"
+  - region "Mi canal":
+    - button "Cómo hago mis tazas Reproducir en YouTube"
+    - list:
+      - listitem:
+        - button "Visita al taller"
+      - listitem:
+        - button "Esmaltes nuevos"
   - link "mycen":
     - /url: /
   - text: ·

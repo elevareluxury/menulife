@@ -26,8 +26,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Cambios de username quedan en `profile_username_history` (redirección).
 - Usernames reservados: tabla `reserved_usernames` y `src/lib/reservedUsernames.ts` (mantener sincronizados).
 - El visitante anónimo **nunca** lee tablas: usa las RPC `get_public_profile`, `get_public_project`, `get_profile_contact_card`,
-  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`, `submit_profile_message`
-  y `track_product_event` (sin sesión, sólo `signup_started`).
+  `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`, `submit_profile_message`,
+  `track_product_event` (sin sesión, sólo `signup_started`) y `subscribe_profile`.
 - Proyectos (Fase 5): `content_objects` (type='project') + `content_blocks`. Son de la identidad y se publican por su cuenta
   (`publish_project` → `published_snapshot`; Studio no puede escribir el snapshot ni pasar a "publicado" directo).
   Los módulos `project`/`portfolio` guardan sólo ids en `content`; `get_public_profile` les agrega `projects` (tarjetas de lo
@@ -299,12 +299,45 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   rechazados, el iframe se arma con el id validado. Fachada `MediaModule` (chunk propio, huella del perfil por
   `ProfileHuellaContext`): nada de terceros hasta tocar "Reproducir" (lo verifica `media.spec.ts`). Bento: video L, música M
   (`bento` puede ser función). Los proveedores están en privacidad (12 idiomas).
+- Último video (bio, `FEATURES.bioModules`): módulo `latest_video` (`content`: `url`, `channel_id` UC… o `handle` @…,
+  `show_title`, `count` 1|3). Reglas puras en `profile/lib/latestVideo.ts` (link del canal, feed y respuesta; imports
+  relativos porque también las usa la función Edge). `api/youtube-latest.ts` (`?channel=` o `?handle=`): con un @ lee la
+  página del canal para saber el id, después el feed público; caché 30 min en la CDN, errores con códigos fijos. Sin volver
+  a publicar. `LatestVideoModule` (chunk propio): fachada con la huella, sin miniaturas de ytimg, YouTube sin cookies al
+  tocar; con error o sin videos no se muestra (en la vista previa, un aviso). Studio: `LatestVideoEditor` con "Probar".
+  E2E en `latest-video.spec.ts` (mock en `support/mockYoutubeLatest.ts`), unitarios en `latestVideo.test.ts`.
 - Formulario de contacto (etapa 05): módulo `contact_form` (`ContactFormModule`, chunk propio con sus textos en
   `profile/lib/contactFormI18n.ts`) → RPC `submit_profile_message` → `profile_messages` (RLS: el dueño lee, marca `read_at` y
   borra; nadie inserta directo). Sin email. Límites en la base: largos, ≤ 3 links, 5 por visitante/perfil/día (hash diario,
   sin IP), 200 por perfil/día; bots (trampa, < 3 s, agente) reciben "ok" sin guardar. Studio → Mensajes (`/studio/messages`)
   y `useUnreadMessages` (contador en la navegación, "Más" en el celular y el Inicio; servirá para el push nativo).
   `ProfileModuleContext` da a los módulos huella, handle y si es vista previa (en la vista previa no se envía).
+- Colaboraciones (V1.1, `FEATURES.bioModules`): módulo `collab` (`CollabModule`, chunk propio, textos en
+  `profile/lib/collabI18n.ts`; título, invitación, "Tarifas desde…" y texto del botón) → RPC `submit_profile_collab`
+  (sólo con un `collab` publicado; mismos controles que el formulario y los límites cuentan juntos) → `profile_messages`
+  con `kind 'collab'` y `details` (empresa, web https, formato de `COLLAB_DELIVERABLES` en `profile/lib/collab.ts`,
+  presupuesto y fecha límite; la base valida con `mycen_valid_collab_details`). Studio → Mensajes filtra Todos /
+  Mensajes / Colaboraciones y muestra los detalles. Migración `20261031000002_profile_collab_messages.sql`, tests en
+  `tests/db/collab.test.sql` y `collab.spec.ts`.
+- Suscribirse (módulos de bio, V1.1, `FEATURES.bioModules`): módulo `subscribe` (`SubscribeModule`, chunk propio, textos en
+  `profile/lib/subscribeI18n.ts`; título, texto, nombre opcional si el dueño lo pide, botón y casilla de consentimiento
+  obligatoria con el nombre del dueño — `displayName` en `ProfileModuleContext` — y link a privacidad) → RPC
+  `subscribe_profile` → `profile_subscribers` (RLS: el dueño lee sin el hash y borra; nadie inserta directo). Email en
+  minúsculas ≤ 254, único por perfil (repetido = "ok" sin revelar nada), 5 por visitante/perfil/día (hash diario, sin IP),
+  500 por perfil/día, tope 50.000; bots reciben "ok" sin guardar. Mycen no le manda nada a la lista. Studio →
+  Suscriptores (`/studio/subscribers`, en la navegación y en "Más"): buscar, borrar y "Exportar CSV"
+  (`lib/subscribersCsv.ts`: escapado y fórmulas neutralizadas). Entra en exportar la cuenta; privacidad (12 idiomas).
+  Migración `20261031000003_profile_subscribers.sql`, tests en `subscribers.test.sql`, `subscribersCsv.test.ts` y
+  `subscribe.spec.ts`.
+- Apoyame y Escuchá en (módulos de bio V1.1, `FEATURES.bioModules`): `support` = hasta 6 medios (Mercado Pago, PayPal,
+  Ko-fi, Buy Me a Coffee y "otro link" con dominio validado y https; alias/CVU/CBU ≤ 60 y clave Pix ≤ 80 con "Copiar" y
+  aviso `role="status"`), mensaje ≤ 140 y montos sugeridos como texto. Mycen no cobra ni procesa pagos (lo dice la tarjeta).
+  `listen_on` = canción o disco, artista, portada (o la huella) y hasta 8 links, uno por plataforma (Spotify, Apple Music,
+  YouTube Music, YouTube, Deezer, TIDAL, SoundCloud, Amazon Music; la plataforma se detecta por el dominio). Sólo links:
+  ni reproductores ni íconos de terceros. Reglas puras en `profile/lib/support.ts` y `listenOn.ts` (la página vuelve a
+  validar lo guardado), chunks propios `SupportModule`/`ListenOnModule` con textos en `supportListenI18n.ts` y CSS en
+  `supportListen.css`; editores en `studio/components/supportListenEditors.tsx`. Tests en `support.test.ts`,
+  `listenOn.test.ts` y `bio-support-listen.spec.ts` (5 estructuras × 2 temas con axe).
 - Apariencia (etapa 06): `AppearancePage` = estructura (miniaturas con la huella real), tema, acento, huella (estilos +
   "Generar otra" → `huella_salt`, con "Volver a la anterior" hasta publicar), portada (sólo Portada) y perfil vivo
   (`status_text`, `available`). Guarda siempre los valores nuevos del tema; vista previa en vivo al costado (≥ 1280 px) o

@@ -43,7 +43,10 @@ for m in \
   20261030000001_life_budgets \
   20261030000002_life_reflection \
   20261030000003_life_why \
-  20261030000004_life_journal; do
+  20261030000004_life_journal \
+  20261031000001_bio_module_types \
+  20261031000002_profile_collab_messages \
+  20261031000003_profile_subscribers; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

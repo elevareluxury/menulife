@@ -22,7 +22,7 @@ export function OverviewPage() {
   const everywhere = useEverywhereT()
   // V1 · etapa 05: mensajes sin leer del formulario de contacto
   const { count: unread } = useUnreadMessages()
-  const hasForm = modules.some(m => m.type === 'contact_form' && !m.deleted_at)
+  const hasForm = modules.some(m => (m.type === 'contact_form' || m.type === 'collab') && !m.deleted_at)
   const canAddToHome = useCanAddToHome()
 
 

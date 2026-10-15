@@ -275,8 +275,12 @@ export async function exportMyData(userId: string, email: string | undefined): P
     identity.profile_versions = data ?? []
     // Mensajes recibidos por el formulario de contacto (sin el hash anti-abuso, que no le sirve a nadie)
     const { data: messages } = await db.from('profile_messages')
-      .select('profile_id, name, contact, message, created_at, read_at').in('profile_id', profileIds)
+      .select('profile_id, kind, name, contact, message, details, created_at, read_at').in('profile_id', profileIds)
     identity.profile_messages = messages ?? []
+    // Suscriptores del módulo "Suscribirse" (sin el hash anti-abuso)
+    const { data: subscribers } = await db.from('profile_subscribers')
+      .select('profile_id, email, name, consent_at, locale, created_at').in('profile_id', profileIds)
+    identity.profile_subscribers = subscribers ?? []
   }
   if (identityIds.length) {
     const { data: objects } = await db.from('content_objects').select('*').in('identity_id', identityIds)
@@ -329,11 +333,15 @@ export interface ProfileMessage {
   message: string
   created_at: string
   read_at: string | null
+  /** 'collab' = propuesta de colaboración (V1.1); sin valor = mensaje del formulario de contacto */
+  kind?: 'message' | 'collab'
+  /** Sólo en 'collab': { company, website?, deliverable, budget?, deadline? } (se lee con readCollabDetails) */
+  details?: unknown
 }
 
 export async function loadMessages(): Promise<ProfileMessage[]> {
   const { data, error } = await db.from('profile_messages')
-    .select('id, profile_id, name, contact, message, created_at, read_at')
+    .select('id, profile_id, kind, name, contact, message, details, created_at, read_at')
     .order('created_at', { ascending: false })
     .limit(300)
   if (error) throw error
@@ -353,6 +361,41 @@ export async function setMessageRead(id: string, read: boolean): Promise<void> {
 
 export async function deleteMessage(id: string): Promise<void> {
   const { error } = await db.from('profile_messages').delete().eq('id', id)
+  if (error) throw error
+}
+
+// ── Suscriptores del módulo "Suscribirse" (módulos de bio, V1.1) ────────────
+// La RLS deja ver sólo los de los Spaces de la cuenta; el dueño lee y borra (no cambia nada).
+
+export interface ProfileSubscriber {
+  id: string
+  profile_id: string
+  email: string
+  name: string | null
+  locale: string | null
+  created_at: string
+}
+
+/** Toda la lista (de a 1000, como devuelve la API; tope de 50.000 por perfil en la base). */
+export async function loadSubscribers(): Promise<ProfileSubscriber[]> {
+  const page = 1000
+  const all: ProfileSubscriber[] = []
+  for (let from = 0; from < 300_000; from += page) {
+    const { data, error } = await db.from('profile_subscribers')
+      .select('id, profile_id, email, name, locale, created_at')
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true })
+      .range(from, from + page - 1)
+    if (error) throw error
+    const rows = (data ?? []) as ProfileSubscriber[]
+    all.push(...rows)
+    if (rows.length < page) break
+  }
+  return all
+}
+
+export async function deleteSubscriber(id: string): Promise<void> {
+  const { error } = await db.from('profile_subscribers').delete().eq('id', id)
   if (error) throw error
 }
 

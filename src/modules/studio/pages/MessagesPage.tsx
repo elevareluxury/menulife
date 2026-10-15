@@ -1,20 +1,27 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Mail, MessageCircle, Trash2 } from 'lucide-react'
+import { Handshake, Mail, MessageCircle, Trash2 } from 'lucide-react'
 import { useStudioT } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
+import { readCollabDetails, type CollabDetails } from '@/modules/profile/lib/collab'
 import { Button, ConfirmDialog, PageHeader } from '../components/ui'
 import { useStudio } from '../StudioContext'
 import { deleteMessage, loadMessages, setMessageRead, type ProfileMessage } from '../lib/studioApi'
 import { notifyMessagesChanged, replyLinks } from '../lib/useUnreadMessages'
 
+type Filter = 'all' | 'message' | 'collab'
+const kindOf = (m: ProfileMessage): 'message' | 'collab' => (m.kind === 'collab' ? 'collab' : 'message')
+
 /**
- * Bandeja de mensajes del formulario de contacto (V1 · etapa 05). Los mensajes no se mandan por email: viven acá.
- * Abrir uno lo marca como leído; se responde por email o WhatsApp según el contacto que dejó la persona.
+ * Bandeja de mensajes del formulario de contacto (V1 · etapa 05) y de las propuestas de Colaboraciones (V1.1).
+ * No se mandan por email: viven acá. Abrir uno lo marca como leído; se responde por email o WhatsApp según el
+ * contacto que dejó la persona. Filtro Todos / Mensajes / Colaboraciones.
  */
 export function MessagesPage() {
-  const t = useStudioT().messages
+  const st = useStudioT()
+  const t = st.messages
+  const tc = st.collab
   const { spaces } = useStudio()
   const locale = langLocale(useAppLang(s => s.lang))
   const [items, setItems] = useState<ProfileMessage[] | null | 'error'>(null)
@@ -22,6 +29,7 @@ export function MessagesPage() {
   const [confirm, setConfirm] = useState<ProfileMessage | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [status, setStatus] = useState('')
+  const [filter, setFilter] = useState<Filter>('all')
 
   useEffect(() => {
     let alive = true
@@ -29,8 +37,33 @@ export function MessagesPage() {
     return () => { alive = false }
   }, [])
 
-  const list = Array.isArray(items) ? items : []
+  const all = Array.isArray(items) ? items : []
+  const list = filter === 'all' ? all : all.filter(m => kindOf(m) === filter)
   const unread = list.filter(m => !m.read_at).length
+  const filters: { value: Filter; label: string }[] = [
+    { value: 'all', label: tc.all }, { value: 'message', label: tc.onlyMessages }, { value: 'collab', label: tc.onlyCollabs },
+  ]
+  const fmtDeadline = (d: string) => {
+    const [y, mo, day] = d.split('-').map(Number)
+    return new Date(y, mo - 1, day).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
+  }
+  const siteLabel = (url: string) => url.replace(/^https:\/\/(www\.)?/i, '').replace(/\/$/, '')
+
+  const collabInfo = (d: CollabDetails) => {
+    return (
+      <dl className="st-collab-details">
+        <div><dt>{tc.company}</dt><dd dir="auto">{d.company}</dd></div>
+        {d.website && (
+          <div><dt>{tc.website}</dt><dd>
+            <a href={d.website} target="_blank" rel="noopener noreferrer nofollow" dir="ltr">{siteLabel(d.website)}</a>
+          </dd></div>
+        )}
+        <div><dt>{tc.deliverable}</dt><dd>{tc.deliverables[d.deliverable]}</dd></div>
+        {d.budget && <div><dt>{tc.budget}</dt><dd dir="auto">{d.budget}</dd></div>}
+        {d.deadline && <div><dt>{tc.deadline}</dt><dd><time dateTime={d.deadline}>{fmtDeadline(d.deadline)}</time></dd></div>}
+      </dl>
+    )
+  }
   const spaceName = (id: string) => spaces.length > 1 ? spaces.find(s => s.id === id)?.display_name : undefined
 
   function update(id: string, patch: Partial<ProfileMessage>) {
@@ -74,7 +107,21 @@ export function MessagesPage() {
       {items === null && <p className="st-help">…</p>}
       {items === 'error' && <p className="st-error" role="alert">{t.loadError}</p>}
 
-      {Array.isArray(items) && !list.length && (
+      {all.length > 0 && (
+        <div className="st-segment" role="group" aria-label={tc.filterLabel} style={{ marginBottom: 12, flexWrap: 'wrap' }}>
+          {filters.map(f => (
+            <button key={f.value} type="button" aria-pressed={filter === f.value} onClick={() => { setFilter(f.value); setOpen(null) }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {Array.isArray(items) && !list.length && filter !== 'all' && all.length > 0 && (
+        <section className="st-card"><p className="st-help" style={{ margin: 0 }}>{tc.emptyFilter}</p></section>
+      )}
+
+      {Array.isArray(items) && !all.length && (
         <section className="st-card">
           <p style={{ marginTop: 0 }}><strong>{t.empty}</strong></p>
           <p className="st-help">{t.emptyCta}</p>
@@ -90,6 +137,7 @@ export function MessagesPage() {
               const isOpen = open === m.id
               const reply = replyLinks(m.contact)
               const space = spaceName(m.profile_id)
+              const collab = kindOf(m) === 'collab' ? readCollabDetails(m.details) : null
               return (
                 <li key={m.id} className={`st-message${m.read_at ? '' : ' is-unread'}`}>
                   <button type="button" className="st-message-head" aria-expanded={isOpen} aria-controls={`msg-${m.id}`}
@@ -98,8 +146,11 @@ export function MessagesPage() {
                     <span className="st-message-meta">
                       <strong>{m.name}</strong>
                       {!m.read_at && <span className="st-badge">{t.newBadge}</span>}
+                      {kindOf(m) === 'collab' && (
+                        <span className="st-badge st-badge-collab"><Handshake size={12} aria-hidden="true" /> {tc.badge}</span>
+                      )}
                       {space && <span className="st-help"> · {space}</span>}
-                      {!isOpen && <span className="st-message-snippet">{m.message}</span>}
+                      {!isOpen && <span className="st-message-snippet">{collab ? `${collab.company} · ${m.message}` : m.message}</span>}
                     </span>
                     <time className="st-help" dateTime={m.created_at}>
                       {new Date(m.created_at).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
@@ -108,6 +159,7 @@ export function MessagesPage() {
                   {isOpen && (
                     <div id={`msg-${m.id}`} className="st-message-body">
                       <p className="st-help" style={{ margin: 0 }}>{t.from}: <span dir="auto">{m.contact}</span></p>
+                      {collab && collabInfo(collab)}
                       <p style={{ whiteSpace: 'pre-line', overflowWrap: 'anywhere' }} dir="auto">{m.message}</p>
                       <div className="st-row" style={{ flexWrap: 'wrap' }}>
                         {reply.email && (

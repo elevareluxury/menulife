@@ -41,5 +41,15 @@ export const MODULE_FIXTURES = [
     content: { url: 'https://youtu.be/dQw4w9WgXcQ', provider: 'youtube', kind: 'video' } }) },
 ]
 
+/**
+ * Módulos que piden datos a una función de api/ (Vite no las corre): van aparte para no cambiar las capturas de otros
+ * specs. modules.spec.ts los suma y responde la función con su mock.
+ */
+export const API_MODULE_FIXTURES = [
+  // Último video (bio): /api/youtube-latest → tests/e2e/support/mockYoutubeLatest.ts
+  { label: 'Mi canal', row: moduleRow({ id: 'm-latest-video', type: 'latest_video', title: 'Mi canal', position: 170,
+    content: { url: 'https://www.youtube.com/@anaperez', handle: '@anaperez', show_title: true, count: 3 } }) },
+]
+
 /** Proyecto que muestran los módulos project/portfolio de arriba (hay que publicarlo con publishProjectRow) */
 export const PROJECT_FIXTURE = projectRow({ id: 'pr-luna', title: 'Marca Café Luna', slug: 'cafe-luna', summary: 'Identidad 2025' })

@@ -55,17 +55,21 @@ function rich(): MockState {
   ]
   state.tables.life_achievements = []
   state.tables.profile_messages = [{ id: 'msg1', profile_id: 'p-ana', name: 'Juan', contact: 'j@x.com', message: 'Hola https://x.com', created_at: iso(-1), read_at: null }]
+  state.tables.profile_subscribers = [
+    { id: 'sub1', profile_id: 'p-ana', email: 'un.email.muy.largo.para.ver.si.se.desborda@dominio-larguisimo.example.com', name: '=Juan, "el"', locale: 'es', created_at: iso(-2) },
+    { id: 'sub2', profile_id: 'p-ana', email: 'sofi@x.com', name: null, locale: null, created_at: iso(-1) },
+  ]
   return state
 }
 
 function empty(): MockState {
   const s = createState({ profiles: [profileRow()] })
-  for (const t of ['life_brain_items', 'life_habits', 'life_habit_logs', 'life_daily_reviews', 'life_goals', 'life_goal_milestones', 'life_goal_checkins', 'life_transactions', 'life_achievements', 'profile_messages']) s.tables[t] = []
+  for (const t of ['life_brain_items', 'life_habits', 'life_habit_logs', 'life_daily_reviews', 'life_goals', 'life_goal_milestones', 'life_goal_checkins', 'life_transactions', 'life_achievements', 'profile_messages', 'profile_subscribers']) s.tables[t] = []
   return s
 }
 
 const ROUTES = ['/studio', '/studio/identity', '/studio/modules', '/studio/projects', '/studio/projects/pr-luna', '/studio/appearance', '/studio/exchange',
-  '/studio/analytics', '/studio/settings', '/studio/preview', '/studio/editor', '/studio/spaces', '/studio/messages', '/studio/everywhere', '/studio/more', '/studio/nada',
+  '/studio/analytics', '/studio/settings', '/studio/preview', '/studio/editor', '/studio/spaces', '/studio/messages', '/studio/subscribers', '/studio/everywhere', '/studio/more', '/studio/nada',
   '/life', '/life/money', '/life/goals', '/life/habits', '/life/brain', '/life/brain?vista=tareas', '/life/replay', '/life/insights', '/life/settings', '/life/journal',
   '/ana', '/ana/estudio', '/ana/projects/cafe-luna', '/ana?src=qr', '/noexiste', '/', '/login', '/register', '/terminos', '/privacidad']
 

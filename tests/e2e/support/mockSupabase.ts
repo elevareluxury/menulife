@@ -72,7 +72,7 @@ export function createState(seed: Partial<MockState['tables']> = {}, usernameHis
   const state: MockState = {
     tables: {
       profiles: [], profile_modules: [], profile_stats_daily: [], profile_versions: [], content_objects: [], content_blocks: [],
-      profile_reports: [], super_admins: [], profile_messages: [],
+      profile_reports: [], super_admins: [], profile_messages: [], profile_subscribers: [],
       ...seed,
     },
     usernameHistory,
@@ -426,8 +426,59 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       if (String(args.p_trap ?? '').trim() || Number(args.p_elapsed_ms ?? 0) < 3000) return 'ok'
       if (state.tables.profile_messages.filter(m => m.profile_id === p.id && m.sender_hash === 'mock-visitor').length >= 5) return 'rate_limited'
       state.tables.profile_messages.push({
-        id: `msg-${Math.random().toString(36).slice(2, 8)}`, profile_id: p.id, name, contact, message,
+        id: `msg-${Math.random().toString(36).slice(2, 8)}`, profile_id: p.id, kind: 'message', name, contact, message, details: null,
         sender_hash: 'mock-visitor', created_at: new Date().toISOString(), read_at: null,
+      })
+      return 'ok'
+    }
+    // = submit_profile_collab (V1.1, Colaboraciones): sólo con un módulo 'collab' publicado; el límite cuenta con los mensajes
+    case 'submit_profile_collab': {
+      const { p } = findSpace(state, String(args.p_handle ?? ''))
+      if (!p || p.status !== 'published' || p.visibility === 'private' || spaceSuspended(state, p)) return 'not_found'
+      const snap = publishedSnapshot(state, p)
+      if (!((snap?.modules as Row[] | undefined) ?? []).some(m => m.type === 'collab')) return 'not_found'
+      const s = (k: string) => String(args[k] ?? '').trim()
+      const name = s('p_name'), email = s('p_email'), company = s('p_company'), message = s('p_message')
+      const website = s('p_website'), budget = s('p_budget'), deadline = s('p_deadline'), deliverable = s('p_deliverable')
+      if (name.length < 1 || name.length > 80 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 120
+        || company.length < 1 || company.length > 120 || message.length < 1 || message.length > 2000
+        || !['post', 'video', 'story', 'event', 'ugc', 'other'].includes(deliverable)
+        || (website && !/^https:\/\/[^\s/?#]+\.[^\s/?#]+([/?#]\S*)?$/i.test(website)) || website.length > 300
+        || budget.length > 60 || (deadline && !/^\d{4}-\d{2}-\d{2}$/.test(deadline))) return 'invalid'
+      if ((message.match(/(https?:\/\/|www\.)/gi) ?? []).length > 3) return 'too_many_links'
+      if (s('p_trap') || Number(args.p_elapsed_ms ?? 0) < 3000) return 'ok'
+      if (state.tables.profile_messages.filter(m => m.profile_id === p.id && m.sender_hash === 'mock-visitor').length >= 5) return 'rate_limited'
+      const details: Row = { company, deliverable }
+      if (website) details.website = website
+      if (budget) details.budget = budget
+      if (deadline) details.deadline = deadline
+      state.tables.profile_messages.push({
+        id: `msg-${Math.random().toString(36).slice(2, 8)}`, profile_id: p.id, kind: 'collab', name, contact: email, message,
+        details, sender_hash: 'mock-visitor', created_at: new Date().toISOString(), read_at: null,
+      })
+      return 'ok'
+    }
+    // = subscribe_profile (módulos de bio, "Suscribirse"): mismas validaciones; todos los visitantes son "la misma persona"
+    case 'subscribe_profile': {
+      const { p } = findSpace(state, String(args.p_handle ?? ''))
+      if (!p || p.status !== 'published' || p.visibility === 'private' || spaceSuspended(state, p)) return 'not_found'
+      const snap = publishedSnapshot(state, p)
+      const mod = ((snap?.modules as Row[] | undefined) ?? []).find(m => m.type === 'subscribe' && m.id === args.p_module_id)
+      if (!mod || !isModuleLive(mod.config as Row)) return 'not_found'
+      if (args.p_consent !== true) return 'consent_required'
+      const email = String(args.p_email ?? '').trim().toLowerCase()
+      let name: string | null = String(args.p_name ?? '').trim() || null
+      if ((mod.content as Row | undefined)?.ask_name !== true) name = null
+      if (email.length < 3 || email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || (name && name.length > 80)) return 'invalid'
+      if (String(args.p_hp ?? '').trim() || Number(args.p_elapsed_ms ?? 0) < 3000) return 'ok'
+      const subs = (state.tables.profile_subscribers ??= [])
+      if (subs.filter(s => s.profile_id === p.id && s.sender_hash === 'mock-visitor').length >= 5) return 'rate_limited'
+      if (subs.some(s => s.profile_id === p.id && s.email === email)) return 'ok'
+      const langs = ['es', 'en', 'pt', 'fr', 'de', 'it', 'zh', 'ja', 'ko', 'hi', 'ar', 'ru']
+      const now = new Date().toISOString()
+      subs.push({
+        id: `sub-${Math.random().toString(36).slice(2, 8)}`, profile_id: p.id, email, name, consent_at: now,
+        locale: langs.includes(String(args.p_locale)) ? args.p_locale : null, module_id: mod.id, sender_hash: 'mock-visitor', created_at: now,
       })
       return 'ok'
     }

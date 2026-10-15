@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
+import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MailPlus, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { StudioContext, type StudioContextValue } from './StudioContext'
 import {
@@ -42,6 +42,7 @@ const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean; deskto
   { to: '/studio/appearance', label: 'appearance', icon: Palette },
   { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
   { to: '/studio/messages',   label: 'messages',   icon: Inbox },
+  { to: '/studio/subscribers', label: 'subscribers', icon: MailPlus },
   { to: '/studio/analytics',  label: 'analytics',  icon: BarChart3 },
   { to: '/studio/settings',   label: 'settings',   icon: Settings },
   { to: '/studio/spaces',     label: 'spaces',     icon: Layers },
