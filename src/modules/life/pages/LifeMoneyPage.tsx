@@ -17,6 +17,10 @@ import { formatMoney } from '@/lib/currencies'
 import toast from 'react-hot-toast'
 import { featureOn } from '@/lib/features'
 import { ImportBankSheet } from '../components/ImportBankSheet'
+import { useInstallments, type InstallmentPlan } from '../hooks/useInstallments'
+import { InstallmentsCard } from '../components/InstallmentsCard'
+import { isInCourse, planName } from '../lib/installments'
+import { localDateKey } from '../hooks/useRecurring'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
@@ -186,10 +190,12 @@ function Sparkline({ curve, color }: { curve: number[]; color: string }) {
 }
 
 // ── Transaction Row ───────────────────────────────────────────────────────────
-function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
+function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf }: {
   tx: Transaction
   fallbackCurrency: string
   locale: string
+  /** Cantidad de cuotas de la compra, si el movimiento es una cuota ("3 de 12") */
+  installmentsOf?: number
   onEdit: () => void
   onDelete: () => void
 }) {
@@ -225,6 +231,13 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
           </p>
         )}
       </div>
+
+      {installmentsOf && tx.installment_no ? (
+        <span aria-label={t.installments.badgeLabel(tx.installment_no, installmentsOf)}
+          style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.secondary, background: colors.surface.high, borderRadius: radius.full, padding: '2px 8px', flexShrink: 0, whiteSpace: 'nowrap' }}>
+          {t.installments.badge(tx.installment_no, installmentsOf)}
+        </span>
+      ) : null}
 
       <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 800, color: amountColor, flexShrink: 0 }} dir="ltr">
         {isIncome ? '+' : '-'}{formatMoney(Number(tx.amount), tx.currency || fallbackCurrency, locale)}
@@ -312,6 +325,7 @@ export function LifeMoneyPage() {
   const isCurrentMonth = month === monthKeyOf(new Date())
 
   const fixed = useRecurring()
+  const plans = useInstallments()
   const [sheetOpen, setSheetOpen]       = useState(false)
   const [editTx, setEditTx]             = useState<Transaction | null>(null)
   const [editFixed, setEditFixed]       = useState<RecurringTx | null>(null)
@@ -334,6 +348,21 @@ export function LifeMoneyPage() {
     fixed.hide(r.id)
     const what = r.description || labelOf(r.category)
     deleteWithUndo({ message: t.recurring.removed(what), commit: () => fixed.remove(r.id), restore: () => void fixed.reload() })
+  }
+  const planSize = new Map(plans.items.map(p => [p.id, p.installments]))
+  const today = localDateKey()
+  const plansInCourse = plans.items.filter(p => isInCourse(p, today))
+  const cancelPlan = (p: InstallmentPlan) => {
+    plans.cancel(p.id).then(() => toast.success(t.installments.cancelled(planName(labelOf, p)))).catch(fail)
+  }
+  const removePlan = (p: InstallmentPlan) => {
+    plans.hide(p.id)
+    for (const g of grouped) for (const tx of g.items) if (tx.installment_plan_id === p.id) hideTransaction(tx.id)
+    deleteWithUndo({
+      message: t.installments.removed(planName(labelOf, p)),
+      commit: () => plans.remove(p.id),
+      restore: () => { void plans.reload(); void reload() },
+    })
   }
   const remove = (tx: Transaction) => {
     hideTransaction(tx.id)
@@ -432,6 +461,10 @@ export function LifeMoneyPage() {
           onDelete={removeFixed} />
       )}
 
+      {isCurrentMonth && plansInCourse.length > 0 && (
+        <InstallmentsCard plans={plansInCourse} locale={locale} onCancel={cancelPlan} onDelete={removePlan} />
+      )}
+
       {everHasData && (
         <div role="search" style={{ marginBottom: 12 }}>
           {/* Sin posicionar (nada de position: relative): así los menús "⋯" de arriba quedan por encima */}
@@ -499,7 +532,8 @@ export function LifeMoneyPage() {
                     {group.items.map(tx => (
                       <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale}
                         onEdit={() => { setEditFixed(null); setEditTx(tx); setSheetOpen(true) }}
-                        onDelete={() => remove(tx)} />
+                        onDelete={() => remove(tx)}
+                        installmentsOf={tx.installment_plan_id ? planSize.get(tx.installment_plan_id) : undefined} />
                     ))}
                   </div>
                   {group.items.length > 1 && single && (
@@ -524,9 +558,10 @@ export function LifeMoneyPage() {
         initial={editFixed ? fixedAsTx(editFixed) : editTx}
         repeatable
         template={!!editFixed}
-        onSave={async (data, repeat) => {
+        onSave={async (data, repeat, installments) => {
           if (editFixed) await fixed.update(editFixed.id, data)
           else if (editTx) await updateTransaction(editTx.id, data)
+          else if (installments) await plans.create(data, installments)
           else if (repeat) await fixed.create(data)
           else await createTransaction(data)
         }}

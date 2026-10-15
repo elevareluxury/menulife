@@ -162,6 +162,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   lo borrado no vuelve, al reanudar no se cargan los meses en pausa). App: `hooks/useRecurring.ts`, "Repetir todos los
   meses" en `TransactionSheet` y tarjeta "Fijos del mes". Migración `20261027000001_life_recurring_transactions.sql`,
   tests en `tests/db/life_recurring.test.sql` y `recurring.spec.ts`.
+- Compras en cuotas (Dinero): `life_installment_plans` (total, 2–72 cuotas, primera fecha, `last_no`, `cancelled_at`;
+  total ≥ 1 por cuota) y `life_transactions.installment_plan_id`/`installment_no` (único). La base carga las vencidas con
+  `life_materialize_installments(p_today, p_tz)` (la llama `useMoney` junto con la de fijos): mismo día que la primera
+  (31 = último día), total / cuotas redondeado y la última ajusta, sin duplicar, lo borrado no vuelve, nada después de
+  cancelar. App: `hooks/useInstallments.ts`, `lib/installments.ts` (misma regla en el cliente), "En cuotas" en
+  `TransactionSheet` (sólo gasto nuevo, excluyente con repetir), fila "3 de 12" y tarjeta `InstallmentsCard` (falta pagar
+  por moneda; "Eliminar" borra la compra y sus cuotas). Migración `20261029000002_life_installments.sql`, tests en
+  `tests/db/life_installments.test.sql`, `installments.test.ts` e `installments.spec.ts`.
 - V1.1 en beta: `featureOn(name)` (`src/lib/features.ts`) prende para todos lo que esté en `FEATURES` y, para probar en
   producción, las funciones de `BETA` en el dispositivo que abrió la app con `?beta=1` (`?beta=0` lo apaga).
 - Dinero por mes (después de la V1): `useMoney(month)` ('YYYY-MM') trae ese mes y el anterior; `MonthSwitcher` ‹ mes › (no

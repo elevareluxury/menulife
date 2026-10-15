@@ -6,6 +6,7 @@ import { LIFE_DATA_UPDATED } from './useBrain'
 import { useLocaleStore } from '@/store/localeStore'
 import { materializeRecurring } from './useRecurring'
 import { monthCurve as curveOf, monthKeyOf, monthRange, shiftMonth } from '../lib/moneyInsights'
+import { materializeInstallments } from './useInstallments'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -23,6 +24,9 @@ export interface Transaction {
   goal_id?: string | null
   /** Generado por un fijo que se repite cada mes */
   recurring_id?: string | null
+  /** Cuota de una compra en cuotas (número en installment_no) */
+  installment_plan_id?: string | null
+  installment_no?: number | null
 }
 
 export interface TransactionFormData {
@@ -84,6 +88,8 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
     if (!user) return
     // Los fijos que ya vencieron se cargan antes de leer (una vez por día; si falla, se sigue igual)
     await materializeRecurring().catch(() => 0)
+    // Lo mismo con las cuotas vencidas de las compras en cuotas
+    await materializeInstallments().catch(() => 0)
     const [from] = monthRange(shiftMonth(month, -1))
     const [, to] = monthRange(month)
     const { data } = await db.from('life_transactions')
