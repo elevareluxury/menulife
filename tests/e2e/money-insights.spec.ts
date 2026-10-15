@@ -46,6 +46,9 @@ test('en qué se fue: gastos por categoría, comparados con el mes anterior, y f
   await page.getByRole('button', { name: 'Quitar el filtro Comida' }).click()
   await expect(page.getByText('Cine')).toBeVisible()
 
+  // La lista entra con un fundido (opacity): medir el contraste recién cuando todo terminó de aparecer
+  await expect.poll(() => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[style*="opacity"]')]
+    .filter(e => e.tagName !== 'BUTTON').every(e => getComputedStyle(e).opacity === '1'))).toBe(true)
   const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(axe.violations.map(v => `${v.id}: ${v.nodes.map(x => x.target.join(' ')).join(', ')}`)).toEqual([])
 })
