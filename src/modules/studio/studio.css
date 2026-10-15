@@ -474,6 +474,14 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 .st-source-bar { height: 6px; margin-top: 6px; border-radius: 999px; background: var(--st-surface-2); overflow: hidden; }
 .st-source-bar span { display: block; height: 100%; border-radius: inherit; background: var(--st-text); }
 
+/* Analítica → "Lo que más tocan": nombre (y módulo) a un lado, toques y % al otro; la barra es decorativa */
+.st-clicks-row { justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
+.st-clicks-label { min-width: 0; overflow-wrap: anywhere; }
+.st-clicks-module { display: block; color: var(--st-muted); font-size: 13px; }
+.st-clicks-numbers { display: flex; flex-direction: column; align-items: flex-end; text-align: end; }
+.st-clicks-numbers span { color: var(--st-muted); font-size: 13px; }
+.st-clicks .st-source-bar span { background: var(--my-accent); }
+
 /* Perfil suspendido (Fase 8) */
 .st-suspended { border-color: color-mix(in srgb, var(--st-danger) 45%, transparent); background: color-mix(in srgb, var(--st-danger) 8%, transparent); margin-bottom: 16px; }
 .st-suspended p { margin: 6px 0 0; color: var(--st-muted); font-size: 14px; line-height: 1.5; }

@@ -3,6 +3,7 @@ import { ArrowUpRight, Coffee, Copy, HeartHandshake, Landmark, Link2, Wallet } f
 import { tr } from '../lib/profileI18n'
 import { isCopyKind, readSupportMethods, SUPPORT_BRAND, supportHref, type SupportKind, type SupportMethod } from '../lib/support'
 import { supportListenStrings } from '../lib/supportListenI18n'
+import { supportKey } from '../lib/clickKeys'
 import type { ModuleProps } from './ProfileModules'
 import './supportListen.css'
 
@@ -36,7 +37,8 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
     return SUPPORT_BRAND[m.kind] ?? new URL(m.value).hostname.replace(/^www\./, '')
   }
 
-  async function copy(value: string) {
+  async function copy(m: SupportMethod) {
+    const value = m.value
     let ok = false
     try {
       await navigator.clipboard.writeText(value)
@@ -49,7 +51,7 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
       setStatus(ok ? t.copied : t.copyFailed)
       timer.current = setTimeout(() => setStatus(''), 4000)
     }, 30)
-    if (ok) onAction(module.id)
+    if (ok) onAction(module.id, supportKey(m))
   }
 
   // El primer link va con el color de acento
@@ -75,7 +77,7 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
                   <span className="mp-support-value" translate="no">{m.value}</span>
                 </span>
                 <button type="button" className="mp-support-copy-btn" aria-label={t.copyAria.replace('{label}', name)}
-                  onClick={() => copy(m.value)}>
+                  onClick={() => copy(m)}>
                   <Copy size={16} aria-hidden="true" /> {t.copy}
                 </button>
               </div>
@@ -85,7 +87,7 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
           if (!href) return null
           return (
             <a key={i} className={`mp-support-link${i === firstLink ? ' is-primary' : ''}`} href={href} target="_blank" rel="noopener noreferrer"
-              onClick={() => onAction(module.id)}>
+              onClick={() => onAction(module.id, supportKey(m))}>
               <span className="mp-support-icon" aria-hidden="true"><Icon size={18} /></span>
               <span className="mp-support-link-name">{name}</span>
               <ArrowUpRight size={18} aria-hidden="true" className="mp-support-arrow" />

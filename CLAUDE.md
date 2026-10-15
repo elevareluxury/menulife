@@ -34,6 +34,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   publicado) al responder, así que publicar un proyecto actualiza el portfolio sin volver a publicar el Space.
 - Analítica: `profile_events` con hash diario anónimo; no guardar IP ni user-agent. Fuentes de tráfico (Fase 7):
   `profile_traffic_sources` (sólo el dueño) agrupa visitas por `?src=` y sitio de origen; Studio las nombra en `lib/trafficSources.ts`.
+- Toques por botón ("Lo que más tocan", Analítica): cada botón público llama `onAction(moduleId, item?)` con una clave corta
+  de `profile/lib/clickKeys.ts` (`urlKey` = hash del link, `supportKey`, plataforma de `listen_on`, `whatsapp|phone|email`,
+  `p:<proyecto>`, `reserve`) → `track_profile_event(…, p_item_key)` → `profile_events.item_key` (≤ 64, `[A-Za-z0-9:_.-]`,
+  la base descarta lo demás; dedup también por clave). `profile_click_stats(p_profile_id, p_days)` (sólo el dueño) da visitas
+  y toques por evento/módulo/clave; `studio/lib/clickStats.ts` les pone nombre con el contenido actual ("Link que ya no
+  está" si se borró) y `ClickRanking` muestra ranking, % sobre visitas y totales por módulo. Un botón nuevo con varios
+  ítems: mandar su clave y nombrarla en `clickItemLabel`. Migración `20261101000001_profile_click_analytics.sql`, tests en
+  `click_analytics.test.sql`, `clickStats.test.ts` y `click-analytics.spec.ts`.
 - Módulos programados (Fase 7): `config.show_from` / `config.show_until` (ISO). La RPC pública los filtra al responder
   (`mycen_module_live`), sin volver a publicar; la misma regla en el cliente está en `profile/lib/moduleSchedule.ts`.
 - Moderación (Fase 8): `report_profile` (anónimo, sin bots, 1 por perfil y día, máx. 10 por día) guarda en `profile_reports`,

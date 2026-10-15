@@ -8,6 +8,7 @@ import type { SpaceSummary } from './spaces'
 import { studioT } from '@/i18n/app/studio'
 import { optimizeImage } from '@/lib/imageOptimize'
 import type { SourceRow } from './trafficSources'
+import type { ClickStats, ClickStatRow } from './clickStats'
 
 // profiles / profile_modules / profile_stats_daily todavía no están en database.types.ts
 const db = supabase as unknown as SupabaseClient
@@ -320,6 +321,17 @@ export async function loadTrafficSources(profileId: string, days: number): Promi
   const { data, error } = await db.rpc('profile_traffic_sources', { p_profile_id: profileId, p_days: days })
   if (error) throw error
   return ((data ?? []) as SourceRow[]).map(r => ({ ...r, visits: Number(r.visits), visitors: Number(r.visitors) }))
+}
+
+/** Analítica → "Lo que más tocan": visitas y toques por botón del período (RPC sólo del dueño) */
+export async function loadClickStats(profileId: string, days: number): Promise<ClickStats> {
+  const { data, error } = await db.rpc('profile_click_stats', { p_profile_id: profileId, p_days: days })
+  if (error) throw error
+  const raw = (data ?? {}) as { visits?: number; items?: ClickStatRow[] }
+  return {
+    visits: Number(raw.visits) || 0,
+    items: (raw.items ?? []).map(r => ({ ...r, taps: Number(r.taps), visitors: Number(r.visitors) })),
+  }
 }
 
 // ── Mensajes del formulario de contacto (V1 · etapa 05) ─────────────────────

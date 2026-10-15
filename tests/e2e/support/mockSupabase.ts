@@ -397,6 +397,46 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       if (!o || !isOwner) throw new Error('NOT_OWNER')
       return { status: o.status, published_at: o.published_at, dirty: !o.published_snapshot || !same(o.published_snapshot, projectSnapshot(state, o)) }
     }
+    // = track_profile_event: sin el dueño, sólo perfiles publicados, módulo del perfil y clave del botón con el
+    // formato de la base. En el mock todos los visitantes son "la misma persona": deduplica por evento + módulo + botón.
+    case 'track_profile_event': {
+      if (isOwner) return null
+      const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
+      if (!p || p.status !== 'published') return null
+      const type = String(args.p_event_type ?? '')
+      if (!['view', 'module_click', 'primary_action_click', 'share', 'copy_link', 'qr_download', 'vcard_download'].includes(type)) return null
+      const moduleId = state.tables.profile_modules.some(m => m.id === args.p_module_id && m.profile_id === p.id) ? args.p_module_id : null
+      const raw = args.p_item_key
+      const itemKey = type !== 'view' && typeof raw === 'string' && /^[A-Za-z0-9:_.-]{1,64}$/.test(raw) ? raw : null
+      const events = (state.tables.profile_events ??= [])
+      if (events.some(e => e.profile_id === p.id && e.event_type === type && e.module_id === moduleId && e.item_key === itemKey)) return null
+      events.push({ profile_id: p.id, event_type: type, module_id: moduleId, item_key: itemKey })
+      // y la vista diaria que lee Analítica
+      const day = new Date().toISOString().slice(0, 10)
+      const daily = state.tables.profile_stats_daily
+      const row = daily.find(r => r.profile_id === p.id && r.day === day && r.event_type === type && r.module_id === moduleId)
+      if (row) row.events = Number(row.events) + 1
+      else daily.push({ profile_id: p.id, day, event_type: type, module_id: moduleId, events: 1, visitors: 1 })
+      return null
+    }
+    // = profile_click_stats: sólo el dueño; visitas y toques por evento + módulo + botón
+    case 'profile_click_stats': {
+      const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
+      if (!p || !isOwner) throw new Error('NOT_OWNER')
+      const events = (state.tables.profile_events ?? []).filter(e => e.profile_id === p.id)
+      const groups = new Map<string, Row>()
+      for (const e of events) {
+        if (!['module_click', 'primary_action_click', 'vcard_download'].includes(String(e.event_type))) continue
+        const k = `${e.event_type}|${e.module_id}|${e.item_key}`
+        const g = groups.get(k) ?? { event_type: e.event_type, module_id: e.module_id, item_key: e.item_key, taps: 0, visitors: 1 }
+        g.taps = Number(g.taps) + 1
+        groups.set(k, g)
+      }
+      return {
+        visits: events.filter(e => e.event_type === 'view').length,
+        items: [...groups.values()].sort((a, b) => Number(b.taps) - Number(a.taps)),
+      }
+    }
     case 'profile_traffic_sources': {
       const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
       if (!p || !isOwner) throw new Error('NOT_OWNER')

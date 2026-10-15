@@ -28,14 +28,15 @@ export function visitSource(): string | null {
   return q.get('src') || q.get('utm_source')?.toLowerCase() || null
 }
 
-/** Registro anónimo de eventos. Nunca bloquea ni rompe la UI. */
-export function trackProfileEvent(profileId: string, eventType: ProfileEventType, moduleId?: string | null) {
+/** Registro anónimo de eventos. Nunca bloquea ni rompe la UI. `itemKey`: qué botón del módulo (lib/clickKeys). */
+export function trackProfileEvent(profileId: string, eventType: ProfileEventType, moduleId?: string | null, itemKey?: string) {
   rpc('track_profile_event', {
     p_profile_id: profileId,
     p_event_type: eventType,
     p_module_id: moduleId ?? null,
     p_referrer: typeof document !== 'undefined' ? document.referrer || null : null,
     p_source: visitSource(),
+    ...(itemKey ? { p_item_key: itemKey } : {}),
   }).then(() => undefined, () => undefined)
 }
 
