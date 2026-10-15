@@ -1,6 +1,6 @@
 import {
   AlignLeft, Clock, FolderOpen, GalleryHorizontal, Image, Images, LayoutGrid, Link2, List, MapPin, MessageSquareQuote,
-  Handshake, Mail, MailPlus, Phone, PlayCircle, ShoppingBag, Sparkles, SquarePlay, UserPlus, Users,
+  Handshake, HeartHandshake, Mail, MailPlus, Music2, Phone, PlayCircle, ShoppingBag, Sparkles, SquarePlay, UserPlus, Users,
 } from 'lucide-react'
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import { moduleSchedule, scheduleState } from '@/modules/profile/lib/moduleSchedule'
@@ -16,11 +16,12 @@ export const MODULE_ICONS: Record<ModuleType, typeof Link2> = {
   featured_action: Sparkles, contact_card: UserPlus, gallery: Images, product: ShoppingBag,
   testimonials: MessageSquareQuote, hours: Clock, cards: GalleryHorizontal, project: FolderOpen, portfolio: LayoutGrid, link_group: List,
   media: PlayCircle, contact_form: Mail,
-  collab: Handshake, subscribe: MailPlus, latest_video: SquarePlay,
+  collab: Handshake, subscribe: MailPlus, latest_video: SquarePlay, support: HeartHandshake, listen_on: Music2,
 }
 
 /** Tipos que se editan en Studio (contact_card se maneja desde Compartir) */
-export const EDITABLE_MODULES: ModuleType[] = ['link', 'social', 'contact', 'location', 'image', 'text', 'featured_action', 'product', 'hours', 'gallery', 'cards', 'testimonials', 'project', 'portfolio', 'link_group', 'media', 'contact_form', 'collab', 'subscribe', 'latest_video']
+export const EDITABLE_MODULES: ModuleType[] = ['link', 'social', 'contact', 'location', 'image', 'text', 'featured_action', 'product', 'hours', 'gallery', 'cards', 'testimonials', 'project', 'portfolio', 'link_group', 'media', 'contact_form',
+  'collab', 'subscribe', 'latest_video', 'support', 'listen_on']
 
 /** "Desde 12 oct 18:00" · "Hasta 20 oct 10:00" · "Terminó" — o null si no está programado */
 export function useScheduleBadge() {

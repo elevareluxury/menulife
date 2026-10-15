@@ -23,10 +23,6 @@ describe('tipos de módulo', () => {
   it('coinciden con el check de la base (la última migración que lo define)', () => {
     const sql = sqlModuleTypes()
     expect(sql.length).toBeGreaterThan(0)
-    // Módulos de bio (V1.1): la base ya acepta los 5 tipos y cada uno se suma a la app por separado.
-    // Cuando estén los 5 en MODULE_TYPES, volver a la igualdad estricta.
-    const pendingBio = ['support', 'subscribe', 'latest_video', 'listen_on', 'collab']
-    expect(MODULE_TYPES.filter(t => !sql.includes(t))).toEqual([])
-    expect(sql.filter(t => !(MODULE_TYPES as readonly string[]).includes(t) && !pendingBio.includes(t))).toEqual([])
+    expect([...MODULE_TYPES].sort()).toEqual([...sql].sort())
   })
 })

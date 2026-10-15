@@ -12,6 +12,9 @@ const MediaModule = lazy(() => import('./MediaModule').then(m => ({ default: m.M
 const SubscribeModule = lazy(() => import('./SubscribeModule').then(m => ({ default: m.SubscribeModule })))
 // "Último video" (bio): chunk propio, pide los datos a /api/youtube-latest
 const LatestVideoModule = lazy(() => import('./LatestVideoModule').then(m => ({ default: m.LatestVideoModule })))
+// Módulos de bio (V1.1): cada uno con su chunk, sus textos y su CSS
+const SupportModule = lazy(() => import('./SupportModule').then(m => ({ default: m.SupportModule })))
+const ListenOnModule = lazy(() => import('./ListenOnModule').then(m => ({ default: m.ListenOnModule })))
 import { parseMediaUrl } from '../lib/media'
 
 export interface GroupProps {
@@ -59,6 +62,8 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   subscribe:       { View: SubscribeModule, bento: 'M' },
   media:           { View: MediaModule, bento: m => (parseMediaUrl(m.content.url)?.kind === 'music' ? 'M' : 'L') },
   latest_video:    { View: LatestVideoModule, bento: 'L' },
+  support:         { View: SupportModule, bento: 'M' },
+  listen_on:       { View: ListenOnModule, bento: 'M' },
 }
 
 /** Tamaño Bento de un módulo */
