@@ -194,6 +194,14 @@ export async function createModule(input: {
   return data as StudioModule
 }
 
+/** Varios módulos de una vez (plantillas): un solo pedido, devueltos en orden de posición */
+export async function createModules(rows: Parameters<typeof createModule>[0][]): Promise<StudioModule[]> {
+  if (!rows.length) return []
+  const { data, error } = await db.from('profile_modules').insert(rows).select('*')
+  if (error) throw error
+  return ((data ?? []) as StudioModule[]).sort((a, b) => a.position - b.position)
+}
+
 export async function updateModule(id: string, patch: Partial<Pick<StudioModule,
   'title' | 'content' | 'translations' | 'visibility' | 'position' | 'config'>>): Promise<StudioModule> {
   const { data, error } = await db.from('profile_modules').update(patch).eq('id', id).select('*').single()

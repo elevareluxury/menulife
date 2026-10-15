@@ -770,5 +770,37 @@ const pt: StudioDict = {
     button: 'Texto do botão (opcional)',
     buttonPlaceholder: 'Inscrever-me',
   },
+  templates: {
+    use: 'Usar um modelo',
+    title: 'Escolha um modelo',
+    intro: 'Adiciona os módulos que cada tipo de perfil costuma usar. Eles entram vazios e ocultos: cada um aparece no seu perfil quando você o completa.',
+    choose: (name: string) => `Ver o modelo ${name}`,
+    look: (layout: string, accent: string) => `Estrutura ${layout} · destaque ${accent}`,
+    back: 'Voltar',
+    willAdd: 'Serão adicionados',
+    alreadyHave: 'Você já tem (não se repetem)',
+    nothingToAdd: 'Você já tem todos os módulos deste modelo.',
+    applyLook: 'Usar também a estrutura e o destaque',
+    applyLookHelp: 'Você pode mudar quando quiser em Aparência.',
+    add: (n: number) => (n === 1 ? 'Adicionar 1 módulo' : `Adicionar ${n} módulos`),
+    added: (n: number) => (n === 1 ? '1 módulo adicionado para completar' : `${n} módulos adicionados para completar`),
+    pending: 'Complete isto',
+    completeX: (t: string) => `Completar ${t}`,
+    checklistTitle: 'Complete seus módulos',
+    checklistText: (n: number) => (n === 1
+      ? 'Falta 1 módulo do modelo. Ele está oculto: aparece no seu perfil quando você o completa e salva.'
+      : `Faltam ${n} módulos do modelo. Estão ocultos: cada um aparece no seu perfil quando você o completa e salva.`),
+    editorHint: 'Este módulo veio de um modelo. Complete e salve: só então ele aparece no seu perfil.',
+    onboardingHint: (n: number) => (n === 1
+      ? 'No Studio, 1 módulo a mais espera por você. Fica oculto até você completá-lo.'
+      : `No Studio, ${n} módulos a mais esperam por você. Ficam ocultos até você completá-los.`),
+    items: {
+      musician: { name: 'Músico/a', description: 'Sua música, seu último vídeo, suas datas e como apoiar você.' },
+      creator: { name: 'Criador/a de conteúdo', description: 'Seu último vídeo, suas redes, seus links e parcerias com marcas.' },
+      professional: { name: 'Profissional / freelancer', description: 'Quem você é, seus trabalhos, avaliações e como contratar você.' },
+      business: { name: 'Negócio local', description: 'Ação principal, horários, endereço, contato e fotos do lugar.' },
+      personal: { name: 'Pessoal', description: 'Suas redes, seus links e um pouco sobre você.' },
+    },
+  },
 }
 export default pt

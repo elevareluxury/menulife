@@ -1046,6 +1046,39 @@ const es = {
     button: 'Texto del botón (opcional)',
     buttonPlaceholder: 'Suscribirme',
   },
+  /** Plantillas de Identity: módulos vacíos y ocultos hasta completarlos (lib/templates.ts) */
+  templates: {
+    use: 'Usar una plantilla',
+    title: 'Elegí una plantilla',
+    intro: 'Suma los módulos que suele usar cada tipo de perfil. Se agregan vacíos y ocultos: cada uno se muestra en tu perfil cuando lo completás.',
+    choose: (name: string) => `Ver la plantilla ${name}`,
+    look: (layout: string, accent: string) => `Estructura ${layout} · acento ${accent}`,
+    back: 'Volver',
+    willAdd: 'Se van a agregar',
+    alreadyHave: 'Ya los tenés (no se repiten)',
+    nothingToAdd: 'Ya tenés todos los módulos de esta plantilla.',
+    applyLook: 'Usar también su estructura y su acento',
+    applyLookHelp: 'Lo podés cambiar cuando quieras en Apariencia.',
+    add: (n: number) => (n === 1 ? 'Agregar 1 módulo' : `Agregar ${n} módulos`),
+    added: (n: number) => (n === 1 ? 'Se agregó 1 módulo para completar' : `Se agregaron ${n} módulos para completar`),
+    pending: 'Completá esto',
+    completeX: (t: string) => `Completar ${t}`,
+    checklistTitle: 'Completá tus módulos',
+    checklistText: (n: number) => (n === 1
+      ? 'Te queda 1 módulo de la plantilla. Está oculto: se muestra en tu perfil cuando lo completás y guardás.'
+      : `Te quedan ${n} módulos de la plantilla. Están ocultos: cada uno se muestra en tu perfil cuando lo completás y guardás.`),
+    editorHint: 'Este módulo vino de una plantilla. Completalo y guardalo: recién ahí se muestra en tu perfil.',
+    onboardingHint: (n: number) => (n === 1
+      ? 'En Studio te espera 1 módulo más para completar. Está oculto hasta que lo completes.'
+      : `En Studio te esperan ${n} módulos más para completar. Están ocultos hasta que los completes.`),
+    items: {
+      musician: { name: 'Músico/a', description: 'Tu música, tu último video, tus fechas y cómo apoyarte.' },
+      creator: { name: 'Creador/a de contenido', description: 'Tu último video, tus redes, tus links y colaboraciones con marcas.' },
+      professional: { name: 'Profesional / freelance', description: 'Quién sos, tus trabajos, reseñas y cómo contratarte.' },
+      business: { name: 'Negocio local', description: 'Acción principal, horarios, dirección, contacto y fotos del lugar.' },
+      personal: { name: 'Personal', description: 'Tus redes, tus links y un poco sobre vos.' },
+    },
+  },
 }
 
 export type StudioDict = typeof es
