@@ -53,6 +53,13 @@ const hi: AuthDict = {
     or: "या",
     failed: "Google नहीं खुल सका। फिर से कोशिश करें।",
   },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "बस एक कदम और",
+    intro: "Google के साथ अपना खाता बनाना पूरा करने के लिए शर्तें और गोपनीयता नीति स्वीकार करें। यह सिर्फ़ एक बार करना होता है।",
+    submit: "जारी रखें",
+    cancel: "रद्द करें और लॉग आउट करें",
+  },
   forgot: {
     title: "पासवर्ड रीसेट करें",
     intro: "अपना ईमेल लिखें, हम नया पासवर्ड बनाने का लिंक भेजेंगे।",

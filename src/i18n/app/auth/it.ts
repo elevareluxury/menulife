@@ -53,6 +53,13 @@ const it: AuthDict = {
     or: "oppure",
     failed: "Non siamo riusciti ad aprire Google. Riprova.",
   },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "Ancora un passo",
+    intro: "Per finire di creare il tuo account con Google, accetta i Termini e l’Informativa sulla privacy. Si fa una sola volta.",
+    submit: "Continua",
+    cancel: "Annulla ed esci",
+  },
   forgot: {
     title: "Recupera password",
     intro: "Scrivi la tua email e ti mandiamo un link per creare una nuova password.",

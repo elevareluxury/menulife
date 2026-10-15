@@ -53,6 +53,13 @@ const ar: AuthDict = {
     or: "أو",
     failed: "تعذّر فتح Google. حاول مرة أخرى.",
   },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "خطوة أخيرة",
+    intro: "لإكمال إنشاء حسابك باستخدام Google، وافق على الشروط وسياسة الخصوصية. يتم ذلك مرة واحدة فقط.",
+    submit: "متابعة",
+    cancel: "إلغاء وتسجيل الخروج",
+  },
   forgot: {
     title: "استعادة كلمة المرور",
     intro: "اكتب بريدك الإلكتروني وسنرسل لك رابطًا لإنشاء كلمة مرور جديدة.",

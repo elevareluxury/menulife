@@ -53,6 +53,13 @@ const es = {
     or: "o",
     failed: "No pudimos abrir Google. Intentá de nuevo.",
   },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "Un paso más",
+    intro: "Para terminar de crear tu cuenta con Google, aceptá los Términos y la Política de privacidad. Se hace una sola vez.",
+    submit: "Continuar",
+    cancel: "Cancelar y salir",
+  },
   forgot: {
     title: 'Recuperar contraseña',
     intro: 'Escribí tu email y te mandamos un link para crear una contraseña nueva.',

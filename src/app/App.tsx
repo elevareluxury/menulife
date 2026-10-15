@@ -3,6 +3,7 @@ import { FEATURES } from '@/lib/features'
 import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
+import { TermsGate } from '@/modules/auth/components/TermsGate'
 import { PrefsInit } from '@/app/PrefsInit'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
@@ -23,6 +24,7 @@ const TableBill = lazy(() => import('@/modules/waiter/pages/TableBill').then(m =
 const OnboardingFlow = lazy(() => import('@/modules/onboarding/pages/OnboardingFlow').then(m => ({ default: m.OnboardingFlow })))
 const OrderTracking = lazy(() => import('@/modules/public/pages/OrderTracking').then(m => ({ default: m.OrderTracking })))
 const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(m => ({ default: m.AuthCallback })))
+const AcceptTerms = lazy(() => import('@/pages/AcceptTerms').then(m => ({ default: m.AcceptTerms })))
 const ForgotPassword = lazy(() => import('@/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })))
 const ResetPassword = lazy(() => import('@/pages/ResetPassword').then(m => ({ default: m.ResetPassword })))
 const ReservationFormPage = lazy(() => import('@/modules/public/pages/ReservationFormPage').then(m => ({ default: m.ReservationFormPage })))
@@ -117,6 +119,7 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AuthInit />
+      <TermsGate />
       <PrefsInit />
       <OfflineBanner />
       <Toaster position="top-right" containerStyle={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
@@ -128,6 +131,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback"    element={<AuthCallback />} />
+          <Route path="/auth/terms"       element={<AcceptTerms />} />
           <Route path="/forgot-password"  element={<ForgotPassword />} />
           <Route path="/reset-password"   element={<ResetPassword />} />
           <Route path="/solicitar-acceso" element={<Navigate to="/register" replace />} />

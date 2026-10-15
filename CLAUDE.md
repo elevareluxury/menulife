@@ -184,8 +184,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Privacidad: el reconocimiento del navegador (Google en Chrome, Apple en Safari), 12 idiomas. Tests en
   `voiceParse.test.ts` y `voice.spec.ts` (reconocimiento simulado).
 - Entrar con Google (V1.1, `FEATURES.googleSignIn`, prendido): `GoogleButton` (`modules/auth/components/`) debajo del
-  login y del registro; no va a Google sin tildar Términos y Privacidad (en el registro, la casilla del formulario; en el
-  login, una propia). Google sólo da nombre, email y foto: la aceptación la pide Mycen. `lib/googleSignIn.ts`: antes de salir anota
+  login y del registro. Google sólo da nombre, email y foto: la aceptación la pide Mycen, una sola vez. En el registro no
+  va a Google sin la casilla del formulario; en el login no se pide y una cuenta nueva de Google sin `terms_accepted_at`
+  pasa por `/auth/terms` (`AcceptTerms`, "Un paso más"; `TermsGate` en `App` no la deja usar la app hasta aceptar). `lib/googleSignIn.ts`: antes de salir anota
   idioma y referido (`mycen_oauth_pending`), Supabase vuelve a `/auth/callback` y `applyPendingSignup` completa
   `terms_accepted_at`, `locale` y `ref` sin pisar lo que haya. El nombre y la foto los da Google (`name`, `avatar_url`).
   Configuración en Google Cloud (Google Auth Platform) + Supabase → Providers → Google. E2E en `google-signin.spec.ts`.

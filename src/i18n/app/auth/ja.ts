@@ -53,6 +53,13 @@ const ja: AuthDict = {
     or: "または",
     failed: "Google を開けませんでした。もう一度お試しください。",
   },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "あと少し",
+    intro: "Google でのアカウント作成を完了するには、利用規約とプライバシーポリシーに同意してください。同意は一度だけです。",
+    submit: "続ける",
+    cancel: "キャンセルしてログアウト",
+  },
   forgot: {
     title: "パスワードの再設定",
     intro: "メールアドレスを入力すると、新しいパスワードを設定するリンクをお送りします。",

@@ -53,6 +53,13 @@ const ru: AuthDict = {
     or: "или",
     failed: "Не удалось открыть Google. Попробуйте ещё раз.",
   },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "Ещё один шаг",
+    intro: "Чтобы завершить создание аккаунта через Google, примите Условия и Политику конфиденциальности. Это нужно сделать один раз.",
+    submit: "Продолжить",
+    cancel: "Отменить и выйти",
+  },
   forgot: {
     title: "Восстановление пароля",
     intro: "Введите почту — мы пришлём ссылку для создания нового пароля.",

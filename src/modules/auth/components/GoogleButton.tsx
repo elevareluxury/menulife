@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
 import { authErrorMessage } from '@/lib/authErrors'
@@ -19,27 +18,25 @@ function GoogleLogo() {
 }
 
 /**
- * La línea "o" y "Continuar con Google", debajo del formulario. Sin aceptar los Términos y la Privacidad no se va a
- * Google (Google sólo nos da nombre, email y foto: la aceptación la pide Mycen). En el registro usa la casilla del
- * formulario (`accepted`); en el login, que no tiene, muestra la suya.
+ * La línea "o" y "Continuar con Google", debajo del formulario. Google sólo nos da nombre, email y foto: la aceptación
+ * de los Términos y la Privacidad la pide Mycen. En el registro (`accepted` = la casilla del formulario) no se va a Google
+ * sin tildarla. En el login no se pide: quien ya tiene cuenta entra directo y una cuenta nueva acepta en `/auth/terms`.
  */
 export function GoogleButton({ referral = null, accepted }: { referral?: Referral | null; accepted?: boolean }) {
   const t = useAuthT()
   const g = t.google
   const r = t.register
-  const ownBox = accepted === undefined
-  const [ownAccepted, setOwnAccepted] = useState(false)
-  const ok = ownBox ? ownAccepted : accepted
+  const signup = accepted !== undefined
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   async function handleClick() {
     setError('')
-    if (!ok) { setError(r.needTerms); return }
+    if (signup && !accepted) { setError(r.needTerms); return }
     setLoading(true)
     try {
       // Si sale bien, el navegador se va a Google; no hace falta apagar "loading"
-      await startGoogleSignIn(useAppLang.getState().lang, referral)
+      await startGoogleSignIn(useAppLang.getState().lang, referral, signup)
     } catch (err: unknown) {
       setError(authErrorMessage(err, t.errors, g.failed))
       setLoading(false)
@@ -54,20 +51,6 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
         <span style={{ fontFamily: font, fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>{g.or}</span>
         <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
       </div>
-      {ownBox && (
-        <label style={{
-          display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer',
-          fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5,
-        }}>
-          <input type="checkbox" checked={ownAccepted} onChange={e => { setOwnAccepted(e.target.checked); setError('') }}
-            style={{ marginTop: '3px', width: 16, height: 16, accentColor: '#F4705A', flexShrink: 0 }} />
-          <span>
-            {r.accept && <>{r.accept}{' '}</>}
-            <Link to="/terminos" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{r.terms}</Link> {r.and}{' '}
-            <Link to="/privacidad" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{r.privacy}</Link>{r.acceptEnd}
-          </span>
-        </label>
-      )}
       {error && (
         <div role="alert" style={{
           padding: '10px 14px', borderRadius: '10px',

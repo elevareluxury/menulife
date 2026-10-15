@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
-import { pendingUpdates } from '@/modules/auth/lib/googleSignIn'
+import { needsTerms, pendingUpdates } from '@/modules/auth/lib/googleSignIn'
 
 vi.mock('@/lib/supabase', () => ({ supabase: {} }))
 
 const now = new Date('2026-10-15T12:00:00Z')
-const pending = { at: '2026-10-15T11:50:00Z', locale: 'fr', ref: 'ana', ref_purpose: 'creador' }
+const pending = { at: '2026-10-15T11:50:00Z', locale: 'fr', ref: 'ana', ref_purpose: 'creador', terms: true }
 
 describe('pendingUpdates (volver de Google)', () => {
   it('completa términos, idioma y referido en una cuenta nueva', () => {
@@ -23,6 +23,19 @@ describe('pendingUpdates (volver de Google)', () => {
   })
 
   it('sin referido sólo completa términos e idioma', () => {
-    expect(pendingUpdates({ at: pending.at, locale: 'es' }, undefined, now)).toEqual({ terms_accepted_at: pending.at, locale: 'es' })
+    expect(pendingUpdates({ at: pending.at, locale: 'es', terms: true }, undefined, now)).toEqual({ terms_accepted_at: pending.at, locale: 'es' })
+  })
+
+  it('desde el login (sin casilla) no marca los términos como aceptados', () => {
+    expect(pendingUpdates({ at: pending.at, locale: 'es', terms: false }, {}, now)).toEqual({ locale: 'es' })
+  })
+})
+
+describe('needsTerms', () => {
+  it('sólo cuentas de Google que todavía no aceptaron', () => {
+    expect(needsTerms({ app_metadata: { provider: 'google' }, user_metadata: {} })).toBe(true)
+    expect(needsTerms({ app_metadata: { provider: 'google' }, user_metadata: { terms_accepted_at: 'x' } })).toBe(false)
+    expect(needsTerms({ app_metadata: { provider: 'email' }, user_metadata: {} })).toBe(false)
+    expect(needsTerms(null)).toBe(false)
   })
 })
