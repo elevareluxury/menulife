@@ -89,7 +89,7 @@ const es = {
       { list: [
         '**Tu cuenta:** nombre, email, contraseña (guardada cifrada, nunca la vemos), idioma, moneda, zona horaria y la fecha en que aceptaste estas condiciones.',
         '**Tu perfil público:** lo que cargás en Studio (nombre, foto, textos, links, proyectos, tarjeta de contacto). Sólo se publica lo que decidís mostrar.',
-        '**Life OS:** tus metas, hábitos, tareas, finanzas y notas. Son privados: sólo vos podés verlos.',
+        '**Life OS:** tus metas, hábitos, tareas, finanzas y notas, incluidos los nombres que escribas (por ejemplo, con quién compartiste un gasto). Son privados: sólo vos podés verlos.',
         '**Mycen Business:** los datos de tu negocio y los que cargues sobre tus clientes y ventas.',
         '**Estadísticas de visitas:** eventos anónimos (visitas y clicks en tu perfil) con un identificador que cambia todos los días. No guardamos direcciones IP ni datos del dispositivo, y no contamos robots.',
         '**Denuncias:** el motivo y el detalle que escribe quien denuncia, con un identificador anónimo diario para evitar abusos.',

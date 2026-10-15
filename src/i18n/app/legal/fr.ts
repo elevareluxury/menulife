@@ -82,7 +82,7 @@ const fr: LegalDict = {
       { list: [
         '**Votre compte :** nom, e-mail, mot de passe (stocké chiffré, nous ne le voyons jamais), langue, devise, fuseau horaire et date d’acceptation de ces conditions.',
         '**Votre profil public :** ce que vous ajoutez dans Studio (nom, photo, textes, liens, projets, carte de contact). Seul ce que vous choisissez d’afficher est publié.',
-        '**Life OS :** vos objectifs, habitudes, tâches, finances et notes. Ils sont privés : vous seul pouvez les voir.',
+        '**Life OS :** vos objectifs, habitudes, tâches, finances et notes, y compris les noms que vous saisissez (par exemple, avec qui vous avez partagé une dépense). Ils sont privés : vous seul pouvez les voir.',
         '**Mycen Business :** les données de votre entreprise et ce que vous ajoutez sur vos clients et ventes.',
         '**Statistiques de visites :** événements anonymes (visites et clics sur votre profil) avec un identifiant qui change chaque jour. Nous ne conservons ni adresses IP ni données de l’appareil, et nous ne comptons pas les robots.',
         '**Signalements :** le motif et le détail écrits par la personne qui signale, avec un identifiant anonyme quotidien pour éviter les abus.',
