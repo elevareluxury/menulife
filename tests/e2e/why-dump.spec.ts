@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 import { createState, installSupabaseMock, OWNER_ID } from './support/mockSupabase'
+import { settle } from './support/settle'
 
 // Life OS · "¿Por qué lo hago?" (frase propia en hábitos y metas, vuelve antes de soltar) y "Vaciar la cabeza"
 // (muchas cosas juntas → revisar → guardar todo; sin conexión queda en la cola del dispositivo).
@@ -16,6 +17,7 @@ function lifeState() {
 }
 
 async function axe(page: Page) {
+  await settle(page)
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
   expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => `${n.html} — ${n.failureSummary}`).join(' | ')}`)).toEqual([])
 }
