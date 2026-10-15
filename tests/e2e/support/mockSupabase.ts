@@ -606,6 +606,43 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       }
       return n
     }
+    case 'life_materialize_installments': {
+      // = supabase/migrations/20261029000002: cuotas vencidas hasta hoy (y no después de cancelar), el mismo día del mes
+      // que la primera (o el último día), total / cuotas redondeado y la última ajusta; sin duplicar ni volver atrás
+      if (!isOwner) return 0
+      const today = String(args.p_today)
+      state.tables.life_transactions ??= []
+      let n = 0
+      for (const p of (state.tables.life_installment_plans ?? []).filter(x => Number(x.last_no ?? 0) < Number(x.installments))) {
+        const count = Number(p.installments)
+        const cents = Math.round(Number(p.total_amount) * 100)
+        const base = Math.round(cents / count)
+        const limit = p.cancelled_at ? [today, String(p.cancelled_at).slice(0, 10)].sort()[0] : today
+        const [fy, fm, fd] = String(p.first_date).split('-').map(Number)
+        let no = Number(p.last_no ?? 0) + 1
+        let last = Number(p.last_no ?? 0)
+        while (no <= count) {
+          const month = new Date(Date.UTC(fy, fm - 1 + (no - 1), 1))
+          const y = month.getUTCFullYear(), m = month.getUTCMonth() + 1
+          const day = Math.min(fd, new Date(Date.UTC(y, m, 0)).getUTCDate())
+          const due = `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+          if (due > limit) break
+          if (!state.tables.life_transactions.some(t => t.installment_plan_id === p.id && Number(t.installment_no) === no)) {
+            state.tables.life_transactions.push({
+              id: `tx-${Math.random().toString(36).slice(2, 10)}`, user_id: p.user_id ?? OWNER_ID, type: 'expense',
+              amount: (no === count ? cents - base * (count - 1) : base) / 100, category: p.category ?? 'Otros',
+              description: p.description ?? null, currency: p.currency, goal_id: p.goal_id ?? null,
+              occurred_at: `${due}T12:00:00.000Z`, installment_plan_id: p.id, installment_no: no, created_at: new Date().toISOString(),
+            })
+            n++
+          }
+          last = no
+          no++
+        }
+        p.last_no = last
+      }
+      return n
+    }
     case 'life_calendar_token': {
       if (!isOwner) throw new Error('not_authenticated')
       const fresh = () => Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')

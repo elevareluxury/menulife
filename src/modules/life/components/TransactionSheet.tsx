@@ -1,21 +1,25 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, Repeat } from 'lucide-react'
+import { TrendingUp, TrendingDown, Repeat, CreditCard } from 'lucide-react'
 import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import { useLocaleStore } from '@/store/localeStore'
 import { usePrefs } from '@/lib/prefs'
-import { currencySymbol } from '@/lib/currencies'
+import { currencySymbol, formatMoney } from '@/lib/currencies'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../lib/lifePalette'
 import type { Transaction, TransactionFormData } from '../hooks/useMoney'
 import { GoalSelect } from './GoalSelect'
+import { installmentAmount, validInstallments, MAX_INSTALLMENTS, MIN_INSTALLMENTS } from '../lib/installments'
 
 interface TransactionSheetProps {
   open: boolean
   onClose: () => void
-  /** `repeat`: el usuario pidió que se repita todos los meses (sólo al crear con `repeatable`) */
-  onSave: (data: TransactionFormData, repeat: boolean) => Promise<void>
+  /**
+   * `repeat`: el usuario pidió que se repita todos los meses (sólo al crear con `repeatable`).
+   * `installments`: compra en cuotas (cantidad); `data.amount` es el total y la fecha, la de la primera cuota.
+   */
+  onSave: (data: TransactionFormData, repeat: boolean, installments?: number | null) => Promise<void>
   initial?: Transaction | null
   /** Ofrece "Repetir todos los meses" al crear */
   repeatable?: boolean
@@ -48,6 +52,8 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
   const [saving, setSaving]       = useState(false)
   const [error, setError]         = useState('')
   const [repeat, setRepeat]       = useState(false)
+  const [split, setSplit]         = useState(false)
+  const [countStr, setCountStr]   = useState('12')
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
@@ -63,6 +69,8 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
       }
       setError('')
       setRepeat(false)
+      setSplit(false)
+      setCountStr('12')
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,9 +83,15 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
     setForm(f => ({ ...f, type, category: defaultCat }))
   }
 
+  // En cuotas: sólo para un gasto nuevo, excluyente con "Repetir todos los meses"
+  const canSplit = !!repeatable && !initial && !template && form.type === 'expense'
+  const inInstallments = canSplit && split
+  const count = Number(countStr)
+
   const handleSave = async () => {
     const amount = parseFloat(amountStr.replace(',', '.'))
     if (!amount || amount <= 0) { setError(t.tx.invalidAmount); return }
+    if (inInstallments && !validInstallments(amount, count)) { setError(t.installments.invalid); return }
     setSaving(true)
     try {
       await onSave({
@@ -85,11 +99,11 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         amount,
         description: form.description?.trim() || undefined,
         // Fecha vacía o inválida (se borró el campo): hoy
-        occurred_at: template || (repeatable && repeat && !initial)
+        occurred_at: template || (repeatable && repeat && !initial) || inInstallments
           // Un fijo guarda la fecha tal cual (el día del mes); un movimiento, el mediodía local de esa fecha
           ? (/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO())
           : new Date(`${/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO()}T12:00:00`).toISOString(),
-      }, !!(repeatable && repeat && !initial))
+      }, !inInstallments && !!(repeatable && repeat && !initial), inInstallments ? count : null)
       onClose()
     } catch { setError(t.common.saveError) }
     finally { setSaving(false) }
@@ -271,7 +285,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
           borderRadius: radius.md, background: repeat ? colors.accent.soft : colors.surface.high,
           border: `1px solid ${repeat ? colors.accent.default : colors.border.subtle}`,
         }}>
-          <input type="checkbox" checked={repeat} onChange={e => setRepeat(e.target.checked)}
+          <input type="checkbox" checked={repeat} onChange={e => { setRepeat(e.target.checked); if (e.target.checked) setSplit(false) }}
             style={{ width: 18, height: 18, marginTop: 2, accentColor: colors.accent.default }} />
           <span style={{ fontFamily: font }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: colors.text.primary }}>
@@ -285,6 +299,61 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
           </span>
         </label>
       )}
+
+      {canSplit && (() => {
+        const amount = parseFloat(amountStr.replace(',', '.'))
+        const each = amount > 0 && validInstallments(amount, count)
+          ? t.installments.each(count, formatMoney(installmentAmount(amount, count, 1), form.currency, locale))
+          : null
+        return (
+          <div style={{
+            marginBottom: '16px', padding: '12px 14px', borderRadius: radius.md,
+            background: split ? colors.accent.soft : colors.surface.high,
+            border: `1px solid ${split ? colors.accent.default : colors.border.subtle}`,
+          }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+              <input type="checkbox" checked={split} onChange={e => { setSplit(e.target.checked); if (e.target.checked) setRepeat(false) }}
+                style={{ width: 18, height: 18, marginTop: 2, accentColor: colors.accent.default }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: font, fontSize: 14, fontWeight: 700, color: colors.text.primary }}>
+                <CreditCard size={14} aria-hidden="true" /> {t.installments.option}
+              </span>
+            </label>
+            {split && (
+              <div style={{ marginTop: 10, fontFamily: font }}>
+                <label htmlFor="tx-installments" style={{ display: 'block', fontSize: 12, fontWeight: 700, color: colors.text.secondary, marginBottom: 6 }}>
+                  {t.installments.count}
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <input id="tx-installments" type="number" inputMode="numeric" min={MIN_INSTALLMENTS} max={MAX_INSTALLMENTS} step={1}
+                    value={countStr} onChange={e => setCountStr(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
+                    aria-describedby="tx-installments-each"
+                    style={{
+                      width: 72, minHeight: 40, padding: '6px 10px', boxSizing: 'border-box', borderRadius: radius.sm,
+                      background: colors.surface.elevated, border: `1px solid ${colors.border.medium}`, color: colors.text.primary,
+                      fontFamily: font, fontSize: 16, fontWeight: 700, outline: 'none',
+                    }} />
+                  {[3, 6, 12, 18, 24].map(n => (
+                    <button key={n} type="button" aria-pressed={count === n} onClick={() => setCountStr(String(n))}
+                      style={{
+                        minWidth: 40, minHeight: 40, padding: '6px 10px', borderRadius: radius.full, cursor: 'pointer',
+                        background: count === n ? colors.surface.elevated : 'transparent',
+                        border: `1px solid ${count === n ? colors.accent.default : colors.border.subtle}`,
+                        color: count === n ? colors.accent.ink : colors.text.secondary,
+                        fontFamily: font, fontSize: 13, fontWeight: 700,
+                      }}>
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <p id="tx-installments-each" aria-live="polite" style={{ fontSize: 14, fontWeight: 700, color: colors.text.primary, margin: '10px 0 2px' }} dir="auto">
+                  {each}
+                </p>
+                <p style={{ fontSize: 12, color: colors.text.secondary, margin: 0, lineHeight: 1.5 }}>{t.installments.hint}</p>
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {template && (
         <p style={{ fontFamily: font, fontSize: 12, color: colors.text.secondary, margin: '0 0 16px', lineHeight: 1.5 }}>{t.recurring.editHint}</p>
