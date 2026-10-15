@@ -5,6 +5,7 @@ import { useStudio } from '../StudioContext'
 import { createModule, friendlyError, updateModule, uploadMedia } from '../lib/studioApi'
 import { moduleDef, type FieldDef } from '../lib/moduleCatalog'
 import type { StudioModule } from '../lib/studioTypes'
+import { isTemplatePending, withoutTemplateMark } from '../lib/templates'
 import { Button, Drawer, ImageField, SelectField, TextField } from './ui'
 import { useStudioT, type StudioDict } from '@/i18n/app/studio'
 
@@ -112,7 +113,8 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
     const translations: Translations = { ...(module?.translations ?? {}) }
     if (Object.keys(enClean).length) translations.en = { ...enClean, _source: 'manual' }
     else delete translations.en
-    const config: Record<string, unknown> = { ...(module?.config ?? {}) }
+    // Módulo de una plantilla: guardarlo completo le saca la marca "Completá esto" (y se muestra; ver save)
+    const config: Record<string, unknown> = withoutTemplateMark(module?.config ?? {})
     const from = fromLocalInput(showFrom)
     const until = fromLocalInput(showUntil)
     if (from) config.show_from = from; else delete config.show_from
@@ -129,7 +131,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
       const payload = buildPayload()
       let row: StudioModule
       if (module) {
-        row = await updateModule(module.id, payload)
+        row = await updateModule(module.id, isTemplatePending(module) ? { ...payload, visibility: 'active' } : payload)
         setModules(prev => prev.map(m => (m.id === row.id ? row : m)))
       } else {
         const position = (modules.reduce((max, m) => Math.max(max, m.position), 0) || 0) + 10
@@ -152,6 +154,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
   </>
   const form = (
       <div className="st-stack">
+        {module && isTemplatePending(module) && <p className="st-help" style={{ margin: 0 }}>{t.templates.editorHint}</p>}
         {def.fields.map(f => {
           if (f.kind === 'image') {
             return (

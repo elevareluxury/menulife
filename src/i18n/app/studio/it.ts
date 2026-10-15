@@ -781,5 +781,37 @@ const it: StudioDict = {
     button: 'Testo del pulsante (facoltativo)',
     buttonPlaceholder: 'Iscrivimi',
   },
+  templates: {
+    use: 'Usa un modello',
+    title: 'Scegli un modello',
+    intro: 'Aggiunge i moduli che ogni tipo di profilo usa di solito. Vengono aggiunti vuoti e nascosti: ognuno appare sul tuo profilo quando lo completi.',
+    choose: (name: string) => `Vedi il modello ${name}`,
+    look: (layout: string, accent: string) => `Struttura ${layout} · accento ${accent}`,
+    back: 'Indietro',
+    willAdd: 'Verranno aggiunti',
+    alreadyHave: 'Li hai già (non si ripetono)',
+    nothingToAdd: 'Hai già tutti i moduli di questo modello.',
+    applyLook: 'Usa anche la sua struttura e il suo accento',
+    applyLookHelp: 'Puoi cambiarlo quando vuoi in Aspetto.',
+    add: (n: number) => (n === 1 ? 'Aggiungi 1 modulo' : `Aggiungi ${n} moduli`),
+    added: (n: number) => (n === 1 ? '1 modulo aggiunto da completare' : `${n} moduli aggiunti da completare`),
+    pending: 'Da completare',
+    completeX: (t: string) => `Completa ${t}`,
+    checklistTitle: 'Completa i tuoi moduli',
+    checklistText: (n: number) => (n === 1
+      ? 'Ti resta 1 modulo del modello. È nascosto: appare sul tuo profilo quando lo completi e salvi.'
+      : `Ti restano ${n} moduli del modello. Sono nascosti: ognuno appare sul tuo profilo quando lo completi e salvi.`),
+    editorHint: 'Questo modulo viene da un modello. Completalo e salvalo: solo allora appare sul tuo profilo.',
+    onboardingHint: (n: number) => (n === 1
+      ? 'In Studio ti aspetta 1 modulo in più. Resta nascosto finché non lo completi.'
+      : `In Studio ti aspettano altri ${n} moduli. Restano nascosti finché non li completi.`),
+    items: {
+      musician: { name: 'Musicista', description: 'La tua musica, il tuo ultimo video, le tue date e come sostenerti.' },
+      creator: { name: 'Content creator', description: 'Il tuo ultimo video, i tuoi social, i tuoi link e le collaborazioni con i brand.' },
+      professional: { name: 'Professionista / freelance', description: 'Chi sei, i tuoi lavori, le recensioni e come assumerti.' },
+      business: { name: 'Attività locale', description: 'Azione principale, orari, indirizzo, contatti e foto del locale.' },
+      personal: { name: 'Personale', description: 'I tuoi social, i tuoi link e qualcosa su di te.' },
+    },
+  },
 }
 export default it

@@ -13,6 +13,7 @@ import { ModuleEditor } from '../components/ModuleEditor'
 import { ModuleLibrary } from '../components/ModuleLibrary'
 import { EDITABLE_MODULES, MODULE_ICONS, useScheduleBadge } from '../lib/moduleUi'
 import { ProfileSaveIndicator } from '../components/shared'
+import { isTemplatePending } from '../lib/templates'
 import { IdentityPage } from './IdentityPage'
 import { AppearancePage } from './AppearancePage'
 import { useStudioT } from '@/i18n/app/studio'
@@ -105,14 +106,15 @@ export function EditorPage() {
               {(m, i, handle, drag) => {
                 const label = title(m)
                 const Icon = MODULE_ICONS[m.type] ?? Link2
-                const badge = m.visibility === 'hidden' ? t.modules.hidden : scheduleBadge(m)
+                const pending = isTemplatePending(m)
+                const badge = pending ? t.templates.pending : m.visibility === 'hidden' ? t.modules.hidden : scheduleBadge(m)
                 return (
                   <li ref={drag.ref} style={drag.style} className={`st-layer-row ${drag.className}${m.visibility === 'hidden' ? ' is-hidden' : ''}`}>
                     <DragHandle {...handle} />
                     {layer(m.id, label, Icon, badge ?? undefined)}
-                    <button type="button" className="st-icon-btn" onClick={() => toggleVisibility(m)} disabled={busyId === m.id}
-                      aria-label={m.visibility === 'active' ? t.modules.hideX(label) : t.modules.showX(label)}
-                      aria-pressed={m.visibility === 'hidden'}>
+                    <button type="button" className="st-icon-btn" onClick={() => (pending ? setSelected(m.id) : toggleVisibility(m))} disabled={busyId === m.id}
+                      aria-label={pending ? t.templates.completeX(label) : m.visibility === 'active' ? t.modules.hideX(label) : t.modules.showX(label)}
+                      aria-pressed={pending ? undefined : m.visibility === 'hidden'}>
                       {m.visibility === 'active' ? <Eye size={15} /> : <EyeOff size={15} />}
                     </button>
                     <Menu label={t.sortable.options(label)} items={[

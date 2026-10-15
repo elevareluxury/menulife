@@ -202,6 +202,17 @@
 .st-library button:hover { border-color: var(--st-border-strong); }
 .st-library strong { display: block; font-size: 14.5px; margin-bottom: 2px; }
 .st-library span { font-size: 12.5px; color: var(--st-faint); }
+/* Plantillas: una por fila, con los módulos que suma */
+.st-template-list { grid-template-columns: 1fr; }
+@media (min-width: 560px) { .st-template-list { grid-template-columns: 1fr; } }
+.st-library .st-template-modules, .st-template-modules { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.st-template-modules .st-template-chip {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--st-muted);
+  padding: 3px 9px; border-radius: 999px; background: var(--st-surface-2);
+}
+.st-module.is-pending { opacity: 1; border-style: dashed; }
+.st-checklist { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.st-checklist strong { font-size: 15px; }
 
 /* ── Drawer / diálogo ───────────────────────────────────────────── */
 .st-overlay { position: fixed; inset: 0; z-index: 50; background: var(--my-scrim); display: flex; justify-content: flex-end; }

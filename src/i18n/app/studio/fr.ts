@@ -781,5 +781,37 @@ const fr: StudioDict = {
     button: 'Texte du bouton (facultatif)',
     buttonPlaceholder: 'M’abonner',
   },
+  templates: {
+    use: 'Utiliser un modèle',
+    title: 'Choisissez un modèle',
+    intro: 'Ajoute les modules que chaque type de profil utilise souvent. Ils sont ajoutés vides et masqués : chacun apparaît sur votre profil une fois complété.',
+    choose: (name: string) => `Voir le modèle ${name}`,
+    look: (layout: string, accent: string) => `Structure ${layout} · accent ${accent}`,
+    back: 'Retour',
+    willAdd: 'Seront ajoutés',
+    alreadyHave: 'Vous les avez déjà (pas de doublon)',
+    nothingToAdd: 'Vous avez déjà tous les modules de ce modèle.',
+    applyLook: 'Utiliser aussi sa structure et son accent',
+    applyLookHelp: 'Vous pouvez le changer à tout moment dans Apparence.',
+    add: (n: number) => (n === 1 ? 'Ajouter 1 module' : `Ajouter ${n} modules`),
+    added: (n: number) => (n === 1 ? '1 module ajouté à compléter' : `${n} modules ajoutés à compléter`),
+    pending: 'À compléter',
+    completeX: (t: string) => `Compléter ${t}`,
+    checklistTitle: 'Complétez vos modules',
+    checklistText: (n: number) => (n === 1
+      ? 'Il reste 1 module du modèle. Il est masqué : il apparaît sur votre profil une fois complété et enregistré.'
+      : `Il reste ${n} modules du modèle. Ils sont masqués : chacun apparaît sur votre profil une fois complété et enregistré.`),
+    editorHint: 'Ce module vient d’un modèle. Complétez-le et enregistrez-le : il n’apparaît sur votre profil qu’à ce moment-là.',
+    onboardingHint: (n: number) => (n === 1
+      ? '1 module de plus vous attend dans Studio. Il reste masqué jusqu’à ce que vous le complétiez.'
+      : `${n} modules de plus vous attendent dans Studio. Ils restent masqués jusqu’à ce que vous les complétiez.`),
+    items: {
+      musician: { name: 'Musicien·ne', description: 'Votre musique, votre dernière vidéo, vos dates et comment vous soutenir.' },
+      creator: { name: 'Créateur·rice de contenu', description: 'Votre dernière vidéo, vos réseaux, vos liens et collaborations avec des marques.' },
+      professional: { name: 'Professionnel·le / freelance', description: 'Qui vous êtes, vos travaux, vos avis et comment vous engager.' },
+      business: { name: 'Commerce local', description: 'Action principale, horaires, adresse, contact et photos du lieu.' },
+      personal: { name: 'Personnel', description: 'Vos réseaux, vos liens et un peu sur vous.' },
+    },
+  },
 }
 export default fr

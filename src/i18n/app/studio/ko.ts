@@ -781,5 +781,37 @@ const ko: StudioDict = {
     button: '버튼 텍스트 (선택)',
     buttonPlaceholder: '구독하기',
   },
+  templates: {
+    use: '템플릿 사용',
+    title: '템플릿 선택',
+    intro: '프로필 유형마다 자주 쓰는 모듈을 추가합니다. 비어 있고 숨겨진 상태로 추가되며, 각 모듈은 완성하면 프로필에 표시됩니다.',
+    choose: (name: string) => `${name} 템플릿 보기`,
+    look: (layout: string, accent: string) => `${layout} 구조 · ${accent} 강조색`,
+    back: '뒤로',
+    willAdd: '추가될 모듈',
+    alreadyHave: '이미 있음 (중복되지 않음)',
+    nothingToAdd: '이 템플릿의 모듈을 이미 모두 가지고 있어요.',
+    applyLook: '구조와 강조색도 사용',
+    applyLookHelp: '모양에서 언제든 바꿀 수 있어요.',
+    add: (n: number) => (n === 1 ? '모듈 1개 추가' : `모듈 ${n}개 추가`),
+    added: (n: number) => (n === 1 ? '완성할 모듈 1개를 추가했어요' : `완성할 모듈 ${n}개를 추가했어요`),
+    pending: '완성하기',
+    completeX: (t: string) => `${t} 완성하기`,
+    checklistTitle: '모듈을 완성하세요',
+    checklistText: (n: number) => (n === 1
+      ? '템플릿 모듈이 1개 남았어요. 숨겨져 있으며, 완성하고 저장하면 프로필에 표시됩니다.'
+      : `템플릿 모듈이 ${n}개 남았어요. 숨겨져 있으며, 각각 완성하고 저장하면 프로필에 표시됩니다.`),
+    editorHint: '이 모듈은 템플릿에서 왔어요. 완성하고 저장해야 프로필에 표시됩니다.',
+    onboardingHint: (n: number) => (n === 1
+      ? 'Studio에서 완성할 모듈 1개가 기다리고 있어요. 완성할 때까지 숨겨져 있어요.'
+      : `Studio에서 완성할 모듈 ${n}개가 기다리고 있어요. 완성할 때까지 숨겨져 있어요.`),
+    items: {
+      musician: { name: '뮤지션', description: '음악, 최신 영상, 공연 일정, 후원 방법.' },
+      creator: { name: '콘텐츠 크리에이터', description: '최신 영상, 소셜 계정, 링크, 브랜드 협업.' },
+      professional: { name: '전문가 / 프리랜서', description: '소개, 작업물, 후기, 의뢰 방법.' },
+      business: { name: '동네 가게', description: '주요 액션, 영업시간, 주소, 연락처, 매장 사진.' },
+      personal: { name: '개인', description: '소셜 계정, 링크, 나에 대한 짧은 소개.' },
+    },
+  },
 }
 export default ko

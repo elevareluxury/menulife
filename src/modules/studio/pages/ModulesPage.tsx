@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Link2, Monitor, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, LayoutTemplate, Link2, Monitor, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import { useStudio } from '../StudioContext'
@@ -12,11 +12,15 @@ import { DragHandle, SortableList } from '../components/SortableList'
 import { EditTabs } from '../components/shared'
 import { ModuleEditor } from '../components/ModuleEditor'
 import { ModuleLibrary } from '../components/ModuleLibrary'
+import { TemplatePicker } from '../components/TemplatePicker'
+import { isTemplatePending } from '../lib/templates'
 import { EDITABLE_MODULES, MODULE_ICONS, useScheduleBadge } from '../lib/moduleUi'
 
 export function ModulesPage() {
   const { modules } = useStudio()
   const [library, setLibrary] = useState(false)
+  const [templates, setTemplates] = useState(false)
+  const [templateNote, setTemplateNote] = useState('')
   const [editing, setEditing] = useState<{ type: ModuleType; module: StudioModule | null } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<StudioModule | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -24,6 +28,7 @@ export function ModulesPage() {
   const scheduleBadge = useScheduleBadge()
   const t = useStudioT()
   const mt = t.modules
+  const pendingCount = modules.filter(isTemplatePending).length
 
   async function confirmRemove(m: StudioModule) {
     setDeleting(true)
@@ -41,25 +46,36 @@ export function ModulesPage() {
           <Button variant="primary" onClick={() => setLibrary(true)}><Plus size={16} aria-hidden="true" /> {mt.add}</Button>
         </>} />
 
-      <p className="st-sr-only" role="status" aria-live="polite">{announce}</p>
+      <p className="st-sr-only" role="status" aria-live="polite">{announce || templateNote}</p>
+      {pendingCount > 0 && (
+        <div className="st-card st-checklist">
+          <strong>{t.templates.checklistTitle}</strong>
+          <span className="st-help">{t.templates.checklistText(pendingCount)}</span>
+        </div>
+      )}
       {error && <p className="st-error" role="alert" style={{ marginBottom: 12 }}>{error}</p>}
 
       {modules.length === 0 ? (
         <div className="st-card st-empty">
           <strong>{mt.emptyTitle}</strong>
           {mt.emptyText}
-          <div style={{ marginTop: 14 }}>
+          <div className="st-row" style={{ marginTop: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button variant="primary" onClick={() => setLibrary(true)}><Plus size={16} aria-hidden="true" /> {mt.addFirst}</Button>
+            <Button onClick={() => setTemplates(true)}><LayoutTemplate size={16} aria-hidden="true" /> {t.templates.use}</Button>
           </div>
         </div>
-      ) : (
+      ) : (<>
+        <div className="st-row" style={{ justifyContent: 'flex-end', marginBottom: 12 }}>
+          <Button size="sm" variant="ghost" onClick={() => setTemplates(true)}><LayoutTemplate size={15} aria-hidden="true" /> {t.templates.use}</Button>
+        </div>
         <SortableList items={modules} label={title} onMove={(from, to) => void moveTo(from, to, false)} className="st-module-list">
           {(m, i, handle, drag) => {
             const Icon = MODULE_ICONS[m.type] ?? Link2
             const label = title(m)
             const canEdit = EDITABLE_MODULES.includes(m.type)
+            const pending = isTemplatePending(m)
             return (
-              <li ref={drag.ref} style={drag.style} className={`st-module ${drag.className}${m.visibility === 'hidden' ? ' is-hidden' : ''}`}>
+              <li ref={drag.ref} style={drag.style} className={`st-module ${drag.className}${m.visibility === 'hidden' ? ' is-hidden' : ''}${pending ? ' is-pending' : ''}`}>
                 <DragHandle {...handle} />
                 <span className="st-module-icon" aria-hidden="true"><Icon size={17} /></span>
                 <button type="button" className="st-module-body" disabled={!canEdit}
@@ -67,15 +83,18 @@ export function ModulesPage() {
                   aria-label={canEdit ? mt.editX(label) : label}>
                   <div className="st-module-title">{label}</div>
                   <div className="st-module-sub">
-                    {m.visibility === 'hidden' && <span className="st-badge" style={{ marginInlineEnd: 6 }}>{mt.hidden}</span>}
+                    {pending
+                      ? <span className="st-badge" style={{ marginInlineEnd: 6 }}>{t.templates.pending}</span>
+                      : m.visibility === 'hidden' && <span className="st-badge" style={{ marginInlineEnd: 6 }}>{mt.hidden}</span>}
                     {scheduleBadge(m) && <span className="st-badge" style={{ marginInlineEnd: 6 }}>{scheduleBadge(m)}</span>}
                     {moduleSummary(m, t) || moduleDef(m.type, t).label}
                   </div>
                 </button>
                 <div className="st-module-actions">
-                  <button type="button" className="st-icon-btn" onClick={() => toggleVisibility(m)} disabled={busyId === m.id}
-                    aria-label={m.visibility === 'active' ? mt.hideX(label) : mt.showX(label)}
-                    aria-pressed={m.visibility === 'hidden'}>
+                  <button type="button" className="st-icon-btn" disabled={busyId === m.id}
+                    onClick={() => (pending ? setEditing({ type: m.type, module: m }) : toggleVisibility(m))}
+                    aria-label={pending ? t.templates.completeX(label) : m.visibility === 'active' ? mt.hideX(label) : mt.showX(label)}
+                    aria-pressed={pending ? undefined : m.visibility === 'hidden'}>
                     {m.visibility === 'active' ? <Eye size={16} /> : <EyeOff size={16} />}
                   </button>
                   <Menu label={t.sortable.options(label)} items={[
@@ -90,10 +109,13 @@ export function ModulesPage() {
             )
           }}
         </SortableList>
-      )}
+      </>)}
 
       {library && <ModuleLibrary onClose={() => setLibrary(false)}
         onPick={type => { setLibrary(false); setEditing({ type, module: null }) }} />}
+
+      {templates && <TemplatePicker onClose={() => setTemplates(false)}
+        onAdded={n => { setTemplates(false); setTemplateNote(t.templates.added(n)) }} />}
 
       {editing && <ModuleEditor type={editing.type} module={editing.module} onClose={() => setEditing(null)} />}
 

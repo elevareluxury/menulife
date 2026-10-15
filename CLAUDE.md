@@ -354,6 +354,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   validar lo guardado), chunks propios `SupportModule`/`ListenOnModule` con textos en `supportListenI18n.ts` y CSS en
   `supportListen.css`; editores en `studio/components/supportListenEditors.tsx`. Tests en `support.test.ts`,
   `listenOn.test.ts` y `bio-support-listen.spec.ts` (5 estructuras × 2 temas con axe).
+- Plantillas de Identity: `studio/lib/templates.ts` (puro: Músico/a, Creador/a, Profesional, Negocio local, Personal →
+  estructura, acento y tipos de módulo en orden; textos en `templates` del diccionario de Studio). Los módulos se crean
+  VACÍOS, OCULTOS y con `config.template` ("Completá esto"; `addTemplateModules` en `lib/applyTemplate.ts`): el ojo no los
+  muestra vacíos, abre el editor; guardarlos completos en `ModuleEditor` les saca la marca y los pone visibles. Así nada
+  inventado entra en la versión publicada. Nunca borra; no repite `SINGLETON_TYPES` ni apila pendientes. Studio → Módulos
+  "Usar una plantilla" (`TemplatePicker`, estructura y acento opcionales) + aviso "Completá tus módulos"; el onboarding
+  aplica la del propósito en el paso de contacto (sin repetir lo cargado). Tests en `templates.test.ts` y `templates.spec.ts`.
 - Apariencia (etapa 06): `AppearancePage` = estructura (miniaturas con la huella real), tema, acento, huella (estilos +
   "Generar otra" → `huella_salt`, con "Volver a la anterior" hasta publicar), portada (sólo Portada) y perfil vivo
   (`status_text`, `available`). Guarda siempre los valores nuevos del tema; vista previa en vivo al costado (≥ 1280 px) o

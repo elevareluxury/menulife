@@ -781,5 +781,37 @@ const zh: StudioDict = {
     button: '按钮文字（可选）',
     buttonPlaceholder: '订阅',
   },
+  templates: {
+    use: '使用模板',
+    title: '选择一个模板',
+    intro: '添加每类主页常用的模块。它们以空白且隐藏的状态加入：每个模块在你填写完成后才会显示在主页上。',
+    choose: (name: string) => `查看模板 ${name}`,
+    look: (layout: string, accent: string) => `${layout} 结构 · ${accent} 强调色`,
+    back: '返回',
+    willAdd: '将添加',
+    alreadyHave: '你已经有了（不会重复）',
+    nothingToAdd: '这个模板的模块你都已经有了。',
+    applyLook: '同时使用它的结构和强调色',
+    applyLookHelp: '随时可以在“外观”中更改。',
+    add: (n: number) => (n === 1 ? '添加 1 个模块' : `添加 ${n} 个模块`),
+    added: (n: number) => (n === 1 ? '已添加 1 个待填写的模块' : `已添加 ${n} 个待填写的模块`),
+    pending: '待填写',
+    completeX: (t: string) => `填写 ${t}`,
+    checklistTitle: '填写你的模块',
+    checklistText: (n: number) => (n === 1
+      ? '还剩 1 个模板模块。它是隐藏的：填写并保存后才会显示在你的主页上。'
+      : `还剩 ${n} 个模板模块。它们是隐藏的：每个模块填写并保存后才会显示在你的主页上。`),
+    editorHint: '这个模块来自模板。填写并保存后，它才会显示在你的主页上。',
+    onboardingHint: (n: number) => (n === 1
+      ? 'Studio 里还有 1 个模块等你填写。填写之前它会保持隐藏。'
+      : `Studio 里还有 ${n} 个模块等你填写。填写之前它们会保持隐藏。`),
+    items: {
+      musician: { name: '音乐人', description: '你的音乐、最新视频、演出日期和支持你的方式。' },
+      creator: { name: '内容创作者', description: '你的最新视频、社交账号、链接和品牌合作。' },
+      professional: { name: '专业人士 / 自由职业', description: '你是谁、你的作品、评价以及如何聘请你。' },
+      business: { name: '本地商家', description: '主要操作、营业时间、地址、联系方式和店内照片。' },
+      personal: { name: '个人', description: '你的社交账号、链接和一点关于你的介绍。' },
+    },
+  },
 }
 export default zh
