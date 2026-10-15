@@ -1,0 +1,20 @@
+/* "Último video": usa la fachada de Video y música (.mp-media-*, layouts.css) y suma la lista de anteriores. */
+.mp-latest { display: grid; gap: 0; }
+.mp-latest-facade { aspect-ratio: 16 / 9; }
+.mp-latest-frame { aspect-ratio: 16 / 9; }
+.mp-latest-more {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+  margin: 0; padding: 8px; list-style: none; border-top: 1px solid var(--my-border);
+}
+.mp-latest-more .mp-latest-facade, .mp-latest-more .mp-latest-frame { border-radius: calc(var(--my-r-bento) * 0.6); }
+.mp-latest-facade.is-small { min-height: 0; padding: 10px; gap: 8px; }
+.mp-latest-facade.is-small .mp-media-play { width: 34px; height: 34px; }
+.mp-latest-facade.is-small .mp-media-title {
+  font-size: var(--my-fs-small); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.mp-latest-facade.is-small .mp-media-provider { display: none; }
+.mp-latest-skeleton { aspect-ratio: 16 / 9; background: var(--my-tile); border-radius: inherit; }
+.mp-latest-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+.mp-latest-note p { margin: 0; font-size: var(--my-fs-small); color: var(--my-muted); }

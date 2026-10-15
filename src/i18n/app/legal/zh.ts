@@ -112,7 +112,7 @@ const zh: LegalDict = {
         '**Supabase：**数据库、登录和文件。',
         '**Vercel：**应用托管和页面分发。',
         '**Resend：**发送账户邮件。',
-        '**YouTube、Vimeo、TikTok、Spotify 和 SoundCloud：**仅当某个主页嵌入了视频或歌曲且你点击“播放”时。在此之前不会与它们连接；之后适用它们各自的政策。',
+        '**YouTube、Vimeo、TikTok、Spotify 和 SoundCloud：**仅当某个主页嵌入了视频或歌曲且你点击“播放”时。在此之前不会与它们连接；之后适用它们各自的政策。如果某个主页显示“最新视频”，Mycen 的服务器会查询主页主人所选 YouTube 频道的公开视频列表，不会发送你的任何数据。',
         '**Anthropic：**仅当企业使用"从 PDF 导入菜单"功能时，处理该文件。',
         '**Mercado Pago：**仅当企业设置其用于收款时；付款在 Mercado Pago 完成。',
         '**Google（登录）：**仅当你选择“使用 Google 继续”时。Google 向我们确认你的姓名、邮箱和头像；我们不会获得你的 Google 密码，也不会访问你账号中的其他内容。',

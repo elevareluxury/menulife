@@ -8,6 +8,8 @@ import { PortfolioModule, ProjectModule } from './ProjectModules'
 // Video y música en su propio chunk: sólo lo baja un perfil que lo usa (la huella de la fachada pesa)
 const ContactFormModule = lazy(() => import('./ContactFormModule').then(m => ({ default: m.ContactFormModule })))
 const MediaModule = lazy(() => import('./MediaModule').then(m => ({ default: m.MediaModule })))
+// "Último video" (bio): chunk propio, pide los datos a /api/youtube-latest
+const LatestVideoModule = lazy(() => import('./LatestVideoModule').then(m => ({ default: m.LatestVideoModule })))
 import { parseMediaUrl } from '../lib/media'
 
 export interface GroupProps {
@@ -52,6 +54,7 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   link_group:      { View: LinkGroupModule, bento: 'M' },
   contact_form:    { View: ContactFormModule, bento: 'M' },
   media:           { View: MediaModule, bento: m => (parseMediaUrl(m.content.url)?.kind === 'music' ? 'M' : 'L') },
+  latest_video:    { View: LatestVideoModule, bento: 'L' },
 }
 
 /** Tamaño Bento de un módulo */
