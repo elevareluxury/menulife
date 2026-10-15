@@ -66,7 +66,7 @@ function empty(): MockState {
 
 const ROUTES = ['/studio', '/studio/identity', '/studio/modules', '/studio/projects', '/studio/projects/pr-luna', '/studio/appearance', '/studio/exchange',
   '/studio/analytics', '/studio/settings', '/studio/preview', '/studio/editor', '/studio/spaces', '/studio/messages', '/studio/everywhere', '/studio/more', '/studio/nada',
-  '/life', '/life/money', '/life/goals', '/life/habits', '/life/brain', '/life/brain?vista=tareas', '/life/replay', '/life/insights', '/life/settings',
+  '/life', '/life/money', '/life/goals', '/life/habits', '/life/brain', '/life/brain?vista=tareas', '/life/replay', '/life/insights', '/life/settings', '/life/journal',
   '/ana', '/ana/estudio', '/ana/projects/cafe-luna', '/ana?src=qr', '/noexiste', '/', '/login', '/register', '/terminos', '/privacidad']
 
 

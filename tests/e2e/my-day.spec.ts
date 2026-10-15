@@ -137,3 +137,34 @@ test('con muchos datos (50 tareas y 15 hábitos) Mi día carga y responde rápid
   await expect(page.getByRole('dialog', { name: 'Elegí una tarea' }).getByRole('button')).toHaveCount(51) // 50 tareas + cerrar
   expect(Date.now() - started).toBeLessThan(10_000)
 })
+
+test('"Mi identidad" va arriba de Mi día y se oculta o se muestra desde Ajustes', async ({ page, context }) => {
+  const state = createState()
+  state.tables.life_brain_items = []
+  state.tables.life_habits = []
+  state.tables.life_habit_logs = []
+  state.tables.life_daily_reviews = []
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/life')
+
+  const identity = page.getByText('Mi identidad', { exact: true })
+  const myDay = page.getByRole('heading', { level: 1, name: 'Mi día' })
+  await expect(identity).toBeVisible()
+  const [idBox, dayBox] = [await identity.boundingBox(), await myDay.boundingBox()]
+  expect(idBox!.y).toBeLessThan(dayBox!.y)
+
+  await page.goto('/life/settings')
+  const toggle = page.getByRole('switch', { name: 'Mostrar "Mi identidad" arriba de Mi día' })
+  await expect(toggle).toHaveAttribute('aria-checked', 'true')
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-checked', 'false')
+  await page.goto('/life')
+  await expect(myDay).toBeVisible()
+  await expect(identity).toHaveCount(0)
+
+  // Se recuerda en el dispositivo y se vuelve a prender
+  await page.goto('/life/settings')
+  await page.getByRole('switch', { name: 'Mostrar "Mi identidad" arriba de Mi día' }).click()
+  await page.goto('/life')
+  await expect(identity).toBeVisible()
+})

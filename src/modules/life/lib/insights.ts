@@ -1,5 +1,6 @@
 import { habitConsistency, shiftDate } from '../lib/habitStreak'
 import { dayKey } from '../hooks/useToday'
+import { median, moodSplit, type MoodDay } from './mood'
 
 // Insights: patrones calculados sólo con los datos reales del usuario.
 // Cada insight exige un mínimo de datos; si no alcanza, no se muestra (nada de promedios ni relleno).
@@ -16,6 +17,8 @@ export interface InsightData {
   milestones: { goal_id: string; is_completed: boolean; completed_at: string | null }[]
   tasksDone: { completed_at: string }[]                       // últimos 14 días
   overdueTasks: number
+  /** Ánimo del cierre del día (últimos 56 días, sólo los días que se contestó) */
+  moods?: MoodDay[]
 }
 
 export type Insight =
@@ -27,6 +30,9 @@ export type Insight =
   | { kind: 'spendTop'; category: string; amount: number; pct: number; currency: string }
   | { kind: 'tasksWeek'; now: number; prev: number }
   | { kind: 'habitStrong'; name: string; pct: number }
+  // Ánimo: sólo con 14 días o más contestados, 5 o más de cada lado y medio punto de diferencia (lib/mood.ts)
+  | { kind: 'moodHabits'; withAvg: number; withoutAvg: number; days: number }
+  | { kind: 'moodSpend'; higher: boolean; withAvg: number; withoutAvg: number; days: number }
 
 const weekdayOf = (key: string) => new Date(`${key}T12:00:00`).getDay()
 const pct = (a: number, b: number) => Math.round((a / b) * 100)
@@ -146,5 +152,43 @@ export function computeInsights(data: InsightData): Insight[] {
   const strong = last30.filter(x => x.done / x.scheduled >= 0.9).sort((a, b) => b.done / b.scheduled - a.done / a.scheduled)[0]
   if (strong) out.push({ kind: 'habitStrong', name: strong.name, pct: pct(strong.done, strong.scheduled) })
 
+  out.push(...moodInsights(data, main, prevStart))
+
+  return out
+}
+
+/**
+ * Ánimo y hábitos / gastos: coincidencias en los datos de la persona, nunca causas. "Hábitos" = días con al menos un
+ * hábito cumplido (desde que existe el primero; sólo se dice si el ánimo fue más alto). "Más gastos" = días con gastos
+ * en la moneda principal por encima de la mediana de los días con ánimo (desde el 1° del mes anterior).
+ */
+export function moodInsights(
+  data: InsightData, mainExpenses: InsightData['expenses'], expensesFrom: string,
+): Insight[] {
+  const out: Insight[] = []
+  const from56 = shiftDate(data.today, -55)
+  const moods = (data.moods ?? []).filter(m => m.date >= from56 && m.date <= data.today)
+  if (!moods.length) return out
+
+  if (data.habits.length) {
+    const firstHabit = data.habits.map(h => dayKey(new Date(h.created_at))).sort()[0]
+    const habitDays = new Set(data.habitLogs.map(l => l.completed_date))
+    const split = moodSplit(moods.filter(m => m.date >= firstHabit), d => habitDays.has(d))
+    if (split && split.withAvg > split.withoutAvg) {
+      out.push({ kind: 'moodHabits', withAvg: split.withAvg, withoutAvg: split.withoutAvg, days: split.withDays + split.withoutDays })
+    }
+  }
+
+  const spendMoods = moods.filter(m => m.date >= expensesFrom)
+  const byDay = new Map<string, number>()
+  for (const e of mainExpenses) {
+    const k = dayKey(new Date(e.occurred_at))
+    byDay.set(k, (byDay.get(k) ?? 0) + e.amount)
+  }
+  const cut = median(spendMoods.map(m => byDay.get(m.date) ?? 0))
+  const spend = moodSplit(spendMoods, d => (byDay.get(d) ?? 0) > cut)
+  if (spend) {
+    out.push({ kind: 'moodSpend', higher: spend.withAvg > spend.withoutAvg, withAvg: spend.withAvg, withoutAvg: spend.withoutAvg, days: spend.withDays + spend.withoutDays })
+  }
   return out
 }

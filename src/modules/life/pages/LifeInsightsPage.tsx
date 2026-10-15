@@ -5,6 +5,7 @@ import { useLifeT } from '@/i18n/app/life'
 import { LifeScreenContainer, LifeCard, LifeEmptyState, colors, font, radius, stagger, fadeInUp } from '../design-system'
 import { useInsights } from '../hooks/useInsights'
 import { InsightCard } from '../components/InsightCard'
+import { WeeklyHistory } from '../components/WeeklyReview'
 
 export function LifeInsightsPage() {
   const t = useLifeT()
@@ -37,6 +38,8 @@ export function LifeInsightsPage() {
           {insights.map((i, n) => <motion.li key={`${i.kind}-${n}`} variants={fadeInUp}><InsightCard insight={i} /></motion.li>)}
         </motion.ul>
       )}
+
+      <WeeklyHistory />
 
       <p style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontFamily: font, fontSize: '12px', color: colors.text.tertiary, margin: '18px 4px 0', lineHeight: 1.5 }}>
         <ShieldCheck size={14} aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }} />{s.privacy}

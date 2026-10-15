@@ -5,7 +5,7 @@ import { Flame, Plus, Check, Pencil, Trash2, Power, ChevronDown, Hash } from 'lu
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
-import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, LifeConfirmDialog, MiniProgressRing, colors, font, radius, stagger, fadeInUp, ink, tint } from '../design-system'
+import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, MiniProgressRing, colors, font, radius, stagger, fadeInUp, ink, tint } from '../design-system'
 import { useHabits, type Habit } from '../hooks/useHabits'
 import { getHabitIcon } from '../lib/lifePalette'
 import { monthHabitDays } from '../lib/kindMoments'
@@ -13,6 +13,7 @@ import { HabitSheet } from '../components/HabitSheet'
 import { ActionMenu } from '../components/ActionMenu'
 import { HabitMeta, HabitValueSheet, QuantityButton } from '../components/HabitControls'
 import { useStreakText } from '../hooks/useStreakText'
+import { LetGoDialog, WhyQuote } from '../components/Why'
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function HabitSkeleton() {
@@ -121,6 +122,7 @@ function HabitCard({ habit, onToggleToday, onAdd, onEditValue, onToggleDay, onEd
             {habit.name}
           </p>
           <HabitMeta habit={habit} />
+          {habit.why && <WhyQuote why={habit.why} color={ink(habit.color)} lines={1} style={{ margin: '0 0 2px' }} />}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             {habit.streak > 0 && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }} title={streakText(habit)}>
@@ -171,6 +173,8 @@ export function LifeHabitsPage() {
   const [sheetOpen, setSheetOpen]       = useState(false)
   const [editHabit, setEditHabit]       = useState<Habit | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Habit | null>(null)
+  // Desactivar un hábito con "¿Por qué lo hago?": antes se muestra su frase
+  const [pauseTarget, setPauseTarget]   = useState<Habit | null>(null)
   const [showInactive, setShowInactive] = useState(false)
   const [valueHabit, setValueHabit]     = useState<Habit | null>(null)
 
@@ -245,7 +249,7 @@ export function LifeHabitsPage() {
                 onToggleDay={(date, done) => safely(toggleDay(habit.id, date, done))}
                 onEdit={() => { setEditHabit(habit); setSheetOpen(true) }}
                 onDelete={() => setDeleteTarget(habit)}
-                onToggleActive={() => safely(toggleActive(habit.id, false))}
+                onToggleActive={() => (habit.why ? setPauseTarget(habit) : safely(toggleActive(habit.id, false)))}
               />
             </motion.div>
           ))}
@@ -301,8 +305,22 @@ export function LifeHabitsPage() {
       <HabitValueSheet habit={valueHabit} onClose={() => setValueHabit(null)}
         onSave={async v => { if (valueHabit) await setDayValue(valueHabit.id, today, v).catch(() => { toast.error(t.common.saveError) }) }} />
 
-      <LifeConfirmDialog
+      <LetGoDialog
+        open={!!pauseTarget}
+        why={pauseTarget?.why}
+        title={t.why.letGoTitle}
+        message={pauseTarget ? t.why.deactivateText(pauseTarget.name) : ''}
+        onConfirm={() => {
+          const target = pauseTarget
+          setPauseTarget(null)
+          if (target) safely(toggleActive(target.id, false))
+        }}
+        onCancel={() => setPauseTarget(null)}
+      />
+
+      <LetGoDialog
         open={!!deleteTarget}
+        why={deleteTarget?.why}
         title={t.habits.deleteTitle}
         message={deleteTarget ? t.habits.deleteText(deleteTarget.name) : ''}
         confirmLabel={t.common.delete}

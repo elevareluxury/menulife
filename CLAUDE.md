@@ -198,6 +198,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `doneWithUndo`. Borrar un gasto compartido borra sus deudas pendientes. Migración
   `20261029000003_life_shared_expenses.sql`, tests en `life_shared_expenses.test.sql`, `splits.test.ts` y
   `shared-expenses.spec.ts`.
+- Presupuestos amables (Dinero): `life_budgets` (categoría fija o propia `'c:' || id` con `life_check_category_owner`,
+  moneda, monto > 0; único por categoría y moneda, hasta 60; vale para todos los meses). `lib/budgets.ts` calcula en el
+  dispositivo lo gastado del mes en esa moneda, lo que queda, días que faltan y "por día" (mes en curso; un mes pasado sólo
+  el resultado) y el estado (bien / cerca ≥ 85 % / pasado). `hooks/useBudgets.ts`, tarjeta `BudgetsCard` (barra con el
+  color de la categoría, "+ Presupuesto", editar monto, borrar con "Deshacer"), `BudgetSheet`, "Poner un presupuesto" en
+  "En qué se fue" y una línea en Mi día (`BudgetNudge`, la más relevante). Tono sin culpa: "fue $X más de lo previsto",
+  nada de rojo. Migración `20261030000001_life_budgets.sql`, tests en `life_budgets.test.sql`, `budgets.test.ts` y
+  `budgets.spec.ts`.
 - Importar del banco (V1.1, `FEATURES.bankImport`, prendido para todos): botón en Dinero → `ImportBankSheet`. Todo en el dispositivo:
   `lib/bankImport.ts` (CSV con comillas y separador detectado, UTF-8 o Windows-1252, títulos y columnas adivinados en
   12 idiomas, débito/crédito o importe con signo, coma o punto decimal, fechas d/m, m/d, a-m-d y serie de Excel,
@@ -217,6 +225,21 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `VoiceCaptureSheet` (se revisa y corrige antes de guardar; gasto/ingreso en "Otros", tarea con fecha y hora, idea).
   Privacidad: el reconocimiento del navegador (Google en Chrome, Apple en Safari), 12 idiomas. Tests en
   `voiceParse.test.ts` y `voice.spec.ts` (reconocimiento simulado).
+- Diario privado (V1.1, `FEATURES.journal`, prendido): `/life/journal` (`LifeJournalPage`), se entra desde el
+  encabezado de Brain (la barra de abajo sigue con 5). `life_journal_entries` (RLS sólo de la dueña; texto 1–10.000,
+  fecha 1900…mañana, ≤ 20 por día y 20.000 por cuenta; `hooks/useJournal.ts`): varias por día, editar en el lugar,
+  borrar con "Deshacer", buscar (la base trae candidatos con `ilike`, el dispositivo confirma sin acentos) y lista por
+  mes. No entra en la búsqueda general, Insights, "Tu mes", métricas ni el calendario; sí en exportar y en "Borrar
+  Life OS". Bloqueo en el dispositivo (Ajustes → `JournalLockCard`, `lib/journalLock.ts`): PIN de 4–8 dígitos
+  guardado como hash PBKDF2-SHA-256 (600.000 vueltas, sal de 16 bytes) en `localStorage` (`mycen_journal_lock:<id>`),
+  espera 30 s ×2 hasta 15 min desde el 3.er error, huella/cara opcional con WebAuthn de plataforma (sólo presencia,
+  sin servidor); se vuelve a bloquear al salir, al pasar a segundo plano y a los 5 min sin uso. Olvidé el PIN =
+  borra el bloqueo del dispositivo y cierra la sesión. No es cifrado: la UI y privacidad (12 idiomas) lo dicen.
+  Migración `20261030000004_life_journal.sql`, tests en `life_journal.test.sql`, `journalLock.test.ts` y `journal.spec.ts`.
+- Vaciar la cabeza: "Vaciar la cabeza" en el + → `BrainDumpSheet` (texto grande y "Dictar" con `useSpeech`).
+  `lib/brainDump.ts` separa en cosas (línea, oración; comas sólo si son 3 o más) y cada una pasa por `parseVoice`; se
+  revisa (tipo con un toque, monto, quitar) y "Guardar todo": tareas e ideas a Brain, gastos/ingresos a Dinero con
+  `suggestCategory` u "Otros"; sin conexión, a `lib/outbox.ts`. Tests en `brainDump.test.ts` y `why-dump.spec.ts`.
 - Entrar con Google (V1.1, `FEATURES.googleSignIn`, prendido): `GoogleButton` (`modules/auth/components/`) debajo del
   login y del registro. Google sólo da nombre, email y foto: la aceptación la pide Mycen, una sola vez. En el registro no
   va a Google sin la casilla del formulario; en el login no se pide y una cuenta nueva de Google sin `terms_accepted_at`
@@ -319,12 +342,29 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `useHabits`: `addToday` ("+1"), `setDayValue`, `weekCount`, `streakUnit`. UI: `QuantityButton` (anillo), `HabitMeta`,
   `HabitValueSheet` (`components/HabitControls.tsx`). Recordatorio por hábito: `useHabitReminders` (con Life OS abierto,
   una vez por día y hábito). E2E en `habits.spec.ts`.
+- "¿Por qué lo hago?": `why` (≤ 200, no en blanco; vacío = null) en `life_habits` y `life_goals` (migración
+  `20261030000003_life_why.sql`, tests en `life_why.test.sql`). `components/Why.tsx`: `WhyField` (al crear/editar),
+  `WhyQuote` (discreta en la tarjeta del hábito, la de la meta y su ficha, y en "Qué bueno verte de vuelta") y
+  `LetGoDialog`: antes de desactivar o borrar un hábito, o borrar una meta, con frase → "Lo empezaste porque: …" con
+  "Seguir intentando" / "Soltar igual" (sin frase, como siempre). E2E en `why-dump.spec.ts`.
 - "Mi día" (etapa 11): `/life` (`LifePage`) es "Mi día": `MyDaySection` (`components/MyDay.tsx`) arriba con hasta 3
   prioridades (tareas o texto; una cuarta explica por qué son 3) y "Cerrar el día" (resaltado desde las 18 h). El cierre
   (`DayReviewSheet`) muestra primero lo logrado (hábitos, tareas hechas hoy y prioridades, con celebración breve), después lo
   que quedó (pasar a mañana, cambiar fecha o soltar; soltar una tarea que se repite salta a la próxima) y "¿Cómo te fue
   hoy?". Datos: `life_daily_reviews` (una por persona y fecha local; `useDailyReview`). Debajo siguen tareas de hoy,
   hábitos, la meta en foco y el mes. `LifeSheet` va en un portal (si no, quedaba bajo la barra). E2E en `my-day.spec.ts`.
+  La tarjeta "Mi identidad" (`HubSection`, → Studio) va arriba de Mi día; se oculta o se muestra en Life OS → Ajustes
+  ("Mi día", `useHomePrefs` en `lib/homePrefs.ts`, guardado en el dispositivo).
+- Ánimo y revisión semanal (V1.1, `FEATURES.lifeReflection`, prendido): en el cierre del día 5 caritas (`MoodPicker`,
+  botones con nombre y `aria-pressed`; un toque guarda, tocar otra vez borra) → `life_daily_reviews.mood` (1–5, null =
+  no contestó). `lib/mood.ts`: Insights `moodHabits` (sólo si fue más alto) y `moodSpend` con ≥ 14 días con ánimo, ≥ 5 de
+  cada lado y ½ punto de diferencia; textos en condicional, sin causas. "Tu mes" suma "Cómo te sentiste" si hay datos.
+  "Tu semana en 5 minutos" (`components/WeeklyReview.tsx`): tarjeta en Mi día el último día de la semana (`week_start`;
+  "Ahora no" la guarda en el dispositivo) y en Insights → "Tus semanas" (revisar cuando quieras + semanas anteriores).
+  3 pasos: lo que salió bien (tareas, hábitos y ánimo reales + texto), qué soltar (atrasadas: semana que viene, fecha o
+  soltar) y hasta 3 focos (texto o tarea con fecha al empezar la semana) → `life_weekly_reviews` (una por semana; `wins`/
+  `let_go` ≤ 500, `next_focus` como las prioridades). Migración `20261030000002_life_reflection.sql`, tests en
+  `life_reflection.test.sql`, `reflection.test.ts` y `reflection.spec.ts`.
 - Life OS con el sistema de diseño y tono sin culpa (etapa 12): `LifeShell` pone `data-mycen-theme` en `<html>` según el
   celular (también lo heredan las hojas en portal) y `MotionConfig reducedMotion="user"`. Los tokens de
   `life/design-system/tokens.ts` apuntan a `--my-*` y a `life.css` (`--life-money|goals|habits|brain` por tema y

@@ -4,13 +4,16 @@ import { useNavigate } from 'react-router-dom'
 import { Check, ListChecks, Moon, Plus, Sparkles, Star, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
-import { localDateKey, useTasks, type LifeTask, type TaskFormData } from '../hooks/useTasks'
+import { localDateKey, taskWithDate as withDate, useTasks, type LifeTask } from '../hooks/useTasks'
 import { useHabits } from '../hooks/useHabits'
 import { MAX_PRIORITIES, useDailyReview, type Priority } from '../hooks/useDailyReview'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
 import { nextOccurrence } from '../lib/recurrence'
 import { shiftDate } from '../lib/habitStreak'
 import { useLifeT } from '@/i18n/app/life'
+import { MoodPicker } from './MoodPicker'
+import { FEATURES } from '@/lib/features'
+import { WeeklyReviewCard } from './WeeklyReview'
 
 // "Mi día" (V1 · etapa 11): las 3 prioridades de la mañana y el cierre del día (primero lo logrado).
 
@@ -29,14 +32,6 @@ const chipBtn: React.CSSProperties = {
 }
 
 const refresh = () => window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
-
-/** Datos de una tarea para guardarla con otra fecha (sin perder repetición, subtareas ni meta). */
-function withDate(task: LifeTask, due: string | null): TaskFormData {
-  return {
-    title: task.title, notes: task.notes, due_date: due, due_time: task.due_time, remind_minutes: task.remind_minutes,
-    goal_id: task.goal_id, is_focus: task.is_focus, recurrence: due ? task.recurrence : null, subtasks: task.subtasks,
-  }
-}
 
 function CheckBox({ done, label, onClick }: { done: boolean; label: string; onClick: () => void }) {
   return (
@@ -163,6 +158,8 @@ export function MyDaySection() {
         )}
       </LifeSheet>
 
+      <WeeklyReviewCard />
+
       {reviewOpen && <DayReviewSheet day={day} onClose={() => setReviewOpen(false)} />}
     </>
   )
@@ -176,7 +173,7 @@ function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyRevie
   const m = t.myDay
   const today = localDateKey()
   const tomorrow = shiftDate(today, 1)
-  const { review, closeDay, removePriority } = day
+  const { review, closeDay, removePriority, setMood } = day
   const { tasks, createTask, updateTask } = useTasks()
   const { todayHabits, activeHabits } = useHabits()
   const [step, setStep] = useState<'achieved' | 'pending'>('achieved')
@@ -255,6 +252,7 @@ function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyRevie
               </ul>
             </>
           ) : <p style={muted}>{m.achievedNone}</p>}
+          {closed && FEATURES.lifeReflection && <MoodPicker value={review.mood} onChange={mood => { setMood(mood).catch(fail) }} />}
           {closed ? (
             review.reflection && <p style={{ ...muted, fontStyle: 'italic' }}>“{review.reflection}”</p>
           ) : (
@@ -287,6 +285,7 @@ function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyRevie
               </ul>
             </>
           )}
+          {FEATURES.lifeReflection && <MoodPicker value={review.mood} onChange={mood => { setMood(mood).catch(fail) }} />}
           <div>
             <label htmlFor="myday-reflection" style={{ fontFamily: font, fontSize: '12px', fontWeight: 700, color: colors.text.tertiary, display: 'block', marginBottom: 6 }}>{m.howWas}</label>
             <textarea id="myday-reflection" value={reflection} maxLength={280} rows={2} placeholder={m.howPlaceholder}
