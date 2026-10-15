@@ -53,14 +53,16 @@ test('escribir, editar, buscar y borrar con "Deshacer"', async ({ page, context 
   expect(created).toMatchObject({ user_id: OWNER_ID, entry_date: today, body: 'Hoy tuve miedo de hablar en la reunión.\nAl final salió bien.' })
   await expect(page.getByText(/Hoy tuve miedo de hablar/)).toBeVisible()
 
-  // Editar
-  await page.getByRole('button', { name: 'Opciones de la entrada' }).first().click()
+  // Editar (el menú de esa entrada: con las dos del mismo día, el orden no se da por sentado)
+  const optionsOf = (text: string | RegExp) =>
+    page.getByText(text).locator('xpath=../..').getByRole('button', { name: 'Opciones de la entrada' })
+  await optionsOf(/Hoy tuve miedo de hablar/).click()
   await page.getByRole('menuitem', { name: 'Editar' }).click()
   const edit = page.getByRole('textbox', { name: 'Entrada del diario' }).nth(1)
   await edit.fill('Hoy hablé en la reunión. Salió bien.')
   await page.getByRole('button', { name: 'Guardar', exact: true }).click()
   await expect(page.getByText('Hoy hablé en la reunión. Salió bien.')).toBeVisible()
-  expect(state.tables.life_journal_entries.find(e => e.id === created.id)?.body).toBe('Hoy hablé en la reunión. Salió bien.')
+  await expect.poll(() => state.tables.life_journal_entries.find(e => e.id === created.id)?.body).toBe('Hoy hablé en la reunión. Salió bien.')
 
   // Buscar (sin acentos ni mayúsculas)
   await page.getByRole('button', { name: 'Buscar en el diario' }).click()
@@ -71,7 +73,7 @@ test('escribir, editar, buscar y borrar con "Deshacer"', async ({ page, context 
 
   // Borrar con "Deshacer": vuelve y no se borra
   const card = page.getByText('Hoy hablé en la reunión. Salió bien.')
-  await page.getByRole('button', { name: 'Opciones de la entrada' }).first().click()
+  await optionsOf('Hoy hablé en la reunión. Salió bien.').click()
   await page.getByRole('menuitem', { name: 'Eliminar' }).click()
   await expect(card).toHaveCount(0)
   await page.getByRole('button', { name: 'Deshacer' }).click()
@@ -80,7 +82,7 @@ test('escribir, editar, buscar y borrar con "Deshacer"', async ({ page, context 
   expect(state.tables.life_journal_entries).toHaveLength(2)
 
   // Borrar de verdad
-  await page.getByRole('button', { name: 'Opciones de la entrada' }).first().click()
+  await optionsOf('Hoy hablé en la reunión. Salió bien.').click()
   await page.getByRole('menuitem', { name: 'Eliminar' }).click()
   await expect(card).toHaveCount(0)
   await expect.poll(() => state.tables.life_journal_entries.length, { timeout: 8_000 }).toBe(1)
