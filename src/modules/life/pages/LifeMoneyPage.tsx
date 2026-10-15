@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp, ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
+import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp, ChevronLeft, ChevronRight, Search, X, Users } from 'lucide-react'
 import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
 import { localDay, useMoney, type Transaction } from '../hooks/useMoney'
 import { useMoneySearch } from '../hooks/useMoneySearch'
@@ -21,6 +21,10 @@ import { useInstallments, type InstallmentPlan } from '../hooks/useInstallments'
 import { InstallmentsCard } from '../components/InstallmentsCard'
 import { isInCourse, planName } from '../lib/installments'
 import { localDateKey } from '../hooks/useRecurring'
+import { newSplitId, useSplits } from '../hooks/useSplits'
+import { SettleSheet, SharedCard } from '../components/SharedCard'
+import { personSuggestions, type PersonBalance } from '../lib/splits'
+import { doneWithUndo } from '../lib/undo'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
@@ -190,8 +194,10 @@ function Sparkline({ curve, color }: { curve: number[]; color: string }) {
 }
 
 // ── Transaction Row ───────────────────────────────────────────────────────────
-function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf }: {
+function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf, shared }: {
   tx: Transaction
+  /** Parte de una cuenta compartida */
+  shared?: boolean
   fallbackCurrency: string
   locale: string
   /** Cantidad de cuotas de la compra, si el movimiento es una cuota ("3 de 12") */
@@ -222,6 +228,7 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, instal
           fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.text.primary,
           margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
+          {shared && <Users size={11} aria-label={t.shared.badge} style={{ display: 'inline', marginInlineEnd: 5, verticalAlign: '-1px', color: colors.text.tertiary }} />}
           {tx.recurring_id && <Repeat size={11} aria-label={t.recurring.badge} style={{ display: 'inline', marginInlineEnd: 5, verticalAlign: '-1px', color: colors.text.tertiary }} />}
           {tx.description || category}
         </p>
@@ -331,6 +338,9 @@ export function LifeMoneyPage() {
   const [editFixed, setEditFixed]       = useState<RecurringTx | null>(null)
   const [importOpen, setImportOpen]     = useState(false)
   const [canImport] = useState(() => featureOn('bankImport'))
+  const splits = useSplits()
+  const [settling, setSettling] = useState<PersonBalance | null>(null)
+  const knownPeople = useMemo(() => personSuggestions(splits.items, '', [], 30), [splits.items])
 
   if (loading && !everHasData && !transactions.length) return <MoneySkeleton />
 
@@ -367,7 +377,23 @@ export function LifeMoneyPage() {
   const remove = (tx: Transaction) => {
     hideTransaction(tx.id)
     const what = `${tx.description || labelOf(tx.category)} · ${formatMoney(Number(tx.amount), tx.currency || mainCurrency, locale)}`
-    deleteWithUndo({ message: t.undo.deleted(what), commit: () => deleteTransaction(tx.id), restore: () => void reload() })
+    // Un gasto compartido se lleva sus deudas pendientes (las saldadas quedan)
+    const pendingSplits = splits.pendingFor(tx.id)
+    splits.hide(pendingSplits)
+    deleteWithUndo({
+      message: t.undo.deleted(what),
+      commit: async () => { await splits.remove(pendingSplits); await deleteTransaction(tx.id) },
+      restore: () => { void reload(); void splits.reload() },
+    })
+  }
+  const removeShared = (b: PersonBalance) => {
+    const ids = b.items.map(i => i.id)
+    splits.hide(ids)
+    deleteWithUndo({ message: t.shared.removed(b.person), commit: () => splits.remove(ids), restore: () => void splits.reload() })
+  }
+  const settle = async (b: PersonBalance, income: number, record: boolean) => {
+    const undo = await splits.settle(b, income, { record, description: t.shared.repaidDesc(b.person) })
+    doneWithUndo({ message: t.shared.settled(b.person), undo })
   }
 
   return (
@@ -464,6 +490,9 @@ export function LifeMoneyPage() {
       {isCurrentMonth && plansInCourse.length > 0 && (
         <InstallmentsCard plans={plansInCourse} locale={locale} onCancel={cancelPlan} onDelete={removePlan} />
       )}
+      {splits.byPerson.length > 0 && (
+        <SharedCard items={splits.byPerson} locale={locale} onSettle={setSettling} onDelete={removeShared} />
+      )}
 
       {everHasData && (
         <div role="search" style={{ marginBottom: 12 }}>
@@ -530,7 +559,7 @@ export function LifeMoneyPage() {
                   <LifeSectionHeader title={formatDateLabel(group.date, t, locale)} />
                   <div>
                     {group.items.map(tx => (
-                      <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale}
+                      <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale} shared={splits.sharedTxIds.has(tx.id)}
                         onEdit={() => { setEditFixed(null); setEditTx(tx); setSheetOpen(true) }}
                         onDelete={() => remove(tx)}
                         installmentsOf={tx.installment_plan_id ? planSize.get(tx.installment_plan_id) : undefined} />
@@ -558,14 +587,29 @@ export function LifeMoneyPage() {
         initial={editFixed ? fixedAsTx(editFixed) : editTx}
         repeatable
         template={!!editFixed}
-        onSave={async (data, repeat, installments) => {
+        shareable
+        knownPeople={knownPeople}
+        onSave={async (data, repeat, installments, shared) => {
           if (editFixed) await fixed.update(editFixed.id, data)
           else if (editTx) await updateTransaction(editTx.id, data)
           else if (installments) await plans.create(data, installments)
           else if (repeat) await fixed.create(data)
+          else if (shared?.debts.length) {
+            // Gasto compartido: el movimiento (con id del cliente) y sus deudas; si las deudas fallan, no queda a medias
+            const id = newSplitId()
+            await createTransaction({ ...data, id })
+            try {
+              await splits.create(id, data.currency, shared.debts, data.description || labelOf(data.category))
+            } catch (e) {
+              await deleteTransaction(id).catch(() => {})
+              throw e
+            }
+          }
           else await createTransaction(data)
         }}
       />
+
+      <SettleSheet balance={settling} locale={locale} onClose={() => setSettling(null)} onConfirm={settle} />
 
     </LifeScreenContainer>
   )

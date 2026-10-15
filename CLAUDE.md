@@ -188,6 +188,16 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   (`CategoryForm`) y Ajustes → "Tus categorías" (`CategoriesCard`: editar, archivar con "Deshacer", restaurar). El CSV de
   Dinero exporta el nombre. Migración `20261029000001_life_custom_categories.sql`, tests en
   `life_custom_categories.test.sql`, `moneyCategories.test.ts` y `custom-categories.spec.ts`.
+- Gastos compartidos (Dinero): el movimiento es lo que salió de tu bolsillo (pagaste vos → el total) o tu parte (pagó otra
+  persona); las deudas van en `life_splits` (persona, `owed_to_me`|`i_owe`, monto, moneda, `settled_at`,
+  `settlement_transaction_id`; RLS del dueño, movimiento vinculado sólo propio por trigger). "Compartido" en
+  `TransactionSheet` (`SharedExpenseFields`: quién pagó, personas con sugerencias, partes iguales o a mano) → reparto en
+  centavos en `lib/splits.ts` (`planSplit`, `balances` por persona y moneda). Tarjeta "Cuentas compartidas" + `SettleSheet`
+  (`hooks/useSplits.ts`): saldar marca todo lo pendiente con esa persona y moneda y, si te debían, registra el ingreso
+  "Juan te devolvió" ('Otros') por lo que te debían; lo que debías no suma otro gasto (tu parte ya estaba). Con
+  `doneWithUndo`. Borrar un gasto compartido borra sus deudas pendientes. Migración
+  `20261029000003_life_shared_expenses.sql`, tests en `life_shared_expenses.test.sql`, `splits.test.ts` y
+  `shared-expenses.spec.ts`.
 - Importar del banco (V1.1, beta `bankImport`): botón en Dinero → `ImportBankSheet`. Todo en el dispositivo:
   `lib/bankImport.ts` (CSV con comillas y separador detectado, UTF-8 o Windows-1252, títulos y columnas adivinados en
   12 idiomas, débito/crédito o importe con signo, coma o punto decimal, fechas d/m, m/d, a-m-d y serie de Excel,

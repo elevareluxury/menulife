@@ -15,6 +15,12 @@ import { CategoryForm } from './CategoryForm'
 import { useCategories, useCategoryLabels } from '../hooks/useCategories'
 import { isCustomKey, suggestColor } from '../lib/moneyCategories'
 import { installmentAmount, validInstallments, MAX_INSTALLMENTS, MIN_INSTALLMENTS } from '../lib/installments'
+import { SharedExpenseFields } from './SharedExpenseFields'
+import { planMessage } from '../lib/splitMessage'
+import { planSplit, type SharedDraft, type SplitDebt } from '../lib/splits'
+
+/** Gasto compartido: las deudas que quedan (el importe del movimiento ya viene ajustado en `data.amount`) */
+export interface SharedSave { debts: SplitDebt[] }
 
 interface TransactionSheetProps {
   open: boolean
@@ -22,13 +28,17 @@ interface TransactionSheetProps {
   /**
    * `repeat`: el usuario pidió que se repita todos los meses (sólo al crear con `repeatable`).
    * `installments`: compra en cuotas (cantidad); `data.amount` es el total y la fecha, la de la primera cuota.
+   * `shared`: gasto compartido (las deudas que quedan; `data.amount` ya viene ajustado).
    */
-  onSave: (data: TransactionFormData, repeat: boolean, installments?: number | null) => Promise<void>
+  onSave: (data: TransactionFormData, repeat: boolean, installments?: number | null, shared?: SharedSave | null) => Promise<void>
   initial?: Transaction | null
   /** Ofrece "Repetir todos los meses" al crear */
   repeatable?: boolean
   /** Edita un fijo: la fecha es la próxima y los cambios valen de acá en adelante */
   template?: boolean
+  /** Ofrece "Compartido" en un gasto nuevo; `knownPeople`: nombres ya usados (el más reciente primero) */
+  shareable?: boolean
+  knownPeople?: string[]
 }
 
 function todayISO(): string {
@@ -36,7 +46,7 @@ function todayISO(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function TransactionSheet({ open, onClose, onSave, initial, repeatable, template }: TransactionSheetProps) {
+export function TransactionSheet({ open, onClose, onSave, initial, repeatable, template, shareable, knownPeople }: TransactionSheetProps) {
   const { currency } = useLocaleStore()  // moneda principal de la cuenta
   const extra = usePrefs(st => st.extra_currencies)
   const t = useLifeT()
@@ -65,6 +75,8 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
   const [newCatOpen, setNewCatOpen] = useState(false)
   const [split, setSplit]         = useState(false)
   const [countStr, setCountStr]   = useState('12')
+  // Gasto compartido (sólo al crear un gasto; no se combina con "Repetir todos los meses")
+  const [shared, setShared] = useState<SharedDraft | null>(null)
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
@@ -84,6 +96,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
       setNewCatOpen(false)
       setSplit(false)
       setCountStr('12')
+      setShared(null)
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,24 +121,29 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
     const amount = parseFloat(amountStr.replace(',', '.'))
     if (!amount || amount <= 0) { setError(t.tx.invalidAmount); return }
     if (inInstallments && !validInstallments(amount, count)) { setError(t.installments.invalid); return }
+    const sharing = canShare && shared ? planSplit(amount, shared) : null
+    if (sharing && !sharing.ok) { setError(planMessage(sharing, t, form.currency, locale).lines[0]); return }
     setSaving(true)
     try {
       await onSave({
         ...form,
-        amount,
+        // Compartido: el movimiento es lo que salió de tu bolsillo (el total) o tu parte, si pagó otra persona
+        amount: sharing?.ok ? sharing.expense : amount,
         description: form.description?.trim() || undefined,
         // Fecha vacía o inválida (se borró el campo): hoy
         occurred_at: template || (repeatable && repeat && !initial) || inInstallments
           // Un fijo guarda la fecha tal cual (el día del mes); un movimiento, el mediodía local de esa fecha
           ? (/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO())
           : new Date(`${/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO()}T12:00:00`).toISOString(),
-      }, !inInstallments && !!(repeatable && repeat && !initial), inInstallments ? count : null)
+      }, !inInstallments && !!(repeatable && repeat && !initial), inInstallments ? count : null, sharing?.ok ? { debts: sharing.debts } : null)
       onClose()
     } catch { setError(t.common.saveError) }
     finally { setSaving(false) }
   }
 
   const isIncome = form.type === 'income'
+  // Compartido no se combina con "Repetir todos los meses" ni con "En cuotas"
+  const canShare = !!shareable && !initial && !template && !isIncome && !repeat && !split
   // Moneda principal + adicionales (+ la del movimiento si se edita uno en otra moneda)
   const currencyOptions = [...new Set([currency, ...extra, form.currency].filter(Boolean))]
 
@@ -325,7 +343,12 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         />
       </div>
 
-      {repeatable && !initial && (
+      {canShare && (
+        <SharedExpenseFields total={parseFloat(amountStr.replace(',', '.'))} currency={form.currency} locale={locale}
+          value={shared} onChange={setShared} knownPeople={knownPeople ?? []} />
+      )}
+
+      {repeatable && !initial && !(canShare && shared) && (
         <label style={{
           display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: '16px', padding: '12px 14px', cursor: 'pointer',
           borderRadius: radius.md, background: repeat ? colors.accent.soft : colors.surface.high,
@@ -346,7 +369,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         </label>
       )}
 
-      {canSplit && (() => {
+      {canSplit && !(canShare && shared) && (() => {
         const amount = parseFloat(amountStr.replace(',', '.'))
         const each = amount > 0 && validInstallments(amount, count)
           ? t.installments.each(count, formatMoney(installmentAmount(amount, count, 1), form.currency, locale))

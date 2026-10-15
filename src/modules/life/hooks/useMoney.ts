@@ -157,7 +157,8 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
-  const createTransaction = useCallback(async (data: TransactionFormData) => {
+  /** `id` opcional (generado en el cliente) para vincular algo al movimiento, como las deudas de un gasto compartido. */
+  const createTransaction = useCallback(async (data: TransactionFormData & { id?: string }) => {
     if (!user) return
     const { error } = await db.from('life_transactions').insert({ ...data, user_id: user.id })
     if (error) throw error
