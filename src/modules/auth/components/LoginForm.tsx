@@ -5,6 +5,8 @@ import toast from 'react-hot-toast'
 import { authErrorMessage } from '@/lib/authErrors'
 import { useAuthT } from '@/i18n/app/auth'
 import { postLoginRoute } from '@/modules/auth/lib/postLoginRoute'
+import { GoogleButton } from '@/modules/auth/components/GoogleButton'
+import { featureOn } from '@/lib/features'
 
 const BASE_INPUT: React.CSSProperties = {
   width: '100%',
@@ -68,6 +70,7 @@ export function LoginForm() {
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {/* Error banner */}
       {error && (
@@ -141,5 +144,7 @@ export function LoginForm() {
       </button>
 
     </form>
+    {featureOn('googleSignIn') && <GoogleButton />}
+    </>
   )
 }

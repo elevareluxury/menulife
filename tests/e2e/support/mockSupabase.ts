@@ -630,12 +630,13 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
 // ── Instalación en el contexto del navegador ────────────────────────────────
 
 export async function installSupabaseMock(context: BrowserContext, state: MockState,
-  opts: { signedIn?: boolean; userMetadata?: Record<string, unknown> } = {}) {
+  opts: { signedIn?: boolean; userMetadata?: Record<string, unknown>; appMetadata?: Record<string, unknown> } = {}) {
   if (opts.signedIn) {
     const session = {
       access_token: 'mock-access-token', refresh_token: 'mock-refresh', token_type: 'bearer', expires_in: 3600,
       expires_at: Math.floor(Date.now() / 1000) + 86_400,
-      user: { id: OWNER_ID, email: 'ana@example.com', aud: 'authenticated', role: 'authenticated', user_metadata: { name: 'Ana Pérez', ...opts.userMetadata } },
+      user: { id: OWNER_ID, email: 'ana@example.com', aud: 'authenticated', role: 'authenticated', user_metadata: { name: 'Ana Pérez', ...opts.userMetadata },
+        ...(opts.appMetadata ? { app_metadata: opts.appMetadata } : {}) },
     }
     // supabase-js guarda la sesión en sb-<ref>-auth-token (ref = primer segmento del host)
     await context.addInitScript(s => localStorage.setItem('sb-mock-auth-token', s), JSON.stringify(session))

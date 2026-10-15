@@ -46,6 +46,20 @@ const ko: AuthDict = {
     welcome: "Mycen에 오신 것을 환영합니다!",
     failed: "계정을 만들지 못했습니다. 다시 시도해 주세요.",
   },
+  /** Entrar con Google: la línea "o" y el botón (la aceptación usa las claves de register) */
+  google: {
+    continue: "Google로 계속하기",
+    going: "Google을 여는 중…",
+    or: "또는",
+    failed: "Google을 열 수 없습니다. 다시 시도해 주세요.",
+  },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "한 단계만 더",
+    intro: "Google로 계정 만들기를 마치려면 이용약관 및 개인정보 처리방침에 동의해 주세요. 한 번만 하면 됩니다.",
+    submit: "계속",
+    cancel: "취소하고 로그아웃",
+  },
   forgot: {
     title: "비밀번호 재설정",
     intro: "이메일을 입력하면 새 비밀번호를 만들 수 있는 링크를 보내드려요.",

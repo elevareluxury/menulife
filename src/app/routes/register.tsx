@@ -9,6 +9,8 @@ import { useAppLang } from '@/i18n/app/store'
 import { useLangDir } from '@/i18n/app/useLangDir'
 import { parseReferral } from '@/lib/referral'
 import { trackOncePerSession } from '@/lib/productEvents'
+import { featureOn } from '@/lib/features'
+import { GoogleButton } from '@/modules/auth/components/GoogleButton'
 
 const CORAL = '#F4705A'
 
@@ -226,6 +228,8 @@ export function RegisterPage() {
             {loading ? r.submitting : r.submit}
           </button>
         </form>
+
+        {featureOn('googleSignIn') && <GoogleButton referral={referral} accepted={accepted} />}
 
         <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.65)' }}>
           {r.haveAccount}{' '}

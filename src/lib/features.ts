@@ -8,6 +8,8 @@ export const FEATURES = {
   bankImport:     false,
   calendarFeed:   false,
   voiceCapture:   false,
+  // Entrar con Google: prendido para todos (se apaga acá si hiciera falta)
+  googleSignIn:   true,
 } as const
 
 export type FeatureName = keyof typeof FEATURES

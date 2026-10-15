@@ -46,6 +46,20 @@ const en: AuthDict = {
     welcome: "Welcome to Mycen!",
     failed: "We couldn’t create your account. Please try again.",
   },
+  /** Entrar con Google: la línea "o" y el botón (la aceptación usa las claves de register) */
+  google: {
+    continue: "Continue with Google",
+    going: "Opening Google…",
+    or: "or",
+    failed: "We couldn't open Google. Try again.",
+  },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "One more step",
+    intro: "To finish creating your account with Google, accept the Terms and the Privacy Policy. You only do this once.",
+    submit: "Continue",
+    cancel: "Cancel and log out",
+  },
   forgot: {
     title: "Reset password",
     intro: "Enter your email and we’ll send you a link to create a new password.",

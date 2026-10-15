@@ -46,6 +46,20 @@ const ar: AuthDict = {
     welcome: "مرحبًا بك في Mycen!",
     failed: "تعذّر إنشاء حسابك. حاول مرة أخرى.",
   },
+  /** Entrar con Google: la línea "o" y el botón (la aceptación usa las claves de register) */
+  google: {
+    continue: "المتابعة باستخدام Google",
+    going: "جارٍ فتح Google…",
+    or: "أو",
+    failed: "تعذّر فتح Google. حاول مرة أخرى.",
+  },
+  /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
+  termsGate: {
+    title: "خطوة أخيرة",
+    intro: "لإكمال إنشاء حسابك باستخدام Google، وافق على الشروط وسياسة الخصوصية. يتم ذلك مرة واحدة فقط.",
+    submit: "متابعة",
+    cancel: "إلغاء وتسجيل الخروج",
+  },
   forgot: {
     title: "استعادة كلمة المرور",
     intro: "اكتب بريدك الإلكتروني وسنرسل لك رابطًا لإنشاء كلمة مرور جديدة.",
