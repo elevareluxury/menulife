@@ -145,6 +145,11 @@
 .mp-form-note { margin: 0; font-size: var(--my-fs-small); color: var(--my-muted); text-align: center; }
 .mp-form-done { margin: 8px 0 14px; font-size: var(--my-fs-lead); }
 
+/* ── Suscribirse (módulos de bio) ── */
+.mp-sub-consent { display: flex; gap: 10px; align-items: flex-start; font-size: var(--my-fs-small); color: var(--my-text); cursor: pointer; }
+.mp-sub-consent input { flex: none; width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--my-accent); cursor: pointer; }
+.mp-sub-privacy { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
 /* Tilde de cuenta verificada junto al nombre (después de la etapa 15): acento del perfil, mismo alto que el texto */
 .my-profile .mp-verified { display: inline-flex; vertical-align: -0.08em; margin-inline-start: 0.22em; color: var(--my-accent); }
 .my-profile .mp-verified svg { width: 0.72em; height: 0.72em; }

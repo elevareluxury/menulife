@@ -10,6 +10,8 @@ export interface ProfileModuleCtx {
   handle: string
   /** Vista previa en Studio u onboarding: no se envía ni se registra nada */
   preview: boolean
+  /** Nombre visible del perfil ("Suscribirse" dice quién recibe el email) */
+  displayName?: string
 }
 
 export const ProfileModuleContext = createContext<ProfileModuleCtx | null>(null)

@@ -208,7 +208,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
 
   const seed = huellaSeed(profile)
   const handle = profileHandle(profile)
-  const moduleCtx = useMemo(() => ({ seed, variant: look.huellaVariant, handle, preview }), [seed, look.huellaVariant, handle, preview])
+  const moduleCtx = useMemo(() => ({ seed, variant: look.huellaVariant, handle, preview, displayName: name }), [seed, look.huellaVariant, handle, preview, name])
   const parts: LayoutParts = {
     look,
     seed,

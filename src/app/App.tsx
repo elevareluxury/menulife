@@ -48,6 +48,7 @@ const StudioPreview   = lazy(() => import('@/modules/studio/pages/MiscPages').th
 const StudioEditor    = lazy(() => import('@/modules/studio/pages/EditorPage').then(m => ({ default: m.EditorPage })))
 const StudioEverywhere = lazy(() => import('@/modules/studio/pages/EverywherePage').then(m => ({ default: m.EverywherePage })))
 const StudioMessages  = lazy(() => import('@/modules/studio/pages/MessagesPage').then(m => ({ default: m.MessagesPage })))
+const StudioSubscribers = lazy(() => import('@/modules/studio/pages/SubscribersPage').then(m => ({ default: m.SubscribersPage })))
 const StudioSpaces    = lazy(() => import('@/modules/studio/pages/SpacesPage').then(m => ({ default: m.SpacesPage })))
 const StudioMore      = lazy(() => import('@/modules/studio/pages/MiscPages').then(m => ({ default: m.MorePage })))
 const SuperAdminPage   = lazy(() => import('./routes/super-admin').then(m => ({ default: m.SuperAdminPage })))
@@ -187,6 +188,7 @@ function App() {
             <Route path="editor"     element={<StudioEditor />} />
             <Route path="spaces"     element={<StudioSpaces />} />
             <Route path="messages"   element={<StudioMessages />} />
+            <Route path="subscribers" element={<StudioSubscribers />} />
             <Route path="everywhere" element={<StudioEverywhere />} />
             <Route path="more"       element={<StudioMore />} />
             <Route path="*"          element={<Navigate to="/studio" replace />} />

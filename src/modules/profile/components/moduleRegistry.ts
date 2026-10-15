@@ -8,6 +8,7 @@ import { PortfolioModule, ProjectModule } from './ProjectModules'
 // Video y música en su propio chunk: sólo lo baja un perfil que lo usa (la huella de la fachada pesa)
 const ContactFormModule = lazy(() => import('./ContactFormModule').then(m => ({ default: m.ContactFormModule })))
 const MediaModule = lazy(() => import('./MediaModule').then(m => ({ default: m.MediaModule })))
+const SubscribeModule = lazy(() => import('./SubscribeModule').then(m => ({ default: m.SubscribeModule })))
 import { parseMediaUrl } from '../lib/media'
 
 export interface GroupProps {
@@ -51,6 +52,7 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   portfolio:       { View: PortfolioModule, bento: 'L' },
   link_group:      { View: LinkGroupModule, bento: 'M' },
   contact_form:    { View: ContactFormModule, bento: 'M' },
+  subscribe:       { View: SubscribeModule, bento: 'M' },
   media:           { View: MediaModule, bento: m => (parseMediaUrl(m.content.url)?.kind === 'music' ? 'M' : 'L') },
 }
 

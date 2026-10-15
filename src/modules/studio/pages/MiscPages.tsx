@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { BarChart3, ChevronRight, Eye, FolderOpen, Inbox, LayoutGrid, LogOut, Palette, Settings, UserRound } from 'lucide-react'
+import { BarChart3, ChevronRight, Eye, FolderOpen, Inbox, LayoutGrid, LogOut, MailPlus, Palette, Settings, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
 import { useUnreadMessages } from '../lib/useUnreadMessages'
@@ -30,6 +30,7 @@ export function MorePage() {
   const items = [
     { to: '/studio/preview', label: t.nav.preview, icon: Eye },
     { to: '/studio/messages', label: t.nav.messages, icon: Inbox },
+    { to: '/studio/subscribers', label: t.nav.subscribers, icon: MailPlus },
     { to: '/studio/modules', label: t.nav.modules, icon: LayoutGrid },
     { to: '/studio/projects', label: t.nav.projects, icon: FolderOpen },
     { to: '/studio/appearance', label: t.nav.appearance, icon: Palette },
