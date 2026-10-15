@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp } from 'lucide-react'
-import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint } from '../design-system'
-import { useMoney, type Transaction } from '../hooks/useMoney'
+import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp, ChevronLeft, ChevronRight, Search, X, Users } from 'lucide-react'
+import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
+import { localDay, useMoney, type Transaction } from '../hooks/useMoney'
+import { useMoneySearch } from '../hooks/useMoneySearch'
+import { categoryBreakdown, monthKeyOf, shiftMonth, type CategoryShare } from '../lib/moneyInsights'
+import { useCategoryLabels } from '../hooks/useCategories'
 import { TransactionSheet } from '../components/TransactionSheet'
 import { nextDue, useRecurring, type RecurringTx } from '../hooks/useRecurring'
 import { ActionMenu } from '../components/ActionMenu'
@@ -14,6 +17,14 @@ import { formatMoney } from '@/lib/currencies'
 import toast from 'react-hot-toast'
 import { featureOn } from '@/lib/features'
 import { ImportBankSheet } from '../components/ImportBankSheet'
+import { useInstallments, type InstallmentPlan } from '../hooks/useInstallments'
+import { InstallmentsCard } from '../components/InstallmentsCard'
+import { isInCourse, planName } from '../lib/installments'
+import { localDateKey } from '../hooks/useRecurring'
+import { newSplitId, useSplits } from '../hooks/useSplits'
+import { SettleSheet, SharedCard } from '../components/SharedCard'
+import { personSuggestions, type PersonBalance } from '../lib/splits'
+import { doneWithUndo } from '../lib/undo'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
@@ -23,10 +34,120 @@ function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
   yesterday.setDate(today.getDate() - 1)
   if (d.toDateString() === today.toDateString()) return t.money.today
   if (d.toDateString() === yesterday.toDateString()) return t.money.yesterday
-  return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })
+  return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long',
+    ...(d.getFullYear() !== today.getFullYear() ? { year: 'numeric' as const } : {}) })
 }
 
-const categoryLabel = (t: LifeDict, cat: string) => t.categories[cat] ?? cat
+
+function monthLabel(key: string, locale: string): string {
+  const [y, m] = key.split('-').map(Number)
+  const d = new Date(y, m - 1, 1)
+  return d.toLocaleDateString(locale, { month: 'long', ...(y !== new Date().getFullYear() ? { year: 'numeric' as const } : {}) })
+}
+
+function groupByDay(txs: Transaction[]): { date: string; items: Transaction[] }[] {
+  const map = new Map<string, Transaction[]>()
+  for (const tx of txs) {
+    const key = localDay(tx.occurred_at)
+    map.set(key, [...(map.get(key) ?? []), tx])
+  }
+  return [...map.entries()].sort((a, b) => b[0].localeCompare(a[0])).map(([date, items]) => ({ date, items }))
+}
+
+const roundBtn: React.CSSProperties = {
+  width: 40, height: 40, borderRadius: radius.full, background: colors.surface.high,
+  border: `1px solid ${colors.border.subtle}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+}
+
+// ── Mes: ‹ septiembre › ──────────────────────────────────────────────────────
+function MonthSwitcher({ month, locale, onChange }: { month: string; locale: string; onChange: (m: string) => void }) {
+  const t = useLifeT()
+  const isCurrent = month === monthKeyOf(new Date())
+  // En árabe (de derecha a izquierda) las flechas apuntan al revés
+  const rtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+  const Prev = rtl ? ChevronRight : ChevronLeft
+  const Next = rtl ? ChevronLeft : ChevronRight
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+      <button type="button" onClick={() => onChange(shiftMonth(month, -1))} aria-label={t.money.prevMonth} title={t.money.prevMonth} style={roundBtn}>
+        <Prev size={18} style={{ color: colors.text.secondary }} aria-hidden="true" />
+      </button>
+      <h2 aria-live="polite" style={{ fontFamily: font, fontSize: 16, fontWeight: 800, color: colors.text.primary, margin: 0, textTransform: 'capitalize' }}>
+        {monthLabel(month, locale)}
+      </h2>
+      <button type="button" onClick={() => onChange(shiftMonth(month, 1))} disabled={isCurrent} aria-label={t.money.nextMonth} title={t.money.nextMonth}
+        style={{ ...roundBtn, opacity: isCurrent ? 0.35 : 1, cursor: isCurrent ? 'default' : 'pointer' }}>
+        <Next size={18} style={{ color: colors.text.secondary }} aria-hidden="true" />
+      </button>
+    </div>
+  )
+}
+
+// ── En qué se fue (gastos por categoría, moneda principal) ───────────────────
+function CategoryCard({ items, currency, locale, prevMonthName, active, onPick }: {
+  items: CategoryShare[]; currency: string; locale: string; prevMonthName: string
+  active: string | null; onPick: (cat: string) => void
+}) {
+  const t = useLifeT()
+  const { labelOf, colorOf } = useCategoryLabels()
+  return (
+    <LifeCard style={{ marginBottom: '12px' }}>
+      <section aria-labelledby="money-by-category">
+      <h2 id="money-by-category" style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', margin: '0 0 8px', textTransform: 'uppercase' }}>
+        {t.money.byCategory} · {currency}
+      </h2>
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {items.map(c => {
+          const label = labelOf(c.category)
+          const color = ink(colorOf(c.category))
+          const pct = Math.round(c.share * 100)
+          return (
+            <li key={c.category}>
+              <button type="button" onClick={() => onPick(c.category)} aria-pressed={active === c.category}
+                aria-label={`${t.money.onlyCategory(label)}: ${formatMoney(c.amount, currency, locale)}, ${pct} %`}
+                style={{
+                  width: '100%', textAlign: 'start', background: active === c.category ? colors.surface.high : 'none',
+                  border: 'none', borderRadius: radius.sm, padding: '6px 4px', cursor: 'pointer', fontFamily: font,
+                }}>
+                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: colors.text.primary }}>{label}</span>
+                  <span dir="ltr" style={{ fontSize: 13, fontWeight: 700, color: colors.text.primary }}>{formatMoney(c.amount, currency, locale)}</span>
+                  <span style={{ width: 40, textAlign: 'end', fontSize: 11, color: colors.text.tertiary }}>{pct} %</span>
+                </span>
+                <span aria-hidden="true" style={{ display: 'block', height: 6, borderRadius: radius.full, background: colors.surface.high, marginTop: 5, overflow: 'hidden' }}>
+                  <span style={{ display: 'block', height: '100%', width: `${Math.max(2, pct)}%`, background: color, borderRadius: radius.full }} />
+                </span>
+                {c.change !== null && c.change !== 0 && (
+                  <span style={{ display: 'block', fontSize: 11, marginTop: 3, color: colors.text.tertiary }}>
+                    {c.change > 0 ? t.money.more(c.change, prevMonthName) : t.money.less(-c.change, prevMonthName)}
+                  </span>
+                )}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+      </section>
+    </LifeCard>
+  )
+}
+
+type Kind = 'all' | 'income' | 'expense'
+
+function Chip({ pressed, onClick, children, label }: { pressed?: boolean; onClick: () => void; children: React.ReactNode; label?: string }) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={pressed} aria-label={label}
+      style={{
+        padding: '6px 12px', borderRadius: radius.full, fontFamily: font, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+        background: pressed ? colors.accent.soft : colors.surface.high,
+        border: `1px solid ${pressed ? colors.accent.soft : colors.border.subtle}`,
+        color: pressed ? colors.accent.ink : colors.text.secondary,
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+      }}>
+      {children}
+    </button>
+  )
+}
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function MoneySkeleton() {
@@ -73,17 +194,22 @@ function Sparkline({ curve, color }: { curve: number[]; color: string }) {
 }
 
 // ── Transaction Row ───────────────────────────────────────────────────────────
-function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
+function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf, shared }: {
   tx: Transaction
+  /** Parte de una cuenta compartida */
+  shared?: boolean
   fallbackCurrency: string
   locale: string
+  /** Cantidad de cuotas de la compra, si el movimiento es una cuota ("3 de 12") */
+  installmentsOf?: number
   onEdit: () => void
   onDelete: () => void
 }) {
   const t = useLifeT()
   const isIncome = tx.type === 'income'
   const amountColor = isIncome ? colors.semantic.success : colors.semantic.error
-  const category = categoryLabel(t, tx.category)
+  const { labelOf } = useCategoryLabels()
+  const category = labelOf(tx.category)
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}` }}>
@@ -102,6 +228,7 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
           fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.text.primary,
           margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
+          {shared && <Users size={11} aria-label={t.shared.badge} style={{ display: 'inline', marginInlineEnd: 5, verticalAlign: '-1px', color: colors.text.tertiary }} />}
           {tx.recurring_id && <Repeat size={11} aria-label={t.recurring.badge} style={{ display: 'inline', marginInlineEnd: 5, verticalAlign: '-1px', color: colors.text.tertiary }} />}
           {tx.description || category}
         </p>
@@ -111,6 +238,13 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete }: {
           </p>
         )}
       </div>
+
+      {installmentsOf && tx.installment_no ? (
+        <span aria-label={t.installments.badgeLabel(tx.installment_no, installmentsOf)}
+          style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.secondary, background: colors.surface.high, borderRadius: radius.full, padding: '2px 8px', flexShrink: 0, whiteSpace: 'nowrap' }}>
+          {t.installments.badge(tx.installment_no, installmentsOf)}
+        </span>
+      ) : null}
 
       <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 800, color: amountColor, flexShrink: 0 }} dir="ltr">
         {isIncome ? '+' : '-'}{formatMoney(Number(tx.amount), tx.currency || fallbackCurrency, locale)}
@@ -134,6 +268,7 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
 }) {
   const t = useLifeT()
   const r = t.recurring
+  const { labelOf } = useCategoryLabels()
   const dateLabel = (key: string) => new Date(`${key}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })
   return (
     <LifeCard style={{ marginBottom: '12px' }}>
@@ -145,7 +280,7 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
         <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {items.map(item => {
             const isIncome = item.type === 'income'
-            const name = item.description || categoryLabel(t, item.category ?? 'Otros')
+            const name = item.description || labelOf(item.category)
             return (
               <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}`, opacity: item.active ? 1 : 0.6 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -177,23 +312,42 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
 export function LifeMoneyPage() {
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
+  const [month, setMonth] = useState(() => monthKeyOf(new Date()))
   const {
-    grouped, loading, mainCurrency,
+    transactions, previous, loading, mainCurrency,
     monthIncome, monthExpense, monthBalance, monthCurve, otherTotals,
-    hasData, reload, createTransaction, updateTransaction, deleteTransaction, hideTransaction,
-  } = useMoney()
+    hasData, everHasData, reload, createTransaction, updateTransaction, deleteTransaction, hideTransaction,
+  } = useMoney(month)
+  const [query, setQuery] = useState('')
+  const [kind, setKind] = useState<Kind>('all')
+  const [cat, setCat] = useState<string | null>(null)
+  const { labelOf, allKeys } = useCategoryLabels()
+  const search = useMoneySearch(query, labelOf, allKeys)
+  const searchingAll = search.results !== null || search.searching
+  const breakdown = useMemo(() => categoryBreakdown(transactions, previous, mainCurrency), [transactions, previous, mainCurrency])
+  const shown = useMemo(() => (search.results ?? transactions)
+    .filter(tx => kind === 'all' || tx.type === kind)
+    .filter(tx => !cat || tx.category === cat), [search.results, transactions, kind, cat])
+  const grouped = useMemo(() => groupByDay(shown), [shown])
+  const isCurrentMonth = month === monthKeyOf(new Date())
 
   const fixed = useRecurring()
+  const plans = useInstallments()
   const [sheetOpen, setSheetOpen]       = useState(false)
   const [editTx, setEditTx]             = useState<Transaction | null>(null)
   const [editFixed, setEditFixed]       = useState<RecurringTx | null>(null)
   const [importOpen, setImportOpen]     = useState(false)
   const [canImport] = useState(() => featureOn('bankImport'))
+  const splits = useSplits()
+  const [settling, setSettling] = useState<PersonBalance | null>(null)
+  const knownPeople = useMemo(() => personSuggestions(splits.items, '', [], 30), [splits.items])
 
-  if (loading) return <MoneySkeleton />
+  if (loading && !everHasData && !transactions.length) return <MoneySkeleton />
 
   const balanceColor = monthBalance >= 0 ? colors.semantic.success : colors.semantic.error
-  const monthName = new Date().toLocaleDateString(locale, { month: 'long' })
+  const monthName = monthLabel(month, locale)
+  const prevMonthName = monthLabel(shiftMonth(month, -1), locale)
+  const changeMonth = (m: string) => { setMonth(m); setCat(null) }
   const openNew = () => { setEditTx(null); setEditFixed(null); setSheetOpen(true) }
   const fail = () => toast.error(t.common.saveError)
   const fixedAsTx = (r: RecurringTx): Transaction => ({
@@ -202,13 +356,44 @@ export function LifeMoneyPage() {
   })
   const removeFixed = (r: RecurringTx) => {
     fixed.hide(r.id)
-    const what = r.description || categoryLabel(t, r.category ?? 'Otros')
+    const what = r.description || labelOf(r.category)
     deleteWithUndo({ message: t.recurring.removed(what), commit: () => fixed.remove(r.id), restore: () => void fixed.reload() })
+  }
+  const planSize = new Map(plans.items.map(p => [p.id, p.installments]))
+  const today = localDateKey()
+  const plansInCourse = plans.items.filter(p => isInCourse(p, today))
+  const cancelPlan = (p: InstallmentPlan) => {
+    plans.cancel(p.id).then(() => toast.success(t.installments.cancelled(planName(labelOf, p)))).catch(fail)
+  }
+  const removePlan = (p: InstallmentPlan) => {
+    plans.hide(p.id)
+    for (const g of grouped) for (const tx of g.items) if (tx.installment_plan_id === p.id) hideTransaction(tx.id)
+    deleteWithUndo({
+      message: t.installments.removed(planName(labelOf, p)),
+      commit: () => plans.remove(p.id),
+      restore: () => { void plans.reload(); void reload() },
+    })
   }
   const remove = (tx: Transaction) => {
     hideTransaction(tx.id)
-    const what = `${tx.description || categoryLabel(t, tx.category)} · ${formatMoney(Number(tx.amount), tx.currency || mainCurrency, locale)}`
-    deleteWithUndo({ message: t.undo.deleted(what), commit: () => deleteTransaction(tx.id), restore: () => void reload() })
+    const what = `${tx.description || labelOf(tx.category)} · ${formatMoney(Number(tx.amount), tx.currency || mainCurrency, locale)}`
+    // Un gasto compartido se lleva sus deudas pendientes (las saldadas quedan)
+    const pendingSplits = splits.pendingFor(tx.id)
+    splits.hide(pendingSplits)
+    deleteWithUndo({
+      message: t.undo.deleted(what),
+      commit: async () => { await splits.remove(pendingSplits); await deleteTransaction(tx.id) },
+      restore: () => { void reload(); void splits.reload() },
+    })
+  }
+  const removeShared = (b: PersonBalance) => {
+    const ids = b.items.map(i => i.id)
+    splits.hide(ids)
+    deleteWithUndo({ message: t.shared.removed(b.person), commit: () => splits.remove(ids), restore: () => void splits.reload() })
+  }
+  const settle = async (b: PersonBalance, income: number, record: boolean) => {
+    const undo = await splits.settle(b, income, { record, description: t.shared.repaidDesc(b.person) })
+    doneWithUndo({ message: t.shared.settled(b.person), undo })
   }
 
   return (
@@ -243,6 +428,8 @@ export function LifeMoneyPage() {
         </button>
         </div>
       </div>
+
+      {everHasData && <MonthSwitcher month={month} locale={locale} onChange={changeMonth} />}
 
       {/* Balance del mes en la moneda principal */}
       {hasData && (
@@ -288,14 +475,61 @@ export function LifeMoneyPage() {
         </LifeCard>
       )}
 
-      {fixed.items.length > 0 && (
+      {breakdown.length > 0 && !searchingAll && (
+        <CategoryCard items={breakdown} currency={mainCurrency} locale={locale} prevMonthName={prevMonthName}
+          active={cat} onPick={c => setCat(prev => (prev === c ? null : c))} />
+      )}
+
+      {isCurrentMonth && fixed.items.length > 0 && (
         <FixedCard items={fixed.items} locale={locale}
           onEdit={r => { setEditTx(null); setEditFixed(r); setSheetOpen(true) }}
           onToggle={r => { fixed.setActive(r, !r.active).catch(fail) }}
           onDelete={removeFixed} />
       )}
 
-      {!hasData ? (
+      {isCurrentMonth && plansInCourse.length > 0 && (
+        <InstallmentsCard plans={plansInCourse} locale={locale} onCancel={cancelPlan} onDelete={removePlan} />
+      )}
+      {splits.byPerson.length > 0 && (
+        <SharedCard items={splits.byPerson} locale={locale} onSettle={setSettling} onDelete={removeShared} />
+      )}
+
+      {everHasData && (
+        <div role="search" style={{ marginBottom: 12 }}>
+          {/* Sin posicionar (nada de position: relative): así los menús "⋯" de arriba quedan por encima */}
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '0 14px', borderRadius: radius.full,
+            background: colors.surface.high, border: `1px solid ${colors.border.subtle}`,
+          }}>
+            <span className="sr-only">{t.money.search}</span>
+            <Search size={16} aria-hidden="true" style={{ color: colors.text.tertiary, flexShrink: 0 }} />
+            <input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder={t.money.searchPlaceholder}
+              style={{
+                flex: 1, minWidth: 0, padding: '11px 0', background: 'transparent', border: 'none', color: colors.text.primary,
+                fontFamily: font, fontSize: 16, outline: 'none',
+              }} />
+          </label>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+            <Chip pressed={kind === 'all'} onClick={() => setKind('all')}>{t.money.all}</Chip>
+            <Chip pressed={kind === 'income'} onClick={() => setKind('income')}>{t.money.income}</Chip>
+            <Chip pressed={kind === 'expense'} onClick={() => setKind('expense')}>{t.money.expense}</Chip>
+            {cat && (
+              <Chip pressed onClick={() => setCat(null)} label={t.money.clearCategory(labelOf(cat))}>
+                {labelOf(cat)} <X size={12} aria-hidden="true" />
+              </Chip>
+            )}
+          </div>
+          {searchingAll && (
+            <p role="status" style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '8px 0 0' }}>
+              {search.searching ? t.money.searching
+                : shown.length ? `${t.money.results(shown.length)}${search.limited ? ` ${t.money.resultsLimited}` : ''}`
+                : t.money.noResults}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!everHasData ? (
         <LifeCard>
           <LifeEmptyState
             icon={Wallet}
@@ -305,8 +539,16 @@ export function LifeMoneyPage() {
             action={{ label: t.money.emptyAction, onClick: openNew }}
           />
         </LifeCard>
+      ) : !grouped.length ? (
+        !searchingAll && (
+          <LifeCard>
+            <p style={{ fontFamily: font, fontSize: 14, color: colors.text.secondary, margin: 0, textAlign: 'center', padding: '12px 0' }}>
+              {hasData ? t.money.noneFiltered : t.money.emptyMonth(monthName)}
+            </p>
+          </LifeCard>
+        )
       ) : (
-        <motion.div variants={stagger} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <motion.div key={`${month}|${query}|${kind}|${cat}`} variants={stagger} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {grouped.map(group => {
             const currencies = new Set(group.items.map(i => i.currency || mainCurrency))
             const single = currencies.size === 1 ? [...currencies][0] : null
@@ -317,9 +559,10 @@ export function LifeMoneyPage() {
                   <LifeSectionHeader title={formatDateLabel(group.date, t, locale)} />
                   <div>
                     {group.items.map(tx => (
-                      <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale}
+                      <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale} shared={splits.sharedTxIds.has(tx.id)}
                         onEdit={() => { setEditFixed(null); setEditTx(tx); setSheetOpen(true) }}
-                        onDelete={() => remove(tx)} />
+                        onDelete={() => remove(tx)}
+                        installmentsOf={tx.installment_plan_id ? planSize.get(tx.installment_plan_id) : undefined} />
                     ))}
                   </div>
                   {group.items.length > 1 && single && (
@@ -344,13 +587,29 @@ export function LifeMoneyPage() {
         initial={editFixed ? fixedAsTx(editFixed) : editTx}
         repeatable
         template={!!editFixed}
-        onSave={async (data, repeat) => {
+        shareable
+        knownPeople={knownPeople}
+        onSave={async (data, repeat, installments, shared) => {
           if (editFixed) await fixed.update(editFixed.id, data)
           else if (editTx) await updateTransaction(editTx.id, data)
+          else if (installments) await plans.create(data, installments)
           else if (repeat) await fixed.create(data)
+          else if (shared?.debts.length) {
+            // Gasto compartido: el movimiento (con id del cliente) y sus deudas; si las deudas fallan, no queda a medias
+            const id = newSplitId()
+            await createTransaction({ ...data, id })
+            try {
+              await splits.create(id, data.currency, shared.debts, data.description || labelOf(data.category))
+            } catch (e) {
+              await deleteTransaction(id).catch(() => {})
+              throw e
+            }
+          }
           else await createTransaction(data)
         }}
       />
+
+      <SettleSheet balance={settling} locale={locale} onClose={() => setSettling(null)} onConfirm={settle} />
 
     </LifeScreenContainer>
   )

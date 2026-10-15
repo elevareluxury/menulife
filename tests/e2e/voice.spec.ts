@@ -1,7 +1,7 @@
 import { expect, test, type BrowserContext } from '@playwright/test'
 import { createState, installSupabaseMock, profileRow } from './support/mockSupabase'
 
-// V1.1 · Cargar con la voz (beta: ?beta=1). El reconocimiento del navegador se simula: "dice" la frase de window.__say.
+// V1.1 · Cargar con la voz (prendido para todos; sólo si el navegador reconoce la voz). El reconocimiento del navegador se simula: "dice" la frase de window.__say.
 
 async function fakeSpeech(context: BrowserContext) {
   await context.addInitScript(() => {
@@ -42,7 +42,7 @@ test('dictar un gasto: se confirma y se guarda', async ({ page, context }) => {
   await fakeSpeech(context)
   const state = seed()
   await installSupabaseMock(context, state, { signedIn: true })
-  await page.goto('/life?beta=1')
+  await page.goto('/life')
   await page.evaluate(() => { (window as unknown as { __say: string }).__say = 'gasté 3500 en el súper' })
 
   await page.getByRole('button', { name: 'Capturar' }).click()
@@ -62,7 +62,7 @@ test('dictar una tarea para mañana y cambiarla antes de guardar', async ({ page
   await fakeSpeech(context)
   const state = seed()
   await installSupabaseMock(context, state, { signedIn: true })
-  await page.goto('/life?beta=1')
+  await page.goto('/life')
   await page.evaluate(() => { (window as unknown as { __say: string }).__say = 'mañana a las 10 llamar al médico' })
 
   await page.getByRole('button', { name: 'Capturar' }).click()
@@ -78,15 +78,24 @@ test('dictar una tarea para mañana y cambiarla antes de guardar', async ({ page
   expect(state.tables.life_brain_items[0]).toMatchObject({ type: 'task', title: 'Llamar al médico de cabecera', due_date: tomorrow, due_time: '10:00' })
 })
 
-test('si no se escucha nada, lo dice; sin beta no aparece', async ({ page, context }) => {
+test('si no se escucha nada, lo dice', async ({ page, context }) => {
   await fakeSpeech(context)
   await installSupabaseMock(context, seed(), { signedIn: true })
   await page.goto('/life')
   await page.getByRole('button', { name: 'Capturar' }).click()
-  await expect(page.getByRole('button', { name: 'Dictar' })).toHaveCount(0)
-
-  await page.goto('/life?beta=1')
-  await page.getByRole('button', { name: 'Capturar' }).click()
   await page.getByRole('button', { name: 'Dictar' }).click()
   await expect(page.getByRole('dialog', { name: 'Dictá' }).getByRole('status')).toHaveText('No te escuché. Probá de nuevo.')
+})
+
+test('si el navegador no reconoce la voz, "Dictar" no aparece', async ({ page, context }) => {
+  await context.addInitScript(() => {
+    const w = window as unknown as Record<string, unknown>
+    delete w.SpeechRecognition
+    delete w.webkitSpeechRecognition
+  })
+  await installSupabaseMock(context, seed(), { signedIn: true })
+  await page.goto('/life')
+  await page.getByRole('button', { name: 'Capturar' }).click()
+  await expect(page.getByRole('button', { name: 'Tarea', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Dictar' })).toHaveCount(0)
 })

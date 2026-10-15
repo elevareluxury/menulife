@@ -7,13 +7,14 @@ import { langLocale } from '@/i18n/app/languages'
 import { formatMoney } from '@/lib/currencies'
 import { colors, font, radius, ink, tint } from '../design-system'
 import type { Insight } from '../lib/insights'
+import { useCategoryLabels } from '../hooks/useCategories'
 
 interface View { title: string; text: string; icon: LucideIcon; color: string; route: string }
 
 const weekdayName = (w: number, locale: string) => new Date(2024, 0, 7 + w).toLocaleDateString(locale, { weekday: 'long' })
 
 /** Texto, ícono y destino de cada insight (los números ya vienen calculados). */
-function insightView(i: Insight, t: LifeDict, locale: string): View {
+function insightView(i: Insight, t: LifeDict, locale: string, labelOf: (category: string) => string): View {
   const it = t.insights.items
   switch (i.kind) {
     case 'tasksOverdue':
@@ -31,7 +32,7 @@ function insightView(i: Insight, t: LifeDict, locale: string): View {
     case 'habitBestDay':
       return { ...it.habitBestDay, text: it.habitBestDay.text(weekdayName(i.best, locale), i.bestPct, weekdayName(i.worst, locale), i.worstPct), icon: CalendarDays, color: colors.area.habits, route: '/life/habits' }
     case 'spendTop':
-      return { ...it.spendTop, text: it.spendTop.text(t.categories[i.category] ?? i.category, i.pct, formatMoney(i.amount, i.currency, locale)), icon: PieChart, color: colors.area.money, route: '/life/money' }
+      return { ...it.spendTop, text: it.spendTop.text(labelOf(i.category), i.pct, formatMoney(i.amount, i.currency, locale)), icon: PieChart, color: colors.area.money, route: '/life/money' }
     case 'tasksWeek':
       return { ...it.tasksWeek, text: it.tasksWeek.text(i.now, i.prev), icon: ListChecks, color: colors.area.brain, route: '/life/brain?vista=tareas' }
     case 'habitStrong':
@@ -43,7 +44,8 @@ export function InsightCard({ insight, compact }: { insight: Insight; compact?: 
   const t = useLifeT()
   const navigate = useNavigate()
   const locale = langLocale(useAppLang(s => s.lang))
-  const v = insightView(insight, t, locale)
+  const { labelOf } = useCategoryLabels()
+  const v = insightView(insight, t, locale, labelOf)
   const Icon = v.icon
   return (
     <button type="button" onClick={() => navigate(v.route)}

@@ -4,7 +4,8 @@ import { existsSync } from 'fs'
 // E2E contra la app real (Vite) con Supabase simulado (tests/e2e/support/mockSupabase.ts):
 // no hace falta base ni red. En CI se usa el Chromium de Playwright; en el entorno de
 // Claude Code hay uno preinstalado.
-const PORT = 5180
+// E2E_PORT: para correr varias copias del proyecto a la vez sin que una use el servidor de otra
+const PORT = Number(process.env.E2E_PORT) || 5180
 const LOCAL_CHROMIUM = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
 
 export default defineConfig({

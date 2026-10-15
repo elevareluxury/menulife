@@ -13,6 +13,9 @@ import { langLocale } from '@/i18n/app/languages'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
 import { detectMapping, parseCsv, splitDuplicates, toTransactions, type Grid, type ImportedTx, type Mapping } from '../lib/bankImport'
+import { useCategoryMemory } from '../hooks/useCategoryMemory'
+import { useCategoryLabels } from '../hooks/useCategories'
+import { suggestCategory } from '../lib/moneyInsights'
 
 // Importar movimientos del banco (V1.1, detrás de FEATURES.bankImport): el archivo se lee en el dispositivo.
 
@@ -92,6 +95,17 @@ export function ImportBankSheet({ open, onClose }: { open: boolean; onClose: () 
 
   const split = useMemo(() => (parsed && existing ? splitDuplicates(parsed.items, existing) : null), [parsed, existing])
 
+  // Los que se parecen a movimientos que ya ordenaste toman esa categoría; el resto va a "Otros"
+  const memory = useCategoryMemory(open)
+  // Una categoría propia archivada ya no se usa para lo nuevo
+  const { keysFor } = useCategoryLabels()
+  const suggestedFor = (i: ImportedTx) => {
+    const s = memory && suggestCategory(memory, i.type, i.description)
+    return s && keysFor(i.type).includes(s) ? s : null
+  }
+  const categoryFor = (i: ImportedTx) => suggestedFor(i) || 'Otros'
+  const autoSorted = split && memory ? split.fresh.filter(i => suggestedFor(i)).length : 0
+
   async function onFile(file: File | undefined) {
     if (!file) return
     setError(''); setBusy(true); setExisting(null)
@@ -114,7 +128,7 @@ export function ImportBankSheet({ open, onClose }: { open: boolean; onClose: () 
     setBusy(true)
     try {
       const rows = items.map(i => ({
-        user_id: user.id, type: i.type, amount: i.amount, category: 'Otros', description: i.description || null,
+        user_id: user.id, type: i.type, amount: i.amount, category: categoryFor(i), description: i.description || null,
         currency, occurred_at: new Date(`${i.date}T12:00:00`).toISOString(),
       }))
       for (let k = 0; k < rows.length; k += 500) {
@@ -205,7 +219,7 @@ export function ImportBankSheet({ open, onClose }: { open: boolean; onClose: () 
               ))}
             </ul>
           </section>
-          <p style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '0 0 12px' }}>{b.categoryNote}</p>
+          <p style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '0 0 12px' }}>{autoSorted > 0 ? b.autoSorted(autoSorted) : b.categoryNote}</p>
 
           {split && split.fresh.length === 0
             ? <p style={{ fontFamily: font, fontSize: 13, color: colors.text.secondary, margin: 0 }}>{b.nothing}</p>

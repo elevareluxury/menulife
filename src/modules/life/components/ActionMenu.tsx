@@ -40,7 +40,8 @@ export function ActionMenu({ label, actions }: { label: string; actions: MenuAct
           <motion.div role="menu" variants={scaleIn} initial="hidden" animate="visible" exit="hidden"
             style={{
               position: 'absolute', insetInlineEnd: 0, top: 42, zIndex: 20, minWidth: 160, overflow: 'hidden',
-              background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
+              // Fondo opaco: con el vidrio translúcido se leía el texto de la fila de abajo
+              background: colors.surface.elevated, border: `1px solid ${colors.border.medium}`,
               borderRadius: radius.md, boxShadow: shadow.elevated,
             }}>
             {actions.map(({ icon: Icon, label: text, onSelect, danger }) => (

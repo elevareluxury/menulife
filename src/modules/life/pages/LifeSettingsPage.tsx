@@ -14,6 +14,7 @@ import { currencyName } from '@/lib/currencies'
 import { useAuthStore } from '@/store/authStore'
 import { featureOn } from '@/lib/features'
 import { CalendarFeedCard } from '../components/CalendarFeedCard'
+import { CategoriesCard } from '../components/CategoriesCard'
 
 function timezones(): string[] {
   try {
@@ -127,6 +128,8 @@ export function LifeSettingsPage() {
           </div>
           <p style={help}>{t.settings.extraHelp}</p>
         </LifeCard>
+
+        <CategoriesCard />
 
         <LifeCard>
           <h2 style={label}>{t.settings.timezone}</h2>

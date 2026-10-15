@@ -162,22 +162,56 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   lo borrado no vuelve, al reanudar no se cargan los meses en pausa). App: `hooks/useRecurring.ts`, "Repetir todos los
   meses" en `TransactionSheet` y tarjeta "Fijos del mes". Migración `20261027000001_life_recurring_transactions.sql`,
   tests en `tests/db/life_recurring.test.sql` y `recurring.spec.ts`.
-- V1.1 en beta: `featureOn(name)` (`src/lib/features.ts`) prende para todos lo que esté en `FEATURES` y, para probar en
+- Compras en cuotas (Dinero): `life_installment_plans` (total, 2–72 cuotas, primera fecha, `last_no`, `cancelled_at`;
+  total ≥ 1 por cuota) y `life_transactions.installment_plan_id`/`installment_no` (único). La base carga las vencidas con
+  `life_materialize_installments(p_today, p_tz)` (la llama `useMoney` junto con la de fijos): mismo día que la primera
+  (31 = último día), total / cuotas redondeado y la última ajusta, sin duplicar, lo borrado no vuelve, nada después de
+  cancelar. App: `hooks/useInstallments.ts`, `lib/installments.ts` (misma regla en el cliente), "En cuotas" en
+  `TransactionSheet` (sólo gasto nuevo, excluyente con repetir), fila "3 de 12" y tarjeta `InstallmentsCard` (falta pagar
+  por moneda; "Eliminar" borra la compra y sus cuotas). Migración `20261029000002_life_installments.sql`, tests en
+  `tests/db/life_installments.test.sql`, `installments.test.ts` e `installments.spec.ts`.
+- V1.1 en beta (hoy vacía; importar, calendario y voz ya están prendidas): `featureOn(name)` (`src/lib/features.ts`) prende para todos lo que esté en `FEATURES` y, para probar en
   producción, las funciones de `BETA` en el dispositivo que abrió la app con `?beta=1` (`?beta=0` lo apaga).
-- Importar del banco (V1.1, beta `bankImport`): botón en Dinero → `ImportBankSheet`. Todo en el dispositivo:
+- Dinero por mes (después de la V1): `useMoney(month)` ('YYYY-MM') trae ese mes y el anterior; `MonthSwitcher` ‹ mes › (no
+  pasa de hoy), "En qué se fue" (`categoryBreakdown`: gastos por categoría en la moneda principal, % y cambio contra el
+  mes anterior; tocar una filtra), buscar en todos los movimientos (`useMoneySearch`: la base trae candidatos con `or`
+  ilike y el nombre traducido de la categoría, el dispositivo confirma con `matchesSearch`; hasta 300) y filtrar por
+  tipo/categoría. Memoria de categorías (`learnCategories` / `suggestCategory` en `lib/moneyInsights.ts`, desde
+  `useCategoryMemory`: lo ya ordenado del último año, sin números ni signos; por las primeras palabras sólo si nunca fue
+  ambiguo): la usan el importador del banco y el formulario de un movimiento nuevo (hasta que se elige a mano).
+  Tests en `moneyInsights.test.ts` y `money-insights.spec.ts`. Ojo: nada posicionado debajo de un menú "⋯" (lo tapa).
+- Categorías propias (Dinero): tabla `life_categories` (tipo, nombre 1–40 único por tipo entre las activas, color de
+  `LIFE_COLORS`; se archivan, no se borran; tope 50 activas) y el movimiento o fijo guarda `'c:' || id` en `category`
+  (trigger: sólo propias de la cuenta). Nombre y color de cualquier categoría (fija o propia; archivada sigue con su
+  nombre, borrada = "Otros") sólo con `useCategoryLabels()` (`labelOf`/`colorOf`/`keysFor`, `lib/moneyCategories.ts`):
+  nunca `t.categories[...]` suelto. `useCategories()` (lista compartida por la cuenta): "+ Nueva" en `TransactionSheet`
+  (`CategoryForm`) y Ajustes → "Tus categorías" (`CategoriesCard`: editar, archivar con "Deshacer", restaurar). El CSV de
+  Dinero exporta el nombre. Migración `20261029000001_life_custom_categories.sql`, tests en
+  `life_custom_categories.test.sql`, `moneyCategories.test.ts` y `custom-categories.spec.ts`.
+- Gastos compartidos (Dinero): el movimiento es lo que salió de tu bolsillo (pagaste vos → el total) o tu parte (pagó otra
+  persona); las deudas van en `life_splits` (persona, `owed_to_me`|`i_owe`, monto, moneda, `settled_at`,
+  `settlement_transaction_id`; RLS del dueño, movimiento vinculado sólo propio por trigger). "Compartido" en
+  `TransactionSheet` (`SharedExpenseFields`: quién pagó, personas con sugerencias, partes iguales o a mano) → reparto en
+  centavos en `lib/splits.ts` (`planSplit`, `balances` por persona y moneda). Tarjeta "Cuentas compartidas" + `SettleSheet`
+  (`hooks/useSplits.ts`): saldar marca todo lo pendiente con esa persona y moneda y, si te debían, registra el ingreso
+  "Juan te devolvió" ('Otros') por lo que te debían; lo que debías no suma otro gasto (tu parte ya estaba). Con
+  `doneWithUndo`. Borrar un gasto compartido borra sus deudas pendientes. Migración
+  `20261029000003_life_shared_expenses.sql`, tests en `life_shared_expenses.test.sql`, `splits.test.ts` y
+  `shared-expenses.spec.ts`.
+- Importar del banco (V1.1, `FEATURES.bankImport`, prendido para todos): botón en Dinero → `ImportBankSheet`. Todo en el dispositivo:
   `lib/bankImport.ts` (CSV con comillas y separador detectado, UTF-8 o Windows-1252, títulos y columnas adivinados en
   12 idiomas, débito/crédito o importe con signo, coma o punto decimal, fechas d/m, m/d, a-m-d y serie de Excel,
   duplicados contando repeticiones) y `lib/xlsx.ts` (lector de .xlsx sin dependencias con `DecompressionStream`; el
   .xls viejo se rechaza con un aviso). Entran como "Otros", hasta 2000 por vez. Tests en `bankImport.test.ts` y
   `bank-import.spec.ts` (fixture `tests/e2e/fixtures/banco.xlsx`).
-- Tareas en el calendario (V1.1, beta `calendarFeed`): Life OS → Ajustes → `CalendarFeedCard`. Link privado
+- Tareas en el calendario (V1.1, `FEATURES.calendarFeed`, prendido): Life OS → Ajustes → `CalendarFeedCard`. Link privado
   `/cal/<token>.ics` (`vercel.json` → `api/calendar.ts`, Edge): RPC `life_calendar_feed(p_token)` (anónima; sólo tareas
   pendientes con fecha, sin notas), horas flotantes, avisos y `RRULE` (mensual con el último día si falta, como la app).
   Token de 64 en `life_calendar_feeds` (nadie lee la tabla; `life_calendar_token(p_rotate)`, `life_calendar_disable()`).
   "cal" reservado como username. Privacidad: el calendario elegido descarga las tareas (12 idiomas). Migración
   `20261028000001_life_calendar_feed.sql`, tests en `life_calendar.test.sql`, `calendarFeed.test.ts` y
   `calendar-feed.spec.ts`.
-- Cargar con la voz (V1.1, beta `voiceCapture`): "Dictar" en el + (sólo si el navegador tiene reconocimiento de voz).
+- Cargar con la voz (V1.1, `FEATURES.voiceCapture`, prendido): "Dictar" en el + (sólo si el navegador tiene reconocimiento de voz).
   `hooks/useSpeech.ts` (Web Speech API, idioma de la app) → `lib/voiceParse.ts` (reglas por idioma, en el dispositivo:
   tipo por palabras clave, primer número como monto con "mil/thousand…", hoy/mañana/día de la semana y hora) →
   `VoiceCaptureSheet` (se revisa y corrige antes de guardar; gasto/ingreso en "Otros", tarea con fecha y hora, idea).
