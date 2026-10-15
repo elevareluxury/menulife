@@ -82,7 +82,7 @@ const it: LegalDict = {
       { list: [
         '**Il tuo account:** nome, email, password (conservata cifrata, non la vediamo mai), lingua, valuta, fuso orario e data in cui hai accettato queste condizioni.',
         '**Il tuo profilo pubblico:** ciò che inserisci in Studio (nome, foto, testi, link, progetti, biglietto da visita). Si pubblica solo ciò che decidi di mostrare.',
-        '**Life OS:** i tuoi obiettivi, abitudini, attività, finanze e note, compresi i nomi che scrivi (per esempio, con chi hai diviso una spesa). Sono privati: solo tu puoi vederli.',
+        '**Life OS:** i tuoi obiettivi, abitudini, attività, finanze e note, compresi i nomi che scrivi (per esempio, con chi hai diviso una spesa). Sono privati: solo tu puoi vederli. Anche il tuo diario: il blocco con PIN, impronta o volto funziona solo sul tuo dispositivo (non viene inviato a Mycen) e le voci non sono cifrate end-to-end.',
         '**Mycen Business:** i dati della tua attività e ciò che inserisci sui tuoi clienti e sulle vendite.',
         '**Statistiche delle visite:** eventi anonimi (visite e clic sul tuo profilo) con un identificativo che cambia ogni giorno. Non conserviamo indirizzi IP né dati del dispositivo e non contiamo i bot.',
         '**Segnalazioni:** il motivo e i dettagli scritti da chi segnala, con un identificativo anonimo giornaliero per evitare abusi.',

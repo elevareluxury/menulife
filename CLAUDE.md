@@ -217,6 +217,17 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `VoiceCaptureSheet` (se revisa y corrige antes de guardar; gasto/ingreso en "Otros", tarea con fecha y hora, idea).
   Privacidad: el reconocimiento del navegador (Google en Chrome, Apple en Safari), 12 idiomas. Tests en
   `voiceParse.test.ts` y `voice.spec.ts` (reconocimiento simulado).
+- Diario privado (V1.1, `FEATURES.journal`, prendido): `/life/journal` (`LifeJournalPage`), se entra desde el
+  encabezado de Brain (la barra de abajo sigue con 5). `life_journal_entries` (RLS sólo de la dueña; texto 1–10.000,
+  fecha 1900…mañana, ≤ 20 por día y 20.000 por cuenta; `hooks/useJournal.ts`): varias por día, editar en el lugar,
+  borrar con "Deshacer", buscar (la base trae candidatos con `ilike`, el dispositivo confirma sin acentos) y lista por
+  mes. No entra en la búsqueda general, Insights, "Tu mes", métricas ni el calendario; sí en exportar y en "Borrar
+  Life OS". Bloqueo en el dispositivo (Ajustes → `JournalLockCard`, `lib/journalLock.ts`): PIN de 4–8 dígitos
+  guardado como hash PBKDF2-SHA-256 (600.000 vueltas, sal de 16 bytes) en `localStorage` (`mycen_journal_lock:<id>`),
+  espera 30 s ×2 hasta 15 min desde el 3.er error, huella/cara opcional con WebAuthn de plataforma (sólo presencia,
+  sin servidor); se vuelve a bloquear al salir, al pasar a segundo plano y a los 5 min sin uso. Olvidé el PIN =
+  borra el bloqueo del dispositivo y cierra la sesión. No es cifrado: la UI y privacidad (12 idiomas) lo dicen.
+  Migración `20261030000004_life_journal.sql`, tests en `life_journal.test.sql`, `journalLock.test.ts` y `journal.spec.ts`.
 - Entrar con Google (V1.1, `FEATURES.googleSignIn`, prendido): `GoogleButton` (`modules/auth/components/`) debajo del
   login y del registro. Google sólo da nombre, email y foto: la aceptación la pide Mycen, una sola vez. En el registro no
   va a Google sin la casilla del formulario; en el login no se pide y una cuenta nueva de Google sin `terms_accepted_at`

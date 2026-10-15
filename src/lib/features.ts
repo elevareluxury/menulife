@@ -10,6 +10,8 @@ export const FEATURES = {
   voiceCapture:   true,
   // Entrar con Google: prendido para todos (se apaga acá si hiciera falta)
   googleSignIn:   true,
+  // Diario privado con bloqueo en el dispositivo (Life OS → Brain → Diario)
+  journal:        true,
 } as const
 
 export type FeatureName = keyof typeof FEATURES
