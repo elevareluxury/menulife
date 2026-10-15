@@ -35,7 +35,8 @@ for m in \
   20261024000001_v1_more_accents \
   20261025000001_v1_verification \
   20261026000001_life_goal_owner \
-  20261027000001_life_recurring_transactions; do
+  20261027000001_life_recurring_transactions \
+  20261028000001_life_calendar_feed; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

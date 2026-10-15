@@ -115,6 +115,8 @@ const it: LegalDict = {
         '**YouTube, Vimeo, TikTok, Spotify e SoundCloud:** solo se un profilo integra un video o un brano e tocchi "Riproduci". Prima non ci colleghiamo a loro; da quel momento valgono le loro politiche.',
         '**Anthropic:** solo se un’attività usa l’importazione del menu da un PDF; viene elaborato quel file.',
         '**Mercado Pago:** solo se un’attività lo configura per incassare; il pagamento avviene su Mercado Pago.',
+        '**Google Calendar, Apple o un altro calendario:** solo se attivi il link del calendario di Life OS; quel servizio scarica le tue attività in sospeso con una data (titolo, data, ora e promemoria). Puoi disattivarlo o cambiarlo quando vuoi.',
+        '**Il riconoscimento vocale del tuo browser:** solo se usi "Detta" in Life OS. Il browser trasforma la voce in testo (in Chrome lo fa il servizio vocale di Google; in Safari, Apple). Mycen riceve solo il testo.',
       ] },
       'Al di fuori di questo, condividiamo dati solo se la legge lo impone o per proteggere i diritti e la sicurezza delle persone.',
     ] },

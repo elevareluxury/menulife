@@ -6,11 +6,13 @@ export const FEATURES = {
   lifeReplay:     true,
   businessInLife: false,
   bankImport:     false,
+  calendarFeed:   false,
+  voiceCapture:   false,
 } as const
 
 export type FeatureName = keyof typeof FEATURES
 
-const BETA: readonly FeatureName[] = ['bankImport']
+const BETA: readonly FeatureName[] = ['bankImport', 'calendarFeed', 'voiceCapture']
 const BETA_KEY = 'mycen_beta'
 
 export function betaOn(): boolean {

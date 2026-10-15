@@ -12,6 +12,8 @@ import { langLocale, type AppLang } from '@/i18n/app/languages'
 import { savePrefs, usePrefs, type Prefs } from '@/lib/prefs'
 import { currencyName } from '@/lib/currencies'
 import { useAuthStore } from '@/store/authStore'
+import { featureOn } from '@/lib/features'
+import { CalendarFeedCard } from '../components/CalendarFeedCard'
 
 function timezones(): string[] {
   try {
@@ -28,6 +30,7 @@ const help: React.CSSProperties = { fontFamily: font, fontSize: 12.5, color: col
 
 export function LifeSettingsPage() {
   const t = useLifeT()
+  const [showCalendar] = useState(() => featureOn('calendarFeed'))
   const navigate = useNavigate()
   const userId = useAuthStore(s => s.user?.id)
   const signOut = useAuthStore(s => s.signOut)
@@ -146,6 +149,8 @@ export function LifeSettingsPage() {
             ))}
           </div>
         </LifeCard>
+
+        {showCalendar && <CalendarFeedCard />}
 
         <LifeCard>
           <h2 style={label}>{t.data.title}</h2>

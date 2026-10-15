@@ -3,6 +3,7 @@
 User-agent: *
 Allow: /
 Disallow: /studio/
+Disallow: /cal/
 Disallow: /studio$
 Disallow: /life/
 Disallow: /life$

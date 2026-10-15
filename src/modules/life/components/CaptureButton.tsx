@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, Lightbulb, StickyNote, CheckSquare, Target, TrendingUp } from 'lucide-react'
+import { Plus, X, Lightbulb, StickyNote, CheckSquare, Target, TrendingUp, Mic } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
@@ -18,6 +18,11 @@ import { useLifeT } from '@/i18n/app/life'
 import type { BrainItemType } from '../hooks/useBrain'
 import type { GoalFormData } from '../hooks/useGoals'
 import type { TransactionFormData } from '../hooks/useMoney'
+import { featureOn } from '@/lib/features'
+import { useLocaleStore } from '@/store/localeStore'
+import { speechSupported } from '../hooks/useSpeech'
+import { VoiceCaptureSheet } from './VoiceCaptureSheet'
+import type { VoiceResult } from '../lib/voiceParse'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -31,7 +36,9 @@ const ACTIONS = [
   { id: 'transaction', icon: TrendingUp,  color: colors.area.money },
 ] as const
 
-type ActionId = typeof ACTIONS[number]['id']
+const VOICE_ACTION = { id: 'voice', icon: Mic, color: colors.accent.default } as const
+
+type ActionId = typeof ACTIONS[number]['id'] | 'voice'
 
 export function CaptureButton() {
   const { user } = useAuthStore()
@@ -44,10 +51,16 @@ export function CaptureButton() {
   const [goalOpen, setGoalOpen]     = useState(false)
   const [moneyOpen, setMoneyOpen]   = useState(false)
   const [taskOpen, setTaskOpen]     = useState(false)
+  const [voiceOpen, setVoiceOpen]   = useState(false)
+  const [canDictate] = useState(() => featureOn('voiceCapture') && speechSupported())
+  const actions = canDictate ? [VOICE_ACTION, ...ACTIONS] : ACTIONS
+  const mainCurrency = useLocaleStore(s => s.currency)
 
   const handleAction = (id: ActionId) => {
     setOpen(false)
-    if (id === 'task') {
+    if (id === 'voice') {
+      setVoiceOpen(true)
+    } else if (id === 'task') {
       setTaskOpen(true)
     } else if (id === 'idea' || id === 'note') {
       setBrainType(id)
@@ -127,6 +140,22 @@ export function CaptureButton() {
     }
   }
 
+  /** Lo dictado, ya revisado por la persona */
+  const handleVoiceSave = async (r: VoiceResult) => {
+    const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` })()
+    if (r.kind === 'expense' || r.kind === 'income') {
+      await handleMoneySave({
+        type: r.kind, amount: r.amount ?? 0, category: 'Otros', description: r.text, currency: mainCurrency,
+        occurred_at: new Date(`${r.date ?? today}T12:00:00`).toISOString(),
+      })
+    } else if (r.kind === 'task') {
+      await handleTaskSave({ title: r.text, due_date: r.date, due_time: r.date ? r.time : null })
+    } else {
+      await handleBrainSave({ type: 'idea', title: r.text })
+    }
+    toast.success(t.voice.saved)
+  }
+
   // Portal a <body>: el botón fijo no depende de ningún contenedor
   return createPortal(
     <>
@@ -160,7 +189,7 @@ export function CaptureButton() {
             gap: '7px',
             zIndex: 49,
           }}>
-            {[...ACTIONS].reverse().map((action, i) => (
+            {[...actions].reverse().map((action, i) => (
               <motion.button
                 key={action.id}
                 initial={{ opacity: 0, x: 20, scale: 0.88 }}
@@ -192,7 +221,7 @@ export function CaptureButton() {
                 }}>
                   <action.icon size={14} style={{ color: ink(action.color) }} strokeWidth={2.5} />
                 </div>
-                {t.capture[action.id]}
+                {action.id === 'voice' ? t.voice.action : t.capture[action.id]}
               </motion.button>
             ))}
           </div>
@@ -248,6 +277,7 @@ export function CaptureButton() {
         initial={null}
         onSave={handleGoalSave}
       />
+      {canDictate && <VoiceCaptureSheet open={voiceOpen} onClose={() => setVoiceOpen(false)} onSave={handleVoiceSave} />}
       <TransactionSheet
         open={moneyOpen}
         onClose={() => setMoneyOpen(false)}

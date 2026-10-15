@@ -12,7 +12,7 @@ export const RESERVED_USERNAMES: ReadonlySet<string> = new Set([
   'support', 'soporte', 'contact', 'contacto', 'terms', 'terminos', 'privacy', 'privacidad',
   'legal', 'blog', 'docs', 'status', 'jobs',
   // Técnicas
-  'api', 'app', 'www', 'admin', 'root', 'static', 'assets', 'public', 'cdn', 'offline', 'sw',
+  'api', 'cal', 'app', 'www', 'admin', 'root', 'static', 'assets', 'public', 'cdn', 'offline', 'sw',
   'manifest', 'favicon', 'robots', 'sitemap', 'og', 'well-known', 'null', 'undefined',
   // Marca
   'mycen', 'menulife', 'resilio', 'official', 'oficial',

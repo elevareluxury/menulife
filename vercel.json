@@ -6,6 +6,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/cal/:file",
+      "destination": "/api/calendar?f=:file"
+    },
+    {
       "source": "/:slug([a-zA-Z0-9][a-zA-Z0-9_-]*)/projects/:project([a-z0-9][a-z0-9-]*)",
       "has": [
         {
