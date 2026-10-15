@@ -162,6 +162,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   lo borrado no vuelve, al reanudar no se cargan los meses en pausa). App: `hooks/useRecurring.ts`, "Repetir todos los
   meses" en `TransactionSheet` y tarjeta "Fijos del mes". Migración `20261027000001_life_recurring_transactions.sql`,
   tests en `tests/db/life_recurring.test.sql` y `recurring.spec.ts`.
+- V1.1 en beta: `featureOn(name)` (`src/lib/features.ts`) prende para todos lo que esté en `FEATURES` y, para probar en
+  producción, las funciones de `BETA` en el dispositivo que abrió la app con `?beta=1` (`?beta=0` lo apaga).
+- Importar del banco (V1.1, beta `bankImport`): botón en Dinero → `ImportBankSheet`. Todo en el dispositivo:
+  `lib/bankImport.ts` (CSV con comillas y separador detectado, UTF-8 o Windows-1252, títulos y columnas adivinados en
+  12 idiomas, débito/crédito o importe con signo, coma o punto decimal, fechas d/m, m/d, a-m-d y serie de Excel,
+  duplicados contando repeticiones) y `lib/xlsx.ts` (lector de .xlsx sin dependencias con `DecompressionStream`; el
+  .xls viejo se rechaza con un aviso). Entran como "Otros", hasta 2000 por vez. Tests en `bankImport.test.ts` y
+  `bank-import.spec.ts` (fixture `tests/e2e/fixtures/banco.xlsx`).
 - El contenido que escribe el dueño se muestra en su idioma original (`default_locale`) o en la traducción guardada en `translations`;
   la traducción automática con Claude está pendiente (Fase 7).
 - Interfaz en español (rioplatense) primero.

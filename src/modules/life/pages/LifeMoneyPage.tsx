@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play } from 'lucide-react'
+import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp } from 'lucide-react'
 import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint } from '../design-system'
 import { useMoney, type Transaction } from '../hooks/useMoney'
 import { TransactionSheet } from '../components/TransactionSheet'
@@ -12,6 +12,8 @@ import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { formatMoney } from '@/lib/currencies'
 import toast from 'react-hot-toast'
+import { featureOn } from '@/lib/features'
+import { ImportBankSheet } from '../components/ImportBankSheet'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
@@ -185,6 +187,8 @@ export function LifeMoneyPage() {
   const [sheetOpen, setSheetOpen]       = useState(false)
   const [editTx, setEditTx]             = useState<Transaction | null>(null)
   const [editFixed, setEditFixed]       = useState<RecurringTx | null>(null)
+  const [importOpen, setImportOpen]     = useState(false)
+  const [canImport] = useState(() => featureOn('bankImport'))
 
   if (loading) return <MoneySkeleton />
 
@@ -219,6 +223,16 @@ export function LifeMoneyPage() {
             {t.money.title}
           </h1>
         </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+        {canImport && (
+          <button type="button" onClick={() => setImportOpen(true)} aria-label={t.bankImport.action} title={t.bankImport.action}
+            style={{
+              width: 40, height: 40, borderRadius: radius.full, background: colors.surface.high,
+              border: `1px solid ${colors.border.subtle}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+            <FileUp size={17} style={{ color: colors.text.secondary }} strokeWidth={2.2} aria-hidden="true" />
+          </button>
+        )}
         <button type="button" onClick={openNew} aria-label={t.money.add} title={t.money.add}
           style={{
             width: 40, height: 40, borderRadius: radius.full,
@@ -227,6 +241,7 @@ export function LifeMoneyPage() {
           }}>
           <Plus size={18} style={{ color: colors.accent.ink }} strokeWidth={2.5} aria-hidden="true" />
         </button>
+        </div>
       </div>
 
       {/* Balance del mes en la moneda principal */}
@@ -320,6 +335,8 @@ export function LifeMoneyPage() {
           })}
         </motion.div>
       )}
+
+      {canImport && <ImportBankSheet open={importOpen} onClose={() => setImportOpen(false)} />}
 
       <TransactionSheet
         open={sheetOpen}
