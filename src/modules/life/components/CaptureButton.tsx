@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, Lightbulb, StickyNote, CheckSquare, Target, TrendingUp, Mic } from 'lucide-react'
+import { Plus, X, Lightbulb, StickyNote, CheckSquare, Target, TrendingUp, Mic, Brain } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
@@ -23,6 +23,7 @@ import { useLocaleStore } from '@/store/localeStore'
 import { speechSupported } from '../hooks/useSpeech'
 import { VoiceCaptureSheet } from './VoiceCaptureSheet'
 import type { VoiceResult } from '../lib/voiceParse'
+import { BrainDumpSheet, type DumpSaveItem } from './BrainDumpSheet'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -37,8 +38,10 @@ const ACTIONS = [
 ] as const
 
 const VOICE_ACTION = { id: 'voice', icon: Mic, color: colors.accent.default } as const
+/** "Vaciar la cabeza": muchas cosas juntas, se revisan y se guardan todas */
+const DUMP_ACTION = { id: 'dump', icon: Brain, color: colors.area.brain } as const
 
-type ActionId = typeof ACTIONS[number]['id'] | 'voice'
+type ActionId = typeof ACTIONS[number]['id'] | 'voice' | 'dump'
 
 export function CaptureButton() {
   const { user } = useAuthStore()
@@ -52,14 +55,17 @@ export function CaptureButton() {
   const [moneyOpen, setMoneyOpen]   = useState(false)
   const [taskOpen, setTaskOpen]     = useState(false)
   const [voiceOpen, setVoiceOpen]   = useState(false)
+  const [dumpOpen, setDumpOpen]     = useState(false)
   const [canDictate] = useState(() => featureOn('voiceCapture') && speechSupported())
-  const actions = canDictate ? [VOICE_ACTION, ...ACTIONS] : ACTIONS
+  const actions = [...(canDictate ? [VOICE_ACTION, ...ACTIONS] : ACTIONS), DUMP_ACTION]
   const mainCurrency = useLocaleStore(s => s.currency)
 
   const handleAction = (id: ActionId) => {
     setOpen(false)
     if (id === 'voice') {
       setVoiceOpen(true)
+    } else if (id === 'dump') {
+      setDumpOpen(true)
     } else if (id === 'task') {
       setTaskOpen(true)
     } else if (id === 'idea' || id === 'note') {
@@ -76,16 +82,16 @@ export function CaptureButton() {
    * Inserta la fila; si no hay conexión la deja en la cola del dispositivo (se sube sola después).
    * Devuelve true si se guardó en la base ahora.
    */
-  const saveOrQueue = async (item: OutboxItem): Promise<boolean> => {
+  const saveOrQueue = async (item: OutboxItem, quiet = false): Promise<boolean> => {
     try {
       const { error } = await db.from(item.table).insert(item.row)
       if (error) throw error
-      window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: item.module } }))
+      if (!quiet) window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: item.module } }))
       return true
     } catch (e) {
       if (!isOfflineError(e)) throw e
       enqueue(item)
-      toast(t.offline.queued, { icon: '☁️' })
+      if (!quiet) toast(t.offline.queued, { icon: '☁️' })
       return false
     }
   }
@@ -156,6 +162,49 @@ export function CaptureButton() {
     toast.success(t.voice.saved)
   }
 
+  /**
+   * "Vaciar la cabeza", ya revisado: tareas e ideas a Brain, gastos e ingresos a Dinero. Sin conexión, cada cosa
+   * queda en la cola del dispositivo (con su id: no se duplica). Devuelve los ids que no se pudieron guardar.
+   */
+  const handleDumpSave = async (items: DumpSaveItem[]): Promise<string[]> => {
+    if (!user) return items.map(i => i.id)
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const failed: string[] = []
+    const modules = new Set<OutboxItem['module']>()
+    let saved = 0
+    let queued = 0
+    let firstBrain: BrainItemType | null = null
+    for (const it of items) {
+      let item: OutboxItem
+      if (it.kind === 'expense' || it.kind === 'income') {
+        item = { table: 'life_transactions', module: 'money', row: {
+          id: it.id, user_id: user.id, type: it.kind, amount: it.amount ?? 0, category: it.category, description: it.text,
+          currency: mainCurrency, occurred_at: new Date(`${it.date ?? today}T12:00:00`).toISOString(),
+        } }
+      } else if (it.kind === 'task') {
+        item = { table: 'life_brain_items', module: 'brain', row: {
+          id: it.id, ...taskColumns({ title: it.text, due_date: it.date, due_time: it.date ? it.time : null }),
+          type: 'task', user_id: user.id, is_completed: false, is_archived: false,
+        } }
+      } else {
+        item = { table: 'life_brain_items', module: 'brain', row: { id: it.id, type: 'idea', title: it.text, user_id: user.id, is_completed: false, is_archived: false } }
+      }
+      try {
+        if (await saveOrQueue(item, true)) {
+          saved++
+          modules.add(item.module)
+          if (item.module === 'brain' && !firstBrain) firstBrain = it.kind === 'task' ? 'task' : 'idea'
+        } else queued++
+      } catch { failed.push(it.id) }
+    }
+    modules.forEach(module => window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module } })))
+    if (firstBrain) void awardFirstCapture(user.id, firstBrain)
+    if (saved + queued > 0) toast.success(t.dump.saved(saved + queued))
+    if (queued > 0) toast(t.offline.queued, { icon: '☁️' })
+    return failed
+  }
+
   // Portal a <body>: el botón fijo no depende de ningún contenedor
   return createPortal(
     <>
@@ -221,7 +270,7 @@ export function CaptureButton() {
                 }}>
                   <action.icon size={14} style={{ color: ink(action.color) }} strokeWidth={2.5} />
                 </div>
-                {action.id === 'voice' ? t.voice.action : t.capture[action.id]}
+                {action.id === 'voice' ? t.voice.action : action.id === 'dump' ? t.dump.action : t.capture[action.id]}
               </motion.button>
             ))}
           </div>
@@ -277,6 +326,7 @@ export function CaptureButton() {
         initial={null}
         onSave={handleGoalSave}
       />
+      <BrainDumpSheet open={dumpOpen} onClose={() => setDumpOpen(false)} onSave={handleDumpSave} />
       {canDictate && <VoiceCaptureSheet open={voiceOpen} onClose={() => setVoiceOpen(false)} onSave={handleVoiceSave} />}
       <TransactionSheet
         open={moneyOpen}

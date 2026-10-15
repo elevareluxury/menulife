@@ -38,6 +38,8 @@ export interface Habit {
   anchor: string | null
   reminder_time: string | null
   reminder_enabled: boolean
+  /** "¿Por qué lo hago?" (≤ 200, opcional) */
+  why?: string | null
   // calculados
   completedToday: boolean
   /** Lo hecho hoy (con cantidad) */
@@ -62,6 +64,7 @@ export interface HabitFormData {
   anchor?: string | null
   reminder_time?: string | null
   reminder_enabled?: boolean
+  why?: string | null
 }
 
 type RawHabit = Omit<Habit, 'completedToday' | 'todayValue' | 'streak' | 'streakUnit' | 'weekCount' | 'week' | 'scheduledToday'>

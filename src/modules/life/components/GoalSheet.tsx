@@ -3,6 +3,8 @@ import { useLifeT } from '@/i18n/app/life'
 import { LifeSheet, LifeButton, colors, font, radius, ink } from '../design-system'
 import { LIFE_COLORS } from '../lib/lifePalette'
 import type { Goal, GoalFormData } from '../hooks/useGoals'
+import { WhyField } from './Why'
+import { whyValue } from '../lib/why'
 
 interface GoalSheetProps {
   open: boolean
@@ -11,7 +13,7 @@ interface GoalSheetProps {
   initial?: Goal | null
 }
 
-const DEFAULT: GoalFormData = { name: '', description: '', target_date: '', color: colors.area.goals }
+const DEFAULT: GoalFormData = { name: '', description: '', target_date: '', color: colors.area.goals, why: null }
 
 const label: React.CSSProperties = {
   fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary,
@@ -34,7 +36,7 @@ export function GoalSheet({ open, onClose, onSave, initial }: GoalSheetProps) {
     /* eslint-disable react-hooks/set-state-in-effect */
     setForm(initial ? {
       name: initial.name, description: initial.description ?? '',
-      target_date: initial.target_date ?? '', color: initial.color,
+      target_date: initial.target_date ?? '', color: initial.color, why: initial.why ?? null,
     } : DEFAULT)
     setError('')
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -49,6 +51,7 @@ export function GoalSheet({ open, onClose, onSave, initial }: GoalSheetProps) {
         name: form.name.trim(),
         description: form.description?.trim() || undefined,
         target_date: form.target_date || undefined,
+        why: whyValue(form.why),
       })
       onClose()
     } catch { setError(t.common.saveError) }
@@ -72,6 +75,8 @@ export function GoalSheet({ open, onClose, onSave, initial }: GoalSheetProps) {
           placeholder={t.goalSheet.descriptionPlaceholder} rows={3} maxLength={300}
           style={{ ...field, resize: 'vertical', minHeight: '72px' }} />
       </div>
+
+      <WhyField id="goal-why" value={form.why ?? ''} onChange={why => setForm(f => ({ ...f, why }))} />
 
       <div style={{ marginBottom: '20px' }}>
         <label htmlFor="goal-date" style={label}>{t.goalSheet.targetDate}</label>

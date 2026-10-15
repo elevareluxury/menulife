@@ -11,6 +11,7 @@ import { TaskList } from './TasksView'
 import { useGoalLinks } from '../hooks/useGoalLinks'
 import { getHabitIcon } from '../lib/lifePalette'
 import { formatMoney } from '@/lib/currencies'
+import { WhyQuote } from './Why'
 
 interface GoalDetailSheetProps {
   goal: Goal | null
@@ -111,7 +112,8 @@ export function GoalDetailSheet({
                 {goal.description}
               </p>
             )}
-            <div style={{ display: 'flex', gap: '8px', marginTop: goal.description ? 12 : 0, flexWrap: 'wrap' }}>
+            {goal.why && <WhyQuote why={goal.why} color={ink(goal.color)} lines={4} style={{ marginTop: goal.description ? 8 : 0 }} />}
+            <div style={{ display: 'flex', gap: '8px', marginTop: goal.description || goal.why ? 12 : 0, flexWrap: 'wrap' }}>
               <span style={{ padding: '4px 10px', borderRadius: radius.full, background: `${tint(ink(statusColor), 8)}`, border: `1px solid ${tint(ink(statusColor), 16)}`, fontFamily: font, fontSize: '11px', fontWeight: 700, color: statusColor }}>
                 {t.status[goal.status]}
               </span>

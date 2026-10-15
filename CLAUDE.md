@@ -228,6 +228,10 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   sin servidor); se vuelve a bloquear al salir, al pasar a segundo plano y a los 5 min sin uso. Olvidé el PIN =
   borra el bloqueo del dispositivo y cierra la sesión. No es cifrado: la UI y privacidad (12 idiomas) lo dicen.
   Migración `20261030000004_life_journal.sql`, tests en `life_journal.test.sql`, `journalLock.test.ts` y `journal.spec.ts`.
+- Vaciar la cabeza: "Vaciar la cabeza" en el + → `BrainDumpSheet` (texto grande y "Dictar" con `useSpeech`).
+  `lib/brainDump.ts` separa en cosas (línea, oración; comas sólo si son 3 o más) y cada una pasa por `parseVoice`; se
+  revisa (tipo con un toque, monto, quitar) y "Guardar todo": tareas e ideas a Brain, gastos/ingresos a Dinero con
+  `suggestCategory` u "Otros"; sin conexión, a `lib/outbox.ts`. Tests en `brainDump.test.ts` y `why-dump.spec.ts`.
 - Entrar con Google (V1.1, `FEATURES.googleSignIn`, prendido): `GoogleButton` (`modules/auth/components/`) debajo del
   login y del registro. Google sólo da nombre, email y foto: la aceptación la pide Mycen, una sola vez. En el registro no
   va a Google sin la casilla del formulario; en el login no se pide y una cuenta nueva de Google sin `terms_accepted_at`
@@ -330,6 +334,11 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `useHabits`: `addToday` ("+1"), `setDayValue`, `weekCount`, `streakUnit`. UI: `QuantityButton` (anillo), `HabitMeta`,
   `HabitValueSheet` (`components/HabitControls.tsx`). Recordatorio por hábito: `useHabitReminders` (con Life OS abierto,
   una vez por día y hábito). E2E en `habits.spec.ts`.
+- "¿Por qué lo hago?": `why` (≤ 200, no en blanco; vacío = null) en `life_habits` y `life_goals` (migración
+  `20261030000003_life_why.sql`, tests en `life_why.test.sql`). `components/Why.tsx`: `WhyField` (al crear/editar),
+  `WhyQuote` (discreta en la tarjeta del hábito, la de la meta y su ficha, y en "Qué bueno verte de vuelta") y
+  `LetGoDialog`: antes de desactivar o borrar un hábito, o borrar una meta, con frase → "Lo empezaste porque: …" con
+  "Seguir intentando" / "Soltar igual" (sin frase, como siempre). E2E en `why-dump.spec.ts`.
 - "Mi día" (etapa 11): `/life` (`LifePage`) es "Mi día": `MyDaySection` (`components/MyDay.tsx`) arriba con hasta 3
   prioridades (tareas o texto; una cuarta explica por qué son 3) y "Cerrar el día" (resaltado desde las 18 h). El cierre
   (`DayReviewSheet`) muestra primero lo logrado (hábitos, tareas hechas hoy y prioridades, con celebración breve), después lo

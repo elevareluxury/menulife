@@ -27,6 +27,8 @@ export interface Goal {
   status: 'in_progress' | 'completed' | 'paused'
   color: string
   sort_order: number
+  /** "¿Por qué lo hago?" (≤ 200, opcional) */
+  why?: string | null
   milestones: Milestone[]
 }
 
@@ -35,6 +37,7 @@ export interface GoalFormData {
   description?: string
   target_date?: string
   color: string
+  why?: string | null
 }
 
 /** Con pasos, el progreso es pasos hechos sobre el total. Sin pasos, queda el manual. */

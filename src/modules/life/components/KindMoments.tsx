@@ -11,6 +11,7 @@ import { dayKey } from '../hooks/useToday'
 import { useAuthStore } from '@/store/authStore'
 import { usePrefs } from '@/lib/prefs'
 import { useLifeT } from '@/i18n/app/life'
+import { WhyQuote } from './Why'
 
 // Momentos amables en "Mi día" (V1 · etapa 12). Nunca muestran rachas ni lo que no se hizo.
 
@@ -58,6 +59,8 @@ export function WelcomeBack({ onClose }: { onClose: () => void }) {
           <span aria-hidden="true" style={{ width: 26, height: 26, borderRadius: '50%', border: `2px solid ${colors.border.medium}` }} />
         </button>
       )}
+      {/* Su "¿Por qué lo hago?", si lo escribió: un recordatorio amable, no una exigencia */}
+      {suggestion?.why && !done && <WhyQuote why={suggestion.why} color={ink(suggestion.color)} style={{ marginTop: 8 }} />}
       {done && (
         <p style={{ ...textStyle, display: 'flex', alignItems: 'center', gap: 6, color: colors.text.primary, fontWeight: 600 }}>
           <Check className="life-pop" size={16} strokeWidth={3} aria-hidden="true" style={{ color: colors.semantic.success }} /> {done}
