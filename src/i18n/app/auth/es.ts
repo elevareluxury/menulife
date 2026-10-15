@@ -46,13 +46,11 @@ const es = {
     welcome: '¡Bienvenido a Mycen!',
     failed: 'No pudimos crear tu cuenta. Intentá de nuevo.',
   },
-  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  /** Entrar con Google: la línea "o" y el botón (la aceptación usa las claves de register) */
   google: {
     continue: "Continuar con Google",
     going: "Abriendo Google…",
-    accept: "Al continuar con Google aceptás los",
-    acceptEnd: ".",
-    or: "o con tu email",
+    or: "o",
     failed: "No pudimos abrir Google. Intentá de nuevo.",
   },
   forgot: {

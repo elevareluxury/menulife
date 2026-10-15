@@ -46,13 +46,11 @@ const de: AuthDict = {
     welcome: "Willkommen bei Mycen!",
     failed: "Wir konnten dein Konto nicht erstellen. Versuch es noch einmal.",
   },
-  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  /** Entrar con Google: la línea "o" y el botón (la aceptación usa las claves de register) */
   google: {
     continue: "Weiter mit Google",
     going: "Google wird geöffnet…",
-    accept: "Wenn du mit Google fortfährst, akzeptierst du die",
-    acceptEnd: ".",
-    or: "oder mit deiner E-Mail",
+    or: "oder",
     failed: "Google konnte nicht geöffnet werden. Versuch es noch einmal.",
   },
   forgot: {

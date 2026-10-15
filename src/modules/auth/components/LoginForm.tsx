@@ -71,7 +71,6 @@ export function LoginForm() {
 
   return (
     <>
-    {featureOn('googleSignIn') && <GoogleButton />}
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {/* Error banner */}
       {error && (
@@ -145,6 +144,7 @@ export function LoginForm() {
       </button>
 
     </form>
+    {featureOn('googleSignIn') && <GoogleButton />}
     </>
   )
 }

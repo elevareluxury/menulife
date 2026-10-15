@@ -18,15 +18,24 @@ function GoogleLogo() {
   )
 }
 
-/** "Continuar con Google", la línea "o" y lo que se acepta al usarlo. */
-export function GoogleButton({ referral = null }: { referral?: Referral | null }) {
+/**
+ * La línea "o" y "Continuar con Google", debajo del formulario. Sin aceptar los Términos y la Privacidad no se va a
+ * Google (Google sólo nos da nombre, email y foto: la aceptación la pide Mycen). En el registro usa la casilla del
+ * formulario (`accepted`); en el login, que no tiene, muestra la suya.
+ */
+export function GoogleButton({ referral = null, accepted }: { referral?: Referral | null; accepted?: boolean }) {
   const t = useAuthT()
   const g = t.google
+  const r = t.register
+  const ownBox = accepted === undefined
+  const [ownAccepted, setOwnAccepted] = useState(false)
+  const ok = ownBox ? ownAccepted : accepted
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   async function handleClick() {
     setError('')
+    if (!ok) { setError(r.needTerms); return }
     setLoading(true)
     try {
       // Si sale bien, el navegador se va a Google; no hace falta apagar "loading"
@@ -39,7 +48,26 @@ export function GoogleButton({ referral = null }: { referral?: Referral | null }
 
   const font = 'var(--font-jakarta)'
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '18px' }}>
+      <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+        <span style={{ fontFamily: font, fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>{g.or}</span>
+        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+      </div>
+      {ownBox && (
+        <label style={{
+          display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer',
+          fontFamily: font, fontSize: '13px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5,
+        }}>
+          <input type="checkbox" checked={ownAccepted} onChange={e => { setOwnAccepted(e.target.checked); setError('') }}
+            style={{ marginTop: '3px', width: 16, height: 16, accentColor: '#F4705A', flexShrink: 0 }} />
+          <span>
+            {r.accept && <>{r.accept}{' '}</>}
+            <Link to="/terminos" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{r.terms}</Link> {r.and}{' '}
+            <Link to="/privacidad" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{r.privacy}</Link>{r.acceptEnd}
+          </span>
+        </label>
+      )}
       {error && (
         <div role="alert" style={{
           padding: '10px 14px', borderRadius: '10px',
@@ -65,16 +93,6 @@ export function GoogleButton({ referral = null }: { referral?: Referral | null }
         <GoogleLogo />
         {loading ? g.going : g.continue}
       </button>
-      <p style={{ margin: 0, textAlign: 'center', fontFamily: font, fontSize: '12px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>
-        {g.accept && <>{g.accept}{' '}</>}
-        <Link to="/terminos" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{t.register.terms}</Link> {t.register.and}{' '}
-        <Link to="/privacidad" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{t.register.privacy}</Link>{g.acceptEnd}
-      </p>
-      <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '6px' }}>
-        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-        <span style={{ fontFamily: font, fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>{g.or}</span>
-        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-      </div>
     </div>
   )
 }

@@ -164,8 +164,6 @@ export function RegisterPage() {
           </div>
         )}
 
-        {featureOn('googleSignIn') && <GoogleButton referral={referral} />}
-
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <DarkInput
             label={r.name}
@@ -230,6 +228,8 @@ export function RegisterPage() {
             {loading ? r.submitting : r.submit}
           </button>
         </form>
+
+        {featureOn('googleSignIn') && <GoogleButton referral={referral} accepted={accepted} />}
 
         <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.65)' }}>
           {r.haveAccount}{' '}

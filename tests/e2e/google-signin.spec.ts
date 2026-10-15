@@ -12,8 +12,12 @@ test('el registro manda a Google con la vuelta a /auth/callback y anota idioma y
     return route.fulfill({ status: 200, contentType: 'text/html', body: '<p>Google</p>' })
   })
   await page.goto('/register?ref=ana&tipo=creador')
-  await expect(page.getByText('Al continuar con Google aceptás los')).toBeVisible()
+  // Sin aceptar los Términos y la Privacidad no se va a Google
+  await page.getByRole('button', { name: 'Continuar con Google' }).click()
+  await expect(page.getByRole('alert')).toHaveText('Para crear tu cuenta, aceptá los Términos y la Política de privacidad.')
+  expect(authorize).toBeNull()
 
+  await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Continuar con Google' }).click()
   await expect.poll(() => authorize?.searchParams.get('provider')).toBe('google')
   expect(authorize!.searchParams.get('redirect_to')).toMatch(/\/auth\/callback$/)
@@ -23,12 +27,21 @@ test('el registro manda a Google con la vuelta a /auth/callback y anota idioma y
   expect(pending).toMatchObject({ locale: 'es', ref: 'ana', ref_purpose: 'creador' })
 })
 
-test('el login también ofrece Google, en el idioma de la persona', async ({ page, context }) => {
+test('el login también ofrece Google, con su propia casilla obligatoria y en el idioma de la persona', async ({ page, context }) => {
   await context.addInitScript(() => localStorage.setItem('mycen_lang', 'en'))
   await installSupabaseMock(context, createState({}))
+  let authorized = false
+  await page.route('**/auth/v1/authorize**', route => {
+    authorized = true
+    return route.fulfill({ status: 200, contentType: 'text/html', body: '<p>Google</p>' })
+  })
   await page.goto('/login')
-  await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Terms' })).toBeVisible()
+  await page.getByRole('button', { name: 'Continue with Google' }).click()
+  await expect(page.getByRole('alert')).toHaveText('To create your account, accept the Terms and the Privacy Policy.')
+  expect(authorized).toBe(false)
+  await page.getByRole('checkbox', { name: /I accept the Terms/ }).check()
+  await page.getByRole('button', { name: 'Continue with Google' }).click()
+  await expect.poll(() => authorized).toBe(true)
 })
 
 test('al volver de Google se completa la cuenta y se entra', async ({ page, context }) => {

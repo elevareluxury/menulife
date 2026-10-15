@@ -46,13 +46,11 @@ const hi: AuthDict = {
     welcome: "Mycen में आपका स्वागत है!",
     failed: "आपका अकाउंट नहीं बन सका। फिर से कोशिश करें।",
   },
-  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  /** Entrar con Google: la línea "o" y el botón (la aceptación usa las claves de register) */
   google: {
     continue: "Google के साथ जारी रखें",
     going: "Google खुल रहा है…",
-    accept: "Google के साथ जारी रखकर आप",
-    acceptEnd: " स्वीकार करते हैं।",
-    or: "या अपने ईमेल से",
+    or: "या",
     failed: "Google नहीं खुल सका। फिर से कोशिश करें।",
   },
   forgot: {
