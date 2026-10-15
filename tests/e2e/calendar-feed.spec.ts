@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createState, installSupabaseMock, profileRow } from './support/mockSupabase'
 
-// V1.1 · Tareas en el calendario por link privado (beta: ?beta=1).
+// V1.1 · Tareas en el calendario por link privado (prendido para todos).
 
 test.use({ viewport: { width: 390, height: 844 } })
 
@@ -12,7 +12,7 @@ test('crear, copiar, cambiar y apagar el link del calendario', async ({ page, co
   await page.goto('/life/settings')
   await expect(page.getByRole('heading', { name: 'Tus tareas en tu calendario' })).toHaveCount(0)
 
-  await page.goto('/life/settings?beta=1')
+  await page.goto('/life/settings')
   await page.getByRole('button', { name: 'Mostrar mi link' }).click()
   const link = page.getByRole('textbox', { name: 'Tus tareas en tu calendario' })
   await expect(link).toHaveValue(/^http:\/\/localhost:\d+\/cal\/[a-f0-9]{64}\.ics$/)

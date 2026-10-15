@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createState, installSupabaseMock, OWNER_ID, profileRow, type MockState } from './support/mockSupabase'
 
-// V1.1 · Importar movimientos del banco (beta: se prende con ?beta=1).
+// V1.1 · Importar movimientos del banco (prendido para todos).
 
 function seed(): MockState {
   const state = createState({ profiles: [profileRow()] })
@@ -31,17 +31,17 @@ const latin1 = Buffer.from(CSV, 'latin1')
 
 test.use({ viewport: { width: 390, height: 844 } })
 
-test('sin ?beta=1 el botón no aparece', async ({ page, context }) => {
+test('el botón está para todos, sin ?beta=1', async ({ page, context }) => {
   await installSupabaseMock(context, seed(), { signedIn: true })
   await page.goto('/life/money')
   await expect(page.getByRole('heading', { level: 1, name: 'Dinero' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Importar del banco' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Importar del banco' })).toBeVisible()
 })
 
 test('importa un CSV del banco sin duplicar lo que ya estaba', async ({ page, context }) => {
   const state = seed()
   await installSupabaseMock(context, state, { signedIn: true })
-  await page.goto('/life/money?beta=1')
+  await page.goto('/life/money')
   await page.getByRole('button', { name: 'Importar del banco' }).click()
   const sheet = page.getByRole('dialog', { name: 'Importar del banco' })
   await sheet.getByLabel('Elegir archivo').setInputFiles({ name: 'movimientos.csv', mimeType: 'text/csv', buffer: latin1 })
@@ -60,15 +60,12 @@ test('importa un CSV del banco sin duplicar lo que ya estaba', async ({ page, co
     ['income', 850000, 'TRANSFERENCIA RECIBIDA', 'ARS', 'Otros'],
     ['expense', 8999, 'DÉBITO AUTOMÁTICO NETFLIX', 'ARS', 'Suscripciones'],
   ])
-  // La beta queda recordada en el dispositivo
-  await page.goto('/life/money')
-  await expect(page.getByRole('button', { name: 'Importar del banco' })).toBeVisible()
 })
 
 test('importa un Excel (.xlsx) y avisa con un .xls viejo', async ({ page, context }) => {
   const state = seed()
   await installSupabaseMock(context, state, { signedIn: true })
-  await page.goto('/life/money?beta=1')
+  await page.goto('/life/money')
   await page.getByRole('button', { name: 'Importar del banco' }).click()
   const sheet = page.getByRole('dialog', { name: 'Importar del banco' })
 

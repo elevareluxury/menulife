@@ -1,20 +1,20 @@
 // Funciones que se prenden por etapas. Insights y "Tu mes" (Replay) entraron antes del freeze de la V1.
-// Las de la V1.1 quedan apagadas para todos, salvo en el dispositivo de quien abre la app con ?beta=1 (se recuerda;
-// ?beta=0 lo apaga). Así se prueban en producción antes de prenderlas.
+// Las de la V1.1 se prueban primero en BETA: apagadas para todos salvo en el dispositivo que abre la app con ?beta=1
+// (se recuerda; ?beta=0 lo apaga). Importar del banco, calendario y voz ya pasaron la prueba y están prendidas.
 export const FEATURES = {
   lifeInsights:   true,
   lifeReplay:     true,
   businessInLife: false,
-  bankImport:     false,
-  calendarFeed:   false,
-  voiceCapture:   false,
+  bankImport:     true,
+  calendarFeed:   true,
+  voiceCapture:   true,
   // Entrar con Google: prendido para todos (se apaga acá si hiciera falta)
   googleSignIn:   true,
 } as const
 
 export type FeatureName = keyof typeof FEATURES
 
-const BETA: readonly FeatureName[] = ['bankImport', 'calendarFeed', 'voiceCapture']
+const BETA: readonly FeatureName[] = []
 const BETA_KEY = 'mycen_beta'
 
 export function betaOn(): boolean {
