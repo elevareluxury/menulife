@@ -2,6 +2,7 @@ import { ArrowUpRight } from 'lucide-react'
 import type { ProjectCard } from '../lib/projectTypes'
 import { tr, ui } from '../lib/profileI18n'
 import { safeHref } from '../lib/safeUrl'
+import { projectKey } from '../lib/clickKeys'
 import type { ProfileLang } from '../lib/profileTypes'
 import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
@@ -46,7 +47,7 @@ export function PortfolioModule({ module, lang, onAction }: ModuleProps) {
           const { title, summary } = cardText(card, lang)
           const cover = safeHref(card.cover_url)
           return (
-            <a key={card.id} className="mp-portfolio-item" href={cardPath(card)!} onClick={() => onAction(module.id)}>
+            <a key={card.id} className="mp-portfolio-item" href={cardPath(card)!} onClick={() => onAction(module.id, projectKey(card.id))}>
               <SafeImage className="mp-portfolio-img" src={cover ?? undefined} alt="" loading="lazy"
                 fallback={<span className="mp-portfolio-img" aria-hidden="true" />} />
               <span className="mp-portfolio-title">{title}</span>

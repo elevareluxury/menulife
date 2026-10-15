@@ -5,6 +5,7 @@ import { BadgeCheck, Calendar, Globe, Share2, UserPlus } from 'lucide-react'
 import { huellaSeed } from '@/lib/huella'
 import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
 import { fetchContactCard, trackProfileEvent } from '../lib/profileApi'
+import { RESERVE_KEY } from '../lib/clickKeys'
 import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref } from '../lib/safeUrl'
 import { isOpenNow } from '../lib/schedule'
@@ -120,7 +121,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   const reserveHref = profile.business?.reservations_enabled && profile.business.business_type !== 'retail'
     ? `/r/${profile.business.slug}/reservar` : null
 
-  const onModuleAction = (moduleId: string) => track(profile.id, 'module_click', moduleId)
+  const onModuleAction = (moduleId: string, item?: string) => track(profile.id, 'module_click', moduleId, item)
 
   async function share() {
     const data = { title: name, text: descriptor || name, url: profileUrl }
@@ -175,7 +176,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   const secondaryNode = (reserveHref || profile.has_contact_card) ? (
     <div className="mp-secondary-row">
       {reserveHref && (
-        <a className="mp-btn-ghost" href={reserveHref} onClick={() => track(profile.id, 'primary_action_click')}>
+        <a className="mp-btn-ghost" href={reserveHref} onClick={() => track(profile.id, 'primary_action_click', null, RESERVE_KEY)}>
           <Calendar size={17} aria-hidden="true" /> {trLabel('Reservar', lang)}
         </a>
       )}
@@ -192,7 +193,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
     let node: React.ReactNode
     if (!select) {
       node = b.kind === 'group'
-        ? <b.Group lang={lang} modules={b.modules} onAction={id => track(profile.id, 'module_click', id)} />
+        ? <b.Group lang={lang} modules={b.modules} onAction={onModuleAction} />
         : <b.View module={b.module} lang={lang} onAction={onModuleAction} />
     } else {
       node = b.kind === 'group'
