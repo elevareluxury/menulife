@@ -25,6 +25,10 @@ import { newSplitId, useSplits } from '../hooks/useSplits'
 import { SettleSheet, SharedCard } from '../components/SharedCard'
 import { personSuggestions, type PersonBalance } from '../lib/splits'
 import { doneWithUndo } from '../lib/undo'
+import { useBudgets } from '../hooks/useBudgets'
+import { BudgetsCard } from '../components/BudgetsCard'
+import { BudgetSheet, type BudgetDraft } from '../components/BudgetSheet'
+import { budgetStatuses, findBudget, type Budget } from '../lib/budgets'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
@@ -84,9 +88,11 @@ function MonthSwitcher({ month, locale, onChange }: { month: string; locale: str
 }
 
 // ── En qué se fue (gastos por categoría, moneda principal) ───────────────────
-function CategoryCard({ items, currency, locale, prevMonthName, active, onPick }: {
+function CategoryCard({ items, currency, locale, prevMonthName, active, onPick, hasBudget, onBudget }: {
   items: CategoryShare[]; currency: string; locale: string; prevMonthName: string
   active: string | null; onPick: (cat: string) => void
+  /** Presupuesto de la categoría elegida (en esta moneda): "Poner un presupuesto" o "Editar presupuesto" */
+  hasBudget: (cat: string) => boolean; onBudget: (cat: string) => void
 }) {
   const t = useLifeT()
   const { labelOf, colorOf } = useCategoryLabels()
@@ -123,6 +129,16 @@ function CategoryCard({ items, currency, locale, prevMonthName, active, onPick }
                   </span>
                 )}
               </button>
+              {active === c.category && (
+                <button type="button" onClick={() => onBudget(c.category)}
+                  style={{
+                    margin: '2px 4px 4px', minHeight: 32, padding: '4px 12px', borderRadius: radius.full, cursor: 'pointer',
+                    background: colors.accent.soft, border: `1px solid ${colors.accent.soft}`, color: colors.accent.ink,
+                    fontFamily: font, fontSize: 12, fontWeight: 700,
+                  }}>
+                  {hasBudget(c.category) ? t.budgets.editFor : t.budgets.setFor}
+                </button>
+              )}
             </li>
           )
         })}
@@ -341,6 +357,12 @@ export function LifeMoneyPage() {
   const splits = useSplits()
   const [settling, setSettling] = useState<PersonBalance | null>(null)
   const knownPeople = useMemo(() => personSuggestions(splits.items, '', [], 30), [splits.items])
+  const budgets = useBudgets()
+  const [budgetDraft, setBudgetDraft] = useState<BudgetDraft | null>(null)
+  const budgetRows = useMemo(
+    () => budgetStatuses(budgets.items, transactions, month, new Date(), mainCurrency),
+    [budgets.items, transactions, month, mainCurrency],
+  )
 
   if (loading && !everHasData && !transactions.length) return <MoneySkeleton />
 
@@ -390,6 +412,20 @@ export function LifeMoneyPage() {
     const ids = b.items.map(i => i.id)
     splits.hide(ids)
     deleteWithUndo({ message: t.shared.removed(b.person), commit: () => splits.remove(ids), restore: () => void splits.reload() })
+  }
+  const openBudget = (category: string) => {
+    const existing = findBudget(budgets.items, category, mainCurrency)
+    setBudgetDraft(existing ? { editing: existing } : { editing: null, category, currency: mainCurrency })
+  }
+  const saveBudget = async (category: string, currency: string, amount: number) => {
+    const target = budgetDraft?.editing ?? findBudget(budgets.items, category, currency)
+    if (target) await budgets.setAmount(target.id, amount)
+    else await budgets.create(category, currency, amount)
+    toast.success(t.budgets.saved)
+  }
+  const removeBudget = (b: Budget) => {
+    budgets.hide(b.id)
+    deleteWithUndo({ message: t.budgets.removed(labelOf(b.category)), commit: () => budgets.remove(b.id), restore: () => void budgets.reload() })
   }
   const settle = async (b: PersonBalance, income: number, record: boolean) => {
     const undo = await splits.settle(b, income, { record, description: t.shared.repaidDesc(b.person) })
@@ -477,7 +513,14 @@ export function LifeMoneyPage() {
 
       {breakdown.length > 0 && !searchingAll && (
         <CategoryCard items={breakdown} currency={mainCurrency} locale={locale} prevMonthName={prevMonthName}
-          active={cat} onPick={c => setCat(prev => (prev === c ? null : c))} />
+          active={cat} onPick={c => setCat(prev => (prev === c ? null : c))}
+          hasBudget={c => !!findBudget(budgets.items, c, mainCurrency)} onBudget={openBudget} />
+      )}
+
+      {everHasData && budgets.loaded && !searchingAll && (
+        <BudgetsCard statuses={budgetRows} locale={locale} monthName={monthName}
+          onAdd={() => setBudgetDraft({ editing: null, currency: mainCurrency })}
+          onEdit={b => setBudgetDraft({ editing: b })} onDelete={removeBudget} />
       )}
 
       {isCurrentMonth && fixed.items.length > 0 && (
@@ -610,6 +653,8 @@ export function LifeMoneyPage() {
       />
 
       <SettleSheet balance={settling} locale={locale} onClose={() => setSettling(null)} onConfirm={settle} />
+
+      <BudgetSheet draft={budgetDraft} budgets={budgets.items} onClose={() => setBudgetDraft(null)} onSave={saveBudget} />
 
     </LifeScreenContainer>
   )

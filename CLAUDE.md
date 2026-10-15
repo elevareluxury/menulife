@@ -198,6 +198,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `doneWithUndo`. Borrar un gasto compartido borra sus deudas pendientes. Migración
   `20261029000003_life_shared_expenses.sql`, tests en `life_shared_expenses.test.sql`, `splits.test.ts` y
   `shared-expenses.spec.ts`.
+- Presupuestos amables (Dinero): `life_budgets` (categoría fija o propia `'c:' || id` con `life_check_category_owner`,
+  moneda, monto > 0; único por categoría y moneda, hasta 60; vale para todos los meses). `lib/budgets.ts` calcula en el
+  dispositivo lo gastado del mes en esa moneda, lo que queda, días que faltan y "por día" (mes en curso; un mes pasado sólo
+  el resultado) y el estado (bien / cerca ≥ 85 % / pasado). `hooks/useBudgets.ts`, tarjeta `BudgetsCard` (barra con el
+  color de la categoría, "+ Presupuesto", editar monto, borrar con "Deshacer"), `BudgetSheet`, "Poner un presupuesto" en
+  "En qué se fue" y una línea en Mi día (`BudgetNudge`, la más relevante). Tono sin culpa: "fue $X más de lo previsto",
+  nada de rojo. Migración `20261030000001_life_budgets.sql`, tests en `life_budgets.test.sql`, `budgets.test.ts` y
+  `budgets.spec.ts`.
 - Importar del banco (V1.1, `FEATURES.bankImport`, prendido para todos): botón en Dinero → `ImportBankSheet`. Todo en el dispositivo:
   `lib/bankImport.ts` (CSV con comillas y separador detectado, UTF-8 o Windows-1252, títulos y columnas adivinados en
   12 idiomas, débito/crédito o importe con signo, coma o punto decimal, fechas d/m, m/d, a-m-d y serie de Excel,

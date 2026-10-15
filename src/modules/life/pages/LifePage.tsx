@@ -22,6 +22,7 @@ import { trackOncePerSession } from '@/lib/productEvents'
 import { HabitMeta, QuantityButton } from '../components/HabitControls'
 import { useStreakText } from '../hooks/useStreakText'
 import { useMoney } from '../hooks/useMoney'
+import { BudgetNudge } from '../components/BudgetNudge'
 import { useToday } from '../hooks/useToday'
 import { getHabitIcon } from '../lib/lifePalette'
 import { useInsights } from '../hooks/useInsights'
@@ -384,7 +385,7 @@ function GoalsCard() {
 function MoneyCard() {
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
-  const { monthIncome, monthExpense, monthBalance, otherTotals, mainCurrency, loading } = useMoney()
+  const { monthIncome, monthExpense, monthBalance, otherTotals, mainCurrency, loading, transactions } = useMoney()
   const empty = monthIncome === 0 && monthExpense === 0 && otherTotals.length === 0
 
   return (
@@ -412,6 +413,7 @@ function MoneyCard() {
               ))}
             </ul>
           )}
+          <BudgetNudge transactions={transactions} mainCurrency={mainCurrency} locale={locale} />
         </>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}><SeeAll to="/life/money" /></div>
