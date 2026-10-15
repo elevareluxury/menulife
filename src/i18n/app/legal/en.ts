@@ -115,6 +115,7 @@ const en: LegalDict = {
         '**YouTube, Vimeo, TikTok, Spotify and SoundCloud:** only if a profile embeds a video or a song and you tap "Play". Nothing connects to them before that; from then on, their own policies apply.',
         '**Anthropic:** only if a business uses the menu import from a PDF; that file is processed.',
         '**Mercado Pago:** only if a business sets it up to get paid; the payment happens on Mercado Pago.',
+        '**Google Calendar, Apple or another calendar:** only if you turn on the Life OS calendar link; that service downloads your pending tasks with a date (title, date, time and reminder). You can turn it off or change it at any time.',
       ] },
       'Beyond that, we only share data if the law requires it or to protect people’s rights and safety.',
     ] },

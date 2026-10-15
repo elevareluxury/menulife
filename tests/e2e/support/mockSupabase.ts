@@ -606,6 +606,18 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       }
       return n
     }
+    case 'life_calendar_token': {
+      if (!isOwner) throw new Error('not_authenticated')
+      const fresh = () => Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
+      state.tables.life_calendar_feeds ??= []
+      const row = state.tables.life_calendar_feeds[0]
+      if (!row || args.p_rotate) state.tables.life_calendar_feeds = [{ user_id: OWNER_ID, token: fresh() }]
+      return state.tables.life_calendar_feeds[0].token
+    }
+    case 'life_calendar_disable': {
+      state.tables.life_calendar_feeds = []
+      return null
+    }
     case 'check_username': {
       const u = String(args.p_username ?? '')
       if (!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(u)) return 'invalid'

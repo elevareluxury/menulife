@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import { colors, font, radius, shadow, tint } from '../tokens'
@@ -21,6 +22,8 @@ export function LifeConfirmDialog({
   onConfirm, onCancel, danger = false,
 }: LifeConfirmDialogProps) {
   const t = useLifeT()
+  const titleId = useId()
+  const textId = useId()
   confirmLabel ??= t.common.confirm
   cancelLabel ??= t.common.cancel
   return (
@@ -43,6 +46,10 @@ export function LifeConfirmDialog({
           />
           <motion.div
             key="dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            aria-describedby={textId}
             initial={{ opacity: 0, scale: 0.92, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 8 }}
@@ -71,13 +78,13 @@ export function LifeConfirmDialog({
                 </div>
               </div>
             )}
-            <h3 style={{
+            <h3 id={titleId} style={{
               fontFamily: font, fontSize: '16px', fontWeight: 700,
               color: colors.text.primary, textAlign: 'center', margin: '0 0 8px',
             }}>
               {title}
             </h3>
-            <p style={{
+            <p id={textId} style={{
               fontFamily: font, fontSize: '13px',
               color: colors.text.secondary, textAlign: 'center',
               lineHeight: 1.5, margin: '0 0 20px',
