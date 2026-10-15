@@ -115,6 +115,7 @@ const pt: LegalDict = {
         '**YouTube, Vimeo, TikTok, Spotify e SoundCloud:** só se um perfil integrar um vídeo ou uma música e você tocar em "Reproduzir". Antes disso não nos conectamos a eles; a partir daí valem as políticas deles.',
         '**Anthropic:** só se um negócio usa a importação do cardápio a partir de um PDF; esse arquivo é processado.',
         '**Mercado Pago:** só se um negócio o configura para receber pagamentos; o pagamento é feito no Mercado Pago.',
+        '**Google (login):** só se você escolher "Continuar com o Google". O Google nos confirma seu nome, seu email e sua foto; não recebemos sua senha do Google nem acessamos mais nada da sua conta.',
         '**Google Agenda, Apple ou outra agenda:** só se você ativar o link de agenda do Life OS; esse serviço baixa suas tarefas pendentes com data (título, data, horário e lembrete). Você pode desativar ou trocar quando quiser.',
         '**Reconhecimento de voz do seu navegador:** só se você usar "Ditar" no Life OS. Seu navegador converte a voz em texto (no Chrome, quem faz isso é o serviço de voz do Google; no Safari, a Apple). O Mycen recebe só o texto.',
       ] },

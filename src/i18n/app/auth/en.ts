@@ -46,6 +46,15 @@ const en: AuthDict = {
     welcome: "Welcome to Mycen!",
     failed: "We couldn’t create your account. Please try again.",
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "Continue with Google",
+    going: "Opening Google…",
+    accept: "By continuing with Google, you accept the",
+    acceptEnd: ".",
+    or: "or with your email",
+    failed: "We couldn't open Google. Try again.",
+  },
   forgot: {
     title: "Reset password",
     intro: "Enter your email and we’ll send you a link to create a new password.",

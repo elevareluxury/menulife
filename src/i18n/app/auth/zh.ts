@@ -46,6 +46,15 @@ const zh: AuthDict = {
     welcome: "欢迎来到 Mycen！",
     failed: "无法创建账户，请重试。",
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "使用 Google 继续",
+    going: "正在打开 Google…",
+    accept: "使用 Google 继续即表示你同意",
+    acceptEnd: "。",
+    or: "或使用邮箱",
+    failed: "无法打开 Google，请重试。",
+  },
   forgot: {
     title: "找回密码",
     intro: "输入你的邮箱，我们会发送一个设置新密码的链接。",

@@ -46,6 +46,15 @@ const es = {
     welcome: '¡Bienvenido a Mycen!',
     failed: 'No pudimos crear tu cuenta. Intentá de nuevo.',
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "Continuar con Google",
+    going: "Abriendo Google…",
+    accept: "Al continuar con Google aceptás los",
+    acceptEnd: ".",
+    or: "o con tu email",
+    failed: "No pudimos abrir Google. Intentá de nuevo.",
+  },
   forgot: {
     title: 'Recuperar contraseña',
     intro: 'Escribí tu email y te mandamos un link para crear una contraseña nueva.',

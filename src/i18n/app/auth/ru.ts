@@ -46,6 +46,15 @@ const ru: AuthDict = {
     welcome: "Добро пожаловать в Mycen!",
     failed: "Не удалось создать аккаунт. Попробуйте ещё раз.",
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "Продолжить с Google",
+    going: "Открываем Google…",
+    accept: "Продолжая с Google, вы принимаете",
+    acceptEnd: ".",
+    or: "или по email",
+    failed: "Не удалось открыть Google. Попробуйте ещё раз.",
+  },
   forgot: {
     title: "Восстановление пароля",
     intro: "Введите почту — мы пришлём ссылку для создания нового пароля.",

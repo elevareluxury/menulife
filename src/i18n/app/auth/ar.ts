@@ -46,6 +46,15 @@ const ar: AuthDict = {
     welcome: "مرحبًا بك في Mycen!",
     failed: "تعذّر إنشاء حسابك. حاول مرة أخرى.",
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "المتابعة باستخدام Google",
+    going: "جارٍ فتح Google…",
+    accept: "بالمتابعة باستخدام Google فإنك توافق على",
+    acceptEnd: ".",
+    or: "أو باستخدام بريدك الإلكتروني",
+    failed: "تعذّر فتح Google. حاول مرة أخرى.",
+  },
   forgot: {
     title: "استعادة كلمة المرور",
     intro: "اكتب بريدك الإلكتروني وسنرسل لك رابطًا لإنشاء كلمة مرور جديدة.",

@@ -115,6 +115,7 @@ const en: LegalDict = {
         '**YouTube, Vimeo, TikTok, Spotify and SoundCloud:** only if a profile embeds a video or a song and you tap "Play". Nothing connects to them before that; from then on, their own policies apply.',
         '**Anthropic:** only if a business uses the menu import from a PDF; that file is processed.',
         '**Mercado Pago:** only if a business sets it up to get paid; the payment happens on Mercado Pago.',
+        '**Google (sign-in):** only if you choose "Continue with Google". Google confirms your name, email and photo to us; we never get your Google password or access anything else in your account.',
         '**Google Calendar, Apple or another calendar:** only if you turn on the Life OS calendar link; that service downloads your pending tasks with a date (title, date, time and reminder). You can turn it off or change it at any time.',
         '**Your browser’s speech recognition:** only if you use "Dictate" in Life OS. Your browser turns your voice into text (in Chrome, Google’s speech service does it; in Safari, Apple). Mycen only receives the text.',
       ] },

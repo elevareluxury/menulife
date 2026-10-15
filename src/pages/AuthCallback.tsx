@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { postLoginRoute } from '@/modules/auth/lib/postLoginRoute'
 import { useAuthT } from '@/i18n/app/auth'
+import { applyPendingSignup } from '@/modules/auth/lib/googleSignIn'
 
 export function AuthCallback() {
   const t = useAuthT()
@@ -27,6 +28,8 @@ export function AuthCallback() {
     const { error, errorDesc, type, code } = params
 
     async function redirectByRole(userId?: string) {
+      // Volviendo de "Continuar con Google": idioma, términos y referido, como en el registro con email
+      await applyPendingSignup()
       const id = userId ?? (await supabase.auth.getUser()).data.user?.id
       if (!id) { navigate('/life', { replace: true }); return }
       navigate(await postLoginRoute(id), { replace: true })

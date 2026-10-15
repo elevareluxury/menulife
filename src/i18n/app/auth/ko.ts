@@ -46,6 +46,15 @@ const ko: AuthDict = {
     welcome: "Mycen에 오신 것을 환영합니다!",
     failed: "계정을 만들지 못했습니다. 다시 시도해 주세요.",
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "Google로 계속하기",
+    going: "Google을 여는 중…",
+    accept: "Google로 계속하면",
+    acceptEnd: "에 동의하게 됩니다.",
+    or: "또는 이메일로",
+    failed: "Google을 열 수 없습니다. 다시 시도해 주세요.",
+  },
   forgot: {
     title: "비밀번호 재설정",
     intro: "이메일을 입력하면 새 비밀번호를 만들 수 있는 링크를 보내드려요.",

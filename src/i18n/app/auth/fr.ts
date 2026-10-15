@@ -46,6 +46,15 @@ const fr: AuthDict = {
     welcome: "Bienvenue sur Mycen !",
     failed: "Impossible de créer votre compte. Réessayez.",
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "Continuer avec Google",
+    going: "Ouverture de Google…",
+    accept: "En continuant avec Google, vous acceptez les",
+    acceptEnd: ".",
+    or: "ou avec votre email",
+    failed: "Impossible d’ouvrir Google. Réessayez.",
+  },
   forgot: {
     title: "Réinitialiser le mot de passe",
     intro: "Saisissez votre e-mail et nous vous enverrons un lien pour créer un nouveau mot de passe.",

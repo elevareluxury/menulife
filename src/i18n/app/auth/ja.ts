@@ -46,6 +46,15 @@ const ja: AuthDict = {
     welcome: "Mycen へようこそ！",
     failed: "アカウントを作成できませんでした。もう一度お試しください。",
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "Google で続ける",
+    going: "Google を開いています…",
+    accept: "Google で続けると、",
+    acceptEnd: "に同意したことになります。",
+    or: "またはメールで",
+    failed: "Google を開けませんでした。もう一度お試しください。",
+  },
   forgot: {
     title: "パスワードの再設定",
     intro: "メールアドレスを入力すると、新しいパスワードを設定するリンクをお送りします。",

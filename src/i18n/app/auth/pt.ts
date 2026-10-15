@@ -46,6 +46,15 @@ const pt: AuthDict = {
     welcome: "Boas-vindas ao Mycen!",
     failed: "Não conseguimos criar sua conta. Tente de novo.",
   },
+  /** Entrar con Google: botón, lo que se acepta al usarlo y la línea que lo separa del email */
+  google: {
+    continue: "Continuar com o Google",
+    going: "Abrindo o Google…",
+    accept: "Ao continuar com o Google, você aceita os",
+    acceptEnd: ".",
+    or: "ou com seu email",
+    failed: "Não conseguimos abrir o Google. Tente de novo.",
+  },
   forgot: {
     title: "Recuperar senha",
     intro: "Digite seu e-mail e enviaremos um link para criar uma nova senha.",
