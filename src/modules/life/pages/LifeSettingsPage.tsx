@@ -15,6 +15,7 @@ import { useAuthStore } from '@/store/authStore'
 import { featureOn } from '@/lib/features'
 import { CalendarFeedCard } from '../components/CalendarFeedCard'
 import { CategoriesCard } from '../components/CategoriesCard'
+import { useHomePrefs } from '../lib/homePrefs'
 
 function timezones(): string[] {
   try {
@@ -129,6 +130,8 @@ export function LifeSettingsPage() {
           <p style={help}>{t.settings.extraHelp}</p>
         </LifeCard>
 
+        <HomeCard />
+
         <CategoriesCard />
 
         <LifeCard>
@@ -210,5 +213,34 @@ export function LifeSettingsPage() {
         }}
       />
     </LifeScreenContainer>
+  )
+}
+
+/** Mi día: mostrar u ocultar la tarjeta "Mi identidad" arriba (se guarda en este dispositivo) */
+function HomeCard() {
+  const t = useLifeT()
+  const { showIdentity, setShowIdentity } = useHomePrefs()
+  return (
+    <LifeCard>
+      <h2 style={{ fontFamily: font, fontSize: 11, fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 10px' }}>
+        {t.settings.homeTitle}
+      </h2>
+      <button type="button" role="switch" aria-checked={showIdentity} onClick={() => setShowIdentity(!showIdentity)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '10px 14px',
+          borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`,
+          color: colors.text.primary, fontFamily: font, fontSize: 14, cursor: 'pointer', textAlign: 'start',
+        }}>
+        <span style={{ flex: 1 }}>{t.settings.showIdentity}</span>
+        <span aria-hidden="true" style={{
+          width: 44, height: 26, borderRadius: radius.full, flexShrink: 0, padding: 3, boxSizing: 'border-box',
+          background: showIdentity ? colors.accent.default : colors.border.medium, display: 'flex',
+          justifyContent: showIdentity ? 'flex-end' : 'flex-start', transition: 'background 0.2s',
+        }}>
+          <span style={{ width: 20, height: 20, borderRadius: radius.full, background: colors.text.primary }} />
+        </span>
+      </button>
+      <p style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '8px 0 0', lineHeight: 1.5 }}>{t.settings.showIdentityHelp}</p>
+    </LifeCard>
   )
 }

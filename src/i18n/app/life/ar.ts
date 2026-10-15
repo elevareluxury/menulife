@@ -24,6 +24,9 @@ const ar: LifeDict = {
     timezone: 'المنطقة الزمنية', timezoneHelp: 'تحدّد متى يبدأ يومك وينتهي.',
     weekStart: 'يبدأ الأسبوع يوم', monday: 'الإثنين', sunday: 'الأحد',
     account: 'الحساب', openStudio: 'فتح Mycen Studio', signOut: 'تسجيل الخروج', savedOk: 'تم حفظ الإعدادات', noResults: 'لا توجد نتائج',
+    homeTitle: "يومي",
+    showIdentity: "إظهار «هويتي» أعلى «يومي»",
+    showIdentityHelp: "يُحفظ على هذا الجهاز.",
   },
   money: {
     title: 'المال', add: 'معاملة جديدة', balance: m => `رصيد ${m}`, otherCurrencies: 'عملات أخرى هذا الشهر',

@@ -24,6 +24,9 @@ const zh: LifeDict = {
     timezone: '时区', timezoneHelp: '决定你的一天何时开始和结束。',
     weekStart: '每周开始于', monday: '星期一', sunday: '星期日',
     account: '账户', openStudio: '打开 Mycen Studio', signOut: '退出登录', savedOk: '设置已保存', noResults: '无结果',
+    homeTitle: "我的一天",
+    showIdentity: "在“我的一天”顶部显示“我的身份”",
+    showIdentityHelp: "仅保存在此设备上。",
   },
   money: {
     title: '财务', add: '新建收支', balance: m => `${m}结余`, otherCurrencies: '本月其他货币',

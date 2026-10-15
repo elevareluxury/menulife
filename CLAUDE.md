@@ -325,6 +325,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   que quedó (pasar a mañana, cambiar fecha o soltar; soltar una tarea que se repite salta a la próxima) y "¿Cómo te fue
   hoy?". Datos: `life_daily_reviews` (una por persona y fecha local; `useDailyReview`). Debajo siguen tareas de hoy,
   hábitos, la meta en foco y el mes. `LifeSheet` va en un portal (si no, quedaba bajo la barra). E2E en `my-day.spec.ts`.
+  La tarjeta "Mi identidad" (`HubSection`, → Studio) va arriba de Mi día; se oculta o se muestra en Life OS → Ajustes
+  ("Mi día", `useHomePrefs` en `lib/homePrefs.ts`, guardado en el dispositivo).
 - Life OS con el sistema de diseño y tono sin culpa (etapa 12): `LifeShell` pone `data-mycen-theme` en `<html>` según el
   celular (también lo heredan las hojas en portal) y `MotionConfig reducedMotion="user"`. Los tokens de
   `life/design-system/tokens.ts` apuntan a `--my-*` y a `life.css` (`--life-money|goals|habits|brain` por tema y

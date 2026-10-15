@@ -24,6 +24,9 @@ const ja: LifeDict = {
     timezone: 'タイムゾーン', timezoneHelp: '1 日の始まりと終わりを決めます。',
     weekStart: '週の始まり', monday: '月曜日', sunday: '日曜日',
     account: 'アカウント', openStudio: 'Mycen Studio を開く', signOut: 'ログアウト', savedOk: '設定を保存しました', noResults: '該当なし',
+    homeTitle: "マイデイ",
+    showIdentity: "マイデイの上部に「マイアイデンティティ」を表示",
+    showIdentityHelp: "この端末に保存されます。",
   },
   money: {
     title: 'お金', add: '新しい収支', balance: m => `${m}の収支`, otherCurrencies: '今月のその他の通貨',

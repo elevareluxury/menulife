@@ -24,6 +24,9 @@ const ko: LifeDict = {
     timezone: '시간대', timezoneHelp: '하루가 언제 시작되고 끝나는지 정합니다.',
     weekStart: '한 주의 시작', monday: '월요일', sunday: '일요일',
     account: '계정', openStudio: 'Mycen Studio 열기', signOut: '로그아웃', savedOk: '설정이 저장되었습니다', noResults: '결과 없음',
+    homeTitle: "나의 하루",
+    showIdentity: "나의 하루 맨 위에 \"나의 아이덴티티\" 표시",
+    showIdentityHelp: "이 기기에 저장돼요.",
   },
   money: {
     title: '돈', add: '새 거래', balance: m => `${m} 잔액`, otherCurrencies: '이번 달 다른 통화',

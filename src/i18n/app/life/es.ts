@@ -69,6 +69,9 @@ const es = {
     signOut: 'Cerrar sesión',
     savedOk: 'Ajustes guardados',
     noResults: 'Sin resultados',
+    homeTitle: "Mi día",
+    showIdentity: "Mostrar \"Mi identidad\" arriba de Mi día",
+    showIdentityHelp: "Se guarda en este dispositivo.",
   },
   money: {
     title: 'Dinero',

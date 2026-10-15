@@ -24,6 +24,9 @@ const en: LifeDict = {
     timezone: 'Time zone', timezoneHelp: 'Defines when your day starts and ends.',
     weekStart: 'Week starts on', monday: 'Monday', sunday: 'Sunday',
     account: 'Account', openStudio: 'Open Mycen Studio', signOut: 'Sign out', savedOk: 'Settings saved', noResults: 'No results',
+    homeTitle: "My day",
+    showIdentity: "Show \"My identity\" at the top of My day",
+    showIdentityHelp: "Saved on this device.",
   },
   money: {
     title: 'Money', add: 'New transaction', balance: m => `${m} balance`, otherCurrencies: 'Other currencies this month',

@@ -24,6 +24,9 @@ const hi: LifeDict = {
     timezone: 'समय क्षेत्र', timezoneHelp: 'तय करता है कि आपका दिन कब शुरू और खत्म होता है।',
     weekStart: 'सप्ताह शुरू होता है', monday: 'सोमवार', sunday: 'रविवार',
     account: 'खाता', openStudio: 'Mycen Studio खोलें', signOut: 'साइन आउट करें', savedOk: 'सेटिंग्स सहेजी गईं', noResults: 'कोई परिणाम नहीं',
+    homeTitle: "मेरा दिन",
+    showIdentity: "\"मेरा दिन\" के ऊपर \"मेरी पहचान\" दिखाएँ",
+    showIdentityHelp: "इस डिवाइस पर सहेजा जाता है।",
   },
   money: {
     title: 'पैसा', add: 'नया लेन-देन', balance: m => `${m} का बैलेंस`, otherCurrencies: 'इस महीने अन्य मुद्राएँ',

@@ -24,6 +24,9 @@ const ru: LifeDict = {
     timezone: 'Часовой пояс', timezoneHelp: 'Определяет, когда начинается и заканчивается ваш день.',
     weekStart: 'Неделя начинается с', monday: 'Понедельник', sunday: 'Воскресенье',
     account: 'Аккаунт', openStudio: 'Открыть Mycen Studio', signOut: 'Выйти', savedOk: 'Настройки сохранены', noResults: 'Ничего не найдено',
+    homeTitle: "Мой день",
+    showIdentity: "Показывать «Мою идентичность» вверху «Моего дня»",
+    showIdentityHelp: "Сохраняется на этом устройстве.",
   },
   money: {
     title: 'Деньги', add: 'Новая операция', balance: m => `Баланс: ${m}`, otherCurrencies: 'Другие валюты в этом месяце',

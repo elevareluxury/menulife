@@ -29,6 +29,7 @@ import { InstallAppButton } from '@/components/ui/InstallAppButton'
 import { InsightCard } from '../components/InsightCard'
 import { colors, font, fontDisplay, radius, shadow, fadeInUp, stagger, tint, ink } from '../design-system'
 import { FEATURES } from '@/lib/features'
+import { useHomePrefs } from '../lib/homePrefs'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -429,6 +430,7 @@ const iconBtn: React.CSSProperties = {
 
 export function LifePage() {
   const navigate = useNavigate()
+  const showIdentity = useHomePrefs(s => s.showIdentity)
   const { user } = useAuthStore()
   const { hasRestaurant, restaurantSlug, restaurantPlan } = useLifeStore()
   const t = useLifeT()
@@ -505,6 +507,18 @@ export function LifePage() {
             </button>
           </motion.div>
 
+          {/* ── Mi identidad (Mycen Identity → Studio), arriba; se oculta desde Ajustes ── */}
+          {showIdentity && (
+            <motion.div variants={fadeInUp}>
+              <HubSection
+                hasRestaurant={hasRestaurant}
+                restaurantSlug={restaurantSlug}
+                avatarUrl={avatarUrl}
+                initials={initials}
+              />
+            </motion.div>
+          )}
+
           {/* ── Tu día ─────────────────────────────────────────────────────── */}
           <motion.div variants={fadeInUp} style={{ padding: '6px 2px 0' }}>
             <h1 style={{ fontFamily: font, fontSize: '26px', fontWeight: 800, color: colors.text.primary, margin: 0, letterSpacing: '-0.02em' }}>
@@ -519,16 +533,6 @@ export function LifePage() {
           <motion.div variants={fadeInUp}><GoalsCard /></motion.div>
           <motion.div variants={fadeInUp}><MoneyCard /></motion.div>
           {FEATURES.lifeInsights && <InsightTeaser />}
-
-          {/* ── Mi identidad (Mycen Identity → Studio) ──────────────────────── */}
-          <motion.div variants={fadeInUp}>
-            <HubSection
-              hasRestaurant={hasRestaurant}
-              restaurantSlug={restaurantSlug}
-              avatarUrl={avatarUrl}
-              initials={initials}
-            />
-          </motion.div>
 
           {/* ── Recap del mes ───────────────────────────────────────────────── */}
           {FEATURES.lifeReplay && (

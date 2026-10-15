@@ -24,6 +24,9 @@ const pt: LifeDict = {
     timezone: 'Fuso horário', timezoneHelp: 'Define quando seu dia começa e termina.',
     weekStart: 'A semana começa na', monday: 'Segunda-feira', sunday: 'Domingo',
     account: 'Conta', openStudio: 'Abrir Mycen Studio', signOut: 'Sair', savedOk: 'Ajustes salvos', noResults: 'Sem resultados',
+    homeTitle: "Meu dia",
+    showIdentity: "Mostrar \"Minha identidade\" no topo de Meu dia",
+    showIdentityHelp: "Fica salvo neste dispositivo.",
   },
   money: {
     title: 'Dinheiro', add: 'Nova movimentação', balance: m => `Saldo de ${m}`, otherCurrencies: 'Outras moedas neste mês',
