@@ -109,3 +109,17 @@ export async function submitProfileCollab(handle: string, input: {
   if (error) throw new Error(error.message)
   return data as MessageResult
 }
+
+export type SubscribeResult = 'ok' | 'invalid' | 'consent_required' | 'rate_limited' | 'full' | 'not_found'
+
+/** Módulo "Suscribirse": el email queda en Studio → Suscriptores del dueño (Mycen no le manda nada a la lista). */
+export async function subscribeProfile(handle: string, input: {
+  moduleId: string; email: string; name: string; consent: boolean; trap: string; elapsedMs: number; locale: string
+}): Promise<SubscribeResult> {
+  const { data, error } = await rpc('subscribe_profile', {
+    p_handle: handle, p_module_id: input.moduleId, p_email: input.email, p_name: input.name || null,
+    p_consent: input.consent, p_hp: input.trap || null, p_elapsed_ms: Math.round(input.elapsedMs), p_locale: input.locale,
+  })
+  if (error) throw new Error(error.message)
+  return data as SubscribeResult
+}

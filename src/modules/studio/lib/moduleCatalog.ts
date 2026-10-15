@@ -7,6 +7,7 @@ import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import type { StudioDict } from '@/i18n/app/studio'
 import { featureOn } from '@/lib/features'
 import type { StudioModule } from './studioTypes'
+import { featureOn } from '@/lib/features'
 import {
   CardsEditor, GalleryEditor, HoursEditor, LinkItemsEditor, MediaUrlEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
   type ExtraEditorProps, type GalleryItem, type LinkItemInput, type ReviewsValue,
@@ -411,6 +412,22 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         const embed = parseMediaUrl(x.url)
         return embed ? `${MEDIA_PROVIDER_NAME[embed.provider]} · ${embed.kind === 'video' ? t.media.video : t.media.music}` : ''
       },
+    },
+    // Módulos de bio (V1.1): "Suscribirse". La lista llega a Studio → Suscriptores; Mycen no le manda nada.
+    subscribe: {
+      addable: featureOn('bioModules'),
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80, placeholder: t.subscribers.titlePlaceholder },
+        { key: 'text', label: t.subscribers.textLabel, kind: 'textarea', translatable: true, maxLength: 200, placeholder: t.subscribers.textPlaceholder },
+        { key: 'ask_name', label: t.subscribers.askName, kind: 'select', required: true, options: [
+          { value: 'no', label: t.subscribers.askNameNo },
+          { value: 'yes', label: t.subscribers.askNameYes },
+        ] },
+        { key: 'button', label: t.subscribers.button, kind: 'text', translatable: true, maxLength: 40, placeholder: t.subscribers.buttonPlaceholder },
+      ],
+      prefill: (x, content) => { x.ask_name = content?.ask_name === true ? 'yes' : 'no' },
+      finalize: (content, x) => { content.ask_name = x.ask_name === 'yes' },
+      summary: () => t.subscribers.moduleSummary,
     },
     // Se edita en Mi identidad → tarjeta de contacto; en la página es el botón "Guardar contacto"
     contact_card: { addable: false, fields: [], summary: () => '' },

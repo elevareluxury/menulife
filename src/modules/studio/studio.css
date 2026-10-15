@@ -569,6 +569,15 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 .st-collab-details a { color: inherit; text-decoration: underline; }
 .st-bottom-nav a[aria-current='page'] .st-unread { background: var(--my-on-accent); color: var(--my-accent); }
 
+/* Suscriptores (módulo "Suscribirse", módulos de bio) */
+.st-subs-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.st-subs-tools .st-input { flex: 1 1 220px; min-width: 0; }
+.st-subs { list-style: none; margin: 0; padding: 0; }
+.st-sub { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 0; }
+.st-sub + .st-sub { border-top: 1px solid var(--st-border); }
+.st-sub-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.st-sub-email { font-weight: 600; overflow-wrap: anywhere; text-align: start; }
+
 /* Mis Spaces visibles (V1 · etapa 07): qué es un Space, con ejemplos y el link que tendría */
 .st-space-explain { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
 .st-space-examples { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
