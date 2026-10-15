@@ -50,6 +50,13 @@ const zh: LifeDict = {
     noResults: "没有找到相关收支。",
     noneFiltered: "本月没有符合该筛选的收支。",
     searching: "正在搜索…",
+    tomorrow: "明天",
+    scheduled: "已计划",
+    inDays: (n: number) => n === 1 ? '明天' : `${n} 天后`,
+    upcomingTitle: "即将到来",
+    upcomingHint: "到了日期才会计入本月结余。",
+    upcomingCount: (n: number) => `${n} 笔记录`,
+    offlineOptions: "离线状态：固定收支、分期和共同支出可在恢复网络后添加。",
   },
   tx: {
     newTitle: '新建收支', editTitle: '编辑收支', income: '收入', expense: '支出', amount: '金额',
@@ -228,6 +235,8 @@ const zh: LifeDict = {
     settled: (n: string) => `已和 ${n} 结清`,
     options: (n: string) => `${n} 的选项`,
     removed: (n: string) => `已删除和 ${n} 之间待结清的`,
+    lockedEdit: "这笔账已经部分结清，所以金额、货币和分摊方式保持不变。其他内容可以修改。",
+    unshared: "已不再共同分摊：待结清的部分已删除。",
   },
   journal: {
     title: '日记',

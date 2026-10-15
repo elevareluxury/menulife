@@ -17,7 +17,8 @@ import { isCustomKey, suggestColor } from '../lib/moneyCategories'
 import { installmentAmount, validInstallments, MAX_INSTALLMENTS, MIN_INSTALLMENTS } from '../lib/installments'
 import { SharedExpenseFields } from './SharedExpenseFields'
 import { planMessage } from '../lib/splitMessage'
-import { planSplit, type SharedDraft, type SplitDebt } from '../lib/splits'
+import { followTotal, planSplit, type EditShared, type SharedDraft, type SplitDebt } from '../lib/splits'
+import { useOutbox } from '../lib/outbox'
 
 /** Gasto compartido: las deudas que quedan (el importe del movimiento ya viene ajustado en `data.amount`) */
 export interface SharedSave { debts: SplitDebt[] }
@@ -39,6 +40,11 @@ interface TransactionSheetProps {
   /** Ofrece "Compartido" en un gasto nuevo; `knownPeople`: nombres ya usados (el más reciente primero) */
   shareable?: boolean
   knownPeople?: string[]
+  /**
+   * Al editar un movimiento con `shareable`: cómo está su parte compartida ('draft' = se ve y se puede cambiar;
+   * 'locked' = ya se saldó algo y el monto, la moneda, el tipo y el reparto quedan como están).
+   */
+  editShared?: EditShared
 }
 
 function todayISO(): string {
@@ -46,7 +52,7 @@ function todayISO(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function TransactionSheet({ open, onClose, onSave, initial, repeatable, template, shareable, knownPeople }: TransactionSheetProps) {
+export function TransactionSheet({ open, onClose, onSave, initial, repeatable, template, shareable, knownPeople, editShared }: TransactionSheetProps) {
   const { currency } = useLocaleStore()  // moneda principal de la cuenta
   const extra = usePrefs(st => st.extra_currencies)
   const t = useLifeT()
@@ -77,6 +83,8 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
   const [countStr, setCountStr]   = useState('12')
   // Gasto compartido (sólo al crear un gasto; no se combina con "Repetir todos los meses")
   const [shared, setShared] = useState<SharedDraft | null>(null)
+  // Sin conexión, el movimiento simple queda en la cola del dispositivo; fijos, cuotas y compartidos no (no se pierden datos)
+  const { offline } = useOutbox()
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
@@ -96,7 +104,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
       setNewCatOpen(false)
       setSplit(false)
       setCountStr('12')
-      setShared(null)
+      setShared(initial && editShared?.kind === 'draft' ? editShared.draft : null)
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,6 +122,10 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
 
   // En cuotas: sólo para un gasto nuevo, excluyente con "Repetir todos los meses"
   const canSplit = !!repeatable && !initial && !template && form.type === 'expense'
+  // Ya se saldó parte de la cuenta: monto, moneda, tipo y reparto no se tocan
+  const sharedLocked = !!shareable && !!initial && !template && editShared?.kind === 'locked'
+  // Sin conexión no se pueden activar (si ya estaban activadas, se avisa al guardar)
+  const offlineOptions = offline && !initial && !template && (!!repeatable || !!shareable)
   const inInstallments = canSplit && split
   const count = Number(countStr)
 
@@ -123,6 +135,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
     if (inInstallments && !validInstallments(amount, count)) { setError(t.installments.invalid); return }
     const sharing = canShare && shared ? planSplit(amount, shared) : null
     if (sharing && !sharing.ok) { setError(planMessage(sharing, t, form.currency, locale).lines[0]); return }
+    if (offlineOptions && (inInstallments || (repeatable && repeat) || sharing)) { setError(t.money.offlineOptions); return }
     setSaving(true)
     try {
       await onSave({
@@ -143,7 +156,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
 
   const isIncome = form.type === 'income'
   // Compartido no se combina con "Repetir todos los meses" ni con "En cuotas"
-  const canShare = !!shareable && !initial && !template && !isIncome && !repeat && !split
+  const canShare = !!shareable && !template && !isIncome && !repeat && !split && !sharedLocked
   // Moneda principal + adicionales (+ la del movimiento si se edita uno en otra moneda)
   const currencyOptions = [...new Set([currency, ...extra, form.currency].filter(Boolean))]
 
@@ -164,6 +177,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
             key={type}
             type="button"
             aria-pressed={form.type === type}
+            disabled={sharedLocked && form.type !== type}
             onClick={() => handleTypeChange(type)}
             style={{
               padding: '11px 8px', borderRadius: radius.sm,
@@ -171,7 +185,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
               border: `1.5px solid ${form.type === type ? clr + '50' : 'transparent'}`,
               color: form.type === type ? clr : colors.text.tertiary,
               fontFamily: font, fontSize: '14px', fontWeight: 700,
-              cursor: 'pointer', transition: 'all 0.18s',
+              cursor: sharedLocked ? 'default' : 'pointer', transition: 'all 0.18s',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
             }}
           >
@@ -201,7 +215,11 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
             onChange={e => {
               const v = e.target.value.replace(/[^0-9.,]/g, '')
               setAmountStr(v)
+              // Editando un gasto que pagó otra persona: tu parte sigue al monto
+              if (initial && shared) setShared(followTotal(shared, v))
             }}
+            readOnly={sharedLocked}
+            aria-describedby={sharedLocked ? 'tx-shared-locked' : undefined}
             placeholder="0"
             aria-label={t.tx.amount}
             dir="ltr"
@@ -227,6 +245,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
           <div role="radiogroup" aria-label={t.tx.currency} style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {currencyOptions.map(c => (
               <button key={c} type="button" role="radio" aria-checked={form.currency === c}
+                disabled={sharedLocked && form.currency !== c}
                 onClick={() => setForm(f => ({ ...f, currency: c }))}
                 style={{
                   minHeight: 36, padding: '6px 14px', borderRadius: radius.full, cursor: 'pointer',
@@ -343,9 +362,18 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         />
       </div>
 
+      {sharedLocked && (
+        <p id="tx-shared-locked" style={{
+          fontFamily: font, fontSize: 13, color: colors.text.secondary, margin: '0 0 16px', lineHeight: 1.5,
+          padding: '12px 14px', borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`,
+        }}>
+          {t.shared.lockedEdit}
+        </p>
+      )}
+
       {canShare && (
         <SharedExpenseFields total={parseFloat(amountStr.replace(',', '.'))} currency={form.currency} locale={locale}
-          value={shared} onChange={setShared} knownPeople={knownPeople ?? []} />
+          value={shared} onChange={setShared} knownPeople={knownPeople ?? []} disabled={offlineOptions && !shared} />
       )}
 
       {repeatable && !initial && !(canShare && shared) && (
@@ -354,7 +382,8 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
           borderRadius: radius.md, background: repeat ? colors.accent.soft : colors.surface.high,
           border: `1px solid ${repeat ? colors.accent.default : colors.border.subtle}`,
         }}>
-          <input type="checkbox" checked={repeat} onChange={e => { setRepeat(e.target.checked); if (e.target.checked) setSplit(false) }}
+          <input type="checkbox" checked={repeat} disabled={offlineOptions && !repeat}
+            onChange={e => { setRepeat(e.target.checked); if (e.target.checked) setSplit(false) }}
             style={{ width: 18, height: 18, marginTop: 2, accentColor: colors.accent.default }} />
           <span style={{ fontFamily: font }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: colors.text.primary }}>
@@ -381,7 +410,8 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
             border: `1px solid ${split ? colors.accent.default : colors.border.subtle}`,
           }}>
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
-              <input type="checkbox" checked={split} onChange={e => { setSplit(e.target.checked); if (e.target.checked) setRepeat(false) }}
+              <input type="checkbox" checked={split} disabled={offlineOptions && !split}
+                onChange={e => { setSplit(e.target.checked); if (e.target.checked) setRepeat(false) }}
                 style={{ width: 18, height: 18, marginTop: 2, accentColor: colors.accent.default }} />
               <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: font, fontSize: 14, fontWeight: 700, color: colors.text.primary }}>
                 <CreditCard size={14} aria-hidden="true" /> {t.installments.option}
@@ -423,6 +453,12 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
           </div>
         )
       })()}
+
+      {offlineOptions && (
+        <p role="status" style={{ fontFamily: font, fontSize: 12, color: colors.text.secondary, margin: '0 0 16px', lineHeight: 1.5 }}>
+          {t.money.offlineOptions}
+        </p>
+      )}
 
       {template && (
         <p style={{ fontFamily: font, fontSize: 12, color: colors.text.secondary, margin: '0 0 16px', lineHeight: 1.5 }}>{t.recurring.editHint}</p>

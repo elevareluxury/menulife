@@ -50,6 +50,13 @@ const de: LifeDict = {
     noResults: "Dazu haben wir keine Buchungen gefunden.",
     noneFiltered: "Diesen Monat gibt es keine Buchungen mit diesem Filter.",
     searching: "Suche…",
+    tomorrow: "Morgen",
+    scheduled: "Geplant",
+    inDays: (n: number) => n === 1 ? 'morgen' : `in ${n} Tagen`,
+    upcomingTitle: "Demnächst",
+    upcomingHint: "Sie zählen zum Monatssaldo, sobald ihr Datum erreicht ist.",
+    upcomingCount: (n: number) => n === 1 ? '1 Buchung' : `${n} Buchungen`,
+    offlineOptions: "Offline: Fixkosten, Ratenzahlungen und geteilte Ausgaben kannst du eintragen, sobald du wieder online bist.",
   },
   tx: {
     newTitle: 'Neue Buchung', editTitle: 'Buchung bearbeiten', income: 'Einnahme', expense: 'Ausgabe', amount: 'Betrag',
@@ -228,6 +235,8 @@ const de: LifeDict = {
     settled: (n: string) => `Mit ${n} ausgeglichen`,
     options: (n: string) => `Optionen für ${n}`,
     removed: (n: string) => `Offenes mit ${n} gelöscht`,
+    lockedEdit: "Du hast einen Teil dieser Rechnung schon beglichen, daher bleiben Betrag, Währung und Aufteilung, wie sie sind. Alles andere kannst du ändern.",
+    unshared: "Nicht mehr geteilt: Offenes wurde gelöscht.",
   },
   journal: {
     title: 'Tagebuch',

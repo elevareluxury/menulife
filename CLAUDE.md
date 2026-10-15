@@ -172,14 +172,19 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `tests/db/life_installments.test.sql`, `installments.test.ts` e `installments.spec.ts`.
 - V1.1 en beta (hoy vacía; importar, calendario y voz ya están prendidas): `featureOn(name)` (`src/lib/features.ts`) prende para todos lo que esté en `FEATURES` y, para probar en
   producción, las funciones de `BETA` en el dispositivo que abrió la app con `?beta=1` (`?beta=0` lo apaga).
-- Dinero por mes (después de la V1): `useMoney(month)` ('YYYY-MM') trae ese mes y el anterior; `MonthSwitcher` ‹ mes › (no
-  pasa de hoy), "En qué se fue" (`categoryBreakdown`: gastos por categoría en la moneda principal, % y cambio contra el
+- Dinero por mes (después de la V1): `useMoney(month)` ('YYYY-MM') trae ese mes y el anterior; `MonthSwitcher` ‹ mes › (llega
+  hasta el mes actual o el último con algo programado, `maxMonth`), "En qué se fue" (`categoryBreakdown`: gastos por categoría en la moneda principal, % y cambio contra el
   mes anterior; tocar una filtra), buscar en todos los movimientos (`useMoneySearch`: la base trae candidatos con `or`
   ilike y el nombre traducido de la categoría, el dispositivo confirma con `matchesSearch`; hasta 300) y filtrar por
   tipo/categoría. Memoria de categorías (`learnCategories` / `suggestCategory` en `lib/moneyInsights.ts`, desde
   `useCategoryMemory`: lo ya ordenado del último año, sin números ni signos; por las primeras palabras sólo si nunca fue
   ambiguo): la usan el importador del banco y el formulario de un movimiento nuevo (hasta que se elige a mano).
   Tests en `moneyInsights.test.ts` y `money-insights.spec.ts`. Ojo: nada posicionado debajo de un menú "⋯" (lo tapa).
+- Fecha futura (Dinero, `lib/moneyFuture.ts`): lo programado se ve en la lista ("en N días", tono neutro) y en la
+  búsqueda, pero `transactions`, totales, curva, "En qué se fue" y presupuestos cuentan sólo lo que ya llegó; lo del mes
+  va en `upcoming` y la tarjeta "Próximos" (por moneda). La carga de fijos y cuotas no cambia. El + de Dinero sin
+  conexión usa la misma cola que el + general (`createTransaction` → `lib/outbox.ts`, se ve enseguida); fijos, cuotas y
+  compartidos no se pueden activar sin conexión (se explica). Tests en `moneyFuture.test.ts` y `money-fixes.spec.ts`.
 - Categorías propias (Dinero): tabla `life_categories` (tipo, nombre 1–40 único por tipo entre las activas, color de
   `LIFE_COLORS`; se archivan, no se borran; tope 50 activas) y el movimiento o fijo guarda `'c:' || id` en `category`
   (trigger: sólo propias de la cuenta). Nombre y color de cualquier categoría (fija o propia; archivada sigue con su
@@ -195,7 +200,10 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   centavos en `lib/splits.ts` (`planSplit`, `balances` por persona y moneda). Tarjeta "Cuentas compartidas" + `SettleSheet`
   (`hooks/useSplits.ts`): saldar marca todo lo pendiente con esa persona y moneda y, si te debían, registra el ingreso
   "Juan te devolvió" ('Otros') por lo que te debían; lo que debías no suma otro gasto (tu parte ya estaba). Con
-  `doneWithUndo`. Borrar un gasto compartido borra sus deudas pendientes. Migración
+  `doneWithUndo`. Borrar un gasto compartido borra sus deudas pendientes. Editarlo recalcula las pendientes
+  (`draftFromSplits` → `planSplit` → `diffSplits`, `useSplits.applyEdit`; misma persona y dirección conserva la fila;
+  sacarle "Compartido" las borra con "Deshacer"); si algo ya se saldó, monto, moneda, tipo y reparto quedan bloqueados
+  (se explica) y lo demás se edita (`splitsEdit.test.ts`). Migración
   `20261029000003_life_shared_expenses.sql`, tests en `life_shared_expenses.test.sql`, `splits.test.ts` y
   `shared-expenses.spec.ts`.
 - Presupuestos amables (Dinero): `life_budgets` (categoría fija o propia `'c:' || id` con `life_check_category_owner`,

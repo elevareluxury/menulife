@@ -50,6 +50,13 @@ const en: LifeDict = {
     noResults: "We found no transactions matching that.",
     noneFiltered: "No transactions match that filter this month.",
     searching: "Searching…",
+    tomorrow: "Tomorrow",
+    scheduled: "Scheduled",
+    inDays: (n: number) => n === 1 ? 'tomorrow' : `in ${n} days`,
+    upcomingTitle: "Coming up",
+    upcomingHint: "They count toward the month’s balance when their date arrives.",
+    upcomingCount: (n: number) => n === 1 ? '1 transaction' : `${n} transactions`,
+    offlineOptions: "You’re offline: recurring items, installments and shared expenses can be added when you’re back online.",
   },
   tx: {
     newTitle: 'New transaction', editTitle: 'Edit transaction', income: 'Income', expense: 'Expense', amount: 'Amount',
@@ -228,6 +235,8 @@ const en: LifeDict = {
     settled: (n: string) => `Settled up with ${n}`,
     options: (n: string) => `${n} options`,
     removed: (n: string) => `Deleted what was pending with ${n}`,
+    lockedEdit: "You already settled part of this bill, so the amount, currency and split stay as they are. You can change everything else.",
+    unshared: "No longer shared: what was pending was deleted.",
   },
   journal: {
     title: 'Journal',

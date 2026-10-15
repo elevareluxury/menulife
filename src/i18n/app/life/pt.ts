@@ -50,6 +50,13 @@ const pt: LifeDict = {
     noResults: "Não encontramos movimentações com isso.",
     noneFiltered: "Não há movimentações com esse filtro neste mês.",
     searching: "Buscando…",
+    tomorrow: "Amanhã",
+    scheduled: "Agendado",
+    inDays: (n: number) => n === 1 ? 'amanhã' : `em ${n} dias`,
+    upcomingTitle: "Próximos",
+    upcomingHint: "Entram no saldo do mês quando chega a data.",
+    upcomingCount: (n: number) => n === 1 ? '1 movimentação' : `${n} movimentações`,
+    offlineOptions: "Sem conexão: fixos, parcelas e despesas compartilhadas podem ser lançados quando a conexão voltar.",
   },
   tx: {
     newTitle: 'Nova movimentação', editTitle: 'Editar movimentação', income: 'Receita', expense: 'Despesa', amount: 'Valor',
@@ -228,6 +235,8 @@ const pt: LifeDict = {
     settled: (n: string) => `Você acertou com ${n}`,
     options: (n: string) => `Opções de ${n}`,
     removed: (n: string) => `Você apagou o pendente com ${n}`,
+    lockedEdit: "Você já acertou parte desta conta, então o valor, a moeda e a divisão ficam como estão. O resto você pode mudar.",
+    unshared: "Não é mais compartilhada: o pendente foi apagado.",
   },
   journal: {
     title: 'Diário',

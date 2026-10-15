@@ -50,6 +50,13 @@ const ar: LifeDict = {
     noResults: "لم نجد معاملات مطابقة.",
     noneFiltered: "لا توجد معاملات بهذا الفلتر هذا الشهر.",
     searching: "جارٍ البحث…",
+    tomorrow: "غدًا",
+    scheduled: "مجدول",
+    inDays: (n: number) => n === 1 ? 'غدًا' : `بعد ${n} أيام`,
+    upcomingTitle: "القادمة",
+    upcomingHint: "تُحتسب في رصيد الشهر عندما يحين تاريخها.",
+    upcomingCount: (n: number) => n === 1 ? 'معاملة واحدة' : `${n} معاملات`,
+    offlineOptions: "لا يوجد اتصال: يمكن إضافة المعاملات الثابتة والأقساط والمصاريف المشتركة عند عودة الاتصال.",
   },
   tx: {
     newTitle: 'معاملة جديدة', editTitle: 'تعديل المعاملة', income: 'دخل', expense: 'مصروف', amount: 'المبلغ',
@@ -228,6 +235,8 @@ const ar: LifeDict = {
     settled: (n: string) => `تمت التسوية مع ${n}`,
     options: (n: string) => `خيارات ${n}`,
     removed: (n: string) => `حذفت المتبقي مع ${n}`,
+    lockedEdit: "سدّدت جزءًا من هذا الحساب، لذلك يبقى المبلغ والعملة والتقسيم كما هي. يمكنك تغيير الباقي.",
+    unshared: "لم يعد مشتركًا: حُذف المتبقي.",
   },
   journal: {
     title: 'المذكّرات',

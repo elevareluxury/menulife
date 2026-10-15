@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { LIFE_DATA_UPDATED } from './useBrain'
-import { balances, type PersonBalance, type Split, type SplitDebt } from '../lib/splits'
+import { balances, diffSplits, type PersonBalance, type Split, type SplitDebt } from '../lib/splits'
 
 // Gastos compartidos (supabase/migrations/20261029000003_life_shared_expenses.sql): quién te debe y a quién le debés.
 // El movimiento registra lo que salió de tu bolsillo; las deudas viven en life_splits.
@@ -122,6 +122,76 @@ export function useSplits() {
     }
   }, [user, load])
 
+  /**
+   * Al editar un gasto compartido: sus deudas pendientes pasan a ser `debts` (vacío = ya no es compartido), en
+   * `currency`. Las saldadas no se tocan. Si algo falla a mitad de camino, vuelve todo como estaba y lanza el error.
+   * Devuelve qué cambió y cómo deshacerlo.
+   */
+  const applyEdit = useCallback(async (transactionId: string, debts: SplitDebt[], currency: string, note: string | null)
+    : Promise<{ changed: boolean; removedAll: boolean; undo: () => Promise<void> }> => {
+    const noop = { changed: false, removedAll: false, undo: async () => {} }
+    if (!user) return noop
+    // Se lee de la base (no de la pantalla): así no se pisa nada que haya cambiado en otro lado
+    const { data, error: readError } = await db.from('life_splits').select('*').eq('user_id', user.id).eq('transaction_id', transactionId)
+    if (readError) throw readError
+    const before: Split[] = (data ?? []).map((s: Split) => ({ ...s, amount: Number(s.amount) }))
+    const pendingBefore = before.filter(s => !s.settled_at)
+    // Si algo ya se saldó, la parte compartida no se toca (la pantalla tampoco deja editarla)
+    if (before.some(s => s.settled_at)) return noop
+    const cleanNote = note?.trim().slice(0, 200) || null
+    const changes = diffSplits(pendingBefore, debts, currency, cleanNote)
+    if (!changes.update.length && !changes.insert.length && !changes.remove.length) return noop
+
+    const inserted = changes.insert.map(d => ({
+      id: newId(), user_id: user.id, transaction_id: transactionId, person: d.person, direction: d.direction,
+      amount: d.amount, currency, note: cleanNote,
+    }))
+    const restore = async () => {
+      if (inserted.length) await db.from('life_splits').delete().eq('user_id', user.id).in('id', inserted.map(r => r.id))
+      for (const s of pendingBefore) {
+        if (changes.remove.includes(s.id)) continue
+        await db.from('life_splits').update({ person: s.person, amount: s.amount, currency: s.currency, note: s.note })
+          .eq('user_id', user.id).eq('id', s.id)
+      }
+      const removed = pendingBefore.filter(s => changes.remove.includes(s.id))
+      if (removed.length) {
+        const { error } = await db.from('life_splits').upsert(removed.map(s => ({
+          id: s.id, user_id: user.id, transaction_id: s.transaction_id, person: s.person, direction: s.direction,
+          amount: s.amount, currency: s.currency, note: s.note, created_at: s.created_at,
+        })), { onConflict: 'id', ignoreDuplicates: true })
+        if (error) throw error
+      }
+    }
+    try {
+      for (const u of changes.update) {
+        const { error } = await db.from('life_splits').update({ person: u.person, amount: u.amount, currency: u.currency, note: u.note })
+          .eq('user_id', user.id).eq('id', u.id).is('settled_at', null)
+        if (error) throw error
+      }
+      if (inserted.length) {
+        const { error } = await db.from('life_splits').insert(inserted)
+        if (error) throw error
+      }
+      if (changes.remove.length) {
+        const { error } = await db.from('life_splits').delete().eq('user_id', user.id).in('id', changes.remove).is('settled_at', null)
+        if (error) throw error
+      }
+    } catch (e) {
+      await restore().catch(() => {})
+      await load()
+      throw e
+    }
+    await load()
+    return {
+      changed: true,
+      removedAll: !debts.length && pendingBefore.length > 0,
+      undo: async () => { await restore(); await load() },
+    }
+  }, [user, load])
+
+  /** Deudas de un movimiento (pendientes y saldadas), para editarlo. */
+  const forTransaction = useCallback((transactionId: string) => items.filter(s => s.transaction_id === transactionId), [items])
+
   /** Oculta deudas en pantalla (para borrar con "Deshacer"). */
   const hide = useCallback((ids: string[]) => setItems(prev => prev.filter(s => !ids.includes(s.id))), [])
 
@@ -135,7 +205,7 @@ export function useSplits() {
   /** Al borrar un movimiento compartido se van sus deudas pendientes (las saldadas quedan como historia). */
   const pendingFor = useCallback((transactionId: string) => pending.filter(s => s.transaction_id === transactionId).map(s => s.id), [pending])
 
-  return { items, pending, byPerson, sharedTxIds, loading, reload: load, create, settle, hide, remove, pendingFor }
+  return { items, pending, byPerson, sharedTxIds, loading, reload: load, create, settle, hide, remove, pendingFor, applyEdit, forTransaction }
 }
 
 export { newId as newSplitId }

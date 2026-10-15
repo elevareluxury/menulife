@@ -50,6 +50,13 @@ const fr: LifeDict = {
     noResults: "Aucune opération ne correspond.",
     noneFiltered: "Aucune opération avec ce filtre ce mois-ci.",
     searching: "Recherche…",
+    tomorrow: "Demain",
+    scheduled: "Prévu",
+    inDays: (n: number) => n === 1 ? 'demain' : `dans ${n} jours`,
+    upcomingTitle: "À venir",
+    upcomingHint: "Ils comptent dans le solde du mois quand leur date arrive.",
+    upcomingCount: (n: number) => n === 1 ? '1 opération' : `${n} opérations`,
+    offlineOptions: "Hors ligne : les opérations fixes, les paiements échelonnés et les dépenses partagées pourront être ajoutés au retour de la connexion.",
   },
   tx: {
     newTitle: 'Nouvelle opération', editTitle: 'Modifier l’opération', income: 'Revenu', expense: 'Dépense', amount: 'Montant',
@@ -228,6 +235,8 @@ const fr: LifeDict = {
     settled: (n: string) => `Réglé avec ${n}`,
     options: (n: string) => `Options de ${n}`,
     removed: (n: string) => `Ce qui restait avec ${n} a été supprimé`,
+    lockedEdit: "Vous avez déjà réglé une partie de ce compte : le montant, la devise et la répartition restent tels quels. Le reste peut être modifié.",
+    unshared: "Plus partagée : ce qui restait dû a été supprimé.",
   },
   journal: {
     title: 'Journal',

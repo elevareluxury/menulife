@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp, ChevronLeft, ChevronRight, Search, X, Users } from 'lucide-react'
+import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp, ChevronLeft, ChevronRight, Search, X, Users, CalendarClock } from 'lucide-react'
 import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
-import { localDay, useMoney, type Transaction } from '../hooks/useMoney'
+import { localDay, useMoney, type Transaction, type TransactionFormData } from '../hooks/useMoney'
 import { useMoneySearch } from '../hooks/useMoneySearch'
 import { categoryBreakdown, monthKeyOf, shiftMonth, type CategoryShare } from '../lib/moneyInsights'
 import { useCategoryLabels } from '../hooks/useCategories'
@@ -23,7 +23,8 @@ import { isInCourse, planName } from '../lib/installments'
 import { localDateKey } from '../hooks/useRecurring'
 import { newSplitId, useSplits } from '../hooks/useSplits'
 import { SettleSheet, SharedCard } from '../components/SharedCard'
-import { personSuggestions, type PersonBalance } from '../lib/splits'
+import { draftFromSplits, personSuggestions, type EditShared, type PersonBalance, type SplitDebt } from '../lib/splits'
+import { daysUntil, type UpcomingTotals } from '../lib/moneyFuture'
 import { doneWithUndo } from '../lib/undo'
 import { useBudgets } from '../hooks/useBudgets'
 import { BudgetsCard } from '../components/BudgetsCard'
@@ -36,8 +37,11 @@ function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
   const today = new Date()
   const yesterday = new Date(today)
   yesterday.setDate(today.getDate() - 1)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
   if (d.toDateString() === today.toDateString()) return t.money.today
   if (d.toDateString() === yesterday.toDateString()) return t.money.yesterday
+  if (d.toDateString() === tomorrow.toDateString()) return t.money.tomorrow
   return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long',
     ...(d.getFullYear() !== today.getFullYear() ? { year: 'numeric' as const } : {}) })
 }
@@ -64,9 +68,10 @@ const roundBtn: React.CSSProperties = {
 }
 
 // ── Mes: ‹ septiembre › ──────────────────────────────────────────────────────
-function MonthSwitcher({ month, locale, onChange }: { month: string; locale: string; onChange: (m: string) => void }) {
+/** `maxMonth`: hasta dónde se avanza (el mes actual o el último con algo programado) */
+function MonthSwitcher({ month, maxMonth, locale, onChange }: { month: string; maxMonth: string; locale: string; onChange: (m: string) => void }) {
   const t = useLifeT()
-  const isCurrent = month === monthKeyOf(new Date())
+  const isCurrent = month >= maxMonth
   // En árabe (de derecha a izquierda) las flechas apuntan al revés
   const rtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
   const Prev = rtl ? ChevronRight : ChevronLeft
@@ -84,6 +89,39 @@ function MonthSwitcher({ month, locale, onChange }: { month: string; locale: str
         <Next size={18} style={{ color: colors.text.secondary }} aria-hidden="true" />
       </button>
     </div>
+  )
+}
+
+// ── Próximos: lo programado del mes, aparte (se suma al balance cuando llega su fecha) ──
+function UpcomingCard({ items, locale }: { items: UpcomingTotals[]; locale: string }) {
+  const t = useLifeT()
+  return (
+    <LifeCard style={{ marginBottom: '12px' }}>
+      <section aria-labelledby="money-upcoming">
+        <h2 id="money-upcoming" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', margin: '0 0 2px', textTransform: 'uppercase' }}>
+          <CalendarClock size={12} aria-hidden="true" /> {t.money.upcomingTitle}
+        </h2>
+        <p style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '0 0 8px' }}>{t.money.upcomingHint}</p>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {items.map(r => (
+            <li key={r.currency} style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', fontFamily: font }}>
+              <strong style={{ width: 44, fontSize: 13, color: colors.text.secondary }}>{r.currency}</strong>
+              <span style={{ flex: 1, fontSize: 12, color: colors.text.tertiary }}>{t.money.upcomingCount(r.count)}</span>
+              {r.income > 0 && (
+                <span dir="ltr" style={{ fontSize: 13, fontWeight: 700, color: colors.text.secondary }}>
+                  <span className="sr-only">{t.money.income} </span>+{formatMoney(r.income, r.currency, locale)}
+                </span>
+              )}
+              {r.expense > 0 && (
+                <span dir="ltr" style={{ fontSize: 13, fontWeight: 700, color: colors.text.secondary }}>
+                  <span className="sr-only">{t.money.expense} </span>-{formatMoney(r.expense, r.currency, locale)}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </LifeCard>
   )
 }
 
@@ -210,8 +248,10 @@ function Sparkline({ curve, color }: { curve: number[]; color: string }) {
 }
 
 // ── Transaction Row ───────────────────────────────────────────────────────────
-function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf, shared }: {
+function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf, shared, inDays }: {
   tx: Transaction
+  /** Programado: días que faltan para su fecha (no cuenta en el balance hasta entonces) */
+  inDays?: number
   /** Parte de una cuenta compartida */
   shared?: boolean
   fallbackCurrency: string
@@ -223,7 +263,9 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, instal
 }) {
   const t = useLifeT()
   const isIncome = tx.type === 'income'
-  const amountColor = isIncome ? colors.semantic.success : colors.semantic.error
+  const scheduled = !!inDays && inDays > 0
+  // Lo programado va en tono neutro: todavía no pasó
+  const amountColor = scheduled ? colors.text.secondary : isIncome ? colors.semantic.success : colors.semantic.error
   const { labelOf } = useCategoryLabels()
   const category = labelOf(tx.category)
 
@@ -254,6 +296,13 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, instal
           </p>
         )}
       </div>
+
+      {scheduled && (
+        <span aria-label={`${t.money.scheduled}, ${t.money.inDays(inDays)}`}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.secondary, background: colors.surface.high, borderRadius: radius.full, padding: '2px 8px', flexShrink: 0, whiteSpace: 'nowrap' }}>
+          <CalendarClock size={11} aria-hidden="true" /> {t.money.inDays(inDays)}
+        </span>
+      )}
 
       {installmentsOf && tx.installment_no ? (
         <span aria-label={t.installments.badgeLabel(tx.installment_no, installmentsOf)}
@@ -330,7 +379,7 @@ export function LifeMoneyPage() {
   const locale = langLocale(useAppLang(s => s.lang))
   const [month, setMonth] = useState(() => monthKeyOf(new Date()))
   const {
-    transactions, previous, loading, mainCurrency,
+    transactions, previous, loading, mainCurrency, upcoming, upcomingTotals, maxMonth, today: todayKey,
     monthIncome, monthExpense, monthBalance, monthCurve, otherTotals,
     hasData, everHasData, reload, createTransaction, updateTransaction, deleteTransaction, hideTransaction,
   } = useMoney(month)
@@ -341,9 +390,10 @@ export function LifeMoneyPage() {
   const search = useMoneySearch(query, labelOf, allKeys)
   const searchingAll = search.results !== null || search.searching
   const breakdown = useMemo(() => categoryBreakdown(transactions, previous, mainCurrency), [transactions, previous, mainCurrency])
-  const shown = useMemo(() => (search.results ?? transactions)
+  // La lista muestra también lo programado del mes (marcado); los totales, sólo lo que ya llegó
+  const shown = useMemo(() => (search.results ?? [...upcoming, ...transactions])
     .filter(tx => kind === 'all' || tx.type === kind)
-    .filter(tx => !cat || tx.category === cat), [search.results, transactions, kind, cat])
+    .filter(tx => !cat || tx.category === cat), [search.results, upcoming, transactions, kind, cat])
   const grouped = useMemo(() => groupByDay(shown), [shown])
   const isCurrentMonth = month === monthKeyOf(new Date())
 
@@ -356,6 +406,8 @@ export function LifeMoneyPage() {
   const [canImport] = useState(() => featureOn('bankImport'))
   const splits = useSplits()
   const [settling, setSettling] = useState<PersonBalance | null>(null)
+  // Al editar un movimiento: cómo está su parte compartida (si las deudas todavía no cargaron, no se toca)
+  const [editShared, setEditShared] = useState<EditShared>({ kind: 'none' })
   const knownPeople = useMemo(() => personSuggestions(splits.items, '', [], 30), [splits.items])
   const budgets = useBudgets()
   const [budgetDraft, setBudgetDraft] = useState<BudgetDraft | null>(null)
@@ -370,7 +422,30 @@ export function LifeMoneyPage() {
   const monthName = monthLabel(month, locale)
   const prevMonthName = monthLabel(shiftMonth(month, -1), locale)
   const changeMonth = (m: string) => { setMonth(m); setCat(null) }
-  const openNew = () => { setEditTx(null); setEditFixed(null); setSheetOpen(true) }
+  const openNew = () => { setEditTx(null); setEditFixed(null); setEditShared({ kind: 'none' }); setSheetOpen(true) }
+  const openEdit = (tx: Transaction) => {
+    setEditFixed(null)
+    setEditTx(tx)
+    setEditShared(splits.loading ? { kind: 'locked' } : draftFromSplits(Number(tx.amount), splits.forTransaction(tx.id)))
+    setSheetOpen(true)
+  }
+  /** Edita el movimiento y, si es (o pasa a ser) compartido, recalcula sus deudas pendientes. */
+  const saveEdit = async (tx: Transaction, data: TransactionFormData, debts: SplitDebt[]) => {
+    await updateTransaction(tx.id, data)
+    // Nada que tocar: ya se saldó algo, o no era ni pasa a ser compartido
+    if (editShared.kind === 'locked' || (editShared.kind === 'none' && !debts.length)) return
+    try {
+      const res = await splits.applyEdit(tx.id, debts, data.currency, data.description || labelOf(data.category))
+      if (res.removedAll) doneWithUndo({ message: t.shared.unshared, undo: res.undo })
+    } catch (e) {
+      // Las deudas no se pudieron cambiar: el movimiento vuelve a como estaba (no queda a medias)
+      await updateTransaction(tx.id, {
+        type: tx.type, amount: Number(tx.amount), category: tx.category, description: tx.description ?? undefined,
+        currency: tx.currency, occurred_at: tx.occurred_at, goal_id: tx.goal_id ?? null,
+      }).catch(() => {})
+      throw e
+    }
+  }
   const fail = () => toast.error(t.common.saveError)
   const fixedAsTx = (r: RecurringTx): Transaction => ({
     id: r.id, type: r.type, amount: r.amount, category: r.category ?? 'Otros', description: r.description,
@@ -465,10 +540,10 @@ export function LifeMoneyPage() {
         </div>
       </div>
 
-      {everHasData && <MonthSwitcher month={month} locale={locale} onChange={changeMonth} />}
+      {everHasData && <MonthSwitcher month={month} maxMonth={maxMonth} locale={locale} onChange={changeMonth} />}
 
-      {/* Balance del mes en la moneda principal */}
-      {hasData && (
+      {/* Balance del mes en la moneda principal (sólo lo que ya llegó) */}
+      {transactions.length > 0 && (
         <LifeCard style={{ marginBottom: '12px' }}>
           <p style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', margin: '0 0 6px', textTransform: 'uppercase' }}>
             {t.money.balance(monthName)} · {mainCurrency}
@@ -510,6 +585,8 @@ export function LifeMoneyPage() {
           </div>
         </LifeCard>
       )}
+
+      {upcomingTotals.length > 0 && !searchingAll && <UpcomingCard items={upcomingTotals} locale={locale} />}
 
       {breakdown.length > 0 && !searchingAll && (
         <CategoryCard items={breakdown} currency={mainCurrency} locale={locale} prevMonthName={prevMonthName}
@@ -603,7 +680,8 @@ export function LifeMoneyPage() {
                   <div>
                     {group.items.map(tx => (
                       <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale} shared={splits.sharedTxIds.has(tx.id)}
-                        onEdit={() => { setEditFixed(null); setEditTx(tx); setSheetOpen(true) }}
+                        inDays={daysUntil(group.date, todayKey)}
+                        onEdit={() => openEdit(tx)}
                         onDelete={() => remove(tx)}
                         installmentsOf={tx.installment_plan_id ? planSize.get(tx.installment_plan_id) : undefined} />
                     ))}
@@ -631,16 +709,18 @@ export function LifeMoneyPage() {
         repeatable
         template={!!editFixed}
         shareable
+        editShared={editTx && !editFixed ? editShared : undefined}
         knownPeople={knownPeople}
         onSave={async (data, repeat, installments, shared) => {
           if (editFixed) await fixed.update(editFixed.id, data)
-          else if (editTx) await updateTransaction(editTx.id, data)
+          else if (editTx) await saveEdit(editTx, data, shared?.debts ?? [])
           else if (installments) await plans.create(data, installments)
           else if (repeat) await fixed.create(data)
           else if (shared?.debts.length) {
             // Gasto compartido: el movimiento (con id del cliente) y sus deudas; si las deudas fallan, no queda a medias
             const id = newSplitId()
-            await createTransaction({ ...data, id })
+            // Sin conexión no se deja en la cola (las deudas no se podrían guardar): falla y se avisa
+            await createTransaction({ ...data, id }, { queue: false })
             try {
               await splits.create(id, data.currency, shared.debts, data.description || labelOf(data.category))
             } catch (e) {

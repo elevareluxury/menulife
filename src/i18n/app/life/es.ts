@@ -107,6 +107,13 @@ const es = {
     noResults: "No encontramos movimientos con eso.",
     noneFiltered: "No hay movimientos con ese filtro este mes.",
     searching: "Buscando…",
+    tomorrow: "Mañana",
+    scheduled: "Programado",
+    inDays: (n: number) => n === 1 ? 'mañana' : `en ${n} días`,
+    upcomingTitle: "Próximos",
+    upcomingHint: "Se suman al balance del mes cuando llega su fecha.",
+    upcomingCount: (n: number) => n === 1 ? '1 movimiento' : `${n} movimientos`,
+    offlineOptions: "Sin conexión: los fijos, las cuotas y los gastos compartidos se pueden cargar cuando vuelva la señal.",
   },
   tx: {
     newTitle: 'Nuevo movimiento',
@@ -295,6 +302,8 @@ const es = {
     settled: (n: string) => `Saldaste con ${n}`,
     options: (n: string) => `Opciones de ${n}`,
     removed: (n: string) => `Borraste lo pendiente con ${n}`,
+    lockedEdit: "Ya saldaste parte de esta cuenta, así que el monto, la moneda y el reparto quedan como están. Lo demás lo podés cambiar.",
+    unshared: "Ya no es compartido: se borró lo pendiente.",
   },
   journal: {
     title: 'Diario',
