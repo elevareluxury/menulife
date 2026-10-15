@@ -1,10 +1,10 @@
 import { useState, useMemo, useRef, type KeyboardEvent } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
   Zap, Lightbulb, StickyNote, CheckSquare, Check, Pencil, Archive, ArchiveRestore, Trash2, Search, X,
-  AlertTriangle, Star, CalendarDays,
+  AlertTriangle, Star, CalendarDays, BookLock,
 } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
@@ -17,6 +17,7 @@ import { deleteWithUndo } from '../lib/undo'
 import { dayKey, useToday } from '../hooks/useToday'
 import { shiftDate } from '../lib/habitStreak'
 import { TasksView } from '../components/TasksView'
+import { featureOn } from '@/lib/features'
 
 const TYPE_META = {
   idea: { icon: Lightbulb,   color: colors.area.brain },
@@ -385,6 +386,18 @@ export function LifeBrainPage() {
             {t.nav.brain}
           </h1>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {/* Diario privado (V1.1): se entra desde Brain, sin sumar una pestaña a la barra de abajo */}
+        {featureOn('journal') && (
+          <Link to="/life/journal" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 40, padding: '0 14px', borderRadius: radius.full,
+            border: `1px solid ${colors.border.subtle}`, color: colors.text.primary, textDecoration: 'none',
+            fontFamily: font, fontSize: 13, fontWeight: 700,
+          }}>
+            <BookLock size={16} aria-hidden="true" style={{ color: colors.accent.ink }} />
+            {t.journal.open}
+          </Link>
+        )}
         {canSearch && (
           <button type="button" onClick={() => { setSearchOpen(v => !v); if (searchOpen) setSearchQ('') }}
             aria-label={searchOpen ? t.brain.closeSearch : t.brain.search} aria-expanded={searchOpen}
@@ -398,6 +411,7 @@ export function LifeBrainPage() {
             {searchOpen ? <X size={16} strokeWidth={2.5} aria-hidden="true" /> : <Search size={16} strokeWidth={2} aria-hidden="true" />}
           </button>
         )}
+        </div>
       </div>
 
       <div role="tablist" aria-label={t.tasks.viewsLabel} style={{

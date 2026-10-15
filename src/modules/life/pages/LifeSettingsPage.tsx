@@ -15,6 +15,7 @@ import { useAuthStore } from '@/store/authStore'
 import { featureOn } from '@/lib/features'
 import { CalendarFeedCard } from '../components/CalendarFeedCard'
 import { CategoriesCard } from '../components/CategoriesCard'
+import { JournalLockCard } from '../components/JournalLock'
 
 function timezones(): string[] {
   try {
@@ -155,6 +156,8 @@ export function LifeSettingsPage() {
 
         {showCalendar && <CalendarFeedCard />}
 
+        {featureOn('journal') && <JournalLockCard />}
+
         <LifeCard>
           <h2 style={label}>{t.data.title}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -190,7 +193,7 @@ export function LifeSettingsPage() {
       <LifeConfirmDialog
         open={confirmDelete}
         title={t.data.deleteTitle}
-        message={t.data.deleteText}
+        message={featureOn('journal') ? `${t.data.deleteText} ${t.journal.deleteNote}` : t.data.deleteText}
         confirmLabel={t.data.deleteConfirm}
         onConfirm={() => void removeAll()}
         onCancel={() => setConfirmDelete(false)}
