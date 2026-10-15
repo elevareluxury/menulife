@@ -305,6 +305,15 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   sin IP), 200 por perfil/día; bots (trampa, < 3 s, agente) reciben "ok" sin guardar. Studio → Mensajes (`/studio/messages`)
   y `useUnreadMessages` (contador en la navegación, "Más" en el celular y el Inicio; servirá para el push nativo).
   `ProfileModuleContext` da a los módulos huella, handle y si es vista previa (en la vista previa no se envía).
+- Apoyame y Escuchá en (módulos de bio V1.1, `FEATURES.bioModules`): `support` = hasta 6 medios (Mercado Pago, PayPal,
+  Ko-fi, Buy Me a Coffee y "otro link" con dominio validado y https; alias/CVU/CBU ≤ 60 y clave Pix ≤ 80 con "Copiar" y
+  aviso `role="status"`), mensaje ≤ 140 y montos sugeridos como texto. Mycen no cobra ni procesa pagos (lo dice la tarjeta).
+  `listen_on` = canción o disco, artista, portada (o la huella) y hasta 8 links, uno por plataforma (Spotify, Apple Music,
+  YouTube Music, YouTube, Deezer, TIDAL, SoundCloud, Amazon Music; la plataforma se detecta por el dominio). Sólo links:
+  ni reproductores ni íconos de terceros. Reglas puras en `profile/lib/support.ts` y `listenOn.ts` (la página vuelve a
+  validar lo guardado), chunks propios `SupportModule`/`ListenOnModule` con textos en `supportListenI18n.ts` y CSS en
+  `supportListen.css`; editores en `studio/components/supportListenEditors.tsx`. Tests en `support.test.ts`,
+  `listenOn.test.ts` y `bio-support-listen.spec.ts` (5 estructuras × 2 temas con axe).
 - Apariencia (etapa 06): `AppearancePage` = estructura (miniaturas con la huella real), tema, acento, huella (estilos +
   "Generar otra" → `huella_salt`, con "Volver a la anterior" hasta publicar), portada (sólo Portada) y perfil vivo
   (`status_text`, `available`). Guarda siempre los valores nuevos del tema; vista previa en vivo al costado (≥ 1280 px) o

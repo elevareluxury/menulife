@@ -4,12 +4,17 @@ import { WEEK_DAYS } from '@/modules/profile/lib/schedule'
 import { safeHref } from '@/modules/profile/lib/safeUrl'
 import { inspectMediaUrl, MEDIA_PROVIDER_NAME, parseMediaUrl } from '@/modules/profile/lib/media'
 import type { CardItem } from '@/modules/profile/components/ProfileModules'
+import { checkSupportMethod, isSupportKind, normalizeSupportMethod, SUPPORT_AMOUNTS_MAX, SUPPORT_MAX_METHODS, SUPPORT_MESSAGE_MAX, type SupportMethod } from '@/modules/profile/lib/support'
+import { checkListenLink, detectListenPlatform, LISTEN_ARTIST_MAX, LISTEN_TITLE_MAX, listenHref, type ListenLink } from '@/modules/profile/lib/listenOn'
+import { featureOn } from '@/lib/features'
 import type { StudioDict } from '@/i18n/app/studio'
 import type { StudioModule } from './studioTypes'
 import {
   CardsEditor, GalleryEditor, HoursEditor, LinkItemsEditor, MediaUrlEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
   type ExtraEditorProps, type GalleryItem, type LinkItemInput, type ReviewsValue,
 } from '../components/moduleExtraEditors'
+import { ListenLinksEditor, SupportMethodsEditor } from '../components/supportListenEditors'
+import { duplicateListenRows, listenErrorText, supportErrorText, type ListenInput, type SupportInput } from './supportListenErrors'
 
 export type FieldKind = 'text' | 'textarea' | 'url' | 'email' | 'tel' | 'number' | 'select' | 'image'
 
@@ -399,6 +404,74 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         const embed = parseMediaUrl(x.url)
         return embed ? `${MEDIA_PROVIDER_NAME[embed.provider]} · ${embed.kind === 'video' ? t.media.video : t.media.music}` : ''
       },
+    },
+    // V1.1 · Apoyame: links de pago y alias/Pix para copiar (Mycen no cobra ni procesa pagos)
+    support: {
+      addable: featureOn('bioModules'),
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80, placeholder: t.support.titlePlaceholder },
+        { key: 'message', label: t.support.message, kind: 'textarea', translatable: true, maxLength: SUPPORT_MESSAGE_MAX, placeholder: t.support.messagePlaceholder },
+        { key: 'amounts', label: t.support.amounts, kind: 'text', translatable: true, maxLength: SUPPORT_AMOUNTS_MAX, placeholder: t.support.amountsPlaceholder },
+      ],
+      validate: x => ((x.message ?? '').length > SUPPORT_MESSAGE_MAX || (x.amounts ?? '').length > SUPPORT_AMOUNTS_MAX ? t.support.errors.too_long : null),
+      extra: extra<SupportInput[]>({
+        init: m => {
+          const saved = Array.isArray(m?.content.methods) ? m.content.methods as Partial<SupportMethod>[] : []
+          const items = saved.map(x => ({ kind: isSupportKind(x.kind) ? x.kind : 'link', value: text(x.value), label: text(x.label) }))
+          return items.length ? items : [{ kind: 'mercadopago', value: '', label: '' }]
+        },
+        validate: items => {
+          const filled = items.filter(i => i.value.trim() || i.label.trim())
+          if (!filled.length) return t.support.errors.none
+          for (const [n, i] of items.entries()) {
+            if (!i.value.trim() && !i.label.trim()) continue
+            const err = checkSupportMethod(i)
+            if (err) return `${t.support.methodN(n + 1)}: ${supportErrorText(t, err, i.kind)}`
+          }
+          return null
+        },
+        apply: (items, content) => {
+          content.methods = items.map(i => normalizeSupportMethod(i)).filter((m): m is SupportMethod => !!m).slice(0, SUPPORT_MAX_METHODS)
+        },
+        Editor: SupportMethodsEditor,
+      }),
+      summary: x => t.support.summary(count(x.methods)),
+    },
+    // V1.1 · Escuchá en: canción o disco con un link por plataforma (sin reproductores ni íconos de terceros)
+    listen_on: {
+      addable: featureOn('bioModules'),
+      fields: [
+        { key: 'title', label: t.listenOn.titleLabel, kind: 'text', isTitle: true, required: true, maxLength: LISTEN_TITLE_MAX, placeholder: t.listenOn.titlePlaceholder },
+        { key: 'artist', label: t.listenOn.artist, kind: 'text', maxLength: LISTEN_ARTIST_MAX },
+        { key: 'cover_url', label: t.listenOn.cover, kind: 'image' },
+      ],
+      validate: x => (x.cover_url && !safeHref(x.cover_url) ? v.badUrl : null),
+      extra: extra<ListenInput[]>({
+        init: m => {
+          const saved = Array.isArray(m?.content.links) ? m.content.links as Partial<ListenLink>[] : []
+          const items = saved.map(x => ({ url: text(x.url) }))
+          return items.length ? items : [{ url: '' }]
+        },
+        validate: items => {
+          if (!items.some(i => i.url.trim())) return t.listenOn.errors.none
+          const dup = duplicateListenRows(items)
+          for (const [n, i] of items.entries()) {
+            if (!i.url.trim()) continue
+            const err = checkListenLink(i.url) ?? (dup.has(n) ? 'duplicate' : null)
+            if (err) return `${t.listenOn.linkN(n + 1)}: ${listenErrorText(t, err, i.url)}`
+          }
+          return null
+        },
+        apply: (items, content) => {
+          content.links = items.flatMap(i => {
+            const platform = detectListenPlatform(i.url)
+            const url = platform ? listenHref(platform, i.url) : null
+            return platform && url ? [{ platform, url }] : []
+          })
+        },
+        Editor: ListenLinksEditor,
+      }),
+      summary: x => [text(x.artist), t.listenOn.summary(count(x.links))].filter(Boolean).join(' · '),
     },
     // Se edita en Mi identidad → tarjeta de contacto; en la página es el botón "Guardar contacto"
     contact_card: { addable: false, fields: [], summary: () => '' },

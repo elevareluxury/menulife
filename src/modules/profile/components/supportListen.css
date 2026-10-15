@@ -1,0 +1,69 @@
+/* "Apoyame" (support) y "Escuchá en" (listen_on), V1.1. Sólo variables del sistema de diseño (--my-*, que lookVars
+   también expone como --p-*); van con su chunk: sólo las baja un perfil que usa alguno de los dos. */
+
+/* ── Apoyame ── */
+.mp-support { display: flex; flex-direction: column; gap: 12px; }
+.mp-support-head { display: flex; align-items: center; gap: 12px; }
+.mp-support-badge {
+  flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--my-accent); color: var(--my-on-accent);
+}
+.mp-support-title { margin: 0; font: 700 var(--my-fs-section) / var(--my-lh-title) var(--my-font-display); overflow-wrap: anywhere; }
+.mp-support-message { margin: 0; font-size: var(--my-fs-body); line-height: var(--my-lh-body); overflow-wrap: anywhere; }
+.mp-support-amounts { margin: 0; font-size: var(--my-fs-small); color: var(--my-muted); overflow-wrap: anywhere; }
+.mp-support-amounts span { font-weight: 600; color: var(--my-text); }
+.mp-support-list { display: flex; flex-direction: column; gap: 8px; }
+
+.mp-support-link, .mp-support-copy {
+  display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 14px;
+  border-radius: var(--my-r-action); border: 1px solid var(--my-border); background: var(--my-tile); color: var(--my-text);
+}
+.mp-support-link { text-decoration: none; font-weight: 600; transition: transform var(--my-dur-fast) var(--my-ease); }
+.mp-support-link:active { transform: scale(0.99); }
+.mp-support-link.is-primary { background: var(--my-accent); border-color: var(--my-accent); color: var(--my-on-accent); }
+.mp-support-link-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.mp-support-icon { flex: none; display: inline-flex; color: var(--my-muted); }
+.mp-support-link.is-primary .mp-support-icon, .mp-support-link.is-primary .mp-support-arrow { color: var(--my-on-accent); }
+.mp-support-arrow { flex: none; color: var(--my-muted); }
+
+.mp-support-copy-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mp-support-copy-label { font-size: var(--my-fs-small); color: var(--my-muted); }
+.mp-support-value { font-weight: 600; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all; }
+.mp-support-copy-btn {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; cursor: pointer;
+  border-radius: var(--my-r-pill); border: 1px solid var(--my-border); background: var(--my-glass); color: var(--my-text);
+  font: 600 var(--my-fs-small) var(--my-font-ui);
+}
+.mp-support-status { margin: 0; min-height: 1.2em; font-size: var(--my-fs-small); font-weight: 600; color: var(--my-text); }
+.mp-support-status:empty { min-height: 0; }
+.mp-support-note { margin: 0; font-size: var(--my-fs-small); color: var(--my-muted); }
+
+/* ── Escuchá en ── */
+.mp-listen { display: flex; flex-direction: column; gap: 14px; }
+.mp-listen-head { display: flex; align-items: center; gap: 14px; }
+.mp-listen-cover {
+  position: relative; flex: none; display: grid; place-items: center; width: 88px; height: 88px; overflow: hidden;
+  border-radius: var(--my-r-field); background: var(--my-tile); color: var(--my-muted); border: 1px solid var(--my-border);
+}
+.mp-listen-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mp-listen-huella { position: absolute; inset: 0; display: grid; place-items: center; }
+.mp-listen-huella svg { width: 140% !important; height: auto !important; }
+.mp-listen-meta { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mp-listen-title { margin: 0; font: 700 var(--my-fs-section) / var(--my-lh-title) var(--my-font-display); overflow-wrap: anywhere; }
+.mp-listen-artist { margin: 0; color: var(--my-muted); font-size: var(--my-fs-body); overflow-wrap: anywhere; }
+
+.mp-listen-links { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.mp-listen-link {
+  display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 12px;
+  border-radius: var(--my-r-action); border: 1px solid var(--my-border); background: var(--my-tile); color: var(--my-text);
+  font-weight: 600; text-decoration: none; transition: transform var(--my-dur-fast) var(--my-ease);
+}
+.mp-listen-link:active { transform: scale(0.99); }
+.mp-listen-icon { flex: none; color: var(--my-accent); }
+.mp-listen-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.mp-listen-arrow { flex: none; color: var(--my-muted); }
+
+.mp-support-link:focus-visible, .mp-support-copy-btn:focus-visible, .mp-listen-link:focus-visible {
+  outline: 2px solid var(--my-accent); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) { .mp-support-link, .mp-listen-link { transition: none; } }
