@@ -164,6 +164,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   tests en `tests/db/life_recurring.test.sql` y `recurring.spec.ts`.
 - V1.1 en beta: `featureOn(name)` (`src/lib/features.ts`) prende para todos lo que esté en `FEATURES` y, para probar en
   producción, las funciones de `BETA` en el dispositivo que abrió la app con `?beta=1` (`?beta=0` lo apaga).
+- Dinero por mes (después de la V1): `useMoney(month)` ('YYYY-MM') trae ese mes y el anterior; `MonthSwitcher` ‹ mes › (no
+  pasa de hoy), "En qué se fue" (`categoryBreakdown`: gastos por categoría en la moneda principal, % y cambio contra el
+  mes anterior; tocar una filtra), buscar en todos los movimientos (`useMoneySearch`: la base trae candidatos con `or`
+  ilike y el nombre traducido de la categoría, el dispositivo confirma con `matchesSearch`; hasta 300) y filtrar por
+  tipo/categoría. Memoria de categorías (`learnCategories` / `suggestCategory` en `lib/moneyInsights.ts`, desde
+  `useCategoryMemory`: lo ya ordenado del último año, sin números ni signos; por las primeras palabras sólo si nunca fue
+  ambiguo): la usan el importador del banco y el formulario de un movimiento nuevo (hasta que se elige a mano).
+  Tests en `moneyInsights.test.ts` y `money-insights.spec.ts`. Ojo: nada posicionado debajo de un menú "⋯" (lo tapa).
 - Importar del banco (V1.1, beta `bankImport`): botón en Dinero → `ImportBankSheet`. Todo en el dispositivo:
   `lib/bankImport.ts` (CSV con comillas y separador detectado, UTF-8 o Windows-1252, títulos y columnas adivinados en
   12 idiomas, débito/crédito o importe con signo, coma o punto decimal, fechas d/m, m/d, a-m-d y serie de Excel,

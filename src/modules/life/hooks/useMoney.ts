@@ -5,6 +5,7 @@ import { award } from '../lib/checkMilestone'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import { useLocaleStore } from '@/store/localeStore'
 import { materializeRecurring } from './useRecurring'
+import { monthCurve as curveOf, monthKeyOf, monthRange, shiftMonth } from '../lib/moneyInsights'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -48,12 +49,6 @@ export interface TransactionGroup {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Inicio del mes en hora local, como instante ISO (comparable con occurred_at). */
-function startOfMonth(): string {
-  const d = new Date()
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString()
-}
-
 /** Fecha local (YYYY-MM-DD) de un instante ISO. */
 export function localDay(iso: string): string {
   const d = new Date(iso)
@@ -72,56 +67,42 @@ function groupByDate(txs: Transaction[]): TransactionGroup[] {
     .map(([date, items]) => ({ date, items }))
 }
 
-/** Cumulative balance per day for the current month (for sparkline). */
-export function buildMonthCurve(txs: Transaction[]): number[] {
-  const now = new Date()
-  const days = now.getDate()  // today's date number
-  const year = now.getFullYear()
-
-  const daily = new Array(days).fill(0)
-  txs.forEach(tx => {
-    const d = new Date(tx.occurred_at)
-    if (d.getFullYear() === year && d.getMonth() + 1 === now.getMonth() + 1) {
-      const idx = d.getDate() - 1
-      if (idx >= 0 && idx < days) {
-        daily[idx] += tx.type === 'income' ? Number(tx.amount) : -Number(tx.amount)
-      }
-    }
-  })
-
-  const curve: number[] = []
-  let running = 0
-  for (const v of daily) { running += v; curve.push(running) }
-  return curve
-}
-
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useMoney() {
+/**
+ * Movimientos de un mes ('YYYY-MM', por defecto el actual) y del anterior (para comparar en qué se fue).
+ * `everHasData`: si la persona tiene algún movimiento (para no mostrar la bienvenida en un mes vacío).
+ */
+export function useMoney(month: string = monthKeyOf(new Date())) {
   const { user } = useAuthStore()
   const mainCurrency = useLocaleStore(s => s.currency)
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
+  const [all, setAll] = useState<Transaction[]>([])
+  const [everHasData, setEverHasData] = useState(false)
+  const [loadedMonth, setLoadedMonth] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     if (!user) return
-    setLoading(true)
     // Los fijos que ya vencieron se cargan antes de leer (una vez por día; si falla, se sigue igual)
     await materializeRecurring().catch(() => 0)
-    // Last 3 months for history; filter month in JS for stats
-    const since = (() => {
-      const d = new Date()
-      d.setMonth(d.getMonth() - 3)
-      return d.toISOString()
-    })()
+    const [from] = monthRange(shiftMonth(month, -1))
+    const [, to] = monthRange(month)
     const { data } = await db.from('life_transactions')
       .select('*')
       .eq('user_id', user.id)
-      .gte('occurred_at', since)
+      .gte('occurred_at', from)
+      .lt('occurred_at', to)
       .order('occurred_at', { ascending: false })
-    setTransactions(data ?? [])
-    setLoading(false)
-  }, [user])
+    const rows: Transaction[] = data ?? []
+    let ever = rows.length > 0
+    if (!ever) {
+      const { data: any1 } = await db.from('life_transactions').select('id').eq('user_id', user.id).limit(1)
+      ever = (any1 ?? []).length > 0
+    }
+    setAll(rows)
+    setEverHasData(ever)
+    setLoadedMonth(month)
+  }, [user, month])
+  const loading = loadedMonth !== month
 
   useEffect(() => {
     let alive = true
@@ -138,11 +119,10 @@ export function useMoney() {
     return () => window.removeEventListener(LIFE_DATA_UPDATED, handler)
   }, [load])
 
-  const monthStart = startOfMonth()
-  const thisMonthTxs = useMemo(
-    () => transactions.filter(t => t.occurred_at >= monthStart),
-    [transactions, monthStart]
-  )
+  const [monthStart] = monthRange(month)
+  const transactions = useMemo(() => all.filter(t => t.occurred_at >= monthStart), [all, monthStart])
+  const previous = useMemo(() => all.filter(t => t.occurred_at < monthStart), [all, monthStart])
+  const thisMonthTxs = transactions
 
   // Totales del mes por moneda: nunca se suman monedas distintas
   const totalsByCurrency = useMemo<CurrencyTotals[]>(() => {
@@ -163,8 +143,8 @@ export function useMoney() {
   const monthBalance = monthIncome - monthExpense
   const otherTotals  = useMemo(() => totalsByCurrency.filter(r => r.currency !== mainCurrency), [totalsByCurrency, mainCurrency])
   const monthCurve   = useMemo(
-    () => buildMonthCurve(thisMonthTxs.filter(t => (t.currency || mainCurrency) === mainCurrency)),
-    [thisMonthTxs, mainCurrency],
+    () => curveOf(thisMonthTxs.filter(t => (t.currency || mainCurrency) === mainCurrency), month, new Date()),
+    [thisMonthTxs, mainCurrency, month],
   )
 
   const grouped = useMemo(() => groupByDate(transactions), [transactions])
@@ -199,7 +179,7 @@ export function useMoney() {
   }, [user, load])
 
   /** Oculta el movimiento en pantalla (para borrar con "Deshacer"). */
-  const hideTransaction = useCallback((id: string) => setTransactions(prev => prev.filter(t => t.id !== id)), [])
+  const hideTransaction = useCallback((id: string) => setAll(prev => prev.filter(t => t.id !== id)), [])
 
   const deleteTransaction = useCallback(async (id: string) => {
     if (!user) return
@@ -209,9 +189,9 @@ export function useMoney() {
   }, [user, load])
 
   return {
-    transactions, grouped, loading, reload: load,
+    transactions, previous, grouped, loading, reload: load,
     monthIncome, monthExpense, monthBalance, monthCurve, otherTotals, mainCurrency,
-    hasData: transactions.length > 0,
+    hasData: transactions.length > 0, everHasData,
     createTransaction, updateTransaction, deleteTransaction, hideTransaction,
   }
 }

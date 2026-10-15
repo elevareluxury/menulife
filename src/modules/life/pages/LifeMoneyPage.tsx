@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp } from 'lucide-react'
-import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint } from '../design-system'
-import { useMoney, type Transaction } from '../hooks/useMoney'
+import { Wallet, Plus, TrendingUp, TrendingDown, Pencil, Trash2, Repeat, Pause, Play, FileUp, ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
+import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
+import { localDay, useMoney, type Transaction } from '../hooks/useMoney'
+import { useMoneySearch } from '../hooks/useMoneySearch'
+import { categoryBreakdown, monthKeyOf, shiftMonth, type CategoryShare } from '../lib/moneyInsights'
+import { CATEGORY_COLORS, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../lib/lifePalette'
 import { TransactionSheet } from '../components/TransactionSheet'
 import { nextDue, useRecurring, type RecurringTx } from '../hooks/useRecurring'
 import { ActionMenu } from '../components/ActionMenu'
@@ -23,10 +26,121 @@ function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
   yesterday.setDate(today.getDate() - 1)
   if (d.toDateString() === today.toDateString()) return t.money.today
   if (d.toDateString() === yesterday.toDateString()) return t.money.yesterday
-  return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })
+  return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long',
+    ...(d.getFullYear() !== today.getFullYear() ? { year: 'numeric' as const } : {}) })
 }
 
 const categoryLabel = (t: LifeDict, cat: string) => t.categories[cat] ?? cat
+const ALL_CATEGORIES = [...new Set([...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES])]
+
+function monthLabel(key: string, locale: string): string {
+  const [y, m] = key.split('-').map(Number)
+  const d = new Date(y, m - 1, 1)
+  return d.toLocaleDateString(locale, { month: 'long', ...(y !== new Date().getFullYear() ? { year: 'numeric' as const } : {}) })
+}
+
+function groupByDay(txs: Transaction[]): { date: string; items: Transaction[] }[] {
+  const map = new Map<string, Transaction[]>()
+  for (const tx of txs) {
+    const key = localDay(tx.occurred_at)
+    map.set(key, [...(map.get(key) ?? []), tx])
+  }
+  return [...map.entries()].sort((a, b) => b[0].localeCompare(a[0])).map(([date, items]) => ({ date, items }))
+}
+
+const roundBtn: React.CSSProperties = {
+  width: 40, height: 40, borderRadius: radius.full, background: colors.surface.high,
+  border: `1px solid ${colors.border.subtle}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+}
+
+// ── Mes: ‹ septiembre › ──────────────────────────────────────────────────────
+function MonthSwitcher({ month, locale, onChange }: { month: string; locale: string; onChange: (m: string) => void }) {
+  const t = useLifeT()
+  const isCurrent = month === monthKeyOf(new Date())
+  // En árabe (de derecha a izquierda) las flechas apuntan al revés
+  const rtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+  const Prev = rtl ? ChevronRight : ChevronLeft
+  const Next = rtl ? ChevronLeft : ChevronRight
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+      <button type="button" onClick={() => onChange(shiftMonth(month, -1))} aria-label={t.money.prevMonth} title={t.money.prevMonth} style={roundBtn}>
+        <Prev size={18} style={{ color: colors.text.secondary }} aria-hidden="true" />
+      </button>
+      <h2 aria-live="polite" style={{ fontFamily: font, fontSize: 16, fontWeight: 800, color: colors.text.primary, margin: 0, textTransform: 'capitalize' }}>
+        {monthLabel(month, locale)}
+      </h2>
+      <button type="button" onClick={() => onChange(shiftMonth(month, 1))} disabled={isCurrent} aria-label={t.money.nextMonth} title={t.money.nextMonth}
+        style={{ ...roundBtn, opacity: isCurrent ? 0.35 : 1, cursor: isCurrent ? 'default' : 'pointer' }}>
+        <Next size={18} style={{ color: colors.text.secondary }} aria-hidden="true" />
+      </button>
+    </div>
+  )
+}
+
+// ── En qué se fue (gastos por categoría, moneda principal) ───────────────────
+function CategoryCard({ items, currency, locale, prevMonthName, active, onPick }: {
+  items: CategoryShare[]; currency: string; locale: string; prevMonthName: string
+  active: string | null; onPick: (cat: string) => void
+}) {
+  const t = useLifeT()
+  return (
+    <LifeCard style={{ marginBottom: '12px' }}>
+      <section aria-labelledby="money-by-category">
+      <h2 id="money-by-category" style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', margin: '0 0 8px', textTransform: 'uppercase' }}>
+        {t.money.byCategory} · {currency}
+      </h2>
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {items.map(c => {
+          const label = categoryLabel(t, c.category)
+          const color = ink(CATEGORY_COLORS[c.category] ?? CATEGORY_COLORS.Otros)
+          const pct = Math.round(c.share * 100)
+          return (
+            <li key={c.category}>
+              <button type="button" onClick={() => onPick(c.category)} aria-pressed={active === c.category}
+                aria-label={`${t.money.onlyCategory(label)}: ${formatMoney(c.amount, currency, locale)}, ${pct} %`}
+                style={{
+                  width: '100%', textAlign: 'start', background: active === c.category ? colors.surface.high : 'none',
+                  border: 'none', borderRadius: radius.sm, padding: '6px 4px', cursor: 'pointer', fontFamily: font,
+                }}>
+                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: colors.text.primary }}>{label}</span>
+                  <span dir="ltr" style={{ fontSize: 13, fontWeight: 700, color: colors.text.primary }}>{formatMoney(c.amount, currency, locale)}</span>
+                  <span style={{ width: 40, textAlign: 'end', fontSize: 11, color: colors.text.tertiary }}>{pct} %</span>
+                </span>
+                <span aria-hidden="true" style={{ display: 'block', height: 6, borderRadius: radius.full, background: colors.surface.high, marginTop: 5, overflow: 'hidden' }}>
+                  <span style={{ display: 'block', height: '100%', width: `${Math.max(2, pct)}%`, background: color, borderRadius: radius.full }} />
+                </span>
+                {c.change !== null && c.change !== 0 && (
+                  <span style={{ display: 'block', fontSize: 11, marginTop: 3, color: colors.text.tertiary }}>
+                    {c.change > 0 ? t.money.more(c.change, prevMonthName) : t.money.less(-c.change, prevMonthName)}
+                  </span>
+                )}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+      </section>
+    </LifeCard>
+  )
+}
+
+type Kind = 'all' | 'income' | 'expense'
+
+function Chip({ pressed, onClick, children, label }: { pressed?: boolean; onClick: () => void; children: React.ReactNode; label?: string }) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={pressed} aria-label={label}
+      style={{
+        padding: '6px 12px', borderRadius: radius.full, fontFamily: font, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+        background: pressed ? colors.accent.soft : colors.surface.high,
+        border: `1px solid ${pressed ? colors.accent.soft : colors.border.subtle}`,
+        color: pressed ? colors.accent.ink : colors.text.secondary,
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+      }}>
+      {children}
+    </button>
+  )
+}
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function MoneySkeleton() {
@@ -177,11 +291,24 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
 export function LifeMoneyPage() {
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
+  const [month, setMonth] = useState(() => monthKeyOf(new Date()))
   const {
-    grouped, loading, mainCurrency,
+    transactions, previous, loading, mainCurrency,
     monthIncome, monthExpense, monthBalance, monthCurve, otherTotals,
-    hasData, reload, createTransaction, updateTransaction, deleteTransaction, hideTransaction,
-  } = useMoney()
+    hasData, everHasData, reload, createTransaction, updateTransaction, deleteTransaction, hideTransaction,
+  } = useMoney(month)
+  const [query, setQuery] = useState('')
+  const [kind, setKind] = useState<Kind>('all')
+  const [cat, setCat] = useState<string | null>(null)
+  const labelOf = useCallback((c: string) => categoryLabel(t, c), [t])
+  const search = useMoneySearch(query, labelOf, ALL_CATEGORIES)
+  const searchingAll = search.results !== null || search.searching
+  const breakdown = useMemo(() => categoryBreakdown(transactions, previous, mainCurrency), [transactions, previous, mainCurrency])
+  const shown = useMemo(() => (search.results ?? transactions)
+    .filter(tx => kind === 'all' || tx.type === kind)
+    .filter(tx => !cat || tx.category === cat), [search.results, transactions, kind, cat])
+  const grouped = useMemo(() => groupByDay(shown), [shown])
+  const isCurrentMonth = month === monthKeyOf(new Date())
 
   const fixed = useRecurring()
   const [sheetOpen, setSheetOpen]       = useState(false)
@@ -190,10 +317,12 @@ export function LifeMoneyPage() {
   const [importOpen, setImportOpen]     = useState(false)
   const [canImport] = useState(() => featureOn('bankImport'))
 
-  if (loading) return <MoneySkeleton />
+  if (loading && !everHasData && !transactions.length) return <MoneySkeleton />
 
   const balanceColor = monthBalance >= 0 ? colors.semantic.success : colors.semantic.error
-  const monthName = new Date().toLocaleDateString(locale, { month: 'long' })
+  const monthName = monthLabel(month, locale)
+  const prevMonthName = monthLabel(shiftMonth(month, -1), locale)
+  const changeMonth = (m: string) => { setMonth(m); setCat(null) }
   const openNew = () => { setEditTx(null); setEditFixed(null); setSheetOpen(true) }
   const fail = () => toast.error(t.common.saveError)
   const fixedAsTx = (r: RecurringTx): Transaction => ({
@@ -244,6 +373,8 @@ export function LifeMoneyPage() {
         </div>
       </div>
 
+      {everHasData && <MonthSwitcher month={month} locale={locale} onChange={changeMonth} />}
+
       {/* Balance del mes en la moneda principal */}
       {hasData && (
         <LifeCard style={{ marginBottom: '12px' }}>
@@ -288,14 +419,54 @@ export function LifeMoneyPage() {
         </LifeCard>
       )}
 
-      {fixed.items.length > 0 && (
+      {breakdown.length > 0 && !searchingAll && (
+        <CategoryCard items={breakdown} currency={mainCurrency} locale={locale} prevMonthName={prevMonthName}
+          active={cat} onPick={c => setCat(prev => (prev === c ? null : c))} />
+      )}
+
+      {isCurrentMonth && fixed.items.length > 0 && (
         <FixedCard items={fixed.items} locale={locale}
           onEdit={r => { setEditTx(null); setEditFixed(r); setSheetOpen(true) }}
           onToggle={r => { fixed.setActive(r, !r.active).catch(fail) }}
           onDelete={removeFixed} />
       )}
 
-      {!hasData ? (
+      {everHasData && (
+        <div role="search" style={{ marginBottom: 12 }}>
+          {/* Sin posicionar (nada de position: relative): así los menús "⋯" de arriba quedan por encima */}
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '0 14px', borderRadius: radius.full,
+            background: colors.surface.high, border: `1px solid ${colors.border.subtle}`,
+          }}>
+            <span className="sr-only">{t.money.search}</span>
+            <Search size={16} aria-hidden="true" style={{ color: colors.text.tertiary, flexShrink: 0 }} />
+            <input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder={t.money.searchPlaceholder}
+              style={{
+                flex: 1, minWidth: 0, padding: '11px 0', background: 'transparent', border: 'none', color: colors.text.primary,
+                fontFamily: font, fontSize: 16, outline: 'none',
+              }} />
+          </label>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+            <Chip pressed={kind === 'all'} onClick={() => setKind('all')}>{t.money.all}</Chip>
+            <Chip pressed={kind === 'income'} onClick={() => setKind('income')}>{t.money.income}</Chip>
+            <Chip pressed={kind === 'expense'} onClick={() => setKind('expense')}>{t.money.expense}</Chip>
+            {cat && (
+              <Chip pressed onClick={() => setCat(null)} label={t.money.clearCategory(categoryLabel(t, cat))}>
+                {categoryLabel(t, cat)} <X size={12} aria-hidden="true" />
+              </Chip>
+            )}
+          </div>
+          {searchingAll && (
+            <p role="status" style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '8px 0 0' }}>
+              {search.searching ? t.money.searching
+                : shown.length ? `${t.money.results(shown.length)}${search.limited ? ` ${t.money.resultsLimited}` : ''}`
+                : t.money.noResults}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!everHasData ? (
         <LifeCard>
           <LifeEmptyState
             icon={Wallet}
@@ -305,8 +476,16 @@ export function LifeMoneyPage() {
             action={{ label: t.money.emptyAction, onClick: openNew }}
           />
         </LifeCard>
+      ) : !grouped.length ? (
+        !searchingAll && (
+          <LifeCard>
+            <p style={{ fontFamily: font, fontSize: 14, color: colors.text.secondary, margin: 0, textAlign: 'center', padding: '12px 0' }}>
+              {hasData ? t.money.noneFiltered : t.money.emptyMonth(monthName)}
+            </p>
+          </LifeCard>
+        )
       ) : (
-        <motion.div variants={stagger} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <motion.div key={`${month}|${query}|${kind}|${cat}`} variants={stagger} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {grouped.map(group => {
             const currencies = new Set(group.items.map(i => i.currency || mainCurrency))
             const single = currencies.size === 1 ? [...currencies][0] : null

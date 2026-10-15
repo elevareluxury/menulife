@@ -8,6 +8,8 @@ import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../lib/lifePalette'
+import { useCategoryMemory } from '../hooks/useCategoryMemory'
+import { suggestCategory } from '../lib/moneyInsights'
 import type { Transaction, TransactionFormData } from '../hooks/useMoney'
 import { GoalSelect } from './GoalSelect'
 
@@ -48,6 +50,9 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
   const [saving, setSaving]       = useState(false)
   const [error, setError]         = useState('')
   const [repeat, setRepeat]       = useState(false)
+  // Movimiento nuevo: la categoría se sugiere por la descripción (lo que ya ordenaste) hasta que elegís una a mano
+  const [catTouched, setCatTouched] = useState(false)
+  const memory = useCategoryMemory(open && !initial)
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
@@ -63,6 +68,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
       }
       setError('')
       setRepeat(false)
+      setCatTouched(false)
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -205,7 +211,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
               key={cat}
               type="button"
               aria-pressed={form.category === cat}
-              onClick={() => setForm(f => ({ ...f, category: cat }))}
+              onClick={() => { setCatTouched(true); setForm(f => ({ ...f, category: cat })) }}
               style={{
                 padding: '6px 12px', borderRadius: radius.full,
                 background: form.category === cat ? (isIncome ? tint(ink(colors.semantic.success), 13) : tint(ink(colors.semantic.error), 13)) : colors.surface.high,
@@ -228,7 +234,14 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         </label>
         <input
           value={form.description}
-          onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+          onChange={e => {
+            const description = e.target.value
+            setForm(f => {
+              const suggested = !initial && !catTouched && memory ? suggestCategory(memory, f.type, description) : null
+              const list: readonly string[] = f.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES
+              return { ...f, description, ...(suggested && list.includes(suggested) ? { category: suggested } : {}) }
+            })
+          }}
           placeholder={t.tx.descriptionPlaceholder}
           aria-label={t.tx.description}
           maxLength={120}
