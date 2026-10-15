@@ -38,7 +38,8 @@ export function useInsights() {
       q('life_brain_items', 'completed_at').eq('type', 'task').eq('is_completed', true).gte('completed_at', twoWeeksAgo),
       db.from('life_brain_items').select('id', { count: 'exact', head: true }).eq('user_id', user.id)
         .eq('type', 'task').eq('is_completed', false).eq('is_archived', false).lt('due_date', today),
-    ]).then(([habits, logs, txs, goals, milestones, tasksDone, overdue]) => {
+      q('life_daily_reviews', 'date,mood').gte('date', shiftDate(today, -55)).not('mood', 'is', null),
+    ]).then(([habits, logs, txs, goals, milestones, tasksDone, overdue, moods]) => {
       if (cancelled) return
       const failed = [habits, logs, txs, goals, milestones, tasksDone, overdue].find(r => r.error)
       if (failed) { setError(true); setLoading(false); return }
@@ -62,6 +63,8 @@ export function useInsights() {
         milestones: (milestones.data ?? []) as unknown as { goal_id: string; is_completed: boolean; completed_at: string | null }[],
         tasksDone: (tasksDone.data ?? []) as unknown as { completed_at: string }[],
         overdueTasks: overdue.count ?? 0,
+        // El ánimo es opcional: si no se pudo leer, los demás insights siguen
+        moods: moods.error ? [] : (moods.data ?? []) as unknown as { date: string; mood: number }[],
       }))
       setError(false)
       setLoading(false)

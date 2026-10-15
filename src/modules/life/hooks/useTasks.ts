@@ -120,6 +120,14 @@ export function taskColumns(data: TaskFormData) {
   }
 }
 
+/** Datos de una tarea para guardarla con otra fecha (sin perder repetición, subtareas ni meta). Sin fecha, sin repetición. */
+export function taskWithDate(task: LifeTask, due: string | null): TaskFormData {
+  return {
+    title: task.title, notes: task.notes, due_date: due, due_time: task.due_time, remind_minutes: task.remind_minutes,
+    goal_id: task.goal_id, is_focus: task.is_focus, recurrence: due ? task.recurrence : null, subtasks: task.subtasks,
+  }
+}
+
 /** La siguiente ocurrencia de una tarea que se repite: misma tarea, próxima fecha, subtareas sin hacer. */
 export function nextTaskData(task: LifeTask, today: string): TaskFormData | null {
   if (!task.recurrence || !task.due_date) return null

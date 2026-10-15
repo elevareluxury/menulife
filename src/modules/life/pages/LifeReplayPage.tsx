@@ -12,6 +12,9 @@ import { colors, font, radius, tint } from '../design-system'
 import { dayKey } from '../hooks/useToday'
 import { frequencyOf, habitConsistency, isDone, isScheduledOn } from '../lib/habitStreak'
 import { usePrefs } from '@/lib/prefs'
+import { FEATURES } from '@/lib/features'
+import { MOODS, moodSummary, nearestMood, type MoodSummary } from '../lib/mood'
+import { MOOD_ICONS } from '../lib/moodIcons'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -35,6 +38,8 @@ interface ReplaySummary {
   notesCount: number
   tasksCompleted: number
   achievementsCount: number
+  /** Ánimo del cierre del día (sólo si se anotó algún día del mes) */
+  mood: MoodSummary | null
 }
 
 function daysOfMonth(year: number, month: number, until: string): string[] {
@@ -57,7 +62,7 @@ async function generateReplay(userId: string, year: number, month: number, mainC
   const today = dayKey()
 
   const q = (table: string, cols: string) => db.from(table).select(cols).eq('user_id', userId)
-  const [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, tasksRes, achRes] = await Promise.all([
+  const [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, tasksRes, achRes, moodRes] = await Promise.all([
     q('life_habits', 'id,name,frequency,target_value,created_at').eq('is_active', true),
     q('life_habit_logs', 'habit_id,completed_date,value').gte('completed_date', firstDay).lte('completed_date', lastDay),
     q('life_goal_milestones', 'id').gte('completed_at', fromIso).lt('completed_at', toIso),
@@ -66,6 +71,9 @@ async function generateReplay(userId: string, year: number, month: number, mainC
     q('life_brain_items', 'type').gte('created_at', fromIso).lt('created_at', toIso),
     q('life_brain_items', 'id').eq('type', 'task').gte('completed_at', fromIso).lt('completed_at', toIso),
     q('life_achievements', 'id').gte('achieved_at', fromIso).lt('achieved_at', toIso),
+    FEATURES.lifeReflection
+      ? q('life_daily_reviews', 'date,mood').gte('date', firstDay).lte('date', lastDay).not('mood', 'is', null)
+      : Promise.resolve({ data: [], error: null }),
   ])
   const failed = [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, achRes].find(r => r.error)
   if (failed) throw failed.error
@@ -118,6 +126,8 @@ async function generateReplay(userId: string, year: number, month: number, mainC
     notesCount: brain.filter(b => b.type === 'note').length,
     tasksCompleted: tasksRes.error ? 0 : (tasksRes.data ?? []).length,
     achievementsCount: (achRes.data ?? []).length,
+    // El ánimo es opcional: si no se pudo leer, el resto del recap sigue
+    mood: moodRes.error ? null : moodSummary(moodRes.data ?? []),
   }
 }
 
@@ -185,6 +195,34 @@ function ReplaySkeleton() {
   )
 }
 
+/** Cómo se sintió el mes (sólo con días anotados): la carita del promedio y cuántas veces cada una, sin juicios. */
+function MoodStory({ mood, index, total }: { mood: MoodSummary; index: number; total: number }) {
+  const t = useLifeT().mood
+  const avg = nearestMood(mood.avg)
+  const AvgIcon = MOOD_ICONS[avg]
+  return (
+    <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.accent.default, 22)} 0%, ${colors.surface.elevated} 100%)`} index={index} total={total}>
+      <CardHeader icon={AvgIcon} kicker={t.replayKicker} title={t.replayTitle} />
+      <div>
+        <BigStat value={t.levels[avg - 1]} label={t.replayAvg(mood.days)} />
+        <ul aria-label={t.replayTitle} style={{ listStyle: 'none', margin: '24px 0 0', padding: 0, display: 'flex', gap: 6 }}>
+          {MOODS.map(m => {
+            const Icon = MOOD_ICONS[m]
+            return (
+              <li key={m} aria-label={t.replayCount(t.levels[m - 1], mood.counts[m - 1])}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '10px 2px', borderRadius: radius.md, background: colors.surface.base }}>
+                <Icon size={22} aria-hidden="true" style={{ color: m === avg ? colors.accent.ink : colors.text.secondary }} />
+                <span aria-hidden="true" style={{ fontFamily: font, fontSize: '15px', fontWeight: 800, color: colors.text.primary }}>{mood.counts[m - 1]}</span>
+              </li>
+            )
+          })}
+        </ul>
+        <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: '16px 0 0', lineHeight: 1.6 }}>{t.replayNote}</p>
+      </div>
+    </StoryCard>
+  )
+}
+
 // ── Página ────────────────────────────────────────────────────────────────────
 
 export function LifeReplayPage() {
@@ -234,9 +272,9 @@ export function LifeReplayPage() {
   const hasData = !!summary && (
     summary.habitsDone > 0 || summary.stepsDone > 0 || summary.income > 0 || summary.expense > 0 ||
     summary.ideasCount > 0 || summary.notesCount > 0 || summary.tasksCompleted > 0 || summary.achievementsCount > 0 ||
-    summary.otherCurrencies.length > 0
+    summary.otherCurrencies.length > 0 || !!summary.mood
   )
-  const TOTAL = 6
+  const TOTAL = summary?.mood ? 7 : 6
 
   return (
     <div style={{ background: colors.bg, paddingBottom: 'calc(32px + env(safe-area-inset-bottom))' }}>
@@ -340,7 +378,9 @@ export function LifeReplayPage() {
               </div>
             </StoryCard>
 
-            <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.area.habits, 26)} 0%, ${colors.surface.elevated} 100%)`} index={5} total={TOTAL}>
+            {summary.mood && <MoodStory mood={summary.mood} index={5} total={TOTAL} />}
+
+            <StoryCard gradient={`linear-gradient(145deg, ${tint(colors.area.habits, 26)} 0%, ${colors.surface.elevated} 100%)`} index={TOTAL - 1} total={TOTAL}>
               <CardHeader icon={Trophy} kicker={r.achievements} title={r.achievementsTitle} />
               <div>
                 {/* Sin culpa: si no hubo logros, no se muestra un "0" grande, sólo el cierre */}

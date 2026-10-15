@@ -8,6 +8,8 @@ const db = supabase as unknown as SupabaseClient
 const LIFE_TABLES = [
   'life_habit_logs', 'life_goal_milestones', 'life_brain_items', 'life_splits', 'life_transactions', 'life_recurring_transactions',
   'life_installment_plans', 'life_categories', 'life_habits', 'life_goals', 'life_tasks', 'life_achievements', 'life_score', 'life_snapshots',
+  // "Mi día" (prioridades, cierre y ánimo) y la revisión semanal
+  'life_daily_reviews', 'life_weekly_reviews',
 ] as const
 
 const PAGE = 1000

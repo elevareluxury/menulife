@@ -249,6 +249,7 @@ export async function loadStats(profileId: string, days: number): Promise<DailyS
 const LIFE_TABLES = [
   'life_goals', 'life_goal_milestones', 'life_tasks', 'life_habits', 'life_habit_logs',
   'life_transactions', 'life_recurring_transactions', 'life_installment_plans', 'life_categories', 'life_splits', 'life_brain_items', 'life_achievements', 'life_score',
+  'life_daily_reviews', 'life_weekly_reviews',
 ]
 
 /** Copia de los datos del usuario (lo que su sesión puede leer) en un JSON descargable. */
