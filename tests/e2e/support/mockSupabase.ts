@@ -226,6 +226,8 @@ const DEFAULTS: Record<string, Row> = {
     frequency: { type: 'daily', days: [0, 1, 2, 3, 4, 5, 6] },
   },
   life_habit_logs: { value: 1 },
+  // Dinero: categorías propias (20261029000001)
+  life_categories: { icon: null, archived_at: null },
 }
 
 const NON_FILTERS = new Set(['select', 'order', 'limit', 'offset', 'on_conflict', 'columns', 'or'])

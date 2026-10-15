@@ -95,7 +95,9 @@ export function foldText(s: string): string {
 export function matchesSearch(tx: MoneyTx, query: string, categoryLabel: string): boolean {
   const words = foldText(query).split(' ').filter(Boolean)
   if (!words.length) return true
-  const hay = foldText(`${tx.description ?? ''} ${tx.category} ${categoryLabel} ${Number(tx.amount)}`)
+  // Una categoría propia se guarda como 'c:<id>': se busca por su nombre, no por el id
+  const raw = tx.category?.startsWith('c:') ? '' : tx.category
+  const hay = foldText(`${tx.description ?? ''} ${raw} ${categoryLabel} ${Number(tx.amount)}`)
   return words.every(w => hay.includes(w))
 }
 

@@ -172,6 +172,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `useCategoryMemory`: lo ya ordenado del último año, sin números ni signos; por las primeras palabras sólo si nunca fue
   ambiguo): la usan el importador del banco y el formulario de un movimiento nuevo (hasta que se elige a mano).
   Tests en `moneyInsights.test.ts` y `money-insights.spec.ts`. Ojo: nada posicionado debajo de un menú "⋯" (lo tapa).
+- Categorías propias (Dinero): tabla `life_categories` (tipo, nombre 1–40 único por tipo entre las activas, color de
+  `LIFE_COLORS`; se archivan, no se borran; tope 50 activas) y el movimiento o fijo guarda `'c:' || id` en `category`
+  (trigger: sólo propias de la cuenta). Nombre y color de cualquier categoría (fija o propia; archivada sigue con su
+  nombre, borrada = "Otros") sólo con `useCategoryLabels()` (`labelOf`/`colorOf`/`keysFor`, `lib/moneyCategories.ts`):
+  nunca `t.categories[...]` suelto. `useCategories()` (lista compartida por la cuenta): "+ Nueva" en `TransactionSheet`
+  (`CategoryForm`) y Ajustes → "Tus categorías" (`CategoriesCard`: editar, archivar con "Deshacer", restaurar). El CSV de
+  Dinero exporta el nombre. Migración `20261029000001_life_custom_categories.sql`, tests en
+  `life_custom_categories.test.sql`, `moneyCategories.test.ts` y `custom-categories.spec.ts`.
 - Importar del banco (V1.1, beta `bankImport`): botón en Dinero → `ImportBankSheet`. Todo en el dispositivo:
   `lib/bankImport.ts` (CSV con comillas y separador detectado, UTF-8 o Windows-1252, títulos y columnas adivinados en
   12 idiomas, débito/crédito o importe con signo, coma o punto decimal, fechas d/m, m/d, a-m-d y serie de Excel,
