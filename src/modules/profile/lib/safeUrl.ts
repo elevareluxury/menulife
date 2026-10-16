@@ -9,7 +9,8 @@ export function safeHref(raw: unknown): string | null {
   if (typeof raw !== 'string') return null
   const url = raw.trim()
   if (!url) return null
-  if (url.startsWith('/') && !url.startsWith('//')) return url
+  // "/\evil.com" el navegador lo lee como "//evil.com" (otro sitio): no es una ruta interna
+  if (url.startsWith('/') && !url.startsWith('//') && !url.startsWith('/\\')) return url
   if (ALLOWED.test(url)) return url
   // "instagram.com/x" sin protocolo
   if (/^[a-z0-9.-]+\.[a-z]{2,}(\/|$)/i.test(url)) return `https://${url}`
