@@ -4,7 +4,7 @@
 const es = {
   meta: {
     title: 'Mycen — Tu identidad digital, todo en un solo lugar',
-    description: 'Creá tu identidad digital: perfil, links, proyectos y contacto en una sola dirección. Organizá tu vida con Life OS y, si tenés un negocio, gestionalo con Mycen Business.',
+    description: 'Creá tu identidad digital: perfil, links, proyectos y contacto en una sola dirección, y organizá tu vida con Life OS.',
   },
   nav: {
     product: 'Producto',
@@ -164,6 +164,8 @@ const es = {
     label: 'Empezá hoy',
     title: 'Empezá hoy.',
     subtitle: 'Creá tu identidad digital. Organizá tu vida. Potenciá tu negocio.',
+    /** Sin Mycen Business (apagado en Super-admin → Landing) */
+    subtitlePersonal: 'Creá tu identidad digital. Organizá tu vida.',
     primary: 'Crear mi espacio gratis →',
     secondary: 'Ya tengo cuenta',
   },
@@ -173,11 +175,16 @@ const es = {
     titleAccent: 'querés saber.',
     items: [
       { q: '¿Qué incluye la cuenta gratuita?', a: 'Tu identidad pública (Mycen Identity: perfil, links, proyectos, QR y tarjeta de contacto), Studio para editarla y medirla, y Life OS completo (Dinero, Metas, Hábitos y Brain). No vence y no pide tarjeta.' },
-      { q: '¿Puedo usar Mycen para mi negocio?', a: 'Sí. Mycen Business sirve para gastronomía, comercio y servicios, con herramientas para cada uno: menú digital, catálogo, agenda de turnos y más.' },
-      { q: '¿Qué pasa si cancelo el plan de negocio?', a: 'Nada: sin contratos ni multas. Lo cancelás desde tu panel cuando quieras y tu cuenta personal sigue activa y gratis.' },
       { q: '¿En qué idiomas está Mycen?', a: 'En 12: español, inglés, portugués, francés, alemán, italiano, chino, japonés, coreano, hindi, árabe y ruso. Los botones de tu página pública se muestran en el idioma de cada visitante.' },
       { q: '¿Puedo llevarme mis datos?', a: 'Sí. Desde Ajustes exportás todo lo tuyo cuando quieras, y podés borrar tu cuenta y tus datos en cualquier momento.' },
     ],
+    /** Van después de la primera pregunta, sólo con Mycen Business prendido */
+    businessItems: [
+      { q: '¿Puedo usar Mycen para mi negocio?', a: 'Sí. Mycen Business sirve para gastronomía, comercio y servicios, con herramientas para cada uno: menú digital, catálogo, agenda de turnos y más.' },
+      { q: '¿Qué pasa si cancelo el plan de negocio?', a: 'Nada: sin contratos ni multas. Lo cancelás desde tu panel cuando quieras y tu cuenta personal sigue activa y gratis.' },
+    ],
+    /** Con Business apagado: la misma pregunta con esta respuesta */
+    businessSoon: 'Sí. Tu perfil tiene una estructura pensada para negocios, con WhatsApp, ubicación, horarios, productos y formulario de contacto, gratis. Las herramientas de gestión (menú digital, pedidos, turnos) llegan más adelante con Mycen Business.',
   },
   footer: {
     product: 'Producto',

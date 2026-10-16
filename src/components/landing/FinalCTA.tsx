@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
+import { useSiteFlags } from '@/lib/siteFlags'
 import { ShimmerButton } from './Navbar'
 
 import { reducedMotion } from './motion'
@@ -10,6 +11,7 @@ declare const gsap: any
 
 export function FinalCTA() {
   const t = useLandingT().cta
+  const { business } = useSiteFlags()
   const titleRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -78,7 +80,7 @@ export function FinalCTA() {
           margin:        '0 auto 48px',
           whiteSpace:    'pre-line',
         }}>
-          {t.subtitle}
+          {business ? t.subtitle : t.subtitlePersonal}
         </p>
 
         <div data-cta-btns style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>

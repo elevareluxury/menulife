@@ -3,7 +3,7 @@ import type { LandingDict } from './es'
 const it: LandingDict = {
   meta: {
     title: 'Mycen — La tua identità digitale, tutto in un unico posto',
-    description: 'Crea la tua identità digitale: profilo, link, progetti e contatti in un unico indirizzo. Organizza la tua vita con Life OS e, se hai un’attività, gestiscila con Mycen Business.',
+    description: 'Crea la tua identità digitale: profilo, link, progetti e contatti in un unico indirizzo, e organizza la tua vita con Life OS.',
   },
   nav: { product: 'Prodotto', pricing: 'Prezzi', login: 'Accedi', cta: 'Crea il tuo Mycen', language: 'Lingua', menu: 'Menu' },
   hero: {
@@ -151,6 +151,8 @@ const it: LandingDict = {
     label: 'Inizia oggi',
     title: 'Inizia oggi.',
     subtitle: 'Crea la tua identità digitale. Organizza la tua vita. Fai crescere la tua attività.',
+    /** Sin Mycen Business (apagado en Super-admin → Landing) */
+    subtitlePersonal: 'Crea la tua identità digitale. Organizza la tua vita.',
     primary: 'Crea il mio spazio gratis →',
     secondary: 'Ho già un account',
   },
@@ -160,11 +162,16 @@ const it: LandingDict = {
     titleAccent: 'vuoi sapere.',
     items: [
       { q: 'Cosa include l’account gratuito?', a: 'La tua identità pubblica (Mycen Identity: profilo, link, progetti, QR code e biglietto da visita), Studio per modificarla e misurarla, e Life OS completo (Denaro, Obiettivi, Abitudini e Brain). Non scade e non richiede carta.' },
-      { q: 'Posso usare Mycen per la mia attività?', a: 'Sì. Mycen Business è pensato per ristorazione, commercio e servizi, con strumenti per ciascuno: menu digitale, catalogo, agenda appuntamenti e altro.' },
-      { q: 'Cosa succede se disdico il piano business?', a: 'Niente: nessun contratto né penale. Disdici dal pannello quando vuoi e il tuo account personale resta attivo e gratuito.' },
       { q: 'In quali lingue è disponibile Mycen?', a: 'In 12: spagnolo, inglese, portoghese, francese, tedesco, italiano, cinese, giapponese, coreano, hindi, arabo e russo. I pulsanti della tua pagina pubblica appaiono nella lingua di ogni visitatore.' },
       { q: 'Posso portare via i miei dati?', a: 'Sì. Da Impostazioni esporti tutto ciò che è tuo quando vuoi, e puoi eliminare il tuo account e i tuoi dati in qualsiasi momento.' },
     ],
+    /** Van después de la primera pregunta, sólo con Mycen Business prendido */
+    businessItems: [
+      { q: 'Posso usare Mycen per la mia attività?', a: 'Sì. Mycen Business è pensato per ristorazione, commercio e servizi, con strumenti per ciascuno: menu digitale, catalogo, agenda appuntamenti e altro.' },
+      { q: 'Cosa succede se disdico il piano business?', a: 'Niente: nessun contratto né penale. Disdici dal pannello quando vuoi e il tuo account personale resta attivo e gratuito.' },
+    ],
+    /** Con Business apagado: la misma pregunta con esta respuesta */
+    businessSoon: 'Sì. Il tuo profilo ha una struttura pensata per le attività, con WhatsApp, posizione, orari, prodotti e modulo di contatto, gratis. Gli strumenti di gestione (menu digitale, ordini, prenotazioni) arriveranno più avanti con Mycen Business.',
   },
   footer: { product: 'Prodotto', pricing: 'Prezzi', faq: 'Domande', contact: 'Contatti', terms: 'Termini', privacy: 'Privacy', madeBy: 'Realizzato da Resilio' },
 }

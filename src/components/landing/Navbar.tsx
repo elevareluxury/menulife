@@ -2,15 +2,18 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
 import { LanguageSelect } from '@/components/ui/LanguageSelect'
+import { useSiteFlags } from '@/lib/siteFlags'
 
 export function Navbar() {
   const l = useLandingT()
+  const { business } = useSiteFlags()
   const [scrolled,   setScrolled]   = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const NAV_LINKS = [
     { label: l.nav.product, href: '#soluciones' },
-    { label: l.nav.pricing, href: '#pricing' },
+    // Los precios son de Mycen Business: sin Business no hay sección de precios
+    ...(business ? [{ label: l.nav.pricing, href: '#pricing' }] : []),
   ]
 
   useEffect(() => {

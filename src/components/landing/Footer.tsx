@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
+import { useSiteFlags } from '@/lib/siteFlags'
 
 const CONTACT_EMAIL = 'team@mycen.id'
 
@@ -11,9 +12,10 @@ const hover = {
 
 export function Footer() {
   const t = useLandingT().footer
+  const { business } = useSiteFlags()
   const anchors = [
     { label: t.product, href: '#soluciones' },
-    { label: t.pricing, href: '#pricing' },
+    ...(business ? [{ label: t.pricing, href: '#pricing' }] : []),
     { label: t.faq,     href: '#faq' },
     { label: t.contact, href: `mailto:${CONTACT_EMAIL}` },
   ]

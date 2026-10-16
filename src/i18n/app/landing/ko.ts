@@ -3,7 +3,7 @@ import type { LandingDict } from './es'
 const ko: LandingDict = {
   meta: {
     title: 'Mycen — 나의 디지털 아이덴티티, 한곳에',
-    description: '프로필, 링크, 프로젝트, 연락처를 하나의 주소에 담아 디지털 아이덴티티를 만드세요. Life OS로 일상을 정리하고, 사업을 한다면 Mycen Business로 운영하세요.',
+    description: '프로필, 링크, 프로젝트, 연락처를 하나의 주소에 담아 디지털 아이덴티티를 만들고, Life OS로 일상을 정리하세요.',
   },
   nav: { product: '제품', pricing: '요금', login: '로그인', cta: '나의 Mycen 만들기', language: '언어', menu: '메뉴' },
   hero: {
@@ -151,6 +151,8 @@ const ko: LandingDict = {
     label: '오늘 시작하세요',
     title: '오늘 시작하세요.',
     subtitle: '디지털 아이덴티티를 만드세요. 일상을 정리하세요. 비즈니스를 키우세요.',
+    /** Sin Mycen Business (apagado en Super-admin → Landing) */
+    subtitlePersonal: '디지털 아이덴티티를 만드세요. 일상을 정리하세요.',
     primary: '무료로 내 공간 만들기 →',
     secondary: '이미 계정이 있어요',
   },
@@ -160,11 +162,16 @@ const ko: LandingDict = {
     titleAccent: '알려드려요.',
     items: [
       { q: '무료 계정에는 무엇이 포함되나요?', a: '공개 아이덴티티(Mycen Identity: 프로필, 링크, 프로젝트, QR 코드, 연락처 카드), 편집하고 분석하는 Studio, 그리고 Life OS 전체(돈, 목표, 습관, Brain)가 포함됩니다. 기한이 없고 카드도 필요 없습니다.' },
-      { q: '사업에 Mycen을 사용할 수 있나요?', a: '네. Mycen Business는 외식, 리테일, 서비스 업종을 위한 도구를 제공합니다: 디지털 메뉴, 카탈로그, 예약 관리 등.' },
-      { q: '비즈니스 요금제를 해지하면 어떻게 되나요?', a: '아무 일도 없습니다. 약정도 위약금도 없습니다. 언제든 대시보드에서 해지할 수 있고, 개인 계정은 계속 무료로 유지됩니다.' },
       { q: 'Mycen은 어떤 언어를 지원하나요?', a: '12개 언어: 스페인어, 영어, 포르투갈어, 프랑스어, 독일어, 이탈리아어, 중국어, 일본어, 한국어, 힌디어, 아랍어, 러시아어. 공개 페이지의 버튼은 방문자마다 그 사람의 언어로 표시됩니다.' },
       { q: '내 데이터를 가져갈 수 있나요?', a: '네. 설정에서 언제든 내 모든 데이터를 내보낼 수 있고, 계정과 데이터를 언제든 삭제할 수 있습니다.' },
     ],
+    /** Van después de la primera pregunta, sólo con Mycen Business prendido */
+    businessItems: [
+      { q: '사업에 Mycen을 사용할 수 있나요?', a: '네. Mycen Business는 외식, 리테일, 서비스 업종을 위한 도구를 제공합니다: 디지털 메뉴, 카탈로그, 예약 관리 등.' },
+      { q: '비즈니스 요금제를 해지하면 어떻게 되나요?', a: '아무 일도 없습니다. 약정도 위약금도 없습니다. 언제든 대시보드에서 해지할 수 있고, 개인 계정은 계속 무료로 유지됩니다.' },
+    ],
+    /** Con Business apagado: la misma pregunta con esta respuesta */
+    businessSoon: '네. 프로필에 사업용 레이아웃이 있어 WhatsApp, 위치, 영업시간, 상품, 문의 양식을 무료로 넣을 수 있어요. 운영 도구(디지털 메뉴, 주문, 예약)는 나중에 Mycen Business로 제공될 예정이에요.',
   },
   footer: { product: '제품', pricing: '요금', faq: '질문', contact: '문의', terms: '약관', privacy: '개인정보', madeBy: 'Resilio 제작' },
 }

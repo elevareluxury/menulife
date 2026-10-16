@@ -17,6 +17,8 @@ export interface MockState {
   rpcCalls: { fn: string; args: Row }[]
   /** Respuesta de profile_traffic_sources (Fase 7) */
   trafficSources?: { source: string | null; referrer_host: string | null; visits: number; visitors: number }[]
+  /** Interruptores del sitio (get_site_flags / admin_set_site_flag) */
+  siteFlags?: { business: boolean }
   /** Escrituras por PostgREST, en orden */
   writes: { method: 'POST' | 'PATCH' | 'DELETE'; table: string; body: unknown }[]
 }
@@ -753,6 +755,13 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
     case 'life_calendar_disable': {
       state.tables.life_calendar_feeds = []
       return null
+    }
+    case 'get_site_flags': return { business: state.siteFlags?.business === true }
+    case 'admin_set_site_flag': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      if (args.p_key !== 'business' || typeof args.p_enabled !== 'boolean') throw new Error('INVALID_FLAG')
+      state.siteFlags = { business: args.p_enabled }
+      return { business: args.p_enabled }
     }
     case 'check_username': {
       const u = String(args.p_username ?? '')

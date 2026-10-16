@@ -3,7 +3,7 @@ import type { LandingDict } from './es'
 const de: LandingDict = {
   meta: {
     title: 'Mycen — Deine digitale Identität, alles an einem Ort',
-    description: 'Erstelle deine digitale Identität: Profil, Links, Projekte und Kontakt unter einer einzigen Adresse. Organisiere dein Leben mit Life OS und führe dein Unternehmen mit Mycen Business.',
+    description: 'Erstelle deine digitale Identität: Profil, Links, Projekte und Kontakt unter einer einzigen Adresse – und organisiere dein Leben mit Life OS.',
   },
   nav: { product: 'Produkt', pricing: 'Preise', login: 'Anmelden', cta: 'Erstelle dein Mycen', language: 'Sprache', menu: 'Menü' },
   hero: {
@@ -151,6 +151,8 @@ const de: LandingDict = {
     label: 'Fang heute an',
     title: 'Fang heute an.',
     subtitle: 'Erstelle deine digitale Identität. Organisiere dein Leben. Bring dein Business voran.',
+    /** Sin Mycen Business (apagado en Super-admin → Landing) */
+    subtitlePersonal: 'Erstelle deine digitale Identität. Organisiere dein Leben.',
     primary: 'Meinen Bereich gratis erstellen →',
     secondary: 'Ich habe schon ein Konto',
   },
@@ -160,11 +162,16 @@ const de: LandingDict = {
     titleAccent: 'wissen willst.',
     items: [
       { q: 'Was ist im kostenlosen Konto enthalten?', a: 'Deine öffentliche Identität (Mycen Identity: Profil, Links, Projekte, QR-Code und Kontaktkarte), Studio zum Bearbeiten und Auswerten und das komplette Life OS (Geld, Ziele, Gewohnheiten und Brain). Es läuft nicht ab und braucht keine Karte.' },
-      { q: 'Kann ich Mycen für mein Unternehmen nutzen?', a: 'Ja. Mycen Business eignet sich für Gastronomie, Handel und Dienstleistungen, mit passenden Werkzeugen: digitale Speisekarte, Katalog, Terminplanung und mehr.' },
-      { q: 'Was passiert, wenn ich den Business-Tarif kündige?', a: 'Nichts: keine Verträge, keine Gebühren. Du kündigst jederzeit im Dashboard, und dein persönliches Konto bleibt aktiv und kostenlos.' },
       { q: 'In welchen Sprachen gibt es Mycen?', a: 'In 12: Spanisch, Englisch, Portugiesisch, Französisch, Deutsch, Italienisch, Chinesisch, Japanisch, Koreanisch, Hindi, Arabisch und Russisch. Die Schaltflächen deiner öffentlichen Seite erscheinen in der Sprache der jeweiligen Besucher.' },
       { q: 'Kann ich meine Daten mitnehmen?', a: 'Ja. In den Einstellungen exportierst du jederzeit alles, was dir gehört, und kannst dein Konto und deine Daten jederzeit löschen.' },
     ],
+    /** Van después de la primera pregunta, sólo con Mycen Business prendido */
+    businessItems: [
+      { q: 'Kann ich Mycen für mein Unternehmen nutzen?', a: 'Ja. Mycen Business eignet sich für Gastronomie, Handel und Dienstleistungen, mit passenden Werkzeugen: digitale Speisekarte, Katalog, Terminplanung und mehr.' },
+      { q: 'Was passiert, wenn ich den Business-Tarif kündige?', a: 'Nichts: keine Verträge, keine Gebühren. Du kündigst jederzeit im Dashboard, und dein persönliches Konto bleibt aktiv und kostenlos.' },
+    ],
+    /** Con Business apagado: la misma pregunta con esta respuesta */
+    businessSoon: 'Ja. Dein Profil hat ein Layout für Unternehmen, mit WhatsApp, Standort, Öffnungszeiten, Produkten und Kontaktformular – kostenlos. Die Verwaltungstools (digitale Speisekarte, Bestellungen, Termine) kommen später mit Mycen Business.',
   },
   footer: { product: 'Produkt', pricing: 'Preise', faq: 'Fragen', contact: 'Kontakt', terms: 'AGB', privacy: 'Datenschutz', madeBy: 'Gemacht von Resilio' },
 }

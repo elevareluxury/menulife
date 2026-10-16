@@ -3,7 +3,7 @@ import type { LandingDict } from './es'
 const zh: LandingDict = {
   meta: {
     title: 'Mycen — 你的数字身份，尽在一处',
-    description: '创建你的数字身份：个人资料、链接、作品和联系方式，集中在一个地址。用 Life OS 规划生活；如果你有生意，用 Mycen Business 来经营。',
+    description: '创建你的数字身份：个人资料、链接、作品和联系方式，集中在一个地址，并用 Life OS 规划生活。',
   },
   nav: { product: '产品', pricing: '价格', login: '登录', cta: '创建你的 Mycen', language: '语言', menu: '菜单' },
   hero: {
@@ -151,6 +151,8 @@ const zh: LandingDict = {
     label: '今天就开始',
     title: '今天就开始。',
     subtitle: '创建你的数字身份。规划你的生活。助力你的生意。',
+    /** Sin Mycen Business (apagado en Super-admin → Landing) */
+    subtitlePersonal: '创建你的数字身份。规划你的生活。',
     primary: '免费创建我的空间 →',
     secondary: '我已有账户',
   },
@@ -160,11 +162,16 @@ const zh: LandingDict = {
     titleAccent: '都在这里。',
     items: [
       { q: '免费账户包含什么？', a: '你的公开身份（Mycen Identity：主页、链接、作品、二维码和联系人名片）、用于编辑和查看数据的 Studio，以及完整的 Life OS（财务、目标、习惯和 Brain）。永不过期，无需绑卡。' },
-      { q: '我可以把 Mycen 用于我的生意吗？', a: '可以。Mycen Business 适用于餐饮、零售和服务业，为每个行业提供工具：电子菜单、商品目录、预约日程等。' },
-      { q: '取消商家方案会怎样？', a: '不会怎样：没有合约，也没有违约金。随时在后台取消，你的个人账户仍然有效且免费。' },
       { q: 'Mycen 支持哪些语言？', a: '12 种：西班牙语、英语、葡萄牙语、法语、德语、意大利语、中文、日语、韩语、印地语、阿拉伯语和俄语。你公开页面上的按钮会以每位访客的语言显示。' },
       { q: '我可以导出我的数据吗？', a: '可以。在设置中随时导出属于你的所有数据，也可以随时删除你的账户和数据。' },
     ],
+    /** Van después de la primera pregunta, sólo con Mycen Business prendido */
+    businessItems: [
+      { q: '我可以把 Mycen 用于我的生意吗？', a: '可以。Mycen Business 适用于餐饮、零售和服务业，为每个行业提供工具：电子菜单、商品目录、预约日程等。' },
+      { q: '取消商家方案会怎样？', a: '不会怎样：没有合约，也没有违约金。随时在后台取消，你的个人账户仍然有效且免费。' },
+    ],
+    /** Con Business apagado: la misma pregunta con esta respuesta */
+    businessSoon: '可以。你的主页有专为商家设计的版式，可放 WhatsApp、地址、营业时间、产品和联系表单，完全免费。经营工具（电子菜单、订单、预约）稍后会随 Mycen Business 推出。',
   },
   footer: { product: '产品', pricing: '价格', faq: '常见问题', contact: '联系我们', terms: '条款', privacy: '隐私', madeBy: '由 Resilio 打造' },
 }
