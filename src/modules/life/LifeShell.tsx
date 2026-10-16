@@ -57,7 +57,7 @@ export function LifeShell() {
   // Capturas guardadas sin conexión: se suben al entrar y cada vez que vuelve la red
   useEffect(() => {
     if (!user) return
-    const flush = () => { void flushOutbox() }
+    const flush = () => { void flushOutbox(user.id) }
     flush()
     window.addEventListener('online', flush)
     return () => window.removeEventListener('online', flush)

@@ -19,6 +19,7 @@ import { SharedExpenseFields } from './SharedExpenseFields'
 import { planMessage } from '../lib/splitMessage'
 import { followTotal, planSplit, type EditShared, type SharedDraft, type SplitDebt } from '../lib/splits'
 import { useOutbox } from '../lib/outbox'
+import { localDateOf } from '../lib/moneyFuture'
 
 /** Gasto compartido: las deudas que quedan (el importe del movimiento ya viene ajustado en `data.amount`) */
 export interface SharedSave { debts: SplitDebt[] }
@@ -92,7 +93,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
       if (initial) {
         setForm({ type: initial.type, amount: initial.amount, category: initial.category,
           description: initial.description ?? '', currency: initial.currency,
-          occurred_at: initial.occurred_at.split('T')[0], goal_id: initial.goal_id ?? null })
+          occurred_at: localDateOf(initial.occurred_at), goal_id: initial.goal_id ?? null })
         setAmountStr(String(initial.amount))
       } else {
         setForm({ ...DEFAULT, currency })

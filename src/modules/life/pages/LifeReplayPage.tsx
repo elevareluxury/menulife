@@ -15,6 +15,7 @@ import { usePrefs } from '@/lib/prefs'
 import { FEATURES } from '@/lib/features'
 import { MOODS, moodSummary, nearestMood, type MoodSummary } from '../lib/mood'
 import { MOOD_ICONS } from '../lib/moodIcons'
+import { isUpcoming } from '../lib/moneyFuture'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -67,7 +68,7 @@ async function generateReplay(userId: string, year: number, month: number, mainC
     q('life_habit_logs', 'habit_id,completed_date,value').gte('completed_date', firstDay).lte('completed_date', lastDay),
     q('life_goal_milestones', 'id').gte('completed_at', fromIso).lt('completed_at', toIso),
     q('life_goals', 'id').eq('status', 'in_progress'),
-    q('life_transactions', 'type,amount,currency').gte('occurred_at', fromIso).lt('occurred_at', toIso),
+    q('life_transactions', 'type,amount,currency,occurred_at').gte('occurred_at', fromIso).lt('occurred_at', toIso),
     q('life_brain_items', 'type').gte('created_at', fromIso).lt('created_at', toIso),
     q('life_brain_items', 'id').eq('type', 'task').gte('completed_at', fromIso).lt('completed_at', toIso),
     q('life_achievements', 'id').gte('achieved_at', fromIso).lt('achieved_at', toIso),
@@ -105,7 +106,9 @@ async function generateReplay(userId: string, year: number, month: number, mainC
   }
 
   // Dinero: sólo la moneda principal se suma; las demás se nombran
-  const txs: { type: string; amount: string; currency: string | null }[] = txRes.data ?? []
+  // Lo programado para más adelante (fecha futura) todavía no cuenta, como en Dinero (lib/moneyFuture.ts)
+  const txs: { type: string; amount: string; currency: string | null; occurred_at: string }[] =
+    (txRes.data ?? []).filter((t: { occurred_at: string }) => !isUpcoming(t, today))
   const main = txs.filter(t => (t.currency ?? mainCurrency) === mainCurrency)
   const income = main.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
   const expense = main.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)

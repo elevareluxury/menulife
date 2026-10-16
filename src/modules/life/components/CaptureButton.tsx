@@ -90,7 +90,8 @@ export function CaptureButton() {
       return true
     } catch (e) {
       if (!isOfflineError(e)) throw e
-      enqueue(item)
+      // Sin lugar en el dispositivo: no se dice "se sube después" (se perdería); se avisa que no se guardó
+      if (!enqueue(item)) throw e
       if (!quiet) toast(t.offline.queued, { icon: '☁️' })
       return false
     }
