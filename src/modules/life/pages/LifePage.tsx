@@ -461,7 +461,7 @@ export function LifePage() {
       <div style={{
         position: 'relative', zIndex: 1,
         maxWidth: '480px', margin: '0 auto',
-        padding: `calc(env(safe-area-inset-top) + 14px) 16px 24px`,
+        padding: '14px 16px 24px',
       }}>
         <motion.div
           variants={stagger}
