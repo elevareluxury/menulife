@@ -6,7 +6,7 @@ import {
 import toast from 'react-hot-toast'
 import { LifeCard, LifeEmptyState, colors, font, radius, ink } from '../design-system'
 import { useGoalOptions, type GoalOption } from '../hooks/useGoalOptions'
-import { localDateKey, useTasks, type LifeTask } from '../hooks/useTasks'
+import { localDateKey, useSavingTasks, useTasks, type LifeTask } from '../hooks/useTasks'
 import { useToday } from '../hooks/useToday'
 import { downloadTaskIcs } from '../lib/ics'
 import { upcomingOccurrences } from '../lib/recurrence'
@@ -359,6 +359,7 @@ export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete,
   const t0 = useLifeT()
   const a = t0.agenda
   const locale = langLocale(useAppLang(st => st.lang))
+  const saving = useSavingTasks()
   return (
     <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
       {tasks.map((t, i) => {
@@ -373,7 +374,8 @@ export function TaskList({ tasks, goalById, onToggle, onEdit, onFocus, onDelete,
         return (
           <li key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 0', borderTop: i ? `1px solid ${colors.border.subtle}` : 'none' }}>
             <button type="button" role="checkbox" aria-checked={done} aria-label={a.complete(t.title)} onClick={() => onToggle(t)}
-              style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+              disabled={saving.has(t.id)} aria-busy={saving.has(t.id) || undefined}
+              style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: saving.has(t.id) ? 'progress' : 'pointer' }}>
               <span aria-hidden="true" style={{
                 width: 22, height: 22, borderRadius: 7,
                 border: `2px solid ${done ? colors.semantic.success : colors.border.medium}`,

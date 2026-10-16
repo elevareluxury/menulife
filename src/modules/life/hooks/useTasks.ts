@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -7,6 +7,7 @@ import { celebrate } from '../lib/celebrate'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import { isValidRecurrence, nextOccurrence, type Recurrence } from '../lib/recurrence'
 import { trackEvent } from '@/lib/productEvents'
+import { remindersChanged } from '../lib/reminderLeader'
 
 // Las tareas viven en Brain (life_brain_items con type = 'task').
 // Las columnas de fecha/recordatorio todavía no están en database.types.ts
@@ -147,6 +148,37 @@ export async function insertTask(userId: string, data: TaskFormData): Promise<Li
   return fromRow(row as BrainTaskRow)
 }
 
+/**
+ * La siguiente ocurrencia de `originId`, una sola vez: la base tiene un índice único en occurrence_of. Si otro
+ * dispositivo (u otro toque) ya la creó, la inserción falla con 23505 y se usa la que existe.
+ */
+async function insertNextOnce(userId: string, originId: string, data: TaskFormData): Promise<{ task: LifeTask; isNew: boolean }> {
+  const { data: row, error } = await db.from('life_brain_items')
+    .insert({ ...taskColumns(data), type: 'task', user_id: userId, is_completed: false, is_archived: false, occurrence_of: originId })
+    .select(COLUMNS).single()
+  if (!error) return { task: fromRow(row as BrainTaskRow), isNew: true }
+  if (error.code !== '23505') throw error
+  const { data: existing, error: err } = await db.from('life_brain_items').select(COLUMNS).eq('occurrence_of', originId).single()
+  if (err) throw err
+  return { task: fromRow(existing as BrainTaskRow), isNew: false }
+}
+
+// Tareas que se están guardando (tildar/destildar). Compartido entre todas las listas de la pantalla: un segundo toque
+// sobre la misma tarea mientras se guarda no hace nada y el casillero queda deshabilitado.
+let savingIds: ReadonlySet<string> = new Set()
+const savingListeners = new Set<() => void>()
+function setSaving(id: string, on: boolean) {
+  const next = new Set(savingIds)
+  if (on) next.add(id); else next.delete(id)
+  savingIds = next
+  savingListeners.forEach(l => l())
+}
+const subscribeSaving = (l: () => void) => { savingListeners.add(l); return () => { savingListeners.delete(l) } }
+/** Ids de las tareas que se están tildando o destildando (para deshabilitar el casillero). */
+export function useSavingTasks(): ReadonlySet<string> {
+  return useSyncExternalStore(subscribeSaving, () => savingIds, () => savingIds)
+}
+
 export function useTasks() {
   const { user } = useAuthStore()
   const [tasks, setTasks] = useState<LifeTask[]>([])
@@ -189,6 +221,7 @@ export function useTasks() {
     if (!user) return
     const task = await insertTask(user.id, data)
     setTasks(prev => [...prev, task])
+    remindersChanged()
   }, [user])
 
   const updateTask = useCallback(async (id: string, data: TaskFormData) => {
@@ -198,6 +231,7 @@ export function useTasks() {
       .eq('id', id).select(COLUMNS).single()
     if (err) throw err
     setTasks(prev => prev.map(t => (t.id === id ? fromRow(row as BrainTaskRow) : t)))
+    remindersChanged()
   }, [])
 
   /**
@@ -209,8 +243,12 @@ export function useTasks() {
     if (done) {
       const next = task.next_occurrence_id ? null : nextTaskData(task, localDateKey())
       if (!next) return
-      const created = await insertTask(user.id, next)
-      setTasks(prev => [...prev.map(t => (t.id === task.id ? { ...t, next_occurrence_id: created.id } : t)), created])
+      const { task: created } = await insertNextOnce(user.id, task.id, next)
+      setTasks(prev => [
+        ...prev.filter(t => t.id !== created.id).map(t => (t.id === task.id ? { ...t, next_occurrence_id: created.id } : t)),
+        // Ya hecha (se completó antes en otro lado): no vuelve a la lista de pendientes
+        ...(created.completed_at ? [] : [created]),
+      ])
       await db.from('life_brain_items').update({ next_occurrence_id: created.id }).eq('id', task.id)
     } else if (task.next_occurrence_id) {
       const nextId = task.next_occurrence_id
@@ -222,7 +260,7 @@ export function useTasks() {
     }
   }, [user])
 
-  const toggleTask = useCallback(async (task: LifeTask) => {
+  const toggleNow = useCallback(async (task: LifeTask) => {
     const done = !task.completed_at
     const completed_at = done ? new Date().toISOString() : null
     setTasks(prev => prev.map(t => (t.id === task.id ? { ...t, completed_at, is_focus: done ? false : t.is_focus } : t)))
@@ -245,6 +283,13 @@ export function useTasks() {
     }
   }, [user, rollRecurrence])
 
+  const toggleTask = useCallback(async (task: LifeTask) => {
+    // Doble toque (o la misma tarea en Mi día y en la lista): el segundo no hace nada mientras se guarda el primero
+    if (savingIds.has(task.id)) return
+    setSaving(task.id, true)
+    try { await toggleNow(task) } finally { setSaving(task.id, false); remindersChanged() }
+  }, [toggleNow])
+
   const setFocus = useCallback(async (task: LifeTask, value: boolean) => {
     setTasks(prev => prev.map(t => (t.id === task.id ? { ...t, is_focus: value } : t)))
     const { error: err } = await db.from('life_brain_items').update({ is_focus: value }).eq('id', task.id)
@@ -261,6 +306,7 @@ export function useTasks() {
     const { error: err } = await db.from('life_brain_items').delete().eq('id', id)
     if (err) throw err
     setTasks(prev => prev.filter(t => t.id !== id))
+    remindersChanged()
   }, [])
 
   return { tasks, loading, error, reload, createTask, updateTask, toggleTask, setFocus, deleteTask, hideLocally }

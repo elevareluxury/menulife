@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Check, ListChecks, Moon, Plus, Sparkles, Star, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
-import { localDateKey, taskWithDate as withDate, useTasks, type LifeTask } from '../hooks/useTasks'
+import { localDateKey, taskWithDate as withDate, useSavingTasks, useTasks, type LifeTask } from '../hooks/useTasks'
 import { useHabits } from '../hooks/useHabits'
 import { MAX_PRIORITIES, useDailyReview, type Priority } from '../hooks/useDailyReview'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
@@ -33,10 +33,10 @@ const chipBtn: React.CSSProperties = {
 
 const refresh = () => window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
 
-function CheckBox({ done, label, onClick }: { done: boolean; label: string; onClick: () => void }) {
+function CheckBox({ done, label, onClick, busy }: { done: boolean; label: string; onClick: () => void; busy?: boolean }) {
   return (
-    <button type="button" role="checkbox" aria-checked={done} aria-label={label} onClick={onClick}
-      style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+    <button type="button" role="checkbox" aria-checked={done} aria-label={label} onClick={onClick} disabled={busy} aria-busy={busy || undefined}
+      style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: busy ? 'progress' : 'pointer' }}>
       <span aria-hidden="true" style={{
         width: 22, height: 22, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.accent.on,
         border: `2px solid ${done ? colors.semantic.success : colors.border.medium}`, background: done ? colors.semantic.success : 'transparent',
@@ -52,6 +52,7 @@ export function MyDaySection() {
   const navigate = useNavigate()
   const today = localDateKey()
   const { tasks, loading: tasksLoading, error: tasksError, toggleTask } = useTasks()
+  const saving = useSavingTasks()
   // Sólo con las tareas cargadas se sabe si una prioridad quedó apuntando a una tarea borrada
   const liveTaskIds = useMemo(() => (tasksLoading || tasksError ? null : new Set(tasks.map(x => x.id))), [tasks, tasksLoading, tasksError])
   const day = useDailyReview(today, liveTaskIds)
@@ -93,7 +94,7 @@ export function MyDaySection() {
               const task = p.kind === 'task' ? taskById.get(p.task_id) : undefined
               return (
                 <li key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <CheckBox done={done} label={m.done(label(p))} onClick={() => {
+                  <CheckBox done={done} label={m.done(label(p))} busy={!!task && saving.has(task.id)} onClick={() => {
                     if (task) toggleTask(task).then(refresh).catch(fail)
                     else toggleTextPriority(p.id).catch(fail)
                   }} />
