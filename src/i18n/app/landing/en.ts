@@ -3,7 +3,7 @@ import type { LandingDict } from './es'
 const en: LandingDict = {
   meta: {
     title: 'Mycen — Your digital identity, all in one place',
-    description: 'Create your digital identity: profile, links, projects and contact details at a single address. Organize your life with Life OS and, if you run a business, manage it with Mycen Business.',
+    description: 'Create your digital identity: profile, links, projects and contact details at a single address, and organize your life with Life OS.',
   },
   nav: { product: 'Product', pricing: 'Pricing', login: 'Log in', cta: 'Create your Mycen', language: 'Language', menu: 'Menu' },
   hero: {
@@ -151,6 +151,8 @@ const en: LandingDict = {
     label: 'Start today',
     title: 'Start today.',
     subtitle: 'Create your digital identity. Organize your life. Grow your business.',
+    /** Sin Mycen Business (apagado en Super-admin → Landing) */
+    subtitlePersonal: 'Create your digital identity. Organize your life.',
     primary: 'Create my free space →',
     secondary: 'I already have an account',
   },
@@ -160,11 +162,16 @@ const en: LandingDict = {
     titleAccent: 'want to know.',
     items: [
       { q: 'What does the free account include?', a: 'Your public identity (Mycen Identity: profile, links, projects, QR code and contact card), Studio to edit and measure it, and the full Life OS (Money, Goals, Habits and Brain). It never expires and no card is required.' },
-      { q: 'Can I use Mycen for my business?', a: 'Yes. Mycen Business works for food & drink, retail and services, with tools for each: digital menu, catalog, appointment scheduling and more.' },
-      { q: 'What happens if I cancel the business plan?', a: 'Nothing: no contracts or penalties. Cancel from your dashboard whenever you like, and your personal account stays active and free.' },
       { q: 'Which languages is Mycen available in?', a: 'Twelve: Spanish, English, Portuguese, French, German, Italian, Chinese, Japanese, Korean, Hindi, Arabic and Russian. The buttons on your public page are shown in each visitor’s language.' },
       { q: 'Can I take my data with me?', a: 'Yes. From Settings you can export everything that’s yours at any time, and you can delete your account and your data whenever you want.' },
     ],
+    /** Van después de la primera pregunta, sólo con Mycen Business prendido */
+    businessItems: [
+      { q: 'Can I use Mycen for my business?', a: 'Yes. Mycen Business works for food & drink, retail and services, with tools for each: digital menu, catalog, appointment scheduling and more.' },
+      { q: 'What happens if I cancel the business plan?', a: 'Nothing: no contracts or penalties. Cancel from your dashboard whenever you like, and your personal account stays active and free.' },
+    ],
+    /** Con Business apagado: la misma pregunta con esta respuesta */
+    businessSoon: 'Yes. Your profile has a layout designed for businesses, with WhatsApp, location, opening hours, products and a contact form, for free. Management tools (digital menu, orders, bookings) come later with Mycen Business.',
   },
   footer: { product: 'Product', pricing: 'Pricing', faq: 'FAQ', contact: 'Contact', terms: 'Terms', privacy: 'Privacy', madeBy: 'Made by Resilio' },
 }

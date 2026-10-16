@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Globe, Target, Rocket } from 'lucide-react'
 import { useLandingT } from '@/i18n/app/landing'
+import { useSiteFlags } from '@/lib/siteFlags'
 
 import { reducedMotion } from './motion'
 import { SplitText } from './SplitText'
@@ -32,7 +33,11 @@ function polarToPercent(angle: number, rx: number, ry: number) {
 
 export function SolutionSection() {
   const t = useLandingT().solution
-  const sats = SATELLITES.map(s => ({ ...s, label: t[s.key], sub: t[`${s.key}Sub`] }))
+  const { business } = useSiteFlags()
+  // Sin Business quedan dos: enfrentadas, para que el dibujo no quede torcido
+  const sats = SATELLITES.filter(s => business || s.key !== 'business').map(s => ({
+    ...s, angle: !business && s.key === 'organization' ? 90 : s.angle, label: t[s.key], sub: t[`${s.key}Sub`],
+  }))
   const sectionRef = useRef<HTMLElement>(null)
   const titleRef   = useRef<HTMLDivElement>(null)
   const vizRef     = useRef<HTMLDivElement>(null)

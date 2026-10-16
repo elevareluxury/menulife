@@ -3,7 +3,7 @@ import type { LandingDict } from './es'
 const ja: LandingDict = {
   meta: {
     title: 'Mycen — あなたのデジタルアイデンティティを、ひとつの場所に',
-    description: 'プロフィール、リンク、プロジェクト、連絡先をひとつのアドレスに。Life OS で毎日を整え、ビジネスをお持ちなら Mycen Business で運営できます。',
+    description: 'プロフィール、リンク、プロジェクト、連絡先をひとつのアドレスに。Life OS で毎日を整えましょう。',
   },
   nav: { product: '製品', pricing: '料金', login: 'ログイン', cta: 'Mycen をつくる', language: '言語', menu: 'メニュー' },
   hero: {
@@ -151,6 +151,8 @@ const ja: LandingDict = {
     label: '今日からはじめよう',
     title: '今日からはじめよう。',
     subtitle: 'デジタルアイデンティティをつくる。暮らしを整える。ビジネスを伸ばす。',
+    /** Sin Mycen Business (apagado en Super-admin → Landing) */
+    subtitlePersonal: 'デジタルアイデンティティをつくる。暮らしを整える。',
     primary: '無料でスペースをつくる →',
     secondary: 'アカウントをお持ちの方',
   },
@@ -160,11 +162,16 @@ const ja: LandingDict = {
     titleAccent: 'すべて。',
     items: [
       { q: '無料アカウントには何が含まれますか？', a: '公開アイデンティティ（Mycen Identity：プロフィール、リンク、プロジェクト、QR コード、連絡先カード）、編集と分析のための Studio、そして Life OS のすべて（お金、目標、習慣、Brain）。期限はなく、カード登録も不要です。' },
-      { q: 'ビジネスに Mycen を使えますか？', a: 'はい。Mycen Business は飲食、小売、サービス業向けで、デジタルメニュー、カタログ、予約管理など業種ごとのツールがあります。' },
-      { q: 'ビジネスプランを解約するとどうなりますか？', a: '何も起きません。契約も違約金もありません。いつでも管理画面から解約でき、個人アカウントは無料のまま使えます。' },
       { q: 'Mycen は何語に対応していますか？', a: '12 言語です：スペイン語、英語、ポルトガル語、フランス語、ドイツ語、イタリア語、中国語、日本語、韓国語、ヒンディー語、アラビア語、ロシア語。公開ページのボタンは訪問者それぞれの言語で表示されます。' },
       { q: 'データを持ち出せますか？', a: 'はい。設定からいつでもあなたのデータをすべてエクスポートでき、アカウントとデータもいつでも削除できます。' },
     ],
+    /** Van después de la primera pregunta, sólo con Mycen Business prendido */
+    businessItems: [
+      { q: 'ビジネスに Mycen を使えますか？', a: 'はい。Mycen Business は飲食、小売、サービス業向けで、デジタルメニュー、カタログ、予約管理など業種ごとのツールがあります。' },
+      { q: 'ビジネスプランを解約するとどうなりますか？', a: '何も起きません。契約も違約金もありません。いつでも管理画面から解約でき、個人アカウントは無料のまま使えます。' },
+    ],
+    /** Con Business apagado: la misma pregunta con esta respuesta */
+    businessSoon: 'はい。プロフィールにはビジネス向けのレイアウトがあり、WhatsApp、所在地、営業時間、商品、問い合わせフォームを無料で載せられます。運営ツール（デジタルメニュー、注文、予約）は今後 Mycen Business で提供予定です。',
   },
   footer: { product: '製品', pricing: '料金', faq: 'よくある質問', contact: 'お問い合わせ', terms: '利用規約', privacy: 'プライバシー', madeBy: 'Resilio 制作' },
 }

@@ -21,6 +21,7 @@ import { FAQSection }           from '@/components/landing/FAQSection'
 import { Footer }               from '@/components/landing/Footer'
 import { ReferralHeroSection } from '@/components/landing/ReferralHeroSection'
 import { useLandingLocale }     from '../lib/useLandingLocale'
+import { useSiteFlags }         from '@/lib/siteFlags'
 
 /** Secciones que se dibujan después del hero (ver `shown`) */
 const REST = 11
@@ -29,6 +30,8 @@ export function LandingPage() {
   useLandingLocale()
   const rootRef = useRef<HTMLDivElement>(null)
   const lang = useAppLang(s => s.lang)
+  // Mycen Business (sección y precios) sólo si el super-admin lo prendió
+  const { business } = useSiteFlags()
   // Rendimiento (V1 · etapa 13): primero se dibuja el hero y después, de a una sección por tarea, el resto. Así el
   // celular no queda trabado dibujando toda la página de una vez. Con un ancla (#pricing) se dibuja todo de entrada.
   const [shown, setShown] = useState(() => (typeof window !== 'undefined' && window.location.hash ? REST : 0))
@@ -84,13 +87,13 @@ export function LandingPage() {
         {shown > 4 && <LifeOSSection />}
 
         {/* Section 5 — Mycen Business */}
-        {shown > 5 && <BusinessSection />}
+        {shown > 5 && business && <BusinessSection />}
 
         {/* Testimonios reales (si no hay, no se muestra) */}
         {shown > 6 && <TestimonialsSection />}
 
         {/* Section 6 — Pricing */}
-        {shown > 7 && <div id="pricing"><PricingSection /></div>}
+        {shown > 7 && business && <div id="pricing"><PricingSection /></div>}
 
         {/* Section 7 — Visión */}
         {shown > 8 && <VisionSection />}

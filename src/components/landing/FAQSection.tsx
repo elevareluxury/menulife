@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLandingT } from '@/i18n/app/landing'
+import { useSiteFlags } from '@/lib/siteFlags'
 
 import { reducedMotion } from './motion'
 import { SplitText } from './SplitText'
@@ -8,6 +9,13 @@ declare const gsap: any
 
 export function FAQSection() {
   const t = useLandingT().faq
+  const { business } = useSiteFlags()
+  // Con Business apagado, la pregunta del negocio cuenta lo que ya hay (el perfil) y lo de gestión, que llega después
+  const items = [
+    t.items[0],
+    ...(business ? t.businessItems : [{ q: t.businessItems[0].q, a: t.businessSoon }]),
+    ...t.items.slice(1),
+  ]
   const [open, setOpen] = useState<number | null>(null)
 
   useEffect(() => {
@@ -42,7 +50,7 @@ export function FAQSection() {
 
         {/* Accordion */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {t.items.map((faq, i) => (
+          {items.map((faq, i) => (
             <FAQItem
               key={i}
               id={`faq-${i}`}

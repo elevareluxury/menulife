@@ -62,8 +62,12 @@ test('la landing pasa axe (WCAG AA)', async ({ page }) => {
   expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
 })
 
+// Los precios son de Mycen Business: estas pruebas lo prenden (interruptor del super-admin)
+const withBusiness = () => Object.assign(createState({}), { siteFlags: { business: true } })
+
 test.describe('animaciones', () => {
-  test('la barra de progreso avanza, la cinta de idiomas corre y el precio cuenta hasta el valor nuevo', async ({ page }) => {
+  test('la barra de progreso avanza, la cinta de idiomas corre y el precio cuenta hasta el valor nuevo', async ({ page, context }) => {
+    await installSupabaseMock(context, withBusiness())
     await page.goto('/?lang=es')
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Tu identidad digital')
     // Cinta: los 12 idiomas para lectores de pantalla, y la pista visual animada
@@ -85,7 +89,7 @@ test.describe('animaciones', () => {
 
   test('con "reducir movimiento" no se mueve nada y todo se ve', async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: 'reduce' })
-    await installSupabaseMock(context, createState({}))
+    await installSupabaseMock(context, withBusiness())
     const page = await context.newPage()
     await page.goto('/?lang=es')
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Tu identidad digital')

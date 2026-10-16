@@ -3,7 +3,7 @@ import type { LandingDict } from './es'
 const fr: LandingDict = {
   meta: {
     title: 'Mycen — Votre identité numérique, tout au même endroit',
-    description: 'Créez votre identité numérique : profil, liens, projets et coordonnées à une seule adresse. Organisez votre vie avec Life OS et, si vous avez une entreprise, gérez-la avec Mycen Business.',
+    description: 'Créez votre identité numérique : profil, liens, projets et coordonnées à une seule adresse, et organisez votre vie avec Life OS.',
   },
   nav: { product: 'Produit', pricing: 'Tarifs', login: 'Se connecter', cta: 'Créez votre Mycen', language: 'Langue', menu: 'Menu' },
   hero: {
@@ -151,6 +151,8 @@ const fr: LandingDict = {
     label: 'Commencez aujourd’hui',
     title: 'Commencez aujourd’hui.',
     subtitle: 'Créez votre identité numérique. Organisez votre vie. Développez votre entreprise.',
+    /** Sin Mycen Business (apagado en Super-admin → Landing) */
+    subtitlePersonal: 'Créez votre identité numérique. Organisez votre vie.',
     primary: 'Créer mon espace gratuit →',
     secondary: 'J’ai déjà un compte',
   },
@@ -160,11 +162,16 @@ const fr: LandingDict = {
     titleAccent: 'voulez savoir.',
     items: [
       { q: 'Que comprend le compte gratuit ?', a: 'Votre identité publique (Mycen Identity : profil, liens, projets, QR code et carte de contact), Studio pour la modifier et la mesurer, et Life OS complet (Argent, Objectifs, Habitudes et Brain). Il n’expire pas et ne demande pas de carte.' },
-      { q: 'Puis-je utiliser Mycen pour mon entreprise ?', a: 'Oui. Mycen Business convient à la restauration, au commerce et aux services, avec des outils pour chacun : menu numérique, catalogue, prise de rendez-vous et plus encore.' },
-      { q: 'Que se passe-t-il si je résilie la formule entreprise ?', a: 'Rien : ni contrat ni pénalité. Vous résiliez depuis votre tableau de bord quand vous voulez, et votre compte personnel reste actif et gratuit.' },
       { q: 'En quelles langues Mycen est-il disponible ?', a: 'En 12 : espagnol, anglais, portugais, français, allemand, italien, chinois, japonais, coréen, hindi, arabe et russe. Les boutons de votre page publique s’affichent dans la langue de chaque visiteur.' },
       { q: 'Puis-je récupérer mes données ?', a: 'Oui. Depuis Réglages, vous exportez tout ce qui vous appartient quand vous voulez, et vous pouvez supprimer votre compte et vos données à tout moment.' },
     ],
+    /** Van después de la primera pregunta, sólo con Mycen Business prendido */
+    businessItems: [
+      { q: 'Puis-je utiliser Mycen pour mon entreprise ?', a: 'Oui. Mycen Business convient à la restauration, au commerce et aux services, avec des outils pour chacun : menu numérique, catalogue, prise de rendez-vous et plus encore.' },
+      { q: 'Que se passe-t-il si je résilie la formule entreprise ?', a: 'Rien : ni contrat ni pénalité. Vous résiliez depuis votre tableau de bord quand vous voulez, et votre compte personnel reste actif et gratuit.' },
+    ],
+    /** Con Business apagado: la misma pregunta con esta respuesta */
+    businessSoon: 'Oui. Votre profil propose une mise en page pensée pour les entreprises, avec WhatsApp, adresse, horaires, produits et formulaire de contact, gratuitement. Les outils de gestion (menu numérique, commandes, rendez-vous) arriveront plus tard avec Mycen Business.',
   },
   footer: { product: 'Produit', pricing: 'Tarifs', faq: 'Questions', contact: 'Contact', terms: 'Conditions', privacy: 'Confidentialité', madeBy: 'Réalisé par Resilio' },
 }

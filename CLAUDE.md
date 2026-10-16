@@ -27,7 +27,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Usernames reservados: tabla `reserved_usernames` y `src/lib/reservedUsernames.ts` (mantener sincronizados).
 - El visitante anónimo **nunca** lee tablas: usa las RPC `get_public_profile`, `get_public_project`, `get_profile_contact_card`,
   `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`, `submit_profile_message`,
-  `track_product_event` (sin sesión, sólo `signup_started`) y `subscribe_profile`.
+  `track_product_event` (sin sesión, sólo `signup_started`), `subscribe_profile` y `get_site_flags`.
 - Proyectos (Fase 5): `content_objects` (type='project') + `content_blocks`. Son de la identidad y se publican por su cuenta
   (`publish_project` → `published_snapshot`; Studio no puede escribir el snapshot ni pasar a "publicado" directo).
   Los módulos `project`/`portfolio` guardan sólo ids en `content`; `get_public_profile` les agrega `projects` (tarjetas de lo
@@ -492,6 +492,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `20261026000001_life_goal_owner.sql`), aviso de "sin conexión" en 12 idiomas (`src/i18n/app/offline.ts`) y recorrido de
   todas las pantallas en `smoke-routes.spec.ts` (sin errores, sin pantalla de error, sin scroll de costado).
 - Landing: las tarjetas de Business dicen "Próximamente" y no llevan a ningún lado (Business no está abierto en la V1).
+- Interruptor de Business: `mycen_site_flags` (nadie lee la tabla) ← `get_site_flags()` (anónima) y
+  `admin_set_site_flag` (sólo super-admins; Super-admin → Landing, `BusinessSwitch`). `src/lib/siteFlags.ts`
+  (`useSiteFlags`, lo último visto queda en el dispositivo; sin respuesta, apagado). Apagado (de entrada): la landing no
+  muestra la sección de Business, Precios (sección y links del menú y del pie), el satélite "Negocios" ni la pregunta de
+  cancelar el plan; la de "¿Puedo usar Mycen para mi negocio?" responde con `faq.businessSoon` y el cierre usa
+  `cta.subtitlePersonal`. La app no cambia (quien ya tiene un negocio lo sigue usando). Migración
+  `20261104000001_site_flags.sql`, tests en `site_flags.test.sql` y `business-switch.spec.ts`.
 - Acentos (después de la etapa 15): 12 (`MYCEN_ACCENTS` en `design/themes.ts` = `tokens.css`, un test compara): los 4
   originales + sol, rosa, lima y los sobrios luna, mono, grafito, pizarra y arena. La base valida los nombres
   (`20261024000001_v1_more_accents.sql`); la conversión de colores viejos sigue eligiendo entre los 4 originales.
