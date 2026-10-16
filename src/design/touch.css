@@ -1,0 +1,36 @@
+/*
+ * Área táctil mínima de 44 × 44 px (guía del proyecto; auditoría v2, #22) sin cambiar el dibujo.
+ *
+ * Cada botón, link y control de Life OS, Studio, el perfil público, acceso, legales y el panel interno lleva un
+ * ::after transparente, centrado, de al menos 44 px: el toque cae en el elemento aunque se vea más chico (un ícono
+ * de 40 px, un chip de 32). No ocupa lugar, así que no mueve nada ni cambia las capturas.
+ *
+ * - Todo va dentro de :where() (especificidad 0): cualquier `position` propia (fixed, absolute, sticky) gana.
+ * - `isolation: isolate` + `z-index: -1`: el área queda debajo del contenido del elemento y arriba de sus vecinos.
+ * - Los links dentro de un párrafo quedan afuera: el ::after taparía las líneas de arriba y abajo (WCAG los exime).
+ * - `data-touch-exempt` lo apaga en un elemento puntual (con el motivo en el código).
+ * - Lo verifica tests/e2e/touch-targets.spec.ts.
+ */
+:where(html[data-mycen-theme], .st-root, .st-bottom-nav, .st-fullscreen, .my-sheet-backdrop, .mp-root, .my-tap-root)
+  :where(button, a[href], summary, [role="button"], [role="link"], [role="tab"], [role="checkbox"], [role="radio"], [role="switch"],
+    [role="menuitem"], [role="option"], label:has(> select), label:has(> input[type="checkbox"]), label:has(> input[type="radio"])):where(:not(:where(p, li, small) a, [data-touch-exempt], .liquid-glass, .liquid-glass-featured)) {
+  position: relative;
+  isolation: isolate;
+}
+
+:where(html[data-mycen-theme], .st-root, .st-bottom-nav, .st-fullscreen, .my-sheet-backdrop, .mp-root, .my-tap-root)
+  :where(button, a[href], summary, [role="button"], [role="link"], [role="tab"], [role="checkbox"], [role="radio"], [role="switch"],
+    [role="menuitem"], [role="option"], label:has(> select), label:has(> input[type="checkbox"]), label:has(> input[type="radio"])):where(:not(:where(p, li, small) a, [data-touch-exempt], .liquid-glass, .liquid-glass-featured))::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+  /* Detrás del contenido del propio elemento (una casilla dentro de su <label> se sigue tocando directo) pero, por
+     isolation, encima de lo que está alrededor */
+  z-index: -1;
+  pointer-events: auto;
+  background: transparent;
+}

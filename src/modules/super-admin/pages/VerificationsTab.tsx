@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAdminT } from '@/i18n/app/admin'
+import { useAdminFormat } from '../lib/adminFormat'
 
 // Verificación de cuenta (después de la etapa 15): pedidos que llegan de Studio → Ajustes. Aprobar pone el tilde en
 // todos los Spaces de la persona; "Quitar" lo saca. Todo por RPC que exigen ser super-admin.
@@ -21,7 +23,6 @@ interface VerificationItem {
   profile: { username: string | null; display_name: string; status: string } | null
 }
 
-const STATUS: Record<VerificationItem['status'], string> = { pending: 'Pendiente', approved: 'Aprobado', rejected: 'Rechazado' }
 const TEXT = '#F5F7FA'
 const MUTED = '#98A2B3'
 const CARD: React.CSSProperties = {
@@ -36,10 +37,12 @@ const INPUT: React.CSSProperties = {
   width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
   background: 'rgba(255,255,255,0.04)', color: TEXT, fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box',
 }
-const fmt = (iso: string) => new Date(iso).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
 const safeLink = (url: string | null) => (url && /^https:\/\//i.test(url) ? url : null)
 
 export function VerificationsTab() {
+  const t = useAdminT()
+  const tv = t.verifications
+  const { dateTime: fmt } = useAdminFormat()
   const [filter, setFilter] = useState<'pending' | 'resolved'>('pending')
   const [reload, setReload] = useState(0)
   const key = `${filter}#${reload}`
@@ -60,7 +63,7 @@ export function VerificationsTab() {
     setBusy(id); setActionError(null)
     const { error } = await rpc(fn, args)
     setBusy(null)
-    if (error) { setActionError('No se pudo guardar. Probá de nuevo.'); return }
+    if (error) { setActionError(tv.saveFailed); return }
     setReload(n => n + 1)
   }
 
@@ -68,62 +71,62 @@ export function VerificationsTab() {
 
   return (
     <div style={{ maxWidth: 900 }}>
-      <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 800, color: TEXT }}>Verificaciones</h1>
+      <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 800, color: TEXT }}>{tv.title}</h1>
       <p style={{ margin: '0 0 16px', fontSize: 13.5, color: MUTED }}>
-        Pedidos de verificación de cuenta. Aprobar muestra el tilde en todos los perfiles de la persona.
+        {tv.intro}
       </p>
-      <div role="radiogroup" aria-label="Filtro" style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div role="radiogroup" aria-label={t.common.filter} style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {(['pending', 'resolved'] as const).map(f => (
           <button key={f} type="button" role="radio" aria-checked={filter === f} onClick={() => setFilter(f)}
             style={{ ...BTN, ...(filter === f ? { background: TEXT, color: '#0A0D12' } : {}) }}>
-            {f === 'pending' ? 'Pendientes' : 'Revisados'}
+            {f === 'pending' ? tv.pending : tv.reviewed}
           </button>
         ))}
       </div>
       {actionError && <p role="alert" style={{ color: '#FCA5A5' }}>{actionError}</p>}
-      {loading ? <p role="status" style={{ color: MUTED }}>Cargando…</p>
-        : result.failed ? <p role="alert" style={{ color: '#FCA5A5' }}>No se pudieron cargar. Revisá que la migración de verificación esté aplicada.</p>
-          : result.items.length === 0 ? <p style={{ color: MUTED }}>{filter === 'pending' ? 'No hay pedidos pendientes.' : 'Todavía no hay pedidos revisados.'}</p>
+      {loading ? <p role="status" style={{ color: MUTED }}>{t.common.loading}</p>
+        : result.failed ? <p role="alert" style={{ color: '#FCA5A5' }}>{tv.loadFailed}</p>
+          : result.items.length === 0 ? <p style={{ color: MUTED }}>{filter === 'pending' ? tv.nonePending : tv.noneReviewed}</p>
             : result.items.map(item => {
               const link = safeLink(item.link)
               const handle = item.profile?.username
               return (
-                <article key={item.id} style={CARD} aria-label={`Pedido de ${item.profile?.display_name ?? item.email ?? ''}`}>
+                <article key={item.id} style={CARD} aria-label={tv.requestOf(item.profile?.display_name ?? item.email ?? '')}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                     <div>
                       <p style={{ margin: 0, color: TEXT, fontWeight: 700 }}>
-                        {item.profile?.display_name ?? '—'} {item.verified && <span style={{ color: '#22C55E' }}>· verificada</span>}
+                        {item.profile?.display_name ?? '—'} {item.verified && <span style={{ color: '#22C55E' }}>· {tv.verified}</span>}
                       </p>
                       <p style={{ margin: '2px 0 0', color: MUTED, fontSize: 13 }}>
-                        {handle ? <a href={`/${handle}`} target="_blank" rel="noopener noreferrer" style={{ color: MUTED }}>/{handle}</a> : 'Sin perfil'}
+                        {handle ? <a href={`/${handle}`} target="_blank" rel="noopener noreferrer" style={{ color: MUTED }}>/{handle}</a> : tv.noProfile}
                         {item.email && <> · {item.email}</>} · {fmt(item.created_at)}
                       </p>
                     </div>
-                    <span style={{ color: MUTED, fontSize: 13 }}>{STATUS[item.status]}</span>
+                    <span style={{ color: MUTED, fontSize: 13 }}>{tv.status[item.status]}</span>
                   </div>
                   <p style={{ margin: '12px 0 0', color: TEXT, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{item.message}</p>
                   {link && <p style={{ margin: '8px 0 0' }}><a href={link} target="_blank" rel="noopener noreferrer nofollow" style={{ color: '#93C5FD', overflowWrap: 'anywhere' }}>{link}</a></p>}
-                  {item.admin_note && <p style={{ margin: '8px 0 0', color: MUTED }}>Nota: {item.admin_note}</p>}
+                  {item.admin_note && <p style={{ margin: '8px 0 0', color: MUTED }}>{t.common.note(item.admin_note)}</p>}
                   {item.status === 'pending' ? (
                     <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
-                      <input style={INPUT} placeholder="Nota para la persona (opcional, se ve en su Studio)" maxLength={300}
-                        aria-label="Nota para la persona" value={notes[item.id] ?? ''}
+                      <input style={INPUT} placeholder={tv.notePlaceholder} maxLength={300}
+                        aria-label={tv.noteLabel} value={notes[item.id] ?? ''}
                         onChange={e => setNotes(n => ({ ...n, [item.id]: e.target.value }))} />
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <button type="button" style={OK} disabled={busy === item.id}
                           onClick={() => { void act(item.id, 'admin_resolve_verification', { p_id: item.id, p_approve: true, p_note: notes[item.id] ?? null }) }}>
-                          Aprobar
+                          {tv.approve}
                         </button>
                         <button type="button" style={BTN} disabled={busy === item.id}
                           onClick={() => { void act(item.id, 'admin_resolve_verification', { p_id: item.id, p_approve: false, p_note: notes[item.id] ?? null }) }}>
-                          Rechazar
+                          {tv.reject}
                         </button>
                       </div>
                     </div>
                   ) : item.verified && (
                     <button type="button" style={{ ...BTN, marginTop: 12 }} disabled={busy === item.id}
                       onClick={() => { void act(item.id, 'admin_set_verified', { p_user_id: item.user_id, p_verified: false }) }}>
-                      Quitar la verificación
+                      {tv.remove}
                     </button>
                   )}
                 </article>

@@ -1,8 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 import { createState, installSupabaseMock, moduleRow, OWNER_ID, profileRow, publishProjectRow, type MockState } from './support/mockSupabase'
 import { API_MODULE_FIXTURES, MODULE_FIXTURES, PROJECT_FIXTURE } from './support/moduleFixtures'
-import { installYoutubeLatestMock, LATEST_VIDEOS } from './support/mockYoutubeLatest'
+import { installYoutubeLatestMock } from './support/mockYoutubeLatest'
 import { rich } from './support/richState'
+import { SPANISH, userStrings } from './support/spanish'
 import studioEn from '../../src/i18n/app/studio/en'
 import lifeEn from '../../src/i18n/app/life/en'
 
@@ -23,19 +24,6 @@ const BIO = [
   moduleRow({ id: 'm-pend', type: 'link', title: null, position: 250, content: {}, visibility: 'hidden', config: { template: 'musician' } }),
 ]
 
-// Palabras que no existen en inglés (ni en los nombres propios de la app) + letras del español
-const SPANISH = /(^|[^\p{L}])(de|que|para|con|tu|tus|una|los|las|del|por|más|está|sin|hoy|ver|nuevo|nueva|guardar|editar|borrar|agregar|eliminar|cerrar|cancelar|todavía|acá|vos|tenés|podés|elegí|mañana|semana|día|días|meta|metas|hábito|hábitos|tarea|tareas|dinero|gasto|gastos|ingresos|perfil|módulo|módulos|compartir|ajustes|inicio|publicar|botón|mensajes|suscriptores|nada|todos)(?=$|[^\p{L}])|[áéíóúñ¿¡]/iu
-
-function userStrings(state: MockState): string[] {
-  const out = new Set<string>(LATEST_VIDEOS.map(v => v.title))
-  const walk = (v: unknown) => {
-    if (typeof v === 'string') { if (v.length >= 3) out.add(v) }
-    else if (Array.isArray(v)) v.forEach(walk)
-    else if (v && typeof v === 'object') Object.values(v).forEach(walk)
-  }
-  walk(state.tables)
-  return [...out].sort((a, b) => b.length - a.length)
-}
 
 /** Textos visibles y atributos accesibles que parecen español, sin lo que cargó la persona. */
 async function spanishOnScreen(page: Page, scope: string, strings: string[]): Promise<string[]> {
@@ -140,5 +128,24 @@ test('perfil público y acceso en inglés: sin textos del sistema en español', 
   for (const r of ['/ana', '/ana/projects/cafe-luna', '/login', '/register', '/forgot-password']) {
     await page.goto(r)
     await expectEnglish(page, r, strings)
+  }
+})
+
+test('panel interno (super-admin) en inglés: sin textos en español', async ({ page, context }) => {
+  test.setTimeout(90_000)
+  const state = rich()
+  await signedInEnglish(context, state)
+  const strings = userStrings(state)
+  // Las pantallas de Mycen Business (negocios, planes…) siguen en español mientras Business no esté abierto: no se
+  // recorren, pero sus nombres en el menú sí están traducidos
+  for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(vp)
+    for (const r of ['/super-admin', '/super-admin/denuncias', '/super-admin/verificaciones', '/super-admin/errores', '/super-admin/producto']) {
+      await page.goto(r)
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      await expectEnglish(page, `${r} (${vp.width})`, strings)
+      // La marca vieja no aparece
+      await expect(page.getByText(/MenuLife/)).toHaveCount(0)
+    }
   }
 })

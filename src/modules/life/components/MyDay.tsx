@@ -36,7 +36,7 @@ const refresh = () => window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { 
 function CheckBox({ done, label, onClick }: { done: boolean; label: string; onClick: () => void }) {
   return (
     <button type="button" role="checkbox" aria-checked={done} aria-label={label} onClick={onClick}
-      style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+      style={{ width: 44, height: 44, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
       <span aria-hidden="true" style={{
         width: 22, height: 22, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.accent.on,
         border: `2px solid ${done ? colors.semantic.success : colors.border.medium}`, background: done ? colors.semantic.success : 'transparent',
@@ -99,12 +99,12 @@ export function MyDaySection() {
                   }} />
                   <button type="button" onClick={() => { if (task) navigate('/life/brain?vista=tareas') }} disabled={!task}
                     style={{
-                      flex: 1, minWidth: 0, textAlign: 'start', background: 'none', border: 'none', padding: '8px 0', cursor: task ? 'pointer' : 'default',
+                      flex: 1, minWidth: 0, minHeight: 44, textAlign: 'start', background: 'none', border: 'none', padding: '8px 0', cursor: task ? 'pointer' : 'default',
                       fontFamily: font, fontSize: '15px', fontWeight: 600, color: done ? colors.text.secondary : colors.text.primary,
                       textDecoration: done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>{label(p)}</button>
                   <button type="button" aria-label={m.remove(label(p))} onClick={() => { setWhy(false); removePriority(p.id).catch(fail) }}
-                    style={{ width: 40, height: 40, background: 'none', border: 'none', color: colors.text.tertiary, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ width: 44, height: 44, flexShrink: 0, background: 'none', border: 'none', color: colors.text.tertiary, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <X size={15} aria-hidden="true" />
                   </button>
                 </li>

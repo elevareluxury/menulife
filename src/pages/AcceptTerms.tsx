@@ -53,7 +53,7 @@ export function AcceptTerms() {
 
   const font = 'var(--font-jakarta)'
   return (
-    <div style={{ minHeight: '100vh', background: '#0F1115', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+    <div className="my-tap-root" style={{ minHeight: '100vh', background: '#0F1115', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       <main style={{
         width: '100%', maxWidth: '420px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: '24px', padding: '40px 36px',

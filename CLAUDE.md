@@ -146,6 +146,13 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   (sincronizada con los checks de `user_settings.language` y `profiles.default_locale`).
 - Life OS, Studio y Profile usan diccionarios tipados por módulo en `src/i18n/app/{life,studio}/<idioma>.ts`
   (el español es la fuente; `tsc` obliga a que cada idioma tenga todas las claves). Mycen Business sigue con i18next (`src/i18n/*.ts`).
+  Sin destello de español (`createNamespace`, `namespace.ts`): el diccionario del idioma guardado empieza a bajar al cargar
+  el grupo y, mientras no llegó, el hook suspende (se ve el esqueleto del `Suspense` de las rutas); `setLang` espera los
+  grupos ya cargados antes de cambiar. Si la descarga falla, español (no queda en blanco). E2E en `lang-flash.spec.ts`
+  (texto visible desde el primer cuadro, diccionarios demorados). Detector de español compartido: `tests/e2e/support/spanish.ts`.
+- Panel interno (super-admin): marca Mycen y diccionario `src/i18n/app/admin/<idioma>.ts` (`useAdminT`; fechas y números
+  con `super-admin/lib/adminFormat.ts`) para la estructura y las pantallas de Mycen (Resumen, Denuncias, Verificaciones,
+  Errores, Producto); las de Business siguen en español. `i18n-coverage.spec.ts` las recorre en inglés.
 - Textos de la página pública (botones del sistema) en `src/modules/profile/lib/profileI18n.ts`.
 - Landing (Lanzamiento L3a): diccionario `src/i18n/app/landing/<idioma>.ts` (`useLandingT`), selector de los 12 idiomas en
   el Navbar, `?lang=xx` fija el idioma y `useLandingLocale` pone título, descripción, `dir` (RTL en árabe), `hreflang` (12 +
@@ -480,6 +487,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   estructuras (también en la vista previa de Studio). Migración `20261025000001_v1_verification.sql`, tests en
   `tests/db/verification.test.sql` y `verification.spec.ts`. Privacidad actualizada (12 idiomas).
 - Errores de contraseña de Supabase (`code: weak_password`, reglas o contraseña filtrada) muestran `weakPassword`.
+- Áreas táctiles de 44 px (auditoría v2, #22): `src/design/touch.css` da a cada botón/link/control de Life OS
+  (`html[data-mycen-theme]`), Studio (`.st-root` y portales), el perfil (`.mp-root`) y `.my-tap-root` (acceso, legales,
+  super-admin) un `::after` transparente de ≥ 44 px (detrás del contenido, `isolation`) sin cambiar el dibujo; los links
+  dentro de un párrafo quedan afuera. Si hay vecinos pegados o un contenedor con scroll, agrandar de verdad (filas de
+  44 px). `touch-targets.spec.ts` mide a 390 px y prueba el toque en los bordes (excepciones: links en texto,
+  deshabilitados y `data-touch-dense`, hoy sólo los 7 puntos de la semana de Hábitos).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

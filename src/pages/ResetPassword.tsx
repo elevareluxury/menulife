@@ -188,7 +188,7 @@ export function ResetPassword() {
 
   if (checking) {
     return (
-      <div style={{ ...S.page }}>
+      <div className="my-tap-root" style={{ ...S.page }}>
         <p role="status" style={{ color: '#98A2B3' }}>{t.common.checking}</p>
       </div>
     )
@@ -197,7 +197,7 @@ export function ResetPassword() {
   const isDisabled = loading || password.length < 8 || confirm.length === 0
 
   return (
-    <div style={S.page}>
+    <div className="my-tap-root" style={S.page}>
       <div style={S.card}>
         <div style={S.logo}>
           <img src="/logo.png" alt="Mycen" style={{ height: '32px', width: 'auto' }} />

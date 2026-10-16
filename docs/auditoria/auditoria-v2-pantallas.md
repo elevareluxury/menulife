@@ -30,7 +30,7 @@ diccionarios). Lo que sigue es lo que sí apareció.
 |---|----------|----------|-----------|--------|
 | 1 | Toda la app (Studio, Life OS, perfil, acceso) | `<html lang>` quedaba en `es` | media | arreglado |
 | 2 | Toda la app en otro idioma | Si falla la descarga del diccionario, la sesión queda en español | media | arreglado |
-| 3 | Toda la app en otro idioma | Se ve español un instante mientras baja el diccionario | baja | a decidir |
+| 3 | Toda la app en otro idioma | Se ve español un instante mientras baja el diccionario | baja | arreglado |
 | 4 | Dinero y Diario en árabe | Las flechas ‹ › del mes apuntaban al revés | media | arreglado |
 | 5 | Studio → Módulos | El aviso "Completá tus módulos" no tenía relleno | media | arreglado |
 | 6 | Hábitos y Mi día (celular) | El progreso ("5 de 8 vasos") se cortaba con "…" | media | arreglado |
@@ -49,9 +49,9 @@ diccionarios). Lo que sigue es lo que sí apareció.
 | 19 | Dinero → Otras monedas | "-US$ 0" con gasto en cero | baja | arreglado |
 | 20 | Perfil | El color de error de "Denunciar" estaba fijo en hex | baja | arreglado |
 | 21 | Perfil en otro idioma | El contenido del dueño queda marcado con el idioma del visitante | media | a decidir |
-| 22 | Varias | Botones de 40 px y chips de 32–36 px en el celular | baja | a decidir |
+| 22 | Varias | Botones de 40 px y chips de 32–36 px en el celular | baja | arreglado |
 | 23 | Studio (celular) | La barra de abajo es sólo íconos | baja | a decidir |
-| 24 | Super-admin | Sólo en español, "MenuLife Admin", contraste y `<pre>` sin foco | baja | a decidir |
+| 24 | Super-admin | Sólo en español, "MenuLife Admin", contraste y `<pre>` sin foco | baja | arreglado |
 | 25 | Diario | El campo de fecha usa el formato del navegador | baja | a decidir |
 
 ### 1. `<html lang>` quedaba en español — media, arreglado
@@ -67,12 +67,15 @@ En `createNamespace` (`src/i18n/app/namespace.ts`) la promesa fallida (`.catch((
 `pending`: con una caída de red o un deploy nuevo justo al cambiar de idioma, nunca se volvía a intentar.
 **Arreglo:** si falla, se borra de `pending` y la próxima pantalla que lo use lo vuelve a pedir.
 
-### 3. Destello de español al abrir en otro idioma — baja, a decidir
+### 3. Destello de español al abrir en otro idioma — baja, arreglado
 El español viaja con la app y los otros idiomas se bajan aparte; en el recorrido (servidor de desarrollo, más lento que
 producción) se vio Mi día entero en español durante ~1 s antes de pasar al inglés, y lo mismo en Brain, Insights y la
 barra de Life OS. En producción con caché es mucho menos, pero en la primera visita con red lenta se nota.
 **Opciones:** precargar el diccionario del idioma guardado (`mycen_lang`) en paralelo al arranque, o mostrar el
 esqueleto hasta tenerlo. Es una decisión de producto/rendimiento (suma una descarga al arranque).
+**Arreglo:** las dos: cada grupo de textos empieza a bajar el idioma guardado apenas se carga y, mientras no llegó, la
+pantalla muestra el esqueleto (suspende) en vez del español; al cambiar de idioma se espera el diccionario antes de
+cambiar. El perfil público no cambia de peso. `lang-flash.spec.ts` lo verifica con los diccionarios demorados.
 
 ### 4. Flechas del mes al revés en árabe — media, arreglado
 `MonthSwitcher` (Dinero) y el Diario elegían la flecha mirando `document.documentElement.dir`, pero Life OS pone `dir`
@@ -132,19 +135,26 @@ muestran en el idioma original del dueño (`default_locale`) cuando no hay tradu
 en español con voz inglesa. Propuesta: envolver los textos del dueño con `lang={default_locale}` (o el de la traducción
 usada) y `dir="auto"`. Toca las 5 estructuras y los módulos, por eso no se hizo en esta pasada.
 
-### 22. Botones chicos en el celular — baja, a decidir
+### 22. Botones chicos en el celular — baja, arreglado
 Pasan WCAG 2.2 AA (24 px) pero no la guía de 44 px del proyecto: botones redondos de Life OS de 40 px (‹ › del mes,
 buscar, volver, cerrar), chips de Brain (Idea/Nota/Tarea 32 px; Todo/Ideas/Notas 36 px), "mycen" del encabezado del
 perfil (22 px de alto), "Volver a Mycen" de los legales (30 px), logo del login (32 px) y "¿Olvidaste tu contraseña?"
 (19 px). Agrandarlos cambia las capturas de referencia; conviene decidirlo con diseño.
+**Arreglo:** `src/design/touch.css` agranda el área táctil a 44 px con un `::after` transparente (el dibujo no cambia);
+donde los vecinos están pegados o hay un contenedor con scroll se agrandó de verdad (prioridades de Mi día, filtros de
+Brain, acciones de Módulos y filas de "Más" en Studio, índice de los legales). Sólo cambió la captura de Mi día.
+`touch-targets.spec.ts` mide y prueba el toque en Life OS, Studio, acceso, legales y el perfil.
 
 ### 23. Barra de Studio sólo con íconos — baja, a decidir
 En el celular las etiquetas de la barra de abajo de Studio son sólo para lectores de pantalla (`.st-nav-label`); a la
 vista quedan cinco íconos. Es una decisión de diseño; se menciona porque "Mis Spaces" y "Más" no se adivinan por el ícono.
 
-### 24. Super-admin — baja, a decidir
+### 24. Super-admin — baja, arreglado
 Es interno: está sólo en español, el encabezado del celular dice "MenuLife Admin" (marca vieja), axe marca contraste
 bajo en las etiquetas de 11 px del resumen y un `<pre>` con scroll que no recibe foco en Verificaciones.
+**Arreglo:** marca Mycen, diccionario en 12 idiomas (`src/i18n/app/admin/`) para la estructura y las pantallas de Mycen
+(las de Business siguen en español), etiquetas del resumen en color atenuado de 12 px (el color queda en un punto) y el
+`<pre>` del detalle técnico de Errores con `tabIndex=0` y `aria-label`. `i18n-coverage.spec.ts` lo recorre en inglés.
 
 ### 25. Fecha del Diario — baja, a decidir
 `<input type="date">` muestra el formato del navegador (en Chromium de prueba, "10/16/2026" aunque la app esté en
