@@ -46,7 +46,7 @@ export function ListenOnModule({ module, lang, onAction }: ModuleProps) {
           return (
             <li key={l.platform}>
               <a className="mp-listen-link" href={l.url} target="_blank" rel="noopener noreferrer"
-                aria-label={t.listenOn.replace('{platform}', name)} onClick={() => onAction(module.id)}>
+                aria-label={t.listenOn.replace('{platform}', name)} onClick={() => onAction(module.id, l.platform)}>
                 <Music2 size={18} aria-hidden="true" className="mp-listen-icon" />
                 <span className="mp-listen-name" translate="no">{name}</span>
                 <ArrowUpRight size={18} aria-hidden="true" className="mp-listen-arrow" />

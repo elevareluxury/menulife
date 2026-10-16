@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, profileRow } from './support/mockSupabase'
 import { MODULE_FIXTURES } from './support/moduleFixtures'
 
@@ -23,7 +23,7 @@ for (const theme of THEMES) {
     await installSupabaseMock(context, state)
     await page.goto('/ana')
     await expect(page.getByRole('heading', { level: 1, name: 'Ana Pérez' })).toBeVisible()
-    const results = await new AxeBuilder({ page })
+    const results = await (await settledAxe(page))
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       // Imágenes de prueba sin conexión (no son parte del tema)
       .exclude('img')

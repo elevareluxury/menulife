@@ -50,6 +50,13 @@ const ko: LifeDict = {
     noResults: "해당하는 내역이 없어요.",
     noneFiltered: "이번 달에는 이 필터에 맞는 내역이 없어요.",
     searching: "검색 중…",
+    tomorrow: "내일",
+    scheduled: "예정",
+    inDays: (n: number) => n === 1 ? '내일' : `${n}일 후`,
+    upcomingTitle: "다가오는 내역",
+    upcomingHint: "날짜가 되면 이번 달 잔액에 반영돼요.",
+    upcomingCount: (n: number) => `${n}건`,
+    offlineOptions: "오프라인 상태예요: 고정 지출, 할부, 공동 지출은 연결이 돌아오면 추가할 수 있어요.",
   },
   tx: {
     newTitle: '새 거래', editTitle: '거래 편집', income: '수입', expense: '지출', amount: '금액',
@@ -228,6 +235,8 @@ const ko: LifeDict = {
     settled: (n: string) => `${n}님과 정산했어요`,
     options: (n: string) => `${n} 옵션`,
     removed: (n: string) => `${n}님과 남은 금액을 삭제했어요`,
+    lockedEdit: "이 지출은 일부 정산되어 금액, 통화, 나누는 방식은 그대로 유지돼요. 나머지는 바꿀 수 있어요.",
+    unshared: "더 이상 공동 지출이 아니에요: 남은 금액은 삭제했어요.",
   },
   journal: {
     title: '일기',

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
 import { createState, installSupabaseMock, OWNER_ID } from './support/mockSupabase'
+import { settle, settledAxe } from './support/settle'
 
 // Life OS con el sistema de diseño y tono sin culpa (V1 · etapa 12): sigue el tema del celular, pasa axe en los dos,
 // da la bienvenida a quien vuelve (sin rachas) y muestra "nuevos comienzos" una vez por fecha.
@@ -43,8 +43,8 @@ for (const [scheme, theme] of [['dark', 'universo'], ['light', 'amanecer']] as c
       await page.goto(path)
       await expect(page.locator('html')).toHaveAttribute('data-mycen-theme', theme)
       await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible()
-      await page.waitForTimeout(300)
-      const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+      await settle(page)
+      const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
       expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => `${n.html} — ${n.failureSummary}`).join(' | ')}`)).toEqual([])
     })
   }

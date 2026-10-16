@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID, profileRow } from './support/mockSupabase'
 
 // Verificación de cuenta: se pide desde Studio → Ajustes y, aprobada, el perfil muestra el tilde junto al nombre.
@@ -28,7 +28,7 @@ test('pedir la verificación desde Ajustes: valida el link y queda en revisión'
   await expect(section.getByRole('button', { name: 'Pedir verificación' })).toHaveCount(0)
   expect(state.rpcCalls.filter(c => c.fn === 'request_verification')).toHaveLength(2)
 
-  const axe = await new AxeBuilder({ page }).include('#st-verification-title').analyze()
+  const axe = await (await settledAxe(page)).include('#st-verification-title').analyze()
   expect(axe.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')).toEqual([])
 })
 

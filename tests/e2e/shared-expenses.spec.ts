@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, OWNER_ID, profileRow, type MockState } from './support/mockSupabase'
 
 // Life OS · Dinero: gastos compartidos y quién le debe a quién.
@@ -53,7 +53,7 @@ test('pagué yo 1000 con Juan a medias: el gasto es el total y "Juan te debe $ 5
   await expect(sheet.getByRole('status')).toContainText(/Se registra el gasto de \$\s?1\.000 que pagaste/)
   // No se combina con "Repetir todos los meses"
   await expect(sheet.getByRole('checkbox', { name: /Repetir todos los meses/ })).toHaveCount(0)
-  const axe = await new AxeBuilder({ page }).include('[role="dialog"]').analyze()
+  const axe = await (await settledAxe(page)).include('[role="dialog"]').analyze()
   expect(axe.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')).toEqual([])
   await sheet.getByRole('button', { name: 'Registrar movimiento' }).click()
 

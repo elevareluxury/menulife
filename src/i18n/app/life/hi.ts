@@ -50,6 +50,13 @@ const hi: LifeDict = {
     noResults: "ऐसा कोई लेन-देन नहीं मिला।",
     noneFiltered: "इस महीने इस फ़िल्टर से कोई लेन-देन नहीं है।",
     searching: "खोज रहे हैं…",
+    tomorrow: "कल",
+    scheduled: "तय",
+    inDays: (n: number) => n === 1 ? 'कल' : `${n} दिन में`,
+    upcomingTitle: "आने वाले",
+    upcomingHint: "तारीख आने पर ये महीने के बैलेंस में जुड़ते हैं।",
+    upcomingCount: (n: number) => `${n} लेन-देन`,
+    offlineOptions: "ऑफ़लाइन: हर महीने वाले, किस्तें और साझा खर्च कनेक्शन लौटने पर जोड़े जा सकते हैं।",
   },
   tx: {
     newTitle: 'नया लेन-देन', editTitle: 'लेन-देन संपादित करें', income: 'आय', expense: 'खर्च', amount: 'राशि',
@@ -228,6 +235,8 @@ const hi: LifeDict = {
     settled: (n: string) => `${n} के साथ हिसाब हो गया`,
     options: (n: string) => `${n} के विकल्प`,
     removed: (n: string) => `${n} के साथ बाकी हिसाब मिटा दिया`,
+    lockedEdit: "इस खर्च का कुछ हिस्सा चुकता हो चुका है, इसलिए रकम, मुद्रा और बँटवारा वैसे ही रहेंगे। बाकी बदल सकते हैं।",
+    unshared: "अब साझा नहीं: बाकी बकाया हटा दिया गया।",
   },
   journal: {
     title: 'डायरी',

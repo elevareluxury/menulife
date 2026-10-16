@@ -3,6 +3,7 @@ import { useStudio } from '../StudioContext'
 import { createModule, deleteModule, friendlyError, saveOrder, updateModule } from './studioApi'
 import { moduleDisplayTitle } from './moduleCatalog'
 import type { StudioModule } from './studioTypes'
+import { isTemplatePending } from './templates'
 import { useStudioT } from '@/i18n/app/studio'
 
 /**
@@ -20,6 +21,8 @@ export function useModuleActions() {
 
   async function toggleVisibility(m: StudioModule) {
     const visibility = m.visibility === 'active' ? 'hidden' : 'active'
+    // Un módulo de plantilla sin completar se muestra sólo al guardarlo completo (nada vacío llega a la página)
+    if (visibility === 'active' && isTemplatePending(m)) return
     setBusyId(m.id); setError(null)
     setModules(prev => prev.map(x => (x.id === m.id ? { ...x, visibility } : x)))
     try {

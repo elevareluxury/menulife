@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
 
 // Colaboraciones (V1.1): una marca propone una colaboración desde el perfil y llega a Studio → Mensajes, separada de
 // los mensajes del formulario de contacto. Sin emails.
 
 const axeViolations = async (page: import('@playwright/test').Page) => {
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   return results.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)
 }
 

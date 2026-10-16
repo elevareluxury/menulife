@@ -507,6 +507,17 @@ const de: StudioDict = {
     primaryClicks: 'Klicks auf die Hauptaktion', moduleClicks: 'Klicks auf Module', shares: 'Mal geteilt', vcards: 'Kontakt-Downloads',
     perDay: 'Besuche pro Tag', chartLabel: (d, t) => `Diagramm der Besuche der letzten ${d} Tage. Gesamt: ${t}.`,
     topModules: 'Meistgeklickte Module', noClicks: 'In diesem Zeitraum hat noch niemand ein Modul angetippt.',
+    clicksTitle: 'Was am häufigsten angetippt wird',
+    clicksHelp: 'Jeder Button deines Profils mit seinen Tipps im Zeitraum. Der Prozentsatz bezieht sich auf die Besuche.',
+    clickTaps: n => n === 1 ? '1 Tipp' : `${n} Tipps`,
+    clickCtr: pct => `${pct} der Besuche`,
+    clickInModule: name => `in ${name}`,
+    clickItemGone: 'Link existiert nicht mehr',
+    clickPrimary: 'Hauptaktion',
+    clickReserve: 'Reservieren',
+    clickSaveContact: 'Kontakt speichern',
+    clickShowAll: n => `Alle anzeigen (${n})`,
+    clickShowLess: 'Weniger anzeigen',
     howWeMeasure: 'So messen wir: ein Besuch pro Person alle 30 Minuten; Bots und deine eigenen Besuche zählen nicht. Wir speichern keine IPs oder persönlichen Daten. „Kontakt speichern“ zählt Downloads, nicht ob der Kontakt gespeichert wurde.',
   },
   settings: {
@@ -769,6 +780,38 @@ const de: StudioDict = {
     askNameYes: 'Ja, Name optional',
     button: 'Text der Schaltfläche (optional)',
     buttonPlaceholder: 'Abonnieren',
+  },
+  templates: {
+    use: 'Vorlage verwenden',
+    title: 'Wähle eine Vorlage',
+    intro: 'Fügt die Module hinzu, die jede Art von Profil oft nutzt. Sie kommen leer und ausgeblendet dazu: Jedes erscheint in deinem Profil, sobald du es ausfüllst.',
+    choose: (name: string) => `Vorlage ${name} ansehen`,
+    look: (layout: string, accent: string) => `Struktur ${layout} · Akzent ${accent}`,
+    back: 'Zurück',
+    willAdd: 'Wird hinzugefügt',
+    alreadyHave: 'Hast du schon (keine Duplikate)',
+    nothingToAdd: 'Du hast schon alle Module dieser Vorlage.',
+    applyLook: 'Auch ihre Struktur und ihren Akzent verwenden',
+    applyLookHelp: 'Du kannst das jederzeit unter Aussehen ändern.',
+    add: (n: number) => (n === 1 ? '1 Modul hinzufügen' : `${n} Module hinzufügen`),
+    added: (n: number) => (n === 1 ? '1 Modul zum Ausfüllen hinzugefügt' : `${n} Module zum Ausfüllen hinzugefügt`),
+    pending: 'Ausfüllen',
+    completeX: (t: string) => `${t} ausfüllen`,
+    checklistTitle: 'Fülle deine Module aus',
+    checklistText: (n: number) => (n === 1
+      ? '1 Modul der Vorlage fehlt noch. Es ist ausgeblendet: Es erscheint in deinem Profil, sobald du es ausfüllst und speicherst.'
+      : `${n} Module der Vorlage fehlen noch. Sie sind ausgeblendet: Jedes erscheint in deinem Profil, sobald du es ausfüllst und speicherst.`),
+    editorHint: 'Dieses Modul stammt aus einer Vorlage. Fülle es aus und speichere es: Erst dann erscheint es in deinem Profil.',
+    onboardingHint: (n: number) => (n === 1
+      ? 'In Studio wartet noch 1 Modul auf dich. Es bleibt ausgeblendet, bis du es ausfüllst.'
+      : `In Studio warten noch ${n} Module auf dich. Sie bleiben ausgeblendet, bis du sie ausfüllst.`),
+    items: {
+      musician: { name: 'Musiker/in', description: 'Deine Musik, dein neuestes Video, deine Termine und wie man dich unterstützt.' },
+      creator: { name: 'Content Creator', description: 'Dein neuestes Video, deine Netzwerke, deine Links und Kooperationen mit Marken.' },
+      professional: { name: 'Profi / Freelance', description: 'Wer du bist, deine Arbeiten, Bewertungen und wie man dich bucht.' },
+      business: { name: 'Lokales Geschäft', description: 'Hauptaktion, Öffnungszeiten, Adresse, Kontakt und Fotos vom Ort.' },
+      personal: { name: 'Persönlich', description: 'Deine Netzwerke, deine Links und ein bisschen über dich.' },
+    },
   },
 }
 export default de

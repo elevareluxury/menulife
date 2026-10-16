@@ -50,6 +50,13 @@ const ja: LifeDict = {
     noResults: "該当する記録は見つかりませんでした。",
     noneFiltered: "今月はこの条件に合う記録がありません。",
     searching: "検索中…",
+    tomorrow: "明日",
+    scheduled: "予定",
+    inDays: (n: number) => n === 1 ? '明日' : `${n}日後`,
+    upcomingTitle: "これから",
+    upcomingHint: "日付になると今月の収支に加わります。",
+    upcomingCount: (n: number) => `${n}件`,
+    offlineOptions: "オフラインです：固定費・分割払い・割り勘は接続が戻ってから追加できます。",
   },
   tx: {
     newTitle: '新しい収支', editTitle: '収支を編集', income: '収入', expense: '支出', amount: '金額',
@@ -228,6 +235,8 @@ const ja: LifeDict = {
     settled: (n: string) => `${n} と精算しました`,
     options: (n: string) => `${n} のオプション`,
     removed: (n: string) => `${n} との未精算を削除しました`,
+    lockedEdit: "この割り勘は一部精算済みのため、金額・通貨・分け方はそのままです。それ以外は変更できます。",
+    unshared: "割り勘ではなくなりました：未精算の分は削除しました。",
   },
   journal: {
     title: '日記',

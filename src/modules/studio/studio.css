@@ -202,6 +202,17 @@
 .st-library button:hover { border-color: var(--st-border-strong); }
 .st-library strong { display: block; font-size: 14.5px; margin-bottom: 2px; }
 .st-library span { font-size: 12.5px; color: var(--st-faint); }
+/* Plantillas: una por fila, con los módulos que suma */
+.st-template-list { grid-template-columns: 1fr; }
+@media (min-width: 560px) { .st-template-list { grid-template-columns: 1fr; } }
+.st-library .st-template-modules, .st-template-modules { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.st-template-modules .st-template-chip {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--st-muted);
+  padding: 3px 9px; border-radius: 999px; background: var(--st-surface-2);
+}
+.st-module.is-pending { opacity: 1; border-style: dashed; }
+.st-checklist { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.st-checklist strong { font-size: 15px; }
 
 /* ── Drawer / diálogo ───────────────────────────────────────────── */
 .st-overlay { position: fixed; inset: 0; z-index: 50; background: var(--my-scrim); display: flex; justify-content: flex-end; }
@@ -473,6 +484,14 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 .st-sources { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
 .st-source-bar { height: 6px; margin-top: 6px; border-radius: 999px; background: var(--st-surface-2); overflow: hidden; }
 .st-source-bar span { display: block; height: 100%; border-radius: inherit; background: var(--st-text); }
+
+/* Analítica → "Lo que más tocan": nombre (y módulo) a un lado, toques y % al otro; la barra es decorativa */
+.st-clicks-row { justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
+.st-clicks-label { min-width: 0; overflow-wrap: anywhere; }
+.st-clicks-module { display: block; color: var(--st-muted); font-size: 13px; }
+.st-clicks-numbers { display: flex; flex-direction: column; align-items: flex-end; text-align: end; }
+.st-clicks-numbers span { color: var(--st-muted); font-size: 13px; }
+.st-clicks .st-source-bar span { background: var(--my-accent); }
 
 /* Perfil suspendido (Fase 8) */
 .st-suspended { border-color: color-mix(in srgb, var(--st-danger) 45%, transparent); background: color-mix(in srgb, var(--st-danger) 8%, transparent); margin-bottom: 16px; }

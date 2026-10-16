@@ -50,6 +50,13 @@ const it: LifeDict = {
     noResults: "Nessun movimento corrisponde.",
     noneFiltered: "Nessun movimento con questo filtro questo mese.",
     searching: "Ricerca…",
+    tomorrow: "Domani",
+    scheduled: "Programmato",
+    inDays: (n: number) => n === 1 ? 'domani' : `tra ${n} giorni`,
+    upcomingTitle: "In arrivo",
+    upcomingHint: "Entrano nel saldo del mese quando arriva la loro data.",
+    upcomingCount: (n: number) => n === 1 ? '1 movimento' : `${n} movimenti`,
+    offlineOptions: "Sei offline: fissi, rate e spese condivise si possono aggiungere quando torna la connessione.",
   },
   tx: {
     newTitle: 'Nuovo movimento', editTitle: 'Modifica movimento', income: 'Entrata', expense: 'Uscita', amount: 'Importo',
@@ -228,6 +235,8 @@ const it: LifeDict = {
     settled: (n: string) => `Hai saldato con ${n}`,
     options: (n: string) => `Opzioni di ${n}`,
     removed: (n: string) => `Hai eliminato il sospeso con ${n}`,
+    lockedEdit: "Hai già saldato parte di questo conto, quindi importo, valuta e divisione restano così. Il resto puoi cambiarlo.",
+    unshared: "Non è più condivisa: ciò che era in sospeso è stato eliminato.",
   },
   journal: {
     title: 'Diario',

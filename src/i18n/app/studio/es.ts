@@ -738,6 +738,17 @@ const es = {
     chartLabel: (days: number, total: number) => `Gráfico de visitas de los últimos ${days} días. Total: ${total}.`,
     topModules: 'Módulos con más clicks',
     noClicks: 'Todavía nadie tocó un módulo en este período.',
+    clicksTitle: 'Lo que más tocan',
+    clicksHelp: 'Cada botón de tu perfil con los toques del período. El porcentaje es sobre las visitas.',
+    clickTaps: (n: number) => n === 1 ? '1 toque' : `${n} toques`,
+    clickCtr: (pct: string) => `${pct} de las visitas`,
+    clickInModule: (name: string) => `en ${name}`,
+    clickItemGone: 'Link que ya no está',
+    clickPrimary: 'Acción principal',
+    clickReserve: 'Reservar',
+    clickSaveContact: 'Guardar contacto',
+    clickShowAll: (n: number) => `Ver todos (${n})`,
+    clickShowLess: 'Ver menos',
     howWeMeasure: 'Cómo medimos: una visita por persona cada 30 minutos; no contamos bots ni tus propias visitas. No guardamos IP ni datos personales. "Guardar contacto" cuenta descargas, no confirma que se haya agendado.',
   },
   settings: {
@@ -1045,6 +1056,39 @@ const es = {
     askNameYes: 'Sí, nombre opcional',
     button: 'Texto del botón (opcional)',
     buttonPlaceholder: 'Suscribirme',
+  },
+  /** Plantillas de Identity: módulos vacíos y ocultos hasta completarlos (lib/templates.ts) */
+  templates: {
+    use: 'Usar una plantilla',
+    title: 'Elegí una plantilla',
+    intro: 'Suma los módulos que suele usar cada tipo de perfil. Se agregan vacíos y ocultos: cada uno se muestra en tu perfil cuando lo completás.',
+    choose: (name: string) => `Ver la plantilla ${name}`,
+    look: (layout: string, accent: string) => `Estructura ${layout} · acento ${accent}`,
+    back: 'Volver',
+    willAdd: 'Se van a agregar',
+    alreadyHave: 'Ya los tenés (no se repiten)',
+    nothingToAdd: 'Ya tenés todos los módulos de esta plantilla.',
+    applyLook: 'Usar también su estructura y su acento',
+    applyLookHelp: 'Lo podés cambiar cuando quieras en Apariencia.',
+    add: (n: number) => (n === 1 ? 'Agregar 1 módulo' : `Agregar ${n} módulos`),
+    added: (n: number) => (n === 1 ? 'Se agregó 1 módulo para completar' : `Se agregaron ${n} módulos para completar`),
+    pending: 'Completá esto',
+    completeX: (t: string) => `Completar ${t}`,
+    checklistTitle: 'Completá tus módulos',
+    checklistText: (n: number) => (n === 1
+      ? 'Te queda 1 módulo de la plantilla. Está oculto: se muestra en tu perfil cuando lo completás y guardás.'
+      : `Te quedan ${n} módulos de la plantilla. Están ocultos: cada uno se muestra en tu perfil cuando lo completás y guardás.`),
+    editorHint: 'Este módulo vino de una plantilla. Completalo y guardalo: recién ahí se muestra en tu perfil.',
+    onboardingHint: (n: number) => (n === 1
+      ? 'En Studio te espera 1 módulo más para completar. Está oculto hasta que lo completes.'
+      : `En Studio te esperan ${n} módulos más para completar. Están ocultos hasta que los completes.`),
+    items: {
+      musician: { name: 'Músico/a', description: 'Tu música, tu último video, tus fechas y cómo apoyarte.' },
+      creator: { name: 'Creador/a de contenido', description: 'Tu último video, tus redes, tus links y colaboraciones con marcas.' },
+      professional: { name: 'Profesional / freelance', description: 'Quién sos, tus trabajos, reseñas y cómo contratarte.' },
+      business: { name: 'Negocio local', description: 'Acción principal, horarios, dirección, contacto y fotos del lugar.' },
+      personal: { name: 'Personal', description: 'Tus redes, tus links y un poco sobre vos.' },
+    },
   },
 }
 

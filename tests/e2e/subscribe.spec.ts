@@ -1,13 +1,13 @@
 import { readFile } from 'node:fs/promises'
 import { expect, test, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
 
 // Módulos de bio (V1.1): "Suscribirse". El visitante deja su email con consentimiento; la dueña ve la lista en
 // Studio → Suscriptores, la busca, borra y exporta CSV. Mycen no le manda nada a la lista.
 
 async function noSerious(page: Page, where: string) {
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
   const bad = results.violations.filter(v => v.impact === 'serious' || v.impact === 'critical')
   expect(bad.map(v => `${where} · ${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
 }

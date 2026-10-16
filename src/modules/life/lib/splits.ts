@@ -198,3 +198,86 @@ export function personSuggestions(splits: Pick<Split, 'person' | 'created_at'>[]
   }
   return [...starts, ...contains].slice(0, max)
 }
+
+// ── Editar un gasto compartido ───────────────────────────────────────────────
+//
+// Al editar el movimiento, sus deudas pendientes se recalculan con planSplit (en centavos). Si alguna ya se saldó,
+// la parte compartida queda bloqueada (monto, moneda, tipo y reparto como están): cambiarla dejaría lo saldado
+// sin sentido. Lo demás (descripción, categoría, fecha, meta) se puede cambiar igual.
+
+export type EditShared =
+  /** No es compartido (se puede volver compartido al editar) */
+  | { kind: 'none' }
+  /** Ya se saldó algo (o las deudas no salen de un reparto conocido): no se toca la parte compartida */
+  | { kind: 'locked' }
+  /** Lo que se ve en "Compartido" al abrir la edición */
+  | { kind: 'draft'; draft: SharedDraft }
+
+/** Cómo se ve "Compartido" al editar un movimiento de `amount` con estas deudas (las de ese movimiento). */
+export function draftFromSplits(amount: number, splits: Pick<Split, 'person' | 'direction' | 'amount' | 'settled_at' | 'created_at'>[]): EditShared {
+  if (!splits.length) return { kind: 'none' }
+  if (splits.some(s => s.settled_at)) return { kind: 'locked' }
+  const ordered = [...splits].sort((a, b) => a.created_at.localeCompare(b.created_at))
+  const totalCents = toCents(amount)
+  if (ordered.every(s => s.direction === 'owed_to_me')) {
+    // Pagaste vos: el movimiento es el total; cada persona te debe su parte
+    const people = ordered.map(s => s.person)
+    const debtCents = ordered.map(s => toCents(Number(s.amount)))
+    const mine = totalCents - debtCents.reduce((a, b) => a + b, 0)
+    if (mine < 0) return { kind: 'locked' }
+    const equal = splitEqual(totalCents, people.length + 1)
+    if (equal.length && equal[0] === mine && equal.slice(1).every((c, i) => c === debtCents[i])) {
+      return { kind: 'draft', draft: { payer: ME, people, mode: 'equal', manual: {} } }
+    }
+    const manual: Record<string, string> = { [ME]: String(fromCents(mine)) }
+    people.forEach((p, i) => { manual[p] = String(fromCents(debtCents[i])) })
+    return { kind: 'draft', draft: { payer: ME, people, mode: 'manual', manual } }
+  }
+  if (ordered.length === 1 && ordered[0].direction === 'i_owe') {
+    // Pagó otra persona: el movimiento es tu parte y es lo que le debés. El total no se guarda, así que el monto
+    // se edita como "tu parte" (a mano, sin la parte de quien pagó; ver followTotal).
+    const payer = ordered[0].person
+    return { kind: 'draft', draft: { payer, people: [payer], mode: 'manual', manual: { [ME]: String(fromCents(totalCents)) } } }
+  }
+  return { kind: 'locked' }
+}
+
+/**
+ * Montos a mano en los que sólo está escrita tu parte (como al editar un gasto que pagó otra persona): tu parte sigue
+ * al monto que se escribe arriba. Si alguien más tiene un monto escrito, no se toca nada.
+ */
+export function followTotal(draft: SharedDraft, amountStr: string): SharedDraft {
+  if (draft.mode !== 'manual') return draft
+  if (draft.people.some(p => (draft.manual[p] ?? '').trim() !== '')) return draft
+  if ((draft.manual[ME] ?? '') === amountStr) return draft
+  return { ...draft, manual: { ...draft.manual, [ME]: amountStr } }
+}
+
+export interface SplitChanges {
+  update: { id: string; person: string; amount: number; currency: string; note: string | null }[]
+  insert: SplitDebt[]
+  remove: string[]
+}
+
+/**
+ * Qué cambiar en las deudas pendientes de un movimiento para que queden como `debts` (vacío = ya no es compartido).
+ * La misma persona y dirección conserva su fila (cambia monto, moneda, nombre y nota); las saldadas no se tocan.
+ */
+export function diffSplits(
+  pending: Pick<Split, 'id' | 'person' | 'direction' | 'amount' | 'currency' | 'note' | 'settled_at'>[],
+  debts: SplitDebt[], currency: string, note: string | null,
+): SplitChanges {
+  const open = pending.filter(s => !s.settled_at)
+  const used = new Set<string>()
+  const update: SplitChanges['update'] = []
+  const insert: SplitDebt[] = []
+  for (const d of debts) {
+    const hit = open.find(s => !used.has(s.id) && s.direction === d.direction && personKey(s.person) === personKey(d.person))
+    if (!hit) { insert.push(d); continue }
+    used.add(hit.id)
+    if (toCents(Number(hit.amount)) !== toCents(d.amount) || hit.currency !== currency || hit.person !== d.person || (hit.note ?? null) !== note) {
+      update.push({ id: hit.id, person: d.person, amount: d.amount, currency, note })
+    }
+  }
+  return { update, insert, remove: open.filter(s => !used.has(s.id)).map(s => s.id) }
+}

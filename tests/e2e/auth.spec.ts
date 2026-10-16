@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock } from './support/mockSupabase'
 
 // Lanzamiento L3b: registro, inicio de sesión y contraseñas en el idioma de la persona.
@@ -77,7 +77,7 @@ for (const path of ['/login', '/register', '/forgot-password']) {
     await expect(page.getByRole('combobox', { name: 'Idioma' })).toBeVisible()
     // La tarjeta entra con un fundido (opacity): medir el contraste recién cuando terminó
     await page.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect?.getTiming().iterations !== Infinity).map(a => a.finished)))
-    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+    const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
     expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`)).toEqual([])
   })
 }

@@ -20,7 +20,7 @@ import { parseMediaUrl } from '../lib/media'
 export interface GroupProps {
   modules: ProfileModule[]
   lang: ProfileLang
-  onAction: (moduleId: string) => void
+  onAction: (moduleId: string, item?: string) => void
 }
 
 /**

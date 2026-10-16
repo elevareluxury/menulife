@@ -507,6 +507,17 @@ const ja: StudioDict = {
     primaryClicks: 'メインアクションのクリック', moduleClicks: 'モジュールのクリック', shares: '共有回数', vcards: '連絡先のダウンロード',
     perDay: '日別の訪問', chartLabel: (d, t) => `過去 ${d} 日間の訪問グラフ。合計：${t}。`,
     topModules: 'よくクリックされたモジュール', noClicks: 'この期間はまだモジュールがタップされていません。',
+    clicksTitle: 'よくタップされるもの',
+    clicksHelp: 'プロフィールの各ボタンと、この期間のタップ数。割合は訪問数に対する値です。',
+    clickTaps: n => `${n} 回タップ`,
+    clickCtr: pct => `訪問の ${pct}`,
+    clickInModule: name => `${name} 内`,
+    clickItemGone: '削除されたリンク',
+    clickPrimary: 'メインアクション',
+    clickReserve: '予約',
+    clickSaveContact: '連絡先を保存',
+    clickShowAll: n => `すべて表示（${n}）`,
+    clickShowLess: '閉じる',
     howWeMeasure: '計測方法：1 人あたり 30 分ごとに 1 訪問として数えます。ボットやあなた自身の訪問は数えません。IP や個人データは保存しません。「連絡先を保存」はダウンロード数で、登録されたかどうかは確認できません。',
   },
   settings: {
@@ -769,6 +780,38 @@ const ja: StudioDict = {
     askNameYes: 'はい、名前は任意',
     button: 'ボタンのテキスト（任意）',
     buttonPlaceholder: '購読する',
+  },
+  templates: {
+    use: 'テンプレートを使う',
+    title: 'テンプレートを選ぶ',
+    intro: 'プロフィールの種類ごとによく使うモジュールを追加します。空の非表示の状態で追加され、入力が完了したものからプロフィールに表示されます。',
+    choose: (name: string) => `テンプレート「${name}」を見る`,
+    look: (layout: string, accent: string) => `${layout} 構成 · ${accent} アクセント`,
+    back: '戻る',
+    willAdd: '追加されるもの',
+    alreadyHave: 'すでにあるもの（重複しません）',
+    nothingToAdd: 'このテンプレートのモジュールはすべてあります。',
+    applyLook: '構成とアクセントも使う',
+    applyLookHelp: '「外観」でいつでも変更できます。',
+    add: (n: number) => (n === 1 ? '1 個のモジュールを追加' : `${n} 個のモジュールを追加`),
+    added: (n: number) => (n === 1 ? '入力待ちのモジュールを 1 個追加しました' : `入力待ちのモジュールを ${n} 個追加しました`),
+    pending: '入力してください',
+    completeX: (t: string) => `${t} を入力`,
+    checklistTitle: 'モジュールを完成させましょう',
+    checklistText: (n: number) => (n === 1
+      ? 'テンプレートのモジュールが 1 個残っています。非表示です：入力して保存するとプロフィールに表示されます。'
+      : `テンプレートのモジュールが ${n} 個残っています。非表示です：それぞれ入力して保存するとプロフィールに表示されます。`),
+    editorHint: 'このモジュールはテンプレートから追加されました。入力して保存すると、プロフィールに表示されます。',
+    onboardingHint: (n: number) => (n === 1
+      ? 'Studio で入力待ちのモジュールがあと 1 個あります。入力するまで非表示です。'
+      : `Studio で入力待ちのモジュールがあと ${n} 個あります。入力するまで非表示です。`),
+    items: {
+      musician: { name: 'ミュージシャン', description: 'あなたの音楽、最新の動画、ライブの日程、応援の方法。' },
+      creator: { name: 'コンテンツクリエイター', description: '最新の動画、SNS、リンク、ブランドとのコラボ。' },
+      professional: { name: 'プロフェッショナル / フリーランス', description: 'あなたについて、実績、レビュー、依頼の方法。' },
+      business: { name: '地域のお店', description: 'メインのアクション、営業時間、住所、連絡先、お店の写真。' },
+      personal: { name: 'パーソナル', description: 'SNS、リンク、あなたについて少し。' },
+    },
   },
 }
 export default ja

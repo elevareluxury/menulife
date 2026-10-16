@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { settledAxe } from './support/settle'
 import { createState, installSupabaseMock } from './support/mockSupabase'
 
 // Lanzamiento L4: términos y privacidad en el idioma de la persona, con el español como referencia.
@@ -34,7 +34,7 @@ test('las páginas legales pasan axe (WCAG AA)', async ({ page, context }) => {
   for (const path of ['/terminos', '/privacidad']) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+    const results = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
     expect(results.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`), path).toEqual([])
   }
 })

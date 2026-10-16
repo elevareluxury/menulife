@@ -5,13 +5,15 @@ import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref, telHref, whatsappHref } from '../lib/safeUrl'
 import { todayKey, WEEK_DAYS } from '../lib/schedule'
 import { NETWORK_LABELS } from '../lib/networks'
+import { urlKey } from '../lib/clickKeys'
 import { SocialIcon } from './SocialIcon'
 import { SafeImage } from './SafeImage'
 
 export interface ModuleProps {
   module: ProfileModule
   lang: ProfileLang
-  onAction: (moduleId: string) => void
+  /** Toque en un botón del módulo; `item` = clave del botón cuando el módulo tiene varios (lib/clickKeys) */
+  onAction: (moduleId: string, item?: string) => void
 }
 
 const str = (v: unknown): string => (typeof v === 'string' ? v : '')
@@ -81,7 +83,7 @@ export function LinkGroupModule({ module, lang, onAction }: ModuleProps) {
     <section className="mp-link-group" aria-label={heading || ui(lang).links}>
       {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
       {items.map((i, n) => (
-        <LinkRow key={i.href + n} href={i.href} title={str(i.title)} subtitle={str(i.subtitle)} onClick={() => onAction(module.id)} />
+        <LinkRow key={i.href + n} href={i.href} title={str(i.title)} subtitle={str(i.subtitle)} onClick={() => onAction(module.id, urlKey(i.url))} />
       ))}
     </section>
   )
@@ -115,10 +117,10 @@ export function ContactModule({ module, lang, onAction }: ModuleProps) {
   const phone = str(module.content.phone)
   const whatsapp = str(module.content.whatsapp)
   const rows = [
-    whatsapp && whatsappHref(whatsapp) && { icon: <MessageCircle size={18} />, label: 'WhatsApp', href: whatsappHref(whatsapp)! },
-    phone && telHref(phone) && { icon: <Phone size={18} />, label: phone, href: telHref(phone)! },
-    email && { icon: <Mail size={18} />, label: email, href: `mailto:${email}` },
-  ].filter(Boolean) as { icon: React.ReactNode; label: string; href: string }[]
+    whatsapp && whatsappHref(whatsapp) && { key: 'whatsapp', icon: <MessageCircle size={18} />, label: 'WhatsApp', href: whatsappHref(whatsapp)! },
+    phone && telHref(phone) && { key: 'phone', icon: <Phone size={18} />, label: phone, href: telHref(phone)! },
+    email && { key: 'email', icon: <Mail size={18} />, label: email, href: `mailto:${email}` },
+  ].filter(Boolean) as { key: string; icon: React.ReactNode; label: string; href: string }[]
   if (!rows.length) return null
 
   return (
@@ -126,7 +128,7 @@ export function ContactModule({ module, lang, onAction }: ModuleProps) {
       <h2 className="mp-card-title">{trLabel(module.title, lang) || t.contact}</h2>
       <div className="mp-row-list">
         {rows.map(r => (
-          <a key={r.href} className="mp-row" href={r.href} {...linkProps(r.href)} onClick={() => onAction(module.id)}>
+          <a key={r.href} className="mp-row" href={r.href} {...linkProps(r.href)} onClick={() => onAction(module.id, r.key)}>
             {r.icon}<span>{r.label}</span>
           </a>
         ))}
@@ -411,7 +413,7 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
             </>
           )
           return href
-            ? <a key={i} className="mp-cards-item" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>{body}</a>
+            ? <a key={i} className="mp-cards-item" href={href} {...linkProps(href)} onClick={() => onAction(module.id, urlKey(item.url))}>{body}</a>
             : <article key={i} className="mp-cards-item">{body}</article>
         })}
       </div>

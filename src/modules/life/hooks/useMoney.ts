@@ -7,6 +7,11 @@ import { useLocaleStore } from '@/store/localeStore'
 import { materializeRecurring } from './useRecurring'
 import { monthCurve as curveOf, monthKeyOf, monthRange, shiftMonth } from '../lib/moneyInsights'
 import { materializeInstallments } from './useInstallments'
+import { useToday } from './useToday'
+import { lastNavigableMonth, splitByArrival, upcomingTotals as upcomingTotalsOf, type UpcomingTotals } from '../lib/moneyFuture'
+import { enqueue, isOfflineError } from '../lib/outbox'
+import toast from 'react-hot-toast'
+import { lifeT } from '@/i18n/app/life'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -73,9 +78,22 @@ function groupByDate(txs: Transaction[]): TransactionGroup[] {
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
+function newTxId(): string {
+  try { return crypto.randomUUID() } catch {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+    })
+  }
+}
+
 /**
  * Movimientos de un mes ('YYYY-MM', por defecto el actual) y del anterior (para comparar en qué se fue).
  * `everHasData`: si la persona tiene algún movimiento (para no mostrar la bienvenida en un mes vacío).
+ *
+ * Fecha futura (lib/moneyFuture.ts): `transactions` y los totales son sólo lo que ya llegó; lo programado del mes
+ * va en `upcoming` / `upcomingTotals` y se suma recién cuando llega su fecha. `maxMonth`: hasta qué mes se puede
+ * avanzar (el actual, o el último con algo programado).
  */
 export function useMoney(month: string = monthKeyOf(new Date())) {
   const { user } = useAuthStore()
@@ -83,6 +101,8 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
   const [all, setAll] = useState<Transaction[]>([])
   const [everHasData, setEverHasData] = useState(false)
   const [loadedMonth, setLoadedMonth] = useState<string | null>(null)
+  const [latestIso, setLatestIso] = useState<string | null>(null)
+  const today = useToday()
 
   const load = useCallback(async () => {
     if (!user) return
@@ -92,13 +112,22 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
     await materializeInstallments().catch(() => 0)
     const [from] = monthRange(shiftMonth(month, -1))
     const [, to] = monthRange(month)
-    const { data } = await db.from('life_transactions')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('occurred_at', from)
-      .lt('occurred_at', to)
-      .order('occurred_at', { ascending: false })
-    const rows: Transaction[] = data ?? []
+    // Lo programado más allá de este mes (para poder avanzar hasta ahí con ‹ mes ›)
+    const [nextStart] = monthRange(shiftMonth(monthKeyOf(new Date()), 1))
+    const [{ data, error }, { data: later }] = await Promise.all([
+      db.from('life_transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('occurred_at', from)
+        .lt('occurred_at', to)
+        .order('occurred_at', { ascending: false }),
+      db.from('life_transactions').select('occurred_at').eq('user_id', user.id)
+        .gte('occurred_at', nextStart).order('occurred_at', { ascending: false }).limit(1),
+    ])
+    // Sin conexión (o error al leer): se queda lo que había en pantalla
+    if (error || !data) { setLoadedMonth(month); return }
+    setLatestIso((later ?? [])[0]?.occurred_at ?? null)
+    const rows: Transaction[] = data
     let ever = rows.length > 0
     if (!ever) {
       const { data: any1 } = await db.from('life_transactions').select('id').eq('user_id', user.id).limit(1)
@@ -126,9 +155,15 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
   }, [load])
 
   const [monthStart] = monthRange(month)
-  const transactions = useMemo(() => all.filter(t => t.occurred_at >= monthStart), [all, monthStart])
-  const previous = useMemo(() => all.filter(t => t.occurred_at < monthStart), [all, monthStart])
+  const split = useMemo(() => splitByArrival(all.filter(t => t.occurred_at >= monthStart), today), [all, monthStart, today])
+  /** Lo que ya llegó (cuenta en los totales) */
+  const transactions = split.arrived
+  /** Programado para más adelante en este mes */
+  const upcoming = split.upcoming
+  const previous = useMemo(() => splitByArrival(all.filter(t => t.occurred_at < monthStart), today).arrived, [all, monthStart, today])
   const thisMonthTxs = transactions
+  const upcomingTotals = useMemo<UpcomingTotals[]>(() => upcomingTotalsOf(upcoming, mainCurrency), [upcoming, mainCurrency])
+  const maxMonth = lastNavigableMonth(today.slice(0, 7), latestIso)
 
   // Totales del mes por moneda: nunca se suman monedas distintas
   const totalsByCurrency = useMemo<CurrencyTotals[]>(() => {
@@ -153,15 +188,30 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
     [thisMonthTxs, mainCurrency, month],
   )
 
-  const grouped = useMemo(() => groupByDate(transactions), [transactions])
+  const grouped = useMemo(() => groupByDate([...upcoming, ...transactions]), [upcoming, transactions])
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
-  /** `id` opcional (generado en el cliente) para vincular algo al movimiento, como las deudas de un gasto compartido. */
-  const createTransaction = useCallback(async (data: TransactionFormData & { id?: string }) => {
+  /**
+   * `id` opcional (generado en el cliente) para vincular algo al movimiento, como las deudas de un gasto compartido.
+   * Sin conexión (y `queue`, por defecto), queda en la cola del dispositivo como con el + general (lib/outbox.ts):
+   * se ve enseguida y se sube solo al volver la señal. Devuelve 'queued' en ese caso.
+   */
+  const createTransaction = useCallback(async (data: TransactionFormData & { id?: string }, opts: { queue?: boolean } = {}): Promise<'saved' | 'queued' | undefined> => {
     if (!user) return
-    const { error } = await db.from('life_transactions').insert({ ...data, user_id: user.id })
-    if (error) throw error
+    const row = { ...data, id: data.id ?? newTxId(), user_id: user.id }
+    try {
+      // Sin red, ni se intenta (va directo a la cola)
+      if (opts.queue !== false && typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('offline')
+      const { error } = await db.from('life_transactions').insert(row)
+      if (error) throw error
+    } catch (e) {
+      if (opts.queue === false || !isOfflineError(e)) throw e
+      enqueue({ table: 'life_transactions', row, module: 'money' })
+      setAll(prev => [{ ...row, description: row.description ?? null } as Transaction, ...prev.filter(t => t.id !== row.id)])
+      toast(lifeT().offline.queued, { icon: '☁️' })
+      return 'queued'
+    }
     await load()
     ;(async () => {
       const { count } = await db.from('life_transactions')
@@ -172,10 +222,13 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
       const { data: monthTxs } = await db.from('life_transactions')
         .select('type,amount').eq('user_id', user.id).eq('currency', data.currency).gte('occurred_at', monthStart)
+        // Lo programado para más adelante todavía no cuenta
+        .lt('occurred_at', new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString())
       const balance = (monthTxs ?? []).reduce((s: number, t: { type: string; amount: string }) =>
         s + (t.type === 'income' ? Number(t.amount) : -Number(t.amount)), 0)
       if (Math.round(balance * 100) > 0) void award(user.id, 'first_positive_month', 'Mes con superávit')
-    })()
+    })().catch(() => {})
+    return 'saved'
   }, [user, load])
 
   const updateTransaction = useCallback(async (id: string, data: Partial<TransactionFormData>) => {
@@ -196,9 +249,9 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
   }, [user, load])
 
   return {
-    transactions, previous, grouped, loading, reload: load,
+    transactions, previous, grouped, loading, reload: load, upcoming, upcomingTotals, maxMonth, today,
     monthIncome, monthExpense, monthBalance, monthCurve, otherTotals, mainCurrency,
-    hasData: transactions.length > 0, everHasData,
+    hasData: transactions.length > 0 || upcoming.length > 0, everHasData,
     createTransaction, updateTransaction, deleteTransaction, hideTransaction,
   }
 }

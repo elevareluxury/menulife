@@ -5,7 +5,7 @@ import { useLifeT } from '@/i18n/app/life'
 import { cleanPerson, emptyDraft, MAX_PEOPLE, ME, personKey, planSplit, type SharedDraft } from '../lib/splits'
 import { planMessage } from '../lib/splitMessage'
 
-// "Compartido" en el formulario de un gasto nuevo: quién pagó, con quién y cómo se divide.
+// "Compartido" en el formulario de un gasto (nuevo o al editarlo): quién pagó, con quién y cómo se divide.
 // Sin nada posicionado (los menús "⋯" de Dinero no quedan tapados).
 
 const label: React.CSSProperties = {
@@ -35,7 +35,7 @@ function Pill({ checked, onClick, children, role = 'radio', label: aria }: {
   )
 }
 
-export function SharedExpenseFields({ total, currency, locale, value, onChange, knownPeople }: {
+export function SharedExpenseFields({ total, currency, locale, value, onChange, knownPeople, disabled }: {
   /** Total escrito en el monto (NaN si todavía no hay) */
   total: number
   currency: string
@@ -45,6 +45,8 @@ export function SharedExpenseFields({ total, currency, locale, value, onChange, 
   onChange: (v: SharedDraft | null) => void
   /** Nombres ya usados, el más reciente primero */
   knownPeople: string[]
+  /** No se puede activar (por ejemplo, sin conexión; quien lo usa explica por qué) */
+  disabled?: boolean
 }) {
   const t = useLifeT()
   const s = t.shared
@@ -54,10 +56,10 @@ export function SharedExpenseFields({ total, currency, locale, value, onChange, 
   if (!value) {
     return (
       <label style={{
-        display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: '16px', padding: '12px 14px', cursor: 'pointer',
+        display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: '16px', padding: '12px 14px', cursor: disabled ? 'default' : 'pointer',
         borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`,
       }}>
-        <input type="checkbox" checked={false} onChange={() => onChange(emptyDraft())}
+        <input type="checkbox" checked={false} disabled={disabled} onChange={() => onChange(emptyDraft())}
           style={{ width: 18, height: 18, marginTop: 2, accentColor: colors.accent.default }} />
         <span style={{ fontFamily: font }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: colors.text.primary }}>

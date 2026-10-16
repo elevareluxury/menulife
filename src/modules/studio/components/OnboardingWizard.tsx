@@ -13,6 +13,8 @@ import { socialUrl } from '../lib/moduleCatalog'
 import { toPublicProfile, publicBaseUrl } from '../lib/preview'
 import { normalizeUsername, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
 import type { StudioModule, StudioProfile } from '../lib/studioTypes'
+import { isTemplatePending, PURPOSE_TEMPLATE, TEMPLATES } from '../lib/templates'
+import { addTemplateModules } from '../lib/applyTemplate'
 import { Button, ImageField, TextField } from './ui'
 import { useStudioT } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
@@ -156,7 +158,12 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
           }
         }
         if (wa.length >= 8) primary = { kind: 'whatsapp', label: w.whatsappAction, url: `https://wa.me/${wa}` }
-        setModules(prev => [...created, ...prev])
+        // Plantilla del propósito: el resto de sus módulos, vacíos y ocultos hasta completarlos en Studio
+        // (nada de texto de ejemplo en la página). No repite lo que ya cargó (Instagram, formulario).
+        const current = [...created, ...modules]
+        const template = purpose ? TEMPLATES[PURPOSE_TEMPLATE[purpose]] : null
+        const fromTemplate = template ? await addTemplateModules(profile.id, template, current, t, { skipExisting: true }) : []
+        setModules(() => [...current, ...fromTemplate])
         setProfile(await updateProfile(profile.id, { primary_action: primary, onboarding_step: 4 }))
         setStep(6)
       } catch (e) { setError(friendlyError(e)) } finally { setBusy(false) }
@@ -186,6 +193,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
   }
 
   const look = profileLook(profile?.theme)
+  const pendingCount = modules.filter(isTemplatePending).length
   const seed = profile ? huellaSeed(profile) : ''
 
   // Momento de la huella: pantalla a oscuras, la huella se dibuja y aparece la frase
@@ -275,6 +283,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
                     <Button onClick={() => { void share() }}><Share2 size={16} aria-hidden="true" /> {w.share}</Button>
                   </div>
                   <span role="status" className="st-sr-only">{copied ? w.copied : ''}</span>
+                  {pendingCount > 0 && <p className="st-help" style={{ margin: 0 }}>{t.templates.onboardingHint(pendingCount)}</p>}
                   <Button onClick={() => { onDone(profile, modules); navigate('/studio/everywhere') }}>{everywhere.title}</Button>
                   <Button variant="ghost" onClick={() => onDone(profile, modules)}>{w.goStudio}</Button>
                 </>

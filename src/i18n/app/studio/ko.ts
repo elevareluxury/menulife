@@ -507,6 +507,17 @@ const ko: StudioDict = {
     primaryClicks: '메인 액션 클릭', moduleClicks: '모듈 클릭', shares: '공유 횟수', vcards: '연락처 다운로드',
     perDay: '일별 방문', chartLabel: (d, t) => `최근 ${d}일 방문 그래프. 합계: ${t}.`,
     topModules: '가장 많이 클릭된 모듈', noClicks: '이 기간에는 아직 모듈을 누른 사람이 없어요.',
+    clicksTitle: '가장 많이 누른 것',
+    clicksHelp: '프로필의 각 버튼과 이 기간의 탭 수예요. 비율은 방문 수 기준이에요.',
+    clickTaps: n => `${n}회 탭`,
+    clickCtr: pct => `방문의 ${pct}`,
+    clickInModule: name => `${name} 안`,
+    clickItemGone: '더 이상 없는 링크',
+    clickPrimary: '주요 버튼',
+    clickReserve: '예약',
+    clickSaveContact: '연락처 저장',
+    clickShowAll: n => `모두 보기 (${n})`,
+    clickShowLess: '접기',
     howWeMeasure: '측정 방식: 한 사람당 30분마다 1회 방문으로 집계하며, 봇과 내 방문은 제외합니다. IP나 개인 정보는 저장하지 않습니다. "연락처 저장"은 다운로드 수이며 실제 저장 여부는 확인하지 않습니다.',
   },
   settings: {
@@ -769,6 +780,38 @@ const ko: StudioDict = {
     askNameYes: '네, 이름은 선택',
     button: '버튼 텍스트 (선택)',
     buttonPlaceholder: '구독하기',
+  },
+  templates: {
+    use: '템플릿 사용',
+    title: '템플릿 선택',
+    intro: '프로필 유형마다 자주 쓰는 모듈을 추가합니다. 비어 있고 숨겨진 상태로 추가되며, 각 모듈은 완성하면 프로필에 표시됩니다.',
+    choose: (name: string) => `${name} 템플릿 보기`,
+    look: (layout: string, accent: string) => `${layout} 구조 · ${accent} 강조색`,
+    back: '뒤로',
+    willAdd: '추가될 모듈',
+    alreadyHave: '이미 있음 (중복되지 않음)',
+    nothingToAdd: '이 템플릿의 모듈을 이미 모두 가지고 있어요.',
+    applyLook: '구조와 강조색도 사용',
+    applyLookHelp: '모양에서 언제든 바꿀 수 있어요.',
+    add: (n: number) => (n === 1 ? '모듈 1개 추가' : `모듈 ${n}개 추가`),
+    added: (n: number) => (n === 1 ? '완성할 모듈 1개를 추가했어요' : `완성할 모듈 ${n}개를 추가했어요`),
+    pending: '완성하기',
+    completeX: (t: string) => `${t} 완성하기`,
+    checklistTitle: '모듈을 완성하세요',
+    checklistText: (n: number) => (n === 1
+      ? '템플릿 모듈이 1개 남았어요. 숨겨져 있으며, 완성하고 저장하면 프로필에 표시됩니다.'
+      : `템플릿 모듈이 ${n}개 남았어요. 숨겨져 있으며, 각각 완성하고 저장하면 프로필에 표시됩니다.`),
+    editorHint: '이 모듈은 템플릿에서 왔어요. 완성하고 저장해야 프로필에 표시됩니다.',
+    onboardingHint: (n: number) => (n === 1
+      ? 'Studio에서 완성할 모듈 1개가 기다리고 있어요. 완성할 때까지 숨겨져 있어요.'
+      : `Studio에서 완성할 모듈 ${n}개가 기다리고 있어요. 완성할 때까지 숨겨져 있어요.`),
+    items: {
+      musician: { name: '뮤지션', description: '음악, 최신 영상, 공연 일정, 후원 방법.' },
+      creator: { name: '콘텐츠 크리에이터', description: '최신 영상, 소셜 계정, 링크, 브랜드 협업.' },
+      professional: { name: '전문가 / 프리랜서', description: '소개, 작업물, 후기, 의뢰 방법.' },
+      business: { name: '동네 가게', description: '주요 액션, 영업시간, 주소, 연락처, 매장 사진.' },
+      personal: { name: '개인', description: '소셜 계정, 링크, 나에 대한 짧은 소개.' },
+    },
   },
 }
 export default ko

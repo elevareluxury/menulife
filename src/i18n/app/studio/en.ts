@@ -507,6 +507,17 @@ const en: StudioDict = {
     primaryClicks: 'Main action clicks', moduleClicks: 'Module clicks', shares: 'Times shared', vcards: 'Contact downloads',
     perDay: 'Visits per day', chartLabel: (d, t) => `Chart of visits over the last ${d} days. Total: ${t}.`,
     topModules: 'Most clicked modules', noClicks: 'Nobody has tapped a module in this period yet.',
+    clicksTitle: 'What people tap most',
+    clicksHelp: 'Every button on your profile with its taps in this period. The percentage is out of visits.',
+    clickTaps: n => n === 1 ? '1 tap' : `${n} taps`,
+    clickCtr: pct => `${pct} of visits`,
+    clickInModule: name => `in ${name}`,
+    clickItemGone: 'Link no longer there',
+    clickPrimary: 'Main action',
+    clickReserve: 'Book',
+    clickSaveContact: 'Save contact',
+    clickShowAll: n => `Show all (${n})`,
+    clickShowLess: 'Show less',
     howWeMeasure: 'How we measure: one visit per person every 30 minutes; we do not count bots or your own visits. We do not store IPs or personal data. "Save contact" counts downloads; it does not confirm the contact was saved.',
   },
   settings: {
@@ -769,6 +780,38 @@ const en: StudioDict = {
     askNameYes: 'Yes, optional name',
     button: 'Button text (optional)',
     buttonPlaceholder: 'Subscribe',
+  },
+  templates: {
+    use: 'Use a template',
+    title: 'Choose a template',
+    intro: 'Adds the modules each kind of profile usually has. They are added empty and hidden: each one shows on your profile once you complete it.',
+    choose: (name: string) => `See the ${name} template`,
+    look: (layout: string, accent: string) => `${layout} layout · ${accent} accent`,
+    back: 'Back',
+    willAdd: 'Will be added',
+    alreadyHave: 'You already have these (not repeated)',
+    nothingToAdd: 'You already have every module in this template.',
+    applyLook: 'Also use its layout and accent',
+    applyLookHelp: 'You can change it anytime in Appearance.',
+    add: (n: number) => (n === 1 ? 'Add 1 module' : `Add ${n} modules`),
+    added: (n: number) => (n === 1 ? '1 module added to complete' : `${n} modules added to complete`),
+    pending: 'Complete this',
+    completeX: (t: string) => `Complete ${t}`,
+    checklistTitle: 'Complete your modules',
+    checklistText: (n: number) => (n === 1
+      ? 'You have 1 template module left. It is hidden: it shows on your profile once you complete and save it.'
+      : `You have ${n} template modules left. They are hidden: each one shows on your profile once you complete and save it.`),
+    editorHint: 'This module came from a template. Complete and save it: only then does it show on your profile.',
+    onboardingHint: (n: number) => (n === 1
+      ? '1 more module is waiting for you in Studio. It stays hidden until you complete it.'
+      : `${n} more modules are waiting for you in Studio. They stay hidden until you complete them.`),
+    items: {
+      musician: { name: 'Musician', description: 'Your music, your latest video, your dates and ways to support you.' },
+      creator: { name: 'Content creator', description: 'Your latest video, your socials, your links and brand collaborations.' },
+      professional: { name: 'Professional / freelance', description: 'Who you are, your work, reviews and how to hire you.' },
+      business: { name: 'Local business', description: 'Main action, hours, address, contact and photos of the place.' },
+      personal: { name: 'Personal', description: 'Your socials, your links and a bit about you.' },
+    },
   },
 }
 export default en

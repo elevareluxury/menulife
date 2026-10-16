@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useStudio } from '../StudioContext'
 import { loadStats } from '../lib/studioApi'
-import { moduleDisplayTitle } from '../lib/moduleCatalog'
 import type { DailyStat } from '../lib/studioTypes'
 import { Button, PageHeader } from '../components/ui'
 import { TrafficSources } from '../components/TrafficSources'
+import { ClickRanking } from '../components/ClickRanking'
 import { useStudioT } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
@@ -43,17 +43,6 @@ export function AnalyticsPage() {
     const shares = sum(['share', 'copy_link'])
     const vcards = sum(['vcard_download'])
 
-    // Los módulos que ya no existen se suman en una sola fila "Módulo eliminado"
-    const byModule = new Map<string, number>()
-    data.filter(d => d.event_type === 'module_click' && d.module_id).forEach(d => {
-      const id = modules.some(x => x.id === d.module_id) ? d.module_id! : ''
-      byModule.set(id, (byModule.get(id) ?? 0) + d.events)
-    })
-    const top = [...byModule.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id, n]) => {
-      const m = modules.find(x => x.id === id)
-      return { id, label: m ? moduleDisplayTitle(m, t) : t.catalog.summary.deleted, n }
-    })
-
     const series: { day: string; label: string; visitas: number }[] = []
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(now - i * 86_400_000)
@@ -64,8 +53,8 @@ export function AnalyticsPage() {
         visitas: data.filter(x => x.event_type === 'view' && x.day === iso).reduce((a, x) => a + x.events, 0),
       })
     }
-    return { views, visitors, primary, moduleClicks, shares, vcards, top, series }
-  }, [data, modules, days, now, t, locale])
+    return { views, visitors, primary, moduleClicks, shares, vcards, series }
+  }, [data, days, now, locale])
 
   return (
     <>
@@ -124,20 +113,7 @@ export function AnalyticsPage() {
 
           <TrafficSources profileId={profile.id} days={days} />
 
-          <section className="st-card">
-            <h2 className="st-card-title">{an.topModules}</h2>
-            {summary.top.length === 0
-              ? <p className="st-help" style={{ margin: 0 }}>{an.noClicks}</p>
-              : (
-                <ol className="st-checklist" style={{ listStyle: 'decimal', paddingInlineStart: 20 }}>
-                  {summary.top.map(row => (
-                    <li key={row.id} style={{ display: 'list-item' }}>
-                      {row.label} — <strong>{row.n}</strong>
-                    </li>
-                  ))}
-                </ol>
-              )}
-          </section>
+          <ClickRanking profileId={profile.id} identityId={profile.identity_id} days={days} modules={modules} />
 
           <p className="st-help">
             {an.howWeMeasure}
