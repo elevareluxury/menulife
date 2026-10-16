@@ -510,6 +510,11 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   dentro de un párrafo quedan afuera. Si hay vecinos pegados o un contenedor con scroll, agrandar de verdad (filas de
   44 px). `touch-targets.spec.ts` mide a 390 px y prueba el toque en los bordes (excepciones: links en texto,
   deshabilitados y `data-touch-dense`, hoy sólo los 7 puntos de la semana de Hábitos).
+- Pantalla de carga: `scripts/bootSplash.ts` (plugin de Vite) pone en `index.html` la huella de la marca (semilla "mycen")
+  centrada y girando sobre el fondo del tema del celular (quieta con "reducir movimiento"; en "/" no, la landing tiene su
+  esqueleto). `src/lib/bootSplash.ts`: la app la saca al dibujar la primera pantalla (`BootSplashDone` en `App.tsx`) y la
+  muestra mientras baja otra ruta (`RouteLoading`); por las dudas se va sola a los 12 s. iPhone instalado: `body` lleva
+  `padding-top: env(safe-area-inset-top)` y lo fijo arriba (barras, cajones) usa `top`/`padding` con ese valor.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea
