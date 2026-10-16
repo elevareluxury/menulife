@@ -21,7 +21,7 @@ const ja: LifeDict = {
     extraCurrencies: 'その他の通貨',
     extraHelp: '他の通貨で収支を記録するためのものです（最大 5 つ）。通貨ごとに別々に集計し、金額の換算は行いません。',
     addCurrency: '通貨を追加', removeCurrency: c => `${c} を削除`, searchCurrency: '通貨を検索…',
-    timezone: 'タイムゾーン', timezoneHelp: '1 日の始まりと終わりを決めます。',
+    timezone: 'タイムゾーン', timezoneHelp: '1 日の始まりと終わりを決めます。', timezoneOther: z => `スマホは別のタイムゾーン（${z}）にあります。Mycen はここで選んだものを使います。`, useDeviceTimezone: 'スマホのものを使う',
     weekStart: '週の始まり', monday: '月曜日', sunday: '日曜日',
     account: 'アカウント', openStudio: 'Mycen Studio を開く', signOut: 'ログアウト', savedOk: '設定を保存しました', noResults: '該当なし',
     homeTitle: "マイデイ",

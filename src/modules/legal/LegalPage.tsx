@@ -46,7 +46,7 @@ export function LegalPage({ doc }: { doc: Doc }) {
   }, [sections])
 
   return (
-    <main style={{ minHeight: '100svh', background: '#111311', color: '#F1F0E9', fontFamily: "'Geist', sans-serif" }}>
+    <main className="my-tap-root" style={{ minHeight: '100svh', background: '#111311', color: '#F1F0E9', fontFamily: "'Geist', sans-serif" }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 20px 64px', lineHeight: 1.65, fontSize: 15.5 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <Link to="/" aria-label={t.ui.back} style={{ color: '#F1F0E9', fontWeight: 700, textDecoration: 'none', fontSize: 18 }}>mycen.</Link>
@@ -61,7 +61,7 @@ export function LegalPage({ doc }: { doc: Doc }) {
         <nav aria-label={t.ui.contents} style={{ margin: '20px 0 8px', padding: '14px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.04)' }}>
           <p style={{ margin: '0 0 6px', fontWeight: 600 }}>{t.ui.contents}</p>
           <ol style={{ margin: 0, paddingInlineStart: 20 }}>
-            {sections.map(s => <li key={s.id}><a href={`#${s.id}`} style={{ color: '#F1F0E9' }}>{s.title}</a></li>)}
+            {sections.map(s => <li key={s.id}><a href={`#${s.id}`} style={{ color: '#F1F0E9', display: 'inline-block', minHeight: 44, padding: '9px 0', boxSizing: 'border-box' }}>{s.title}</a></li>)}
           </ol>
         </nav>
 

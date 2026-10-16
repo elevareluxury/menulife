@@ -7,6 +7,7 @@ import './i18n'
 import './lib/fonts'
 import './index.css'
 import './design/tokens.css'
+import './design/touch.css'
 import { installLowFx } from './design/lowfx'
 
 // Errores que nadie atrapa → registro propio (L5, /super-admin/errores)

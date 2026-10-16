@@ -1,3 +1,5 @@
+// Bloques del Hub viejo: los usa sólo el onboarding de Mycen Business (`createHubFromTemplate`,
+// que todavía crea filas en `hub_blocks`). La página pública vieja y su editor se retiraron.
 import { z } from 'zod'
 
 export type BlockType =
@@ -167,37 +169,4 @@ export const BLOCK_DEFINITIONS: Record<BlockType, BlockDef> = {
     icon: 'Share2', dataSource: 'jsonb',
     configSchema: SocialLinksBlockConfigSchema, defaultOrder: 90,
   },
-}
-
-// ── Tipos públicos ────────────────────────────────────────────────────────────
-
-export interface HubBlock {
-  id: string
-  restaurant_id: string
-  block_type: BlockType
-  sort_order: number
-  is_active: boolean
-  config: Record<string, any>
-  created_at: string
-  updated_at: string
-}
-
-export function isLegacyBlock(type: BlockType): boolean {
-  return BLOCK_DEFINITIONS[type].dataSource === 'table'
-}
-
-export function validateBlockConfig(
-  type: BlockType,
-  config: any,
-): { success: boolean; data?: any; error?: string } {
-  const def = BLOCK_DEFINITIONS[type]
-  if (!def.configSchema) return { success: true, data: config }
-  const result = def.configSchema.safeParse(config)
-  if (result.success) return { success: true, data: result.data }
-  // Zod v4: errors in result.error.issues
-  const issues = result.error?.issues ?? []
-  return {
-    success: false,
-    error: issues.map((e: any) => e.message).join(', '),
-  }
 }

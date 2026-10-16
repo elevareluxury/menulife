@@ -36,7 +36,9 @@ function WeekDots({ habit, onToggle }: { habit: Habit; onToggle: (date: string, 
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
   return (
-    <div style={{ display: 'flex', gap: '2px' }} role="group" aria-label={t.habits.weekHelp}>
+    // Siete puntos en la fila de la tarjeta: 32 px de ancho cada uno (no entran siete de 44). Cumplen WCAG 2.5.8 por
+    // espaciado y el ::after de 44 px (touch.css) los agranda hacia arriba y abajo; touch-targets.spec.ts los exime
+    <div style={{ display: 'flex', gap: '2px' }} role="group" aria-label={t.habits.weekHelp} data-touch-dense="">
       {habit.week.map(d => {
         const label = new Date(`${d.date}T12:00:00`).toLocaleDateString(locale, { weekday: 'short', day: 'numeric' })
         return (

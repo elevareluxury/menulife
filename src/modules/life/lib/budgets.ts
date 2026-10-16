@@ -1,6 +1,7 @@
 // Dinero: presupuestos amables (tabla life_budgets). Un presupuesto es un tope mensual para una categoría de gasto en
 // una moneda; lo gastado sale de los movimientos del mes en esa misma moneda (nunca se suman monedas distintas).
 // Puro (sin red ni DOM): lo usan la tarjeta "Presupuestos", "En qué se fue" y Mi día.
+import { dateKeyOf, lifeTimeZone } from './zonedTime'
 
 export interface Budget {
   id: string
@@ -49,11 +50,13 @@ export interface BudgetStatus {
 const cents = (n: number) => Math.round(n * 100)
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/** 'YYYY-MM' local de una fecha o de un instante ISO ('YYYY-MM-DD' sola se toma como día local). */
-export function monthOf(value: string | Date): string {
-  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value.slice(0, 7)
-  const d = typeof value === 'string' ? new Date(value) : value
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`
+/**
+ * 'YYYY-MM' de un instante ISO en la zona de la cuenta ('YYYY-MM-DD' sola se toma como día local) o de un Date de
+ * calendario (campos locales; para "ahora", `lifeNow()`).
+ */
+export function monthOf(value: string | Date, tz: string = lifeTimeZone()): string {
+  if (typeof value === 'string') return dateKeyOf(value, tz).slice(0, 7)
+  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}`
 }
 
 const keyOf = (category: string | null | undefined, currency: string) => `${category || 'Otros'}|${currency}`

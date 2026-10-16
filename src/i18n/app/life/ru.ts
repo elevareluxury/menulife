@@ -21,7 +21,7 @@ const ru: LifeDict = {
     extraCurrencies: 'Другие валюты',
     extraHelp: 'Чтобы записывать операции в других валютах (до 5). Они суммируются отдельно: мы не конвертируем суммы.',
     addCurrency: 'Добавить валюту', removeCurrency: c => `Убрать ${c}`, searchCurrency: 'Найти валюту…',
-    timezone: 'Часовой пояс', timezoneHelp: 'Определяет, когда начинается и заканчивается ваш день.',
+    timezone: 'Часовой пояс', timezoneHelp: 'Определяет, когда начинается и заканчивается ваш день.', timezoneOther: z => `Телефон в другом часовом поясе (${z}). Mycen использует выбранный здесь.`, useDeviceTimezone: 'Взять пояс телефона',
     weekStart: 'Неделя начинается с', monday: 'Понедельник', sunday: 'Воскресенье',
     account: 'Аккаунт', openStudio: 'Открыть Mycen Studio', signOut: 'Выйти', savedOk: 'Настройки сохранены', noResults: 'Ничего не найдено',
     homeTitle: "Мой день",

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { LIFE_DATA_UPDATED } from './useBrain'
-import { localDateKey } from './useRecurring'
+import { lifeDayOf, lifeTimeZone, todayKey } from '../lib/zonedTime'
 import type { TransactionFormData } from './useMoney'
 
 // Compras en cuotas (supabase/migrations/20261029000002_life_installments.sql). La base carga las cuotas vencidas con
@@ -33,13 +33,13 @@ let pending: Promise<number> | null = null
  * Quien llama mientras otra carga está en curso espera esa misma (Dinero y la tarjeta de cuotas leen después).
  */
 export function materializeInstallments(force = false): Promise<number> {
-  const today = localDateKey()
-  // Por cuenta y día: si en la misma pestaña entra otra cuenta, a esa también se le cargan sus cuotas
-  const key = `${useAuthStore.getState().user?.id ?? ''}|${today}`
+  // "Hoy" y la hora del movimiento en la zona de la cuenta (lib/zonedTime.ts)
+  const tz = lifeTimeZone()
+  const today = todayKey(tz)
+  // Por cuenta, día y zona: si en la misma pestaña entra otra cuenta, a esa también se le cargan sus cuotas
+  const key = `${useAuthStore.getState().user?.id ?? ''}|${today}|${tz}`
   if (!force && materializedOn === key) return pending ?? Promise.resolve(0)
   materializedOn = key
-  let tz = 'UTC'
-  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { /* UTC */ }
   const run: Promise<number> = (async () => {
     const { data, error } = await db.rpc('life_materialize_installments', { p_today: today, p_tz: tz })
     if (error) { materializedOn = null; return 0 }
@@ -89,7 +89,7 @@ export function useInstallments() {
   /** Nueva compra en cuotas: `data.amount` es el total y la fecha, la de la primera cuota. Lo vencido se carga enseguida. */
   const create = useCallback(async (data: TransactionFormData, count: number) => {
     if (!user) return
-    const date = /^\d{4}-\d{2}-\d{2}$/.test(data.occurred_at) ? data.occurred_at : localDateKey(new Date(data.occurred_at))
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(data.occurred_at) ? data.occurred_at : lifeDayOf(data.occurred_at)
     const { error } = await db.from('life_installment_plans').insert({
       user_id: user.id, description: data.description?.trim() || null, category: data.category || null,
       currency: data.currency, total_amount: data.amount, installments: count, first_date: date,

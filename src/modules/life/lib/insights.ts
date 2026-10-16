@@ -1,5 +1,5 @@
 import { habitConsistency, shiftDate } from '../lib/habitStreak'
-import { dayKey } from '../hooks/useToday'
+import { calendarKey, lifeDayOf } from './zonedTime'
 import { median, moodSplit, type MoodDay } from './mood'
 
 // Insights: patrones calculados sólo con los datos reales del usuario.
@@ -49,7 +49,7 @@ export function scheduledRows(
   h: { days: number[]; created_at: string }, done: (date: string) => boolean, today: string, windowDays: number,
 ): { date: string; done: boolean }[] {
   const from = shiftDate(today, -(windowDays - 1))
-  const created = dayKey(new Date(h.created_at))
+  const created = lifeDayOf(h.created_at)
   return daysBetween(created > from ? created : from, today)
     .filter(d => h.days.includes(weekdayOf(d)))
     .map(d => ({ date: d, done: done(d) }))
@@ -69,7 +69,7 @@ function last30Days(data: InsightData) {
   return data.habits.map(h => {
     const done = new Set(data.habitLogs.filter(l => l.habit_id === h.id).map(l => l.completed_date))
     const freq = h.times ? { type: 'times_per_week' as const, times: h.times } : { type: 'weekly' as const, days: h.days }
-    const c = habitConsistency(done, freq, dayKey(new Date(h.created_at)), from, data.today, data.weekStart ?? 1)
+    const c = habitConsistency(done, freq, lifeDayOf(h.created_at), from, data.today, data.weekStart ?? 1)
     return { name: h.name, done: c.done, scheduled: c.expected }
   })
 }
@@ -86,7 +86,7 @@ export function computeInsights(data: InsightData): Insight[] {
     const ms = data.milestones.filter(m => m.goal_id === g.id)
     if (!ms.some(m => !m.is_completed)) continue
     const last = ms.map(m => m.completed_at).filter((x): x is string => !!x).sort().pop() ?? g.created_at
-    const days = Math.floor((new Date(`${today}T12:00:00`).getTime() - new Date(`${dayKey(new Date(last))}T12:00:00`).getTime()) / 86_400_000)
+    const days = Math.floor((new Date(`${today}T12:00:00`).getTime() - new Date(`${lifeDayOf(last)}T12:00:00`).getTime()) / 86_400_000)
     if (days >= 14) out.push({ kind: 'goalStalled', goalId: g.id, name: g.name, days })
   }
 
@@ -100,10 +100,10 @@ export function computeInsights(data: InsightData): Insight[] {
   const monthStart = `${today.slice(0, 7)}-01`
   const prevFirst = new Date(y, m - 2, 1)
   const prevLastDay = new Date(y, m - 1, 0).getDate()
-  const prevStart = dayKey(prevFirst)
-  const prevEnd = dayKey(new Date(y, m - 2, Math.min(d, prevLastDay)))
+  const prevStart = calendarKey(prevFirst)
+  const prevEnd = calendarKey(new Date(y, m - 2, Math.min(d, prevLastDay)))
   const main = data.expenses.filter(e => e.currency === data.mainCurrency)
-  const inRange = (e: { occurred_at: string }, a: string, b: string) => { const k = dayKey(new Date(e.occurred_at)); return k >= a && k <= b }
+  const inRange = (e: { occurred_at: string }, a: string, b: string) => { const k = lifeDayOf(e.occurred_at); return k >= a && k <= b }
   const nowList = main.filter(e => inRange(e, monthStart, today))
   const nowTotal = nowList.reduce((s, e) => s + e.amount, 0)
   const prevTotal = main.filter(e => inRange(e, prevStart, prevEnd)).reduce((s, e) => s + e.amount, 0)
@@ -143,7 +143,7 @@ export function computeInsights(data: InsightData): Insight[] {
   // Tareas completadas: últimos 7 días vs. los 7 anteriores
   const weekAgo = shiftDate(today, -6)
   const twoWeeksAgo = shiftDate(today, -13)
-  const doneKeys = data.tasksDone.map(t => dayKey(new Date(t.completed_at)))
+  const doneKeys = data.tasksDone.map(t => lifeDayOf(t.completed_at))
   const nowTasks = doneKeys.filter(k => k >= weekAgo && k <= today).length
   const prevTasks = doneKeys.filter(k => k >= twoWeeksAgo && k < weekAgo).length
   if (nowTasks + prevTasks >= 3) out.push({ kind: 'tasksWeek', now: nowTasks, prev: prevTasks })
@@ -171,7 +171,7 @@ export function moodInsights(
   if (!moods.length) return out
 
   if (data.habits.length) {
-    const firstHabit = data.habits.map(h => dayKey(new Date(h.created_at))).sort()[0]
+    const firstHabit = data.habits.map(h => lifeDayOf(h.created_at)).sort()[0]
     const habitDays = new Set(data.habitLogs.map(l => l.completed_date))
     const split = moodSplit(moods.filter(m => m.date >= firstHabit), d => habitDays.has(d))
     if (split && split.withAvg > split.withoutAvg) {
@@ -182,7 +182,7 @@ export function moodInsights(
   const spendMoods = moods.filter(m => m.date >= expensesFrom)
   const byDay = new Map<string, number>()
   for (const e of mainExpenses) {
-    const k = dayKey(new Date(e.occurred_at))
+    const k = lifeDayOf(e.occurred_at)
     byDay.set(k, (byDay.get(k) ?? 0) + e.amount)
   }
   const cut = median(spendMoods.map(m => byDay.get(m.date) ?? 0))

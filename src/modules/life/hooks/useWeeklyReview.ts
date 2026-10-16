@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore'
 import { isDone, shiftDate } from '../lib/habitStreak'
 import { summarizeWeek, weekEndOf, MAX_FOCUS, WEEKLY_TEXT_MAX, type WeekSummary } from '../lib/weeklyReview'
 import { prioritiesOf } from './useDailyReview'
-import { dayKey } from './useToday'
+import { lifeDayOf, lifeTimeZone, startOfLocalDayISO } from '../lib/zonedTime'
 
 // Revisión semanal: una fila de life_weekly_reviews por persona y semana (week_start).
 const db = supabase as unknown as SupabaseClient
@@ -63,8 +63,10 @@ export function useWeeklyReview(week: string) {
     if (!user) return
     let cancelled = false
     const end = weekEndOf(week)
-    const fromIso = new Date(`${week}T00:00:00`).toISOString()
-    const toIso = new Date(`${shiftDate(end, 1)}T00:00:00`).toISOString()
+    // La semana en la zona de la cuenta (lib/zonedTime.ts)
+    const tz = lifeTimeZone()
+    const fromIso = startOfLocalDayISO(week, tz)
+    const toIso = startOfLocalDayISO(shiftDate(end, 1), tz)
     const q = (table: string, cols: string) => db.from(table).select(cols).eq('user_id', user.id)
     void Promise.all([
       q('life_weekly_reviews', COLUMNS).eq('week_start', week).maybeSingle(),
@@ -79,7 +81,7 @@ export function useWeeklyReview(week: string) {
       setReview(fromRow(week, row.data as Record<string, unknown> | null))
       setSummary(summarizeWeek(week, {
         tasksCompletedOn: ((tasks.data ?? []) as unknown as { completed_at: string | null }[])
-          .flatMap(x => (x.completed_at ? [dayKey(new Date(x.completed_at))] : [])),
+          .flatMap(x => (x.completed_at ? [lifeDayOf(x.completed_at)] : [])),
         habitDoneOn: ((logs.data ?? []) as unknown as { habit_id: string; completed_date: string; value: number | null }[])
           .filter(l => isDone(Number(l.value ?? 1), target.get(l.habit_id))).map(l => l.completed_date),
         // El ánimo es opcional: si no se pudo leer, el resto del resumen sigue

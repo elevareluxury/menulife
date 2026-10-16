@@ -17,6 +17,7 @@ import { CalendarFeedCard } from '../components/CalendarFeedCard'
 import { CategoriesCard } from '../components/CategoriesCard'
 import { useHomePrefs } from '../lib/homePrefs'
 import { JournalLockCard } from '../components/JournalLock'
+import { deviceTimeZone, lifeToday, sameTimeZone } from '../lib/zonedTime'
 
 function timezones(): string[] {
   try {
@@ -52,7 +53,10 @@ export function LifeSettingsPage() {
     savePrefs(userId, patch).catch(() => toast.error(t.common.saveError))
   }
 
-  const stamp = () => new Date().toISOString().slice(0, 10)
+  const stamp = () => lifeToday()
+  // La cuenta usa otra zona que el celular (viaje, o se eligió a mano): se avisa con calma y se ofrece la del celular
+  const device = deviceTimeZone()
+  const otherZone = !!prefs.timezoneSaved && !sameTimeZone(prefs.timezoneSaved, device)
   const download = async (kind: 'json' | 'csv') => {
     if (!userId || busy) return
     setBusy(kind)
@@ -142,6 +146,15 @@ export function LifeSettingsPage() {
             {zones.map(z => <option key={z} value={z}>{z.replace(/_/g, ' ')}</option>)}
           </select>
           <p style={help}>{t.settings.timezoneHelp}</p>
+          {otherZone && (
+            <div data-testid="timezone-other" role="status" style={{ marginTop: 12, padding: '10px 12px', borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}` }}>
+              <p style={{ ...help, margin: 0 }}>{t.settings.timezoneOther(device.replace(/_/g, ' '))}</p>
+              <button type="button" onClick={() => save({ timezone: device })}
+                style={{ marginTop: 8, minHeight: 40, padding: '6px 14px', borderRadius: radius.full, background: 'transparent', border: `1px solid ${colors.border.medium}`, color: colors.text.primary, fontFamily: font, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                {t.settings.useDeviceTimezone}
+              </button>
+            </div>
+          )}
 
           <h2 style={{ ...label, marginTop: 20 }}>{t.settings.weekStart}</h2>
           <div role="radiogroup" style={{ display: 'flex', gap: 8 }}>

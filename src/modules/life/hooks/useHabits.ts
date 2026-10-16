@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
 import { celebrate } from '../lib/celebrate'
 import { LIFE_DATA_UPDATED } from './useBrain'
+import { remindersChanged } from '../lib/reminderLeader'
 import { useToday } from './useToday'
 import { usePrefs } from '@/lib/prefs'
 import { trackEvent } from '@/lib/productEvents'
@@ -220,6 +221,7 @@ export function useHabits() {
     if (!user) return
     const { error: err } = await db.from('life_habits').insert({ ...data, user_id: user.id, sort_order: rawHabits.length })
     if (err) throw err
+    remindersChanged()
     await load()
   }, [user, rawHabits.length, load])
 
@@ -227,6 +229,7 @@ export function useHabits() {
     if (!user) return
     const { error: err } = await db.from('life_habits').update(data).eq('id', id).eq('user_id', user.id)
     if (err) throw err
+    remindersChanged()
     await load()
   }, [user, load])
 
@@ -234,6 +237,7 @@ export function useHabits() {
     if (!user) return
     const { error: err } = await db.from('life_habits').delete().eq('id', id).eq('user_id', user.id)
     if (err) throw err
+    remindersChanged()
     await load()
   }, [user, load])
 
@@ -242,6 +246,7 @@ export function useHabits() {
     setRawHabits(prev => prev.map(h => (h.id === id ? { ...h, is_active: isActive } : h)))
     const { error: err } = await db.from('life_habits').update({ is_active: isActive }).eq('id', id).eq('user_id', user.id)
     if (err) { setRawHabits(prev => prev.map(h => (h.id === id ? { ...h, is_active: !isActive } : h))); throw err }
+    remindersChanged()
   }, [user])
 
   return {

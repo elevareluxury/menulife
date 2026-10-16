@@ -30,7 +30,6 @@ const ResetPassword = lazy(() => import('@/pages/ResetPassword').then(m => ({ de
 const ReservationFormPage = lazy(() => import('@/modules/public/pages/ReservationFormPage').then(m => ({ default: m.ReservationFormPage })))
 const DashboardPage = lazy(() => import('./routes/dashboard').then(m => ({ default: m.DashboardPage })))
 const DashboardHome = lazy(() => import('./routes/dashboard').then(m => ({ default: m.DashboardHome })))
-const HubPublicPage    = lazy(() => import('@/modules/public/pages/HubPublicPage').then(m => ({ default: m.HubPublicPage })))
 const ProfilePublicPage = lazy(() => import('@/modules/profile/pages/ProfilePublicPage').then(m => ({ default: m.ProfilePublicPage })))
 const LegalPage       = lazy(() => import('@/modules/legal/LegalPage').then(m => ({ default: m.LegalPage })))
 const ProjectPublicPage = lazy(() => import('@/modules/profile/pages/ProjectPublicPage').then(m => ({ default: m.ProjectPublicPage })))
@@ -109,11 +108,19 @@ function WaiterLegacyRedirect() {
   return <Navigate to={`/mozo/${slug ?? ''}`} replace />
 }
 
-// Mycen Identity: la página pública. El Hub viejo queda accesible con ?v=1
-// como respaldo temporal durante la transición.
+// Mycen Identity: la página pública. El Hub viejo (`?v=1`) se retiró: ese link
+// (y los QR impresos que lo tengan) cae en la página nueva, sin `v` y con el resto
+// de los parámetros (por ejemplo `?src=qr`).
 function PublicSlugRoute() {
   const [params] = useSearchParams()
-  return params.get('v') === '1' ? <HubPublicPage /> : <ProfilePublicPage />
+  const { slug } = useParams()
+  if (params.has('v')) {
+    const rest = new URLSearchParams(params)
+    rest.delete('v')
+    const qs = rest.toString()
+    return <Navigate to={`/${encodeURIComponent(slug ?? '')}${qs ? `?${qs}` : ''}`} replace />
+  }
+  return <ProfilePublicPage />
 }
 
 function App() {
@@ -265,7 +272,7 @@ function App() {
           <Route path="/superadmin/*" element={<Navigate to="/super-admin" replace />} />
           {/* Catálogo retail público */}
           <Route path="/catalogo/:slug" element={<CatalogoPublic />} />
-          {/* Hub Público — /:slug debe ir antes del catch-all */}
+          {/* Mycen Identity — /:slug debe ir antes del catch-all */}
           <Route path="/:slug" element={<ErrorBoundary><PublicSlugRoute /></ErrorBoundary>} />
           <Route path="/:slug/projects/:projectSlug" element={<ErrorBoundary><ProjectPublicPage /></ErrorBoundary>} />
           {/* Space secundario dentro del principal: /ana/estudio (Identity Fase 10) */}

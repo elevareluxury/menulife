@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAdminT } from '@/i18n/app/admin'
+import { useAdminFormat } from '../lib/adminFormat'
 
 // Registro de errores propio (Lanzamiento L5): lo que falla en los navegadores, agrupado por huella.
 // Todo pasa por RPC que exigen ser super-admin; las tablas no se leen directo.
@@ -15,13 +17,7 @@ interface AppError {
 }
 interface Summary { open: number; new_today: number; affected_today: number }
 
-const AREAS: Record<string, string> = {
-  landing: 'Landing', auth: 'Acceso', profile: 'Página pública', studio: 'Studio', life: 'Life OS',
-  business: 'Business', admin: 'Super-admin', other: 'Otro',
-}
-const FILTERS: Array<{ key: Status | 'all'; label: string }> = [
-  { key: 'open', label: 'Abiertos' }, { key: 'resolved', label: 'Resueltos' }, { key: 'ignored', label: 'Ignorados' }, { key: 'all', label: 'Todos' },
-]
+const FILTERS: Array<Status | 'all'> = ['open', 'resolved', 'ignored', 'all']
 
 const TEXT = '#F5F7FA'
 const MUTED = '#98A2B3'
@@ -39,9 +35,11 @@ const INPUT: React.CSSProperties = {
 }
 const TAG: React.CSSProperties = { fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', color: TEXT }
 
-const fmt = (iso: string) => new Date(iso).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
-
 export function ErrorsTab() {
+  const t = useAdminT()
+  const te = t.errors
+  const areas = te.areas as Record<string, string>
+  const { dateTime: fmt } = useAdminFormat()
   const [filter, setFilter] = useState<Status | 'all'>('open')
   const [area, setArea] = useState<string>('')
   const [reload, setReload] = useState(0)
@@ -62,29 +60,28 @@ export function ErrorsTab() {
 
   const current = result?.key === key ? result : null
   const errors = current ? current.errors.filter(e => !area || e.area === area) : null
-  const error = current?.failed ? 'No pudimos cargar los errores. ¿La migración de L5 está aplicada?' : actionError
+  const error = current?.failed ? te.loadFailed : actionError
 
   const setStatus = useCallback(async (id: string, status: Status, note?: string) => {
     setBusy(id); setActionError(null)
     const { error: e } = await rpc('admin_set_error_status', { p_error_id: id, p_status: status, p_note: note ?? null })
     setBusy(null)
-    if (e) { setActionError('No se pudo completar la acción. Probá de nuevo.'); return }
+    if (e) { setActionError(t.common.actionFailed); return }
     setReload(n => n + 1)
-  }, [])
+  }, [t])
 
   const summary = current?.summary
 
   return (
     <div style={{ color: TEXT, maxWidth: 900 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 6px' }}>Errores</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 6px' }}>{te.title}</h1>
       <p style={{ color: MUTED, margin: '0 0 18px', fontSize: 14 }}>
-        Lo que falla en el navegador de las personas, agrupado: el mismo error en distintas versiones cuenta como uno.
-        "Personas" es un conteo anónimo por día (sin IP ni datos personales). Si un error resuelto vuelve a pasar, se reabre solo.
+        {te.intro}
       </p>
 
       {summary && (
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-          {[['Abiertos', summary.open], ['Nuevos hoy', summary.new_today], ['Personas afectadas hoy', summary.affected_today]].map(([label, n]) => (
+          {[[te.summaryOpen, summary.open], [te.summaryNewToday, summary.new_today], [te.summaryAffectedToday, summary.affected_today]].map(([label, n]) => (
             <div key={label as string} style={{ ...CARD, marginBottom: 0, padding: '12px 16px', minWidth: 150 }}>
               <div style={{ fontSize: 24, fontWeight: 700 }}>{n}</div>
               <div style={{ color: MUTED, fontSize: 13 }}>{label}</div>
@@ -94,57 +91,56 @@ export function ErrorsTab() {
       )}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <div role="group" aria-label="Estado" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div role="group" aria-label={te.statusGroup} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {FILTERS.map(f => (
-            <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => setFilter(f.key)}
-              style={{ ...BTN, ...(filter === f.key ? { background: `${ACCENT}22`, color: ACCENT, borderColor: `${ACCENT}55` } : {}) }}>
-              {f.label}
+            <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)}
+              style={{ ...BTN, ...(filter === f ? { background: `${ACCENT}22`, color: ACCENT, borderColor: `${ACCENT}55` } : {}) }}>
+              {te.filters[f]}
             </button>
           ))}
         </div>
         <label style={{ fontSize: 13, color: MUTED, display: 'flex', alignItems: 'center', gap: 8 }}>
-          Zona
+          {te.area}
           <select value={area} onChange={e => setArea(e.target.value)} style={{ ...INPUT, width: 'auto', minHeight: 40 }}>
-            <option value="">Todas</option>
-            {Object.entries(AREAS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            <option value="">{te.allAreas}</option>
+            {Object.entries(areas).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
       </div>
 
       {error && <p role="alert" style={{ color: ACCENT }}>{error}</p>}
-      {errors === null && <p style={{ color: MUTED }}>Cargando…</p>}
+      {errors === null && <p role="status" style={{ color: MUTED }}>{t.common.loading}</p>}
       {errors?.length === 0 && !error && (
-        <div style={CARD}><p style={{ margin: 0, color: MUTED }}>{filter === 'open' ? 'No hay errores abiertos. 🎉' : 'No hay errores en esta vista.'}</p></div>
+        <div style={CARD}><p style={{ margin: 0, color: MUTED }}>{filter === 'open' ? te.noneOpen : te.noneHere}</p></div>
       )}
 
-      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }} aria-label="Errores">
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }} aria-label={te.list}>
         {errors?.map(e => (
           <li key={e.id} style={CARD} aria-label={e.message}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
-              <span style={TAG}>{AREAS[e.area] ?? e.area}</span>
-              {e.reopened && <span style={{ ...TAG, background: `${ACCENT}22`, color: ACCENT }}>Volvió a pasar</span>}
-              {e.status !== 'open' && <span style={{ ...TAG, color: MUTED }}>{e.status === 'resolved' ? 'Resuelto' : 'Ignorado'}</span>}
+              <span style={TAG}>{areas[e.area] ?? e.area}</span>
+              {e.reopened && <span style={{ ...TAG, background: `${ACCENT}22`, color: ACCENT }}>{te.reopened}</span>}
+              {e.status !== 'open' && <span style={{ ...TAG, color: MUTED }}>{e.status === 'resolved' ? te.resolvedTag : te.ignoredTag}</span>}
             </div>
             <p style={{ margin: '0 0 8px', fontWeight: 600, fontFamily: 'ui-monospace, monospace', fontSize: 14, wordBreak: 'break-word' }}>{e.message}</p>
             <p style={{ margin: 0, color: MUTED, fontSize: 13 }}>
-              {e.count} {e.count === 1 ? 'vez' : 'veces'} · {e.affected} {e.affected === 1 ? 'persona' : 'personas'} ({e.affected_today} hoy)
-              · última {fmt(e.last_seen)} · primera {fmt(e.first_seen)}
+              {[te.times(e.count), te.people(e.affected, e.affected_today), te.last(fmt(e.last_seen)), te.first(fmt(e.first_seen))].join(' · ')}
             </p>
             <p style={{ margin: '4px 0 0', color: MUTED, fontSize: 13 }}>
-              {[e.path, e.browser, e.release && `versión ${e.release}`].filter(Boolean).join(' · ')}
+              {[e.path, e.browser, e.release && te.version(e.release)].filter(Boolean).join(' · ')}
             </p>
-            {e.note && <p style={{ margin: '6px 0 0', fontSize: 13 }}>Nota: {e.note}</p>}
+            {e.note && <p style={{ margin: '6px 0 0', fontSize: 13 }}>{t.common.note(e.note)}</p>}
             {e.stack && (
               <details style={{ marginTop: 10 }}>
-                <summary style={{ cursor: 'pointer', color: MUTED, fontSize: 13 }}>Ver detalle técnico</summary>
-                <pre style={{ marginTop: 8, padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.04)', fontSize: 12, overflow: 'auto', whiteSpace: 'pre-wrap', color: '#D0D5DD' }}>{e.stack}</pre>
+                <summary style={{ cursor: 'pointer', color: MUTED, fontSize: 13 }}>{te.details}</summary>
+                <pre tabIndex={0} aria-label={te.stackLabel} style={{ marginTop: 8, padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.04)', fontSize: 12, overflow: 'auto', whiteSpace: 'pre-wrap', color: '#D0D5DD' }}>{e.stack}</pre>
               </details>
             )}
 
             <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {e.status === 'open' && (
                 <label style={{ fontSize: 13, color: MUTED }}>
-                  Nota (opcional: qué se hizo)
+                  {te.noteLabel}
                   <input style={{ ...INPUT, marginTop: 6 }} value={notes[e.id] ?? ''} maxLength={300}
                     onChange={ev => setNotes(n => ({ ...n, [e.id]: ev.target.value }))} />
                 </label>
@@ -153,12 +149,12 @@ export function ErrorsTab() {
                 {e.status === 'open' ? (
                   <>
                     <button type="button" style={{ ...BTN, background: ACCENT, border: 'none', color: '#fff' }} disabled={busy !== null}
-                      onClick={() => setStatus(e.id, 'resolved', notes[e.id])}>Marcar resuelto</button>
+                      onClick={() => setStatus(e.id, 'resolved', notes[e.id])}>{te.markResolved}</button>
                     <button type="button" style={BTN} disabled={busy !== null}
-                      onClick={() => setStatus(e.id, 'ignored', notes[e.id])}>Ignorar</button>
+                      onClick={() => setStatus(e.id, 'ignored', notes[e.id])}>{te.ignore}</button>
                   </>
                 ) : (
-                  <button type="button" style={BTN} disabled={busy !== null} onClick={() => setStatus(e.id, 'open')}>Reabrir</button>
+                  <button type="button" style={BTN} disabled={busy !== null} onClick={() => setStatus(e.id, 'open')}>{te.reopen}</button>
                 )}
               </div>
             </div>

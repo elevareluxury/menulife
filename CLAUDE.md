@@ -54,11 +54,12 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   sin bots, con topes; una pantalla de la versión anterior que ya no existe tras publicar recarga la página una vez,
   `src/lib/staleChunk.ts`, sin reportarse) y el super-admin los ve y resuelve en `/super-admin/errores` (`admin_list_errors`,
   `admin_set_error_status`, `admin_error_summary`). Un error resuelto que vuelve a pasar se reabre solo.
-- Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()` y se retiran cuando Studio reemplace al editor viejo.
+- Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()`. La página pública vieja y su editor ya no
+  existen; quedan las tablas, la importación y `src/modules/hub/lib/` (plantillas que usa el onboarding de Business, `/onboarding`).
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
 ## Código
-- Página pública (Identity): `src/modules/profile/` en `/:slug` (el Hub viejo queda con `?v=1` como respaldo temporal). `ProfileView` se reutiliza en la vista previa de Studio y en el onboarding.
+- Página pública (Identity): `src/modules/profile/` en `/:slug` (el Hub viejo se retiró: `/{username}?v=1` redirige a `/{username}` sin `v` y con el resto de los parámetros, `PublicSlugRoute` en `App.tsx`; E2E en `hub-retired.spec.ts`). `ProfileView` se reutiliza en la vista previa de Studio y en el onboarding.
 - Módulos: la lista de tipos es `MODULE_TYPES` (`profileTypes.ts`, igual al check `profile_modules_type_check`). Cada tipo se define en
   dos registros `Record<ModuleType, …>`: el público (`profile/components/moduleRegistry.ts`, cómo se dibuja; lo usan la página y la
   vista previa) y el de Studio (`studio/lib/moduleCatalog.ts`: campos, validación, valores iniciales, qué se guarda, resumen y editor
@@ -146,6 +147,13 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   (sincronizada con los checks de `user_settings.language` y `profiles.default_locale`).
 - Life OS, Studio y Profile usan diccionarios tipados por módulo en `src/i18n/app/{life,studio}/<idioma>.ts`
   (el español es la fuente; `tsc` obliga a que cada idioma tenga todas las claves). Mycen Business sigue con i18next (`src/i18n/*.ts`).
+  Sin destello de español (`createNamespace`, `namespace.ts`): el diccionario del idioma guardado empieza a bajar al cargar
+  el grupo y, mientras no llegó, el hook suspende (se ve el esqueleto del `Suspense` de las rutas); `setLang` espera los
+  grupos ya cargados antes de cambiar. Si la descarga falla, español (no queda en blanco). E2E en `lang-flash.spec.ts`
+  (texto visible desde el primer cuadro, diccionarios demorados). Detector de español compartido: `tests/e2e/support/spanish.ts`.
+- Panel interno (super-admin): marca Mycen y diccionario `src/i18n/app/admin/<idioma>.ts` (`useAdminT`; fechas y números
+  con `super-admin/lib/adminFormat.ts`) para la estructura y las pantallas de Mycen (Resumen, Denuncias, Verificaciones,
+  Errores, Producto); las de Business siguen en español. `i18n-coverage.spec.ts` las recorre en inglés.
 - Textos de la página pública (botones del sistema) en `src/modules/profile/lib/profileI18n.ts`.
 - Landing (Lanzamiento L3a): diccionario `src/i18n/app/landing/<idioma>.ts` (`useLandingT`), selector de los 12 idiomas en
   el Navbar, `?lang=xx` fija el idioma y `useLandingLocale` pone título, descripción, `dir` (RTL en árabe), `hreflang` (12 +
@@ -163,6 +171,13 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Textos sin revisión de abogado: revisarlos antes de abrir al público.
 - Preferencias de la cuenta en `user_settings` (idioma, moneda principal, monedas extra, zona horaria, inicio de semana):
   `src/lib/prefs.ts` (`usePrefs`, `savePrefs`), se cargan en `PrefsInit`. Ajustes en `/life/settings` y Studio → Ajustes.
+- Zona horaria de Life OS: "hoy", meses, horas (Mi día desde las 18 h, recordatorios), claves de fecha, bordes de
+  consultas y `p_tz` de fijos/cuotas usan `user_settings.timezone` (`lib/zonedTime.ts`, sólo `Intl`: `lifeToday`,
+  `lifeDayOf(instante)`, `lifeNow()` = reloj de pared para cuentas de calendario, `startOfLocalDayISO`,
+  `zonedTimeToDate`; `prefs.ts` la anota con `setAccountTimeZone`). Sin zona guardada (o inválida) sigue al celular, y
+  la zona sólo se guarda si la persona la elige (`timezoneSaved`). `dayKey(d)`/`localDateKey(d)` con un Date de
+  calendario leen campos locales; sin argumento, hoy de la cuenta. `LifeShell` espera las preferencias (máx. 5 s).
+  Ajustes avisa si el celular está en otra zona ("Usar la del celular"). Tests en `zonedTime.test.ts` y `timezone.spec.ts`.
 - Dinero: nunca sumar monedas distintas; cada movimiento guarda su `currency`.
 - Fijos que se repiten cada mes (Dinero): `life_recurring_transactions` (día del mes, desde, `last_period`, pausa) y
   `life_transactions.recurring_id`/`recurring_period` (único por mes). La base carga lo vencido con
@@ -390,7 +405,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   el último día si no existe; atrasada → la primera desde hoy) y el selector (`repeatChoiceOf` / `recurrenceFor`). Al
   completar, `useTasks` crea la siguiente (hora, aviso y subtareas sin hacer) y la anota; al destildar, la borra si no se
   hizo. Ficha: `RepeatField` y `SubtasksField` (`TaskExtras.tsx`); lista con ícono y "3 de 5"; el calendario muestra las
-  próximas repeticiones. E2E en `tasks.spec.ts`.
+  próximas repeticiones. E2E en `tasks.spec.ts`. Una sola siguiente: `occurrence_of` (en la siguiente, su origen) con
+  índice único y trigger de dueña (`20261103000002_life_task_next_once.sql`); si llega 23505, `useTasks` usa la que
+  existe. Tildar bloquea la tarea mientras se guarda (`useSavingTasks`, casillero deshabilitado). Tests en
+  `life_task_next_once.test.sql` y `life-once.spec.ts`.
 - Hábitos (etapa 10): `life_habits` suma `target_value` (null = sí/no), `unit`, `anchor` ("después de…"),
   `reminder_time`/`reminder_enabled`; `frequency` admite `{ type: 'times_per_week', times }`; `life_habit_logs.value`
   (con cantidad, el día se cumple con `value >= target_value`). Rachas que perdonan en `lib/habitStreak.ts` (un día
@@ -398,6 +416,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `useHabits`: `addToday` ("+1"), `setDayValue`, `weekCount`, `streakUnit`. UI: `QuantityButton` (anillo), `HabitMeta`,
   `HabitValueSheet` (`components/HabitControls.tsx`). Recordatorio por hábito: `useHabitReminders` (con Life OS abierto,
   una vez por día y hábito). E2E en `habits.spec.ts`.
+  Recordatorios (hábitos y tareas) con varias pestañas: `lib/reminderLeader.ts` — avisa sólo la pestaña líder
+  (`electLeader`: Web Locks o, sin ellos, alquiler en localStorage + `BroadcastChannel`); `reminderLoop` lee la base al
+  abrir, al volver a la pestaña, con `remindersChanged()` (lo llaman `useTasks`/`useHabits` al cambiar algo) y cada
+  5 min, y compara horas en el dispositivo cada 30 s. Hábitos: marca por hábito y día antes de avisar (`claimMark`),
+  marcas de más de 7 días se borran; tareas: avisa quien logra marcar `reminded_at` (sólo si seguía vacío).
+  Tests en `reminderLeader.test.ts` y `life-once.spec.ts`.
 - "¿Por qué lo hago?": `why` (≤ 200, no en blanco; vacío = null) en `life_habits` y `life_goals` (migración
   `20261030000003_life_why.sql`, tests en `life_why.test.sql`). `components/Why.tsx`: `WhyField` (al crear/editar),
   `WhyQuote` (discreta en la tarjeta del hábito, la de la meta y su ficha, y en "Qué bueno verte de vuelta") y
@@ -480,6 +504,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   estructuras (también en la vista previa de Studio). Migración `20261025000001_v1_verification.sql`, tests en
   `tests/db/verification.test.sql` y `verification.spec.ts`. Privacidad actualizada (12 idiomas).
 - Errores de contraseña de Supabase (`code: weak_password`, reglas o contraseña filtrada) muestran `weakPassword`.
+- Áreas táctiles de 44 px (auditoría v2, #22): `src/design/touch.css` da a cada botón/link/control de Life OS
+  (`html[data-mycen-theme]`), Studio (`.st-root` y portales), el perfil (`.mp-root`) y `.my-tap-root` (acceso, legales,
+  super-admin) un `::after` transparente de ≥ 44 px (detrás del contenido, `isolation`) sin cambiar el dibujo; los links
+  dentro de un párrafo quedan afuera. Si hay vecinos pegados o un contenedor con scroll, agrandar de verdad (filas de
+  44 px). `touch-targets.spec.ts` mide a 390 px y prueba el toque en los bordes (excepciones: links en texto,
+  deshabilitados y `data-touch-dense`, hoy sólo los 7 puntos de la semana de Hábitos).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

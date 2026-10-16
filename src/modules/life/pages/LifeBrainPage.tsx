@@ -14,7 +14,8 @@ import { useBrain, type BrainItem, type BrainItemType } from '../hooks/useBrain'
 import { BrainItemSheet } from '../components/BrainItemSheet'
 import { ActionMenu } from '../components/ActionMenu'
 import { deleteWithUndo } from '../lib/undo'
-import { dayKey, useToday } from '../hooks/useToday'
+import { useToday } from '../hooks/useToday'
+import { lifeDayOf } from '../lib/zonedTime'
 import { shiftDate } from '../lib/habitStreak'
 import { TasksView } from '../components/TasksView'
 import { featureOn } from '@/lib/features'
@@ -232,8 +233,9 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
     const yesterday = shiftDate(today, -1)
     const map = new Map<string, BrainItem[]>()
     for (const item of items) {
-      const d = new Date(item.created_at)
-      const k = dayKey(d)
+      // Día de la zona de la cuenta (lib/zonedTime.ts)
+      const k = lifeDayOf(item.created_at)
+      const d = new Date(`${k}T12:00:00`)
       const label = k === today ? t.brain.today
         : k === yesterday ? t.brain.yesterday
           : d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })
@@ -295,7 +297,7 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
           {FILTERS.map(f => (
             <button key={f} type="button" role="radio" aria-checked={filter === f} onClick={() => setFilter(f)}
               style={{
-                minHeight: 36, padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
+                minHeight: 44, padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
                 background: filter === f ? colors.area.brain : colors.surface.high,
                 border: `1px solid ${filter === f ? colors.area.brain : colors.border.subtle}`,
                 color: filter === f ? colors.accent.on : colors.text.secondary,

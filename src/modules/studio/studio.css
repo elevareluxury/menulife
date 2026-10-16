@@ -49,7 +49,7 @@
 .st-logo { font-family: var(--my-font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.03em; padding: 4px 10px 18px; color: var(--st-text); text-decoration: none; }
 .st-logo small { display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: var(--st-faint); text-transform: uppercase; margin-top: 2px; }
 .st-nav-item {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; min-height: 44px; box-sizing: border-box;
   color: var(--st-muted); text-decoration: none; font-size: 14px; font-weight: 500;
   transition: background 0.15s, color 0.15s;
 }
@@ -249,8 +249,10 @@
 .st-empty { text-align: center; padding: 28px 12px; color: var(--st-muted); font-size: 14px; }
 .st-empty strong { display: block; color: var(--st-text); font-size: 15px; margin-bottom: 4px; }
 
-.st-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.st-checklist li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.st-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+/* Cada fila mide 44 px (área táctil del proyecto): el link ocupa toda la fila */
+.st-checklist li { display: flex; align-items: center; gap: 10px; font-size: 14px; min-height: 44px; }
+.st-checklist li > a { flex: 1; align-self: stretch; display: flex; align-items: center; }
 .st-checklist li.is-done { color: var(--st-faint); text-decoration: line-through; }
 
 .st-url { font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 13.5px; padding: 10px 12px; border-radius: 10px; background: var(--st-bg); border: 1px solid var(--st-border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
@@ -273,7 +275,7 @@
 
 @media (max-width: 599px) {
   .st-hide-on-mobile { display: none !important; }
-  .st-module-actions .st-icon-btn { width: 40px; height: 40px; }
+  .st-module-actions .st-icon-btn { width: 44px; height: 44px; }
   .st-layer-row .st-icon-btn { width: 44px; height: 44px; }
   .st-module { padding-left: 10px; gap: 8px; }
   .st-module-icon { display: none; }

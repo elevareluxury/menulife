@@ -88,7 +88,7 @@ export async function logAdminAction(
 
 export function openWhatsApp(phone: string, name: string) {
   const msg = encodeURIComponent(
-    `Hola ${name}, te contactamos desde el equipo de MenuLife. ¿Cómo va todo con el sistema?`
+    `Hola ${name}, te contactamos desde el equipo de Mycen. ¿Cómo va todo con el sistema?`
   )
   window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank')
 }

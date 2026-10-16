@@ -21,7 +21,7 @@ const hi: LifeDict = {
     extraCurrencies: 'अन्य मुद्राएँ',
     extraHelp: 'दूसरी मुद्राओं में लेन-देन दर्ज करने के लिए (अधिकतम 5)। इन्हें अलग-अलग जोड़ा जाता है: हम राशियों को नहीं बदलते।',
     addCurrency: 'मुद्रा जोड़ें', removeCurrency: c => `${c} हटाएँ`, searchCurrency: 'मुद्रा खोजें…',
-    timezone: 'समय क्षेत्र', timezoneHelp: 'तय करता है कि आपका दिन कब शुरू और खत्म होता है।',
+    timezone: 'समय क्षेत्र', timezoneHelp: 'तय करता है कि आपका दिन कब शुरू और खत्म होता है।', timezoneOther: z => `आपका फ़ोन दूसरे समय क्षेत्र (${z}) में है। Mycen यहाँ चुना गया समय क्षेत्र इस्तेमाल करता है।`, useDeviceTimezone: 'फ़ोन वाला इस्तेमाल करें',
     weekStart: 'सप्ताह शुरू होता है', monday: 'सोमवार', sunday: 'रविवार',
     account: 'खाता', openStudio: 'Mycen Studio खोलें', signOut: 'साइन आउट करें', savedOk: 'सेटिंग्स सहेजी गईं', noResults: 'कोई परिणाम नहीं',
     homeTitle: "मेरा दिन",

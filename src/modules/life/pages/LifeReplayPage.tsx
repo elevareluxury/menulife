@@ -10,6 +10,7 @@ import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { colors, font, radius, tint } from '../design-system'
 import { dayKey } from '../hooks/useToday'
+import { calendarKey, lifeDayOf, lifeNow, lifeTimeZone, startOfLocalDayISO, todayKey } from '../lib/zonedTime'
 import { frequencyOf, habitConsistency, isDone, isScheduledOn } from '../lib/habitStreak'
 import { usePrefs } from '@/lib/prefs'
 import { FEATURES } from '@/lib/features'
@@ -58,9 +59,11 @@ async function generateReplay(userId: string, year: number, month: number, mainC
   const firstDay = `${year}-${pad(month)}-01`
   const nextFirst = new Date(year, month, 1)
   const lastDay = dayKey(new Date(year, month, 0))
-  const fromIso = new Date(year, month - 1, 1).toISOString()
-  const toIso = nextFirst.toISOString()
-  const today = dayKey()
+  // Bordes del mes en la zona de la cuenta (lib/zonedTime.ts)
+  const tz = lifeTimeZone()
+  const fromIso = startOfLocalDayISO(firstDay, tz)
+  const toIso = startOfLocalDayISO(calendarKey(nextFirst), tz)
+  const today = todayKey(tz)
 
   const q = (table: string, cols: string) => db.from(table).select(cols).eq('user_id', userId)
   const [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, tasksRes, achRes, moodRes] = await Promise.all([
@@ -91,7 +94,7 @@ async function generateReplay(userId: string, year: number, month: number, mainC
   for (const h of habits) {
     const freq = frequencyOf(h.frequency)
     const done = new Set(logs.filter(l => l.habit_id === h.id && isDone(Number(l.value ?? 1), h.target_value)).map(l => l.completed_date))
-    const c = habitConsistency(done, freq, dayKey(new Date(h.created_at)), firstDay, today, weekStart, lastDay)
+    const c = habitConsistency(done, freq, lifeDayOf(h.created_at), firstDay, today, weekStart, lastDay)
     let streak = 0
     for (const d of days) {
       if (done.has(d)) { streak++; longestStreak = Math.max(longestStreak, streak) }
@@ -236,7 +239,7 @@ export function LifeReplayPage() {
   const currency = useLocaleStore(s => s.currency)
   const weekStart = usePrefs(st => st.week_start)
   const { user } = useAuthStore()
-  const now = new Date()
+  const now = lifeNow()   // mes de la zona de la cuenta
   const [cursor, setCursor] = useState({ y: now.getFullYear(), m: now.getMonth() + 1 })
   const [attempt, setAttempt] = useState(0)
   const key = `${cursor.y}-${cursor.m}-${currency}-${weekStart}-${attempt}`

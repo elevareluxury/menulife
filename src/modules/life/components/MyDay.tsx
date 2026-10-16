@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { Check, ListChecks, Moon, Plus, Sparkles, Star, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
-import { localDateKey, taskWithDate as withDate, useTasks, type LifeTask } from '../hooks/useTasks'
+import { taskWithDate as withDate, useSavingTasks, useTasks, type LifeTask } from '../hooks/useTasks'
+import { useToday } from '../hooks/useToday'
+import { lifeDayOf, lifeNow } from '../lib/zonedTime'
 import { useHabits } from '../hooks/useHabits'
 import { MAX_PRIORITIES, useDailyReview, type Priority } from '../hooks/useDailyReview'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
@@ -33,10 +35,10 @@ const chipBtn: React.CSSProperties = {
 
 const refresh = () => window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module: 'brain' } }))
 
-function CheckBox({ done, label, onClick }: { done: boolean; label: string; onClick: () => void }) {
+function CheckBox({ done, label, onClick, busy }: { done: boolean; label: string; onClick: () => void; busy?: boolean }) {
   return (
-    <button type="button" role="checkbox" aria-checked={done} aria-label={label} onClick={onClick}
-      style={{ width: 40, height: 40, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+    <button type="button" role="checkbox" aria-checked={done} aria-label={label} onClick={onClick} disabled={busy} aria-busy={busy || undefined}
+      style={{ width: 44, height: 44, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', padding: 0, cursor: busy ? 'progress' : 'pointer' }}>
       <span aria-hidden="true" style={{
         width: 22, height: 22, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.accent.on,
         border: `2px solid ${done ? colors.semantic.success : colors.border.medium}`, background: done ? colors.semantic.success : 'transparent',
@@ -50,8 +52,9 @@ export function MyDaySection() {
   const t = useLifeT()
   const m = t.myDay
   const navigate = useNavigate()
-  const today = localDateKey()
+  const today = useToday()
   const { tasks, loading: tasksLoading, error: tasksError, toggleTask } = useTasks()
+  const saving = useSavingTasks()
   // Sólo con las tareas cargadas se sabe si una prioridad quedó apuntando a una tarea borrada
   const liveTaskIds = useMemo(() => (tasksLoading || tasksError ? null : new Set(tasks.map(x => x.id))), [tasks, tasksLoading, tasksError])
   const day = useDailyReview(today, liveTaskIds)
@@ -62,7 +65,7 @@ export function MyDaySection() {
   const [why, setWhy] = useState(false)
   const [reviewOpen, setReviewOpen] = useState(false)
   const full = livePriorities.length >= MAX_PRIORITIES
-  const evening = new Date().getHours() >= 18
+  const evening = lifeNow().getHours() >= 18   // hora de la zona de la cuenta
   const taskById = useMemo(() => new Map(tasks.map(x => [x.id, x])), [tasks])
   const fail = () => toast.error(t.common.saveError)
 
@@ -93,18 +96,18 @@ export function MyDaySection() {
               const task = p.kind === 'task' ? taskById.get(p.task_id) : undefined
               return (
                 <li key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <CheckBox done={done} label={m.done(label(p))} onClick={() => {
+                  <CheckBox done={done} label={m.done(label(p))} busy={!!task && saving.has(task.id)} onClick={() => {
                     if (task) toggleTask(task).then(refresh).catch(fail)
                     else toggleTextPriority(p.id).catch(fail)
                   }} />
                   <button type="button" onClick={() => { if (task) navigate('/life/brain?vista=tareas') }} disabled={!task}
                     style={{
-                      flex: 1, minWidth: 0, textAlign: 'start', background: 'none', border: 'none', padding: '8px 0', cursor: task ? 'pointer' : 'default',
+                      flex: 1, minWidth: 0, minHeight: 44, textAlign: 'start', background: 'none', border: 'none', padding: '8px 0', cursor: task ? 'pointer' : 'default',
                       fontFamily: font, fontSize: '15px', fontWeight: 600, color: done ? colors.text.secondary : colors.text.primary,
                       textDecoration: done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>{label(p)}</button>
                   <button type="button" aria-label={m.remove(label(p))} onClick={() => { setWhy(false); removePriority(p.id).catch(fail) }}
-                    style={{ width: 40, height: 40, background: 'none', border: 'none', color: colors.text.tertiary, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ width: 44, height: 44, flexShrink: 0, background: 'none', border: 'none', color: colors.text.tertiary, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <X size={15} aria-hidden="true" />
                   </button>
                 </li>
@@ -171,7 +174,7 @@ type PendingItem = { key: string; text: string; task?: LifeTask; priority?: Prio
 function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyReview>; onClose: () => void }) {
   const t = useLifeT()
   const m = t.myDay
-  const today = localDateKey()
+  const today = useToday()
   const tomorrow = shiftDate(today, 1)
   const { review, closeDay, removePriority, setMood } = day
   const { tasks, createTask, updateTask } = useTasks()
@@ -188,7 +191,7 @@ function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyRevie
   const taskById = new Map(tasks.map(x => [x.id, x]))
   const priorityTaskIds = new Set(review.priorities.flatMap(p => (p.kind === 'task' ? [p.task_id] : [])))
   const habitsDone = [...todayHabits, ...activeHabits.filter(h => !h.scheduledToday)].filter(h => h.completedToday)
-  const tasksDone = tasks.filter(x => x.completed_at && localDateKey(new Date(x.completed_at)) === today)
+  const tasksDone = tasks.filter(x => x.completed_at && lifeDayOf(x.completed_at) === today)
   const textDone = review.priorities.filter(p => p.kind === 'text' && p.done)
   const achieved = [
     ...habitsDone.map(h => ({ key: `h-${h.id}`, kind: m.habitLabel, text: h.name })),
