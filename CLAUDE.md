@@ -54,11 +54,12 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   sin bots, con topes; una pantalla de la versión anterior que ya no existe tras publicar recarga la página una vez,
   `src/lib/staleChunk.ts`, sin reportarse) y el super-admin los ve y resuelve en `/super-admin/errores` (`admin_list_errors`,
   `admin_set_error_status`, `admin_error_summary`). Un error resuelto que vuelve a pasar se reabre solo.
-- Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()` y se retiran cuando Studio reemplace al editor viejo.
+- Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()`. La página pública vieja y su editor ya no
+  existen; quedan las tablas, la importación y `src/modules/hub/lib/` (plantillas que usa el onboarding de Business, `/onboarding`).
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
 ## Código
-- Página pública (Identity): `src/modules/profile/` en `/:slug` (el Hub viejo queda con `?v=1` como respaldo temporal). `ProfileView` se reutiliza en la vista previa de Studio y en el onboarding.
+- Página pública (Identity): `src/modules/profile/` en `/:slug` (el Hub viejo se retiró: `/{username}?v=1` redirige a `/{username}` sin `v` y con el resto de los parámetros, `PublicSlugRoute` en `App.tsx`; E2E en `hub-retired.spec.ts`). `ProfileView` se reutiliza en la vista previa de Studio y en el onboarding.
 - Módulos: la lista de tipos es `MODULE_TYPES` (`profileTypes.ts`, igual al check `profile_modules_type_check`). Cada tipo se define en
   dos registros `Record<ModuleType, …>`: el público (`profile/components/moduleRegistry.ts`, cómo se dibuja; lo usan la página y la
   vista previa) y el de Studio (`studio/lib/moduleCatalog.ts`: campos, validación, valores iniciales, qué se guarda, resumen y editor

@@ -6,7 +6,7 @@ en la [auditoría V1](auditoria-v1.md); acá sólo se confirma lo que la web nec
 
 **En pocas palabras:** no apareció nada grave en lo nuevo (Identity, Studio, Life OS). Lo más importante estaba en la
 **página vieja del Hub** (`/{username}?v=1`, la de respaldo): un link armado por el dueño de un negocio podía ejecutar
-código en mycen.id al tocarlo. Está arreglado. También se arreglaron cosas chicas (una foto que el servidor descargaba
+código en mycen.id al tocarlo. Está arreglado y después se retiró esa página (`?v=1` lleva a Identity). También se arreglaron cosas chicas (una foto que el servidor descargaba
 de cualquier lado, el micrófono bloqueado para "Dictar", fórmulas en el CSV de Dinero) y quedan algunas decisiones.
 
 ## Arreglado en esta revisión
@@ -20,16 +20,16 @@ de cualquier lado, el micrófono bloqueado para "Dictar", fórmulas en el CSV de
 | Baja | vCard (`vcard.ts`) y calendario (`api/calendar.ts`) escapaban `\n` pero no un `\r` suelto. | Un nombre o una tarea con `\r` podía agregar un campo de más en la tarjeta o el evento (por ejemplo, otro email). Lo escribe la misma persona, así que el daño es chico. | Se escapan `\r\n`, `\r` y `\n`. | `securityWeb.test.ts`. |
 | Baja | Studio → Mensajes: "Responder por mail" armaba `mailto:` con lo que escribió el visitante. | `ana@x.com?bcc=…&body=…` abría un mail con copias o texto que el dueño no escribió. | El contacto sólo se toma como email si no tiene `? & # % , ; :` ni comillas; si no, no hay botón (el contacto se sigue viendo). | `securityWeb.test.ts`. |
 | Baja | `safeHref` aceptaba `/\evil.com` como ruta interna. | El navegador lo lee como `//evil.com`: el link iba a otro sitio en la misma pestaña. No ejecuta código. | Se rechaza. | `securityWeb.test.ts`. |
-| Baja | CSP sin `frame-src`. | Si algún día se colara un iframe con otra dirección, se cargaría igual. | `frame-src 'self'` + YouTube (sin cookies y el de siempre, que usa el Hub viejo), Vimeo, Spotify, SoundCloud y TikTok. | `securityWeb.test.ts`. |
+| Baja | CSP sin `frame-src`. | Si algún día se colara un iframe con otra dirección, se cargaría igual. | `frame-src 'self'` + YouTube sin cookies (el de siempre lo usaba sólo el Hub viejo y salió al retirarlo), Vimeo, Spotify, SoundCloud y TikTok. | `securityWeb.test.ts`. |
 | Baja | `Referrer-Policy: origin-when-cross-origin` y `X-XSS-Protection: 1; mode=block`. | El primero manda el origen también a páginas `http://`; el segundo es un filtro viejo que los navegadores ya sacaron y que en algunos casos se usaba para atacar. | `strict-origin-when-cross-origin` y `X-XSS-Protection: 0` (lo recomendado hoy). | `securityWeb.test.ts`. |
+| Media | Hub viejo (`?v=1`) seguía vivo: leía tablas `hub_*` y `restaurants` directo, cargaba Google Fonts (`useThemeFonts`), no usaba el sistema de diseño y era la zona que tuvo el problema alto. | Ese código podía volver a tener links sin filtrar o leer datos de más. | **Arreglado: se retiró el Hub viejo.** `/{username}?v=1` redirige a la página de Identity (sin `v`, con `?src=` y lo demás), así que los QR y links impresos siguen andando. Se borraron `HubPublicPage`, el editor viejo (`HubPage`, `HubBlockEditor`), sus bloques, `useThemeFonts` (Google Fonts) y `themeConfig`. Quedan las tablas `hub_*`, `mycen_import_hub()` y las plantillas de `src/modules/hub/lib/` que usa el onboarding de Business. `www.youtube.com` (sólo lo usaba el Hub viejo) salió de `frame-src`. | `tests/e2e/hub-retired.spec.ts`, `securityWeb.test.ts`. |
+| Baja | `src/modules/hub/components/blocks/BioBlock.tsx` limpiaba HTML con `innerHTML` en un `div` del documento (las imágenes con `onerror` se ejecutan antes de limpiar). No se usaba. | Si se revivía, XSS con la bio. | **Arreglado: se retiró el Hub viejo** (archivo borrado junto con `HubBlockRenderer` y `HubBlockEditor`). | — |
 
 ## A decidir (no se cambió)
 
 | Gravedad | Hallazgo | Por qué no se tocó / recomendación |
 |---|---|---|
 | Media | **CSP sin `script-src` ni `connect-src`.** Si algún día entra un XSS, nada frena que cargue scripts de afuera o mande datos a otro sitio. | `index.html` tiene un script en línea (esqueleto del hero, `scripts/heroShell.ts`), así que `script-src 'self'` lo rompería. Propuesta: calcular su hash en el build y publicar `script-src 'self' 'sha256-…'`; `connect-src 'self' https://<proyecto>.supabase.co wss://<proyecto>.supabase.co`. Conviene probarlo primero como `Content-Security-Policy-Report-Only` en un preview. |
-| Media | **Hub viejo (`?v=1`) sigue vivo.** Lee tablas `hub_*` y `restaurants` directo, carga Google Fonts (`useThemeFonts`), no usa el sistema de diseño y es la zona que tuvo el problema alto. | Retirarlo cuando Studio reemplace al editor viejo (ya está previsto en CLAUDE.md). Mientras tanto, los links quedan filtrados. |
-| Baja | `src/modules/hub/components/blocks/BioBlock.tsx` limpia HTML con `innerHTML` en un `div` del documento (las imágenes con `onerror` se ejecutan antes de limpiar) y no revisa lo que queda tras desarmar una etiqueta no permitida. | Hoy **no se usa** (nadie importa `HubBlockRenderer` ni `HubBlockEditor`). Borrar esos archivos junto con el Hub viejo; si se reviviera, usar `DOMParser` y texto plano. |
 | Baja | Imágenes del perfil (foto, portada, links con imagen) se muestran desde la URL guardada. Studio siempre sube a Supabase, pero si alguien guarda otra URL por la API, el navegador del visitante la pide al abrir el perfil (ese sitio ve su IP). | Opcional: aceptar en la página pública sólo imágenes del almacenamiento de Mycen (como ya hace la imagen al compartir). |
 | Baja | Cola sin conexión de Life OS (`mycen_life_outbox`) no es por cuenta: si alguien carga algo sin red, cierra sesión y entra otra cuenta en el mismo celular, al volver la red se intenta subir (la base lo rechaza por RLS) y el aviso de error muestra el título a la otra cuenta. | Guardar la cola por usuario (`mycen_life_outbox:<id>`) o vaciarla al cerrar sesión. |
 | Baja | `api/youtube-latest` se puede usar desde afuera como “lector de feeds de YouTube” gratis. Tiene formato estricto, 5 s de espera, tope de tamaño y caché de 30 min en la CDN, así que el costo es bajo. Sigue redirecciones antes de mirar adónde fueron (sólo YouTube puede redirigir). | Si se ve abuso: firewall de Vercel con límite por IP. |
@@ -54,7 +54,7 @@ de cualquier lado, el micrófono bloqueado para "Dictar", fórmulas en el CSV de
   `api/youtube-latest.ts` sólo pide a `www.youtube.com` con formato estricto, tiempo y tamaño máximos, y errores con
   códigos fijos (nunca repite lo que llegó). Los previsualizadores no pueden llegar a rutas privadas: `og.ts` manda
   `studio`, `life`, `super-admin`, etc. a la app normal.
-- **Fuentes**: todas desde `@fontsource` y `public/fonts` (nada de Google Fonts fuera del Hub viejo).
+- **Fuentes**: todas desde `@fontsource` y `public/fonts` (nada de Google Fonts; la única carga, `useThemeFonts` del Hub viejo, se borró al retirarlo).
 - **Acceso**: no hay `?next=` ni redirecciones con destino que venga de la URL; Google y los mails vuelven siempre a
   `/auth/callback` del mismo sitio; los errores viajan como códigos. `mycen_oauth_pending` guarda sólo idioma, aceptación,
   referido y hora (vence en 1 h). `TermsGate` es un paso de consentimiento, no de seguridad (la base no depende de él).

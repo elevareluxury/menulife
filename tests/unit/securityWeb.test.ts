@@ -100,7 +100,7 @@ describe('vercel.json: encabezados de seguridad', () => {
     const frames = csp.split(';').map(s => s.trim()).find(s => s.startsWith('frame-src'))!.split(/\s+/).slice(1)
     expect(frames.sort()).toEqual([
       "'self'", 'https://open.spotify.com', 'https://player.vimeo.com', 'https://w.soundcloud.com', 'https://www.tiktok.com',
-      'https://www.youtube-nocookie.com', 'https://www.youtube.com',
+      'https://www.youtube-nocookie.com',
     ].sort())
   })
 
