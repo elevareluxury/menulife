@@ -1277,3 +1277,15 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
   font-family: var(--font-jakarta); font-size: 15px; color: rgba(255,255,255,0.85); line-height: 1.5;
 }
 .ml-myday li::before { content: '✦'; color: var(--ml-salmon); flex-shrink: 0; }
+
+/* Fechas y horas en el iPhone: Safari les da un ancho mínimo propio y no se achican, así que dos lado a lado (fecha y
+   hora de una tarea) se salían de la hoja, se pisaban y dejaban mover la pantalla de costado. Sin el dibujo nativo
+   se comportan como cualquier campo; al tocarlos se sigue abriendo el selector del sistema. */
+input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"], input[type="week"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+input::-webkit-date-and-time-value { text-align: start; min-height: 1.4em; }

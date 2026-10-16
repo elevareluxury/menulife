@@ -522,6 +522,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   esqueleto). `src/lib/bootSplash.ts`: la app la saca al dibujar la primera pantalla (`BootSplashDone` en `App.tsx`) y la
   muestra mientras baja otra ruta (`RouteLoading`); por las dudas se va sola a los 12 s. iPhone instalado: `body` lleva
   `padding-top: env(safe-area-inset-top)` y lo fijo arriba (barras, cajones) usa `top`/`padding` con ese valor.
+- Celular (teclado, ancho y gestos): `installViewportVars` (`src/lib/viewportVars.ts`, en `main.tsx`) anota `--kb`
+  (alto del teclado) y `--vvh` (alto visible) con `visualViewport`; `LifeSheet`, `.my-sheet-backdrop`, `.st-overlay` y
+  `.st-dialog-wrap` se apoyan arriba del teclado y nunca son más altos que lo visible; su contenido sólo se mueve para
+  arriba y abajo. Nada de `autoFocus` en hojas: `ref={focusOnMount}` (enfoca sin mover la pantalla). Fechas y horas sin
+  dibujo nativo (`index.css`: en iPhone no se achicaban y se pisaban). Brain cambia de vista deslizando de costado
+  (`hooks/useSwipeNav.ts`: gesto claramente horizontal, no sobre campos ni zonas con scroll de costado; RTL invertido).
+  La landing en el celular muestra idioma y cuenta (sin menú hamburguesa). E2E en `swipe-sheets.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

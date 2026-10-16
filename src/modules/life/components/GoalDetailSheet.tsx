@@ -86,7 +86,7 @@ export function GoalDetailSheet({
   }
 
   return (
-    <LifeSheet open={open} onClose={onClose} title={goal.name} maxHeight="92vh">
+    <LifeSheet open={open} onClose={onClose} title={goal.name} maxHeight="92dvh">
       <div style={{ position: 'relative' }}>
         <AnimatePresence>
           {celebrating && (

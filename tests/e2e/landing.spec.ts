@@ -36,8 +36,9 @@ test('árabe se ve de derecha a izquierda', async ({ page }) => {
 test('el selector cambia el idioma y la URL lo acompaña', async ({ page }) => {
   await page.goto('/?lang=en')
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Your digital identity')
-  // En el celular el selector está dentro del menú
-  await page.getByRole('button', { name: 'Menu' }).click()
+  // En el celular, idioma y cuenta están a la vista (sin menú hamburguesa)
+  await expect(page.getByRole('button', { name: 'Menu' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
   await page.getByRole('combobox', { name: 'Language' }).selectOption('pt')
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Sua identidade digital')
   await expect(page).toHaveURL(/\?lang=pt$/)
