@@ -24,6 +24,7 @@ import { speechSupported } from '../hooks/useSpeech'
 import { VoiceCaptureSheet } from './VoiceCaptureSheet'
 import type { VoiceResult } from '../lib/voiceParse'
 import { BrainDumpSheet, type DumpSaveItem } from './BrainDumpSheet'
+import { lifeTimeZone, lifeToday, noonOfLocalDayISO } from '../lib/zonedTime'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -149,11 +150,11 @@ export function CaptureButton() {
 
   /** Lo dictado, ya revisado por la persona */
   const handleVoiceSave = async (r: VoiceResult) => {
-    const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` })()
+    const today = lifeToday()   // zona de la cuenta (lib/zonedTime.ts)
     if (r.kind === 'expense' || r.kind === 'income') {
       await handleMoneySave({
         type: r.kind, amount: r.amount ?? 0, category: 'Otros', description: r.text, currency: mainCurrency,
-        occurred_at: new Date(`${r.date ?? today}T12:00:00`).toISOString(),
+        occurred_at: noonOfLocalDayISO(r.date ?? today, lifeTimeZone()),
       })
     } else if (r.kind === 'task') {
       await handleTaskSave({ title: r.text, due_date: r.date, due_time: r.date ? r.time : null })
@@ -169,8 +170,7 @@ export function CaptureButton() {
    */
   const handleDumpSave = async (items: DumpSaveItem[]): Promise<string[]> => {
     if (!user) return items.map(i => i.id)
-    const now = new Date()
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const today = lifeToday()
     const failed: string[] = []
     const modules = new Set<OutboxItem['module']>()
     let saved = 0
@@ -181,7 +181,7 @@ export function CaptureButton() {
       if (it.kind === 'expense' || it.kind === 'income') {
         item = { table: 'life_transactions', module: 'money', row: {
           id: it.id, user_id: user.id, type: it.kind, amount: it.amount ?? 0, category: it.category, description: it.text,
-          currency: mainCurrency, occurred_at: new Date(`${it.date ?? today}T12:00:00`).toISOString(),
+          currency: mainCurrency, occurred_at: noonOfLocalDayISO(it.date ?? today, lifeTimeZone()),
         } }
       } else if (it.kind === 'task') {
         item = { table: 'life_brain_items', module: 'brain', row: {

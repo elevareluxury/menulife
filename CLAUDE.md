@@ -163,6 +163,13 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   Textos sin revisión de abogado: revisarlos antes de abrir al público.
 - Preferencias de la cuenta en `user_settings` (idioma, moneda principal, monedas extra, zona horaria, inicio de semana):
   `src/lib/prefs.ts` (`usePrefs`, `savePrefs`), se cargan en `PrefsInit`. Ajustes en `/life/settings` y Studio → Ajustes.
+- Zona horaria de Life OS: "hoy", meses, horas (Mi día desde las 18 h, recordatorios), claves de fecha, bordes de
+  consultas y `p_tz` de fijos/cuotas usan `user_settings.timezone` (`lib/zonedTime.ts`, sólo `Intl`: `lifeToday`,
+  `lifeDayOf(instante)`, `lifeNow()` = reloj de pared para cuentas de calendario, `startOfLocalDayISO`,
+  `zonedTimeToDate`; `prefs.ts` la anota con `setAccountTimeZone`). Sin zona guardada (o inválida) sigue al celular, y
+  la zona sólo se guarda si la persona la elige (`timezoneSaved`). `dayKey(d)`/`localDateKey(d)` con un Date de
+  calendario leen campos locales; sin argumento, hoy de la cuenta. `LifeShell` espera las preferencias (máx. 5 s).
+  Ajustes avisa si el celular está en otra zona ("Usar la del celular"). Tests en `zonedTime.test.ts` y `timezone.spec.ts`.
 - Dinero: nunca sumar monedas distintas; cada movimiento guarda su `currency`.
 - Fijos que se repiten cada mes (Dinero): `life_recurring_transactions` (día del mes, desde, `last_period`, pausa) y
   `life_transactions.recurring_id`/`recurring_period` (único por mes). La base carga lo vencido con

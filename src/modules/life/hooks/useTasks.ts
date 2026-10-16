@@ -7,6 +7,7 @@ import { celebrate } from '../lib/celebrate'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import { isValidRecurrence, nextOccurrence, type Recurrence } from '../lib/recurrence'
 import { trackEvent } from '@/lib/productEvents'
+import { calendarKey, lifeTimeZone, lifeToday, zonedTimeToDate } from '../lib/zonedTime'
 
 // Las tareas viven en Brain (life_brain_items con type = 'task').
 // Las columnas de fecha/recordatorio todavía no están en database.types.ts
@@ -86,19 +87,20 @@ function fromRow(r: BrainTaskRow): LifeTask {
   }
 }
 
-/** Fecha local YYYY-MM-DD (no UTC: "hoy" es el día del usuario). */
-export function localDateKey(d: Date = new Date()): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+/**
+ * Fecha YYYY-MM-DD (no UTC: "hoy" es el día del usuario). Sin argumento: hoy en la zona de la cuenta
+ * (lib/zonedTime.ts). Con un Date de calendario (`new Date(y, m, d)`): sus campos locales.
+ */
+export function localDateKey(d?: Date): string {
+  return d ? calendarKey(d) : lifeToday()
 }
 
-/** Momento del vencimiento (si no hay hora, se usa las 09:00 para los recordatorios). */
-export function taskDueAt(t: Pick<LifeTask, 'due_date' | 'due_time'>): Date | null {
-  if (!t.due_date) return null
+/** Momento del vencimiento en la zona de la cuenta (si no hay hora, se usa las 09:00 para los recordatorios). */
+export function taskDueAt(t: Pick<LifeTask, 'due_date' | 'due_time'>, tz: string = lifeTimeZone()): Date | null {
+  if (!t.due_date || !/^\d{4}-\d{2}-\d{2}$/.test(t.due_date)) return null
   const time = t.due_time ? t.due_time.slice(0, 5) : '09:00'
-  const d = new Date(`${t.due_date}T${time}:00`)
+  if (!/^\d{2}:\d{2}$/.test(time)) return null
+  const d = zonedTimeToDate(t.due_date, time, tz)
   return Number.isNaN(d.getTime()) ? null : d
 }
 

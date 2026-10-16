@@ -6,6 +6,7 @@ import { formatMoney } from '@/lib/currencies'
 import { useBudgets } from '../hooks/useBudgets'
 import { useCategoryLabels } from '../hooks/useCategories'
 import { budgetStatuses, monthOf, mostRelevant, type BudgetTx } from '../lib/budgets'
+import { lifeNow } from '../lib/zonedTime'
 
 /** Mi día, tarjeta del mes: una sola línea amable si algún presupuesto está cerca del tope o se pasó (el más relevante). */
 export function BudgetNudge({ transactions, mainCurrency, locale }: {
@@ -18,7 +19,7 @@ export function BudgetNudge({ transactions, mainCurrency, locale }: {
   const { labelOf } = useCategoryLabels()
   const s = useMemo(() => {
     if (!items.length) return null
-    const now = new Date()
+    const now = lifeNow()   // fecha de la zona de la cuenta
     return mostRelevant(budgetStatuses(items, transactions, monthOf(now), now, mainCurrency))
   }, [items, transactions, mainCurrency])
   if (!s) return null

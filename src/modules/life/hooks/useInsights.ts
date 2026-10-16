@@ -7,6 +7,8 @@ import { computeInsights, type Insight } from '../lib/insights'
 import { ALL_DAYS, frequencyOf, isDone, shiftDate } from '../lib/habitStreak'
 import { usePrefs } from '@/lib/prefs'
 import { useToday } from './useToday'
+import { lifeTimeZone, startOfLocalDayISO } from '../lib/zonedTime'
+import { shiftMonth } from '../lib/moneyInsights'
 
 // Las tablas de Life OS todavía no están en database.types.ts
 const db = supabase as unknown as SupabaseClient
@@ -24,9 +26,10 @@ export function useInsights() {
   useEffect(() => {
     if (!user) return
     let cancelled = false
-    const [y, m] = today.split('-').map(Number)
-    const prevMonthStart = new Date(y, m - 2, 1).toISOString()
-    const twoWeeksAgo = new Date(`${shiftDate(today, -13)}T00:00:00`).toISOString()
+    // Bordes en la zona de la cuenta (lib/zonedTime.ts)
+    const tz = lifeTimeZone()
+    const prevMonthStart = startOfLocalDayISO(`${shiftMonth(today.slice(0, 7), -1)}-01`, tz)
+    const twoWeeksAgo = startOfLocalDayISO(shiftDate(today, -13), tz)
     const q = (table: string, cols: string) => db.from(table).select(cols).eq('user_id', user.id)
 
     void Promise.all([

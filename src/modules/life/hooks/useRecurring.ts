@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import type { TransactionFormData } from './useMoney'
+import { calendarKey, lifeTimeZone, lifeToday, todayKey } from '../lib/zonedTime'
 
 // Gastos e ingresos fijos que se repiten cada mes (supabase/migrations/20261027000001_life_recurring_transactions.sql).
 // La base carga lo que ya venció con life_materialize_recurring: sin duplicar y sin volver a cargar lo que se borró.
@@ -25,8 +26,9 @@ export interface RecurringTx {
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
-export function localDateKey(d = new Date()): string {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+/** YYYY-MM-DD: sin argumento, hoy en la zona de la cuenta; con un Date de calendario, sus campos locales. */
+export function localDateKey(d?: Date): string {
+  return d ? calendarKey(d) : lifeToday()
 }
 const monthOf = (key: string) => key.slice(0, 7)
 function addMonths(ym: string, n: number): string {
@@ -52,13 +54,13 @@ let materializedOn: string | null = null
 
 /** Carga los fijos vencidos (una vez por día y pestaña, salvo `force`). Devuelve cuántos movimientos creó. */
 export async function materializeRecurring(force = false): Promise<number> {
-  const today = localDateKey()
-  // Por cuenta y día: si en la misma pestaña entra otra cuenta, a esa también se le cargan sus fijos
-  const key = `${useAuthStore.getState().user?.id ?? ''}|${today}`
+  // "Hoy" y la hora del movimiento en la zona de la cuenta (lib/zonedTime.ts)
+  const tz = lifeTimeZone()
+  const today = todayKey(tz)
+  // Por cuenta, día y zona: si en la misma pestaña entra otra cuenta, a esa también se le cargan sus fijos
+  const key = `${useAuthStore.getState().user?.id ?? ''}|${today}|${tz}`
   if (!force && materializedOn === key) return 0
   materializedOn = key
-  let tz = 'UTC'
-  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { /* UTC */ }
   const { data, error } = await db.rpc('life_materialize_recurring', { p_today: today, p_tz: tz })
   if (error) { materializedOn = null; return 0 }
   return Number(data) || 0

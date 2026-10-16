@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { taskDueAt, localDateKey, type LifeTask } from './useTasks'
 import { lifeT } from '@/i18n/app/life'
+import { lifeNow } from '../lib/zonedTime'
 
 const db = supabase as unknown as SupabaseClient
 const CHECK_EVERY_MS = 30_000
@@ -20,7 +21,7 @@ export function useTaskReminders(userId: string | undefined) {
     let cancelled = false
 
     async function check() {
-      const today = new Date()
+      const today = lifeNow()   // días de calendario en la zona de la cuenta
       const from = new Date(today); from.setDate(from.getDate() - 1)
       const to = new Date(today); to.setDate(to.getDate() + 8)
       const { data } = await db.from('life_brain_items')

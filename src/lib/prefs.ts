@@ -5,6 +5,7 @@ import { useAppLang } from '@/i18n/app/store'
 import { isAppLang, type AppLang } from '@/i18n/app/languages'
 import { changeLocaleTo, ACTIVE_LOCALES } from '@/i18n'
 import { guessCurrency } from './currencies'
+import { deviceTimeZone, isValidTimeZone, setAccountTimeZone } from '@/modules/life/lib/zonedTime'
 
 // user_settings todavía no está en database.types.ts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,12 +21,12 @@ export interface Prefs {
 
 interface PrefsState extends Prefs {
   loadedFor: string | null
+  /** Zona guardada en la cuenta (null = nunca se eligió: Life OS sigue al dispositivo). */
+  timezoneSaved: string | null
   apply: (p: Partial<Prefs>) => void
 }
 
-function browserTimezone(): string {
-  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { return 'UTC' }
-}
+const browserTimezone = deviceTimeZone
 
 export const usePrefs = create<PrefsState>((set) => ({
   language: useAppLang.getState().lang,
@@ -34,8 +35,12 @@ export const usePrefs = create<PrefsState>((set) => ({
   timezone: browserTimezone(),
   week_start: 1,
   loadedFor: null,
+  timezoneSaved: null,
   apply: (p) => set(p),
 }))
+
+// Life OS calcula "hoy", meses y horas en la zona de la cuenta (lib/zonedTime.ts)
+usePrefs.subscribe(s => setAccountTimeZone(s.timezoneSaved))
 
 /** Lleva las preferencias al resto de la app (idioma de la interfaz y moneda). */
 function propagate(p: Partial<Prefs>) {
@@ -49,18 +54,22 @@ function propagate(p: Partial<Prefs>) {
 
 export async function loadPrefs(userId: string): Promise<void> {
   const { data, error } = await db.from('user_settings').select('*').eq('user_id', userId).maybeSingle()
-  if (error) return   // sin tabla o sin red: seguimos con los valores del dispositivo
+  if (error) {   // sin tabla o sin red: seguimos con los valores del dispositivo
+    usePrefs.setState({ loadedFor: userId })
+    return
+  }
   const state = usePrefs.getState()
+  const saved = isValidTimeZone(data?.timezone) ? (data.timezone as string) : null
   const next: Prefs = data
     ? {
         language: isAppLang(data.language) ? data.language : state.language,
         currency: data.currency ?? state.currency,
         extra_currencies: data.extra_currencies ?? [],
-        timezone: data.timezone ?? state.timezone,
+        timezone: saved ?? browserTimezone(),
         week_start: data.week_start === 0 ? 0 : 1,
       }
     : { language: state.language, currency: state.currency, extra_currencies: [], timezone: state.timezone, week_start: state.week_start }
-  usePrefs.setState({ ...next, loadedFor: userId })
+  usePrefs.setState({ ...next, timezoneSaved: saved, loadedFor: userId })
   propagate(next)
 }
 
@@ -74,15 +83,18 @@ export async function savePrefs(userId: string, patch: Partial<Prefs>): Promise<
     timezone: patch.timezone ?? prev.timezone,
     week_start: patch.week_start ?? prev.week_start,
   }
-  usePrefs.setState(merged)
+  // La zona sólo se guarda si la persona la eligió: sin elegir, Life OS sigue al dispositivo (aunque viaje)
+  const timezoneSaved = patch.timezone && isValidTimeZone(patch.timezone) ? patch.timezone : prev.timezoneSaved
+  usePrefs.setState({ ...merged, timezoneSaved })
   propagate(merged)
-  const { error } = await db.from('user_settings').upsert({ user_id: userId, ...merged }, { onConflict: 'user_id' })
+  const { error } = await db.from('user_settings')
+    .upsert({ user_id: userId, ...merged, timezone: timezoneSaved }, { onConflict: 'user_id' })
   if (error) {
     const back: Prefs = {
       language: prev.language, currency: prev.currency, extra_currencies: prev.extra_currencies,
       timezone: prev.timezone, week_start: prev.week_start,
     }
-    usePrefs.setState(back)
+    usePrefs.setState({ ...back, timezoneSaved: prev.timezoneSaved })
     propagate(back)
     throw error
   }

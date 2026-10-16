@@ -6,6 +6,7 @@ import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { useSpeech } from '../hooks/useSpeech'
 import { parseVoice, type VoiceKind, type VoiceResult } from '../lib/voiceParse'
+import { lifeNow } from '../lib/zonedTime'
 
 // V1.1 (beta voiceCapture): dictar y confirmar. Se guarda sólo después de que la persona lo revisa.
 
@@ -38,7 +39,7 @@ export function VoiceCaptureSheet({ open, onClose, onSave }: {
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- el texto final se interpreta una vez */
     if (speech.final) {
-      const r = parseVoice(speech.final, lang)
+      const r = parseVoice(speech.final, lang, lifeNow())
       setDraft(r)
       setAmountStr(r.amount != null ? String(r.amount) : '')
     }

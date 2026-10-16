@@ -1,4 +1,5 @@
 // Dinero: meses, "en qué se fue", búsqueda y la memoria de categorías. Todo puro (sin red ni DOM) y en el dispositivo.
+import { dateKeyOf, lifeTimeZone, startOfLocalDayISO } from './zonedTime'
 
 export interface MoneyTx {
   type: 'income' | 'expense'
@@ -11,8 +12,10 @@ export interface MoneyTx {
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-// ── Meses ('YYYY-MM', en hora local) ─────────────────────────────────────────
+// ── Meses ('YYYY-MM') ────────────────────────────────────────────────────────
+// Los instantes (occurred_at) se leen en la zona de la cuenta (lib/zonedTime.ts); `tz` se puede pasar en los tests.
 
+/** Mes de un Date de calendario (campos locales). Para "este mes" pasar `lifeNow()`. */
 export function monthKeyOf(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`
 }
@@ -22,26 +25,25 @@ export function shiftMonth(key: string, delta: number): string {
   return monthKeyOf(new Date(y, m - 1 + delta, 1))
 }
 
-/** Primer día del mes y primer día del siguiente (instantes ISO, comparables con occurred_at). */
-export function monthRange(key: string): [string, string] {
-  const [y, m] = key.split('-').map(Number)
-  return [new Date(y, m - 1, 1).toISOString(), new Date(y, m, 1).toISOString()]
+/** Comienzo del mes y del siguiente en la zona `tz` (instantes ISO, comparables con occurred_at). */
+export function monthRange(key: string, tz: string = lifeTimeZone()): [string, string] {
+  return [startOfLocalDayISO(`${key}-01`, tz), startOfLocalDayISO(`${shiftMonth(key, 1)}-01`, tz)]
 }
 
-export function inMonth(iso: string, key: string): boolean {
-  return monthKeyOf(new Date(iso)) === key
+export function inMonth(iso: string, key: string, tz: string = lifeTimeZone()): boolean {
+  return dateKeyOf(iso, tz).slice(0, 7) === key
 }
 
-/** Saldo acumulado por día del mes; en el mes actual llega hasta hoy. */
-export function monthCurve(txs: MoneyTx[], key: string, today: Date): number[] {
+/** Saldo acumulado por día del mes; en el mes actual llega hasta hoy (`today`: reloj de pared, ver `lifeNow`). */
+export function monthCurve(txs: MoneyTx[], key: string, today: Date, tz: string = lifeTimeZone()): number[] {
   const [y, m] = key.split('-').map(Number)
   const lastDay = new Date(y, m, 0).getDate()
   const days = monthKeyOf(today) === key ? today.getDate() : lastDay
   const daily = new Array<number>(days).fill(0)
   for (const tx of txs) {
-    const d = new Date(tx.occurred_at)
-    if (monthKeyOf(d) !== key) continue
-    const i = d.getDate() - 1
+    const day = dateKeyOf(tx.occurred_at, tz)
+    if (day.slice(0, 7) !== key) continue
+    const i = Number(day.slice(8, 10)) - 1
     if (i < days) daily[i] += tx.type === 'income' ? Number(tx.amount) : -Number(tx.amount)
   }
   let run = 0

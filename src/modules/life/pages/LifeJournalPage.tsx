@@ -10,9 +10,9 @@ import { LifeScreenContainer, LifeCard, LifeEmptyState, LifeSectionHeader, color
 import { ActionMenu } from '../components/ActionMenu'
 import { JournalLockScreen } from '../components/JournalLock'
 import { useJournal, JournalError, JOURNAL_MAX, type JournalEntry, type JournalSaveError } from '../hooks/useJournal'
-import { dayKey, useToday } from '../hooks/useToday'
+import { dayKey, useLifeTimeZone, useToday } from '../hooks/useToday'
 import { deleteWithUndo } from '../lib/undo'
-import { monthKeyOf, shiftMonth } from '../lib/moneyInsights'
+import { shiftMonth } from '../lib/moneyInsights'
 import { isIdle, readLock, writeLock, type JournalLock } from '../lib/journalLock'
 
 // Diario privado (V1.1, FEATURES.journal). Entradas por día, editar, borrar con "Deshacer", buscar y lista por mes.
@@ -118,6 +118,7 @@ function EntryCard({ entry, onSave, onDelete }: {
 }) {
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
+  const tz = useLifeTimeZone()
   const errorText = useErrorText()
   const [editing, setEditing] = useState(false)
   const [body, setBody] = useState(entry.body)
@@ -126,7 +127,7 @@ function EntryCard({ entry, onSave, onDelete }: {
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const long = entry.body.length > 320 || entry.body.split('\n').length > 6
-  const time = new Date(entry.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+  const time = new Date(entry.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: tz })
 
   if (editing) {
     return (
@@ -179,7 +180,7 @@ function JournalBody({ draft, setDraft }: { draft: { body: string; date: string 
   const locale = langLocale(useAppLang(s => s.lang))
   const today = useToday()
   const errorText = useErrorText()
-  const [month, setMonth] = useState(() => monthKeyOf(new Date()))
+  const [month, setMonth] = useState(() => today.slice(0, 7))
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [saving, setSaving] = useState(false)
@@ -187,7 +188,7 @@ function JournalBody({ draft, setDraft }: { draft: { body: string; date: string 
   const { entries, loading, error: loadError, searching, reload, create, update, hideLocally, remove } =
     useJournal({ month, query: searchOpen ? query : '', enabled: true })
 
-  const isCurrent = month === monthKeyOf(new Date())
+  const isCurrent = month === today.slice(0, 7)
   const rawMonth = new Date(`${month}-15T12:00:00`).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   const monthName = rawMonth.charAt(0).toLocaleUpperCase(locale) + rawMonth.slice(1)
 

@@ -61,6 +61,8 @@ const es = {
     searchCurrency: 'Buscar moneda…',
     timezone: 'Zona horaria',
     timezoneHelp: 'Define cuándo empieza y termina tu día.',
+    timezoneOther: (z: string) => `Tu celular está en otra zona horaria (${z}). Mycen usa la elegida acá.`,
+    useDeviceTimezone: 'Usar la del celular',
     weekStart: 'La semana empieza el',
     monday: 'Lunes',
     sunday: 'Domingo',

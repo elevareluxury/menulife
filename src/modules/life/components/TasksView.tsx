@@ -8,6 +8,7 @@ import { LifeCard, LifeEmptyState, colors, font, radius, ink } from '../design-s
 import { useGoalOptions, type GoalOption } from '../hooks/useGoalOptions'
 import { localDateKey, useTasks, type LifeTask } from '../hooks/useTasks'
 import { useToday } from '../hooks/useToday'
+import { lifeNow } from '../lib/zonedTime'
 import { downloadTaskIcs } from '../lib/ics'
 import { upcomingOccurrences } from '../lib/recurrence'
 import { deleteWithUndo } from '../lib/undo'
@@ -57,7 +58,7 @@ export function TasksView() {
   const weekStart = usePrefs(st => st.week_start)
   const todayKey = useToday()
   const [mode, setMode] = useState<Mode>('list')
-  const [cursor, setCursor] = useState(() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() } })
+  const [cursor, setCursor] = useState(() => { const d = lifeNow(); return { y: d.getFullYear(), m: d.getMonth() } })
   const [selected, setSelected] = useState(() => localDateKey())
   const [sheet, setSheet] = useState<{ open: boolean; task: LifeTask | null; date: string | null }>({ open: false, task: null, date: null })
   const [showDone, setShowDone] = useState(false)

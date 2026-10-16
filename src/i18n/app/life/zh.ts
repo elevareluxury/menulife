@@ -21,7 +21,7 @@ const zh: LifeDict = {
     extraCurrencies: '其他货币',
     extraHelp: '用于记录其他货币的收支（最多 5 种）。各货币分别汇总，我们不会换算金额。',
     addCurrency: '添加货币', removeCurrency: c => `移除 ${c}`, searchCurrency: '搜索货币…',
-    timezone: '时区', timezoneHelp: '决定你的一天何时开始和结束。',
+    timezone: '时区', timezoneHelp: '决定你的一天何时开始和结束。', timezoneOther: z => `你的手机在另一个时区（${z}）。Mycen 使用这里选择的时区。`, useDeviceTimezone: '使用手机的时区',
     weekStart: '每周开始于', monday: '星期一', sunday: '星期日',
     account: '账户', openStudio: '打开 Mycen Studio', signOut: '退出登录', savedOk: '设置已保存', noResults: '无结果',
     homeTitle: "我的一天",

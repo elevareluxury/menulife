@@ -30,11 +30,12 @@ import { useBudgets } from '../hooks/useBudgets'
 import { BudgetsCard } from '../components/BudgetsCard'
 import { BudgetSheet, type BudgetDraft } from '../components/BudgetSheet'
 import { budgetStatuses, findBudget, type Budget } from '../lib/budgets'
+import { lifeNow } from '../lib/zonedTime'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
   const d = new Date(dateStr + 'T12:00:00')
-  const today = new Date()
+  const today = lifeNow()
   const yesterday = new Date(today)
   yesterday.setDate(today.getDate() - 1)
   const tomorrow = new Date(today)
@@ -50,7 +51,7 @@ function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
 function monthLabel(key: string, locale: string): string {
   const [y, m] = key.split('-').map(Number)
   const d = new Date(y, m - 1, 1)
-  return d.toLocaleDateString(locale, { month: 'long', ...(y !== new Date().getFullYear() ? { year: 'numeric' as const } : {}) })
+  return d.toLocaleDateString(locale, { month: 'long', ...(y !== lifeNow().getFullYear() ? { year: 'numeric' as const } : {}) })
 }
 
 function groupByDay(txs: Transaction[]): { date: string; items: Transaction[] }[] {
@@ -374,7 +375,7 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
 export function LifeMoneyPage() {
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
-  const [month, setMonth] = useState(() => monthKeyOf(new Date()))
+  const [month, setMonth] = useState(() => monthKeyOf(lifeNow()))
   const {
     transactions, previous, loading, mainCurrency, upcoming, upcomingTotals, maxMonth, today: todayKey,
     monthIncome, monthExpense, monthBalance, monthCurve, otherTotals,
@@ -392,7 +393,7 @@ export function LifeMoneyPage() {
     .filter(tx => kind === 'all' || tx.type === kind)
     .filter(tx => !cat || tx.category === cat), [search.results, upcoming, transactions, kind, cat])
   const grouped = useMemo(() => groupByDay(shown), [shown])
-  const isCurrentMonth = month === monthKeyOf(new Date())
+  const isCurrentMonth = month === todayKey.slice(0, 7)
 
   const fixed = useRecurring()
   const plans = useInstallments()
@@ -409,8 +410,9 @@ export function LifeMoneyPage() {
   const budgets = useBudgets()
   const [budgetDraft, setBudgetDraft] = useState<BudgetDraft | null>(null)
   const budgetRows = useMemo(
-    () => budgetStatuses(budgets.items, transactions, month, new Date(), mainCurrency),
-    [budgets.items, transactions, month, mainCurrency],
+    // Hoy de la zona de la cuenta, como fecha de calendario
+    () => budgetStatuses(budgets.items, transactions, month, new Date(`${todayKey}T12:00:00`), mainCurrency),
+    [budgets.items, transactions, month, mainCurrency, todayKey],
   )
 
   if (loading && !everHasData && !transactions.length) return <MoneySkeleton />

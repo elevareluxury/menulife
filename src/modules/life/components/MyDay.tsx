@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { Check, ListChecks, Moon, Plus, Sparkles, Star, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
-import { localDateKey, taskWithDate as withDate, useTasks, type LifeTask } from '../hooks/useTasks'
+import { taskWithDate as withDate, useTasks, type LifeTask } from '../hooks/useTasks'
+import { useToday } from '../hooks/useToday'
+import { lifeDayOf, lifeNow } from '../lib/zonedTime'
 import { useHabits } from '../hooks/useHabits'
 import { MAX_PRIORITIES, useDailyReview, type Priority } from '../hooks/useDailyReview'
 import { LIFE_DATA_UPDATED } from '../hooks/useBrain'
@@ -50,7 +52,7 @@ export function MyDaySection() {
   const t = useLifeT()
   const m = t.myDay
   const navigate = useNavigate()
-  const today = localDateKey()
+  const today = useToday()
   const { tasks, loading: tasksLoading, error: tasksError, toggleTask } = useTasks()
   // Sólo con las tareas cargadas se sabe si una prioridad quedó apuntando a una tarea borrada
   const liveTaskIds = useMemo(() => (tasksLoading || tasksError ? null : new Set(tasks.map(x => x.id))), [tasks, tasksLoading, tasksError])
@@ -62,7 +64,7 @@ export function MyDaySection() {
   const [why, setWhy] = useState(false)
   const [reviewOpen, setReviewOpen] = useState(false)
   const full = livePriorities.length >= MAX_PRIORITIES
-  const evening = new Date().getHours() >= 18
+  const evening = lifeNow().getHours() >= 18   // hora de la zona de la cuenta
   const taskById = useMemo(() => new Map(tasks.map(x => [x.id, x])), [tasks])
   const fail = () => toast.error(t.common.saveError)
 
@@ -171,7 +173,7 @@ type PendingItem = { key: string; text: string; task?: LifeTask; priority?: Prio
 function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyReview>; onClose: () => void }) {
   const t = useLifeT()
   const m = t.myDay
-  const today = localDateKey()
+  const today = useToday()
   const tomorrow = shiftDate(today, 1)
   const { review, closeDay, removePriority, setMood } = day
   const { tasks, createTask, updateTask } = useTasks()
@@ -188,7 +190,7 @@ function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyRevie
   const taskById = new Map(tasks.map(x => [x.id, x]))
   const priorityTaskIds = new Set(review.priorities.flatMap(p => (p.kind === 'task' ? [p.task_id] : [])))
   const habitsDone = [...todayHabits, ...activeHabits.filter(h => !h.scheduledToday)].filter(h => h.completedToday)
-  const tasksDone = tasks.filter(x => x.completed_at && localDateKey(new Date(x.completed_at)) === today)
+  const tasksDone = tasks.filter(x => x.completed_at && lifeDayOf(x.completed_at) === today)
   const textDone = review.priorities.filter(p => p.kind === 'text' && p.done)
   const achieved = [
     ...habitsDone.map(h => ({ key: `h-${h.id}`, kind: m.habitLabel, text: h.name })),

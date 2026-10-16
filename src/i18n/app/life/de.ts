@@ -21,7 +21,7 @@ const de: LifeDict = {
     extraCurrencies: 'Weitere Währungen',
     extraHelp: 'Um Buchungen in anderen Währungen zu erfassen (bis zu 5). Sie werden getrennt summiert: Wir rechnen keine Beträge um.',
     addCurrency: 'Währung hinzufügen', removeCurrency: c => `${c} entfernen`, searchCurrency: 'Währung suchen…',
-    timezone: 'Zeitzone', timezoneHelp: 'Legt fest, wann dein Tag beginnt und endet.',
+    timezone: 'Zeitzone', timezoneHelp: 'Legt fest, wann dein Tag beginnt und endet.', timezoneOther: z => `Dein Handy ist in einer anderen Zeitzone (${z}). Mycen nutzt die hier gewählte.`, useDeviceTimezone: 'Die vom Handy nutzen',
     weekStart: 'Die Woche beginnt am', monday: 'Montag', sunday: 'Sonntag',
     account: 'Konto', openStudio: 'Mycen Studio öffnen', signOut: 'Abmelden', savedOk: 'Einstellungen gespeichert', noResults: 'Keine Ergebnisse',
     homeTitle: "Mein Tag",

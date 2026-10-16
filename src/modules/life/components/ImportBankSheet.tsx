@@ -16,6 +16,8 @@ import { detectMapping, parseCsv, splitDuplicates, toTransactions, type Grid, ty
 import { useCategoryMemory } from '../hooks/useCategoryMemory'
 import { useCategoryLabels } from '../hooks/useCategories'
 import { suggestCategory } from '../lib/moneyInsights'
+import { dateKeyOf, lifeTimeZone, noonOfLocalDayISO, startOfLocalDayISO } from '../lib/zonedTime'
+import { shiftDate } from '../lib/habitStreak'
 
 // Importar movimientos del banco (V1.1, detrás de FEATURES.bankImport): el archivo se lee en el dispositivo.
 
@@ -78,16 +80,16 @@ export function ImportBankSheet({ open, onClose }: { open: boolean; onClose: () 
   useEffect(() => {
     if (!range || !user) return
     let alive = true
-    const from = new Date(`${range[0]}T00:00:00`); from.setDate(from.getDate() - 1)
-    const to = new Date(`${range[1]}T00:00:00`); to.setDate(to.getDate() + 2)
+    // Días de la zona de la cuenta (lib/zonedTime.ts), con un día de margen a cada lado
+    const tz = lifeTimeZone()
+    const from = startOfLocalDayISO(shiftDate(range[0], -1), tz)
+    const to = startOfLocalDayISO(shiftDate(range[1], 2), tz)
     void db.from('life_transactions').select('type,amount,description,occurred_at,currency')
-      .eq('user_id', user.id).gte('occurred_at', from.toISOString()).lt('occurred_at', to.toISOString()).limit(5000)
+      .eq('user_id', user.id).gte('occurred_at', from).lt('occurred_at', to).limit(5000)
       .then(({ data }) => {
         if (!alive) return
-        const pad = (n: number) => String(n).padStart(2, '0')
         setExisting((data ?? []).filter(r => r.currency === currency).map(r => {
-          const d = new Date(r.occurred_at as string)
-          return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, type: r.type as string, amount: Number(r.amount), description: r.description as string | null }
+          return { date: dateKeyOf(r.occurred_at as string, tz), type: r.type as string, amount: Number(r.amount), description: r.description as string | null }
         }))
       })
     return () => { alive = false }
@@ -129,7 +131,7 @@ export function ImportBankSheet({ open, onClose }: { open: boolean; onClose: () 
     try {
       const rows = items.map(i => ({
         user_id: user.id, type: i.type, amount: i.amount, category: categoryFor(i), description: i.description || null,
-        currency, occurred_at: new Date(`${i.date}T12:00:00`).toISOString(),
+        currency, occurred_at: noonOfLocalDayISO(i.date, lifeTimeZone()),
       }))
       for (let k = 0; k < rows.length; k += 500) {
         const { error: err } = await db.from('life_transactions').insert(rows.slice(k, k + 500))
