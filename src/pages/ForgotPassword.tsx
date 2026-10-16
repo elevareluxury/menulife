@@ -158,7 +158,7 @@ export function ForgotPassword() {
   // ── Estado post-envío ──────────────────────────────────────────────────────
   if (emailSent) {
     return (
-      <div style={S.page}>
+      <div className="my-tap-root" style={S.page}>
         <div style={S.card}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>📧</div>
@@ -199,7 +199,7 @@ export function ForgotPassword() {
 
   // ── Formulario ─────────────────────────────────────────────────────────────
   return (
-    <div style={S.page}>
+    <div className="my-tap-root" style={S.page}>
       <div style={S.card}>
         <div style={{ position: 'absolute', top: '16px', insetInlineEnd: '16px' }}>
           <LanguageSelect label={t.common.language} />

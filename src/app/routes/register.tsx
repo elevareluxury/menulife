@@ -118,7 +118,7 @@ export function RegisterPage() {
   }
 
   return (
-    <div style={{
+    <div className="my-tap-root" style={{
       minHeight: '100vh', background: '#0F1115',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '24px', position: 'relative', overflow: 'hidden',

@@ -297,7 +297,7 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
           {FILTERS.map(f => (
             <button key={f} type="button" role="radio" aria-checked={filter === f} onClick={() => setFilter(f)}
               style={{
-                minHeight: 36, padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
+                minHeight: 44, padding: '6px 14px', borderRadius: radius.full, flexShrink: 0,
                 background: filter === f ? colors.area.brain : colors.surface.high,
                 border: `1px solid ${filter === f ? colors.area.brain : colors.border.subtle}`,
                 color: filter === f ? colors.accent.on : colors.text.secondary,

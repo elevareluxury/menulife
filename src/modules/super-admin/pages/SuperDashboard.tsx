@@ -6,7 +6,9 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { PLAN_COLORS, PLAN_LABELS, timeSince } from '../lib/adminActions'
+import { PLAN_COLORS, PLAN_LABELS } from '../lib/adminActions'
+import { useAdminT, type AdminDict } from '@/i18n/app/admin'
+import { useAdminFormat } from '../lib/adminFormat'
 
 const CARD_BG    = '#171A21'
 const BORDER     = 'rgba(255,255,255,0.06)'
@@ -22,17 +24,38 @@ interface KPI {
   color: string
 }
 
+type AlertKind = 'trialsExpiring' | 'inactive' | 'oldRequests' | 'incompleteOnboarding'
 interface Alert {
   level: 'red' | 'yellow' | 'blue' | 'orange'
-  text: string
+  kind: AlertKind
+  count: number
   names: string[]
   link: string
 }
 
 interface RecentEvent {
-  type: 'new_restaurant' | 'approved' | 'plan_change'
-  label: string
+  type: 'new_restaurant' | 'approved'
+  name: string
   time: string
+}
+
+interface Totals {
+  totalRest: number; newThisMonth: number; pendingReq: number; activeRest: number; revenue: number
+  ordersToday: number; waiters: number; drivers: number; tables: number
+}
+
+function buildKpis(n: Totals, td: AdminDict['dashboard'], num: (v: number) => string): KPI[] {
+  return [
+    { label: td.totalBusinesses, value: String(n.totalRest), sub: td.newThisMonth(n.newThisMonth), icon: <Store className="w-4 h-4" />, color: '#3B82F6' },
+    { label: td.pendingRequests, value: String(n.pendingReq), sub: n.pendingReq > 0 ? td.needsReview : td.allClear,
+      icon: <ClipboardList className="w-4 h-4" />, color: n.pendingReq > 0 ? ACCENT : '#10B981' },
+    { label: td.activeOnline, value: String(n.activeRest), sub: td.rightNow, icon: <CheckCircle className="w-4 h-4" />, color: '#10B981' },
+    { label: td.revenueMonth, value: `$${num(n.revenue)}`, sub: td.allBusinesses, icon: <TrendingUp className="w-4 h-4" />, color: '#F59E0B' },
+    { label: td.ordersToday, value: String(n.ordersToday), sub: td.inAllBusinesses, icon: <ShoppingBag className="w-4 h-4" />, color: '#8B5CF6' },
+    { label: td.activeWaiters, value: String(n.waiters), sub: td.systemTotal, icon: <Users className="w-4 h-4" />, color: '#06B6D4' },
+    { label: td.drivers, value: String(n.drivers), sub: td.systemTotal, icon: <Truck className="w-4 h-4" />, color: '#F97316' },
+    { label: td.activeTables, value: String(n.tables), sub: td.systemTotal, icon: <Grid3x3 className="w-4 h-4" />, color: '#EC4899' },
+  ]
 }
 
 function KPICard({ kpi }: { kpi: KPI }) {
@@ -46,7 +69,11 @@ function KPICard({ kpi }: { kpi: KPI }) {
       </div>
       <p className="text-2xl font-bold mb-0.5" style={{ color: TEXT }}>{kpi.value}</p>
       <p className="text-xs font-medium mb-1" style={{ color: TEXT_MUTED }}>{kpi.label}</p>
-      <p className="text-[11px]" style={{ color: kpi.color }}>{kpi.sub}</p>
+      {/* Auditoría v2 (#24): con el color del ícono a 11 px no llegaba a 4,5:1; el color queda en el punto */}
+      <p className="text-xs flex items-center gap-1.5" style={{ color: TEXT_MUTED }}>
+        <span aria-hidden="true" className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: kpi.color }} />
+        {kpi.sub}
+      </p>
     </div>
   )
 }
@@ -60,8 +87,11 @@ const ALERT_COLORS = {
 
 export function SuperDashboard() {
   const navigate = useNavigate()
+  const t = useAdminT()
+  const td = t.dashboard
+  const { number, since } = useAdminFormat()
   const [loading, setLoading] = useState(true)
-  const [kpis, setKpis] = useState<KPI[]>([])
+  const [totals, setTotals] = useState<Totals | null>(null)
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [recentEvents, setRecentEvents] = useState<RecentEvent[]>([])
   const [planDistribution, setPlanDistribution] = useState<{ plan: string; count: number }[]>([])
@@ -113,64 +143,10 @@ export function SuperDashboard() {
         new Date(r.created_at) >= new Date(startOfMonth)
       ).length
 
-      setKpis([
-        {
-          label: 'Total negocios',
-          value: String(totalRest ?? 0),
-          sub: `+${newThisMonth} este mes`,
-          icon: <Store className="w-4 h-4" />,
-          color: '#3B82F6',
-        },
-        {
-          label: 'Solicitudes pendientes',
-          value: String(pendingReq ?? 0),
-          sub: (pendingReq ?? 0) > 0 ? 'Requieren revisión' : 'Todo al día',
-          icon: <ClipboardList className="w-4 h-4" />,
-          color: (pendingReq ?? 0) > 0 ? ACCENT : '#10B981',
-        },
-        {
-          label: 'Activos online',
-          value: String(activeRest ?? 0),
-          sub: 'en este momento',
-          icon: <CheckCircle className="w-4 h-4" />,
-          color: '#10B981',
-        },
-        {
-          label: 'Revenue este mes',
-          value: `$${revenue.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`,
-          sub: 'todos los negocios',
-          icon: <TrendingUp className="w-4 h-4" />,
-          color: '#F59E0B',
-        },
-        {
-          label: 'Pedidos hoy',
-          value: String((todayOrdersData ?? []).length),
-          sub: 'en todos los negocios',
-          icon: <ShoppingBag className="w-4 h-4" />,
-          color: '#8B5CF6',
-        },
-        {
-          label: 'Mozos activos',
-          value: String(totalWaiters ?? 0),
-          sub: 'total sistema',
-          icon: <Users className="w-4 h-4" />,
-          color: '#06B6D4',
-        },
-        {
-          label: 'Repartidores',
-          value: String(totalDrivers ?? 0),
-          sub: 'total sistema',
-          icon: <Truck className="w-4 h-4" />,
-          color: '#F97316',
-        },
-        {
-          label: 'Mesas activas',
-          value: String(totalTables ?? 0),
-          sub: 'total sistema',
-          icon: <Grid3x3 className="w-4 h-4" />,
-          color: '#EC4899',
-        },
-      ])
+      setTotals({
+        totalRest: totalRest ?? 0, newThisMonth, pendingReq: pendingReq ?? 0, activeRest: activeRest ?? 0, revenue,
+        ordersToday: (todayOrdersData ?? []).length, waiters: totalWaiters ?? 0, drivers: totalDrivers ?? 0, tables: totalTables ?? 0,
+      })
 
       // Alerts
       const rests = (allRest ?? []) as {
@@ -201,24 +177,24 @@ export function SuperDashboard() {
 
       const newAlerts: Alert[] = []
       if (expiringSoon.length)
-        newAlerts.push({ level: 'red', text: `${expiringSoon.length} trial${expiringSoon.length > 1 ? 's' : ''} vence${expiringSoon.length === 1 ? '' : 'n'} en los próximos 3 días`, names: expiringSoon.map(r => r.name), link: '/super-admin/planes' })
+        newAlerts.push({ level: 'red', kind: 'trialsExpiring', count: expiringSoon.length, names: expiringSoon.map(r => r.name), link: '/super-admin/planes' })
       if (noActivity7d.length)
-        newAlerts.push({ level: 'yellow', text: `${noActivity7d.length} negocio${noActivity7d.length > 1 ? 's' : ''} sin actividad en 7+ días`, names: noActivity7d.slice(0, 3).map(r => r.name), link: '/super-admin/negocios' })
+        newAlerts.push({ level: 'yellow', kind: 'inactive', count: noActivity7d.length, names: noActivity7d.slice(0, 3).map(r => r.name), link: '/super-admin/negocios' })
       if (pendingOld.length)
-        newAlerts.push({ level: 'blue', text: `${pendingOld.length} solicitud${pendingOld.length > 1 ? 'es' : ''} pendiente${pendingOld.length > 1 ? 's' : ''} hace +48 horas`, names: (pendingOld as { business_name: string }[]).slice(0, 3).map(r => r.business_name), link: '/super-admin/solicitudes' })
+        newAlerts.push({ level: 'blue', kind: 'oldRequests', count: pendingOld.length, names: (pendingOld as { business_name: string }[]).slice(0, 3).map(r => r.business_name), link: '/super-admin/solicitudes' })
       if (incompleteOnboarding.length)
-        newAlerts.push({ level: 'orange', text: `${incompleteOnboarding.length} negocio${incompleteOnboarding.length > 1 ? 's' : ''} sin completar onboarding`, names: incompleteOnboarding.slice(0, 3).map(r => r.name), link: '/super-admin/negocios' })
+        newAlerts.push({ level: 'orange', kind: 'incompleteOnboarding', count: incompleteOnboarding.length, names: incompleteOnboarding.slice(0, 3).map(r => r.name), link: '/super-admin/negocios' })
 
       setAlerts(newAlerts)
 
       // Recent events
       const events: RecentEvent[] = []
       ;(recentRest ?? []).forEach(r => {
-        events.push({ type: 'new_restaurant', label: `🆕 ${r.name} se registró`, time: r.created_at })
+        events.push({ type: 'new_restaurant', name: r.name, time: r.created_at })
       })
       ;(recentApproved ?? []).forEach(r => {
         if (r.reviewed_at) {
-          events.push({ type: 'approved', label: `✅ ${(r as { business_name: string }).business_name} aprobado`, time: r.reviewed_at })
+          events.push({ type: 'approved', name: (r as { business_name: string }).business_name, time: r.reviewed_at })
         }
       })
       events.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
@@ -237,13 +213,14 @@ export function SuperDashboard() {
     }
   }
 
+  const kpis = totals ? buildKpis(totals, td, number) : []
   const maxPlanCount = Math.max(...planDistribution.map(p => p.count), 1)
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: TEXT }}>Panel de control</h1>
-        <p className="text-sm" style={{ color: TEXT_MUTED }}>Vista global de Mycen</p>
+        <h1 className="text-2xl font-bold mb-1" style={{ color: TEXT }}>{td.title}</h1>
+        <p className="text-sm" style={{ color: TEXT_MUTED }}>{td.subtitle}</p>
       </div>
 
       <OpenErrorsBanner />
@@ -278,7 +255,7 @@ export function SuperDashboard() {
 
       {/* Row 3: Alertas */}
       <div className="rounded-2xl p-5 mb-6" style={{ backgroundColor: CARD_BG, border: `1px solid ${BORDER}` }}>
-        <h2 className="text-sm font-semibold mb-4" style={{ color: TEXT }}>⚠️ Alertas que requieren atención</h2>
+        <h2 className="text-sm font-semibold mb-4" style={{ color: TEXT }}>{td.alertsTitle}</h2>
         {loading ? (
           <div className="space-y-2">
             {[1,2].map(i => (
@@ -291,7 +268,7 @@ export function SuperDashboard() {
             style={{ backgroundColor: '#10B98110', border: '1px solid #10B98130' }}>
             <CheckCircle className="w-5 h-5 flex-shrink-0" style={{ color: '#10B981' }} />
             <p className="text-sm" style={{ color: '#10B981' }}>
-              Todo en orden. No hay alertas pendientes.
+              {td.noAlerts}
             </p>
           </div>
         ) : (
@@ -304,18 +281,18 @@ export function SuperDashboard() {
                   style={{ backgroundColor: cfg.bg, border: `1px solid ${cfg.border}` }}>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium mb-0.5" style={{ color: cfg.text }}>
-                      {cfg.dot} {alert.text}
+                      <span aria-hidden="true">{cfg.dot}</span> {td[alert.kind](alert.count)}
                     </p>
                     <p className="text-xs truncate" style={{ color: TEXT_MUTED }}>
-                      {alert.names.join(', ')}{alert.names.length < alert.names.length ? '' : ''}
+                      {alert.names.join(', ')}
                     </p>
                   </div>
-                  <button
+                  <button type="button"
                     onClick={() => navigate(alert.link)}
                     className="flex items-center gap-1 text-xs font-medium flex-shrink-0 transition-opacity hover:opacity-70"
-                    style={{ color: cfg.text }}
+                    style={{ color: cfg.text, minHeight: 44, minWidth: 44 }}
                   >
-                    Ver <ChevronRight className="w-3 h-3" />
+                    {td.see} <ChevronRight className="w-3 h-3 rtl:rotate-180" aria-hidden="true" />
                   </button>
                 </div>
               )
@@ -329,10 +306,10 @@ export function SuperDashboard() {
         {/* Recent activity */}
         <div className="rounded-2xl p-5" style={{ backgroundColor: CARD_BG, border: `1px solid ${BORDER}` }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold" style={{ color: TEXT }}>Actividad reciente</h2>
-            <button onClick={() => navigate('/super-admin/negocios')}
-              className="text-xs" style={{ color: ACCENT }}>
-              Ver todos →
+            <h2 className="text-sm font-semibold" style={{ color: TEXT }}>{td.recentActivity}</h2>
+            <button type="button" onClick={() => navigate('/super-admin/negocios')}
+              className="text-xs" style={{ color: ACCENT, minHeight: 44 }}>
+              {td.seeAll}
             </button>
           </div>
           {loading ? (
@@ -343,13 +320,15 @@ export function SuperDashboard() {
               ))}
             </div>
           ) : recentEvents.length === 0 ? (
-            <p className="text-sm py-6 text-center" style={{ color: TEXT_MUTED }}>Sin actividad reciente</p>
+            <p className="text-sm py-6 text-center" style={{ color: TEXT_MUTED }}>{td.noActivity}</p>
           ) : (
             <div className="space-y-2">
               {recentEvents.map((ev, i) => (
                 <div key={i} className="flex items-center justify-between gap-3">
-                  <span className="text-sm" style={{ color: TEXT }}>{ev.label}</span>
-                  <span className="text-xs flex-shrink-0" style={{ color: TEXT_MUTED }}>{timeSince(ev.time)}</span>
+                  <span className="text-sm" style={{ color: TEXT }}>
+                    <span aria-hidden="true">{ev.type === 'approved' ? '✅' : '🆕'}</span> {ev.type === 'approved' ? td.approved(ev.name) : td.registered(ev.name)}
+                  </span>
+                  <span className="text-xs flex-shrink-0" style={{ color: TEXT_MUTED }}>{since(ev.time)}</span>
                 </div>
               ))}
             </div>
@@ -358,7 +337,7 @@ export function SuperDashboard() {
 
         {/* Plan distribution */}
         <div className="rounded-2xl p-5" style={{ backgroundColor: CARD_BG, border: `1px solid ${BORDER}` }}>
-          <h2 className="text-sm font-semibold mb-4" style={{ color: TEXT }}>Distribución por plan</h2>
+          <h2 className="text-sm font-semibold mb-4" style={{ color: TEXT }}>{td.planDistribution}</h2>
           {loading ? (
             <div className="space-y-3">
               {[1,2,3].map(i => (
@@ -367,7 +346,7 @@ export function SuperDashboard() {
               ))}
             </div>
           ) : planDistribution.length === 0 ? (
-            <p className="text-sm py-6 text-center" style={{ color: TEXT_MUTED }}>Sin datos</p>
+            <p className="text-sm py-6 text-center" style={{ color: TEXT_MUTED }}>{td.noData}</p>
           ) : (
             <div className="space-y-4">
               {planDistribution.map(({ plan, count }) => (
@@ -400,6 +379,7 @@ export function SuperDashboard() {
 /** Aviso con los errores abiertos (registro propio, L5). No aparece si no hay o si la migración no está. */
 function OpenErrorsBanner() {
   const navigate = useNavigate()
+  const td = useAdminT().dashboard
   const [summary, setSummary] = useState<{ open: number; affected_today: number } | null>(null)
   useEffect(() => {
     void Promise.resolve((supabase as unknown as { rpc: (fn: string) => PromiseLike<{ data: unknown; error: unknown }> })
@@ -408,10 +388,10 @@ function OpenErrorsBanner() {
   if (!summary || summary.open === 0) return null
   return (
     <button type="button" onClick={() => navigate('/super-admin/errores')}
-      className="w-full text-left rounded-2xl mb-6 px-5 py-4"
+      className="w-full text-start rounded-2xl mb-6 px-5 py-4"
       style={{ backgroundColor: 'rgba(255,107,122,0.08)', border: '1px solid rgba(255,107,122,0.3)', color: TEXT, cursor: 'pointer' }}>
-      <strong>{summary.open} {summary.open === 1 ? 'error abierto' : 'errores abiertos'}</strong>
-      <span style={{ color: TEXT_MUTED }}> · {summary.affected_today} {summary.affected_today === 1 ? 'persona afectada' : 'personas afectadas'} hoy · Ver errores →</span>
+      <strong>{td.openErrors(summary.open)}</strong>
+      <span style={{ color: TEXT_MUTED }}> · {td.affectedToday(summary.affected_today)} · {td.seeErrors}</span>
     </button>
   )
 }

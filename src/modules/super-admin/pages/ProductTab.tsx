@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAdminT, type AdminDict } from '@/i18n/app/admin'
+import { useAdminFormat } from '../lib/adminFormat'
 
 // Métricas de producto propias (V1 · etapa 14): si la V1 cumple su propósito (ROADMAP, "Métricas de éxito").
 // Todo sale de product_events por la RPC admin_product_metrics (sólo super-admins). Sin terceros ni datos personales:
@@ -40,12 +42,12 @@ const TH: React.CSSProperties = { textAlign: 'start', padding: '8px 10px', color
 const TD: React.CSSProperties = { padding: '8px 10px', color: TEXT, fontSize: 13.5, borderTop: '1px solid rgba(255,255,255,0.06)' }
 
 const pct = (n: number, d: number) => (d > 0 ? `${Math.round((n / d) * 100)} %` : '—')
-function duration(seconds: number | null): string {
+function duration(seconds: number | null, tp: AdminDict['product'], num: (n: number, digits?: number) => string): string {
   if (seconds == null) return '—'
-  if (seconds < 90) return `${Math.round(seconds)} s`
-  if (seconds < 5400) return `${Math.round(seconds / 60)} min`
-  if (seconds < 172800) return `${(seconds / 3600).toFixed(1)} h`
-  return `${(seconds / 86400).toFixed(1)} días`
+  if (seconds < 90) return tp.seconds(Math.round(seconds))
+  if (seconds < 5400) return tp.minutes(Math.round(seconds / 60))
+  if (seconds < 172800) return tp.hours(num(Math.round(seconds / 360) / 10, 1))
+  return tp.days(num(Math.round(seconds / 8640) / 10, 1))
 }
 const cell = (n: number | null, users: number) => (n == null ? '…' : pct(n, users))
 
@@ -60,6 +62,9 @@ function Kpi({ label, value, sub }: { label: string; value: string; sub: string 
 }
 
 export function ProductTab() {
+  const t = useAdminT()
+  const tp = t.product
+  const { date, number } = useAdminFormat()
   const [days, setDays] = useState<(typeof PERIODS)[number]>(90)
   const [result, setResult] = useState<{ days: number; data: ProductMetrics | null; failed: boolean } | null>(null)
 
@@ -77,52 +82,51 @@ export function ProductTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 1100 }}>
       <header>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: TEXT }}>Producto</h1>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: TEXT }}>{tp.title}</h1>
         <p style={{ margin: '4px 0 0', fontSize: 13.5, color: MUTED }}>
-          Métricas propias de la V1 (sin terceros). Los eventos no guardan contenido de tareas, hábitos ni mensajes.
+          {tp.intro}
         </p>
       </header>
 
-      <div role="radiogroup" aria-label="Período" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div role="radiogroup" aria-label={tp.period} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {PERIODS.map(p => (
           <button key={p} type="button" role="radio" aria-checked={days === p} onClick={() => setDays(p)}
             style={{ ...BTN, ...(days === p ? { background: TEXT, color: '#0A0D12' } : {}) }}>
-            Últimos {p} días
+            {tp.lastDays(p)}
           </button>
         ))}
       </div>
 
-      {loading ? <p style={{ color: MUTED }} role="status">Cargando…</p>
-        : result?.failed || !m ? <p style={{ color: '#FCA5A5' }} role="alert">No se pudieron cargar las métricas. Revisá que la migración de la etapa 14 esté aplicada.</p>
+      {loading ? <p style={{ color: MUTED }} role="status">{t.common.loading}</p>
+        : result?.failed || !m ? <p style={{ color: '#FCA5A5' }} role="alert">{tp.loadFailed}</p>
           : (
             <>
               <section aria-label="Identity" style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-                <Kpi label="Tiempo hasta publicar" value={duration(m.publish_median_seconds)} sub="Mediana, desde el registro" />
-                <Kpi label="Cuentas publicadas" value={pct(m.published, m.signups)} sub={`${m.published} de ${m.signups} registros del período`} />
-                <Kpi label="Registros por referido" value={pct(m.referral_signups, m.signups)} sub={`${m.referral_signups} llegaron desde un perfil`} />
-                <Kpi label="Eventos" value={m.events_total.toLocaleString('es-AR')} sub="En el período" />
+                <Kpi label={tp.timeToPublish} value={duration(m.publish_median_seconds, tp, number)} sub={tp.medianSinceSignup} />
+                <Kpi label={tp.published} value={pct(m.published, m.signups)} sub={tp.publishedSub(m.published, m.signups)} />
+                <Kpi label={tp.referralSignups} value={pct(m.referral_signups, m.signups)} sub={tp.referralSub(m.referral_signups)} />
+                <Kpi label={tp.events} value={number(m.events_total)} sub={tp.inPeriod} />
               </section>
 
               <section aria-label="Life OS" style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-                <Kpi label="Hábito 4+ días por semana" value={pct(m.habit4_users, m.week_life_users)}
-                  sub={`${m.habit4_users} de ${m.week_life_users} activos en Life OS (últimos 7 días)`} />
-                <Kpi label="Tasa de regreso" value={pct(m.returned_users, m.period_life_users)}
-                  sub={`Volvieron tras 3+ días · mediana ${m.return_median_days == null ? '—' : `${m.return_median_days} días`}`} />
+                <Kpi label={tp.habit4} value={pct(m.habit4_users, m.week_life_users)}
+                  sub={tp.habit4Sub(m.habit4_users, m.week_life_users)} />
+                <Kpi label={tp.returnRate} value={pct(m.returned_users, m.period_life_users)}
+                  sub={tp.returnSub(m.return_median_days == null ? '—' : tp.days(number(m.return_median_days, 1)))} />
               </section>
 
               <section style={CARD} aria-labelledby="pt-retention">
-                <h2 id="pt-retention" style={{ margin: '0 0 4px', fontSize: 16, color: TEXT }}>Retención de Life OS por cohorte semanal</h2>
+                <h2 id="pt-retention" style={{ margin: '0 0 4px', fontSize: 16, color: TEXT }}>{tp.retentionTitle}</h2>
                 <p style={{ margin: '0 0 10px', fontSize: 12.5, color: MUTED }}>
-                  Cohorte = semana del primer uso. Día 1 = volvió al día siguiente; semana 1 = días 7 a 13; mes 1 = días 30 a 36.
-                  "…" = la cohorte todavía no llegó a ese día.
+                  {tp.retentionHelp}
                 </p>
-                {m.retention.length === 0 ? <p style={{ color: MUTED, fontSize: 13.5, margin: 0 }}>Todavía no hay uso de Life OS.</p> : (
+                {m.retention.length === 0 ? <p style={{ color: MUTED, fontSize: 13.5, margin: 0 }}>{tp.noLifeUse}</p> : (
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead><tr><th style={TH}>Semana</th><th style={TH}>Personas</th><th style={TH}>Día 1</th><th style={TH}>Semana 1</th><th style={TH}>Mes 1</th></tr></thead>
+                    <thead><tr><th style={TH}>{tp.week}</th><th style={TH}>{tp.people}</th><th style={TH}>{tp.day1}</th><th style={TH}>{tp.week1}</th><th style={TH}>{tp.month1}</th></tr></thead>
                     <tbody>
                       {m.retention.map(c => (
                         <tr key={c.week}>
-                          <td style={TD}>{new Date(`${c.week}T12:00:00`).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                          <td style={TD}>{date(`${c.week}T12:00:00`)}</td>
                           <td style={TD}>{c.users}</td>
                           <td style={TD}>{cell(c.d1, c.users)}</td>
                           <td style={TD}>{cell(c.d7, c.users)}</td>
@@ -135,10 +139,10 @@ export function ProductTab() {
               </section>
 
               <section style={CARD} aria-labelledby="pt-refs">
-                <h2 id="pt-refs" style={{ margin: '0 0 10px', fontSize: 16, color: TEXT }}>Registros por referido</h2>
-                {m.referrals.length === 0 ? <p style={{ color: MUTED, fontSize: 13.5, margin: 0 }}>Nadie llegó desde un perfil en este período.</p> : (
+                <h2 id="pt-refs" style={{ margin: '0 0 10px', fontSize: 16, color: TEXT }}>{tp.referralsTitle}</h2>
+                {m.referrals.length === 0 ? <p style={{ color: MUTED, fontSize: 13.5, margin: 0 }}>{tp.noReferrals}</p> : (
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead><tr><th style={TH}>Perfil</th><th style={TH}>Registros</th></tr></thead>
+                    <thead><tr><th style={TH}>{tp.profile}</th><th style={TH}>{tp.signups}</th></tr></thead>
                     <tbody>
                       {m.referrals.map(r => <tr key={r.ref}><td style={TD}>/{r.ref}</td><td style={TD}>{r.signups}</td></tr>)}
                     </tbody>
