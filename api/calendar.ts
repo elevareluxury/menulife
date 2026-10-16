@@ -17,7 +17,7 @@ export interface FeedTask {
 const DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
 
 function esc(v: string): string {
-  return v.replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/([,;])/g, '\\$1')
+  return v.replace(/\\/g, '\\\\').replace(/\r\n|\r|\n/g, '\\n').replace(/([,;])/g, '\\$1')
 }
 
 /** Líneas de hasta 75 bytes (RFC 5545), cortando sin partir caracteres. */

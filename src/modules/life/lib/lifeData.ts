@@ -35,8 +35,11 @@ export async function exportLifeJson(userId: string): Promise<Blob> {
   return new Blob([JSON.stringify({ exported_at: new Date().toISOString(), life_os: tables }, null, 2)], { type: 'application/json' })
 }
 
-function csvCell(v: unknown): string {
-  const s = v == null ? '' : String(v)
+/** Un texto que empieza con = + - @ (o tabulación / retorno) se antepone con ' para que la planilla no lo ejecute como
+ *  fórmula (la descripción puede venir de un extracto del banco importado). Los números quedan tal cual. */
+export function csvCell(v: unknown): string {
+  let s = v == null ? '' : String(v)
+  if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 

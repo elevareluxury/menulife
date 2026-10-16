@@ -1,7 +1,7 @@
 import type { ContactCard } from './profileApi'
 
 function esc(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/([,;])/g, '\\$1')
+  return value.replace(/\\/g, '\\\\').replace(/\r\n|\r|\n/g, '\\n').replace(/([,;])/g, '\\$1')
 }
 
 /** vCard 3.0 sólo con los datos que el dueño autorizó (get_profile_contact_card). */
