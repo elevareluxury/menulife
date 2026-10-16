@@ -230,6 +230,12 @@ const DEFAULTS: Record<string, Row> = {
   life_categories: { icon: null, archived_at: null },
 }
 
+/** Índices únicos parciales (sólo valores no nulos), como en la base: el segundo insert da 23505 */
+const UNIQUE: Record<string, string[]> = {
+  // 20261103000002_life_task_next_once: una sola siguiente ocurrencia por tarea
+  life_brain_items: ['occurrence_of'],
+}
+
 const NON_FILTERS = new Set(['select', 'order', 'limit', 'offset', 'on_conflict', 'columns', 'or'])
 
 function filterRows(rows: Row[], params: URLSearchParams): Row[] {
@@ -832,10 +838,13 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
           const err = spaceRules(state, row, null)
           if (err) return err
         }
+        const dup = (UNIQUE[table] ?? []).find(c => row[c] != null && rows.some(x => x[c] === row[c]))
+        if (dup) return `UNIQUE:${dup}`
         rows.push(row)
         return row
       })
       const failed = created.find((c): c is string => typeof c === 'string')
+      if (failed?.startsWith('UNIQUE:')) return json({ code: '23505', message: `duplicate key value (${failed.slice(7)})` }, 409)
       if (failed) return json({ code: '22023', message: failed }, 400)
       state.writes.push({ method: 'POST', table, body })
       return json(single ? created[0] : created, 201)

@@ -390,7 +390,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   el último día si no existe; atrasada → la primera desde hoy) y el selector (`repeatChoiceOf` / `recurrenceFor`). Al
   completar, `useTasks` crea la siguiente (hora, aviso y subtareas sin hacer) y la anota; al destildar, la borra si no se
   hizo. Ficha: `RepeatField` y `SubtasksField` (`TaskExtras.tsx`); lista con ícono y "3 de 5"; el calendario muestra las
-  próximas repeticiones. E2E en `tasks.spec.ts`.
+  próximas repeticiones. E2E en `tasks.spec.ts`. Una sola siguiente: `occurrence_of` (en la siguiente, su origen) con
+  índice único y trigger de dueña (`20261103000002_life_task_next_once.sql`); si llega 23505, `useTasks` usa la que
+  existe. Tildar bloquea la tarea mientras se guarda (`useSavingTasks`, casillero deshabilitado). Tests en
+  `life_task_next_once.test.sql` y `life-once.spec.ts`.
 - Hábitos (etapa 10): `life_habits` suma `target_value` (null = sí/no), `unit`, `anchor` ("después de…"),
   `reminder_time`/`reminder_enabled`; `frequency` admite `{ type: 'times_per_week', times }`; `life_habit_logs.value`
   (con cantidad, el día se cumple con `value >= target_value`). Rachas que perdonan en `lib/habitStreak.ts` (un día
@@ -398,6 +401,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `useHabits`: `addToday` ("+1"), `setDayValue`, `weekCount`, `streakUnit`. UI: `QuantityButton` (anillo), `HabitMeta`,
   `HabitValueSheet` (`components/HabitControls.tsx`). Recordatorio por hábito: `useHabitReminders` (con Life OS abierto,
   una vez por día y hábito). E2E en `habits.spec.ts`.
+  Recordatorios (hábitos y tareas) con varias pestañas: `lib/reminderLeader.ts` — avisa sólo la pestaña líder
+  (`electLeader`: Web Locks o, sin ellos, alquiler en localStorage + `BroadcastChannel`); `reminderLoop` lee la base al
+  abrir, al volver a la pestaña, con `remindersChanged()` (lo llaman `useTasks`/`useHabits` al cambiar algo) y cada
+  5 min, y compara horas en el dispositivo cada 30 s. Hábitos: marca por hábito y día antes de avisar (`claimMark`),
+  marcas de más de 7 días se borran; tareas: avisa quien logra marcar `reminded_at` (sólo si seguía vacío).
+  Tests en `reminderLeader.test.ts` y `life-once.spec.ts`.
 - "¿Por qué lo hago?": `why` (≤ 200, no en blanco; vacío = null) en `life_habits` y `life_goals` (migración
   `20261030000003_life_why.sql`, tests en `life_why.test.sql`). `components/Why.tsx`: `WhyField` (al crear/editar),
   `WhyQuote` (discreta en la tarjeta del hábito, la de la meta y su ficha, y en "Qué bueno verte de vuelta") y
