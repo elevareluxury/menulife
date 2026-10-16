@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import type { Restaurant } from '@/types'
 import { isReservedUsername } from '@/lib/reservedUsernames'
+import { safeHref } from '@/modules/profile/lib/safeUrl'
 
 const db = supabase as any
 
@@ -635,10 +636,11 @@ export function HubPublicPage() {
   const hubAbout: string       = ra.hub_about??''
   const hubCoverUrl: string    = ra.hub_cover_url??''
   const hubMainCtaText: string = ra.hub_main_cta_text??''
-  const hubMainCtaUrl: string  = ra.hub_main_cta_url??''
+  // Links escritos por el dueño: sólo http(s), mailto, tel o rutas internas (nunca javascript:)
+  const hubMainCtaUrl: string  = safeHref(ra.hub_main_cta_url) ?? ''
   const googleRating: number|null   = ra.google_rating??null
   const googleReviewCount: number|null = ra.google_review_count??null
-  const googleReviewUrl: string  = ra.google_review_url??''
+  const googleReviewUrl: string  = safeHref(ra.google_review_url) ?? ''
   const address = [r.address,r.city].filter(Boolean).join(', ')
   const menuHref = isRetail ? `/catalogo/${slug}` : `/r/${slug}`
 
@@ -663,7 +665,8 @@ export function HubPublicPage() {
   async function handleLinkClick(link: HubLink) {
     trackEvent(r.id, 'link_click', link.id)
     db.from('hub_links').update({ click_count: (link.click_count || 0) + 1 }).eq('id', link.id).then()
-    window.open(link.url, '_blank', 'noopener,noreferrer')
+    const href = safeHref(link.url)
+    if (href) window.open(href, '_blank', 'noopener,noreferrer')
   }
 
   // ── Social entries
@@ -1070,8 +1073,8 @@ export function HubPublicPage() {
                       ${featuredProduct.price.toLocaleString('es-AR')}
                     </p>
                   )}
-                  {featuredProduct.cta_text&&featuredProduct.cta_url && (
-                    <a href={featuredProduct.cta_url} target="_blank" rel="noopener noreferrer" className="hub-btn"
+                  {featuredProduct.cta_text&&safeHref(featuredProduct.cta_url) && (
+                    <a href={safeHref(featuredProduct.cta_url)!} target="_blank" rel="noopener noreferrer" className="hub-btn"
                       style={{marginTop:4,display:'inline-flex',alignItems:'center',
                         background:'rgba(245,158,11,.1)',border:'1px solid rgba(245,158,11,.2)',
                         color:'#FFFFFF',fontSize:12,fontWeight:600,padding:'5px 12px',
@@ -1284,8 +1287,8 @@ export function HubPublicPage() {
                   ))}
                 </div>
               )}
-              {social.google_review && (
-                <a href={social.google_review} target="_blank" rel="noopener noreferrer"
+              {safeHref(social.google_review) && (
+                <a href={safeHref(social.google_review)!} target="_blank" rel="noopener noreferrer"
                   onClick={()=>trackEvent(r.id,'link_click')}
                   style={{display:'block',textAlign:'center',marginTop:12,
                     fontFamily:"'Geist Mono',monospace",fontSize:12.5,color:'#FFFFFF',textDecoration:'none'}}>

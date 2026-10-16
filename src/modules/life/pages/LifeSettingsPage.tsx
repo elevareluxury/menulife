@@ -112,11 +112,11 @@ export function LifeSettingsPage() {
           <h2 style={{ ...label, marginTop: 20 }}>{t.settings.extraCurrencies}</h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {prefs.extra_currencies.map(c => (
-              <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 6px 6px 12px', borderRadius: radius.full, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`, fontFamily: font, fontSize: 13, color: colors.text.primary }}>
+              <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: 2, paddingInlineStart: 12, borderRadius: radius.full, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`, fontFamily: font, fontSize: 13, color: colors.text.primary }}>
                 <strong>{c}</strong>
                 <button type="button" aria-label={t.settings.removeCurrency(c)}
                   onClick={() => save({ extra_currencies: prefs.extra_currencies.filter(x => x !== c) })}
-                  style={{ width: 28, height: 28, borderRadius: radius.full, border: 'none', background: 'transparent', color: colors.text.secondary, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  style={{ width: 40, height: 40, borderRadius: radius.full, border: 'none', background: 'transparent', color: colors.text.secondary, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                   <X size={14} aria-hidden="true" />
                 </button>
               </span>

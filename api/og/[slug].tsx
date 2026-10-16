@@ -32,6 +32,22 @@ const SKY: Record<MycenTheme, string> = {
   amanecer: 'linear-gradient(180deg, #E9E3F7 0%, #F6DDD6 32%, #FFE9DA 52%, #FFF6EE 70%, #FBF4EE 100%)',
 }
 
+/**
+ * Foto del perfil para la imagen: sólo un archivo subido a Mycen (almacenamiento público de Supabase). Esta función la
+ * descarga para dibujarla; con una URL cualquiera, el servidor de Mycen pediría lo que el dueño quisiera (SSRF).
+ */
+export function ogAvatar(avatarUrl: string | null | undefined, supabaseUrl: string): string | null {
+  if (!avatarUrl) return null
+  try {
+    const url = new URL(avatarUrl)
+    const base = new URL(supabaseUrl)
+    if (url.protocol !== 'https:' || url.host !== base.host || url.username || url.password) return null
+    return url.pathname.startsWith('/storage/v1/object/public/') ? url.href : null
+  } catch {
+    return null
+  }
+}
+
 const brand = (origin: string) => Response.redirect(`${origin}/og-image.png`, 302)
 
 async function font(origin: string, file: string): Promise<ArrayBuffer | null> {
@@ -75,7 +91,7 @@ export default async function handler(req: Request): Promise<Response> {
     colorA: accent, colorB: SECONDARY_COLORS[look.mode], size: 460,
   })
   const handle = `${url.host.replace(/^www\./, '')}/${p.handle ?? p.username}`
-  const avatar = p.avatar_url && /^https:\/\//i.test(p.avatar_url) ? p.avatar_url : null
+  const avatar = ogAvatar(p.avatar_url, supabaseUrl)
   const initial = Array.from(p.display_name.trim())[0]?.toUpperCase() ?? '·'
   const nameSize = p.display_name.length > 22 ? 52 : p.display_name.length > 14 ? 64 : 76
 

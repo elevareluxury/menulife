@@ -154,13 +154,13 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
     return () => window.removeEventListener(LIFE_DATA_UPDATED, handler)
   }, [load])
 
-  const [monthStart] = monthRange(month)
-  const split = useMemo(() => splitByArrival(all.filter(t => t.occurred_at >= monthStart), today), [all, monthStart, today])
+  // Por mes local (no comparando textos ISO: la base devuelve "+00:00" y monthRange ".000Z", y en el borde no coinciden)
+  const split = useMemo(() => splitByArrival(all.filter(t => localDay(t.occurred_at).slice(0, 7) === month), today), [all, month, today])
   /** Lo que ya llegó (cuenta en los totales) */
   const transactions = split.arrived
   /** Programado para más adelante en este mes */
   const upcoming = split.upcoming
-  const previous = useMemo(() => splitByArrival(all.filter(t => t.occurred_at < monthStart), today).arrived, [all, monthStart, today])
+  const previous = useMemo(() => splitByArrival(all.filter(t => localDay(t.occurred_at).slice(0, 7) < month), today).arrived, [all, month, today])
   const thisMonthTxs = transactions
   const upcomingTotals = useMemo<UpcomingTotals[]>(() => upcomingTotalsOf(upcoming, mainCurrency), [upcoming, mainCurrency])
   const maxMonth = lastNavigableMonth(today.slice(0, 7), latestIso)
@@ -207,7 +207,7 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
       if (error) throw error
     } catch (e) {
       if (opts.queue === false || !isOfflineError(e)) throw e
-      enqueue({ table: 'life_transactions', row, module: 'money' })
+      if (!enqueue({ table: 'life_transactions', row, module: 'money' })) throw e
       setAll(prev => [{ ...row, description: row.description ?? null } as Transaction, ...prev.filter(t => t.id !== row.id)])
       toast(lifeT().offline.queued, { icon: '☁️' })
       return 'queued'

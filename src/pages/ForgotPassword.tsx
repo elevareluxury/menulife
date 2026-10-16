@@ -189,7 +189,7 @@ export function ForgotPassword() {
           </button>
 
           <Link to="/login" style={S.backLink}>
-            <ArrowLeft size={15} />
+            <ArrowLeft size={15} className="flip-rtl" aria-hidden="true" />
             {t.common.backToLogin}
           </Link>
         </div>
@@ -264,7 +264,7 @@ export function ForgotPassword() {
         </form>
 
         <Link to="/login" style={S.backLink}>
-          <ArrowLeft size={15} />
+          <ArrowLeft size={15} className="flip-rtl" aria-hidden="true" />
           {t.common.backToLogin}
         </Link>
       </div>

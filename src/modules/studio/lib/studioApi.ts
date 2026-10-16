@@ -256,8 +256,8 @@ export async function loadStats(profileId: string, days: number): Promise<DailyS
 // ── Privacidad: exportar y eliminar ──────────────────────────────────────────
 
 const LIFE_TABLES = [
-  'life_goals', 'life_goal_milestones', 'life_tasks', 'life_habits', 'life_habit_logs',
-  'life_transactions', 'life_recurring_transactions', 'life_installment_plans', 'life_budgets', 'life_categories', 'life_splits', 'life_brain_items', 'life_achievements', 'life_score',
+  'life_goals', 'life_goal_milestones', 'life_goal_checkins', 'life_tasks', 'life_habits', 'life_habit_logs',
+  'life_transactions', 'life_recurring_transactions', 'life_installment_plans', 'life_budgets', 'life_categories', 'life_splits', 'life_brain_items', 'life_achievements', 'life_score', 'life_snapshots',
   'life_journal_entries',
   'life_daily_reviews', 'life_weekly_reviews',
 ]

@@ -32,7 +32,8 @@ export function useUnreadMessages(): { count: number; refresh: () => void } {
 /** Link para responder según el contacto que dejó la persona: email, WhatsApp o ninguno */
 export function replyLinks(contact: string): { email: string | null; whatsapp: string | null } {
   const c = contact.trim()
-  const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c) ? `mailto:${c}` : null
+  // Sin ? & # % , ; : ni comillas: con "a@b.com?bcc=…&body=…" el mail se armaría con copias o un texto ajeno
+  const email = /^[^\s@?&#%,;:<>"]+@[^\s@?&#%,;:<>"]+\.[^\s@?&#%,;:<>"]+$/.test(c) ? `mailto:${c}` : null
   const digits = c.replace(/[^\d]/g, '')
   const whatsapp = !email && digits.length >= 8 && digits.length <= 15 && /^[+\d\s().-]+$/.test(c) ? `https://wa.me/${digits}` : null
   return { email, whatsapp }

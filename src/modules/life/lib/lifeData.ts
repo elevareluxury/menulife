@@ -1,12 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { localDateOf } from './moneyFuture'
 
 // Las tablas de Life OS todavía no están en database.types.ts
 const db = supabase as unknown as SupabaseClient
 
 // Hijas antes que madres (aunque las FK borran en cascada, así no depende de eso)
 const LIFE_TABLES = [
-  'life_habit_logs', 'life_goal_milestones', 'life_brain_items', 'life_splits', 'life_transactions', 'life_recurring_transactions',
+  'life_habit_logs', 'life_goal_milestones', 'life_goal_checkins', 'life_brain_items', 'life_splits', 'life_transactions', 'life_recurring_transactions',
   'life_installment_plans', 'life_budgets', 'life_categories', 'life_habits', 'life_goals', 'life_tasks', 'life_achievements', 'life_score', 'life_snapshots',
   'life_journal_entries',
   'life_daily_reviews', 'life_weekly_reviews',
@@ -35,20 +36,37 @@ export async function exportLifeJson(userId: string): Promise<Blob> {
   return new Blob([JSON.stringify({ exported_at: new Date().toISOString(), life_os: tables }, null, 2)], { type: 'application/json' })
 }
 
-function csvCell(v: unknown): string {
-  const s = v == null ? '' : String(v)
+const FORMULA = /^[=+\-@\t\r]/
+
+/** Celda de CSV. Un texto que empieza con = + - @ (o tabulación / retorno) va con ' delante para que la planilla no lo
+ *  tome como fórmula (la descripción puede venir de un extracto del banco importado). Los números quedan tal cual. */
+export function csvCell(v: unknown, text = typeof v === 'string'): string {
+  let s = v == null ? '' : String(v)
+  if (text && FORMULA.test(s)) s = `'${s}`
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
+const MONEY_COLS = ['occurred_at', 'type', 'amount', 'currency', 'category', 'description'] as const
+
+/**
+ * Filas del CSV de Dinero (sin BOM). La fecha es la local del dispositivo (no la de UTC) y una categoría propia
+ * ('c:<id>') va con su nombre. Cada fila con su moneda: nunca se suman.
+ */
+export function moneyCsvLines(rows: Record<string, unknown>[], customNames: ReadonlyMap<string, string>): string[] {
+  const sorted = [...rows].sort((a, b) => String(a.occurred_at).localeCompare(String(b.occurred_at)))
+  return [MONEY_COLS.join(','), ...sorted.map(r => MONEY_COLS.map(c => {
+    if (c === 'occurred_at') return csvCell(localDateOf(String(r[c])))
+    if (c === 'category') return csvCell(typeof r[c] === 'string' ? customNames.get(r[c] as string) ?? r[c] : r[c], true)
+    return csvCell(r[c], c === 'description')
+  }).join(','))]
 }
 
 /** Movimientos de dinero en CSV (para abrir en una planilla). Cada fila con su moneda. */
 export async function exportMoneyCsv(userId: string): Promise<Blob> {
   const rows = await readAll('life_transactions', userId)
-  rows.sort((a, b) => String(a.occurred_at).localeCompare(String(b.occurred_at)))
   // Categorías propias ('c:<id>'): en la planilla va su nombre
   const custom = new Map((await readAll('life_categories', userId)).map(c => [`c:${String(c.id)}`, String(c.name)]))
-  for (const r of rows) if (typeof r.category === 'string' && custom.has(r.category)) r.category = custom.get(r.category)
-  const cols = ['occurred_at', 'type', 'amount', 'currency', 'category', 'description'] as const
-  const lines = [cols.join(','), ...rows.map(r => cols.map(c => csvCell(c === 'occurred_at' ? String(r[c]).slice(0, 10) : r[c])).join(','))]
+  const lines = moneyCsvLines(rows, custom)
   // BOM para que Excel lea bien los acentos
   return new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' })
 }
@@ -59,6 +77,9 @@ export async function deleteLifeData(userId: string): Promise<void> {
     const { error } = await db.from(table).delete().eq('user_id', userId)
     if (error && error.code !== '42P01' && error.code !== 'PGRST205') throw error
   }
+  // El link privado del calendario no se puede borrar por la tabla (nadie la lee): se apaga con su RPC
+  const { error } = await db.rpc('life_calendar_disable')
+  if (error && error.code !== 'PGRST202' && error.code !== '42883') throw error
 }
 
 export function downloadBlob(blob: Blob, filename: string) {

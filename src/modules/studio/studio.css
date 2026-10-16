@@ -211,8 +211,8 @@
   padding: 3px 9px; border-radius: 999px; background: var(--st-surface-2);
 }
 .st-module.is-pending { opacity: 1; border-style: dashed; }
-.st-checklist { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
-.st-checklist strong { font-size: 15px; }
+.st-pending-note { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.st-pending-note strong { font-size: 15px; }
 
 /* ── Drawer / diálogo ───────────────────────────────────────────── */
 .st-overlay { position: fixed; inset: 0; z-index: 50; background: var(--my-scrim); display: flex; justify-content: flex-end; }
@@ -538,7 +538,8 @@ body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav { display:
 .st-layer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .st-layer-row { display: flex; align-items: center; gap: 0; border-radius: 12px; }
 .st-layer-row .st-icon-btn { width: 40px; height: 40px; }
-.st-layer-row.is-hidden .st-layer-title { opacity: 0.55; }
+/* Oculto: color atenuado del sistema (con opacidad no llegaba a 4,5:1 en el tema claro) */
+.st-layer-row.is-hidden .st-layer-title { color: var(--st-muted); }
 .st-layer {
   flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 8px 10px; min-height: 44px;
   border: 1px solid transparent; border-radius: 12px; background: none; color: var(--st-text);

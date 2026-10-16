@@ -84,8 +84,8 @@ const de: LegalDict = {
         '**Dein öffentliches Profil:** was du in Studio einträgst (Name, Foto, Texte, Links, Projekte, Kontaktkarte). Veröffentlicht wird nur, was du zeigen willst.',
         '**Life OS:** deine Ziele, Gewohnheiten, Aufgaben, Finanzen und Notizen, auch die Namen, die du einträgst (zum Beispiel, mit wem du eine Ausgabe geteilt hast). Sie sind privat: Nur du siehst sie. Dein Tagebuch auch: Die Sperre mit PIN, Fingerabdruck oder Gesicht funktioniert nur auf deinem Gerät (sie wird nicht an Mycen gesendet), und die Einträge sind nicht Ende-zu-Ende-verschlüsselt.',
         '**Mycen Business:** die Daten deines Unternehmens und was du über deine Kunden und Verkäufe einträgst.',
-        '**Besuchsstatistiken:** anonyme Ereignisse (Besuche und Klicks auf deinem Profil) mit einer Kennung, die sich täglich ändert. Wir speichern weder IP-Adressen noch Gerätedaten und zählen keine Bots.',
-        '**Meldungen:** Grund und Details der meldenden Person, mit einer täglichen anonymen Kennung gegen Missbrauch.',
+        '**Besuchsstatistiken:** anonyme Ereignisse (Besuche und Klicks auf deinem Profil) mit einer Kennung, die sich täglich ändert. Wir speichern weder IP-Adressen noch Gerätedaten und zählen keine Bots. Außerdem speichern wir, von welcher Website oder welchem Link der Besuch kam (zum Beispiel Instagram oder der QR-Code).',
+        '**Meldungen:** Grund und Details der meldenden Person, mit einer täglichen anonymen Kennung gegen Missbrauch. Ist die meldende Person angemeldet, speichern wir auch ihr Konto: Nur das Mycen-Team sieht es, nie die gemeldete Person.',
         '**Nachrichten aus dem Kontaktformular:** Name, Kontakt (E-Mail oder WhatsApp) und Nachricht, die eine besuchende Person hinterlässt. Hat das Profil das Modul Kooperationen, gibt eine Marke außerdem ihr Unternehmen und das Gesuchte an, optional auch Website, Budget und Frist. Nur die Person, der das Profil gehört, sieht sie in Studio; sie werden weder veröffentlicht noch per E-Mail verschickt. Gegen Missbrauch nutzen wir eine anonyme Kennung, die sich täglich ändert, ohne IP-Adresse oder Gerätedaten.',
         '**Abonnements:** Wenn du dich über das Modul „Abonnieren“ eines Profils einträgst, speichern wir deine E-Mail (und deinen Namen, falls das Profil danach fragt), das Datum deiner Einwilligung und deine Sprache und geben sie an die Person weiter, der das Profil gehört. Sie sieht sie in Studio und kann sie exportieren. Mycen schickt dieser Liste nichts: Die Person, der das Profil gehört, entscheidet, wie sie sie nutzt, und ist dafür verantwortlich, das richtig zu tun. Um dich auszutragen, bitte diese Person darum oder schreib uns an team@mycen.id, dann löschen wir sie. Um Missbrauch zu verhindern, nutzen wir eine anonyme Kennung, die sich jeden Tag ändert, ohne IP-Adresse oder Gerätedaten.',
         '**Einladungen:** Wenn du dein Konto über „Erstelle deine Identität“ im Profil einer anderen Person anlegst, speichern wir, welches Profil dich gebracht hat und dessen Art, um zu verstehen, wie Mycen wächst. Diese Person sieht deine Daten nicht.',
@@ -128,16 +128,16 @@ const de: LegalDict = {
     { id: 'plazos', title: 'Wie lange wir sie speichern', body: [
       { list: [
         'Die Daten deines Kontos, deines Profils und von Life OS, solange du das Konto hast. Löschst du es, löschen wir sie; Sicherungskopien der Dienstleister werden in ihren üblichen Zyklen überschrieben.',
-        'Besuchsstatistiken werden zusammengefasst und anonym gespeichert.',
+        'Besuchsstatistiken werden als anonyme Ereignisse (mit der täglich wechselnden Kennung) gespeichert, solange das Profil besteht; wird es gelöscht, werden sie mitgelöscht.',
         'Nachrichten aus dem Kontaktformular, bis die Person, der das Profil gehört, sie löscht oder ihr Konto löscht.',
         'Abonnement-E-Mails, bis die Person, der das Profil gehört, sie löscht, ihr Konto löscht oder du uns bittest, sie zu löschen.',
-        'Fehlerprotokolle werden bis zur Behebung gespeichert; die Zählung betroffener Personen 90 Tage.',
+        'Fehlerprotokolle werden gespeichert, solange sie bei der Behebung helfen (ein behobener Fehler bleibt gespeichert, falls er wieder auftritt); die Zählung betroffener Personen 90 Tage.',
         'Nutzungsereignisse, solange du dein Konto hast; wenn du es löschst, sind sie in keiner Weise mehr mit dir verbunden.',
         'Was das Gesetz aufzubewahren verlangt (zum Beispiel Rechnungsdaten), für die dort festgelegte Frist.',
       ] },
     ] },
     { id: 'dispositivo', title: 'Was auf deinem Gerät gespeichert wird', body: [
-      'Mycen verwendet keine Werbe- oder Tracking-Cookies. In deinem Browser speichern wir nur, was für den Betrieb nötig ist: deine Sitzung, deine Sprache und einige Entwürfe und Einstellungen. Du kannst das in den Browser-Einstellungen löschen (dann musst du dich neu anmelden).',
+      'Mycen verwendet keine Werbe- oder Tracking-Cookies. In deinem Browser speichern wir nur, was für den Betrieb nötig ist: deine Sitzung, deine Sprache und einige Entwürfe und Einstellungen. Du kannst das in den Browser-Einstellungen löschen (dann musst du dich neu anmelden). Wenn du in Life OS offline etwas einträgst, bleibt es auf deinem Gerät, bis es hochgeladen wird (nur mit deiner Sitzung). Von der Tagebuch-PIN speichern wir nur einen verschlüsselten Fingerabdruck (Hash), nie die PIN.',
     ] },
     { id: 'seguridad', title: 'Sicherheit', body: [
       'Wir nutzen verschlüsselte Verbindungen, verschlüsselt gespeicherte Passwörter und Berechtigungen in der Datenbank, damit jede Person nur ihre eigenen Daten sieht. Kein System ist perfekt: Sollte etwas deine Daten betreffen, informieren wir dich und handeln wie gesetzlich vorgeschrieben.',

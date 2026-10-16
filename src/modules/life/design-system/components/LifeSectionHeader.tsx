@@ -52,7 +52,7 @@ export function LifeSectionHeader({ title, action }: LifeSectionHeaderProps) {
           onMouseLeave={e => { e.currentTarget.style.opacity = '0.85' }}
         >
           {action.label}
-          <ChevronRight size={12} strokeWidth={2.5} />
+          <ChevronRight size={12} strokeWidth={2.5} className="flip-rtl" aria-hidden="true" />
         </button>
       )}
     </div>

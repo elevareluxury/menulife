@@ -45,7 +45,7 @@ export function MorePage() {
           <Link key={i.to} to={i.to} className="st-nav-item" style={{ justifyContent: 'space-between' }}>
             <span className="st-row"><i.icon size={18} aria-hidden="true" /> {i.label}
               {i.to === '/studio/messages' && unread > 0 && (
-                <span className="st-unread" aria-label={t.messages.unread.replace('{n}', String(unread))}>{unread > 99 ? '99+' : unread}</span>
+                <span className="st-unread" role="img" aria-label={t.messages.unread.replace('{n}', String(unread))}>{unread > 99 ? '99+' : unread}</span>
               )}
             </span>
             <ChevronRight size={16} aria-hidden="true" className="flip-rtl" />

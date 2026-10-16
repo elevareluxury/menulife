@@ -20,6 +20,15 @@ export function localDayOf(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+/**
+ * Fecha local (YYYY-MM-DD) para mostrar o editar un movimiento: una fecha sola queda igual (un fijo guarda el día);
+ * un instante pasa a la fecha de este dispositivo. Nunca cortar el ISO en la "T": esa es la fecha en UTC (un movimiento
+ * de las 22 h en Buenos Aires quedaría al día siguiente).
+ */
+export function localDateOf(value: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : localDayOf(value)
+}
+
 /** ¿El movimiento todavía no llegó? (su fecha local es posterior a hoy) */
 export function isUpcoming(tx: Pick<FutureTx, 'occurred_at'>, todayKey: string): boolean {
   return localDayOf(tx.occurred_at) > todayKey
