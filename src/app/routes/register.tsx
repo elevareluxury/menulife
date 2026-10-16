@@ -204,8 +204,8 @@ export function RegisterPage() {
               style={{ marginTop: '3px', width: 16, height: 16, accentColor: CORAL, flexShrink: 0 }} />
             <span>
               {r.accept && <>{r.accept}{' '}</>}
-              <Link to="/terminos" target="_blank" style={{ color: '#fff' }}>{r.terms}</Link> {r.and}{' '}
-              <Link to="/privacidad" target="_blank" style={{ color: '#fff' }}>{r.privacy}</Link>{r.acceptEnd}
+              <Link to="/terminos" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{r.terms}</Link> {r.and}{' '}
+              <Link to="/privacidad" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{r.privacy}</Link>{r.acceptEnd}
             </span>
           </label>
 

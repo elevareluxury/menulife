@@ -103,10 +103,10 @@ export function StudioShell() {
   // Tema del celular (Universo / Amanecer) y su fondo sin flashes
   const theme = useStudioSurface()
 
-  if (!initialized || loading) return <Centered><span className="st-spinner" aria-label={t.nav.loading} /></Centered>
+  if (!initialized || loading) return <Centered><span className="st-spinner" role="status" aria-label={t.nav.loading} /></Centered>
   if (!user) return <Navigate to="/login" replace />
 
-  if (load.kind === 'loading') return <Centered><span className="st-spinner" aria-label={t.nav.loading} /></Centered>
+  if (load.kind === 'loading') return <Centered><span className="st-spinner" role="status" aria-label={t.nav.loading} /></Centered>
   if (load.kind === 'error') {
     return (
       <Centered>
@@ -146,7 +146,7 @@ export function StudioShell() {
 function UnreadBadge({ count, label }: { count: number; label: string }) {
   if (!count) return null
   return (
-    <span className="st-unread" aria-label={label.replace('{n}', String(count))}>{count > 99 ? '99+' : count}</span>
+    <span className="st-unread" role="img" aria-label={label.replace('{n}', String(count))}>{count > 99 ? '99+' : count}</span>
   )
 }
 

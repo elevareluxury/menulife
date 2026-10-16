@@ -97,7 +97,8 @@ export function AnalyticsPage() {
             <h2 className="st-card-title">{an.perDay}</h2>
             <div style={{ width: '100%', height: 200 }} role="img" dir="ltr"
               aria-label={an.chartLabel(days, summary.views)}>
-              <ResponsiveContainer>
+              {/* initialDimension: sin medida inicial, recharts avisa "width(-1)" en la consola antes de medir */}
+              <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 200 }}>
                 <AreaChart data={summary.series} margin={{ top: 6, right: 6, bottom: 0, left: -24 }}>
                   <CartesianGrid stroke="var(--st-border)" vertical={false} />
                   <XAxis dataKey="label" tick={{ fill: 'var(--st-faint)', fontSize: 11 }} axisLine={false} tickLine={false}

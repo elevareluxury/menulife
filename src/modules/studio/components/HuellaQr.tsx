@@ -36,7 +36,7 @@ export function HuellaQr({ url, seed, variant, accent, label, title, svgRef }: {
       <g dangerouslySetInnerHTML={{ __html: huella }} />
       {/* Zona de silencio: la huella no entra al código */}
       <rect x={156} y={156} width={288} height={288} rx={28} fill={QR_COLORS.bg} />
-      <QRCodeSVG value={url} level="H" size={240} x={180} y={180} marginSize={0}
+      <QRCodeSVG value={url} level="H" size={240} x={180} y={180} marginSize={0} aria-hidden="true"
         bgColor={QR_COLORS.bg} fgColor={QR_COLORS.fg} />
       <text x={width / 2} y={645} textAnchor="middle" fontSize={label.length > 28 ? 26 : 32} fontWeight={600}
         fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" fill={QR_COLORS.fg}>{label}</text>

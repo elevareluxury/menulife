@@ -37,7 +37,7 @@ export function SharedCard({ items, locale, onSettle, onDelete }: {
                   </p>
                 </div>
                 {!even && (
-                  <span dir="ltr" aria-label={owesMe ? s.owesYou(b.person, amount) : s.youOwe(b.person, amount)}
+                  <span dir="ltr" role="img" aria-label={owesMe ? s.owesYou(b.person, amount) : s.youOwe(b.person, amount)}
                     style={{ fontFamily: font, fontSize: 14, fontWeight: 800, flexShrink: 0, color: owesMe ? colors.semantic.success : colors.text.primary }}>
                     {amount}
                   </span>

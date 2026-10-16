@@ -19,7 +19,9 @@ export function createNamespace<D>(es: D, loaders: Partial<Record<AppLang, Loade
     if (!p) {
       const loader = loaders[lang]
       p = loader
-        ? loader().then(m => { cache.set(lang, m.default); return m.default }).catch(() => es)
+        // Si la descarga falla (sin red, deploy nuevo), se muestra el español y se vuelve a intentar cuando se monte
+        // otra pantalla que lo use; antes la promesa fallida quedaba guardada y la sesión seguía en español
+        ? loader().then(m => { cache.set(lang, m.default); return m.default }).catch(() => { pending.delete(lang); return es })
         : Promise.resolve(es)
       pending.set(lang, p)
     }

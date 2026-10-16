@@ -36,7 +36,7 @@ export function ProjectEditorPage() {
   }, [id, attempt])
 
   const state: Load = load?.id === id ? load.state : { kind: 'loading' }
-  if (state.kind === 'loading') return <div className="st-center"><span className="st-spinner" aria-label={t.nav.loading} /></div>
+  if (state.kind === 'loading') return <div className="st-center"><span className="st-spinner" role="status" aria-label={t.nav.loading} /></div>
   if (state.kind !== 'ready') {
     return (
       <div className="st-card st-empty">

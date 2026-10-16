@@ -136,7 +136,7 @@ export function SuperAdminLayout({ children }: { children: ReactNode }) {
               <div className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: ACCENT }}>Admin</div>
             </div>
           </div>
-          <button onClick={() => setMobileOpen(false)} style={{ color: TEXT_MUTED }}>
+          <button type="button" aria-label="Cerrar menú" onClick={() => setMobileOpen(false)} style={{ color: TEXT_MUTED }}>
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -189,7 +189,7 @@ export function SuperAdminLayout({ children }: { children: ReactNode }) {
           className="lg:hidden sticky top-0 z-10 flex items-center justify-between px-4 h-12"
           style={{ backgroundColor: SIDEBAR_BG, borderBottom: `1px solid ${BORDER}` }}
         >
-          <button onClick={() => setMobileOpen(true)} style={{ color: TEXT_MUTED }}>
+          <button type="button" aria-label="Abrir menú" onClick={() => setMobileOpen(true)} style={{ color: TEXT_MUTED }}>
             <Menu className="w-5 h-5" />
           </button>
           <span className="text-sm font-bold" style={{ color: TEXT }}>MenuLife Admin</span>
