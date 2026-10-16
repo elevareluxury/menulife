@@ -47,7 +47,8 @@ for m in \
   20261031000001_bio_module_types \
   20261031000002_profile_collab_messages \
   20261031000003_profile_subscribers \
-  20261101000001_profile_click_analytics; do
+  20261101000001_profile_click_analytics \
+  20261102000001_audit2_db; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

@@ -6,7 +6,7 @@ const db = supabase as unknown as SupabaseClient
 
 // Hijas antes que madres (aunque las FK borran en cascada, así no depende de eso)
 const LIFE_TABLES = [
-  'life_habit_logs', 'life_goal_milestones', 'life_brain_items', 'life_splits', 'life_transactions', 'life_recurring_transactions',
+  'life_habit_logs', 'life_goal_milestones', 'life_goal_checkins', 'life_brain_items', 'life_splits', 'life_transactions', 'life_recurring_transactions',
   'life_installment_plans', 'life_budgets', 'life_categories', 'life_habits', 'life_goals', 'life_tasks', 'life_achievements', 'life_score', 'life_snapshots',
   'life_journal_entries',
   'life_daily_reviews', 'life_weekly_reviews',
@@ -59,6 +59,9 @@ export async function deleteLifeData(userId: string): Promise<void> {
     const { error } = await db.from(table).delete().eq('user_id', userId)
     if (error && error.code !== '42P01' && error.code !== 'PGRST205') throw error
   }
+  // El link privado del calendario no se puede borrar por la tabla (nadie la lee): se apaga con su RPC
+  const { error } = await db.rpc('life_calendar_disable')
+  if (error && error.code !== 'PGRST202' && error.code !== '42883') throw error
 }
 
 export function downloadBlob(blob: Blob, filename: string) {
