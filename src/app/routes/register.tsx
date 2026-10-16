@@ -11,6 +11,7 @@ import { parseReferral } from '@/lib/referral'
 import { trackOncePerSession } from '@/lib/productEvents'
 import { featureOn } from '@/lib/features'
 import { GoogleButton } from '@/modules/auth/components/GoogleButton'
+import { AuthBrand } from '@/components/ui/AuthBrand'
 
 const CORAL = '#F4705A'
 
@@ -145,9 +146,7 @@ export function RegisterPage() {
 
         {/* Logo + title */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', marginBottom: '16px' }}>
-            <img src="/logo.png" alt="Mycen" className="h-8 w-auto" />
-          </Link>
+          <AuthBrand />
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.7)', margin: 0 }}>
             {r.subtitle}
           </p>

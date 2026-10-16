@@ -19,8 +19,6 @@ const zh: AuthDict = {
     welcome: "欢迎回来！",
     newHere: "第一次来？",
     createFree: "免费创建你的 Mycen →",
-    team: "你是 Mycen 团队成员吗？",
-    adminAccess: "团队入口 →",
     passwordUpdated: "完成，你的密码已更新。请用新密码登录。",
     linkInvalid: "链接无效或已过期，请重试。",
     failed: "无法登录，请重试。",

@@ -529,6 +529,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   dibujo nativo (`index.css`: en iPhone no se achicaban y se pisaban). Brain cambia de vista deslizando de costado
   (`hooks/useSwipeNav.ts`: gesto claramente horizontal, no sobre campos ni zonas con scroll de costado; RTL invertido).
   La landing en el celular muestra idioma y cuenta (sin menú hamburguesa). E2E en `swipe-sheets.spec.ts`.
+- Pantallas de acceso (login, registro, recuperar, cambiar contraseña, aceptar términos): `AuthBrand` (huella de la
+  marca de `src/lib/brandMark.ts`, la misma de la pantalla de carga, y "mycen.id" debajo); sin link al panel del equipo.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

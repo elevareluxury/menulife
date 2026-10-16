@@ -19,8 +19,6 @@ const de: AuthDict = {
     welcome: "Schön, dass du wieder da bist!",
     newHere: "Neu hier?",
     createFree: "Erstelle dein Mycen kostenlos →",
-    team: "Gehörst du zum Mycen-Team?",
-    adminAccess: "Zugang fürs Team →",
     passwordUpdated: "Fertig, dein Passwort wurde geändert. Melde dich mit dem neuen an.",
     linkInvalid: "Der Link ist ungültig oder abgelaufen. Versuch es noch einmal.",
     failed: "Die Anmeldung hat nicht geklappt. Versuch es noch einmal.",

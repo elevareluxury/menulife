@@ -5,6 +5,7 @@ import { ArrowLeft, Mail } from 'lucide-react'
 import { LanguageSelect } from '@/components/ui/LanguageSelect'
 import { useAuthT } from '@/i18n/app/auth'
 import { useLangDir } from '@/i18n/app/useLangDir'
+import { AuthBrand } from '@/components/ui/AuthBrand'
 
 const S = {
   page: {
@@ -205,7 +206,7 @@ export function ForgotPassword() {
           <LanguageSelect label={t.common.language} />
         </div>
         <div style={S.logo}>
-          <img src="/logo.png" alt="Mycen" style={{ height: '32px', width: 'auto' }} />
+          <AuthBrand />
         </div>
 
         <h1 style={S.title}>{f.title}</h1>

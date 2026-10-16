@@ -1289,3 +1289,6 @@ input[type="date"], input[type="time"], input[type="datetime-local"], input[type
   box-sizing: border-box;
 }
 input::-webkit-date-and-time-value { text-align: start; min-height: 1.4em; }
+
+/* Huella de la marca en las pantallas de acceso (components/ui/AuthBrand.tsx) */
+.auth-brand-mark svg { display: block; width: 100%; height: 100%; }

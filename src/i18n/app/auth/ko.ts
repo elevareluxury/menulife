@@ -19,8 +19,6 @@ const ko: AuthDict = {
     welcome: "다시 오신 걸 환영해요!",
     newHere: "처음이신가요?",
     createFree: "무료로 나의 Mycen 만들기 →",
-    team: "Mycen 팀이신가요?",
-    adminAccess: "팀 전용 로그인 →",
     passwordUpdated: "비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요.",
     linkInvalid: "링크가 유효하지 않거나 만료되었습니다. 다시 시도해 주세요.",
     failed: "로그인하지 못했습니다. 다시 시도해 주세요.",
