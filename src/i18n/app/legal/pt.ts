@@ -84,8 +84,8 @@ const pt: LegalDict = {
         '**Seu perfil público:** o que você cadastra no Studio (nome, foto, textos, links, projetos, cartão de contato). Só é publicado o que você decide mostrar.',
         '**Life OS:** suas metas, hábitos, tarefas, finanças e notas, incluindo os nomes que você escrever (por exemplo, com quem dividiu um gasto). São privados: só você pode vê-los. Seu diário também: o bloqueio com PIN, digital ou rosto funciona só no seu dispositivo (não vai para a Mycen) e as entradas não têm criptografia de ponta a ponta.',
         '**Mycen Business:** os dados do seu negócio e o que você cadastrar sobre seus clientes e vendas.',
-        '**Estatísticas de visitas:** eventos anônimos (visitas e cliques no seu perfil) com um identificador que muda todos os dias. Não guardamos endereços IP nem dados do dispositivo, e não contamos robôs.',
-        '**Denúncias:** o motivo e o detalhe escritos por quem denuncia, com um identificador anônimo diário para evitar abusos.',
+        '**Estatísticas de visitas:** eventos anônimos (visitas e cliques no seu perfil) com um identificador que muda todos os dias. Não guardamos endereços IP nem dados do dispositivo, e não contamos robôs. Também guardamos de qual site ou link veio a visita (por exemplo, Instagram ou o QR).',
+        '**Denúncias:** o motivo e o detalhe escritos por quem denuncia, com um identificador anônimo diário para evitar abusos. Se quem denuncia estiver com a sessão iniciada, guardamos também a conta: só a equipe do Mycen a vê, nunca a pessoa denunciada.',
         '**Mensagens do formulário de contato:** o nome, o contato (e-mail ou WhatsApp) e a mensagem que um visitante deixa. Se o perfil tem o módulo Colaborações, uma marca deixa também a empresa e o que procura e, se quiser, o site, um orçamento e um prazo. Só a pessoa dona do perfil as vê, no Studio; não são publicadas nem enviadas por e-mail. Para evitar abusos usamos um identificador anônimo que muda todos os dias, sem IP nem dados do dispositivo.',
         '**Inscrições:** se você se inscrever pelo módulo “Inscrever-se” de um perfil, guardamos seu e-mail (e seu nome, se o perfil pedir), a data em que você deu seu consentimento e seu idioma, e os entregamos à pessoa dona desse perfil, que os vê no Studio e pode exportá-los. A Mycen não envia nada a essa lista: a pessoa dona do perfil decide como usá-la e é responsável por fazê-lo corretamente. Para sair, peça a essa pessoa ou escreva para team@mycen.id e nós apagamos. Para evitar abusos, usamos um identificador anônimo que muda todos os dias, sem IP nem dados do dispositivo.',
         '**Convites:** se você criar sua conta a partir de “Crie sua identidade” no perfil de outra pessoa, guardamos qual perfil trouxe você e o tipo dele, para entender como o Mycen cresce. Essa pessoa não vê seus dados.',
@@ -128,16 +128,16 @@ const pt: LegalDict = {
     { id: 'plazos', title: 'Por quanto tempo os guardamos', body: [
       { list: [
         'Os dados da sua conta, do seu perfil e do Life OS, enquanto você tiver a conta. Se você a excluir, apagamos; as cópias de segurança dos fornecedores são sobrescritas em seus ciclos habituais.',
-        'As estatísticas de visitas são guardadas agrupadas e anônimas.',
+        'As estatísticas de visitas são guardadas como eventos anônimos (com o identificador que muda todo dia) enquanto o perfil existir; se ele for apagado, são apagadas junto.',
         'As mensagens do formulário de contato, até que a pessoa dona do perfil as apague ou exclua a conta.',
         'Os e-mails de inscrição, até que a pessoa dona do perfil os apague, exclua a conta ou você nos peça para apagá-los.',
-        'Os registros de erros são guardados até serem resolvidos; a contagem de pessoas afetadas, 90 dias.',
+        'Os registros de erros são guardados enquanto servirem para corrigi-los (um resolvido continua guardado caso volte a acontecer); a contagem de pessoas afetadas, 90 dias.',
         'Os eventos de uso, enquanto você tiver a conta; se você a excluir, deixam de ter qualquer vínculo com você.',
         'O que a lei obrigar a conservar (por exemplo, dados de faturamento), pelo prazo que ela fixar.',
       ] },
     ] },
     { id: 'dispositivo', title: 'O que fica no seu dispositivo', body: [
-      'O Mycen não usa cookies de publicidade nem de rastreamento. No seu navegador guardamos só o necessário para funcionar: sua sessão, seu idioma e alguns rascunhos e preferências. Você pode apagar isso nas configurações do navegador (vai precisar entrar de novo).',
+      'O Mycen não usa cookies de publicidade nem de rastreamento. No seu navegador guardamos só o necessário para funcionar: sua sessão, seu idioma e alguns rascunhos e preferências. Você pode apagar isso nas configurações do navegador (vai precisar entrar de novo). Se você registrar algo no Life OS sem conexão, isso fica no seu dispositivo até ser enviado (só com a sua sessão). Do PIN do diário guardamos só uma impressão cifrada (hash), nunca o PIN.',
     ] },
     { id: 'seguridad', title: 'Segurança', body: [
       'Usamos conexões criptografadas, senhas guardadas com criptografia e permissões no banco de dados para que cada pessoa veja só o que é seu. Nenhum sistema é perfeito: se acontecer algo que afete seus dados, avisaremos e agiremos conforme a lei.',

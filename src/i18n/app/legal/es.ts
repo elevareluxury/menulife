@@ -6,7 +6,7 @@
 export type LegalBlock = string | { list: string[] }
 export interface LegalSection { id: string; title: string; body: LegalBlock[] }
 
-const UPDATED = '2026-10-15'
+const UPDATED = '2026-10-16'
 
 const es = {
   ui: {
@@ -91,8 +91,8 @@ const es = {
         '**Tu perfil público:** lo que cargás en Studio (nombre, foto, textos, links, proyectos, tarjeta de contacto). Sólo se publica lo que decidís mostrar.',
         '**Life OS:** tus metas, hábitos, tareas, finanzas y notas, incluidos los nombres que escribas (por ejemplo, con quién compartiste un gasto). Son privados: sólo vos podés verlos. Tu diario también: el bloqueo con PIN, huella o cara funciona sólo en tu dispositivo (no viaja a Mycen) y las entradas no tienen cifrado de extremo a extremo.',
         '**Mycen Business:** los datos de tu negocio y los que cargues sobre tus clientes y ventas.',
-        '**Estadísticas de visitas:** eventos anónimos (visitas y clicks en tu perfil) con un identificador que cambia todos los días. No guardamos direcciones IP ni datos del dispositivo, y no contamos robots.',
-        '**Denuncias:** el motivo y el detalle que escribe quien denuncia, con un identificador anónimo diario para evitar abusos.',
+        '**Estadísticas de visitas:** eventos anónimos (visitas y clicks en tu perfil) con un identificador que cambia todos los días. No guardamos direcciones IP ni datos del dispositivo, y no contamos robots. También guardamos de qué sitio o link llegó la visita (por ejemplo, Instagram o el QR).',
+        '**Denuncias:** el motivo y el detalle que escribe quien denuncia, con un identificador anónimo diario para evitar abusos. Si quien denuncia tiene la sesión iniciada, guardamos también su cuenta: la ve sólo el equipo de Mycen, nunca la persona denunciada.',
         '**Mensajes del formulario de contacto:** el nombre, el contacto (email o WhatsApp) y el mensaje que deja un visitante. Si el perfil tiene el módulo Colaboraciones, una marca deja además su empresa y qué busca, y si quiere su sitio web, un presupuesto y una fecha límite. Los ve sólo la persona dueña del perfil, en Studio; no se publican ni se mandan por email. Para evitar abusos usamos un identificador anónimo que cambia todos los días, sin IP ni datos del dispositivo.',
         '**Suscripciones:** si te suscribís desde el módulo “Suscribirse” de un perfil, guardamos tu email (y tu nombre, si el perfil lo pide), la fecha en que diste tu consentimiento y tu idioma, y se los damos a la persona dueña de ese perfil, que los ve en Studio y los puede exportar. Mycen no le manda nada a esa lista: la persona dueña del perfil decide cómo usarla y es responsable de hacerlo bien. Para salir, pedíselo a esa persona o escribinos a team@mycen.id y lo borramos. Para evitar abusos usamos un identificador anónimo que cambia todos los días, sin IP ni datos del dispositivo.',
         '**Invitaciones:** si creás tu cuenta desde “Creá tu identidad” en el perfil de otra persona, guardamos qué perfil te trajo y su tipo, para saber cómo crece Mycen. Esa persona no ve tus datos.',
@@ -135,16 +135,16 @@ const es = {
     { id: 'plazos', title: 'Cuánto tiempo los guardamos', body: [
       { list: [
         'Los datos de tu cuenta, tu perfil y Life OS, mientras tengas la cuenta. Si la eliminás, los borramos; las copias de seguridad de los proveedores se sobrescriben en sus ciclos habituales.',
-        'Las estadísticas de visitas se guardan agrupadas y anónimas.',
+        'Las estadísticas de visitas se guardan como eventos anónimos (con el identificador que cambia cada día) mientras exista el perfil; si se borra, se borran con él.',
         'Los mensajes del formulario de contacto, hasta que la persona dueña del perfil los borra o elimina su cuenta.',
         'Los emails de suscripción, hasta que la persona dueña del perfil los borra, elimina su cuenta o nos pedís que los borremos.',
-        'Los registros de errores se guardan hasta que se resuelven; el conteo de personas afectadas, 90 días.',
+        'Los registros de errores se guardan mientras sirvan para arreglarlos (uno resuelto queda guardado por si vuelve a pasar); el conteo de personas afectadas, 90 días.',
         'Los eventos de uso, mientras tengas la cuenta; si la eliminás, quedan sin ningún vínculo con vos.',
         'Lo que la ley obligue a conservar (por ejemplo, datos de facturación), por el plazo que fije.',
       ] },
     ] },
     { id: 'dispositivo', title: 'Lo que se guarda en tu dispositivo', body: [
-      'Mycen no usa cookies de publicidad ni de seguimiento. En tu navegador guardamos sólo lo necesario para que funcione: tu sesión, tu idioma y algunos borradores y preferencias. Podés borrarlo desde la configuración del navegador (vas a tener que iniciar sesión de nuevo).',
+      'Mycen no usa cookies de publicidad ni de seguimiento. En tu navegador guardamos sólo lo necesario para que funcione: tu sesión, tu idioma y algunos borradores y preferencias. Podés borrarlo desde la configuración del navegador (vas a tener que iniciar sesión de nuevo). Si cargás algo en Life OS sin conexión, queda en tu dispositivo hasta que se sube (sólo con tu sesión). Del PIN del diario guardamos sólo una huella cifrada (hash), nunca el PIN.',
     ] },
     { id: 'seguridad', title: 'Seguridad', body: [
       'Usamos conexiones cifradas, contraseñas guardadas con cifrado y permisos en la base de datos para que cada persona vea sólo lo suyo. Ningún sistema es perfecto: si pasara algo que afecte tus datos, te avisamos y actuamos según lo que indique la ley.',

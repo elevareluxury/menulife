@@ -84,8 +84,8 @@ const fr: LegalDict = {
         '**Votre profil public :** ce que vous ajoutez dans Studio (nom, photo, textes, liens, projets, carte de contact). Seul ce que vous choisissez d’afficher est publié.',
         '**Life OS :** vos objectifs, habitudes, tâches, finances et notes, y compris les noms que vous saisissez (par exemple, avec qui vous avez partagé une dépense). Ils sont privés : vous seul pouvez les voir. Votre journal aussi : le verrouillage par code PIN, empreinte ou visage fonctionne uniquement sur votre appareil (il n’est pas envoyé à Mycen) et les entrées ne sont pas chiffrées de bout en bout.',
         '**Mycen Business :** les données de votre entreprise et ce que vous ajoutez sur vos clients et ventes.',
-        '**Statistiques de visites :** événements anonymes (visites et clics sur votre profil) avec un identifiant qui change chaque jour. Nous ne conservons ni adresses IP ni données de l’appareil, et nous ne comptons pas les robots.',
-        '**Signalements :** le motif et le détail écrits par la personne qui signale, avec un identifiant anonyme quotidien pour éviter les abus.',
+        '**Statistiques de visites :** événements anonymes (visites et clics sur votre profil) avec un identifiant qui change chaque jour. Nous ne conservons ni adresses IP ni données de l’appareil, et nous ne comptons pas les robots. Nous conservons aussi le site ou le lien d’où vient la visite (par exemple Instagram ou le QR code).',
+        '**Signalements :** le motif et le détail écrits par la personne qui signale, avec un identifiant anonyme quotidien pour éviter les abus. Si la personne qui signale est connectée, nous conservons aussi son compte : seule l’équipe Mycen le voit, jamais la personne signalée.',
         '**Messages du formulaire de contact :** le nom, le contact (e-mail ou WhatsApp) et le message laissés par un visiteur. Si le profil a le module Collaborations, une marque indique aussi son entreprise et ce qu’elle recherche, et si elle le souhaite son site web, un budget et une date limite. Seule la personne propriétaire du profil les voit, dans Studio ; ils ne sont ni publiés ni envoyés par e-mail. Pour éviter les abus, nous utilisons un identifiant anonyme qui change chaque jour, sans IP ni données de l’appareil.',
         '**Abonnements :** si vous vous abonnez via le module « S’abonner » d’un profil, nous conservons votre e-mail (et votre nom, si le profil le demande), la date de votre consentement et votre langue, et nous les transmettons à la personne propriétaire de ce profil, qui les voit dans Studio et peut les exporter. Mycen n’envoie rien à cette liste : la personne propriétaire du profil décide de son usage et est responsable de l’utiliser correctement. Pour vous désabonner, demandez-le à cette personne ou écrivez-nous à team@mycen.id et nous le supprimons. Pour éviter les abus, nous utilisons un identifiant anonyme qui change chaque jour, sans adresse IP ni données de l’appareil.',
         '**Invitations :** si tu crées ton compte depuis « Crée ton identité » sur le profil de quelqu’un d’autre, nous enregistrons quel profil t’a amené et son type, pour comprendre comment Mycen grandit. Cette personne ne voit pas tes données.',
@@ -128,16 +128,16 @@ const fr: LegalDict = {
     { id: 'plazos', title: 'Combien de temps nous les conservons', body: [
       { list: [
         'Les données de votre compte, de votre profil et de Life OS, tant que vous avez le compte. Si vous le supprimez, nous les effaçons ; les sauvegardes des prestataires sont écrasées selon leurs cycles habituels.',
-        'Les statistiques de visites sont conservées agrégées et anonymes.',
+        'Les statistiques de visites sont conservées sous forme d’événements anonymes (avec l’identifiant qui change chaque jour) tant que le profil existe ; s’il est supprimé, elles le sont aussi.',
         'Les messages du formulaire de contact, jusqu’à ce que la personne propriétaire du profil les supprime ou supprime son compte.',
         'Les e-mails d’abonnement, jusqu’à ce que la personne propriétaire du profil les supprime, supprime son compte ou que vous nous demandiez de les supprimer.',
-        'Les journaux d’erreurs sont conservés jusqu’à leur résolution ; le décompte des personnes concernées, 90 jours.',
+        'Les journaux d’erreurs sont conservés tant qu’ils servent à corriger les problèmes (une erreur résolue reste enregistrée au cas où elle se reproduirait) ; le décompte des personnes concernées, 90 jours.',
         'Les événements d’utilisation, tant que vous avez votre compte ; si vous le supprimez, ils ne sont plus liés à vous d’aucune façon.',
         'Ce que la loi oblige à conserver (par exemple, les données de facturation), pendant la durée qu’elle fixe.',
       ] },
     ] },
     { id: 'dispositivo', title: 'Ce qui est stocké sur votre appareil', body: [
-      'Mycen n’utilise pas de cookies publicitaires ni de suivi. Dans votre navigateur, nous ne conservons que le nécessaire au fonctionnement : votre session, votre langue et quelques brouillons et préférences. Vous pouvez l’effacer dans les réglages du navigateur (vous devrez vous reconnecter).',
+      'Mycen n’utilise pas de cookies publicitaires ni de suivi. Dans votre navigateur, nous ne conservons que le nécessaire au fonctionnement : votre session, votre langue et quelques brouillons et préférences. Vous pouvez l’effacer dans les réglages du navigateur (vous devrez vous reconnecter). Si vous saisissez quelque chose dans Life OS hors connexion, cela reste sur votre appareil jusqu’à l’envoi (uniquement avec votre session). Pour le code PIN du journal, nous ne gardons qu’une empreinte chiffrée (hash), jamais le code.',
     ] },
     { id: 'seguridad', title: 'Sécurité', body: [
       'Nous utilisons des connexions chiffrées, des mots de passe stockés chiffrés et des permissions dans la base de données pour que chaque personne ne voie que ce qui lui appartient. Aucun système n’est parfait : si un incident touchait vos données, nous vous préviendrions et agirions comme la loi l’exige.',

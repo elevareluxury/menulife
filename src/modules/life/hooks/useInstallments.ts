@@ -34,8 +34,10 @@ let pending: Promise<number> | null = null
  */
 export function materializeInstallments(force = false): Promise<number> {
   const today = localDateKey()
-  if (!force && materializedOn === today) return pending ?? Promise.resolve(0)
-  materializedOn = today
+  // Por cuenta y día: si en la misma pestaña entra otra cuenta, a esa también se le cargan sus cuotas
+  const key = `${useAuthStore.getState().user?.id ?? ''}|${today}`
+  if (!force && materializedOn === key) return pending ?? Promise.resolve(0)
+  materializedOn = key
   let tz = 'UTC'
   try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { /* UTC */ }
   const run: Promise<number> = (async () => {

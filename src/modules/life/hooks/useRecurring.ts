@@ -53,8 +53,10 @@ let materializedOn: string | null = null
 /** Carga los fijos vencidos (una vez por día y pestaña, salvo `force`). Devuelve cuántos movimientos creó. */
 export async function materializeRecurring(force = false): Promise<number> {
   const today = localDateKey()
-  if (!force && materializedOn === today) return 0
-  materializedOn = today
+  // Por cuenta y día: si en la misma pestaña entra otra cuenta, a esa también se le cargan sus fijos
+  const key = `${useAuthStore.getState().user?.id ?? ''}|${today}`
+  if (!force && materializedOn === key) return 0
+  materializedOn = key
   let tz = 'UTC'
   try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { /* UTC */ }
   const { data, error } = await db.rpc('life_materialize_recurring', { p_today: today, p_tz: tz })

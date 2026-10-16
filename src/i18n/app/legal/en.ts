@@ -84,8 +84,8 @@ const en: LegalDict = {
         '**Your public profile:** what you add in Studio (name, photo, texts, links, projects, contact card). Only what you choose to show is published.',
         '**Life OS:** your goals, habits, tasks, finances and notes, including the names you type (for example, who you split an expense with). They are private: only you can see them. So is your journal: the PIN, fingerprint or face lock works only on your device (it is not sent to Mycen) and entries are not end-to-end encrypted.',
         '**Mycen Business:** your business data and what you add about your customers and sales.',
-        '**Visit statistics:** anonymous events (visits and clicks on your profile) with an identifier that changes every day. We don’t store IP addresses or device data, and we don’t count bots.',
-        '**Reports:** the reason and details written by the person reporting, with a daily anonymous identifier to prevent abuse.',
+        '**Visit statistics:** anonymous events (visits and clicks on your profile) with an identifier that changes every day. We don’t store IP addresses or device data, and we don’t count bots. We also store which site or link the visit came from (for example, Instagram or the QR code).',
+        '**Reports:** the reason and details written by the person reporting, with a daily anonymous identifier to prevent abuse. If the person reporting is signed in, we also store their account: only the Mycen team sees it, never the reported person.',
         '**Contact form messages:** the name, contact (email or WhatsApp) and message a visitor leaves. If the profile has the Collaborations module, a brand also leaves its company and what it is looking for, and optionally its website, a budget and a deadline. Only the profile owner sees them, in Studio; they are not published or emailed. To prevent abuse we use an anonymous identifier that changes every day, with no IP or device data.',
         '**Subscriptions:** if you subscribe through a profile’s “Subscribe” module, we store your email (and your name, if the profile asks for it), the date you gave your consent and your language, and we give them to the owner of that profile, who sees them in Studio and can export them. Mycen sends nothing to that list: the profile owner decides how to use it and is responsible for doing so properly. To leave, ask that person or write to us at team@mycen.id and we will delete it. To prevent abuse we use an anonymous identifier that changes every day, with no IP address or device data.',
         '**Invitations:** if you create your account from “Create your identity” on someone else’s profile, we save which profile brought you and its type, to understand how Mycen grows. That person can’t see your data.',
@@ -128,16 +128,16 @@ const en: LegalDict = {
     { id: 'plazos', title: 'How long we keep it', body: [
       { list: [
         'Your account, profile and Life OS data, for as long as you have the account. If you delete it, we erase it; providers’ backups are overwritten in their usual cycles.',
-        'Visit statistics are kept aggregated and anonymous.',
+        'Visit statistics are kept as anonymous events (with the identifier that changes every day) for as long as the profile exists; if it is deleted, they are deleted with it.',
         'Contact form messages, until the profile owner deletes them or deletes their account.',
         'Subscription emails, until the profile owner deletes them, deletes their account or you ask us to delete them.',
-        'Error records are kept until they are resolved; the count of affected people, 90 days.',
+        'Error records are kept for as long as they help us fix problems (a resolved one stays in case it happens again); the count of affected people, 90 days.',
         'Usage events, while you have your account; if you delete it, they are no longer linked to you in any way.',
         'Whatever the law requires us to keep (for example, billing data), for the period it sets.',
       ] },
     ] },
     { id: 'dispositivo', title: 'What is stored on your device', body: [
-      'Mycen does not use advertising or tracking cookies. In your browser we only store what is needed for it to work: your session, your language and some drafts and preferences. You can clear it from your browser settings (you will need to sign in again).',
+      'Mycen does not use advertising or tracking cookies. In your browser we only store what is needed for it to work: your session, your language and some drafts and preferences. You can clear it from your browser settings (you will need to sign in again). If you add something in Life OS while offline, it stays on your device until it is uploaded (only with your session). For the journal PIN we only store an encrypted fingerprint (hash), never the PIN.',
     ] },
     { id: 'seguridad', title: 'Security', body: [
       'We use encrypted connections, passwords stored with encryption and database permissions so each person only sees their own data. No system is perfect: if something affecting your data happened, we would let you know and act as the law requires.',
