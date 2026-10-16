@@ -72,21 +72,18 @@ const roundBtn: React.CSSProperties = {
 function MonthSwitcher({ month, maxMonth, locale, onChange }: { month: string; maxMonth: string; locale: string; onChange: (m: string) => void }) {
   const t = useLifeT()
   const isCurrent = month >= maxMonth
-  // En árabe (de derecha a izquierda) las flechas apuntan al revés
-  const rtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-  const Prev = rtl ? ChevronRight : ChevronLeft
-  const Next = rtl ? ChevronLeft : ChevronRight
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
       <button type="button" onClick={() => onChange(shiftMonth(month, -1))} aria-label={t.money.prevMonth} title={t.money.prevMonth} style={roundBtn}>
-        <Prev size={18} style={{ color: colors.text.secondary }} aria-hidden="true" />
+        {/* En árabe la fila se invierte y `flip-rtl` da vuelta la flecha (el `dir` está en LifeShell, no en <html>) */}
+        <ChevronLeft size={18} className="flip-rtl" style={{ color: colors.text.secondary }} aria-hidden="true" />
       </button>
       <h2 aria-live="polite" style={{ fontFamily: font, fontSize: 16, fontWeight: 800, color: colors.text.primary, margin: 0, textTransform: 'capitalize' }}>
         {monthLabel(month, locale)}
       </h2>
       <button type="button" onClick={() => onChange(shiftMonth(month, 1))} disabled={isCurrent} aria-label={t.money.nextMonth} title={t.money.nextMonth}
         style={{ ...roundBtn, opacity: isCurrent ? 0.35 : 1, cursor: isCurrent ? 'default' : 'pointer' }}>
-        <Next size={18} style={{ color: colors.text.secondary }} aria-hidden="true" />
+        <ChevronRight size={18} className="flip-rtl" style={{ color: colors.text.secondary }} aria-hidden="true" />
       </button>
     </div>
   )
@@ -298,14 +295,14 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, instal
       </div>
 
       {scheduled && (
-        <span aria-label={`${t.money.scheduled}, ${t.money.inDays(inDays)}`}
+        <span role="img" aria-label={`${t.money.scheduled}, ${t.money.inDays(inDays)}`}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.secondary, background: colors.surface.high, borderRadius: radius.full, padding: '2px 8px', flexShrink: 0, whiteSpace: 'nowrap' }}>
           <CalendarClock size={11} aria-hidden="true" /> {t.money.inDays(inDays)}
         </span>
       )}
 
       {installmentsOf && tx.installment_no ? (
-        <span aria-label={t.installments.badgeLabel(tx.installment_no, installmentsOf)}
+        <span role="img" aria-label={t.installments.badgeLabel(tx.installment_no, installmentsOf)}
           style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.secondary, background: colors.surface.high, borderRadius: radius.full, padding: '2px 8px', flexShrink: 0, whiteSpace: 'nowrap' }}>
           {t.installments.badge(tx.installment_no, installmentsOf)}
         </span>
@@ -578,7 +575,7 @@ export function LifeMoneyPage() {
                   {formatMoney(r.balance, r.currency, locale)}
                 </span>
                 <span dir="ltr" style={{ fontSize: 11, color: colors.text.tertiary }}>
-                  +{formatMoney(r.income, r.currency, locale)} · -{formatMoney(r.expense, r.currency, locale)}
+                  {r.income > 0 ? '+' : ''}{formatMoney(r.income, r.currency, locale)} · {r.expense > 0 ? '-' : ''}{formatMoney(r.expense, r.currency, locale)}
                 </span>
               </div>
             ))}

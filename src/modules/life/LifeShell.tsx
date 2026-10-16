@@ -101,7 +101,9 @@ export function LifeShell() {
       WebkitOverflowScrolling: 'touch',
       background: colors.bg,
       color: colors.text.primary,
-      paddingBottom: 'calc(88px + env(safe-area-inset-bottom))',
+      // Lo último de cada pantalla ("⋯" de la última fila, "Cerrar sesión") tiene que quedar arriba del botón +
+      // (84 px desde abajo + 56 de alto), no sólo arriba del menú
+      paddingBottom: 'calc(156px + env(safe-area-inset-bottom))',
     }}>
       {/* "Reducir movimiento" apaga las animaciones de Life OS (también las de framer-motion) */}
       <MotionConfig reducedMotion="user">

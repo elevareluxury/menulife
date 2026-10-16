@@ -82,7 +82,7 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
             </span>
           </button>
         ) : (
-          <span aria-label={t.brain.types[item.type]} style={{
+          <span role="img" aria-label={t.brain.types[item.type]} style={{
             width: 32, height: 32, margin: 4, borderRadius: radius.sm, flexShrink: 0,
             background: `${tint(ink(meta.color), 8)}`, border: `1px solid ${tint(ink(meta.color), 15)}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',

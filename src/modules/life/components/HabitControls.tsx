@@ -44,7 +44,8 @@ export function HabitMeta({ habit }: { habit: Habit }) {
   if (habit.frequency.type === 'times_per_week') items.push(p.weekProgress(habit.weekCount, habit.frequency.times))
   if (!items.length) return null
   return (
-    <span style={{ display: 'block', fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+    // Hasta 2 líneas: en una sola, con un "Después de…" largo, el progreso ("5 de 8 vasos") quedaba cortado
+    <span style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary, marginTop: 1, overflow: 'hidden', overflowWrap: 'anywhere' }}>
       {items.join(' · ')}
     </span>
   )

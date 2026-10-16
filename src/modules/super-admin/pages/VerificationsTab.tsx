@@ -51,7 +51,7 @@ export function VerificationsTab() {
   useEffect(() => {
     let cancelled = false
     rpc('admin_list_verifications', { p_status: filter }).then(r => {
-      if (!cancelled) setResult({ key, items: r.error ? [] : (r.data as VerificationItem[]), failed: !!r.error })
+      if (!cancelled) setResult({ key, items: r.error ? [] : ((r.data as VerificationItem[] | null) ?? []), failed: !!r.error })
     })
     return () => { cancelled = true }
   }, [filter, key])

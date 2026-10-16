@@ -403,7 +403,7 @@ const hi: StudioDict = {
       project: 'चुना हुआ प्रोजेक्ट',
       portfolioAll: 'सभी प्रकाशित प्रोजेक्ट',
       portfolioSome: n => `${n} चुने हुए प्रोजेक्ट`,
-      image: 'इमेज', photos: n => `${n} फ़ोटो`, reviews: n => `${n} समीक्षाएँ`,
+      image: 'इमेज', photos: n => `${n} फ़ोटो`, reviews: n => `${n} ${n === 1 ? 'समीक्षा' : 'समीक्षाएँ'}`,
       cards: (n, stacked) => `${n} कार्ड · ${stacked ? 'एक के नीचे एक' : 'स्वाइप करने योग्य'}`, hours: 'साप्ताहिक समय',
       social: 'सोशल मीडिया', product: 'प्रोडक्ट', button: 'बटन', deleted: 'हटाया गया मॉड्यूल',
     },

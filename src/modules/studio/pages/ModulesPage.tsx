@@ -48,7 +48,7 @@ export function ModulesPage() {
 
       <p className="st-sr-only" role="status" aria-live="polite">{announce || templateNote}</p>
       {pendingCount > 0 && (
-        <div className="st-card st-checklist">
+        <div className="st-card st-pending-note">
           <strong>{t.templates.checklistTitle}</strong>
           <span className="st-help">{t.templates.checklistText(pendingCount)}</span>
         </div>

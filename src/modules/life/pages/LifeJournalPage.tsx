@@ -188,9 +188,6 @@ function JournalBody({ draft, setDraft }: { draft: { body: string; date: string 
     useJournal({ month, query: searchOpen ? query : '', enabled: true })
 
   const isCurrent = month === monthKeyOf(new Date())
-  const rtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-  const Prev = rtl ? ChevronRight : ChevronLeft
-  const Next = rtl ? ChevronLeft : ChevronRight
   const rawMonth = new Date(`${month}-15T12:00:00`).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   const monthName = rawMonth.charAt(0).toLocaleUpperCase(locale) + rawMonth.slice(1)
 
@@ -241,14 +238,14 @@ function JournalBody({ draft, setDraft }: { draft: { body: string; date: string 
         ) : (
           <>
             <button type="button" onClick={() => setMonth(m => shiftMonth(m, -1))} aria-label={t.journal.prevMonth} title={t.journal.prevMonth} style={roundBtn}>
-              <Prev size={18} aria-hidden="true" />
+              <ChevronLeft size={18} aria-hidden="true" className="flip-rtl" />
             </button>
             <h2 aria-live="polite" style={{ flex: 1, textAlign: 'center', fontFamily: font, fontSize: 16, fontWeight: 800, color: colors.text.primary, margin: 0 }}>
               {monthName}
             </h2>
             <button type="button" onClick={() => setMonth(m => shiftMonth(m, 1))} disabled={isCurrent} aria-label={t.journal.nextMonth} title={t.journal.nextMonth}
               style={{ ...roundBtn, opacity: isCurrent ? 0.35 : 1, cursor: isCurrent ? 'default' : 'pointer' }}>
-              <Next size={18} aria-hidden="true" />
+              <ChevronRight size={18} aria-hidden="true" className="flip-rtl" />
             </button>
           </>
         )}
