@@ -5,6 +5,7 @@ import { useLifeT } from '@/i18n/app/life'
 import { formatMoney } from '@/lib/currencies'
 import { ActionMenu } from './ActionMenu'
 import { settlementIncome, type PersonBalance } from '../lib/splits'
+import { lifeTimeZone } from '../lib/zonedTime'
 
 // Cuentas compartidas en Dinero: lo pendiente con cada persona (por moneda, sin sumar monedas distintas) y "Saldar".
 
@@ -109,7 +110,7 @@ export function SettleSheet({ balance, locale, onClose, onConfirm }: {
             {b.items.map(it => (
               <li key={it.id} style={{ display: 'flex', gap: 10, padding: '6px 0', borderBottom: `1px solid ${colors.border.subtle}`, fontFamily: font, fontSize: 13 }}>
                 <span style={{ flex: 1, minWidth: 0, color: colors.text.secondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {it.note || new Date(it.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
+                  {it.note || new Date(it.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: lifeTimeZone() })}
                 </span>
                 <span style={{ color: colors.text.tertiary }}>{it.direction === 'owed_to_me' ? s.owesYouShort : s.youOweShort}</span>
                 <span dir="ltr" style={{ fontWeight: 700, color: colors.text.primary }}>{money(Number(it.amount))}</span>

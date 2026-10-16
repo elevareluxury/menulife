@@ -11,6 +11,7 @@ import { useCategoryLabels } from '../hooks/useCategories'
 import { suggestCategory } from '../lib/moneyInsights'
 import { parseDump, DUMP_MAX_CHARS, type DumpItem } from '../lib/brainDump'
 import type { VoiceKind } from '../lib/voiceParse'
+import { lifeNow } from '../lib/zonedTime'
 
 // "Vaciar la cabeza": todo junto en un texto (o dictado) → lista para revisar → "Guardar todo". Cada cosa se
 // interpreta en el dispositivo con las reglas del dictado; nada se guarda sin pasar por la revisión.
@@ -68,7 +69,7 @@ export function BrainDumpSheet({ open, onClose, onSave }: {
   }, [speech.final])
 
   const review = () => {
-    const items = parseDump(text, lang)
+    const items = parseDump(text, lang, lifeNow())
     if (!items.length) { setError(d.nothing); return }
     setError('')
     stop()

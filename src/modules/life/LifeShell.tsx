@@ -20,6 +20,7 @@ import { langDir } from '@/i18n/app/languages'
 import { colors } from './design-system'
 import { THEME_BG } from '@/design/themes'
 import { usePrefersLight } from '@/modules/profile/lib/usePrefersLight'
+import { usePrefs } from '@/lib/prefs'
 import './life.css'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,6 +30,9 @@ export function LifeShell() {
   const { user, loading, initialized } = useAuthStore()
   const { setHasRestaurant, setRestaurantName, setRestaurantSlug, setRestaurantPlan } = useLifeStore()
   const [timedOut, setTimedOut] = useState(false)
+  // "Hoy", meses y horas usan la zona de la cuenta (user_settings.timezone): se espera a tener las preferencias para
+  // no leer ni guardar nada con el día del celular (si tardan, a los 5 s se sigue con la zona del dispositivo)
+  const prefsReady = usePrefs(s => !!user && s.loadedFor === user.id)
   useTaskReminders(user?.id)
   useHabitReminders(user?.id)
   const dir = langDir(useAppLang(s => s.lang))
@@ -52,7 +56,7 @@ export function LifeShell() {
   }, [])
 
   // Anota la visita del día (para dar la bienvenida a quien vuelve después de unos días; lib/kindMoments.ts)
-  useEffect(() => { if (user) registerVisit(user.id, dayKey()) }, [user])
+  useEffect(() => { if (user && (prefsReady || timedOut)) registerVisit(user.id, dayKey()) }, [user, prefsReady, timedOut])
 
   // Capturas guardadas sin conexión: se suben al entrar y cada vez que vuelve la red
   useEffect(() => {
@@ -78,7 +82,7 @@ export function LifeShell() {
       })
   }, [user, setHasRestaurant])
 
-  if ((!initialized || loading) && !timedOut) {
+  if ((!initialized || loading || (user && !prefsReady)) && !timedOut) {
     return (
       <div data-mycen-theme={theme} style={{
         minHeight: '100dvh', background: colors.bg,

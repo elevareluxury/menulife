@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { localDateKey } from './useTasks'
+import { lifeTimeZone, todayKey, zonedTimeToDate } from '../lib/zonedTime'
 import { frequencyOf, isDone, isScheduledOn } from '../lib/habitStreak'
 import { lifeT } from '@/i18n/app/life'
 import { anchorHasPrefix, anchorLabel } from '../lib/habitAnchor'
@@ -46,10 +47,11 @@ export function useHabitReminders(userId: string | undefined) {
 
     const check = async (habits: HabitRow[]) => {
       const now = new Date()
-      const today = localDateKey(now)
+      const tz = lifeTimeZone()
+      const today = todayKey(tz, now)   // día y hora de la zona de la cuenta
       const due = habits.filter(h => {
         if (!h.reminder_time || wasReminded(h.id, today) || !isScheduledOn(frequencyOf(h.frequency), today)) return false
-        const at = new Date(`${today}T${h.reminder_time.slice(0, 5)}:00`).getTime()
+        const at = zonedTimeToDate(today, h.reminder_time.slice(0, 5), tz).getTime()
         return now.getTime() >= at && now.getTime() - at <= LATE_MS
       })
       if (!due.length) return

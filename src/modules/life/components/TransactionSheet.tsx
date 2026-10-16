@@ -20,6 +20,7 @@ import { planMessage } from '../lib/splitMessage'
 import { followTotal, planSplit, type EditShared, type SharedDraft, type SplitDebt } from '../lib/splits'
 import { useOutbox } from '../lib/outbox'
 import { localDateOf } from '../lib/moneyFuture'
+import { lifeTimeZone, lifeToday, noonOfLocalDayISO } from '../lib/zonedTime'
 
 /** Gasto compartido: las deudas que quedan (el importe del movimiento ya viene ajustado en `data.amount`) */
 export interface SharedSave { debts: SplitDebt[] }
@@ -48,10 +49,8 @@ interface TransactionSheetProps {
   editShared?: EditShared
 }
 
-function todayISO(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
+/** Hoy en la zona de la cuenta (lib/zonedTime.ts). */
+const todayISO = (): string => lifeToday()
 
 export function TransactionSheet({ open, onClose, onSave, initial, repeatable, template, shareable, knownPeople, editShared }: TransactionSheetProps) {
   const { currency } = useLocaleStore()  // moneda principal de la cuenta
@@ -146,9 +145,9 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         description: form.description?.trim() || undefined,
         // Fecha vacía o inválida (se borró el campo): hoy
         occurred_at: template || (repeatable && repeat && !initial) || inInstallments
-          // Un fijo guarda la fecha tal cual (el día del mes); un movimiento, el mediodía local de esa fecha
+          // Un fijo guarda la fecha tal cual (el día del mes); un movimiento, el mediodía de esa fecha en la zona de la cuenta
           ? (/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO())
-          : new Date(`${/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO()}T12:00:00`).toISOString(),
+          : noonOfLocalDayISO(/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO(), lifeTimeZone()),
       }, !inInstallments && !!(repeatable && repeat && !initial), inInstallments ? count : null, sharing?.ok ? { debts: sharing.debts } : null)
       onClose()
     } catch { setError(t.common.saveError) }
@@ -392,7 +391,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
             </span>
             {repeat && (
               <span style={{ display: 'block', fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
-                {t.recurring.repeatHint(Number((form.occurred_at || todayISO()).slice(8, 10)) || new Date().getDate())}
+                {t.recurring.repeatHint(Number((form.occurred_at || todayISO()).slice(8, 10)) || Number(todayISO().slice(8, 10)))}
               </span>
             )}
           </span>

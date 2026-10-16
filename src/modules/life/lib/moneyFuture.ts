@@ -12,21 +12,20 @@ export interface FutureTx {
   occurred_at: string
 }
 
-const pad = (n: number) => String(n).padStart(2, '0')
+import { dateKeyOf, lifeTimeZone } from './zonedTime'
 
-/** Fecha local (YYYY-MM-DD) de un instante ISO. */
-export function localDayOf(iso: string): string {
-  const d = new Date(iso)
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+/** Fecha local (YYYY-MM-DD) de un instante ISO, en la zona de la cuenta (lib/zonedTime.ts). */
+export function localDayOf(iso: string, tz: string = lifeTimeZone()): string {
+  return dateKeyOf(iso, tz)
 }
 
 /**
  * Fecha local (YYYY-MM-DD) para mostrar o editar un movimiento: una fecha sola queda igual (un fijo guarda el día);
- * un instante pasa a la fecha de este dispositivo. Nunca cortar el ISO en la "T": esa es la fecha en UTC (un movimiento
+ * un instante pasa a la fecha de la zona de la cuenta. Nunca cortar el ISO en la "T": esa es la fecha en UTC (un movimiento
  * de las 22 h en Buenos Aires quedaría al día siguiente).
  */
-export function localDateOf(value: string): string {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : localDayOf(value)
+export function localDateOf(value: string, tz: string = lifeTimeZone()): string {
+  return dateKeyOf(value, tz)
 }
 
 /** ¿El movimiento todavía no llegó? (su fecha local es posterior a hoy) */

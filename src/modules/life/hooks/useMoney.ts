@@ -7,8 +7,10 @@ import { useLocaleStore } from '@/store/localeStore'
 import { materializeRecurring } from './useRecurring'
 import { monthCurve as curveOf, monthKeyOf, monthRange, shiftMonth } from '../lib/moneyInsights'
 import { materializeInstallments } from './useInstallments'
-import { useToday } from './useToday'
-import { lastNavigableMonth, splitByArrival, upcomingTotals as upcomingTotalsOf, type UpcomingTotals } from '../lib/moneyFuture'
+import { useLifeTimeZone, useToday } from './useToday'
+import { lifeNow, lifeTimeZone, startOfLocalDayISO, todayKey } from '../lib/zonedTime'
+import { shiftDate } from '../lib/habitStreak'
+import { lastNavigableMonth, localDayOf, splitByArrival, upcomingTotals as upcomingTotalsOf, type UpcomingTotals } from '../lib/moneyFuture'
 import { enqueue, isOfflineError } from '../lib/outbox'
 import toast from 'react-hot-toast'
 import { lifeT } from '@/i18n/app/life'
@@ -58,11 +60,8 @@ export interface TransactionGroup {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Fecha local (YYYY-MM-DD) de un instante ISO. */
-export function localDay(iso: string): string {
-  const d = new Date(iso)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
+/** Fecha local (YYYY-MM-DD) de un instante ISO, en la zona de la cuenta. */
+export const localDay = (iso: string): string => localDayOf(iso)
 
 function groupByDate(txs: Transaction[]): TransactionGroup[] {
   const map = new Map<string, Transaction[]>()
@@ -95,7 +94,7 @@ function newTxId(): string {
  * va en `upcoming` / `upcomingTotals` y se suma recién cuando llega su fecha. `maxMonth`: hasta qué mes se puede
  * avanzar (el actual, o el último con algo programado).
  */
-export function useMoney(month: string = monthKeyOf(new Date())) {
+export function useMoney(month: string = monthKeyOf(lifeNow())) {
   const { user } = useAuthStore()
   const mainCurrency = useLocaleStore(s => s.currency)
   const [all, setAll] = useState<Transaction[]>([])
@@ -103,6 +102,7 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
   const [loadedMonth, setLoadedMonth] = useState<string | null>(null)
   const [latestIso, setLatestIso] = useState<string | null>(null)
   const today = useToday()
+  const tz = useLifeTimeZone()
 
   const load = useCallback(async () => {
     if (!user) return
@@ -110,10 +110,11 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
     await materializeRecurring().catch(() => 0)
     // Lo mismo con las cuotas vencidas de las compras en cuotas
     await materializeInstallments().catch(() => 0)
-    const [from] = monthRange(shiftMonth(month, -1))
-    const [, to] = monthRange(month)
+    // Bordes del mes en la zona de la cuenta (lib/zonedTime.ts)
+    const [from] = monthRange(shiftMonth(month, -1), tz)
+    const [, to] = monthRange(month, tz)
     // Lo programado más allá de este mes (para poder avanzar hasta ahí con ‹ mes ›)
-    const [nextStart] = monthRange(shiftMonth(monthKeyOf(new Date()), 1))
+    const [nextStart] = monthRange(shiftMonth(monthKeyOf(lifeNow()), 1), tz)
     const [{ data, error }, { data: later }] = await Promise.all([
       db.from('life_transactions')
         .select('*')
@@ -136,7 +137,7 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
     setAll(rows)
     setEverHasData(ever)
     setLoadedMonth(month)
-  }, [user, month])
+  }, [user, month, tz])
   const loading = loadedMonth !== month
 
   useEffect(() => {
@@ -155,12 +156,12 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
   }, [load])
 
   // Por mes local (no comparando textos ISO: la base devuelve "+00:00" y monthRange ".000Z", y en el borde no coinciden)
-  const split = useMemo(() => splitByArrival(all.filter(t => localDay(t.occurred_at).slice(0, 7) === month), today), [all, month, today])
+  const split = useMemo(() => splitByArrival(all.filter(t => localDayOf(t.occurred_at, tz).slice(0, 7) === month), today), [all, month, today, tz])
   /** Lo que ya llegó (cuenta en los totales) */
   const transactions = split.arrived
   /** Programado para más adelante en este mes */
   const upcoming = split.upcoming
-  const previous = useMemo(() => splitByArrival(all.filter(t => localDay(t.occurred_at).slice(0, 7) < month), today).arrived, [all, month, today])
+  const previous = useMemo(() => splitByArrival(all.filter(t => localDayOf(t.occurred_at, tz).slice(0, 7) < month), today).arrived, [all, month, today, tz])
   const thisMonthTxs = transactions
   const upcomingTotals = useMemo<UpcomingTotals[]>(() => upcomingTotalsOf(upcoming, mainCurrency), [upcoming, mainCurrency])
   const maxMonth = lastNavigableMonth(today.slice(0, 7), latestIso)
@@ -184,8 +185,8 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
   const monthBalance = monthIncome - monthExpense
   const otherTotals  = useMemo(() => totalsByCurrency.filter(r => r.currency !== mainCurrency), [totalsByCurrency, mainCurrency])
   const monthCurve   = useMemo(
-    () => curveOf(thisMonthTxs.filter(t => (t.currency || mainCurrency) === mainCurrency), month, new Date()),
-    [thisMonthTxs, mainCurrency, month],
+    () => curveOf(thisMonthTxs.filter(t => (t.currency || mainCurrency) === mainCurrency), month, new Date(`${today}T12:00:00`), tz),
+    [thisMonthTxs, mainCurrency, month, tz, today],
   )
 
   const grouped = useMemo(() => groupByDate([...upcoming, ...transactions]), [upcoming, transactions])
@@ -218,12 +219,13 @@ export function useMoney(month: string = monthKeyOf(new Date())) {
         .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
       if (count === 1) void award(user.id, 'first_transaction', 'Primer movimiento registrado')
       // Check positive month balance
-      const now = new Date()
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      const zone = lifeTimeZone()
+      const todayNow = todayKey(zone)
+      const [monthStart] = monthRange(todayNow.slice(0, 7), zone)
       const { data: monthTxs } = await db.from('life_transactions')
         .select('type,amount').eq('user_id', user.id).eq('currency', data.currency).gte('occurred_at', monthStart)
         // Lo programado para más adelante todavía no cuenta
-        .lt('occurred_at', new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString())
+        .lt('occurred_at', startOfLocalDayISO(shiftDate(todayNow, 1), zone))
       const balance = (monthTxs ?? []).reduce((s: number, t: { type: string; amount: string }) =>
         s + (t.type === 'income' ? Number(t.amount) : -Number(t.amount)), 0)
       if (Math.round(balance * 100) > 0) void award(user.id, 'first_positive_month', 'Mes con superávit')

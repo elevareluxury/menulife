@@ -13,7 +13,8 @@ import { TaskList } from '../components/TasksView'
 import { useAuthStore } from '@/store/authStore'
 import { useLifeStore } from '@/store/lifeStore'
 import { useActiveGoals } from '../hooks/useActiveGoals'
-import { useTasks, localDateKey, type LifeTask } from '../hooks/useTasks'
+import { useTasks, type LifeTask } from '../hooks/useTasks'
+import { lifeDayOf, lifeNow } from '../lib/zonedTime'
 import { useHabits } from '../hooks/useHabits'
 import { MyDaySection } from '../components/MyDay'
 import { FreshStart, WelcomeBack } from '../components/KindMoments'
@@ -35,7 +36,7 @@ import { useHomePrefs } from '../lib/homePrefs'
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function greet(t: LifeDict) {
-  const h = new Date().getHours()
+  const h = lifeNow().getHours()
   return h < 12 ? t.home.greetMorning : h < 20 ? t.home.greetAfternoon : t.home.greetEvening
 }
 
@@ -230,7 +231,7 @@ function TodayTasksCard() {
   const [sheet, setSheet] = useState<{ open: boolean; task: LifeTask | null }>({ open: false, task: null })
 
   const { list, overdue } = useMemo(() => {
-    const doneToday = (x: LifeTask) => !!x.completed_at && localDateKey(new Date(x.completed_at)) === today
+    const doneToday = (x: LifeTask) => !!x.completed_at && lifeDayOf(x.completed_at) === today
     const pending = tasks.filter(x => !x.completed_at)
     const focus = pending.filter(x => x.is_focus)
     const dueToday = pending.filter(x => !x.is_focus && x.due_date === today)

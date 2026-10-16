@@ -21,7 +21,7 @@ const ar: LifeDict = {
     extraCurrencies: 'عملات أخرى',
     extraHelp: 'لتسجيل معاملات بعملات أخرى (حتى 5). تُجمع كل عملة على حدة: لا نحوّل المبالغ.',
     addCurrency: 'إضافة عملة', removeCurrency: c => `إزالة ${c}`, searchCurrency: 'ابحث عن عملة…',
-    timezone: 'المنطقة الزمنية', timezoneHelp: 'تحدّد متى يبدأ يومك وينتهي.',
+    timezone: 'المنطقة الزمنية', timezoneHelp: 'تحدّد متى يبدأ يومك وينتهي.', timezoneOther: z => `هاتفك في منطقة زمنية أخرى (${z}). يستخدم Mycen المنطقة المختارة هنا.`, useDeviceTimezone: 'استخدام منطقة الهاتف',
     weekStart: 'يبدأ الأسبوع يوم', monday: 'الإثنين', sunday: 'الأحد',
     account: 'الحساب', openStudio: 'فتح Mycen Studio', signOut: 'تسجيل الخروج', savedOk: 'تم حفظ الإعدادات', noResults: 'لا توجد نتائج',
     homeTitle: "يومي",

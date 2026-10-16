@@ -5,7 +5,8 @@ import { useAuthStore } from '@/store/authStore'
 import { usePrefs } from '@/lib/prefs'
 import { LIFE_DATA_UPDATED } from './useBrain'
 import { frequencyOf, habitConsistency, isDone, shiftDate } from '../lib/habitStreak'
-import { dayKey, useToday } from './useToday'
+import { useToday } from './useToday'
+import { lifeDayOf } from '../lib/zonedTime'
 
 // Las tablas de Life OS todavía no están en database.types.ts
 const db = supabase as unknown as SupabaseClient
@@ -52,7 +53,7 @@ export function useGoalLinks(goalId: string | null) {
       const habits = habitRows.map(x => {
         const done = new Set(logs.filter(l => l.habit_id === x.id && isDone(Number(l.value ?? 1), x.target_value))
           .map(l => l.completed_date))
-        const c = habitConsistency(done, frequencyOf(x.frequency), dayKey(new Date(x.created_at)), shiftDate(today, -29), today, weekStart)
+        const c = habitConsistency(done, frequencyOf(x.frequency), lifeDayOf(x.created_at), shiftDate(today, -29), today, weekStart)
         return { id: x.id, name: x.name, color: x.color, icon: x.icon, done: c.done, scheduled: c.expected }
       })
       // Dinero por moneda: nunca se suman monedas distintas

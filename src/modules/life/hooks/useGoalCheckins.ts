@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { calendarKey, lifeNow } from '../lib/zonedTime'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -29,17 +30,14 @@ export interface CheckinInput {
   progress_percentage?: number
 }
 
-/** Retorna el lunes de la semana de una fecha dada como YYYY-MM-DD. */
-export function getWeekStartDate(date: Date = new Date()): string {
-  const d = new Date(date)
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  const monday = new Date(d.setDate(diff))
-  return monday.toISOString().slice(0, 10)
+/** Lunes (YYYY-MM-DD) de la semana de una fecha de calendario; por defecto, hoy en la zona de la cuenta. */
+export function getWeekStartDate(date: Date = lifeNow()): string {
+  const day = date.getDay()
+  return calendarKey(new Date(date.getFullYear(), date.getMonth(), date.getDate() - day + (day === 0 ? -6 : 1)))
 }
 
 /** Los recordatorios aparecen desde el viernes (5=vie, 6=sáb, 0=dom). */
-export function isCheckinDay(date: Date = new Date()): boolean {
+export function isCheckinDay(date: Date = lifeNow()): boolean {
   const day = date.getDay()
   return day === 5 || day === 6 || day === 0
 }

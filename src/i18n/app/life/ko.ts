@@ -21,7 +21,7 @@ const ko: LifeDict = {
     extraCurrencies: '다른 통화',
     extraHelp: '다른 통화로 거래를 기록할 때 사용합니다(최대 5개). 통화별로 따로 합산하며 금액을 환산하지 않습니다.',
     addCurrency: '통화 추가', removeCurrency: c => `${c} 제거`, searchCurrency: '통화 검색…',
-    timezone: '시간대', timezoneHelp: '하루가 언제 시작되고 끝나는지 정합니다.',
+    timezone: '시간대', timezoneHelp: '하루가 언제 시작되고 끝나는지 정합니다.', timezoneOther: z => `휴대폰이 다른 시간대(${z})에 있어요. Mycen은 여기서 고른 시간대를 써요.`, useDeviceTimezone: '휴대폰 시간대 사용',
     weekStart: '한 주의 시작', monday: '월요일', sunday: '일요일',
     account: '계정', openStudio: 'Mycen Studio 열기', signOut: '로그아웃', savedOk: '설정이 저장되었습니다', noResults: '결과 없음',
     homeTitle: "나의 하루",

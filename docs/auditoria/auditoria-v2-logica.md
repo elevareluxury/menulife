@@ -20,7 +20,7 @@ Tests nuevos: `tests/unit/auditLogic.test.ts` (reproducen los errores arreglados
 | 8 | baja | Mes de un movimiento comparando textos ISO | arreglado |
 | 9 | media | Privacidad: denuncias guardan la cuenta de quien denuncia y no se decía | arreglado (12 idiomas) |
 | 10 | baja | Privacidad: estadísticas "agrupadas", errores "hasta que se resuelven", origen de visitas, cola y PIN en el dispositivo | arreglado (12 idiomas) |
-| 11 | baja | Zona horaria de `user_settings` no se usa para las fechas | a decidir |
+| 11 | baja | Zona horaria de `user_settings` no se usa para las fechas | arreglado (Life OS usa la zona de la cuenta) |
 | 12 | baja | Tarea que se repite: doble toque o dos dispositivos pueden crear dos "siguientes" | a decidir |
 | 13 | baja | "Cada N semanas" cuenta semanas de lunes a domingo aunque `week_start` sea domingo | a decidir |
 | 14 | baja | Recordatorios de hábitos: consulta cada 30 s y marcas en `localStorage` que no se limpian | a decidir |
@@ -111,6 +111,8 @@ redirige a `/register`): si vuelve, sumarlo a la política.
     (hoy, fijos, cuotas, recordatorios) usan la zona del dispositivo (`Intl…timeZone`). Si la persona viaja o tiene el
     celular en otra zona, la preferencia no hace nada. Decidir: usarla en `life_materialize_*` y `dayKey`, o sacarla de
     Ajustes para no prometer algo que no pasa.
+    **Arreglado:** Life OS usa la zona de la cuenta (`lib/zonedTime.ts`): hoy, meses, horas, recordatorios y `p_tz` de
+    fijos y cuotas. Sin zona elegida sigue al celular; Ajustes avisa si el celular está en otra zona.
 12. **Tarea que se repite duplicada (baja).** `rollRecurrence` crea la siguiente si `next_occurrence_id` está vacío en el
     objeto que llega. Dos toques muy rápidos con el mismo objeto, o completarla en dos dispositivos, crean dos
     siguientes. Un arreglo sólido es una restricción en la base (única por tarea origen) o crear la siguiente en una RPC.
