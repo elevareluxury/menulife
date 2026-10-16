@@ -1,5 +1,6 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { FEATURES } from '@/lib/features'
+import { hideBootSplash, showBootSplash } from '@/lib/bootSplash'
 import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
@@ -95,12 +96,19 @@ const LifeInsightsPage = lazy(() => import('@/modules/life/pages/LifeInsightsPag
 const LifeJournalPage = lazy(() => import('@/modules/life/pages/LifeJournalPage').then(m => ({ default: m.LifeJournalPage })))
 const LifeReplayPage = lazy(() => import('@/modules/life/pages/LifeReplayPage').then(m => ({ default: m.LifeReplayPage })))
 
-function LoadingSpinner() {
-  return (
-    <div className="flex items-center justify-center h-screen" style={{ background: '#0F1115' }}>
-      <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#F4705A', borderTopColor: 'transparent' }} />
-    </div>
-  )
+/** Mientras baja una pantalla se ve la pantalla de carga con la huella (index.html, scripts/bootSplash.ts) */
+function RouteLoading() {
+  useEffect(() => {
+    showBootSplash()
+    return hideBootSplash
+  }, [])
+  return null
+}
+
+/** Se monta cuando la primera pantalla ya está lista: saca la pantalla de carga */
+function BootSplashDone() {
+  useEffect(hideBootSplash, [])
+  return null
 }
 
 function WaiterLegacyRedirect() {
@@ -133,7 +141,8 @@ function App() {
       <OfflineBanner />
       <Toaster position="top-right" containerStyle={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
 
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<RouteLoading />}>
+        <BootSplashDone />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           {DevDesignPage && <Route path="/dev/design" element={<DevDesignPage />} />}

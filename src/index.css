@@ -212,6 +212,9 @@ body {
   overflow-x: clip;
   overscroll-behavior-y: none;
   width: 100%;
+  /* Instalada en el iPhone (pantalla completa, barra de estado translúcida + viewport-fit=cover) el contenido se
+     dibuja debajo de la hora y la isla: se deja libre esa franja en todas las pantallas. En el navegador vale 0. */
+  padding-top: env(safe-area-inset-top, 0px);
   @apply bg-gray-50 text-gray-900;
 }
 

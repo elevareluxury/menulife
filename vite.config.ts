@@ -4,12 +4,14 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 import { heroShellPlugin } from './scripts/heroShell'
+import { bootSplashPlugin } from './scripts/bootSplash'
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
     heroShellPlugin(),
+    bootSplashPlugin(),
     VitePWA({
       // Use our custom service worker — VitePWA injects the precache manifest
       strategies: 'injectManifest',

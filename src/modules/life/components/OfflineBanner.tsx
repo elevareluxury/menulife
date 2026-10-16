@@ -10,8 +10,8 @@ export function OfflineBanner() {
   if (offline || pending === 0) return null
   return (
     <div role="status" style={{
-      position: 'sticky', top: 0, zIndex: 40, display: 'flex', justifyContent: 'center',
-      padding: 'calc(env(safe-area-inset-top) + 6px) 16px 6px', pointerEvents: 'none',
+      position: 'sticky', top: 'env(safe-area-inset-top, 0px)', zIndex: 40, display: 'flex', justifyContent: 'center',
+      padding: '6px 16px', pointerEvents: 'none',
     }}>
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: radius.full,

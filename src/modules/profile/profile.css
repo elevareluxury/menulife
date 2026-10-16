@@ -19,7 +19,7 @@
 
 /* ── Barra superior ─────────────────────────────────────────────── */
 .mp-topbar {
-  position: sticky; top: 0; z-index: 10;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
   display: flex; align-items: center; justify-content: space-between;
   max-width: 640px; margin: 0 auto; padding: 12px 20px;
   background: color-mix(in srgb, var(--p-bg) 82%, transparent);
@@ -183,7 +183,7 @@
 
 .mp-lightbox {
   position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.92);
-  display: flex; align-items: center; justify-content: center; padding: 20px;
+  display: flex; align-items: center; justify-content: center; padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 20px;
 }
 .mp-lightbox img, .mp-lightbox video { max-width: 100%; max-height: 86svh; border-radius: calc(12px * var(--p-rs, 1)); }
 .mp-lightbox .mp-icon-btn { position: absolute; top: 16px; right: 16px; color: #fff; }
