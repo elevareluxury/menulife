@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
-import { installSupabaseMock } from './support/mockSupabase'
+import { createState, installSupabaseMock, profileRow } from './support/mockSupabase'
+import { MODULE_FIXTURES } from './support/moduleFixtures'
 import { rich } from './support/richState'
 
 // En el celular: Brain se recorre deslizando de costado, y las hojas (nueva tarea) se ven desde arriba, enteras y sin
@@ -73,4 +74,85 @@ test('con el teclado abierto la hoja queda arriba de él y no más alta que lo v
   const box = (await page.getByRole('dialog').boundingBox())!
   expect(Math.round(box.y + box.height)).toBeLessThanOrEqual(367 + 1)
   expect(box.y).toBeGreaterThanOrEqual(0)
+})
+
+test('con una hoja abierta lo de atrás queda quieto, y al cerrarla vuelve a moverse', async ({ page, context }) => {
+  await installSupabaseMock(context, rich(), { signedIn: true })
+  await page.goto('/life/goals')
+  const root = page.locator('[data-scroll-root]').first()
+  await expect.poll(() => root.evaluate(el => getComputedStyle(el).overflowY)).toBe('auto')
+  await page.getByRole('button', { name: 'Nueva meta', exact: true }).first().click()
+  const sheet = page.getByRole('dialog')
+  await expect(sheet).toBeVisible()
+  expect(await root.evaluate(el => getComputedStyle(el).overflowY)).toBe('hidden')
+  // La hoja sólo se mueve para arriba y abajo y no rebota
+  expect(await sheet.evaluate(el => getComputedStyle(el).touchAction)).toMatch(/pan-y/)
+  const wide = await sheet.evaluate(el => [...el.querySelectorAll('*')].filter(c => c.getBoundingClientRect().right > el.getBoundingClientRect().right + 1).length)
+  expect(wide).toBe(0)
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+  await expect.poll(() => root.evaluate(el => getComputedStyle(el).overflowY)).toBe('auto')
+})
+
+test('en un celular chico (320 px) nada se sale de las hojas de Life OS', async ({ page, context }) => {
+  test.setTimeout(120_000)
+  await installSupabaseMock(context, rich(), { signedIn: true })
+  await page.setViewportSize({ width: 320, height: 640 })
+  const sheets: [string, RegExp | string][] = [
+    ['/life/goals', 'Nueva meta'], ['/life/habits', /Nuevo hábito/], ['/life/money', /Nuevo movimiento|Agregar movimiento/],
+    ['/life/brain?vista=tareas', /Nueva tarea|Agregar tarea/],
+  ]
+  for (const [route, name] of sheets) {
+    await page.goto(route)
+    await page.getByRole('button', { name }).first().click()
+    const sheet = page.getByRole('dialog').last()
+    await expect(sheet).toBeVisible()
+    await page.waitForTimeout(500)
+    const out = await sheet.evaluate(el => {
+      const box = el.getBoundingClientRect()
+      return [...el.querySelectorAll('*')].filter(c => {
+        if (c.closest('svg') && c.tagName !== 'svg') return false
+        const b = c.getBoundingClientRect()
+        return b.width > 0 && (b.right > box.right + 1 || b.left < box.left - 1)
+      }).map(c => c.getAttribute('aria-label') ?? c.textContent?.slice(0, 20) ?? c.tagName)
+    })
+    expect(out, route).toEqual([])
+    await page.keyboard.press('Escape')
+  }
+})
+
+test('fecha y hora vacías se ven como campos para tocar (ícono de calendario y reloj)', async ({ page, context }) => {
+  await installSupabaseMock(context, rich(), { signedIn: true })
+  await page.goto('/life/brain?vista=tareas')
+  await page.getByRole('button', { name: /Nueva tarea|Agregar tarea/ }).first().click()
+  for (const id of ['#task-date', '#task-time']) {
+    const input = page.locator(id)
+    await expect(input).toHaveValue('')
+    const icon = page.locator(`.my-picker:has(${id}) .my-picker-icon`)
+    await expect(icon).toBeVisible()
+    const [a, b] = [(await input.boundingBox())!, (await icon.boundingBox())!]
+    expect(b.x).toBeGreaterThan(a.x)
+    expect(b.x + b.width).toBeLessThanOrEqual(a.x + a.width)
+  }
+  // Tocar la fecha la deja elegir; la hora se habilita después
+  await page.locator('#task-date').fill('2026-10-20')
+  await expect(page.locator('#task-time')).toBeEnabled()
+})
+
+test('Identity en 320 px: horarios y "Programar" entran en el editor, con ícono', async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 700 })
+  const state = createState({ profiles: [profileRow()], profile_modules: MODULE_FIXTURES.map(f => structuredClone(f.row)) })
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/studio/modules')
+  await page.getByRole('button', { name: 'Editar Horarios', exact: true }).click()
+  await page.getByRole('button', { name: 'Agregar', exact: true }).last().click()
+  await expect(page.getByLabel('Mostrar desde')).toBeVisible()
+  const fields = await page.evaluate(() => [...document.querySelectorAll('input')]
+    .filter(i => /date|time/.test(i.type))
+    .map(i => ({ type: i.type, right: i.getBoundingClientRect().right, icon: !!i.closest('.my-picker')?.querySelector('.my-picker-icon') })))
+  expect(fields.length).toBeGreaterThanOrEqual(4)
+  for (const f of fields) {
+    expect(f.right, f.type).toBeLessThanOrEqual(320)
+    expect(f.icon, f.type).toBe(true)
+  }
 })

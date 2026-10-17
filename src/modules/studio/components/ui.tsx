@@ -2,6 +2,9 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { AlertCircle, Check, ImagePlus, MoreHorizontal, Trash2, X, type LucideIcon } from 'lucide-react'
 import type { SaveState } from '../lib/studioTypes'
 import { useStudioT } from '@/i18n/app/studio'
+import { useScrollLock } from '@/lib/scrollLock'
+import { PickerWrap } from '@/components/ui/PickerWrap'
+import { pickerKind } from '@/lib/pickerKind'
 
 // ── Botón ───────────────────────────────────────────────────────────────────
 
@@ -47,6 +50,12 @@ export function Field({ label, required, help, error, counter, children, htmlFor
   )
 }
 
+// Fechas y horas con ícono y sin el dibujo nativo (components/ui/PickerWrap.tsx)
+function withPicker(type: string, input: React.ReactElement) {
+  const kind = pickerKind(type)
+  return kind ? <PickerWrap kind={kind}>{input}</PickerWrap> : input
+}
+
 export function TextField({ label, value, onChange, required, help, error, maxLength, multiline, type = 'text', placeholder, inputMode, autoFocus, onEnter }: {
   label: ReactNode
   value: string
@@ -75,8 +84,8 @@ export function TextField({ label, value, onChange, required, help, error, maxLe
       counter={multiline && maxLength ? { value: value.length, max: maxLength } : undefined}>
       {multiline
         ? <textarea className="st-textarea" rows={4} {...common} />
-        : <input className="st-input" type={type} inputMode={inputMode} {...common}
-            onKeyDown={onEnter ? e => { if (e.key === 'Enter') { e.preventDefault(); onEnter() } } : undefined} />}
+        : withPicker(type, <input className="st-input" type={type} inputMode={inputMode} {...common}
+            onKeyDown={onEnter ? e => { if (e.key === 'Enter') { e.preventDefault(); onEnter() } } : undefined} />)}
     </Field>
   )
 }
@@ -199,6 +208,7 @@ export function Drawer({ title, onClose, children, footer }: {
   const titleId = useId()
   const t = useStudioT().common
   useEscape(onClose)
+  useScrollLock(true)
   return (
     <div className="st-overlay" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="st-drawer" role="dialog" aria-modal="true" aria-labelledby={titleId}>
@@ -227,6 +237,7 @@ export function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm,
   const titleId = useId()
   const t = useStudioT().common
   useEscape(onCancel)
+  useScrollLock(true)
   return (
     <div className="st-dialog-wrap" onMouseDown={e => { if (e.target === e.currentTarget) onCancel() }}>
       <div className="st-dialog" role="alertdialog" aria-modal="true" aria-labelledby={titleId}>

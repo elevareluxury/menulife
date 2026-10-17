@@ -8,6 +8,7 @@ import { uploadMedia } from '../lib/studioApi'
 import { useAutoCover } from '../lib/autoCover'
 import { useStudio } from '../StudioContext'
 import { Button, ImageField, SelectField, TextField, Toggle } from './ui'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 import { useStudioT } from '@/i18n/app/studio'
 import { huellaSeed } from '@/lib/huella'
 import { useAppLang } from '@/i18n/app/store'
@@ -43,18 +44,19 @@ export function HoursEditor({ value: schedule, onChange }: ExtraEditorProps<Week
         const open = !slot.closed
         const update = (patch: Partial<typeof slot>) => onChange({ ...schedule, [day]: { ...slot, ...patch } })
         return (
-          <div key={day} className="st-row" style={{ minHeight: 44, borderTop: '1px solid var(--st-border)', paddingTop: 6 }}>
+          <div key={day} className="st-row" style={{ minHeight: 44, flexWrap: 'wrap', rowGap: 6, borderTop: '1px solid var(--st-border)', paddingTop: 6, paddingBottom: open ? 6 : 0 }}>
             <span style={{ width: 92, fontSize: 14 }}>{e.days[day]}</span>
             <button type="button" role="switch" aria-checked={open} aria-label={e.dayOpen(e.days[day])}
               className="st-toggle" onClick={() => update({ closed: open })}><span aria-hidden="true" /></button>
             {open ? (
-              <>
-                <input className="st-input" type="time" aria-label={e.dayOpens(e.days[day])} style={{ width: 'auto', padding: '7px 8px' }}
-                  value={slot.open ?? '09:00'} onChange={e => update({ open: e.target.value })} />
+              // En el celular los dos horarios van en su propia línea: al lado del día no entraban en 320 px
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '1 1 260px', minWidth: 0 }}>
+                <PickerWrap kind="time"><input className="st-input" type="time" aria-label={e.dayOpens(e.days[day])} style={{ paddingInlineStart: 10 }}
+                  value={slot.open ?? '09:00'} onChange={e => update({ open: e.target.value })} /></PickerWrap>
                 <span aria-hidden="true">–</span>
-                <input className="st-input" type="time" aria-label={e.dayCloses(e.days[day])} style={{ width: 'auto', padding: '7px 8px' }}
-                  value={slot.close ?? '18:00'} onChange={e => update({ close: e.target.value })} />
-              </>
+                <PickerWrap kind="time"><input className="st-input" type="time" aria-label={e.dayCloses(e.days[day])} style={{ paddingInlineStart: 10 }}
+                  value={slot.close ?? '18:00'} onChange={e => update({ close: e.target.value })} /></PickerWrap>
+              </div>
             ) : <span className="st-help">{e.closed}</span>}
           </div>
         )

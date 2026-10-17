@@ -21,6 +21,7 @@ import { followTotal, planSplit, type EditShared, type SharedDraft, type SplitDe
 import { useOutbox } from '../lib/outbox'
 import { localDateOf } from '../lib/moneyFuture'
 import { lifeTimeZone, lifeToday, noonOfLocalDayISO } from '../lib/zonedTime'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 /** Gasto compartido: las deudas que quedan (el importe del movimiento ya viene ajustado en `data.amount`) */
 export interface SharedSave { debts: SplitDebt[] }
@@ -85,6 +86,17 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
   const [shared, setShared] = useState<SharedDraft | null>(null)
   // Sin conexión, el movimiento simple queda en la cola del dispositivo; fijos, cuotas y compartidos no (no se pierden datos)
   const { offline } = useOutbox()
+
+  // Si se escribió la descripción antes de que llegara la memoria de categorías, sugerir al llegar
+  useEffect(() => {
+    if (initial || catTouched || !memory) return
+    /* eslint-disable-next-line react-hooks/set-state-in-effect -- sugerencia al llegar la memoria */
+    setForm(f => {
+      const suggested = f.description ? suggestCategory(memory, f.type, f.description) : null
+      return suggested && suggested !== f.category && keysFor(f.type).includes(suggested) ? { ...f, category: suggested } : f
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sólo cuando llega la memoria
+  }, [memory])
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
@@ -165,7 +177,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
 
       {/* Type toggle */}
       <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr',
+        display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
         gap: '8px', marginBottom: '24px',
         padding: '4px',
         background: colors.surface.high,
@@ -345,7 +357,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         <label style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
           {template ? t.recurring.nextDate : t.tx.date}
         </label>
-        <input
+        <PickerWrap kind="date"><input
           type="date"
           aria-label={t.tx.date}
           value={form.occurred_at}
@@ -359,7 +371,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
             fontFamily: font, fontSize: '14px', outline: 'none',
             colorScheme: 'inherit',
           }}
-        />
+        /></PickerWrap>
       </div>
 
       {sharedLocked && (

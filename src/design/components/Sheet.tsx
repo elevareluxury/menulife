@@ -2,6 +2,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { IconButton } from './IconButton'
+import { useScrollLock } from '@/lib/scrollLock'
 
 export interface SheetProps {
   open: boolean
@@ -36,11 +37,10 @@ export function Sheet({ open, onClose, title, closeLabel, children }: SheetProps
   }, [open])
 
   const ready = open && !!look.theme
+  useScrollLock(ready)
   useEffect(() => {
     if (!ready) return
     const previous = document.activeElement as HTMLElement | null
-    const overflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
     const first = panel.current?.querySelector<HTMLElement>(FOCUSABLE)
     ;(first ?? panel.current)?.focus()
 
@@ -56,7 +56,6 @@ export function Sheet({ open, onClose, title, closeLabel, children }: SheetProps
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = overflow
       previous?.focus?.()
     }
   }, [ready])

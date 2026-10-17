@@ -7,6 +7,7 @@ import type { LifeTask, Subtask, TaskFormData } from '../hooks/useTasks'
 import { customOf, recurrenceFor, repeatChoiceOf, type CustomRepeat, type RepeatChoice } from '../lib/recurrence'
 import { RepeatField, SubtasksField } from './TaskExtras'
 import { useLifeT } from '@/i18n/app/life'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 const REMINDER_OPTIONS = [
   { value: '', key: 'none' }, { value: '0', key: 'now' }, { value: '10', key: 'm10' },
@@ -96,15 +97,15 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
             onKeyDown={e => { if (e.key === 'Enter') void save() }}
             placeholder={s.placeholder} style={inputStyle} aria-invalid={!!error && !title.trim()} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '10px' }}>
           <div>
             <label htmlFor="task-date" style={labelStyle}>{s.date}</label>
-            <input id="task-date" type="date" value={date} onChange={e => setDate(e.target.value)} style={inputStyle} />
+            <PickerWrap kind="date"><input id="task-date" type="date" value={date} onChange={e => setDate(e.target.value)} style={inputStyle} /></PickerWrap>
           </div>
           <div>
             <label htmlFor="task-time" style={labelStyle}>{s.time}</label>
-            <input id="task-time" type="time" value={time} disabled={!date} onChange={e => setTime(e.target.value)}
-              style={{ ...inputStyle, opacity: date ? 1 : 0.5 }} />
+            <PickerWrap kind="time"><input id="task-time" type="time" value={time} disabled={!date} onChange={e => setTime(e.target.value)}
+              style={{ ...inputStyle, opacity: date ? 1 : 0.5 }} /></PickerWrap>
           </div>
         </div>
         <div>

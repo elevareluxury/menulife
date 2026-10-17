@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { optimizeImage } from '@/lib/imageOptimize'
 import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import {
@@ -619,11 +620,12 @@ export function BusinessSettings() {
       let finalCoverUrl: string | null = formData.cover_image_url || null
       if (coverFile) {
         setUploadingCover(true)
-        const ext = coverFile.name.split('.').pop() ?? 'jpg'
+        const coverUpload = await optimizeImage(coverFile, { maxSide: 1920 })
+        const ext = coverUpload.name.split('.').pop() ?? 'jpg'
         const fileName = `covers/${restaurant.id}-${Date.now()}.${ext}`
         const { error: coverErr } = await supabase.storage
           .from('restaurant-assets')
-          .upload(fileName, coverFile, { cacheControl: '3600', upsert: true })
+          .upload(fileName, coverUpload, { cacheControl: '3600', upsert: true })
         setUploadingCover(false)
         if (coverErr) {
           toast.error(`Error al subir la portada: ${coverErr.message}`)
@@ -641,11 +643,12 @@ export function BusinessSettings() {
       let finalBannerUrl: string | null = formData.banner_url || null
       if (bannerFile) {
         setUploadingBanner(true)
-        const ext = bannerFile.name.split('.').pop() ?? 'jpg'
+        const bannerUpload = await optimizeImage(bannerFile, { maxSide: 1920 })
+        const ext = bannerUpload.name.split('.').pop() ?? 'jpg'
         const fileName = `banners/${restaurant.id}-${Date.now()}.${ext}`
         const { error: bannerErr } = await supabase.storage
           .from('restaurant-assets')
-          .upload(fileName, bannerFile, { cacheControl: '3600', upsert: true })
+          .upload(fileName, bannerUpload, { cacheControl: '3600', upsert: true })
         setUploadingBanner(false)
         if (bannerErr) {
           toast.error(`Error al subir el banner: ${bannerErr.message}`)

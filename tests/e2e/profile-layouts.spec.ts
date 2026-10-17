@@ -71,6 +71,27 @@ test('portada: la tapa ocupa la primera pantalla y avisa que hay más abajo', as
   await expect(page.getByText('Diseño marcas desde 2015.')).toBeInViewport()
 })
 
+test('portada con foto: la foto cubre toda la tapa (sin franja vacía arriba)', async ({ page, context }) => {
+  const url = 'https://mock.supabase.co/storage/v1/object/public/profile-media/u/tapa.webp'
+  const state = createState({ profiles: [profile({ layout: 'portada', mode: 'amanecer', accent: 'ion', cover: { type: 'imagen', url } })], profile_modules: rows() })
+  await installSupabaseMock(context, state)
+  // Una foto apaisada (como una captura): antes quedaba centrada con su alto natural
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500"><rect width="1200" height="500" fill="#335"/></svg>'
+  await context.route('**/profile-media/**', route => route.fulfill({ status: 200, contentType: 'image/svg+xml', body: svg }))
+  for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 900 }]) {
+    await page.setViewportSize(vp)
+    await page.goto('/ana')
+    const img = page.locator('.mp-cover-art img')
+    await expect(img).toBeVisible()
+    await expect.poll(() => img.evaluate(el => (el as HTMLImageElement).complete)).toBe(true)
+    const hero = (await page.locator('.mp-cover-hero').boundingBox())!
+    const box = (await img.boundingBox())!
+    expect(Math.abs(box.y - hero.y)).toBeLessThan(1)
+    expect(Math.abs(box.height - hero.height)).toBeLessThan(1)
+    expect(Math.abs(box.width - hero.width)).toBeLessThan(1)
+  }
+})
+
 test('bento: cada tipo de módulo tiene su tamaño', async ({ page, context }) => {
   const state = createState({ profiles: [profile({ layout: 'bento' })], profile_modules: rows() })
   await installSupabaseMock(context, state)

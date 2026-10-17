@@ -276,7 +276,7 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
   return (
     <>
       {!archived && totalCount > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '6px', marginBottom: '12px' }}>
           {([['idea', ideasCount], ['note', notesCount], ['task', tasksCount]] as const).map(([k, value]) => (
             <button key={k} type="button" onClick={() => (k === 'task' ? onShowTasks() : setFilter(k))}
               style={{

@@ -36,15 +36,16 @@ function WeekDots({ habit, onToggle }: { habit: Habit; onToggle: (date: string, 
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
   return (
-    // Siete puntos en la fila de la tarjeta: 32 px de ancho cada uno (no entran siete de 44). Cumplen WCAG 2.5.8 por
-    // espaciado y el ::after de 44 px (touch.css) los agranda hacia arriba y abajo; touch-targets.spec.ts los exime
-    <div style={{ display: 'flex', gap: '2px' }} role="group" aria-label={t.habits.weekHelp} data-touch-dense="">
+    // Siete puntos en su propia fila, a lo ancho de la tarjeta (al lado del nombre no entraban y pisaban el "⋯"): se
+    // reparten el ancho, de 28 a 44 px cada uno. Cumplen WCAG 2.5.8 por espaciado y el ::after de 44 px (touch.css) los
+    // agranda hacia arriba y abajo; touch-targets.spec.ts los exime
+    <div style={{ display: 'flex', gap: '2px', flex: '1 1 auto', minWidth: 0, maxWidth: 7 * 44 }} role="group" aria-label={t.habits.weekHelp} data-touch-dense="">
       {habit.week.map(d => {
         const label = new Date(`${d.date}T12:00:00`).toLocaleDateString(locale, { weekday: 'short', day: 'numeric' })
         return (
           <button key={d.date} type="button" onClick={() => onToggle(d.date, !d.done)}
             aria-pressed={d.done} aria-label={t.habits.dayToggle(habit.name, label, d.done)} title={label}
-            style={{ width: 32, height: 36, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ flex: '1 1 0', minWidth: 28, maxWidth: 44, height: 36, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span aria-hidden="true" style={{
               width: 9, height: 9, borderRadius: '50%',
               background: d.done ? ink(habit.color) : 'transparent',
@@ -140,12 +141,6 @@ function HabitCard({ habit, onToggleToday, onAdd, onEditValue, onToggleDay, onEd
                 <MiniProgressRing progress={Math.round(Math.min(1, habit.weekCount / habit.frequency.times) * 100)} color={ink(habit.color)} size={22} showLabel={false} />
               </span>
             )}
-            <WeekDots habit={habit} onToggle={onToggleDay} />
-            {!habit.scheduledToday && (
-              <span style={{ fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.tertiary }}>
-                {t.habits.notToday}
-              </span>
-            )}
           </div>
         </div>
 
@@ -157,6 +152,14 @@ function HabitCard({ habit, onToggleToday, onAdd, onEditValue, onToggleDay, onEd
         ]} />
 
         {habit.scheduledToday && (qty ? <QuantityButton habit={habit} onAdd={onAdd} /> : <HabitToggle habit={habit} onToggle={onToggleToday} />)}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+        <WeekDots habit={habit} onToggle={onToggleDay} />
+        {!habit.scheduledToday && (
+          <span style={{ fontFamily: font, fontSize: '10px', fontWeight: 600, color: colors.text.tertiary }}>
+            {t.habits.notToday}
+          </span>
+        )}
       </div>
     </LifeCard>
   )

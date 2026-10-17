@@ -61,7 +61,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
   return (
     <LifeSheet open={open} onClose={onClose} title={initial ? s.editTitle : s.newTitle}>
       <div role="radiogroup" aria-label={t.brain.captureType} style={{
-        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '20px',
+        display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '6px', marginBottom: '20px',
         padding: '4px', background: colors.surface.high, borderRadius: radius.md,
       }}>
         {TYPE_OPTIONS.map(({ type, icon: Icon, color }) => (

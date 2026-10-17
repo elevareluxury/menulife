@@ -48,8 +48,8 @@
 .st-thumb-grid i { border-radius: 7px; background: var(--my-glass-strong); border: 1px solid var(--my-border); }
 .st-thumb-grid i:last-child { grid-column: 1 / -1; }
 
-.st-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.st-mode-option { flex-direction: row; align-items: center; gap: 12px; }
+.st-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 10px; }
+.st-mode-option { flex-direction: row; align-items: center; gap: 12px; min-width: 0; }
 .st-mode-sky { flex: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--st-border);
   background: var(--my-sky); background-color: var(--my-bg); }
 

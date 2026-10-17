@@ -16,6 +16,7 @@ import { useLifeT } from '@/i18n/app/life'
 import { MoodPicker } from './MoodPicker'
 import { FEATURES } from '@/lib/features'
 import { WeeklyReviewCard } from './WeeklyReview'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 // "Mi día" (V1 · etapa 11): las 3 prioridades de la mañana y el cierre del día (primero lo logrado).
 
@@ -279,7 +280,7 @@ function DayReviewSheet({ day, onClose }: { day: ReturnType<typeof useDailyRevie
                     </div>
                     {dateFor === item.key && (
                       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                        <input type="date" aria-label={m.changeDate} value={newDate} min={tomorrow} onChange={e => setNewDate(e.target.value)} style={{ ...input, colorScheme: 'inherit' }} />
+                        <PickerWrap kind="date"><input type="date" aria-label={m.changeDate} value={newDate} min={tomorrow} onChange={e => setNewDate(e.target.value)} style={{ ...input, colorScheme: 'inherit' }} /></PickerWrap>
                         <button type="button" style={chipBtn} disabled={!newDate} onClick={() => { void move(item, newDate) }}>{t.common.save}</button>
                       </div>
                     )}

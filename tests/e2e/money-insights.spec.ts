@@ -86,6 +86,21 @@ test('buscar encuentra en todos los meses y se filtra por tipo', async ({ page, 
   await expect(page.getByText('Carrefour')).toHaveCount(0)
 })
 
+test('si la memoria de categorías llega después de escribir, igual sugiere la categoría', async ({ page, context }) => {
+  await installSupabaseMock(context, seed(), { signedIn: true })
+  await page.goto('/life/money')
+  await expect(page.getByRole('button', { name: 'Nuevo movimiento' }).first()).toBeVisible()
+  // La memoria (lo ya ordenado del último año) tarda: se escribe antes de que llegue
+  await page.route('**/rest/v1/life_transactions*', async route => {
+    if (route.request().method() === 'GET') await new Promise(r => setTimeout(r, 1500))
+    await route.fallback()
+  })
+  await page.getByRole('button', { name: 'Nuevo movimiento' }).first().click()
+  const sheet = page.getByRole('dialog', { name: 'Nuevo movimiento' })
+  await sheet.getByRole('textbox', { name: 'Descripción (opcional)' }).fill('Uber trip 0099')
+  await expect(sheet.getByRole('button', { name: 'Transporte' })).toHaveAttribute('aria-pressed', 'true')
+})
+
 test('un movimiento nuevo toma la categoría que ya usaste para algo parecido', async ({ page, context }) => {
   await installSupabaseMock(context, seed(), { signedIn: true })
   await page.goto('/life/money')

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Lightbulb, StickyNote, CheckSquare, Target, TrendingUp, Mic, Brain } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useScrollLock } from '@/lib/scrollLock'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
 import { BrainItemSheet } from './BrainItemSheet'
@@ -50,6 +51,7 @@ export function CaptureButton() {
 
 
   const [open, setOpen]             = useState(false)
+  useScrollLock(open)
   const [brainOpen, setBrainOpen]   = useState(false)
   const [brainType, setBrainType]   = useState<BrainItemType>('idea')
   const [goalOpen, setGoalOpen]     = useState(false)
@@ -218,7 +220,7 @@ export function CaptureButton() {
             exit={{ opacity: 0 }}
             onClick={() => setOpen(false)}
             style={{
-              position: 'fixed', inset: 0, zIndex: 48,
+              position: 'fixed', inset: 0, zIndex: 48, touchAction: 'none',
               background: 'var(--my-scrim)',
               backdropFilter: 'blur(3px)',
               WebkitBackdropFilter: 'blur(3px)',
@@ -238,6 +240,9 @@ export function CaptureButton() {
             flexDirection: 'column',
             gap: '7px',
             zIndex: 49,
+            // En un celular chico la lista no se mete debajo de la barra de arriba: si no entra, se mueve sólo ella
+            maxHeight: 'calc(var(--vvh, 100dvh) - 160px - env(safe-area-inset-bottom) - env(safe-area-inset-top))',
+            overflowY: 'auto', overscrollBehavior: 'none', touchAction: 'pan-y',
           }}>
             {[...actions].reverse().map((action, i) => (
               <motion.button

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import { colors, font, radius, shadow, tint } from '../tokens'
 import { useLifeT } from '@/i18n/app/life'
+import { useScrollLock } from '@/lib/scrollLock'
 
 interface LifeConfirmDialogProps {
   open: boolean
@@ -28,6 +29,7 @@ export function LifeConfirmDialog({
   const textId = useId()
   confirmLabel ??= t.common.confirm
   cancelLabel ??= t.common.cancel
+  useScrollLock(open)
   return (
     <AnimatePresence>
       {open && (
@@ -40,7 +42,7 @@ export function LifeConfirmDialog({
             transition={{ duration: 0.18 }}
             onClick={onCancel}
             style={{
-              position: 'fixed', inset: 0, zIndex: 300,
+              position: 'fixed', inset: 0, zIndex: 300, touchAction: 'none',
               background: 'var(--my-scrim)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
@@ -66,7 +68,7 @@ export function LifeConfirmDialog({
               borderRadius: radius.xl,
               border: `1px solid ${colors.border.medium}`,
               boxShadow: shadow.elevated,
-              padding: '24px 20px 20px',
+              padding: '24px 20px 20px', touchAction: 'none',
             }}
           >
             {danger && (

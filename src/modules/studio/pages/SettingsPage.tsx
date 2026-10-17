@@ -15,6 +15,7 @@ import { APP_LANGS, LANG_INFO, isAppLang, langLocale, type AppLang } from '@/i18
 import { useAppLang } from '@/i18n/app/store'
 import { savePrefs, usePrefs } from '@/lib/prefs'
 import { useVerification } from '../lib/useVerification'
+import { useScrollLock } from '@/lib/scrollLock'
 
 export function SettingsPage() {
   const { profile, patchProfile, userId, business, publish, publishing } = useStudio()
@@ -324,6 +325,7 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
   const [open, setOpen] = useState(false)
   const [word, setWord] = useState('')
   const [deleting, setDeleting] = useState(false)
+  useScrollLock(open)
   const [message, setMessage] = useState<string | null>(null)
   const t = useStudioT()
   const st = t.settings

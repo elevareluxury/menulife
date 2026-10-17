@@ -9,6 +9,7 @@ import type { Habit, HabitFormData } from '../hooks/useHabits'
 import { GoalSelect } from './GoalSelect'
 import { WhyField } from './Why'
 import { whyValue } from '../lib/why'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 interface HabitSheetProps {
   open: boolean
@@ -140,7 +141,7 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
 
       <div style={{ marginBottom: '20px' }}>
         <span style={label}>{t.habitSheet.icon}</span>
-        <div role="radiogroup" aria-label={t.habitSheet.icon} style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '6px' }}>
+        <div role="radiogroup" aria-label={t.habitSheet.icon} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(36px, 1fr))', gap: '6px' }}>
           {HABIT_ICONS.map(({ name, icon: Icon }) => (
             <button key={name} type="button" role="radio" aria-checked={form.icon === name} aria-label={name}
               onClick={() => setForm(f => ({ ...f, icon: name }))}
@@ -223,7 +224,7 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
           <span style={{ fontFamily: font, fontSize: '14px', fontWeight: 600, color: colors.text.primary }}>{p.quantity}</span>
         </label>
         {withQty ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginTop: 8 }}>
             <div>
               <label htmlFor="habit-target" style={label}>{p.target}</label>
               <input id="habit-target" type="number" inputMode="decimal" min={1} max={100000} value={form.target_value ?? ''}
@@ -255,8 +256,8 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
         {form.reminder_enabled && (
           <div style={{ marginTop: 8 }}>
             <label htmlFor="habit-reminder" style={label}>{p.reminderTime}</label>
-            <input id="habit-reminder" type="time" value={form.reminder_time ?? ''}
-              onChange={e => setForm(f => ({ ...f, reminder_time: e.target.value || null }))} style={{ ...fieldStyle, colorScheme: 'inherit' }} />
+            <PickerWrap kind="time"><input id="habit-reminder" type="time" value={form.reminder_time ?? ''}
+              onChange={e => setForm(f => ({ ...f, reminder_time: e.target.value || null }))} style={{ ...fieldStyle, colorScheme: 'inherit' }} /></PickerWrap>
           </div>
         )}
         <p style={hintStyle}>{p.reminderHint}</p>
