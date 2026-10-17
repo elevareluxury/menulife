@@ -133,6 +133,12 @@
 .mp-media-text { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .mp-media-title { font-weight: 600; font-size: var(--my-fs-lead); overflow-wrap: anywhere; }
 .mp-media-provider { font-size: var(--my-fs-small); color: var(--my-muted); }
+/* Portada (guardada en Mycen al pegar el link): ocupa la tarjeta; el título va sobre una placa del tema para leerse */
+.mp-media-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.mp-media-cover ~ .mp-media-text {
+  padding: 8px 12px; border-radius: var(--my-r-field); background: var(--my-glass-strong-solid); box-shadow: var(--my-shadow-float);
+}
+.mp-media-music .mp-media-facade:has(.mp-media-cover) { min-height: 180px; align-items: flex-end; }
 .mp-media-frame { width: 100%; overflow: hidden; border-radius: inherit; background: var(--my-tile); }
 .mp-media-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
 

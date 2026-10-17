@@ -113,7 +113,7 @@ const it: LegalDict = {
         '**Supabase:** database, accesso e file.',
         '**Vercel:** hosting dell’applicazione e consegna delle pagine.',
         '**Resend:** invio delle email del tuo account.',
-        '**YouTube, Vimeo, TikTok, Spotify e SoundCloud:** solo se un profilo integra un video o un brano e tocchi "Riproduci". Prima non ci colleghiamo a loro; da quel momento valgono le loro politiche. Se un profilo mostra il suo "Ultimo video", il server di Mycen consulta l’elenco pubblico dei video del canale YouTube scelto dal proprietario, senza inviare alcun tuo dato.',
+        '**YouTube, Vimeo, TikTok, Spotify e SoundCloud:** solo se un profilo integra un video o un brano e tocchi "Riproduci". Prima non ci colleghiamo a loro; da quel momento valgono le loro politiche. Se un profilo mostra il suo "Ultimo video", il server di Mycen consulta l’elenco pubblico dei video del canale YouTube scelto dal proprietario, senza inviare alcun tuo dato. Quando il titolare di un profilo incolla uno di questi link in Studio, il server di Mycen recupera la copertina pubblica di quel video o di quella canzone e la salva come un’altra foto del profilo: così la pagina la mostra senza collegarti al fornitore.',
         '**Anthropic:** solo se un’attività usa l’importazione del menu da un PDF; viene elaborato quel file.',
         '**Mercado Pago:** solo se un’attività lo configura per incassare; il pagamento avviene su Mercado Pago.',
         '**Google (accesso):** solo se scegli "Continua con Google". Google ci conferma nome, email e foto; non riceviamo mai la tua password di Google né accediamo ad altro del tuo account.',

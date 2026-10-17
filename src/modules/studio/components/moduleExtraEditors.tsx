@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Plus, Star, Trash2 } from 'lucide-react'
 import type { WeekSchedule } from '@/modules/profile/lib/profileTypes'
 import { WEEK_DAYS } from '@/modules/profile/lib/schedule'
 import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import { uploadMedia } from '../lib/studioApi'
+import { useAutoCover } from '../lib/autoCover'
 import { useStudio } from '../StudioContext'
 import { Button, ImageField, SelectField, TextField, Toggle } from './ui'
 import { useStudioT } from '@/i18n/app/studio'
@@ -24,6 +25,9 @@ export interface ExtraEditorProps<S> {
   value: S
   onChange: (value: S) => void
   userId: string
+  /** Campos comunes del módulo (por ejemplo, la portada) para los editores que los completan solos */
+  fields?: Record<string, string>
+  setField?: (key: string, value: string) => void
 }
 
 // ── Horarios ────────────────────────────────────────────────────────────────
@@ -306,28 +310,39 @@ export function LinkItemsEditor({ value: items, onChange }: ExtraEditorProps<Lin
 
 // ── Video y música (V1 · etapa 04): se pega el link, se detecta el proveedor y se ve la fachada ──
 
-export function MediaUrlEditor({ value: url, onChange }: ExtraEditorProps<string>) {
+export interface MediaValue { url: string; cover: string }
+
+export function MediaUrlEditor({ value, onChange, userId }: ExtraEditorProps<MediaValue>) {
   const t = useStudioT().media
   const { profile } = useStudio()
   const lang = useAppLang(st => st.lang)
+  const { url, cover } = value
   const result = inspectMediaUrl(url)
   const embed = 'embed' in result ? result.embed : null
   const error = url.trim() && 'error' in result ? t.errors[result.error] : null
   const look = profileLook(profile.theme)
+  // La portada se busca sola al pegar el link (ver lib/autoCover.ts)
+  const setCover = useCallback((c: string) => onChange({ url, cover: c }), [onChange, url])
+  const auto = useAutoCover({ url: embed ? url.trim() : null, cover, setCover, userId })
   return (
     <div className="st-stack" style={{ gap: 12 }}>
       <TextField label={t.url} type="url" value={url} placeholder="https://…" required help={t.help}
-        error={error} onChange={onChange} />
+        error={error} onChange={v => onChange({ url: v, cover })} />
       {embed && (
         <div className="st-stack" style={{ gap: 8 }}>
           <p className="st-help" role="status" style={{ margin: 0 }}>
             {t.detected.replace('{provider}', MEDIA_PROVIDER_NAME[embed.provider])} · {embed.kind === 'video' ? t.video : t.music}
           </p>
+          <ImageField label={t.cover} value={cover || null} shape="wide"
+            help={auto.state === 'loading' ? t.coverLoading : auto.state === 'auto' ? t.coverAuto.replace('{provider}', auto.provider)
+              : auto.state === 'none' && !cover ? t.coverNone : undefined}
+            onUpload={async file => onChange({ url, cover: await uploadMedia(userId, file) })}
+            onClear={() => onChange({ url, cover: '' })} />
           {/* Vista previa de la fachada con el tema y la huella del perfil (no carga nada del proveedor) */}
           <div className="mp-root my-profile st-media-preview" data-mycen-theme={look.mode} data-mycen-accent={look.accent}
             style={{ ...lookVars(look), minHeight: 0, padding: 12, borderRadius: 16 }} inert>
             <ProfileModuleContext.Provider value={{ seed: huellaSeed(profile), variant: look.huellaVariant, handle: '', preview: true }}>
-              <MediaModule module={{ id: 'preview', type: 'media', title: null, content: { url }, config: {}, translations: {} }}
+              <MediaModule module={{ id: 'preview', type: 'media', title: null, content: { url, cover_url: cover || undefined }, config: {}, translations: {} }}
                 lang={lang} onAction={() => undefined} />
             </ProfileModuleContext.Provider>
           </div>

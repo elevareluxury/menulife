@@ -542,6 +542,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `admin_audit_log` (nadie lee la tabla; `admin_list_audit`) cada suspensión, verificación, denuncia o pedido resuelto,
   error y interruptor que cambia un super-admin. Migración `20261105000001_admin_console.sql`, tests en
   `admin_console.test.sql` y `admin-console.spec.ts`; textos en `src/i18n/app/admin/` (12 idiomas).
+- Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
+  portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
+  `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,
+  tope 6 MB) y la sube con `uploadMedia` (WebP) como `content.cover_url`. La página la muestra desde Mycen
+  (`.mp-media-cover` en `MediaModule`), así el visitante no se conecta con el proveedor; se puede cambiar o sacar y no
+  se vuelve a buscar para el mismo link. Los editores propios reciben `fields`/`setField` (la de "Escuchá en" completa
+  su campo `cover_url`). Privacidad (12 idiomas). Tests en `mediaCover.test.ts` y `media.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

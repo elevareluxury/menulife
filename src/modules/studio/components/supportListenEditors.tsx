@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useCallback, useId } from 'react'
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
 import {
   checkSupportMethod, isCopyKind, SUPPORT_ALIAS_MAX, SUPPORT_BRAND, SUPPORT_KINDS, SUPPORT_LABEL_MAX, SUPPORT_MAX_METHODS,
@@ -11,6 +11,8 @@ import { duplicateListenRows, listenErrorText, supportErrorText, type ListenInpu
 import { useStudioT } from '@/i18n/app/studio'
 import { Button, SelectField, TextField } from './ui'
 import type { ExtraEditorProps } from './moduleExtraEditors'
+import { useAutoCover } from '../lib/autoCover'
+import { coverRequestFor } from '@/modules/profile/lib/mediaCover'
 
 // Editores propios de "Apoyame" (support) y "Escuchá en" (listen_on), V1.1. Se registran en `lib/moduleCatalog.ts`.
 
@@ -95,14 +97,23 @@ export function SupportMethodsEditor({ value: items, onChange }: ExtraEditorProp
 
 // ── Escuchá en ──
 
-export function ListenLinksEditor({ value: items, onChange }: ExtraEditorProps<ListenInput[]>) {
+export function ListenLinksEditor({ value: items, onChange, userId, fields, setField }: ExtraEditorProps<ListenInput[]>) {
   const t = useStudioT()
   const l = t.listenOn
   const ops = useListOps(items, onChange)
   const dup = duplicateListenRows(items)
   const uid = useId()
+  // Sin portada, se usa la del primer link de Spotify, YouTube o SoundCloud (lib/autoCover.ts)
+  const coverFrom = items.map(i => i.url.trim()).find(u => u && coverRequestFor(u)) ?? null
+  const setCover = useCallback((c: string) => setField?.('cover_url', c), [setField])
+  const auto = useAutoCover({ url: setField ? coverFrom : null, cover: fields?.cover_url ?? '', setCover, userId })
   return (
     <div className="st-stack" style={{ gap: 10 }}>
+      {auto.state !== 'idle' && (
+        <p className="st-help" role="status" style={{ margin: 0 }}>
+          {auto.state === 'loading' ? t.media.coverLoading : auto.state === 'auto' ? t.media.coverAuto.replace('{provider}', auto.provider) : t.media.coverNone}
+        </p>
+      )}
       <span className="st-label">{l.links(items.length)}</span>
       <p className="st-help" style={{ margin: 0 }}>{l.help}</p>
       {items.map((item, i) => {
