@@ -5,7 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { taskDueAt, localDateKey, type LifeTask } from './useTasks'
-import { lifeT } from '@/i18n/app/life'
+import { lifeTReady } from '@/i18n/app/life'
 import { electLeader, reminderLoop } from '../lib/reminderLeader'
 import { lifeNow } from '../lib/zonedTime'
 
@@ -47,7 +47,7 @@ export function useTaskReminders(userId: string | undefined) {
       const now = Date.now()
       // En la app de iOS/Android se programan en el teléfono (llegan con la app cerrada)
       if (isNativeApp()) {
-        const ts = lifeT().taskSheet
+        const ts = (await lifeTReady()).taskSheet
         await scheduleNativeReminders('task', tasks.flatMap(task => {
           const due = taskDueAt(task)
           if (!due) return []
@@ -75,7 +75,7 @@ export function useTaskReminders(userId: string | undefined) {
         if (error) { notified.delete(key); continue }
         if (!claimed?.length) continue
 
-        const ts = lifeT().taskSheet
+        const ts = (await lifeTReady()).taskSheet
         const when = task.due_time ? ts.reminderAt(task.due_time.slice(0, 5)) : ts.reminderToday
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
           new Notification(task.title, { body: ts.reminderBody(when), tag: `life-task-${task.id}` })

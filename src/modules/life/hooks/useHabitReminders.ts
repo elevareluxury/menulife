@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { localDateKey } from './useTasks'
 import { lifeTimeZone, todayKey, zonedTimeToDate } from '../lib/zonedTime'
 import { frequencyOf, isDone, isScheduledOn } from '../lib/habitStreak'
-import { lifeT } from '@/i18n/app/life'
+import { lifeT, lifeTReady } from '@/i18n/app/life'
 import { anchorHasPrefix, anchorLabel } from '../lib/habitAnchor'
 import { claimMark, cleanOldMarks, electLeader, reminderLoop } from '../lib/reminderLeader'
 
@@ -48,6 +48,7 @@ export function useHabitReminders(userId: string | undefined) {
     }
 
     const check = async (habits: HabitRow[]) => {
+      await lifeTReady()   // los textos del aviso, en el idioma de la cuenta (nunca en español por llegar antes)
       const now = new Date()
       const tz = lifeTimeZone()
       const today = todayKey(tz, now)   // día y hora de la zona de la cuenta

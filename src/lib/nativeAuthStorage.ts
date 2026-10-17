@@ -3,9 +3,16 @@
 // también en las preferencias nativas (UserDefaults / SharedPreferences), de donde se recupera si localStorage se
 // perdió. El plugin se baja sólo en la app.
 
-type Prefs = typeof import('@capacitor/preferences').Preferences
-let prefs: Promise<Prefs> | null = null
-const native = () => (prefs ??= import('@capacitor/preferences').then(m => m.Preferences))
+// Se guarda el módulo, no el plugin: un plugin de Capacitor responde a cualquier nombre (también a `then`), así que una
+// promesa que lo devuelve quedaría esperando para siempre
+type PrefsModule = typeof import('@capacitor/preferences')
+let mod: Promise<PrefsModule> | null = null
+const native = () => (mod ??= import('@capacitor/preferences'))
+
+// Si el plugin no contesta, la sesión no puede quedar esperando: se sigue sin la copia nativa
+function withTimeout<T>(p: Promise<T>, fallback: T, ms = 1500): Promise<T> {
+  return Promise.race([p, new Promise<T>(resolve => window.setTimeout(() => resolve(fallback), ms))])
+}
 
 function local(): Storage | null {
   try { return window.localStorage } catch { return null }
@@ -16,17 +23,18 @@ export const nativeAuthStorage = {
     const saved = local()?.getItem(key) ?? null
     if (saved !== null) return saved
     try {
-      const { value } = await (await native()).get({ key })
+      const value = await withTimeout(native().then(m => m.Preferences.get({ key })).then(r => r.value), null)
       if (value !== null) try { local()?.setItem(key, value) } catch { /* sin espacio: queda la copia nativa */ }
       return value
     } catch { return null }
   },
   async setItem(key: string, value: string): Promise<void> {
     try { local()?.setItem(key, value) } catch { /* sin espacio: queda la copia nativa */ }
-    try { await (await native()).set({ key, value }) } catch { /* sin plugin: queda localStorage */ }
+    // La copia nativa se escribe de fondo: localStorage ya la tiene para esta sesión
+    void native().then(m => m.Preferences.set({ key, value })).catch(() => { /* sin plugin: queda localStorage */ })
   },
   async removeItem(key: string): Promise<void> {
     try { local()?.removeItem(key) } catch { /* nada */ }
-    try { await (await native()).remove({ key }) } catch { /* nada */ }
+    void native().then(m => m.Preferences.remove({ key })).catch(() => { /* nada */ })
   },
 }
