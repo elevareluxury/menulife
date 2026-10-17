@@ -1,3 +1,4 @@
+import { webOrigin } from '@/lib/platform'
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, Edit, Trash2, Copy, MessageCircle, Smartphone, CheckCircle, XCircle, BarChart2, Users } from 'lucide-react'
 import bcrypt from 'bcryptjs'
@@ -175,7 +176,7 @@ function DriverHistorial({ restaurantId }: { restaurantId: string }) {
 }
 
 function DriverLinkBanner({ slug }: { slug: string }) {
-  const url = `${window.location.origin}/delivery/${slug}/login`
+  const url = `${webOrigin()}/delivery/${slug}/login`
 
   const copy = async () => {
     await navigator.clipboard.writeText(url)

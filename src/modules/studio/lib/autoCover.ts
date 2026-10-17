@@ -1,3 +1,4 @@
+import { apiUrl } from '@/lib/platform'
 import { useEffect, useRef, useState } from 'react'
 import { coverRequestFor } from '@/modules/profile/lib/mediaCover'
 import { MEDIA_PROVIDER_NAME } from '@/modules/profile/lib/media'
@@ -33,7 +34,7 @@ export function useAutoCover({ url, cover, setCover, userId }: {
       setStatus({ state: 'loading' })
       void (async () => {
         try {
-          const res = await fetch(`/api/media-cover?url=${encodeURIComponent(url)}`)
+          const res = await fetch(apiUrl(`/api/media-cover?url=${encodeURIComponent(url)}`))
           if (!res.ok) throw new Error('no_cover')
           const blob = await res.blob()
           if (!blob.type.startsWith('image/')) throw new Error('no_cover')

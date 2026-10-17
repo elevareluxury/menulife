@@ -1,3 +1,4 @@
+import { saveFile } from '@/lib/nativeFiles'
 import { useState, useRef } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -84,10 +85,7 @@ function exportCSV(restaurantSlug: string, desde: Date, hasta: Date, data: Retur
   ]
   const csv = rows.map(r => r.join(',')).join('\n')
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
-  link.download = `estadisticas-${restaurantSlug}-${desde.toISOString().slice(0, 10)}-${hasta.toISOString().slice(0, 10)}.csv`
-  link.click()
+  void saveFile(blob, `estadisticas-${restaurantSlug}-${desde.toISOString().slice(0, 10)}-${hasta.toISOString().slice(0, 10)}.csv`)
 }
 
 export function EstadisticasTab({ restaurantId, restaurantSlug }: EstadisticasTabProps) {

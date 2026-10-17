@@ -124,6 +124,8 @@ const es = {
         '**Anthropic:** sólo si un negocio usa la importación de su menú desde un PDF; se procesa ese archivo.',
         '**Mercado Pago:** sólo si un negocio lo configura para cobrar; el pago se hace en Mercado Pago.',
         '**Google (inicio de sesión):** sólo si elegís "Continuar con Google". Google nos confirma tu nombre, tu email y tu foto; no recibimos tu contraseña de Google ni accedemos a nada más de tu cuenta.',
+        '**Apple (inicio de sesión):** sólo si elegís "Continuar con Apple". Apple nos confirma tu nombre y tu email (o un email de reenvío que Apple genera si preferís ocultar el tuyo); no recibimos tu contraseña ni accedemos a nada más de tu cuenta.',
+        '**App de iOS y Android:** si la descargás, Apple (App Store) o Google (Google Play) registran la descarga según sus propias políticas. Los recordatorios de la app se programan en tu teléfono; Mycen no usa un servicio de notificaciones de terceros.',
         '**Google Calendar, Apple u otro calendario:** sólo si activás el link de calendario de Life OS; ese servicio descarga tus tareas pendientes con fecha (título, fecha, hora y aviso). Lo podés apagar o cambiar cuando quieras.',
         '**Reconocimiento de voz de tu navegador:** sólo si usás "Dictar" en Life OS. Tu navegador convierte la voz en texto (en Chrome lo hace el servicio de voz de Google; en Safari, Apple). Mycen recibe sólo el texto.',
       ] },

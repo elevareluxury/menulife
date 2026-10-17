@@ -23,7 +23,7 @@ const de: LifeDict = {
     addCurrency: 'Währung hinzufügen', removeCurrency: c => `${c} entfernen`, searchCurrency: 'Währung suchen…',
     timezone: 'Zeitzone', timezoneHelp: 'Legt fest, wann dein Tag beginnt und endet.', timezoneOther: z => `Dein Handy ist in einer anderen Zeitzone (${z}). Mycen nutzt die hier gewählte.`, useDeviceTimezone: 'Die vom Handy nutzen',
     weekStart: 'Die Woche beginnt am', monday: 'Montag', sunday: 'Sonntag',
-    account: 'Konto', openStudio: 'Mycen Studio öffnen', signOut: 'Abmelden', savedOk: 'Einstellungen gespeichert', noResults: 'Keine Ergebnisse',
+    account: 'Konto', openStudio: 'Mycen Studio öffnen', signOut: 'Abmelden', deleteAccount: "Mein Konto löschen", deleteAccountHelp: "Löscht dein Konto, deine Identität und ganz Life OS. Das lässt sich nicht rückgängig machen.", deleteAccountTitle: "Konto endgültig löschen?", deleteAccountText: "Dein Konto, dein Profil, deine Bilder und alle Life-OS-Daten werden gelöscht und können nicht wiederhergestellt werden. Exportiere deine Daten vorher, wenn du möchtest. Zum Bestätigen tippe", deleteAccountWord: "LÖSCHEN", deleteAccountField: "Bestätigung", deleteAccountBusiness: "Dein Konto hat ein Unternehmen bei Mycen Business. Zum Schließen schreib an team@mycen.id, damit wir die Daten deiner Kunden und Verkäufe schützen.", deleteAccountError: "Wir konnten das Konto nicht löschen. Versuch es in ein paar Minuten erneut.", savedOk: 'Einstellungen gespeichert', noResults: 'Keine Ergebnisse',
     homeTitle: "Mein Tag",
     showIdentity: "„Meine Identität“ oben in Mein Tag anzeigen",
     showIdentityHelp: "Wird auf diesem Gerät gespeichert.",

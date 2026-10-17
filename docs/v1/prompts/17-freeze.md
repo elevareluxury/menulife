@@ -10,7 +10,8 @@ Congelar oficialmente la V1 como la base estable para la app de iOS y Android.
 
 1. Desde `main` actualizada, verificá:
    - CI en verde en el último commit.
-   - `src/lib/features.ts`: `lifeInsights`, `lifeReplay` y `businessInLife` en `false`.
+   - `src/lib/features.ts`: `businessInLife` en `false` (Insights y "Tu mes" se prendieron a propósito antes del
+     freeze; `appleSignIn` queda en BETA hasta configurarlo, ver `docs/app/README.md`).
    - Todas las migraciones del repo aplicadas en Supabase (listá cuáles y pedime confirmación).
 2. Versión `1.0.0` en `package.json` y `CHANGELOG.md` con todo lo que trae la V1
    (en lenguaje de usuario, en español).

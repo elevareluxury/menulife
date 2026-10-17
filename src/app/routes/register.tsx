@@ -1,3 +1,4 @@
+import { authCallbackUrl } from '@/lib/platform'
 import { useEffect, useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
@@ -95,7 +96,7 @@ export function RegisterPage() {
             name: name.trim(), terms_accepted_at: new Date().toISOString(), locale: useAppLang.getState().lang,
             ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
           },
-          emailRedirectTo: window.location.origin + '/auth/callback',
+          emailRedirectTo: authCallbackUrl(),
         },
       })
       if (authError) throw authError

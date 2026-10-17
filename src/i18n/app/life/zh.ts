@@ -23,7 +23,7 @@ const zh: LifeDict = {
     addCurrency: '添加货币', removeCurrency: c => `移除 ${c}`, searchCurrency: '搜索货币…',
     timezone: '时区', timezoneHelp: '决定你的一天何时开始和结束。', timezoneOther: z => `你的手机在另一个时区（${z}）。Mycen 使用这里选择的时区。`, useDeviceTimezone: '使用手机的时区',
     weekStart: '每周开始于', monday: '星期一', sunday: '星期日',
-    account: '账户', openStudio: '打开 Mycen Studio', signOut: '退出登录', savedOk: '设置已保存', noResults: '无结果',
+    account: '账户', openStudio: '打开 Mycen Studio', signOut: '退出登录', deleteAccount: "删除我的账户", deleteAccountHelp: "删除你的账户、身份和全部 Life OS 数据。此操作无法撤销。", deleteAccountTitle: "永久删除你的账户？", deleteAccountText: "你的账户、资料、图片和所有 Life OS 数据都会被删除，且无法恢复。你可以先导出数据。确认请输入", deleteAccountWord: "删除", deleteAccountField: "确认", deleteAccountBusiness: "你的账户关联了 Mycen Business 商家。如需注销，请写信至 team@mycen.id，以便我们妥善处理客户和销售数据。", deleteAccountError: "无法删除账户，请几分钟后再试。", savedOk: '设置已保存', noResults: '无结果',
     homeTitle: "我的一天",
     showIdentity: "在“我的一天”顶部显示“我的身份”",
     showIdentityHelp: "仅保存在此设备上。",

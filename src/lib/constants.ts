@@ -1,5 +1,6 @@
+import { webOrigin } from '@/lib/platform'
 export const APP_NAME = 'menulife'
-export const APP_URL = import.meta.env.VITE_APP_URL ?? window.location.origin
+export const APP_URL = import.meta.env.VITE_APP_URL ?? webOrigin()
 
 export const ROUTES = {
   HOME: '/',

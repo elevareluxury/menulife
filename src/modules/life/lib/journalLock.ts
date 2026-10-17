@@ -12,6 +12,8 @@
 //
 // Sin DOM salvo las funciones de WebAuthn y el almacenamiento (que se pueden pasar en los tests).
 
+import { isNativeApp } from '@/lib/platform'
+
 export const PIN_MIN = 4
 export const PIN_MAX = 8
 export const PBKDF2_ITERATIONS = 600_000
@@ -160,6 +162,8 @@ function fromB64url(s: string): Uint8Array {
 export async function deviceUnlockAvailable(): Promise<boolean> {
   try {
     if (typeof window === 'undefined' || !window.PublicKeyCredential || !window.isSecureContext) return false
+    // En la app (capacitor://localhost) WebAuthn no tiene un dominio propio: queda sólo el PIN
+    if (isNativeApp()) return false
     return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
   } catch { return false }
 }

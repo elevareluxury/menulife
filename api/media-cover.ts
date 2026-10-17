@@ -10,10 +10,12 @@ export const config = { runtime: 'edge' }
 const TIMEOUT_MS = 6000
 const UA = 'Mozilla/5.0 (compatible; MycenBot/1.0; +https://mycen.id)'
 type Fail = 'bad_request' | 'not_found' | 'upstream'
+// La app de iOS/Android (origen capacitor://localhost o https://localhost) la pide desde otro origen; es pública y sin sesión
+const CORS = { 'access-control-allow-origin': '*' }
 
 const fail = (kind: Fail) => new Response(JSON.stringify({ error: kind }), {
   status: kind === 'bad_request' ? 400 : kind === 'not_found' ? 404 : 502,
-  headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': kind === 'upstream' ? 'no-store' : 'public, max-age=300, s-maxage=3600', 'x-content-type-options': 'nosniff', 'x-robots-tag': 'noindex' },
+  headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': kind === 'upstream' ? 'no-store' : 'public, max-age=300, s-maxage=3600', 'x-content-type-options': 'nosniff', 'x-robots-tag': 'noindex', ...CORS },
 })
 
 async function fetchWithTimeout(url: string, accept: string): Promise<Response> {
@@ -52,7 +54,7 @@ async function image(url: string): Promise<{ body: Uint8Array; type: string } | 
 }
 
 export default async function handler(req: Request): Promise<Response> {
-  if (req.method !== 'GET') return new Response(null, { status: 405, headers: { allow: 'GET' } })
+  if (req.method !== 'GET') return new Response(null, { status: 405, headers: { allow: 'GET', ...CORS } })
   const raw = new URL(req.url).searchParams.get('url')
   if (!raw || raw.length > 600) return fail('bad_request')
   const request = coverRequestFor(raw)
@@ -75,7 +77,7 @@ export default async function handler(req: Request): Promise<Response> {
       if (img) {
         return new Response(img.body.buffer as ArrayBuffer, {
           status: 200,
-          headers: { 'content-type': img.type, 'cache-control': 'public, max-age=3600, s-maxage=86400', 'x-content-type-options': 'nosniff', 'x-robots-tag': 'noindex' },
+          headers: { 'content-type': img.type, 'cache-control': 'public, max-age=3600, s-maxage=86400', 'x-content-type-options': 'nosniff', 'x-robots-tag': 'noindex', ...CORS },
         })
       }
     }

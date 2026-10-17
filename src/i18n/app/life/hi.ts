@@ -23,7 +23,7 @@ const hi: LifeDict = {
     addCurrency: 'मुद्रा जोड़ें', removeCurrency: c => `${c} हटाएँ`, searchCurrency: 'मुद्रा खोजें…',
     timezone: 'समय क्षेत्र', timezoneHelp: 'तय करता है कि आपका दिन कब शुरू और खत्म होता है।', timezoneOther: z => `आपका फ़ोन दूसरे समय क्षेत्र (${z}) में है। Mycen यहाँ चुना गया समय क्षेत्र इस्तेमाल करता है।`, useDeviceTimezone: 'फ़ोन वाला इस्तेमाल करें',
     weekStart: 'सप्ताह शुरू होता है', monday: 'सोमवार', sunday: 'रविवार',
-    account: 'खाता', openStudio: 'Mycen Studio खोलें', signOut: 'साइन आउट करें', savedOk: 'सेटिंग्स सहेजी गईं', noResults: 'कोई परिणाम नहीं',
+    account: 'खाता', openStudio: 'Mycen Studio खोलें', signOut: 'साइन आउट करें', deleteAccount: "मेरा खाता हटाएँ", deleteAccountHelp: "आपका खाता, आपकी पहचान और पूरा Life OS हटा देता है। इसे वापस नहीं किया जा सकता।", deleteAccountTitle: "क्या अपना खाता हमेशा के लिए हटाना है?", deleteAccountText: "आपका खाता, प्रोफ़ाइल, तस्वीरें और Life OS का सारा डेटा हट जाएगा और वापस नहीं मिलेगा। चाहें तो पहले अपना डेटा निर्यात करें। पुष्टि के लिए लिखें", deleteAccountWord: "हटाएँ", deleteAccountField: "पुष्टि", deleteAccountBusiness: "आपके खाते में Mycen Business पर एक व्यवसाय है। इसे बंद करने के लिए team@mycen.id पर लिखें, ताकि हम आपके ग्राहकों और बिक्री का डेटा सुरक्षित रख सकें।", deleteAccountError: "हम खाता नहीं हटा सके। कुछ मिनट बाद फिर कोशिश करें।", savedOk: 'सेटिंग्स सहेजी गईं', noResults: 'कोई परिणाम नहीं',
     homeTitle: "मेरा दिन",
     showIdentity: "\"मेरा दिन\" के ऊपर \"मेरी पहचान\" दिखाएँ",
     showIdentityHelp: "इस डिवाइस पर सहेजा जाता है।",

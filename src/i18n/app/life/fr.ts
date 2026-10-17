@@ -23,7 +23,7 @@ const fr: LifeDict = {
     addCurrency: 'Ajouter une devise', removeCurrency: c => `Retirer ${c}`, searchCurrency: 'Rechercher une devise…',
     timezone: 'Fuseau horaire', timezoneHelp: 'Définit quand votre journée commence et se termine.', timezoneOther: z => `Votre téléphone est dans un autre fuseau horaire (${z}). Mycen utilise celui choisi ici.`, useDeviceTimezone: 'Utiliser celui du téléphone',
     weekStart: 'La semaine commence le', monday: 'Lundi', sunday: 'Dimanche',
-    account: 'Compte', openStudio: 'Ouvrir Mycen Studio', signOut: 'Se déconnecter', savedOk: 'Réglages enregistrés', noResults: 'Aucun résultat',
+    account: 'Compte', openStudio: 'Ouvrir Mycen Studio', signOut: 'Se déconnecter', deleteAccount: "Supprimer mon compte", deleteAccountHelp: "Supprime ton compte, ton identité et tout Life OS. Action irréversible.", deleteAccountTitle: "Supprimer ton compte définitivement ?", deleteAccountText: "Ton compte, ton profil, tes images et toutes tes données Life OS seront supprimés sans possibilité de récupération. Tu peux d'abord exporter tes données. Pour confirmer, écris", deleteAccountWord: "SUPPRIMER", deleteAccountField: "Confirmation", deleteAccountBusiness: "Ton compte a une entreprise sur Mycen Business. Pour le fermer, écris à team@mycen.id afin que nous protégions les données de tes clients et de tes ventes.", deleteAccountError: "Impossible de supprimer le compte. Réessaie dans quelques minutes.", savedOk: 'Réglages enregistrés', noResults: 'Aucun résultat',
     homeTitle: "Ma journée",
     showIdentity: "Afficher « Mon identité » en haut de Ma journée",
     showIdentityHelp: "Enregistré sur cet appareil.",

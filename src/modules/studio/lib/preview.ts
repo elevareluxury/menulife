@@ -2,6 +2,7 @@ import type { ProfileModule, PublicProfile } from '@/modules/profile/lib/profile
 import type { ProjectCard } from '@/modules/profile/lib/projectTypes'
 import { isModuleLive } from '@/modules/profile/lib/moduleSchedule'
 import type { StudioBusiness, StudioModule, StudioProfile, StudioProject } from './studioTypes'
+import { webOrigin } from '@/lib/platform'
 
 /**
  * Dominio público de los perfiles. Configurable con VITE_PUBLIC_PROFILE_BASE
@@ -9,7 +10,7 @@ import type { StudioBusiness, StudioModule, StudioProfile, StudioProject } from 
  */
 export function publicBaseUrl(): string {
   const env = (import.meta.env.VITE_PUBLIC_PROFILE_BASE as string | undefined)?.replace(/\/+$/, '')
-  return env || window.location.origin
+  return env || webOrigin()
 }
 
 /**

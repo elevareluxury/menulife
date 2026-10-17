@@ -1,3 +1,4 @@
+import { saveFile } from '@/lib/nativeFiles'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BadgeCheck, Download, History, Trash2 } from 'lucide-react'
@@ -334,12 +335,7 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
     setExporting(true); setMessage(null)
     try {
       const blob = await exportMyData(userId, user?.email)
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${st.fileName}-${new Date().toISOString().slice(0, 10)}.json`
-      document.body.appendChild(a); a.click(); a.remove()
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      await saveFile(blob, `${st.fileName}-${new Date().toISOString().slice(0, 10)}.json`)
     } catch {
       setMessage(st.downloadError)
     } finally { setExporting(false) }

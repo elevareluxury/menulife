@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mycen</string>
+    <string name="title_activity_main">Mycen</string>
+    <string name="package_name">id.mycen.app</string>
+    <string name="custom_url_scheme">id.mycen.app</string>
+</resources>

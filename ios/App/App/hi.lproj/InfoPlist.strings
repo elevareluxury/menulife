@@ -1,0 +1,7 @@
+/* Textos de los permisos de iOS (hi). Mantener los 12 idiomas (docs/app/README.md). */
+"CFBundleDisplayName" = "Mycen";
+"NSCameraUsageDescription" = "Mycen कैमरे का उपयोग करता है ताकि आप अपनी प्रोफ़ाइल या प्रोजेक्ट के लिए फ़ोटो ले सकें।";
+"NSPhotoLibraryUsageDescription" = "Mycen आपकी फ़ोटो तक पहुँचता है ताकि आप अपनी प्रोफ़ाइल या प्रोजेक्ट के लिए तस्वीर चुन सकें।";
+"NSPhotoLibraryAddUsageDescription" = "आपके कहने पर Mycen आपका QR और पहचान कार्ड फ़ोटो में सहेजता है।";
+"NSMicrophoneUsageDescription" = "Mycen माइक्रोफ़ोन का उपयोग सिर्फ़ तब करता है जब आप कोई खर्च, काम या विचार बोलकर लिखवाते हैं।";
+"NSSpeechRecognitionUsageDescription" = "Mycen आपकी बोली गई बात को टेक्स्ट में बदलता है ताकि आप सहेजने से पहले उसे देख सकें।";

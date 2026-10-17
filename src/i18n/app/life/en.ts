@@ -23,7 +23,7 @@ const en: LifeDict = {
     addCurrency: 'Add currency', removeCurrency: c => `Remove ${c}`, searchCurrency: 'Search currency…',
     timezone: 'Time zone', timezoneHelp: 'Defines when your day starts and ends.', timezoneOther: z => `Your phone is in another time zone (${z}). Mycen uses the one chosen here.`, useDeviceTimezone: 'Use my phone\'s',
     weekStart: 'Week starts on', monday: 'Monday', sunday: 'Sunday',
-    account: 'Account', openStudio: 'Open Mycen Studio', signOut: 'Sign out', savedOk: 'Settings saved', noResults: 'No results',
+    account: 'Account', openStudio: 'Open Mycen Studio', signOut: 'Sign out', deleteAccount: "Delete my account", deleteAccountHelp: "Deletes your account, your identity and all of Life OS. This can't be undone.", deleteAccountTitle: "Delete your account forever?", deleteAccountText: "Your account, profile, images and all your Life OS data will be deleted and can't be recovered. You may want to export your data first. To confirm, type", deleteAccountWord: "DELETE", deleteAccountField: "Confirmation", deleteAccountBusiness: "Your account has a business on Mycen Business. To close it, write to team@mycen.id so we can take care of your customers' and sales data.", deleteAccountError: "We couldn't delete the account. Please try again in a few minutes.", savedOk: 'Settings saved', noResults: 'No results',
     homeTitle: "My day",
     showIdentity: "Show \"My identity\" at the top of My day",
     showIdentityHelp: "Saved on this device.",

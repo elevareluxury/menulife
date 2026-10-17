@@ -1,3 +1,4 @@
+import { saveFile } from '@/lib/nativeFiles'
 import { useEffect, useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Check, Copy, Download, MessageCircle } from 'lucide-react'
@@ -47,14 +48,7 @@ export function IdentityCardSection() {
 
   function download() {
     if (!blob.current) return
-    const url = URL.createObjectURL(blob.current)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `mycen-${handle.replace('/', '-')}-${mode === 'light' ? 'clara' : 'oscura'}.png`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    void saveFile(blob.current, `mycen-${handle.replace('/', '-')}-${mode === 'light' ? 'clara' : 'oscura'}.png`)
   }
 
   const ready = preview?.key === key
