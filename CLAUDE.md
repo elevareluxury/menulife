@@ -525,8 +525,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
 - Celular (teclado, ancho y gestos): `installViewportVars` (`src/lib/viewportVars.ts`, en `main.tsx`) anota `--kb`
   (alto del teclado) y `--vvh` (alto visible) con `visualViewport`; `LifeSheet`, `.my-sheet-backdrop`, `.st-overlay` y
   `.st-dialog-wrap` se apoyan arriba del teclado y nunca son más altos que lo visible; su contenido sólo se mueve para
-  arriba y abajo. Nada de `autoFocus` en hojas: `ref={focusOnMount}` (enfoca sin mover la pantalla). Fechas y horas sin
-  dibujo nativo (`index.css`: en iPhone no se achicaban y se pisaban). Brain cambia de vista deslizando de costado
+  arriba y abajo. Nada de `autoFocus` en hojas: `ref={focusOnMount}` (enfoca sin mover la pantalla). Fechas y horas de Mycen van
+  en `PickerWrap` (`components/ui/PickerWrap.tsx`; `TextField` de Studio y `Field` del sistema de diseño lo hacen solos):
+  sin dibujo nativo (en iPhone no se achicaban y se pisaban) y con ícono de calendario/reloj (vacías, si no, quedaban en
+  blanco); sólo dentro de `.my-picker`, Business sigue nativo. Brain cambia de vista deslizando de costado
   (`hooks/useSwipeNav.ts`: gesto claramente horizontal, no sobre campos ni zonas con scroll de costado; RTL invertido).
   La landing en el celular muestra idioma y cuenta (sin menú hamburguesa). Con una hoja o diálogo abierto lo de atrás
   queda quieto: `useScrollLock` (`src/lib/scrollLock.ts`, cuenta hojas abiertas) bloquea `<body>` y cada

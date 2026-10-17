@@ -14,6 +14,7 @@ import { dayKey, useLifeTimeZone, useToday } from '../hooks/useToday'
 import { deleteWithUndo } from '../lib/undo'
 import { shiftMonth } from '../lib/moneyInsights'
 import { isIdle, readLock, writeLock, type JournalLock } from '../lib/journalLock'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 // Diario privado (V1.1, FEATURES.journal). Entradas por día, editar, borrar con "Deshacer", buscar y lista por mes.
 // Si la persona activó el bloqueo en este dispositivo, primero se desbloquea; se vuelve a bloquear al salir, al pasar
@@ -89,8 +90,8 @@ function EntryForm({ body, date, onBody, onDate, onSubmit, onCancel, submitLabel
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <label htmlFor={dateId} style={{ fontFamily: font, fontSize: 13, fontWeight: 600, color: colors.text.secondary }}>{t.journal.date}</label>
-          <input id={dateId} type="date" value={date} max={today} min="1900-01-01" required
-            onChange={e => { if (e.target.value) onDate(e.target.value) }} style={dateStyle} />
+          <PickerWrap kind="date"><input id={dateId} type="date" value={date} max={today} min="1900-01-01" required
+            onChange={e => { if (e.target.value) onDate(e.target.value) }} style={dateStyle} /></PickerWrap>
         </div>
         <span id={countId} style={{ fontFamily: font, fontSize: 12, color: tooLong ? colors.semantic.error : colors.text.tertiary }}>
           {body.length > JOURNAL_MAX * 0.8 ? t.journal.chars(nf.format(body.length), nf.format(JOURNAL_MAX)) : ''}

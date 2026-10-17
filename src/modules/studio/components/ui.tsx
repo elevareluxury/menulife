@@ -3,6 +3,8 @@ import { AlertCircle, Check, ImagePlus, MoreHorizontal, Trash2, X, type LucideIc
 import type { SaveState } from '../lib/studioTypes'
 import { useStudioT } from '@/i18n/app/studio'
 import { useScrollLock } from '@/lib/scrollLock'
+import { PickerWrap } from '@/components/ui/PickerWrap'
+import { pickerKind } from '@/lib/pickerKind'
 
 // ── Botón ───────────────────────────────────────────────────────────────────
 
@@ -48,6 +50,12 @@ export function Field({ label, required, help, error, counter, children, htmlFor
   )
 }
 
+// Fechas y horas con ícono y sin el dibujo nativo (components/ui/PickerWrap.tsx)
+function withPicker(type: string, input: React.ReactElement) {
+  const kind = pickerKind(type)
+  return kind ? <PickerWrap kind={kind}>{input}</PickerWrap> : input
+}
+
 export function TextField({ label, value, onChange, required, help, error, maxLength, multiline, type = 'text', placeholder, inputMode, autoFocus, onEnter }: {
   label: ReactNode
   value: string
@@ -76,8 +84,8 @@ export function TextField({ label, value, onChange, required, help, error, maxLe
       counter={multiline && maxLength ? { value: value.length, max: maxLength } : undefined}>
       {multiline
         ? <textarea className="st-textarea" rows={4} {...common} />
-        : <input className="st-input" type={type} inputMode={inputMode} {...common}
-            onKeyDown={onEnter ? e => { if (e.key === 'Enter') { e.preventDefault(); onEnter() } } : undefined} />}
+        : withPicker(type, <input className="st-input" type={type} inputMode={inputMode} {...common}
+            onKeyDown={onEnter ? e => { if (e.key === 'Enter') { e.preventDefault(); onEnter() } } : undefined} />)}
     </Field>
   )
 }

@@ -9,6 +9,7 @@ import type { Habit, HabitFormData } from '../hooks/useHabits'
 import { GoalSelect } from './GoalSelect'
 import { WhyField } from './Why'
 import { whyValue } from '../lib/why'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 interface HabitSheetProps {
   open: boolean
@@ -255,8 +256,8 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
         {form.reminder_enabled && (
           <div style={{ marginTop: 8 }}>
             <label htmlFor="habit-reminder" style={label}>{p.reminderTime}</label>
-            <input id="habit-reminder" type="time" value={form.reminder_time ?? ''}
-              onChange={e => setForm(f => ({ ...f, reminder_time: e.target.value || null }))} style={{ ...fieldStyle, colorScheme: 'inherit' }} />
+            <PickerWrap kind="time"><input id="habit-reminder" type="time" value={form.reminder_time ?? ''}
+              onChange={e => setForm(f => ({ ...f, reminder_time: e.target.value || null }))} style={{ ...fieldStyle, colorScheme: 'inherit' }} /></PickerWrap>
           </div>
         )}
         <p style={hintStyle}>{p.reminderHint}</p>

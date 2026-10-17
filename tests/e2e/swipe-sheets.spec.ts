@@ -119,3 +119,21 @@ test('en un celular chico (320 px) nada se sale de las hojas de Life OS', async 
     await page.keyboard.press('Escape')
   }
 })
+
+test('fecha y hora vacías se ven como campos para tocar (ícono de calendario y reloj)', async ({ page, context }) => {
+  await installSupabaseMock(context, rich(), { signedIn: true })
+  await page.goto('/life/brain?vista=tareas')
+  await page.getByRole('button', { name: /Nueva tarea|Agregar tarea/ }).first().click()
+  for (const id of ['#task-date', '#task-time']) {
+    const input = page.locator(id)
+    await expect(input).toHaveValue('')
+    const icon = page.locator(`.my-picker:has(${id}) .my-picker-icon`)
+    await expect(icon).toBeVisible()
+    const [a, b] = [(await input.boundingBox())!, (await icon.boundingBox())!]
+    expect(b.x).toBeGreaterThan(a.x)
+    expect(b.x + b.width).toBeLessThanOrEqual(a.x + a.width)
+  }
+  // Tocar la fecha la deja elegir; la hora se habilita después
+  await page.locator('#task-date').fill('2026-10-20')
+  await expect(page.locator('#task-time')).toBeEnabled()
+})

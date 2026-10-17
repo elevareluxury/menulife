@@ -7,6 +7,7 @@ import { langLocale } from '@/i18n/app/languages'
 import { useSpeech } from '../hooks/useSpeech'
 import { parseVoice, type VoiceKind, type VoiceResult } from '../lib/voiceParse'
 import { lifeNow } from '../lib/zonedTime'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 // V1.1 (beta voiceCapture): dictar y confirmar. Se guarda sólo después de que la persona lo revisa.
 
@@ -115,11 +116,11 @@ export function VoiceCaptureSheet({ open, onClose, onSave }: {
             <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
               <div style={{ flex: 1 }}>
                 <label htmlFor="voice-date" style={label}>{v.date}</label>
-                <input id="voice-date" type="date" value={draft.date ?? ''} onChange={e => setDraft({ ...draft, date: e.target.value || null })} style={field} />
+                <PickerWrap kind="date"><input id="voice-date" type="date" value={draft.date ?? ''} onChange={e => setDraft({ ...draft, date: e.target.value || null })} style={field} /></PickerWrap>
               </div>
               <div style={{ flex: 1 }}>
                 <label htmlFor="voice-time" style={label}>{v.time}</label>
-                <input id="voice-time" type="time" value={draft.time ?? ''} disabled={!draft.date} onChange={e => setDraft({ ...draft, time: e.target.value || null })} style={field} />
+                <PickerWrap kind="time"><input id="voice-time" type="time" value={draft.time ?? ''} disabled={!draft.date} onChange={e => setDraft({ ...draft, time: e.target.value || null })} style={field} /></PickerWrap>
               </div>
             </div>
           )}

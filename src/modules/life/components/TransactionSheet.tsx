@@ -21,6 +21,7 @@ import { followTotal, planSplit, type EditShared, type SharedDraft, type SplitDe
 import { useOutbox } from '../lib/outbox'
 import { localDateOf } from '../lib/moneyFuture'
 import { lifeTimeZone, lifeToday, noonOfLocalDayISO } from '../lib/zonedTime'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 /** Gasto compartido: las deudas que quedan (el importe del movimiento ya viene ajustado en `data.amount`) */
 export interface SharedSave { debts: SplitDebt[] }
@@ -345,7 +346,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         <label style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
           {template ? t.recurring.nextDate : t.tx.date}
         </label>
-        <input
+        <PickerWrap kind="date"><input
           type="date"
           aria-label={t.tx.date}
           value={form.occurred_at}
@@ -359,7 +360,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
             fontFamily: font, fontSize: '14px', outline: 'none',
             colorScheme: 'inherit',
           }}
-        />
+        /></PickerWrap>
       </div>
 
       {sharedLocked && (

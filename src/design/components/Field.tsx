@@ -1,5 +1,7 @@
 import { useId } from 'react'
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
+import { PickerWrap } from '@/components/ui/PickerWrap'
+import { pickerKind } from '@/lib/pickerKind'
 
 interface FieldBase {
   /** Etiqueta real (<label>), siempre visible */
@@ -29,7 +31,10 @@ export function Field(props: FieldProps) {
       <label className="my-field-label" htmlFor={id}>{label}</label>
       {multiline
         ? <textarea {...(rest as TextareaHTMLAttributes<HTMLTextAreaElement>)} {...common} />
-        : <input {...(rest as InputHTMLAttributes<HTMLInputElement>)} {...common} />}
+        : pickerKind((rest as InputHTMLAttributes<HTMLInputElement>).type)
+          // Fechas y horas con ícono y sin el dibujo nativo (components/ui/PickerWrap.tsx)
+          ? <PickerWrap kind={pickerKind((rest as InputHTMLAttributes<HTMLInputElement>).type)!}><input {...(rest as InputHTMLAttributes<HTMLInputElement>)} {...common} /></PickerWrap>
+          : <input {...(rest as InputHTMLAttributes<HTMLInputElement>)} {...common} />}
       {hint && <span id={hintId} className="my-field-hint">{hint}</span>}
       {error && <span id={errorId} className="my-field-error" role="alert">{error}</span>}
     </div>

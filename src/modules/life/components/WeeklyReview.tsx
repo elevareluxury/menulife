@@ -19,6 +19,7 @@ import { nextOccurrence } from '../lib/recurrence'
 import { shiftDate, weekStartOf } from '../lib/habitStreak'
 import { celebrate } from '../lib/celebrate'
 import { MOOD_ICONS } from '../lib/moodIcons'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 // "Tu semana en 5 minutos": tarjeta en Mi día el último día de la semana, hoja guiada de 3 pasos (lo que salió bien,
 // qué soltar, 3 cosas para la semana que viene) y la lista de semanas anteriores (en Insights).
@@ -231,7 +232,7 @@ function OverdueTasks({ week }: { week: string }) {
           </div>
           {dateFor === task.id && (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <input type="date" aria-label={m.changeDate} value={newDate} min={today} onChange={e => setNewDate(e.target.value)} style={{ ...input, colorScheme: 'inherit' }} />
+              <PickerWrap kind="date"><input type="date" aria-label={m.changeDate} value={newDate} min={today} onChange={e => setNewDate(e.target.value)} style={{ ...input, colorScheme: 'inherit' }} /></PickerWrap>
               <button type="button" style={chipBtn} disabled={!newDate} onClick={() => { void move(task, newDate) }}>{t.common.save}</button>
             </div>
           )}

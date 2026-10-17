@@ -5,6 +5,7 @@ import { LIFE_COLORS } from '../lib/lifePalette'
 import type { Goal, GoalFormData } from '../hooks/useGoals'
 import { WhyField } from './Why'
 import { whyValue } from '../lib/why'
+import { PickerWrap } from '@/components/ui/PickerWrap'
 
 interface GoalSheetProps {
   open: boolean
@@ -80,8 +81,8 @@ export function GoalSheet({ open, onClose, onSave, initial }: GoalSheetProps) {
 
       <div style={{ marginBottom: '20px' }}>
         <label htmlFor="goal-date" style={label}>{t.goalSheet.targetDate}</label>
-        <input id="goal-date" type="date" value={form.target_date} onChange={e => setForm(f => ({ ...f, target_date: e.target.value }))}
-          style={{ ...field, color: form.target_date ? colors.text.primary : colors.text.tertiary, colorScheme: 'inherit' }} />
+        <PickerWrap kind="date"><input id="goal-date" type="date" value={form.target_date} onChange={e => setForm(f => ({ ...f, target_date: e.target.value }))}
+          style={{ ...field, color: form.target_date ? colors.text.primary : colors.text.tertiary, colorScheme: 'inherit' }} /></PickerWrap>
       </div>
 
       <div style={{ marginBottom: '24px' }}>
