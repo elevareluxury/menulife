@@ -14,6 +14,8 @@ interface LifeConfirmDialogProps {
   onConfirm: () => void
   onCancel: () => void
   danger?: boolean
+  /** El botón de confirmar queda apagado (por ejemplo, hasta escribir la palabra de confirmación) */
+  confirmDisabled?: boolean
   /** Algo más entre el texto y los botones (por ejemplo, el "¿Por qué lo hago?" antes de soltar) */
   children?: ReactNode
 }
@@ -22,7 +24,7 @@ export function LifeConfirmDialog({
   open, title, message,
   confirmLabel,
   cancelLabel,
-  onConfirm, onCancel, danger = false, children,
+  onConfirm, onCancel, danger = false, confirmDisabled = false, children,
 }: LifeConfirmDialogProps) {
   const t = useLifeT()
   const titleId = useId()
@@ -114,16 +116,17 @@ export function LifeConfirmDialog({
               </button>
               <button
                 onClick={onConfirm}
+                disabled={confirmDisabled}
                 style={{
                   flex: 1, padding: '11px', borderRadius: radius.md,
                   background: danger ? colors.semantic.error : colors.accent.default,
                   border: 'none',
                   color: colors.accent.on,
                   fontFamily: font, fontSize: '14px', fontWeight: 700,
-                  cursor: 'pointer', transition: 'opacity 0.15s',
+                  cursor: confirmDisabled ? 'not-allowed' : 'pointer', transition: 'opacity 0.15s', opacity: confirmDisabled ? 0.5 : 1,
                 }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+                onMouseEnter={e => { if (!confirmDisabled) e.currentTarget.style.opacity = '0.88' }}
+                onMouseLeave={e => { if (!confirmDisabled) e.currentTarget.style.opacity = '1' }}
               >
                 {confirmLabel}
               </button>

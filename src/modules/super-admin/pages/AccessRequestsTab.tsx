@@ -1,3 +1,4 @@
+import { webOrigin } from '@/lib/platform'
 import { useState, useEffect, useCallback } from 'react'
 import { Building2, Mail, Phone, MapPin, Clock, CheckCircle2, XCircle, RefreshCw, Link2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -344,7 +345,7 @@ export function AccessRequestsTab() {
   ]
 
   const copyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/solicitar-acceso`)
+    navigator.clipboard.writeText(`${webOrigin()}/solicitar-acceso`)
     toast.success('Link copiado al portapapeles')
   }
 

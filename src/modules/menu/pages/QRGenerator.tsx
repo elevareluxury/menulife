@@ -1,3 +1,5 @@
+import { webOrigin } from '@/lib/platform'
+import { saveFile } from '@/lib/nativeFiles'
 import { useState, useRef } from 'react'
 import { Download } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
@@ -47,7 +49,7 @@ export function QRGenerator() {
     return <Card><p className="text-gray-600">No se encontró el restaurante</p></Card>
   }
 
-  const menuUrl = `${window.location.origin}/r/${restaurant.slug}`
+  const menuUrl = `${webOrigin()}/r/${restaurant.slug}`
   const tableUrl = selectedTable ? `${menuUrl}?mesa=${selectedTable}` : ''
   const activeTables = tables.filter(t => t.is_active)
   const clampedSize = Math.min(512, Math.max(128, size))
@@ -56,10 +58,7 @@ export function QRGenerator() {
     const svg = qrRef.current?.querySelector('svg')
     if (!svg) return
     svgToCanvas(svg as SVGElement, clampedSize).then(canvas => {
-      const link = document.createElement('a')
-      link.download = `menulife-qr-${restaurant.slug}.png`
-      link.href = canvas.toDataURL('image/png')
-      link.click()
+      void saveFile(canvas.toDataURL('image/png'), `menulife-qr-${restaurant.slug}.png`)
     })
   }
 
@@ -79,10 +78,7 @@ export function QRGenerator() {
       ctx.font = `bold ${Math.round(clampedSize * 0.09)}px sans-serif`
       ctx.textAlign = 'center'
       ctx.fillText(`Mesa ${tableNum}`, clampedSize / 2, clampedSize + labelH - 10)
-      const link = document.createElement('a')
-      link.download = `menulife-mesa-${tableNum}-${restaurant.slug}.png`
-      link.href = canvas.toDataURL('image/png')
-      link.click()
+      void saveFile(canvas.toDataURL('image/png'), `menulife-mesa-${tableNum}-${restaurant.slug}.png`)
     })
   }
 
@@ -117,10 +113,7 @@ export function QRGenerator() {
       ctx.drawImage(qrCanvas, x, y + labelH)
     }
 
-    const link = document.createElement('a')
-    link.download = `menulife-mesas-${restaurant.slug}.png`
-    link.href = canvas.toDataURL('image/png')
-    link.click()
+    void saveFile(canvas.toDataURL('image/png'), `menulife-mesas-${restaurant.slug}.png`)
   }
 
   return (

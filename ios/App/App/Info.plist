@@ -52,6 +52,10 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Mycen uses the camera so you can take a photo for your profile or your projects.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mycen uses the microphone only while you dictate an expense, a task or an idea.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Mycen turns what you dictate into text so you can review it before saving.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Mycen accesses your photos so you can choose an image for your profile or your projects.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

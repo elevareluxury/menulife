@@ -1,9 +1,17 @@
-import { authCallbackUrl, isNativeApp } from '@/lib/platform'
+import { authCallbackUrl, isNativeApp, nativePlatform } from '@/lib/platform'
 // Entrar con Google (V1.1). Supabase hace el ida y vuelta con Google y vuelve a /auth/callback con la sesión.
 // Lo que el registro con email guarda en la cuenta (idioma de los mails, aceptación de los términos, referido) se
 // anota antes de salir y se completa al volver, sin pisar lo que la cuenta ya tenga.
 import { loadSupabase } from '@/lib/supabaseLazy'
 import type { Referral } from '@/lib/referral'
+import { featureOn } from '@/lib/features'
+
+/** Qué botones de acceso con otra cuenta se muestran. App Store (regla 4.8): en la app de iPhone, Google sólo va
+ *  junto a "Entrar con Apple"; mientras Apple no esté configurado, ahí se entra con email. */
+export function oauthProviders(): { google: boolean; apple: boolean } {
+  const apple = featureOn('appleSignIn')
+  return { google: featureOn('googleSignIn') && (nativePlatform() !== 'ios' || apple), apple }
+}
 
 const KEY = 'mycen_oauth_pending'
 const MAX_AGE_MS = 60 * 60 * 1000

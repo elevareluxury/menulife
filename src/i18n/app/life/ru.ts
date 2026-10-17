@@ -23,7 +23,7 @@ const ru: LifeDict = {
     addCurrency: 'Добавить валюту', removeCurrency: c => `Убрать ${c}`, searchCurrency: 'Найти валюту…',
     timezone: 'Часовой пояс', timezoneHelp: 'Определяет, когда начинается и заканчивается ваш день.', timezoneOther: z => `Телефон в другом часовом поясе (${z}). Mycen использует выбранный здесь.`, useDeviceTimezone: 'Взять пояс телефона',
     weekStart: 'Неделя начинается с', monday: 'Понедельник', sunday: 'Воскресенье',
-    account: 'Аккаунт', openStudio: 'Открыть Mycen Studio', signOut: 'Выйти', savedOk: 'Настройки сохранены', noResults: 'Ничего не найдено',
+    account: 'Аккаунт', openStudio: 'Открыть Mycen Studio', signOut: 'Выйти', deleteAccount: "Удалить мой аккаунт", deleteAccountHelp: "Удаляет аккаунт, вашу идентичность и весь Life OS. Отменить нельзя.", deleteAccountTitle: "Удалить аккаунт навсегда?", deleteAccountText: "Аккаунт, профиль, изображения и все данные Life OS будут удалены без возможности восстановления. Сначала можно экспортировать данные. Для подтверждения введите", deleteAccountWord: "УДАЛИТЬ", deleteAccountField: "Подтверждение", deleteAccountBusiness: "К вашему аккаунту привязан бизнес в Mycen Business. Чтобы закрыть его, напишите на team@mycen.id — так мы позаботимся о данных ваших клиентов и продаж.", deleteAccountError: "Не удалось удалить аккаунт. Попробуйте через несколько минут.", savedOk: 'Настройки сохранены', noResults: 'Ничего не найдено',
     homeTitle: "Мой день",
     showIdentity: "Показывать «Мою идентичность» вверху «Моего дня»",
     showIdentityHelp: "Сохраняется на этом устройстве.",

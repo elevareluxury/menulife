@@ -3,8 +3,7 @@ import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
 import { authErrorMessage } from '@/lib/authErrors'
 import type { Referral } from '@/lib/referral'
-import { startOAuthSignIn } from '@/modules/auth/lib/googleSignIn'
-import { featureOn } from '@/lib/features'
+import { oauthProviders, startOAuthSignIn } from '@/modules/auth/lib/googleSignIn'
 
 // Logo de Google con sus colores oficiales (lo piden sus pautas de marca para el botón de acceso)
 function GoogleLogo() {
@@ -40,6 +39,7 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
   const a = t.apple
   const [loading, setLoading] = useState<'google' | 'apple' | null>(null)
   const [error, setError] = useState('')
+  const [shown] = useState(oauthProviders)
 
   async function handleClick(provider: 'google' | 'apple') {
     setError('')
@@ -55,6 +55,7 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
   }
 
   const font = 'var(--font-jakarta)'
+  if (!shown.google && !shown.apple) return null
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '18px' }}>
       <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -71,7 +72,7 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
           {error}
         </div>
       )}
-      <button
+      {shown.google && (<button
         type="button"
         onClick={() => handleClick('google')}
         disabled={!!loading}
@@ -86,8 +87,8 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
       >
         <GoogleLogo />
         {loading === 'google' ? g.going : g.continue}
-      </button>
-      {featureOn('appleSignIn') && (
+      </button>)}
+      {shown.apple && (
         <button
           type="button"
           onClick={() => handleClick('apple')}

@@ -3,3 +3,5 @@
 "NSCameraUsageDescription" = "O Mycen usa a câmera para você tirar uma foto para o seu perfil ou seus projetos.";
 "NSPhotoLibraryUsageDescription" = "O Mycen acessa suas fotos para você escolher uma imagem para o seu perfil ou seus projetos.";
 "NSPhotoLibraryAddUsageDescription" = "O Mycen salva seu QR e seu cartão de identidade em Fotos quando você pede.";
+"NSMicrophoneUsageDescription" = "O Mycen usa o microfone só enquanto você dita um gasto, uma tarefa ou uma ideia.";
+"NSSpeechRecognitionUsageDescription" = "O Mycen transforma em texto o que você dita para você revisar antes de salvar.";

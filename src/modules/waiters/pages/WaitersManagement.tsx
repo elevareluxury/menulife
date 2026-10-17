@@ -1,3 +1,4 @@
+import { webOrigin } from '@/lib/platform'
 import { useState, useEffect } from 'react'
 import { Plus, Edit, Trash2, UserCheck, UserX, Copy, MessageCircle, Smartphone, BarChart2, Users } from 'lucide-react'
 import bcrypt from 'bcryptjs'
@@ -17,7 +18,7 @@ import type { Waiter } from '@/types'
 const db = supabase as any
 
 function WaiterLinkBanner({ slug }: { slug: string }) {
-  const url = `${window.location.origin}/mozo/${slug}`
+  const url = `${webOrigin()}/mozo/${slug}`
 
   const copy = async () => {
     await navigator.clipboard.writeText(url)

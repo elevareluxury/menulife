@@ -47,7 +47,7 @@ export function CalendarFeedCard() {
     toast.success(c.disabled)
   }
 
-  const host = window.location.host
+  const host = new URL(webOrigin()).host
   const https = token ? `${webOrigin()}/cal/${token}.ics` : ''
   const webcal = token ? `webcal://${host}/cal/${token}.ics` : ''
 

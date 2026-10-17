@@ -3,3 +3,5 @@
 "NSCameraUsageDescription" = "Mycen はプロフィールやプロジェクト用の写真を撮るためにカメラを使います。";
 "NSPhotoLibraryUsageDescription" = "Mycen はプロフィールやプロジェクト用の画像を選ぶために写真にアクセスします。";
 "NSPhotoLibraryAddUsageDescription" = "ご希望のときに、Mycen は QR コードと ID カードを写真に保存します。";
+"NSMicrophoneUsageDescription" = "Mycen は支出・タスク・アイデアを音声入力している間だけマイクを使います。";
+"NSSpeechRecognitionUsageDescription" = "Mycen は音声入力した内容を文字にし、保存前に確認できるようにします。";

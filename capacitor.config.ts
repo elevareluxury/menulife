@@ -16,6 +16,10 @@ const config: CapacitorConfig = {
     contentInset: 'never',
   },
   plugins: {
+    SystemBars: {
+      // Android 15+ dibuja de borde a borde: la página ya usa viewport-fit=cover y env(safe-area-inset-*)
+      initialViewportFitValueHint: 'cover',
+    },
     SplashScreen: {
       // La app la saca cuando dibujó la primera pantalla (NativeBridge)
       launchAutoHide: false,

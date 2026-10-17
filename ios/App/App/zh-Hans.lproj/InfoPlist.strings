@@ -3,3 +3,5 @@
 "NSCameraUsageDescription" = "Mycen 使用相机，方便你为个人资料或项目拍照。";
 "NSPhotoLibraryUsageDescription" = "Mycen 访问你的照片，方便你为个人资料或项目选择图片。";
 "NSPhotoLibraryAddUsageDescription" = "当你需要时，Mycen 会把你的二维码和身份卡保存到照片中。";
+"NSMicrophoneUsageDescription" = "Mycen 仅在你口述支出、任务或想法时使用麦克风。";
+"NSSpeechRecognitionUsageDescription" = "Mycen 会把你口述的内容转成文字，方便你在保存前检查。";

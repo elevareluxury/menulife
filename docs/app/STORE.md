@@ -40,10 +40,14 @@ Palabras clave (es): `link en bio,perfil,hábitos,tareas,metas,diario,presupuest
   tareas, hábitos, metas, diario, movimientos), identificador de cuenta.
 - **Uso de la app (analítica propia, vinculado a la cuenta):** eventos de producto sin contenido (`product_events`).
 - **Diagnóstico (no vinculado):** errores de la app con un hash diario anónimo (`app_errors`).
-- **Cifrado en tránsito:** sí (HTTPS). **Borrar la cuenta desde la app:** sí (Studio → Ajustes).
+- **Cifrado en tránsito:** sí (HTTPS). **Borrar la cuenta desde la app:** sí (Studio → Ajustes y Life OS → Ajustes →
+  Cuenta, así llega también quien usa sólo Life OS).
+- El manifiesto `ios/App/App/PrivacyInfo.xcprivacy` declara lo mismo (nombre, email, fotos, contenido, información
+  financiera de Dinero, id de cuenta, uso de la app y errores no vinculados); si cambia esta lista, cambiarlo también.
 - Export compliance: sólo cifrado estándar (`ITSAppUsesNonExemptEncryption = false` ya está en Info.plist).
 
 ## Revisión de Apple: notas para el revisor
 - Cuenta de prueba: crear una con email (sin datos reales) y ponerla en "App Review Information".
 - "La app no cobra nada; los módulos Apoyame/Mercado Pago son links del dueño del perfil a sus propios medios."
-- "Entrar con Apple" está junto a "Continuar con Google" (guía 4.8).
+- "Entrar con Apple" está junto a "Continuar con Google" (guía 4.8). Mientras `appleSignIn` esté apagado, la app de
+  iPhone no muestra Google (`oauthProviders()` en `googleSignIn.ts`): se entra con email.
