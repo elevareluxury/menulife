@@ -21,6 +21,14 @@ export function ProtectedRoute({ superAdminOnly = false }: { superAdminOnly?: bo
   }
 
   if (!user) return <Navigate to="/login" replace />
+  // El rol llega después de la sesión (consulta aparte): esperarlo antes de decidir
+  if (superAdminOnly && role === null && !timedOut) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    )
+  }
   if (superAdminOnly && role !== 'super_admin') return <Navigate to="/dashboard" replace />
 
   return <Outlet />
@@ -36,6 +44,14 @@ export function PublicRoute() {
   }, [])
 
   if (!initialized && !timedOut) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    )
+  }
+
+  if (user && role === null && !timedOut) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner size="lg" />

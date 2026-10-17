@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { publicRpc } from '@/lib/publicRpc'
 
 // Registro de errores propio (Lanzamiento L5, sin proveedores externos): lo que falla en el navegador de alguien
 // llega a la RPC report_client_error y el super-admin lo ve en /super-admin/errores, agrupado.
@@ -67,7 +67,7 @@ export function reportError(err: unknown, extra?: { area?: ErrorArea; componentS
   sent.add(key)
   const fullStack = [stack, extra?.componentStack && `Componentes:${extra.componentStack}`].filter(Boolean).join('\n')
   void Promise.resolve(
-    (supabase as unknown as { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<unknown> }).rpc('report_client_error', {
+    publicRpc('report_client_error', {
       p_message: message,
       p_stack: fullStack || null,
       p_area: area,

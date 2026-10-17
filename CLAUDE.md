@@ -129,9 +129,17 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   en bucle), las secciones fuera de pantalla quedan en pausa (`.ml-paused`), el canvas del hero se detiene cuando no se ve
   y no usar `scroll-behavior: smooth` en `<html>` (las anclas se mueven por JS). El hero es una sola pantalla (sin tarjeta fijada).
   Acentos de títulos: Geist sin cursiva (no hay cursiva cargada) con degradé fijo (`.ml-shine`, `.ch-line2`).
-- `manualChunks` sólo agrupa supabase y react: agrupar recharts/framer a mano arrastraba dependencias a todas las páginas.
-- Presupuesto de peso: `npm run check:budget` (después de `npm run build`, también en CI) mide JS+CSS gzip de perfil,
-  proyecto y landing con `dist/.vite/manifest.json`. Si un cambio lo supera, achicarlo antes de subir el límite.
+- `advancedChunks` sólo agrupa supabase y react (+ el ayudante de precarga de Vite en `vendor`: en el bloque de supabase
+  hacía que toda página bajara Supabase): agrupar recharts/framer a mano arrastraba dependencias a todas las páginas.
+- La entrada de la app no lleva Supabase ni i18next (antes de la V1: perfil 239 → 166 KB, landing 264 → 191 KB):
+  - i18next es sólo de Business: el plugin `scripts/businessI18n.ts` agrega `import '@/i18n'` a cada archivo que usa
+    `react-i18next`; el idioma se sincroniza con `syncBusinessLocale` (`src/i18n/businessLocale.ts`).
+  - Lo que corre al abrir cualquier página pide el cliente con `loadSupabase()` (`src/lib/supabaseLazy.ts`); un visitante
+    sin sesión guardada lo baja recién cuando la página terminó de dibujarse (`useAuth`).
+  - Página pública, interruptores, errores y métricas usan `publicRpc` (`src/lib/publicRpc.ts`: POST a /rest/v1/rpc con el
+    token de la sesión del dispositivo si hay; si venció, anónimo). No importar `@/lib/supabase` en `profile/` ni en la landing.
+- Presupuesto de peso: `npm run check:budget` (después de `npm run build`, también en CI) mide JS+CSS gzip de perfil
+  (185 KB), proyecto (175) y landing (215) con `dist/.vite/manifest.json`. Si un cambio lo supera, achicarlo antes de subir el límite.
 - Fuentes desde `@fontsource` (`src/lib/fonts.ts`; las de títulos de perfil, a pedido en `ensureProfileFont`): nada de Google Fonts.
 - Imágenes: `uploadMedia` las achica (avatar 640 px, resto 1920 px) y las pasa a WebP en el dispositivo (`lib/imageOptimize.ts`).
   También Business (`useImageUpload`: logos 640, fotos 1600; portada y banner 1920) y las fotos de testimonios (640).

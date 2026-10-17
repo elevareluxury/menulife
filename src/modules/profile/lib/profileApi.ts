@@ -1,12 +1,9 @@
-import { supabase } from '@/lib/supabase'
+import { publicRpc } from '@/lib/publicRpc'
 import type { ProfileEventType, ProfileLookup, PublicProfile } from './profileTypes'
 import type { ProjectLookup, PublicProject } from './projectTypes'
 
-// Las RPCs de Profile todavía no están en database.types.ts (generado antes de la Fase 0)
-type RpcClient = {
-  rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { message: string } | null }>
-}
-const rpc = (fn: string, args: Record<string, unknown>) => (supabase as unknown as RpcClient).rpc(fn, args)
+// Sólo RPC públicas: van con `publicRpc` (un fetch), sin el cliente de Supabase, para que la página pública pese menos
+const rpc = (fn: string, args: Record<string, unknown>) => publicRpc(fn, args)
 
 /** `handle`: "ana" o "ana/estudio" (Space secundario, Fase 10) */
 export async function fetchPublicProfile(handle: string): Promise<ProfileLookup> {

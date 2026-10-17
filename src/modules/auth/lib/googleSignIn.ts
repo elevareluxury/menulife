@@ -1,7 +1,7 @@
 // Entrar con Google (V1.1). Supabase hace el ida y vuelta con Google y vuelve a /auth/callback con la sesión.
 // Lo que el registro con email guarda en la cuenta (idioma de los mails, aceptación de los términos, referido) se
 // anota antes de salir y se completa al volver, sin pisar lo que la cuenta ya tenga.
-import { supabase } from '@/lib/supabase'
+import { loadSupabase } from '@/lib/supabaseLazy'
 import type { Referral } from '@/lib/referral'
 
 const KEY = 'mycen_oauth_pending'
@@ -23,6 +23,7 @@ export async function startGoogleSignIn(locale: string, referral: Referral | nul
     ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
   }
   try { localStorage.setItem(KEY, JSON.stringify(pending)) } catch { /* sin almacenamiento: se entra igual */ }
+  const supabase = await loadSupabase()
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin + '/auth/callback' },
@@ -58,6 +59,7 @@ export async function applyPendingSignup(): Promise<void> {
     pending = JSON.parse(raw) as PendingSignup
   } catch { return }
   try {
+    const supabase = await loadSupabase()
     const { data } = await supabase.auth.getUser()
     const updates = pendingUpdates(pending, data.user?.user_metadata, new Date())
     if (updates) await supabase.auth.updateUser({ data: updates })

@@ -5,6 +5,7 @@ import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 import { heroShellPlugin } from './scripts/heroShell'
 import { bootSplashPlugin } from './scripts/bootSplash'
+import { businessI18nPlugin } from './scripts/businessI18n'
 
 export default defineConfig({
   plugins: [
@@ -12,6 +13,7 @@ export default defineConfig({
     tailwindcss(),
     heroShellPlugin(),
     bootSplashPlugin(),
+    businessI18nPlugin(),
     VitePWA({
       // Use our custom service worker — VitePWA injects the precache manifest
       strategies: 'injectManifest',
@@ -80,9 +82,13 @@ export default defineConfig({
       output: {
         // Sólo se agrupan librerías que usa casi toda página. recharts y framer-motion NO: agruparlas a mano
         // arrastraba dependencias compartidas y hacía que cada perfil público descargara gráficos y animaciones.
-        manualChunks(id) {
-          if (id.includes('node_modules/@supabase/')) return 'supabase'
-          if (/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)) return 'vendor'
+        advancedChunks: {
+          groups: [
+            // El ayudante que precarga pantallas lo usa la entrada: si queda en el bloque de Supabase, cada página baja
+            // Supabase entero sólo por él
+            { name: 'vendor', test: /vite\/preload-helper|node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/, priority: 2 },
+            { name: 'supabase', test: /node_modules[\\/]@supabase[\\/]/, priority: 1 },
+          ],
         },
       },
     },

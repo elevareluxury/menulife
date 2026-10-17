@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
-import { supabase } from '@/lib/supabase'
+import { loadSupabase } from '@/lib/supabaseLazy'
 
 export function useAuth() {
   const store = useAuthStore()
@@ -15,6 +15,13 @@ export function useAuth() {
       if (mounted) useAuthStore.setState({ loading: false, initialized: true })
     }, 8_000)
 
+    let unsubscribe: (() => void) | null = null
+    // Sin sesión guardada ni vuelta de un link de acceso: es un visitante. Ya se sabe que no hay usuario y el cliente
+    // de Supabase (~50 KB) se baja cuando la página terminó de dibujarse, sólo para escuchar si inicia sesión.
+    const visitor = !hasStoredSession() && !/[#&?](access_token|code|error|type)=/.test(window.location.href)
+    if (visitor) useAuthStore.setState({ user: null, loading: false, initialized: true })
+    void whenIdle(visitor).then(loadSupabase).then(supabase => {
+    if (!mounted) return
     // getSession() reads from localStorage — fast, no network round-trip.
     // Set loading:false IMMEDIATELY once we know the session state.
     supabase.auth.getSession()
@@ -69,11 +76,17 @@ export function useAuth() {
         store.checkAuth()
       }
     })
+    unsubscribe = () => subscription.unsubscribe()
+    }).catch(() => {
+      if (!mounted) return
+      clearTimeout(safetyTimeout)
+      useAuthStore.setState({ loading: false, initialized: true })
+    })
 
     return () => {
       mounted = false
       clearTimeout(safetyTimeout)
-      subscription.unsubscribe()
+      unsubscribe?.()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -87,4 +100,24 @@ export function useAuth() {
     isRestaurantOwner: store.role === 'restaurant_owner',
     signOut: store.signOut,
   }
+}
+
+/** supabase-js guarda la sesión en localStorage como sb-<ref>-auth-token */
+function hasStoredSession(): boolean {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) return true
+    }
+  } catch { /* sin almacenamiento: se trata como visitante */ }
+  return false
+}
+
+function whenIdle(defer: boolean): Promise<void> {
+  if (!defer) return Promise.resolve()
+  return new Promise(resolve => {
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }
+    if (w.requestIdleCallback) w.requestIdleCallback(() => resolve(), { timeout: 3000 })
+    else setTimeout(resolve, 1500)
+  })
 }

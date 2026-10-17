@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowRight, ExternalLink } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { loadSupabase } from '@/lib/supabaseLazy'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any
 
 interface RestaurantPreview {
   name: string
@@ -24,14 +22,15 @@ export function ReferralHeroSection() {
   useEffect(() => {
     if (ref !== 'hub' || !from) { setLoading(false); return }
 
-    db.from('restaurants')
+    // Sólo con ?ref=hub&from=…: el cliente de Supabase baja recién ahí (la landing no lo necesita para mostrarse)
+    void loadSupabase().then(sb => (sb as any).from('restaurants') // eslint-disable-line @typescript-eslint/no-explicit-any
       .select('name, slug, logo_url, hub_category, city')
       .eq('slug', from)
       .maybeSingle()
       .then(({ data }: { data: RestaurantPreview | null }) => {
         if (data) setRestaurant(data)
         setLoading(false)
-      })
+      }))
   }, [ref, from])
 
   if (loading || !restaurant) return null

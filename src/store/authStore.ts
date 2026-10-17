@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { supabase } from '@/lib/supabase'
+import { loadSupabase } from '@/lib/supabaseLazy'
 import type { User } from '@supabase/supabase-js'
 import type { UserRole } from '@/types'
 
@@ -28,6 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Pure role resolver — never touches loading state.
     // useAuth hook owns loading; this only fills in the role after session is confirmed.
     try {
+      const supabase = await loadSupabase()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) return
 
@@ -44,7 +45,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOut: async () => {
-    await supabase.auth.signOut()
+    await (await loadSupabase()).auth.signOut()
     set({ user: null, role: null })
   },
 }))

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { publicRpc } from '@/lib/publicRpc'
 import { useAuthStore } from '@/store/authStore'
 
 // Métricas de producto propias (V1 · etapa 14): eventos de uso sin terceros, a product_events por la RPC
@@ -25,13 +25,12 @@ export interface ProductEventProps {
   days?: number
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any
 
 export function trackEvent(event: ProductEvent, props: ProductEventProps = {}): void {
   try {
     const clean = Object.fromEntries(Object.entries(props).filter(([, v]) => v !== undefined && v !== null && v !== ''))
-    void Promise.resolve(db.rpc('track_product_event', { p_event: event, p_props: clean })).catch(() => undefined)
+    // Con la sesión del dispositivo (publicRpc manda su token): sin sesión la base sólo acepta signup_started
+    void publicRpc('track_product_event', { p_event: event, p_props: clean }).catch(() => undefined)
   } catch { /* sin conexión o sin cliente: no importa */ }
 }
 
