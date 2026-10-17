@@ -7,7 +7,7 @@ const ROUTES = ['/studio', '/studio/identity', '/studio/modules', '/studio/proje
   '/life', '/life/money', '/life/goals', '/life/habits', '/life/brain', '/life/brain?vista=tareas', '/life/replay', '/life/insights', '/life/settings', '/life/journal',
   '/ana', '/ana/estudio', '/ana/projects/cafe-luna', '/ana?src=qr', '/noexiste', '/', '/login', '/register', '/terminos', '/privacidad', '/forgot-password', '/auth/terms',
   // Panel interno (auditoría v2: "Verificaciones" caía con una respuesta vacía)
-  '/super-admin', '/super-admin/denuncias', '/super-admin/errores', '/super-admin/producto', '/super-admin/verificaciones']
+  '/super-admin', '/super-admin/personas', '/super-admin/personas?q=ana', '/super-admin/actividad', '/super-admin/denuncias', '/super-admin/errores', '/super-admin/producto', '/super-admin/verificaciones']
 
 
 // Red de seguridad (auditoría total): cada pantalla de Studio, Life OS, el perfil público y las páginas abiertas se

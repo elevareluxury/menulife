@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Play } from 'lucide-react'
 import { Huella } from '@/design/components/Huella'
 import { MEDIA_PROVIDER_NAME, parseMediaUrl } from '../lib/media'
+import { safeHref } from '../lib/safeUrl'
 import { tr, ui } from '../lib/profileI18n'
 import type { ModuleProps } from './ProfileModules'
 import { useProfileModule } from './profileModuleContext'
@@ -18,6 +19,8 @@ export function MediaModule({ module, lang, onAction }: ModuleProps) {
   const embed = parseMediaUrl(module.content.url)
   if (!embed) return null
   const provider = MEDIA_PROVIDER_NAME[embed.provider]
+  // Portada que se guardó en Mycen al cargar el link (Studio): se ve sin conectarse con el proveedor
+  const cover = safeHref(module.content.cover_url)
   const title = tr(module.title, module.translations, 'title', lang) || provider
   const video = embed.kind === 'video'
   const box = embed.height
@@ -40,11 +43,13 @@ export function MediaModule({ module, lang, onAction }: ModuleProps) {
       ) : (
         <button type="button" className="mp-media-facade" style={video ? { aspectRatio: String(Math.max(embed.ratio, 16 / 9)) } : undefined}
           onClick={() => { setPlaying(true); onAction(module.id) }}>
-          {huella && (
-            <span className="mp-media-art" aria-hidden="true">
-              <Huella seed={huella.seed} variant={huella.variant} />
-            </span>
-          )}
+          {cover
+            ? <img className="mp-media-cover" src={cover} alt="" loading="lazy" decoding="async" />
+            : huella && (
+              <span className="mp-media-art" aria-hidden="true">
+                <Huella seed={huella.seed} variant={huella.variant} />
+              </span>
+            )}
           <span className="mp-media-play" aria-hidden="true"><Play size={22} fill="currentColor" /></span>
           <span className="mp-media-text">
             <span className="mp-media-title">{title}</span>

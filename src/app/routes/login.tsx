@@ -3,6 +3,7 @@ import { LoginForm } from '@/modules/auth/components/LoginForm'
 import { LanguageSelect } from '@/components/ui/LanguageSelect'
 import { useAuthT } from '@/i18n/app/auth'
 import { useLangDir } from '@/i18n/app/useLangDir'
+import { AuthBrand } from '@/components/ui/AuthBrand'
 
 // Avisos que llegan por la URL desde otros pasos (códigos, no texto: así se muestran en el idioma de la persona)
 const MESSAGES = { password_updated: 'passwordUpdated' } as const
@@ -43,9 +44,7 @@ export function LoginPage() {
 
         {/* Logo + title */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', marginBottom: '16px' }}>
-            <img src="/logo.png" alt="Mycen" className="h-8 w-auto" />
-          </Link>
+          <AuthBrand />
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.7)', margin: 0 }}>
             {t.login.subtitle}
           </p>
@@ -73,14 +72,6 @@ export function LoginPage() {
           </Link>
         </p>
 
-        <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '11px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>
-            {t.login.team}{' '}
-            <Link to="/super-admin" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'underline' }}>
-              {t.login.adminAccess}
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   )

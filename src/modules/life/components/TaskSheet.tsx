@@ -1,3 +1,4 @@
+import { focusOnMount } from '@/lib/viewportVars'
 import { useEffect, useState } from 'react'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
 import { Star } from 'lucide-react'
@@ -91,7 +92,7 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>
           <label htmlFor="task-title" style={labelStyle}>{s.task}</label>
-          <input id="task-title" autoFocus value={title} maxLength={200} onChange={e => setTitle(e.target.value)}
+          <input id="task-title" ref={focusOnMount} value={title} maxLength={200} onChange={e => setTitle(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') void save() }}
             placeholder={s.placeholder} style={inputStyle} aria-invalid={!!error && !title.trim()} />
         </div>

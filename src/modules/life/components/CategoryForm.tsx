@@ -1,3 +1,4 @@
+import { focusOnMount } from '@/lib/viewportVars'
 import { useId, useState } from 'react'
 import { Check } from 'lucide-react'
 import { LifeButton, colors, font, radius, ink } from '../design-system'
@@ -38,7 +39,7 @@ export function CategoryForm({ type, items, initial, defaultColor, submitLabel, 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: 12, borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}` }}>
       <label htmlFor={`${id}-name`} style={{ fontFamily: font, fontSize: 12, fontWeight: 700, color: colors.text.secondary }}>{c.name}</label>
-      <input id={`${id}-name`} value={name} maxLength={CATEGORY_NAME_MAX} autoFocus placeholder={c.namePlaceholder}
+      <input id={`${id}-name`} value={name} maxLength={CATEGORY_NAME_MAX} ref={focusOnMount} placeholder={c.namePlaceholder}
         aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined}
         onChange={e => { setName(e.target.value); setError('') }}
         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void submit() } }}

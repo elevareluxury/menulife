@@ -13,7 +13,7 @@ interface LifeSheetProps {
   maxHeight?: string
 }
 
-export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }: LifeSheetProps) {
+export function LifeSheet({ open, onClose, title, children, maxHeight = '88dvh' }: LifeSheetProps) {
   const titleId = useId()
   const t = useLifeT()
   // Lock body scroll + handle Escape key
@@ -63,9 +63,10 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }
             transition={{ type: 'spring', stiffness: 320, damping: 32, mass: 0.9 }}
             style={{
               position: 'fixed',
-              bottom: 0, left: 0, right: 0,
+              // Arriba del teclado y nunca más alta que lo que se ve (`--kb`/`--vvh`, lib/viewportVars.ts)
+              bottom: 'var(--kb, 0px)', left: 0, right: 0,
               zIndex: 201,
-              maxHeight,
+              maxHeight: `min(${maxHeight}, calc(var(--vvh, 100dvh) - 12px))`,
               display: 'flex', flexDirection: 'column',
               background: colors.surface.elevated,
               borderRadius: `${radius['2xl']} ${radius['2xl']} 0 0`,
@@ -107,7 +108,8 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88vh' }
             </div>
 
             {/* Content */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 28px' }}>
+            {/* Sólo se mueve para arriba y abajo; empieza siempre desde arriba (se monta de nuevo cada vez que abre) */}
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', padding: '16px 20px 28px' }}>
               {children}
             </div>
           </motion.div>

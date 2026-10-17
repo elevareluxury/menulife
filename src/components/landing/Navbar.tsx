@@ -8,7 +8,6 @@ export function Navbar() {
   const l = useLandingT()
   const { business } = useSiteFlags()
   const [scrolled,   setScrolled]   = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
 
   const NAV_LINKS = [
     { label: l.nav.product, href: '#soluciones' },
@@ -66,44 +65,19 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Mobile burger */}
-        <button className="lg:hidden" onClick={() => setMobileOpen(v => !v)} aria-label={l.nav.menu} aria-expanded={mobileOpen}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', padding: '4px' }}>
-          {mobileOpen
-            ? <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" /></svg>
-            : <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-          }
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div style={{
-          background: 'rgba(15,17,21,0.97)', borderTop: '1px solid rgba(255,255,255,0.06)',
-          padding: '20px 24px', fontFamily: 'var(--font-jakarta)',
-        }}>
-          {NAV_LINKS.map(link => (
-            <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} style={{
-              display: 'block', color: 'rgba(255,255,255,0.7)', textDecoration: 'none',
-              padding: '10px 0', fontSize: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)',
-            }}>{link.label}</a>
-          ))}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-            <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>{l.nav.language}</span>
-            <LanguageSelect label={l.nav.language} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
-            <Link to="/login" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
-              <button style={{ width: '100%', padding: '12px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50px', background: 'transparent', color: '#fff', fontSize: '14px', cursor: 'pointer', fontFamily: 'var(--font-jakarta)' }}>
-                {l.nav.login}
-              </button>
-            </Link>
-            <Link to="/register" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
-              <ShimmerButton style={{ width: '100%' }}>{l.nav.cta}</ShimmerButton>
-            </Link>
-          </div>
+        {/* Celular: idioma y cuenta a la vista, sin menú escondido (el resto está en la página) */}
+        <div className="flex lg:hidden" style={{ gap: '10px', alignItems: 'center' }}>
+          <LanguageSelect label={l.nav.language} />
+          <Link to="/login" aria-label={l.nav.login} title={l.nav.login} style={{
+            width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff',
+          }}>
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+          </Link>
         </div>
-      )}
+      </div>
     </nav>
   )
 }

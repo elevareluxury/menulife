@@ -8,6 +8,7 @@ import { useLangDir } from '@/i18n/app/useLangDir'
 import { authErrorMessage } from '@/lib/authErrors'
 import { needsTerms } from '@/modules/auth/lib/googleSignIn'
 import { postLoginRoute } from '@/modules/auth/lib/postLoginRoute'
+import { AuthBrand } from '@/components/ui/AuthBrand'
 
 const CORAL = '#F4705A'
 
@@ -59,7 +60,7 @@ export function AcceptTerms() {
         borderRadius: '24px', padding: '40px 36px',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <img src="/logo.png" alt="Mycen" className="h-8 w-auto" style={{ display: 'inline-block', marginBottom: '16px' }} />
+          <AuthBrand />
           <h1 style={{ fontFamily: font, fontSize: '20px', fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>{g.title}</h1>
           <p style={{ fontFamily: font, fontSize: '14px', color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5 }}>{g.intro}</p>
         </div>

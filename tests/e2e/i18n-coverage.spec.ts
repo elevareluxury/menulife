@@ -140,7 +140,7 @@ test('panel interno (super-admin) en inglés: sin textos en español', async ({ 
   // recorren, pero sus nombres en el menú sí están traducidos
   for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(vp)
-    for (const r of ['/super-admin', '/super-admin/denuncias', '/super-admin/verificaciones', '/super-admin/errores', '/super-admin/producto']) {
+    for (const r of ['/super-admin', '/super-admin/personas?q=ana', '/super-admin/actividad', '/super-admin/denuncias', '/super-admin/verificaciones', '/super-admin/errores', '/super-admin/producto']) {
       await page.goto(r)
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
       await expectEnglish(page, `${r} (${vp.width})`, strings)

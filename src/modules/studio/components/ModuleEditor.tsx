@@ -179,7 +179,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
           )
         })}
 
-        {def.extra && <def.extra.Editor value={extra} onChange={v => { setExtra(v); setError(null) }} userId={userId} />}
+        {def.extra && <def.extra.Editor value={extra} onChange={v => { setExtra(v); setError(null) }} userId={userId} fields={values} setField={set} />}
 
         {translatable.length > 0 && (
           <div className="st-card" style={{ background: 'var(--st-bg)' }}>

@@ -19,8 +19,6 @@ const es = {
     welcome: '¡Hola de nuevo!',
     newHere: '¿Sos nuevo?',
     createFree: 'Creá tu Mycen gratis →',
-    team: '¿Sos del equipo de Mycen?',
-    adminAccess: 'Acceso para el equipo →',
     passwordUpdated: 'Listo, tu contraseña se actualizó. Iniciá sesión con la nueva.',
     linkInvalid: 'El link no es válido o ya venció. Probá de nuevo.',
     failed: 'No pudimos iniciar sesión. Intentá de nuevo.',

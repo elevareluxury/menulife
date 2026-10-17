@@ -87,12 +87,13 @@ textarea.my-field-input { min-height: 110px; resize: vertical; }
 
 /* ── Hoja (abajo en celular, diálogo en computadora) ── */
 .my-sheet-backdrop {
-  position: fixed; inset: 0; z-index: 1000;
+  /* Arriba del teclado del celular (lib/viewportVars.ts) */
+  position: fixed; inset: 0 0 var(--kb, 0px); z-index: 1000;
   display: flex; align-items: flex-end; justify-content: center;
   background: var(--my-scrim);
 }
 .my-sheet {
-  position: relative; width: 100%; max-height: 88svh; overflow-y: auto; overscroll-behavior: contain;
+  position: relative; width: 100%; max-height: min(88svh, calc(var(--vvh, 100dvh) - 12px)); overflow: hidden auto; overscroll-behavior: contain;
   padding: 12px 20px calc(24px + env(safe-area-inset-bottom));
   border-radius: var(--my-r-hero) var(--my-r-hero) 0 0;
   background: var(--my-glass-strong-solid); color: var(--my-text);

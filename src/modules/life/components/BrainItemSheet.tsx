@@ -1,3 +1,4 @@
+import { focusOnMount } from '@/lib/viewportVars'
 import { useState, useEffect } from 'react'
 import { Lightbulb, StickyNote, CheckSquare } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
@@ -84,7 +85,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
         <label htmlFor="brain-title" style={label}>{titleLabel}</label>
         <input id="brain-title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
           placeholder={titlePlaceholder} maxLength={100} aria-invalid={!!error && !form.title.trim()}
-          autoFocus
+          ref={focusOnMount}
           style={{
             width: '100%', padding: '12px 14px', boxSizing: 'border-box', borderRadius: radius.md,
             background: colors.surface.high,

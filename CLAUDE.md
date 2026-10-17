@@ -522,6 +522,33 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   esqueleto). `src/lib/bootSplash.ts`: la app la saca al dibujar la primera pantalla (`BootSplashDone` en `App.tsx`) y la
   muestra mientras baja otra ruta (`RouteLoading`); por las dudas se va sola a los 12 s. iPhone instalado: `body` lleva
   `padding-top: env(safe-area-inset-top)` y lo fijo arriba (barras, cajones) usa `top`/`padding` con ese valor.
+- Celular (teclado, ancho y gestos): `installViewportVars` (`src/lib/viewportVars.ts`, en `main.tsx`) anota `--kb`
+  (alto del teclado) y `--vvh` (alto visible) con `visualViewport`; `LifeSheet`, `.my-sheet-backdrop`, `.st-overlay` y
+  `.st-dialog-wrap` se apoyan arriba del teclado y nunca son más altos que lo visible; su contenido sólo se mueve para
+  arriba y abajo. Nada de `autoFocus` en hojas: `ref={focusOnMount}` (enfoca sin mover la pantalla). Fechas y horas sin
+  dibujo nativo (`index.css`: en iPhone no se achicaban y se pisaban). Brain cambia de vista deslizando de costado
+  (`hooks/useSwipeNav.ts`: gesto claramente horizontal, no sobre campos ni zonas con scroll de costado; RTL invertido).
+  La landing en el celular muestra idioma y cuenta (sin menú hamburguesa). E2E en `swipe-sheets.spec.ts`.
+- Pantallas de acceso (login, registro, recuperar, cambiar contraseña, aceptar términos): `AuthBrand` (huella de la
+  marca de `src/lib/brandMark.ts`, la misma de la pantalla de carga, y "mycen.id" debajo); sin link al panel del equipo.
+- Panel del equipo (auditoría del panel): menú en dos grupos — Mycen (Resumen, Personas, Denuncias, Verificaciones,
+  Errores, Producto, Actividad del equipo, Landing, Testimonios) y Business (plegable; abierto si Business está prendido)
+  —, contadores de pendientes (`admin_pending_counts`), huella de la marca y, en el celular, barra de abajo (Resumen,
+  Personas, Denuncias, Errores, Más) sin hamburguesa. Resumen (`HomeTab`, `admin_overview`): cuentas, publicados, Life OS
+  activo, verificadas/suspendidos, "Para revisar" con links y barras de 30 días; el resumen viejo de Business va debajo
+  sólo con Business prendido. Personas (`PeopleTab`, `?q=`/`?id=`): `admin_search_accounts` (email, usuario o nombre;
+  comodines como texto) y `admin_account_detail` (Spaces con denuncias/mensajes/suscriptores, verificar, suspender con
+  motivo, Life OS sólo en cantidades). Actividad (`ActivityTab`): triggers `mycen_audit` anotan solos en
+  `admin_audit_log` (nadie lee la tabla; `admin_list_audit`) cada suspensión, verificación, denuncia o pedido resuelto,
+  error y interruptor que cambia un super-admin. Migración `20261105000001_admin_console.sql`, tests en
+  `admin_console.test.sql` y `admin-console.spec.ts`; textos en `src/i18n/app/admin/` (12 idiomas).
+- Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
+  portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
+  `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,
+  tope 6 MB) y la sube con `uploadMedia` (WebP) como `content.cover_url`. La página la muestra desde Mycen
+  (`.mp-media-cover` en `MediaModule`), así el visitante no se conecta con el proveedor; se puede cambiar o sacar y no
+  se vuelve a buscar para el mismo link. Los editores propios reciben `fields`/`setField` (la de "Escuchá en" completa
+  su campo `cover_url`). Privacidad (12 idiomas). Tests en `mediaCover.test.ts` y `media.spec.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

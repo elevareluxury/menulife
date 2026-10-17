@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { useAuthT } from '@/i18n/app/auth'
 import { authErrorMessage } from '@/lib/authErrors'
 import { useLangDir } from '@/i18n/app/useLangDir'
+import { AuthBrand } from '@/components/ui/AuthBrand'
 
 const S = {
   page: {
@@ -200,7 +201,7 @@ export function ResetPassword() {
     <div className="my-tap-root" style={S.page}>
       <div style={S.card}>
         <div style={S.logo}>
-          <img src="/logo.png" alt="Mycen" style={{ height: '32px', width: 'auto' }} />
+          <AuthBrand />
         </div>
 
         <h1 style={S.title}>{r.title}</h1>

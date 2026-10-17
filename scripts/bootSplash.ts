@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import { generateHuella, huellaToSvg } from '../src/lib/huella'
+import { brandMarkSvg } from '../src/lib/brandMark'
 import { ACCENT_COLORS, SECONDARY_COLORS, THEME_BG } from '../src/design/themes'
 
 // Pantalla de carga: la huella de Mycen (semilla "mycen", la del ícono) centrada y girando, sobre el fondo del tema del
@@ -12,11 +12,7 @@ const U = { bg: THEME_BG.universo, a: ACCENT_COLORS.plasma.universo.accent, b: S
 const A = { bg: THEME_BG.amanecer, a: ACCENT_COLORS.plasma.amanecer.accent, b: SECONDARY_COLORS.amanecer }
 
 function markSvg(): string {
-  const svg = huellaToSvg(generateHuella('mycen', 'orbitas'), { colorA: 'var(--bs-a)', colorB: 'var(--bs-b)', size: 200 })
-  // Como en el ícono: trazos un poco más firmes para que se lea en chico
-  return svg
-    .replace(/stroke-width="([\d.]+)"/g, (_, w) => `stroke-width="${(Number(w) * 1.8).toFixed(2)}"`)
-    .replace(/stroke-opacity="([\d.]+)"/g, (_, o) => `stroke-opacity="${Math.min(1, Number(o) * 2.2).toFixed(2)}"`)
+  return brandMarkSvg('var(--bs-a)', 'var(--bs-b)')
 }
 
 const STYLE = `#boot-splash{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;` +

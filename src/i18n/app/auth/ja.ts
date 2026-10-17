@@ -19,8 +19,6 @@ const ja: AuthDict = {
     welcome: "おかえりなさい！",
     newHere: "はじめての方",
     createFree: "無料で Mycen をつくる →",
-    team: "Mycen チームの方",
-    adminAccess: "チーム用ログイン →",
     passwordUpdated: "パスワードを更新しました。新しいパスワードでログインしてください。",
     linkInvalid: "リンクが無効か、期限が切れています。もう一度お試しください。",
     failed: "ログインできませんでした。もう一度お試しください。",

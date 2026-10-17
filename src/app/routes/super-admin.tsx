@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { Spinner } from '@/components/ui/Spinner'
 import { SuperAdminLayout } from '@/modules/super-admin/components/SuperAdminLayout'
-import { SuperDashboard }    from '@/modules/super-admin/pages/SuperDashboard'
 import { AccessRequestsTab } from '@/modules/super-admin/pages/AccessRequestsTab'
 import { RestaurantsTab }    from '@/modules/super-admin/pages/RestaurantsTab'
 import { MetricasTab }       from '@/modules/super-admin/pages/MetricasTab'
@@ -17,6 +16,9 @@ import { ReportsTab }        from '@/modules/super-admin/pages/ReportsTab'
 import { ErrorsTab }         from '@/modules/super-admin/pages/ErrorsTab'
 import { ProductTab }        from '@/modules/super-admin/pages/ProductTab'
 import { VerificationsTab }  from '@/modules/super-admin/pages/VerificationsTab'
+import { HomeTab }           from '@/modules/super-admin/pages/HomeTab'
+import { PeopleTab }         from '@/modules/super-admin/pages/PeopleTab'
+import { ActivityTab }       from '@/modules/super-admin/pages/ActivityTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
@@ -42,7 +44,9 @@ export function SuperAdminPage() {
   return (
     <SuperAdminLayout>
       <Routes>
-        <Route index                    element={<SuperDashboard />} />
+        <Route index                    element={<HomeTab />} />
+        <Route path="personas"          element={<PeopleTab />} />
+        <Route path="actividad"         element={<ActivityTab />} />
         <Route path="solicitudes"       element={<AccessRequestsTab />} />
         <Route path="denuncias"         element={<ReportsTab />} />
         <Route path="verificaciones"    element={<VerificationsTab />} />

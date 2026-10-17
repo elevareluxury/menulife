@@ -77,7 +77,7 @@ export function BrainDumpSheet({ open, onClose, onSave }: {
   }
 
   return (
-    <LifeSheet open={open} onClose={onClose} title={d.title} maxHeight="92vh">
+    <LifeSheet open={open} onClose={onClose} title={d.title} maxHeight="92dvh">
       {!rows ? (
         <div>
           <p style={{ ...small, fontSize: 13.5, color: colors.text.secondary, margin: '0 0 14px' }}>{d.intro}</p>

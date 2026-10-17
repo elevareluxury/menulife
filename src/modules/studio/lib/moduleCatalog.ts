@@ -12,7 +12,7 @@ import type { StudioDict } from '@/i18n/app/studio'
 import type { StudioModule } from './studioTypes'
 import {
   CardsEditor, GalleryEditor, HoursEditor, LinkItemsEditor, MediaUrlEditor, PortfolioPicker, ProjectPicker, ReviewsEditor,
-  type ExtraEditorProps, type GalleryItem, type LinkItemInput, type ReviewsValue,
+  type ExtraEditorProps, type GalleryItem, type LinkItemInput, type MediaValue, type ReviewsValue,
 } from '../components/moduleExtraEditors'
 import { LatestVideoEditor, type LatestVideoValue } from '../components/LatestVideoEditor'
 import { ListenLinksEditor, SupportMethodsEditor } from '../components/supportListenEditors'
@@ -400,16 +400,19 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       fields: [
         { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
       ],
-      extra: extra<string>({
-        init: m => text(m?.content.url),
-        validate: url => {
+      extra: extra<MediaValue>({
+        init: m => ({ url: text(m?.content.url), cover: text(m?.content.cover_url) }),
+        validate: ({ url, cover }) => {
           const r = inspectMediaUrl(url)
-          return 'error' in r ? t.media.errors[r.error] : null
+          if ('error' in r) return t.media.errors[r.error]
+          return cover && !safeHref(cover) ? v.badUrl : null
         },
-        apply: (url, content) => {
+        apply: ({ url, cover }, content) => {
           const embed = parseMediaUrl(url)
           content.url = url.trim()
           if (embed) { content.provider = embed.provider; content.kind = embed.kind }
+          if (cover) content.cover_url = cover
+          else delete content.cover_url
         },
         Editor: MediaUrlEditor,
       }),

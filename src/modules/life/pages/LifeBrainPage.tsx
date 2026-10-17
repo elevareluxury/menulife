@@ -1,3 +1,5 @@
+import { focusOnMount } from '@/lib/viewportVars'
+import { useSwipeNav } from '../hooks/useSwipeNav'
 import { useState, useMemo, useRef, type KeyboardEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -8,7 +10,7 @@ import {
 } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
-import { langLocale } from '@/i18n/app/languages'
+import { langDir, langLocale } from '@/i18n/app/languages'
 import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
 import { useBrain, type BrainItem, type BrainItemType } from '../hooks/useBrain'
 import { BrainItemSheet } from '../components/BrainItemSheet'
@@ -375,9 +377,22 @@ export function LifeBrainPage() {
     }, { replace: true })
   }
 
+  // Deslizar de costado pasa a la vista de al lado; la animación entra desde el lado hacia el que se fue
+  const [slide, setSlide] = useState(0)
+  const go = (step: 1 | -1) => {
+    const i = VIEWS.indexOf(view) + step
+    if (i < 0 || i >= VIEWS.length) return
+    setSlide(step)
+    setView(VIEWS[i])
+  }
+  const swipe = useSwipeNav(() => go(1), () => go(-1))
+  const rtl = langDir(useAppLang(s => s.lang)) === 'rtl'
+
   const canSearch = view !== 'tasks'
 
   return (
+    // Toda la pantalla escucha el gesto (también el espacio vacío debajo de una lista corta)
+    <div {...swipe} style={{ minHeight: 'calc(100dvh - 140px)' }}>
     <LifeScreenContainer>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: '24px', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
@@ -421,7 +436,8 @@ export function LifeBrainPage() {
         background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
       }}>
         {VIEWS.map(v => (
-          <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}
+          <button key={v} type="button" role="tab" aria-selected={view === v}
+            onClick={() => { setSlide(Math.sign(VIEWS.indexOf(v) - VIEWS.indexOf(view))); setView(v) }}
             style={{
               flex: 1, minHeight: 40, padding: '9px 8px', borderRadius: radius.full, border: 'none', cursor: 'pointer',
               background: view === v ? `${tint(colors.area.brain, 13)}` : 'transparent',
@@ -439,7 +455,7 @@ export function LifeBrainPage() {
             style={{ overflow: 'hidden', marginBottom: '10px' }}>
             <input value={searchQ} onChange={e => setSearchQ(e.target.value)}
               placeholder={t.brain.searchPlaceholder} aria-label={t.brain.searchPlaceholder} type="search"
-              autoFocus
+              ref={focusOnMount}
               style={{
                 width: '100%', padding: '10px 14px', boxSizing: 'border-box', borderRadius: radius.md,
                 background: colors.surface.high, border: `1px solid ${colors.border.medium}`,
@@ -449,9 +465,15 @@ export function LifeBrainPage() {
         )}
       </AnimatePresence>
 
-      {view === 'tasks'
-        ? <TasksView />
-        : <BrainItemsView key={view} archived={view === 'archive'} searchQ={canSearch && searchOpen ? searchQ : ''} onShowTasks={() => setView('tasks')} />}
+      <div>
+        <motion.div key={view} initial={slide ? { opacity: 0, x: `${slide * (rtl ? -24 : 24)}%` } : false} animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}>
+          {view === 'tasks'
+            ? <TasksView />
+            : <BrainItemsView archived={view === 'archive'} searchQ={canSearch && searchOpen ? searchQ : ''} onShowTasks={() => setView('tasks')} />}
+        </motion.div>
+      </div>
     </LifeScreenContainer>
+    </div>
   )
 }

@@ -19,8 +19,6 @@ const fr: AuthDict = {
     welcome: "Ravi de vous revoir !",
     newHere: "Nouveau ici ?",
     createFree: "Créez votre Mycen gratuitement →",
-    team: "Vous faites partie de l’équipe Mycen ?",
-    adminAccess: "Accès équipe →",
     passwordUpdated: "C’est fait, votre mot de passe a été mis à jour. Connectez-vous avec le nouveau.",
     linkInvalid: "Le lien n’est pas valide ou a expiré. Réessayez.",
     failed: "Impossible de vous connecter. Réessayez.",

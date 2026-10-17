@@ -9,11 +9,13 @@ import './index.css'
 import './design/tokens.css'
 import './design/touch.css'
 import { installLowFx } from './design/lowfx'
+import { installViewportVars } from './lib/viewportVars'
 
 // Errores que nadie atrapa → registro propio (L5, /super-admin/errores)
 installErrorReporting()
 // Vidrio sólido con reducir transparencia o en equipos lentos (sistema de diseño §6)
 installLowFx()
+installViewportVars()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
