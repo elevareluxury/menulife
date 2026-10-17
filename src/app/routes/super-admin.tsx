@@ -22,15 +22,17 @@ import { ActivityTab }       from '@/modules/super-admin/pages/ActivityTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
-  const { loading, initialized, isAuthenticated, isSuperAdmin } = useAuth()
+  const { loading, initialized, isAuthenticated, isSuperAdmin, role } = useAuth()
   const [timedOut, setTimedOut] = useState(false)
 
   useEffect(() => {
-    const t = setTimeout(() => setTimedOut(true), 5_000)
+    // Red de seguridad: sin sesión, 5 s; con sesión se espera más al rol (consulta aparte, con la red lenta tarda)
+    const t = setTimeout(() => setTimedOut(true), isAuthenticated ? 15_000 : 5_000)
     return () => clearTimeout(t)
-  }, [])
+  }, [isAuthenticated])
 
-  if ((!initialized || loading) && !timedOut) {
+  // Con sesión, el rol llega después (consulta aparte): esperarlo antes de decidir que no es del equipo
+  if ((!initialized || loading || (isAuthenticated && role === null)) && !timedOut) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0F1115' }}>
         <Spinner size="lg" />
