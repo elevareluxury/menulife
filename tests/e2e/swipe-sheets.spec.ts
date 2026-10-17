@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
-import { installSupabaseMock } from './support/mockSupabase'
+import { createState, installSupabaseMock, profileRow } from './support/mockSupabase'
+import { MODULE_FIXTURES } from './support/moduleFixtures'
 import { rich } from './support/richState'
 
 // En el celular: Brain se recorre deslizando de costado, y las hojas (nueva tarea) se ven desde arriba, enteras y sin
@@ -136,4 +137,22 @@ test('fecha y hora vacías se ven como campos para tocar (ícono de calendario y
   // Tocar la fecha la deja elegir; la hora se habilita después
   await page.locator('#task-date').fill('2026-10-20')
   await expect(page.locator('#task-time')).toBeEnabled()
+})
+
+test('Identity en 320 px: horarios y "Programar" entran en el editor, con ícono', async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 700 })
+  const state = createState({ profiles: [profileRow()], profile_modules: MODULE_FIXTURES.map(f => structuredClone(f.row)) })
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/studio/modules')
+  await page.getByRole('button', { name: 'Editar Horarios', exact: true }).click()
+  await page.getByRole('button', { name: 'Agregar', exact: true }).last().click()
+  await expect(page.getByLabel('Mostrar desde')).toBeVisible()
+  const fields = await page.evaluate(() => [...document.querySelectorAll('input')]
+    .filter(i => /date|time/.test(i.type))
+    .map(i => ({ type: i.type, right: i.getBoundingClientRect().right, icon: !!i.closest('.my-picker')?.querySelector('.my-picker-icon') })))
+  expect(fields.length).toBeGreaterThanOrEqual(4)
+  for (const f of fields) {
+    expect(f.right, f.type).toBeLessThanOrEqual(320)
+    expect(f.icon, f.type).toBe(true)
+  }
 })

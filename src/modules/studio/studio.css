@@ -99,8 +99,8 @@
 .st-card-title { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--st-muted); margin: 0 0 14px; }
 .st-stack { display: flex; flex-direction: column; gap: 14px; }
 .st-row { display: flex; align-items: center; gap: 10px; }
-.st-grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 560px) { .st-grid-2 { grid-template-columns: 1fr 1fr; } }
+.st-grid-2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .st-grid-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 
 /* ── Botones ────────────────────────────────────────────────────── */
 .st-btn {
