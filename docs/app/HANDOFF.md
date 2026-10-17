@@ -7,8 +7,14 @@ Android") y `docs/app/README.md`.
 ## Estado
 - PR #81 = app con Capacitor 8 (plataforma, descargas/compartir nativos, acceso PKCE + deep links, recordatorios
   locales, "Entrar con Apple" en BETA, fichas de tiendas). Su primer commit pasó el CI completo (347/347 E2E).
-- Segundo commit (auditoría para las tiendas), subido con tsc, build, eslint (0 errores), `npm test` (519) y presupuesto
-  OK. **Falta correr la E2E completa** (`CI=1`, servidor nuevo en el puerto 5180) o esperar el CI del PR.
+- Segundo y tercer commit (auditoría para las tiendas; sesión sin esperar al plugin nativo): CI del PR en verde
+  (`checks` y `database` sobre `064164d`).
+- Cuarto commit (tests): unitario de `oauthProviders()` en `googleSignIn.test.ts`, E2E `delete-account.spec.ts`
+  (Life OS → Ajustes: palabra de confirmación, cancelar, cuenta con negocio) y `delete_my_account` en el mock (igual a la
+  migración: `HAS_BUSINESS` si hay un restaurante propio). eslint 0 errores, `npm test` 523, build y presupuesto OK, E2E
+  completa local 324 en verde (los 26 de `visual.spec.ts` sólo comparan en Linux: en Windows no hay capturas `-win32`).
+- En Windows con `core.autocrlf=true`, `emailTemplates.test.ts` falla por CRLF en `supabase/templates/` (en el CI no):
+  volver a sacar esa carpeta con `git -c core.autocrlf=false checkout`.
 
 ## Qué cambió en la auditoría
 1. `/api/media-cover` y `/api/youtube-latest`: CORS `*` (la app pide desde `capacitor://localhost`; antes fallaba).
@@ -25,8 +31,6 @@ Android") y `docs/app/README.md`.
    `@capacitor/preferences`, oficial y sólo en la app). `capacitor.config.ts`: `SystemBars.initialViewportFitValueHint`.
 
 ## Qué falta
-- Tests nuevos: un unitario de `oauthProviders()` (iOS sin Apple → sin Google) y un E2E de "Eliminar mi cuenta" desde
-  Life OS (mock de `delete_my_account` en `tests/e2e/support/mockSupabase.ts` si no está). Correr la E2E completa.
 - Esperar el CI verde del PR #81 → el usuario dice "listo" → mergear (merge commit) → reset de la rama a `origin/main`.
 - Después: freeze v1.0.0 según `docs/v1/prompts/17-freeze.md` (pedir confirmación de migraciones aplicadas, CHANGELOG,
   `docs/v1/RELEASE.md`, rama `release/v1` y tag `v1.0.0`).

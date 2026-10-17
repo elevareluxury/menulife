@@ -473,6 +473,13 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       if (!p || !isOwner) throw new Error('NOT_OWNER')
       return state.trafficSources ?? []
     }
+    // = delete_my_account: con un negocio no se borra (HAS_BUSINESS); si no, cae todo lo de la cuenta en cascada
+    case 'delete_my_account': {
+      if (!isOwner) throw new Error('NOT_AUTHENTICATED')
+      if ((state.tables.restaurants ?? []).some(r => r.owner_id === OWNER_ID)) throw new Error('HAS_BUSINESS')
+      for (const name of Object.keys(state.tables)) state.tables[name] = state.tables[name].filter(r => r.user_id !== OWNER_ID)
+      return null
+    }
     // = record_referral (V1 · etapa 08): una por cuenta, sólo a perfiles publicados de otra persona
     case 'record_referral': {
       if (!isOwner) throw new Error('NOT_SIGNED_IN')
