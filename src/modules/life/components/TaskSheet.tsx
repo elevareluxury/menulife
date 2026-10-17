@@ -96,7 +96,7 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
             onKeyDown={e => { if (e.key === 'Enter') void save() }}
             placeholder={s.placeholder} style={inputStyle} aria-invalid={!!error && !title.trim()} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '10px' }}>
           <div>
             <label htmlFor="task-date" style={labelStyle}>{s.date}</label>
             <input id="task-date" type="date" value={date} onChange={e => setDate(e.target.value)} style={inputStyle} />

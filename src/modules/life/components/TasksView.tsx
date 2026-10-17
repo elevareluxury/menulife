@@ -268,7 +268,7 @@ export function TasksView() {
               <h2 style={{ fontFamily: font, fontSize: '15px', fontWeight: 700, color: colors.text.primary, margin: 0 }} aria-live="polite">{monthLabel}</h2>
               <button type="button" style={navBtn} onClick={() => shift(1)} aria-label={a.nextMonth}><ChevronRight size={16} className="flip-rtl" aria-hidden="true" /></button>
             </div>
-            <div role="grid" aria-label={a.calendarOf(monthLabel)} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
+            <div role="grid" aria-label={a.calendarOf(monthLabel)} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '4px' }}>
               {weekdayInitials(locale, weekStart).map((w, i) => (
                 <div key={i} role="columnheader" style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: colors.text.tertiary, textAlign: 'center', padding: '4px 0', textTransform: 'uppercase' }}>{w}</div>
               ))}

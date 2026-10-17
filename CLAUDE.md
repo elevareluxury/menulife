@@ -528,7 +528,11 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   arriba y abajo. Nada de `autoFocus` en hojas: `ref={focusOnMount}` (enfoca sin mover la pantalla). Fechas y horas sin
   dibujo nativo (`index.css`: en iPhone no se achicaban y se pisaban). Brain cambia de vista deslizando de costado
   (`hooks/useSwipeNav.ts`: gesto claramente horizontal, no sobre campos ni zonas con scroll de costado; RTL invertido).
-  La landing en el celular muestra idioma y cuenta (sin menú hamburguesa). E2E en `swipe-sheets.spec.ts`.
+  La landing en el celular muestra idioma y cuenta (sin menú hamburguesa). Con una hoja o diálogo abierto lo de atrás
+  queda quieto: `useScrollLock` (`src/lib/scrollLock.ts`, cuenta hojas abiertas) bloquea `<body>` y cada
+  `[data-scroll-root]` (Life OS y Studio scrollean su marco, no la página); fondos con `touch-action: none`, hojas con
+  `pan-y pinch-zoom` y `overscroll-behavior: none` (no se arrastran ni rebotan). Grillas en hojas con `minmax(0, 1fr)`
+  o `auto-fill` (nada de `repeat(N, 1fr)` con mínimos que no entran en 320 px). E2E en `swipe-sheets.spec.ts`.
 - Pantallas de acceso (login, registro, recuperar, cambiar contraseña, aceptar términos): `AuthBrand` (huella de la
   marca de `src/lib/brandMark.ts`, la misma de la pantalla de carga, y "mycen.id" debajo); sin link al panel del equipo.
 - Panel del equipo (auditoría del panel): menú en dos grupos — Mycen (Resumen, Personas, Denuncias, Verificaciones,

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { colors, font, radius, shadow } from '../tokens'
 import { useLifeT } from '@/i18n/app/life'
+import { useScrollLock } from '@/lib/scrollLock'
 
 interface LifeSheetProps {
   open: boolean
@@ -16,17 +17,13 @@ interface LifeSheetProps {
 export function LifeSheet({ open, onClose, title, children, maxHeight = '88dvh' }: LifeSheetProps) {
   const titleId = useId()
   const t = useLifeT()
-  // Lock body scroll + handle Escape key
+  // Lo de atrás queda quieto (también el marco de Life OS) y Escape cierra
+  useScrollLock(open)
   useEffect(() => {
     if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      document.removeEventListener('keydown', onKey)
-    }
+    return () => document.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
   // En un portal a <body>: si no, una página con su propio apilado (z-index) la dejaba debajo de la barra de abajo
@@ -44,7 +41,7 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88dvh' 
             transition={{ duration: 0.2 }}
             onClick={onClose}
             style={{
-              position: 'fixed', inset: 0, zIndex: 200,
+              position: 'fixed', inset: 0, zIndex: 200, touchAction: 'none',
               background: 'var(--my-scrim)',
               backdropFilter: 'blur(6px)',
               WebkitBackdropFilter: 'blur(6px)',
@@ -72,6 +69,8 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88dvh' 
               borderRadius: `${radius['2xl']} ${radius['2xl']} 0 0`,
               boxShadow: shadow.elevated,
               paddingBottom: 'env(safe-area-inset-bottom)',
+              // La hoja no se arrastra ni rebota: sólo su contenido se mueve, y sólo para arriba y abajo
+              overscrollBehavior: 'none', touchAction: 'pan-y pinch-zoom',
             }}
           >
             {/* Handle */}
@@ -109,7 +108,7 @@ export function LifeSheet({ open, onClose, title, children, maxHeight = '88dvh' 
 
             {/* Content */}
             {/* Sólo se mueve para arriba y abajo; empieza siempre desde arriba (se monta de nuevo cada vez que abre) */}
-            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', padding: '16px 20px 28px' }}>
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'none', padding: '16px 20px 28px' }}>
               {children}
             </div>
           </motion.div>

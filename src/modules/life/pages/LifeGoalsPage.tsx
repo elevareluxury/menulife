@@ -146,7 +146,7 @@ export function LifeGoalsPage() {
       </div>
 
       {goals.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px', marginBottom: '16px' }}>
           {[
             { label: t.goals.active,    value: String(activeCount),    color: colors.area.goals },
             { label: t.goals.completed, value: String(completedCount), color: colors.semantic.success },

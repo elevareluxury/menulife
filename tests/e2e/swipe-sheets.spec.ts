@@ -74,3 +74,48 @@ test('con el teclado abierto la hoja queda arriba de él y no más alta que lo v
   expect(Math.round(box.y + box.height)).toBeLessThanOrEqual(367 + 1)
   expect(box.y).toBeGreaterThanOrEqual(0)
 })
+
+test('con una hoja abierta lo de atrás queda quieto, y al cerrarla vuelve a moverse', async ({ page, context }) => {
+  await installSupabaseMock(context, rich(), { signedIn: true })
+  await page.goto('/life/goals')
+  const root = page.locator('[data-scroll-root]').first()
+  await expect.poll(() => root.evaluate(el => getComputedStyle(el).overflowY)).toBe('auto')
+  await page.getByRole('button', { name: 'Nueva meta', exact: true }).first().click()
+  const sheet = page.getByRole('dialog')
+  await expect(sheet).toBeVisible()
+  expect(await root.evaluate(el => getComputedStyle(el).overflowY)).toBe('hidden')
+  // La hoja sólo se mueve para arriba y abajo y no rebota
+  expect(await sheet.evaluate(el => getComputedStyle(el).touchAction)).toMatch(/pan-y/)
+  const wide = await sheet.evaluate(el => [...el.querySelectorAll('*')].filter(c => c.getBoundingClientRect().right > el.getBoundingClientRect().right + 1).length)
+  expect(wide).toBe(0)
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+  await expect.poll(() => root.evaluate(el => getComputedStyle(el).overflowY)).toBe('auto')
+})
+
+test('en un celular chico (320 px) nada se sale de las hojas de Life OS', async ({ page, context }) => {
+  test.setTimeout(120_000)
+  await installSupabaseMock(context, rich(), { signedIn: true })
+  await page.setViewportSize({ width: 320, height: 640 })
+  const sheets: [string, RegExp | string][] = [
+    ['/life/goals', 'Nueva meta'], ['/life/habits', /Nuevo hábito/], ['/life/money', /Nuevo movimiento|Agregar movimiento/],
+    ['/life/brain?vista=tareas', /Nueva tarea|Agregar tarea/],
+  ]
+  for (const [route, name] of sheets) {
+    await page.goto(route)
+    await page.getByRole('button', { name }).first().click()
+    const sheet = page.getByRole('dialog').last()
+    await expect(sheet).toBeVisible()
+    await page.waitForTimeout(500)
+    const out = await sheet.evaluate(el => {
+      const box = el.getBoundingClientRect()
+      return [...el.querySelectorAll('*')].filter(c => {
+        if (c.closest('svg') && c.tagName !== 'svg') return false
+        const b = c.getBoundingClientRect()
+        return b.width > 0 && (b.right > box.right + 1 || b.left < box.left - 1)
+      }).map(c => c.getAttribute('aria-label') ?? c.textContent?.slice(0, 20) ?? c.tagName)
+    })
+    expect(out, route).toEqual([])
+    await page.keyboard.press('Escape')
+  }
+})

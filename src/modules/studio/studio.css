@@ -215,7 +215,7 @@
 .st-pending-note strong { font-size: 15px; }
 
 /* ── Drawer / diálogo ───────────────────────────────────────────── */
-.st-overlay { position: fixed; inset: 0 0 var(--kb, 0px); z-index: 50; background: var(--my-scrim); display: flex; justify-content: flex-end; }
+.st-overlay { position: fixed; inset: 0 0 var(--kb, 0px); z-index: 50; touch-action: none; background: var(--my-scrim); display: flex; justify-content: flex-end; }
 .st-drawer {
   width: 100%; max-width: 480px; height: 100%; background: var(--st-panel); border-left: 1px solid var(--st-border);
   display: flex; flex-direction: column; animation: st-slide 0.2s ease-out;
@@ -224,11 +224,11 @@
 @keyframes st-slide { from { transform: translateX(24px); opacity: 0; } }
 .st-drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--st-border); }
 .st-drawer-head h2 { margin: 0; font-size: 17px; }
-.st-drawer-body { flex: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; padding: 18px; }
+.st-drawer-body { flex: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: none; touch-action: pan-y pinch-zoom; padding: 18px; }
 .st-drawer-foot { display: flex; gap: 10px; padding: 14px 18px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--st-border); }
 .st-drawer-foot > * { flex: 1; }
 
-.st-dialog-wrap { position: fixed; inset: 0 0 var(--kb, 0px); z-index: 60; background: var(--my-scrim); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.st-dialog-wrap { position: fixed; inset: 0 0 var(--kb, 0px); z-index: 60; touch-action: none; background: var(--my-scrim); display: flex; align-items: center; justify-content: center; padding: 20px; }
 .st-dialog { width: 100%; max-width: 400px; background: var(--st-panel); border: 1px solid var(--st-border); border-radius: 18px; padding: 22px; }
 .st-dialog h2 { margin: 0 0 8px; font-size: 18px; }
 .st-dialog p { margin: 0 0 20px; color: var(--st-muted); font-size: 14.5px; line-height: 1.5; }

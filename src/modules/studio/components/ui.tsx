@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { AlertCircle, Check, ImagePlus, MoreHorizontal, Trash2, X, type LucideIcon } from 'lucide-react'
 import type { SaveState } from '../lib/studioTypes'
 import { useStudioT } from '@/i18n/app/studio'
+import { useScrollLock } from '@/lib/scrollLock'
 
 // ── Botón ───────────────────────────────────────────────────────────────────
 
@@ -199,6 +200,7 @@ export function Drawer({ title, onClose, children, footer }: {
   const titleId = useId()
   const t = useStudioT().common
   useEscape(onClose)
+  useScrollLock(true)
   return (
     <div className="st-overlay" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="st-drawer" role="dialog" aria-modal="true" aria-labelledby={titleId}>
@@ -227,6 +229,7 @@ export function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm,
   const titleId = useId()
   const t = useStudioT().common
   useEscape(onCancel)
+  useScrollLock(true)
   return (
     <div className="st-dialog-wrap" onMouseDown={e => { if (e.target === e.currentTarget) onCancel() }}>
       <div className="st-dialog" role="alertdialog" aria-modal="true" aria-labelledby={titleId}>

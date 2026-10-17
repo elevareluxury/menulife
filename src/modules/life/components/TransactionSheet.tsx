@@ -165,7 +165,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
 
       {/* Type toggle */}
       <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr',
+        display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
         gap: '8px', marginBottom: '24px',
         padding: '4px',
         background: colors.surface.high,
