@@ -63,7 +63,11 @@
   min-height: calc(100svh - 64px); margin: 0 -20px; padding: 0; overflow: hidden;
 }
 .mp-cover-art { position: absolute; inset: 0; display: grid; place-items: center; background: var(--my-tile); }
-.mp-cover-art img { width: 100%; height: 100%; object-fit: cover; }
+/* La foto cubre toda la tapa. Posicionada (no por la grilla): en Safari el alto en % de un hijo de grilla no se
+   resolvía, la foto quedaba con su alto natural, centrada, y arriba se veía una franja vacía */
+.mp-cover-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+/* Con foto, el degradé sube un poco más: el nombre se lee aunque la foto tenga texto o detalles abajo */
+.mp-cover-art:has(img) + .mp-cover-fade { background: linear-gradient(to top, var(--my-bg) 30%, transparent 80%); }
 .mp-cover-huella { width: min(118vw, 640px) !important; height: min(118vw, 640px) !important; margin-top: -18svh; }
 .mp-cover-fade { position: absolute; inset: 0; background: linear-gradient(to top, var(--my-bg) 22%, transparent 72%); pointer-events: none; }
 .mp-cover-body { position: relative; padding: 0 20px 22px; }
