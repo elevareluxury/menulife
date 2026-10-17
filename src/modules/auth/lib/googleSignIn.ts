@@ -1,3 +1,4 @@
+import { authCallbackUrl, isNativeApp } from '@/lib/platform'
 // Entrar con Google (V1.1). Supabase hace el ida y vuelta con Google y vuelve a /auth/callback con la sesión.
 // Lo que el registro con email guarda en la cuenta (idioma de los mails, aceptación de los términos, referido) se
 // anota antes de salir y se completa al volver, sin pisar lo que la cuenta ya tenga.
@@ -18,17 +19,29 @@ export interface PendingSignup {
 }
 
 export async function startGoogleSignIn(locale: string, referral: Referral | null, terms: boolean): Promise<void> {
+  return startOAuthSignIn('google', locale, referral, terms)
+}
+
+/** Google o Apple: mismo camino (se anota idioma, términos y referido; vuelve a /auth/callback) */
+export async function startOAuthSignIn(provider: 'google' | 'apple', locale: string, referral: Referral | null, terms: boolean): Promise<void> {
   const pending: PendingSignup = {
     at: new Date().toISOString(), locale, terms,
     ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
   }
   try { localStorage.setItem(KEY, JSON.stringify(pending)) } catch { /* sin almacenamiento: se entra igual */ }
   const supabase = await loadSupabase()
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.origin + '/auth/callback' },
+  // En la app, el acceso se abre en el navegador del sistema (Google no deja entrar desde una vista web) y vuelve con
+  // un link de mycen.id que abre la app (NativeBridge lo lleva a /auth/callback)
+  const native = isNativeApp()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: authCallbackUrl(), skipBrowserRedirect: native },
   })
   if (error) throw error
+  if (native && data?.url) {
+    const { Browser } = await import('@capacitor/browser')
+    await Browser.open({ url: data.url, presentationStyle: 'popover' })
+  }
 }
 
 /** Datos para completar la cuenta: sólo los que falten y si lo anotado tiene menos de una hora. */

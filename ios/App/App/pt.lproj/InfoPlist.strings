@@ -1,0 +1,5 @@
+/* Textos de los permisos de iOS (pt). Mantener los 12 idiomas (docs/app/README.md). */
+"CFBundleDisplayName" = "Mycen";
+"NSCameraUsageDescription" = "O Mycen usa a câmera para você tirar uma foto para o seu perfil ou seus projetos.";
+"NSPhotoLibraryUsageDescription" = "O Mycen acessa suas fotos para você escolher uma imagem para o seu perfil ou seus projetos.";
+"NSPhotoLibraryAddUsageDescription" = "O Mycen salva seu QR e seu cartão de identidade em Fotos quando você pede.";

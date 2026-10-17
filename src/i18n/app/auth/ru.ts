@@ -51,6 +51,11 @@ const ru: AuthDict = {
     or: "или",
     failed: "Не удалось открыть Google. Попробуйте ещё раз.",
   },
+  apple: {
+    continue: 'Продолжить с Apple',
+    going: 'Открываем Apple…',
+    failed: 'Не удалось открыть Apple. Попробуйте ещё раз.',
+  },
   /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
   termsGate: {
     title: "Ещё один шаг",

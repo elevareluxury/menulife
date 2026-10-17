@@ -1,3 +1,4 @@
+import { saveFile } from '@/lib/nativeFiles'
 import { useEffect, useId, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Download, Trash2 } from 'lucide-react'
@@ -42,14 +43,7 @@ export function SubscribersPage() {
 
   function exportCsv() {
     const blob = new Blob([subscribersCsv(list)], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `mycen-${handle.replace('/', '-')}-subscribers-${new Date().toISOString().slice(0, 10)}.csv`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    void saveFile(blob, `mycen-${handle.replace('/', '-')}-subscribers-${new Date().toISOString().slice(0, 10)}.csv`)
   }
 
   async function remove(s: ProfileSubscriber) {

@@ -568,6 +568,16 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (`.mp-media-cover` en `MediaModule`), así el visitante no se conecta con el proveedor; se puede cambiar o sacar y no
   se vuelve a buscar para el mismo link. Los editores propios reciben `fields`/`setField` (la de "Escuchá en" completa
   su campo `cover_url`). Privacidad (12 idiomas). Tests en `mediaCover.test.ts` y `media.spec.ts`.
+- App de iOS y Android (Capacitor 8, `capacitor.config.ts`, `ios/`, `android/`; pasos y lo que hace el usuario en
+  `docs/app/README.md`, fichas de las tiendas en `docs/app/STORE.md`). Es la misma web: `src/lib/platform.ts`
+  (`isNativeApp` sin importar @capacitor/core, `webOrigin()` = mycen.id en la app, `apiUrl()` para `/api`,
+  `authCallbackUrl()`); nada de `window.location.origin` para links públicos. En la app: `/` → `/login` (sin landing ni
+  precios), sin "Agregar a inicio" ni service worker, descargas y compartir con `saveFile`/`shareLink`
+  (`src/lib/nativeFiles.ts`), acceso con PKCE y navegador del sistema (`googleSignIn.ts`, `startOAuthSignIn`), links de
+  mycen.id que abren la app (`NativeBridge`, `lib/appLinks.ts`, `public/.well-known/`), recordatorios programados en el
+  teléfono (`life/lib/nativeReminders.ts`, desde `useTaskReminders`/`useHabitReminders`). Los plugins se importan sólo
+  en la app (dinámicos). Entrar con Apple: `FEATURES.appleSignIn` (en BETA hasta configurarlo; textos y privacidad en
+  12 idiomas). Íconos: `node scripts/build-app-assets.mjs`. E2E `native-app.spec.ts` (simula el puente de iOS).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

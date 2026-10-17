@@ -51,6 +51,12 @@ const es = {
     or: "o",
     failed: "No pudimos abrir Google. Intentá de nuevo.",
   },
+  /** Entrar con Apple (la App Store lo exige si se ofrece Google) */
+  apple: {
+    continue: 'Continuar con Apple',
+    going: 'Abriendo Apple…',
+    failed: 'No pudimos abrir Apple. Intentá de nuevo.',
+  },
   /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
   termsGate: {
     title: "Un paso más",

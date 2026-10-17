@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { FEATURES } from '@/lib/features'
+import { isNativeApp } from '@/lib/platform'
 import { hideBootSplash, showBootSplash } from '@/lib/bootSplash'
 import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
@@ -13,6 +14,8 @@ import { RequirePlan } from '@/app/RequirePlan'
 import { RequireStaffAuth } from '@/app/RequireStaffAuth'
 
 // Todo se carga al entrar a su ruta: quien abre un perfil público no descarga la landing ni Mycen Business (Lanzamiento L1)
+// Sólo en la app de iOS/Android (links que abren la app, botón atrás, barra de estado)
+const NativeBridge = lazy(() => import('@/app/native/NativeBridge'))
 const LandingPage = lazy(() => import('@/modules/landing/pages/LandingPage').then(m => ({ default: m.LandingPage })))
 const LoginPage = lazy(() => import('./routes/login').then(m => ({ default: m.LoginPage })))
 const RegisterPage = lazy(() => import('./routes/register').then(m => ({ default: m.RegisterPage })))
@@ -136,6 +139,7 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AuthInit />
+      {isNativeApp() && <Suspense fallback={null}><NativeBridge /></Suspense>}
       <TermsGate />
       <PrefsInit />
       <OfflineBanner />
@@ -144,7 +148,8 @@ function App() {
       <Suspense fallback={<RouteLoading />}>
         <BootSplashDone />
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          {/* La app de iOS/Android abre en el acceso (la landing y sus precios son de la web) */}
+          <Route path="/" element={isNativeApp() ? <Navigate to="/login" replace /> : <LandingPage />} />
           {DevDesignPage && <Route path="/dev/design" element={<DevDesignPage />} />}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

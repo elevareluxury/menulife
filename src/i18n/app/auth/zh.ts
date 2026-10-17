@@ -51,6 +51,11 @@ const zh: AuthDict = {
     or: "或",
     failed: "无法打开 Google，请重试。",
   },
+  apple: {
+    continue: '通过 Apple 继续',
+    going: '正在打开 Apple…',
+    failed: '无法打开 Apple，请重试。',
+  },
   /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
   termsGate: {
     title: "还差一步",

@@ -1,3 +1,4 @@
+import { shareLink } from '@/lib/nativeFiles'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEverywhereT } from '@/i18n/app/share/everywhere'
@@ -188,8 +189,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
     try { await navigator.clipboard.writeText(publicUrl); setCopied(true) } catch { /* sin portapapeles */ }
   }
   async function share() {
-    if (navigator.share) { try { await navigator.share({ title: name, url: publicUrl }) } catch { /* canceló */ } }
-    else await copy()
+    if (!(await shareLink(name, publicUrl))) await copy()
   }
 
   const look = profileLook(profile?.theme)

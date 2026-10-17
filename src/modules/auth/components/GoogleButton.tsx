@@ -3,7 +3,8 @@ import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
 import { authErrorMessage } from '@/lib/authErrors'
 import type { Referral } from '@/lib/referral'
-import { startGoogleSignIn } from '@/modules/auth/lib/googleSignIn'
+import { startOAuthSignIn } from '@/modules/auth/lib/googleSignIn'
+import { featureOn } from '@/lib/features'
 
 // Logo de Google con sus colores oficiales (lo piden sus pautas de marca para el botón de acceso)
 function GoogleLogo() {
@@ -17,8 +18,17 @@ function GoogleLogo() {
   )
 }
 
+// Logo de Apple (manzana) en blanco sobre negro, como piden sus pautas para el botón de acceso
+function AppleLogo() {
+  return (
+    <svg width="16" height="18" viewBox="0 0 814 1000" aria-hidden="true" focusable="false">
+      <path fill="#fff" d="M788 340c-6 4-108 62-108 190 0 148 130 200 134 202-1 3-21 72-69 142-43 62-88 124-156 124s-86-40-165-40c-77 0-104 41-166 41s-106-57-156-127C45 790 0 663 0 543 0 349 126 247 250 247c66 0 121 43 162 43 39 0 101-46 176-46 29 0 131 3 200 96zM554 158c31-37 53-88 53-140 0-7-1-14-2-20-50 2-110 34-146 76-28 32-55 84-55 136 0 8 1 16 2 18 3 1 9 1 14 1 45 0 101-30 134-71z" />
+    </svg>
+  )
+}
+
 /**
- * La línea "o" y "Continuar con Google", debajo del formulario. Google sólo nos da nombre, email y foto: la aceptación
+ * La línea "o", "Continuar con Google" y (si está prendido) "Continuar con Apple", debajo del formulario. Google sólo nos da nombre, email y foto: la aceptación
  * de los Términos y la Privacidad la pide Mycen. En el registro (`accepted` = la casilla del formulario) no se va a Google
  * sin tildarla. En el login no se pide: quien ya tiene cuenta entra directo y una cuenta nueva acepta en `/auth/terms`.
  */
@@ -27,19 +37,20 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
   const g = t.google
   const r = t.register
   const signup = accepted !== undefined
-  const [loading, setLoading] = useState(false)
+  const a = t.apple
+  const [loading, setLoading] = useState<'google' | 'apple' | null>(null)
   const [error, setError] = useState('')
 
-  async function handleClick() {
+  async function handleClick(provider: 'google' | 'apple') {
     setError('')
     if (signup && !accepted) { setError(r.needTerms); return }
-    setLoading(true)
+    setLoading(provider)
     try {
-      // Si sale bien, el navegador se va a Google; no hace falta apagar "loading"
-      await startGoogleSignIn(useAppLang.getState().lang, referral, signup)
+      // Si sale bien, el navegador se va a Google o Apple; no hace falta apagar "loading"
+      await startOAuthSignIn(provider, useAppLang.getState().lang, referral, signup)
     } catch (err: unknown) {
-      setError(authErrorMessage(err, t.errors, g.failed))
-      setLoading(false)
+      setError(authErrorMessage(err, t.errors, provider === 'apple' ? a.failed : g.failed))
+      setLoading(null)
     }
   }
 
@@ -62,9 +73,9 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
       )}
       <button
         type="button"
-        onClick={handleClick}
-        disabled={loading}
-        aria-busy={loading}
+        onClick={() => handleClick('google')}
+        disabled={!!loading}
+        aria-busy={loading === 'google'}
         style={{
           width: '100%', minHeight: '46px', padding: '11px 16px', borderRadius: '50px',
           border: '1px solid rgba(255,255,255,0.18)', background: '#fff', color: '#1F1F1F',
@@ -74,8 +85,26 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
         }}
       >
         <GoogleLogo />
-        {loading ? g.going : g.continue}
+        {loading === 'google' ? g.going : g.continue}
       </button>
+      {featureOn('appleSignIn') && (
+        <button
+          type="button"
+          onClick={() => handleClick('apple')}
+          disabled={!!loading}
+          aria-busy={loading === 'apple'}
+          style={{
+            width: '100%', minHeight: '46px', padding: '11px 16px', borderRadius: '50px',
+            border: '1px solid rgba(255,255,255,0.28)', background: '#000', color: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+            fontFamily: font, fontSize: '14px', fontWeight: 600,
+            cursor: loading ? 'progress' : 'pointer', opacity: loading ? 0.75 : 1,
+          }}
+        >
+          <AppleLogo />
+          {loading === 'apple' ? a.going : a.continue}
+        </button>
+      )}
     </div>
   )
 }

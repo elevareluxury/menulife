@@ -10,6 +10,9 @@ export const FEATURES = {
   voiceCapture:   true,
   // Entrar con Google: prendido para todos (se apaga acá si hiciera falta)
   googleSignIn:   true,
+  // Entrar con Apple: la App Store lo exige si la app ofrece Google. Prender cuando esté configurado en Apple y en
+  // Supabase → Providers → Apple (pasos en docs/app/README.md). Mientras tanto se prueba con ?beta=1 (BETA)
+  appleSignIn:    false,
   // Diario privado con bloqueo en el dispositivo (Life OS → Brain → Diario)
   journal:        true,
   // Ánimo del día y revisión semanal guiada en Life OS (V1.1, pedido directo; prendido para todos)
@@ -21,7 +24,7 @@ export const FEATURES = {
 
 export type FeatureName = keyof typeof FEATURES
 
-const BETA: readonly FeatureName[] = []
+const BETA: readonly FeatureName[] = ['appleSignIn']
 const BETA_KEY = 'mycen_beta'
 
 export function betaOn(): boolean {

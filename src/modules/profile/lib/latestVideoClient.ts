@@ -1,3 +1,4 @@
+import { apiUrl } from '@/lib/platform'
 // Pide los videos más nuevos de un canal a la función de Mycen (`api/youtube-latest.ts`, mismo origen: no es un
 // tercero). Una sola consulta por canal mientras la página está abierta; la respuesta se vuelve a validar.
 import { sanitizeLatestResponse, type LatestVideosResponse } from './latestVideo'
@@ -8,7 +9,7 @@ const cache = new Map<string, Promise<LatestVideosResponse | null>>()
 export function loadLatestVideos(query: string): Promise<LatestVideosResponse | null> {
   const hit = cache.get(query)
   if (hit) return hit
-  const p = fetch(`/api/youtube-latest?${query}`, { headers: { accept: 'application/json' } })
+  const p = fetch(apiUrl(`/api/youtube-latest?${query}`), { headers: { accept: 'application/json' } })
     .then(res => (res.ok ? res.json() : null))
     .then(sanitizeLatestResponse)
     .catch(() => null)

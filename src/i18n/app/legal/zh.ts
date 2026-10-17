@@ -117,6 +117,8 @@ const zh: LegalDict = {
         '**Anthropic：**仅当企业使用"从 PDF 导入菜单"功能时，处理该文件。',
         '**Mercado Pago：**仅当企业设置其用于收款时；付款在 Mercado Pago 完成。',
         '**Google（登录）：**仅当你选择“使用 Google 继续”时。Google 向我们确认你的姓名、邮箱和头像；我们不会获得你的 Google 密码，也不会访问你账号中的其他内容。',
+        '**Apple（登录）：**仅当你选择“通过 Apple 继续”时。Apple 向我们确认你的姓名和邮箱（如果你选择隐藏邮箱，则是 Apple 生成的转发邮箱）；我们不会获得你的密码，也不会访问你账户中的其他内容。',
+        '**iOS 和 Android 应用：**如果你下载应用，Apple（App Store）或 Google（Google Play）会按其自身政策记录下载。应用的提醒在你的手机上设置；Mycen 不使用第三方通知服务。',
         '**Google 日历、Apple 或其他日历：**仅当你开启 Life OS 的日历链接时；该服务会下载你有日期的待办任务（标题、日期、时间和提醒）。你可以随时关闭或更换。',
         '**浏览器的语音识别：**仅当你在 Life OS 中使用“语音输入”时。浏览器会把语音转成文字（在 Chrome 中由 Google 的语音服务完成；在 Safari 中由 Apple 完成）。Mycen 只收到文字。',
       ] },

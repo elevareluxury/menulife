@@ -1,4 +1,6 @@
 import { useEffect } from 'react'
+import { scheduleNativeReminders } from '../lib/nativeReminders'
+import { isNativeApp } from '@/lib/platform'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
@@ -43,6 +45,18 @@ export function useTaskReminders(userId: string | undefined) {
     const notified = new Set<string>()
     const check = async (tasks: ReminderTask[]) => {
       const now = Date.now()
+      // En la app de iOS/Android se programan en el teléfono (llegan con la app cerrada)
+      if (isNativeApp()) {
+        const ts = lifeT().taskSheet
+        await scheduleNativeReminders('task', tasks.flatMap(task => {
+          const due = taskDueAt(task)
+          if (!due) return []
+          const at = new Date(due.getTime() - (task.remind_minutes ?? 0) * 60_000)
+          const when = task.due_time ? ts.reminderAt(task.due_time.slice(0, 5)) : ts.reminderToday
+          return [{ key: `${task.id}:${at.getTime()}`, title: task.title, body: ts.reminderBody(when), at }]
+        })).catch(() => undefined)
+        return
+      }
       for (const task of tasks) {
         const due = taskDueAt(task)
         if (!due) continue
