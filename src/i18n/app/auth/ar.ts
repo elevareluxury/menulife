@@ -51,6 +51,11 @@ const ar: AuthDict = {
     or: "أو",
     failed: "تعذّر فتح Google. حاول مرة أخرى.",
   },
+  apple: {
+    continue: 'المتابعة باستخدام Apple',
+    going: 'جارٍ فتح Apple…',
+    failed: 'تعذّر فتح Apple. حاول مرة أخرى.',
+  },
   /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
   termsGate: {
     title: "خطوة أخيرة",

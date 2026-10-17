@@ -1,3 +1,4 @@
+import { nativePlatform } from '@/lib/platform'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 // Dictado con el reconocimiento de voz del navegador (Chrome, Edge, Safari en iPhone/Mac, Android). En Chrome el
@@ -22,6 +23,8 @@ type RecognitionCtor = new () => Recognition
 
 function ctor(): RecognitionCtor | null {
   if (typeof window === 'undefined') return null
+  // En la app de Android el WebView trae el objeto pero no reconoce nada: ahí no se ofrece dictar
+  if (nativePlatform() === 'android') return null
   const w = window as unknown as { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor }
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }

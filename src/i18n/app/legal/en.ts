@@ -117,6 +117,8 @@ const en: LegalDict = {
         '**Anthropic:** only if a business uses the menu import from a PDF; that file is processed.',
         '**Mercado Pago:** only if a business sets it up to get paid; the payment happens on Mercado Pago.',
         '**Google (sign-in):** only if you choose "Continue with Google". Google confirms your name, email and photo to us; we never get your Google password or access anything else in your account.',
+        '**Apple (sign-in):** only if you choose "Continue with Apple". Apple confirms your name and email to us (or a relay email Apple creates if you prefer to hide yours); we never get your password or access anything else in your account.',
+        '**iOS and Android app:** if you download it, Apple (App Store) or Google (Google Play) record the download under their own policies. The app’s reminders are scheduled on your phone; Mycen doesn’t use a third-party notification service.',
         '**Google Calendar, Apple or another calendar:** only if you turn on the Life OS calendar link; that service downloads your pending tasks with a date (title, date, time and reminder). You can turn it off or change it at any time.',
         '**Your browser’s speech recognition:** only if you use "Dictate" in Life OS. Your browser turns your voice into text (in Chrome, Google’s speech service does it; in Safari, Apple). Mycen only receives the text.',
       ] },

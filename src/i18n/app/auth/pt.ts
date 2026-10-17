@@ -51,6 +51,11 @@ const pt: AuthDict = {
     or: "ou",
     failed: "Não conseguimos abrir o Google. Tente de novo.",
   },
+  apple: {
+    continue: 'Continuar com a Apple',
+    going: 'Abrindo a Apple…',
+    failed: 'Não conseguimos abrir a Apple. Tente de novo.',
+  },
   /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
   termsGate: {
     title: "Só mais um passo",

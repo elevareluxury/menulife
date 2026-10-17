@@ -43,6 +43,9 @@ export function LifeSettingsPage() {
   const [picker, setPicker] = useState<'main' | 'extra' | null>(null)
   const [busy, setBusy] = useState<'json' | 'csv' | 'delete' | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [accountDialog, setAccountDialog] = useState(false)
+  const [accountWord, setAccountWord] = useState('')
+  const [deletingAccount, setDeletingAccount] = useState(false)
   const zones = useMemo(() => {
     const all = timezones()
     return all.includes(prefs.timezone) ? all : [prefs.timezone, ...all]
@@ -76,6 +79,21 @@ export function LifeSettingsPage() {
       for (const module of ['brain', 'goals', 'money']) window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module } }))
     } catch { toast.error(t.data.deleteError) }
     finally { setBusy(null) }
+  }
+  // Eliminar la cuenta entera también desde acá: quien usa sólo Life OS no tiene Studio (lo pide el App Store)
+  const removeAccount = async () => {
+    if (!userId || deletingAccount) return
+    setDeletingAccount(true)
+    const { deleteMyAccount } = await import('@/modules/studio/lib/studioApi')
+    const result = await deleteMyAccount(userId)
+    if (result === 'deleted') {
+      await signOut()
+      navigate('/', { replace: true })
+      return
+    }
+    setDeletingAccount(false)
+    setAccountDialog(false)
+    toast.error(result === 'has_business' ? t.settings.deleteAccountBusiness : t.settings.deleteAccountError, { duration: 8000 })
   }
   const dataBtn: React.CSSProperties = {
     display: 'flex', alignItems: 'center', gap: 10, minHeight: 48, padding: '10px 14px', borderRadius: radius.md,
@@ -202,7 +220,12 @@ export function LifeSettingsPage() {
               style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 48, padding: '10px 14px', borderRadius: radius.md, background: 'transparent', border: `1px solid ${colors.border.subtle}`, color: colors.semantic.error, fontFamily: font, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
               <LogOut size={16} aria-hidden="true" className="flip-rtl" /> {t.settings.signOut}
             </button>
+            <button type="button" disabled={deletingAccount} onClick={() => { setAccountWord(''); setAccountDialog(true) }}
+              style={{ ...dataBtn, background: 'transparent', color: colors.semantic.error }}>
+              <Trash2 size={16} aria-hidden="true" /> {t.settings.deleteAccount}
+            </button>
           </div>
+          <p style={help}>{t.settings.deleteAccountHelp}</p>
         </LifeCard>
       </div>
 
@@ -215,6 +238,21 @@ export function LifeSettingsPage() {
         onCancel={() => setConfirmDelete(false)}
         danger
       />
+
+      <LifeConfirmDialog
+        open={accountDialog}
+        title={t.settings.deleteAccountTitle}
+        message={`${t.settings.deleteAccountText} ${t.settings.deleteAccountWord}.`}
+        confirmLabel={deletingAccount ? t.data.preparing : t.settings.deleteAccount}
+        confirmDisabled={deletingAccount || accountWord.trim().toLocaleUpperCase() !== t.settings.deleteAccountWord.toLocaleUpperCase()}
+        onConfirm={() => void removeAccount()}
+        onCancel={() => { if (!deletingAccount) setAccountDialog(false) }}
+        danger
+      >
+        <input value={accountWord} onChange={e => setAccountWord(e.target.value)} aria-label={t.settings.deleteAccountField}
+          autoComplete="off" autoCapitalize="characters" spellCheck={false} data-testid="delete-account-word"
+          style={{ width: '100%', minHeight: 48, padding: '10px 12px', marginBottom: 14, borderRadius: radius.md, background: colors.surface.high, border: `1px solid ${colors.border.subtle}`, color: colors.text.primary, fontFamily: font, fontSize: 16, boxSizing: 'border-box' }} />
+      </LifeConfirmDialog>
 
       <CurrencySheet
         open={picker !== null}

@@ -1,3 +1,4 @@
+import { shareLink } from '@/lib/nativeFiles'
 import { Link } from 'react-router-dom'
 import { Globe, Share2 } from 'lucide-react'
 import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
@@ -11,6 +12,7 @@ import { SafeImage } from './SafeImage'
 import { ReportButton } from './ReportDialog'
 import '../profile.css'
 import '../layouts/layouts.css'
+import { webOrigin } from '@/lib/platform'
 
 /** Página de un proyecto: /{username}/projects/{slug}. */
 export function ProjectView({ project, lang, onLang, look, onToast, toast }: {
@@ -28,13 +30,10 @@ export function ProjectView({ project, lang, onLang, look, onToast, toast }: {
   const title = tr(project.title, project.translations, 'title', lang)
   const summary = tr(project.summary, project.translations, 'summary', lang)
   const cover = safeHref(project.cover_url)
-  const url = `${window.location.origin}/${space.username}/projects/${project.slug}`
+  const url = `${webOrigin()}/${space.username}/projects/${project.slug}`
 
   async function share() {
-    if (navigator.share) {
-      try { await navigator.share({ title, text: summary || title, url }) } catch { /* canceló */ }
-      return
-    }
+    if (await shareLink(title, url, summary || title)) return
     try {
       await navigator.clipboard.writeText(url)
       onToast(t.linkCopied)

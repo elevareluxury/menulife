@@ -23,7 +23,7 @@ const ar: LifeDict = {
     addCurrency: 'إضافة عملة', removeCurrency: c => `إزالة ${c}`, searchCurrency: 'ابحث عن عملة…',
     timezone: 'المنطقة الزمنية', timezoneHelp: 'تحدّد متى يبدأ يومك وينتهي.', timezoneOther: z => `هاتفك في منطقة زمنية أخرى (${z}). يستخدم Mycen المنطقة المختارة هنا.`, useDeviceTimezone: 'استخدام منطقة الهاتف',
     weekStart: 'يبدأ الأسبوع يوم', monday: 'الإثنين', sunday: 'الأحد',
-    account: 'الحساب', openStudio: 'فتح Mycen Studio', signOut: 'تسجيل الخروج', savedOk: 'تم حفظ الإعدادات', noResults: 'لا توجد نتائج',
+    account: 'الحساب', openStudio: 'فتح Mycen Studio', signOut: 'تسجيل الخروج', deleteAccount: "حذف حسابي", deleteAccountHelp: "يحذف حسابك وهويتك وكل بيانات Life OS. لا يمكن التراجع عن ذلك.", deleteAccountTitle: "هل تريد حذف حسابك نهائيًا؟", deleteAccountText: "سيُحذف حسابك وملفك الشخصي وصورك وكل بيانات Life OS ولن يمكن استعادتها. يمكنك تصدير بياناتك أولًا. للتأكيد اكتب", deleteAccountWord: "حذف", deleteAccountField: "التأكيد", deleteAccountBusiness: "حسابك مرتبط بنشاط تجاري في Mycen Business. لإغلاقه راسلنا على team@mycen.id حتى نحافظ على بيانات عملائك ومبيعاتك.", deleteAccountError: "تعذّر حذف الحساب. حاول مرة أخرى بعد بضع دقائق.", savedOk: 'تم حفظ الإعدادات', noResults: 'لا توجد نتائج',
     homeTitle: "يومي",
     showIdentity: "إظهار «هويتي» أعلى «يومي»",
     showIdentityHelp: "يُحفظ على هذا الجهاز.",

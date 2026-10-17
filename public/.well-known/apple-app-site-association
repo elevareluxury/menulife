@@ -1,0 +1,20 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["APPLE_TEAM_ID.id.mycen.app"],
+        "components": [
+          { "/": "/auth/*", "comment": "Volver de Google, confirmar email y recuperar contraseña" },
+          { "/": "/reset-password" },
+          { "/": "/login" },
+          { "/": "/register" },
+          { "/": "/studio" },
+          { "/": "/studio/*" },
+          { "/": "/life" },
+          { "/": "/life/*" }
+        ]
+      }
+    ]
+  },
+  "webcredentials": { "apps": ["APPLE_TEAM_ID.id.mycen.app"] }
+}

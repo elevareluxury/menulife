@@ -96,3 +96,20 @@ test('sin aceptar, una cuenta de Google no puede usar la app', async ({ page, co
   await page.getByRole('button', { name: 'Cancelar y salir' }).click()
   await expect(page).toHaveURL(/\/login$/)
 })
+
+test('Entrar con Apple: apagado no aparece; en beta manda a Apple por el mismo camino', async ({ page, context }) => {
+  await installSupabaseMock(context, createState({}))
+  let authorize: URL | null = null
+  await page.route('**/auth/v1/authorize**', route => {
+    authorize = new URL(route.request().url())
+    return route.fulfill({ status: 200, contentType: 'text/html', body: '<p>Apple</p>' })
+  })
+  await page.goto('/login')
+  await expect(page.getByRole('button', { name: 'Continuar con Google' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Continuar con Apple' })).toHaveCount(0)
+
+  await page.goto('/login?beta=1')
+  await page.getByRole('button', { name: 'Continuar con Apple' }).click()
+  await expect.poll(() => authorize?.searchParams.get('provider')).toBe('apple')
+  expect(authorize!.searchParams.get('redirect_to')).toMatch(/\/auth\/callback$/)
+})

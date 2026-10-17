@@ -5,6 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useLifeT } from '@/i18n/app/life'
 import { LifeCard, LifeConfirmDialog, colors, font, radius } from '../design-system'
+import { webOrigin } from '@/lib/platform'
 
 // V1.1 (beta calendarFeed): link privado para suscribirse a las tareas desde Google Calendar o el iPhone.
 // El link lo arma api/calendar.ts (/cal/<token>.ics); el token lo crea o cambia la RPC life_calendar_token.
@@ -46,8 +47,8 @@ export function CalendarFeedCard() {
     toast.success(c.disabled)
   }
 
-  const host = window.location.host
-  const https = token ? `${window.location.origin}/cal/${token}.ics` : ''
+  const host = new URL(webOrigin()).host
+  const https = token ? `${webOrigin()}/cal/${token}.ics` : ''
   const webcal = token ? `webcal://${host}/cal/${token}.ics` : ''
 
   return (

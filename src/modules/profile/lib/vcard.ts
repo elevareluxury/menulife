@@ -1,3 +1,4 @@
+import { saveFile } from '@/lib/nativeFiles'
 import type { ContactCard } from './profileApi'
 
 function esc(value: string): string {
@@ -23,12 +24,5 @@ export function buildVCard(card: ContactCard, profileUrl: string): string {
 
 export function downloadVCard(card: ContactCard, profileUrl: string) {
   const blob = new Blob([buildVCard(card, profileUrl)], { type: 'text/vcard;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${(card.handle ?? card.username).replace('/', '-')}.vcf`
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  void saveFile(blob, `${(card.handle ?? card.username).replace('/', '-')}.vcf`)
 }

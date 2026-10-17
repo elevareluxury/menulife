@@ -23,7 +23,7 @@ const ja: LifeDict = {
     addCurrency: '通貨を追加', removeCurrency: c => `${c} を削除`, searchCurrency: '通貨を検索…',
     timezone: 'タイムゾーン', timezoneHelp: '1 日の始まりと終わりを決めます。', timezoneOther: z => `スマホは別のタイムゾーン（${z}）にあります。Mycen はここで選んだものを使います。`, useDeviceTimezone: 'スマホのものを使う',
     weekStart: '週の始まり', monday: '月曜日', sunday: '日曜日',
-    account: 'アカウント', openStudio: 'Mycen Studio を開く', signOut: 'ログアウト', savedOk: '設定を保存しました', noResults: '該当なし',
+    account: 'アカウント', openStudio: 'Mycen Studio を開く', signOut: 'ログアウト', deleteAccount: "アカウントを削除", deleteAccountHelp: "アカウント、アイデンティティ、Life OS のすべてを削除します。元に戻せません。", deleteAccountTitle: "アカウントを完全に削除しますか？", deleteAccountText: "アカウント、プロフィール、画像、Life OS のすべてのデータが削除され、復元できません。先にデータを書き出すこともできます。確認のため次を入力してください：", deleteAccountWord: "削除", deleteAccountField: "確認", deleteAccountBusiness: "このアカウントには Mycen Business のビジネスがあります。解約は team@mycen.id までご連絡ください。お客様や売上のデータを守るためです。", deleteAccountError: "アカウントを削除できませんでした。数分後にもう一度お試しください。", savedOk: '設定を保存しました', noResults: '該当なし',
     homeTitle: "マイデイ",
     showIdentity: "マイデイの上部に「マイアイデンティティ」を表示",
     showIdentityHelp: "この端末に保存されます。",

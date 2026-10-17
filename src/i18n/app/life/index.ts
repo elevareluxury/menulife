@@ -1,4 +1,5 @@
 import { createNamespace } from '../namespace'
+import { useAppLang } from '../store'
 import es, { type LifeDict } from './es'
 
 const life = createNamespace<LifeDict>(es, {
@@ -9,4 +10,7 @@ const life = createNamespace<LifeDict>(es, {
 
 export const useLifeT = life.useDict
 export const lifeT = life.peek
+/** Espera el diccionario del idioma activo (para textos fuera de React, como los recordatorios: nunca en español por
+ *  llegar antes que el diccionario). */
+export const lifeTReady = () => life.load(useAppLang.getState().lang)
 export type { LifeDict }

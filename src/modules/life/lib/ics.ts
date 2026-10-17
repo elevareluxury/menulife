@@ -1,3 +1,4 @@
+import { saveFile } from '@/lib/nativeFiles'
 import { taskDueAt, type LifeTask } from '../hooks/useTasks'
 
 type IcsTask = Pick<LifeTask, 'id' | 'title' | 'notes' | 'due_date' | 'due_time' | 'remind_minutes'>
@@ -44,13 +45,6 @@ export function buildTaskIcs(task: IcsTask): string | null {
 export function downloadTaskIcs(task: IcsTask): boolean {
   const ics = buildTaskIcs(task)
   if (!ics) return false
-  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }))
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${task.title.replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 40) || 'tarea'}.ics`
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  void saveFile(new Blob([ics], { type: 'text/calendar;charset=utf-8' }), `${task.title.replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 40) || 'tarea'}.ics`)
   return true
 }

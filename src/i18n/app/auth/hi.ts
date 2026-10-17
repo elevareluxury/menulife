@@ -51,6 +51,11 @@ const hi: AuthDict = {
     or: "या",
     failed: "Google नहीं खुल सका। फिर से कोशिश करें।",
   },
+  apple: {
+    continue: 'Apple के साथ जारी रखें',
+    going: 'Apple खुल रहा है…',
+    failed: 'Apple नहीं खुल सका। फिर से कोशिश करें।',
+  },
   /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
   termsGate: {
     title: "बस एक कदम और",

@@ -1,3 +1,4 @@
+import { saveFile, shareLink } from '@/lib/nativeFiles'
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, Copy, Download, ExternalLink, Globe2, Share2 } from 'lucide-react'
@@ -35,14 +36,6 @@ function svgToPng(svg: SVGSVGElement, width: number, height: number): Promise<st
   })
 }
 
-function download(href: string, filename: string) {
-  const a = document.createElement('a')
-  a.href = href
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-}
 
 export function ExchangePage() {
   const { profile, publicUrl, patchProfile, handle } = useStudio()
@@ -58,18 +51,14 @@ export function ExchangePage() {
   const isPublished = profile.status === 'published'
 
   async function share() {
-    if (navigator.share) {
-      try { await navigator.share({ title: profile.display_name, url: publicUrl }) } catch { /* cancelado */ }
-    } else {
-      await copy(publicUrl)
-    }
+    if (!(await shareLink(profile.display_name, publicUrl))) await copy(publicUrl)
   }
 
   async function downloadPng() {
     const svg = qrRef.current
     trackEvent('qr_downloaded', { format: 'png' })
     // 2× el tamaño de la pieza: nítido para imprimir en tamaño tarjeta
-    if (svg) download(await svgToPng(svg, HUELLA_QR_SIZE.width * 2, HUELLA_QR_SIZE.height * 2), `mycen-${handle.replace('/', '-')}-qr.png`)
+    if (svg) await saveFile(await svgToPng(svg, HUELLA_QR_SIZE.width * 2, HUELLA_QR_SIZE.height * 2), `mycen-${handle.replace('/', '-')}-qr.png`)
   }
 
   function downloadSvg() {
@@ -77,9 +66,7 @@ export function ExchangePage() {
     if (!svg) return
     trackEvent('qr_downloaded', { format: 'svg' })
     const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    download(url, `mycen-${handle.replace('/', '-')}-qr.svg`)
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    void saveFile(blob, `mycen-${handle.replace('/', '-')}-qr.svg`)
   }
 
   return (

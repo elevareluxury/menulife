@@ -1,3 +1,4 @@
+import { isNativeApp } from '@/lib/platform'
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { MonitorDown, Share, Smartphone } from 'lucide-react'
@@ -23,6 +24,8 @@ export function InstallAppButton({ className, style, iconOnly }: InstallAppButto
   const [open, setOpen] = useState(false)
 
   const mode = installMode(pwa)
+  // En la app de iOS/Android ya está instalada: no hay nada que agregar a inicio
+  if (isNativeApp()) return null
   if (!mode) return null
 
   const Icon = mode === 'prompt' && platform === 'desktop' ? MonitorDown : Smartphone
