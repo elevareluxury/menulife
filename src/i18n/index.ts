@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next'
 import es from './es'
 import en from './en'
 import type { LocaleMeta } from '@/modules/globalization/globalizationTypes'
+import { BUSINESS_LANG_KEY, registerBusinessLocale } from './businessLocale'
 
 // ─── Locale metadata ──────────────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ i18n.use(initReactI18next).init({
     es: { translation: es },
     en: { translation: en },
   },
-  lng:             localStorage.getItem('menulife_lang') ?? 'es',
+  lng:             localStorage.getItem(BUSINESS_LANG_KEY) ?? 'es',
   // Fallback chain: business language → Spanish → English (never breaks UI)
   fallbackLng:     ['es', 'en'],
   interpolation:   { escapeValue: false },
@@ -86,5 +87,10 @@ export async function changeLocaleTo(lang: string): Promise<void> {
   document.documentElement.lang = lang
   document.documentElement.dir  = meta?.dir ?? 'ltr'
 }
+
+registerBusinessLocale(changeLocaleTo)
+// Si se eligió otro idioma antes de que Business arrancara, cargar su diccionario
+const saved = localStorage.getItem(BUSINESS_LANG_KEY)
+if (saved && saved !== 'es' && saved !== 'en') void changeLocaleTo(saved)
 
 export default i18n

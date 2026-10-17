@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { supabase } from '@/lib/supabase'
+import { publicRpc } from '@/lib/publicRpc'
 
 // Interruptores del sitio que prende el super-admin (Super-admin → Landing), sin publicar una versión nueva:
 // RPC `get_site_flags` (tabla `mycen_site_flags`). Hoy: `business` = mostrar Mycen Business en la landing (sección,
@@ -36,8 +36,7 @@ export function loadSiteFlags(): Promise<SiteFlags> {
   if (!loading) {
     loading = (async () => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await (supabase as any).rpc('get_site_flags')
+        const { data, error } = await publicRpc('get_site_flags')
         if (!error && data && typeof data === 'object') set({ business: (data as Partial<SiteFlags>).business === true })
       } catch { /* sin red: queda lo último visto */ }
       return current()

@@ -10,9 +10,9 @@ const manifest = JSON.parse(readFileSync(join(DIST, '.vite', 'manifest.json'), '
 
 /** Páginas y su límite en KB (gzip): la entrada de la app + el bloque de la ruta, con lo que importan de forma estática */
 const BUDGETS = [
-  { name: 'Perfil público (/:username)', route: 'src/modules/profile/pages/ProfilePublicPage.tsx', maxKb: 240 },
-  { name: 'Proyecto (/:username/projects/:slug)', route: 'src/modules/profile/pages/ProjectPublicPage.tsx', maxKb: 240 },
-  { name: 'Landing (/)', route: 'src/modules/landing/pages/LandingPage.tsx', maxKb: 310 },
+  { name: 'Perfil público (/:username)', route: 'src/modules/profile/pages/ProfilePublicPage.tsx', maxKb: 185 },
+  { name: 'Proyecto (/:username/projects/:slug)', route: 'src/modules/profile/pages/ProjectPublicPage.tsx', maxKb: 175 },
+  { name: 'Landing (/)', route: 'src/modules/landing/pages/LandingPage.tsx', maxKb: 215 },
 ]
 
 const sizes = new Map()

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useLandingT } from '@/i18n/app/landing'
 import { useAppLang } from '@/i18n/app/store'
-import { supabase } from '@/lib/supabase'
+import { loadSupabase } from '@/lib/supabaseLazy'
 import type { Testimonial } from '@/components/ui/stagger-testimonials'
 // framer-motion sólo se baja si hay testimonios reales para mostrar (rendimiento de la landing)
 const StaggerTestimonials = lazy(() => import('@/components/ui/stagger-testimonials').then(m => ({ default: m.StaggerTestimonials })))
@@ -18,15 +18,16 @@ export function TestimonialsSection() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
 
   useEffect(() => {
+    // El cliente de Supabase baja recién acá (esta sección se monta al final de la landing)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(supabase as any)
+    void loadSupabase().then(sb => (sb as any)
       .from('testimonials')
       .select('id, name, role, business, content, content_en, avatar_url')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .then(({ data }: { data: Testimonial[] | null }) => {
         if (data && data.length > 0) setTestimonials(data)
-      })
+      }))
   }, [])
 
   const hasAny = testimonials.length > 0

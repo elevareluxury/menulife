@@ -1,15 +1,15 @@
 import { create } from 'zustand'
-import { supabase } from '@/lib/supabase'
+import { loadSupabase } from '@/lib/supabaseLazy'
 import { useLocaleStore } from '@/store/localeStore'
 import { useAppLang } from '@/i18n/app/store'
 import { isAppLang, type AppLang } from '@/i18n/app/languages'
-import { changeLocaleTo, ACTIVE_LOCALES } from '@/i18n'
+import { syncBusinessLocale } from '@/i18n/businessLocale'
 import { guessCurrency } from './currencies'
 import { deviceTimeZone, isValidTimeZone, setAccountTimeZone } from '@/modules/life/lib/zonedTime'
 
 // user_settings todavía no está en database.types.ts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any
+const getDb = async () => (await loadSupabase()) as any
 
 export interface Prefs {
   language: AppLang
@@ -47,12 +47,13 @@ function propagate(p: Partial<Prefs>) {
   if (p.language) {
     useAppLang.getState().setLang(p.language)
     // Mycen Business usa i18next con sus propios idiomas
-    if ((ACTIVE_LOCALES as readonly string[]).includes(p.language)) void changeLocaleTo(p.language)
+    syncBusinessLocale(p.language)
   }
   if (p.currency) useLocaleStore.getState().setCurrency(p.currency)
 }
 
 export async function loadPrefs(userId: string): Promise<void> {
+  const db = await getDb()
   const { data, error } = await db.from('user_settings').select('*').eq('user_id', userId).maybeSingle()
   if (error) {   // sin tabla o sin red: seguimos con los valores del dispositivo
     usePrefs.setState({ loadedFor: userId })
@@ -87,6 +88,7 @@ export async function savePrefs(userId: string, patch: Partial<Prefs>): Promise<
   const timezoneSaved = patch.timezone && isValidTimeZone(patch.timezone) ? patch.timezone : prev.timezoneSaved
   usePrefs.setState({ ...merged, timezoneSaved })
   propagate(merged)
+  const db = await getDb()
   const { error } = await db.from('user_settings')
     .upsert({ user_id: userId, ...merged, timezone: timezoneSaved }, { onConflict: 'user_id' })
   if (error) {
@@ -100,7 +102,7 @@ export async function savePrefs(userId: string, patch: Partial<Prefs>): Promise<
   }
   // Los mails de Supabase (confirmar cuenta, recuperar contraseña) eligen idioma con user_metadata.locale
   if (patch.language && patch.language !== prev.language) {
-    void supabase.auth.updateUser({ data: { locale: patch.language } }).catch(() => { /* sin red: queda el anterior */ })
+    void db.auth.updateUser({ data: { locale: patch.language } }).catch(() => { /* sin red: queda el anterior */ })
   }
 }
 
