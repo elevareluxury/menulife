@@ -23,7 +23,7 @@ const ko: LifeDict = {
     addCurrency: '통화 추가', removeCurrency: c => `${c} 제거`, searchCurrency: '통화 검색…',
     timezone: '시간대', timezoneHelp: '하루가 언제 시작되고 끝나는지 정합니다.', timezoneOther: z => `휴대폰이 다른 시간대(${z})에 있어요. Mycen은 여기서 고른 시간대를 써요.`, useDeviceTimezone: '휴대폰 시간대 사용',
     weekStart: '한 주의 시작', monday: '월요일', sunday: '일요일',
-    account: '계정', openStudio: 'Mycen Studio 열기', signOut: '로그아웃', savedOk: '설정이 저장되었습니다', noResults: '결과 없음',
+    account: '계정', openStudio: 'Mycen Studio 열기', signOut: '로그아웃', deleteAccount: "내 계정 삭제", deleteAccountHelp: "계정, 아이덴티티, Life OS 전체를 삭제합니다. 되돌릴 수 없어요.", deleteAccountTitle: "계정을 영구히 삭제할까요?", deleteAccountText: "계정, 프로필, 이미지와 모든 Life OS 데이터가 삭제되며 복구할 수 없어요. 먼저 데이터를 내보낼 수 있어요. 확인하려면 다음을 입력하세요:", deleteAccountWord: "삭제", deleteAccountField: "확인", deleteAccountBusiness: "이 계정에는 Mycen Business 비즈니스가 있어요. 해지하려면 team@mycen.id로 연락해 주세요. 고객과 매출 데이터를 보호하기 위해서예요.", deleteAccountError: "계정을 삭제하지 못했어요. 몇 분 후 다시 시도해 주세요.", savedOk: '설정이 저장되었습니다', noResults: '결과 없음',
     homeTitle: "나의 하루",
     showIdentity: "나의 하루 맨 위에 \"나의 아이덴티티\" 표시",
     showIdentityHelp: "이 기기에 저장돼요.",

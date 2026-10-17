@@ -52,6 +52,11 @@ const ko: AuthDict = {
     or: "또는",
     failed: "Google을 열 수 없습니다. 다시 시도해 주세요.",
   },
+  apple: {
+    continue: 'Apple로 계속하기',
+    going: 'Apple을 여는 중…',
+    failed: 'Apple을 열 수 없습니다. 다시 시도해 주세요.',
+  },
   /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
   termsGate: {
     title: "한 단계만 더",

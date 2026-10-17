@@ -117,6 +117,8 @@ const fr: LegalDict = {
         '**Anthropic :** uniquement si une entreprise utilise l’import de son menu depuis un PDF ; ce fichier est traité.',
         '**Mercado Pago :** uniquement si une entreprise le configure pour encaisser ; le paiement se fait sur Mercado Pago.',
         '**Google (connexion) :** uniquement si vous choisissez « Continuer avec Google ». Google nous confirme votre nom, votre email et votre photo ; nous ne recevons jamais votre mot de passe Google et n’accédons à rien d’autre dans votre compte.',
+        '**Apple (connexion) :** uniquement si vous choisissez « Continuer avec Apple ». Apple nous confirme votre nom et votre email (ou un email de relais créé par Apple si vous préférez masquer le vôtre) ; nous ne recevons jamais votre mot de passe et n’accédons à rien d’autre dans votre compte.',
+        '**App iOS et Android :** si vous la téléchargez, Apple (App Store) ou Google (Google Play) enregistrent le téléchargement selon leurs propres règles. Les rappels de l’app sont programmés sur votre téléphone ; Mycen n’utilise pas de service de notifications tiers.',
         '**Google Agenda, Apple ou un autre calendrier :** seulement si vous activez le lien de calendrier de Life OS ; ce service télécharge vos tâches en attente avec une date (titre, date, heure et rappel). Vous pouvez le désactiver ou le changer à tout moment.',
         '**La reconnaissance vocale de votre navigateur :** seulement si vous utilisez « Dicter » dans Life OS. Votre navigateur transforme la voix en texte (dans Chrome, c’est le service vocal de Google ; dans Safari, Apple). Mycen ne reçoit que le texte.',
       ] },

@@ -1,3 +1,4 @@
+import { isNativeApp } from '@/lib/platform'
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) return false
   if (Notification.permission === 'granted') return true
@@ -65,7 +66,8 @@ export function playUrgentSound() {
 }
 
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
-  if (!('serviceWorker' in navigator)) return null
+  // En la app de iOS/Android no hay service worker: la app ya funciona sin conexión y avisa con notificaciones nativas
+  if (!('serviceWorker' in navigator) || isNativeApp()) return null
   try {
     const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
     return registration

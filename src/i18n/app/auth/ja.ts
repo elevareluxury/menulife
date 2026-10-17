@@ -52,6 +52,11 @@ const ja: AuthDict = {
     or: "または",
     failed: "Google を開けませんでした。もう一度お試しください。",
   },
+  apple: {
+    continue: 'Appleで続ける',
+    going: 'Apple を開いています…',
+    failed: 'Apple を開けませんでした。もう一度お試しください。',
+  },
   /** Cuenta nueva con Google desde el login: aceptar Términos y Privacidad una vez (/auth/terms) */
   termsGate: {
     title: "あと少し",

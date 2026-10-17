@@ -1,3 +1,4 @@
+import { authCallbackUrl } from '@/lib/platform'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
@@ -132,7 +133,7 @@ export function ForgotPassword() {
     setLoading(true)
     try {
       const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: authCallbackUrl(),
       })
       // Siempre mostramos éxito aunque el email no exista (no revela qué emails tienen cuenta)
       void authError
@@ -149,7 +150,7 @@ export function ForgotPassword() {
     setLoading(true)
     try {
       await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: authCallbackUrl(),
       })
     } finally {
       setLoading(false)

@@ -31,6 +31,8 @@ function json(body: unknown, status: number, cache: string): Response {
       'cache-control': cache,
       'x-content-type-options': 'nosniff',
       'x-robots-tag': 'noindex',
+      // La app de iOS/Android la pide desde otro origen (capacitor://localhost); es pública y sin sesión
+      'access-control-allow-origin': '*',
     },
   })
 }

@@ -1,3 +1,4 @@
+import { shareLink } from '@/lib/nativeFiles'
 import { lazy, Suspense, useMemo, useRef } from 'react'
 import type { ComponentType, LazyExoticComponent } from 'react'
 import { Link } from 'react-router-dom'
@@ -22,6 +23,7 @@ import '@/design/motion.css'
 import '@/design/components/design.css'
 import '../profile.css'
 import '../layouts/layouts.css'
+import { webOrigin } from '@/lib/platform'
 
 // Cada estructura (V1 · sistema de diseño §9) en su propio chunk: el perfil baja sólo la que usa
 const LAYOUTS: Record<ProfileLayout, LazyExoticComponent<ComponentType<LayoutParts>>> = {
@@ -101,7 +103,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   const t = ui(lang)
   const groupPickedRef = useRef(false)
   const track: typeof trackProfileEvent = (...args) => { if (!preview) trackProfileEvent(...args) }
-  const profileUrl = `${window.location.origin}/${profileHandle(profile)}`
+  const profileUrl = `${webOrigin()}/${profileHandle(profile)}`
   const name = tr(profile.display_name, profile.translations, 'display_name', lang)
   const descriptor = tr(profile.descriptor, profile.translations, 'descriptor', lang)
   const bio = tr(profile.bio, profile.translations, 'bio', lang)
@@ -124,12 +126,9 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   const onModuleAction = (moduleId: string, item?: string) => track(profile.id, 'module_click', moduleId, item)
 
   async function share() {
-    const data = { title: name, text: descriptor || name, url: profileUrl }
-    if (navigator.share) {
-      try {
-        await navigator.share(data)
-        track(profile.id, 'share')
-      } catch { /* el usuario canceló */ }
+    // Menú del sistema (en la app de iOS/Android, el nativo); si no hay, se copia el link
+    if (await shareLink(name, profileUrl, descriptor || name)) {
+      track(profile.id, 'share')
       return
     }
     try {
