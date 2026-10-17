@@ -32,6 +32,21 @@ test.describe('en inglés', () => {
     expect(body.data?.name).toBe('Ana Pérez')
   })
 
+  test('si el servidor corta el registro (504), pide confirmar por email en vez de decir que falló', async ({ page }) => {
+    await page.route('**/auth/v1/signup**', route => route.fulfill({
+      status: 504, contentType: 'text/html', headers: { 'access-control-allow-origin': '*' }, body: '<html>Gateway Timeout</html>' }))
+    await page.goto('/register')
+    await page.getByLabel('Your name').fill('Ana Pérez')
+    await page.getByLabel('Email').fill('ana@example.com')
+    await page.getByLabel('Password').fill('secreta123')
+    await page.getByRole('checkbox').check()
+    await page.getByRole('button', { name: 'Create my free account' }).click()
+
+    await expect(page.getByText('Check your email to confirm your account.', { exact: false })).toBeVisible()
+    await expect(page).toHaveURL(/\/login$/)
+    await expect(page.getByText('We couldn’t create your account.', { exact: false })).toHaveCount(0)
+  })
+
   test('el login muestra el error en inglés y el aviso de contraseña cambiada', async ({ page }) => {
     await page.route('**/auth/v1/token**', route => route.fulfill({
       status: 400, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },

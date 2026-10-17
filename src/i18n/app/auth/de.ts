@@ -41,6 +41,7 @@ const de: AuthDict = {
     weakPassword: "Das Passwort braucht mindestens 8 Zeichen, mit Buchstaben und Zahlen.",
     needTerms: "Um dein Konto zu erstellen, akzeptiere die AGB und die Datenschutzerklärung.",
     checkEmail: "Konto erstellt! Bestätige es über die E-Mail, die wir dir geschickt haben.",
+    checkEmailSlow: "Bestätige dein Konto über die E-Mail, die wir dir geschickt haben. Kommt sie in ein paar Minuten nicht an, registriere dich noch einmal mit derselben E-Mail.",
     welcome: "Willkommen bei Mycen!",
     failed: "Wir konnten dein Konto nicht erstellen. Versuch es noch einmal.",
   },

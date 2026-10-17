@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { authErrorMessage } from '../../src/lib/authErrors'
+import { authErrorMessage, signupMaybeCreated } from '../../src/lib/authErrors'
 import es from '../../src/i18n/app/auth/es'
 
 // Los errores de Supabase se traducen a mensajes claros; si no se reconocen, el genérico.
@@ -12,5 +12,20 @@ describe('authErrorMessage', () => {
   })
   it('lo desconocido usa el genérico', () => {
     expect(authErrorMessage({ message: 'algo raro' }, e, 'genérico')).toBe('genérico')
+  })
+})
+
+// El servidor cortó el registro (5xx): la cuenta suele crearse y el mail sale igual
+describe('signupMaybeCreated', () => {
+  it('error del servidor o timeout → pedir que revise el email', () => {
+    expect(signupMaybeCreated({ status: 504, message: '{}' })).toBe(true)
+    expect(signupMaybeCreated({ status: 500, message: 'Error sending confirmation email' })).toBe(true)
+    expect(signupMaybeCreated({ message: 'Gateway Timeout' })).toBe(true)
+  })
+  it('sin conexión o errores conocidos del registro → no', () => {
+    expect(signupMaybeCreated({ status: 0, message: 'Failed to fetch' })).toBe(false)
+    expect(signupMaybeCreated({ status: 422, message: 'User already registered' })).toBe(false)
+    expect(signupMaybeCreated({ status: 429, message: 'Email rate limit exceeded' })).toBe(false)
+    expect(signupMaybeCreated(null)).toBe(false)
   })
 })
