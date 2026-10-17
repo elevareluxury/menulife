@@ -134,6 +134,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   proyecto y landing con `dist/.vite/manifest.json`. Si un cambio lo supera, achicarlo antes de subir el límite.
 - Fuentes desde `@fontsource` (`src/lib/fonts.ts`; las de títulos de perfil, a pedido en `ensureProfileFont`): nada de Google Fonts.
 - Imágenes: `uploadMedia` las achica (avatar 640 px, resto 1920 px) y las pasa a WebP en el dispositivo (`lib/imageOptimize.ts`).
+  También Business (`useImageUpload`: logos 640, fotos 1600; portada y banner 1920) y las fotos de testimonios (640).
 - Zoom permitido en toda la app (sin `user-scalable=no`); los campos táctiles usan 16px para que iOS no haga zoom al tocarlos.
 
 ## Buscadores (Lanzamiento L2)
@@ -535,6 +536,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `[data-scroll-root]` (Life OS y Studio scrollean su marco, no la página); fondos con `touch-action: none`, hojas con
   `pan-y pinch-zoom` y `overscroll-behavior: none` (no se arrastran ni rebotan). Grillas en hojas con `minmax(0, 1fr)`
   o `auto-fill` (nada de `repeat(N, 1fr)` con mínimos que no entran en 320 px). E2E en `swipe-sheets.spec.ts`.
+  En Studio `.st-row` y `.st-topbar` bajan a otra línea lo que no entra y `.st-btn` parte su texto antes de salirse.
+  Auditoría de diseño permanente: `layout-audit.spec.ts` (detector en `support/layoutAudit.ts`) recorre a 320 px todas
+  las pantallas (español y ruso), el perfil con todos los módulos (5 estructuras × 2 temas) y cada editor de módulo:
+  nada se sale de la pantalla ni de su recuadro, nada queda cortado y los controles no se pisan.
 - Pantallas de acceso (login, registro, recuperar, cambiar contraseña, aceptar términos): `AuthBrand` (huella de la
   marca de `src/lib/brandMark.ts`, la misma de la pantalla de carga, y "mycen.id" debajo); sin link al panel del equipo.
 - Panel del equipo (auditoría del panel): menú en dos grupos — Mycen (Resumen, Personas, Denuncias, Verificaciones,

@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
+import { optimizeImage } from '@/lib/imageOptimize'
 
 export function useImageUpload() {
   const [uploading, setUploading] = useState(false)
 
-  const uploadImage = async (file: File, bucket: string) => {
+  const uploadImage = async (original: File, bucket: string) => {
     try {
       setUploading(true)
+      // Se achica y pasa a WebP en el dispositivo antes de subir (logos 640 px, fotos 1600 px)
+      const file = await optimizeImage(original, { maxSide: bucket.includes('logo') ? 640 : 1600 })
       const fileExt = file.name.split('.').pop()
       const fileName = `${crypto.randomUUID()}.${fileExt}`
 

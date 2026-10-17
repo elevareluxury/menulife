@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { optimizeImage } from '@/lib/imageOptimize'
 import { Plus, Pencil, Trash2, Upload, X, GripVertical, ToggleLeft, ToggleRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
@@ -83,11 +84,13 @@ export function TestimonialsTab() {
   }
 
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > 2 * 1024 * 1024) { toast.error('Imagen demasiado grande (máx 2 MB)'); return }
+    const picked = e.target.files?.[0]
+    if (!picked) return
     setUploading(true)
     try {
+      // Se achica a 640 px y pasa a WebP en el dispositivo; el tope de 2 MB cuenta después
+      const file = await optimizeImage(picked, { maxSide: 640 })
+      if (file.size > 2 * 1024 * 1024) { toast.error('Imagen demasiado grande (máx 2 MB)'); return }
       const ext = file.name.split('.').pop()
       const fileName = `testimonials/${Date.now()}.${ext}`
       const { error: upErr } = await supabase.storage

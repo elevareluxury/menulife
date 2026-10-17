@@ -285,7 +285,7 @@ export function LifeReplayPage() {
   return (
     <div style={{ background: colors.bg, paddingBottom: 'calc(32px + env(safe-area-inset-bottom))' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 16px' }}>
-        <div style={{ paddingTop: '20px', paddingBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+        <div style={{ paddingTop: '20px', paddingBottom: '12px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
           <button type="button" onClick={() => navigate('/life')}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px', minHeight: 40, padding: '8px 12px', borderRadius: radius.full,
@@ -294,7 +294,7 @@ export function LifeReplayPage() {
             }}>
             <ArrowLeft size={14} strokeWidth={2.5} aria-hidden="true" className="flip-rtl" /> {r.back}
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginInlineStart: 'auto' }}>
             <button type="button" style={navBtn} onClick={() => shift(-1)} aria-label={r.prevMonth}><ChevronLeft size={16} aria-hidden="true" className="flip-rtl" /></button>
             <span aria-live="polite" style={{ fontFamily: font, fontSize: 14, fontWeight: 700, color: colors.text.primary, minWidth: 120, textAlign: 'center' }}>{monthLabel}</span>
             <button type="button" style={{ ...navBtn, opacity: isCurrentMonth ? 0.35 : 1 }} disabled={isCurrentMonth}
