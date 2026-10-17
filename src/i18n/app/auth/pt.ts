@@ -41,6 +41,7 @@ const pt: AuthDict = {
     weakPassword: "A senha precisa ter pelo menos 8 caracteres, com letras e números.",
     needTerms: "Para criar sua conta, aceite os Termos e a Política de privacidade.",
     checkEmail: "Conta criada! Confira seu e-mail para confirmá-la.",
+    checkEmailSlow: "Confira seu e-mail para confirmar sua conta. Se não chegar em alguns minutos, cadastre-se de novo com o mesmo e-mail.",
     welcome: "Boas-vindas ao Mycen!",
     failed: "Não conseguimos criar sua conta. Tente de novo.",
   },

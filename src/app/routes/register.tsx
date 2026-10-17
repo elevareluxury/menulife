@@ -3,7 +3,7 @@ import { useEffect, useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
-import { authErrorMessage } from '@/lib/authErrors'
+import { authErrorMessage, signupMaybeCreated } from '@/lib/authErrors'
 import { LanguageSelect } from '@/components/ui/LanguageSelect'
 import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
@@ -113,6 +113,12 @@ export function RegisterPage() {
       // Onboarding guiado: Studio lo muestra a quien todavía no tiene identidad
       navigate('/studio')
     } catch (err: unknown) {
+      // Error del servidor: la cuenta suele crearse y el mail sale igual (si no, volver a registrarse lo reenvía)
+      if (signupMaybeCreated(err)) {
+        toast.success(r.checkEmailSlow, { duration: 10000 })
+        navigate('/login')
+        return
+      }
       setError(authErrorMessage(err, t.errors, r.failed))
     } finally {
       setLoading(false)

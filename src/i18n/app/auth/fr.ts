@@ -41,6 +41,7 @@ const fr: AuthDict = {
     weakPassword: "Le mot de passe doit contenir au moins 8 caractères, avec des lettres et des chiffres.",
     needTerms: "Pour créer votre compte, acceptez les Conditions et la Politique de confidentialité.",
     checkEmail: "Compte créé ! Vérifiez vos e-mails pour le confirmer.",
+    checkEmailSlow: "Vérifiez vos e-mails pour confirmer votre compte. S’il n’arrive pas d’ici quelques minutes, inscrivez-vous à nouveau avec le même e-mail.",
     welcome: "Bienvenue sur Mycen !",
     failed: "Impossible de créer votre compte. Réessayez.",
   },

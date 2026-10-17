@@ -41,6 +41,7 @@ const zh: AuthDict = {
     weakPassword: "密码至少需要 8 位，并包含字母和数字。",
     needTerms: "要创建账户，请同意条款和隐私政策。",
     checkEmail: "账户已创建！请查收邮件完成确认。",
+    checkEmailSlow: "请查收邮件以确认你的账户。如果几分钟后仍未收到，请用同一邮箱重新注册。",
     welcome: "欢迎来到 Mycen！",
     failed: "无法创建账户，请重试。",
   },

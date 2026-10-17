@@ -41,6 +41,8 @@ const es = {
     weakPassword: 'La contraseña necesita al menos 8 caracteres, con letras y números.',
     needTerms: 'Para crear tu cuenta, aceptá los Términos y la Política de privacidad.',
     checkEmail: '¡Cuenta creada! Revisá tu email para confirmarla.',
+    /** Supabase cortó la respuesta (error del servidor) pero la cuenta suele crearse y el mail sale igual */
+    checkEmailSlow: 'Revisá tu email para confirmar tu cuenta. Si en unos minutos no te llegó, registrate de nuevo con el mismo email.',
     welcome: '¡Bienvenido a Mycen!',
     failed: 'No pudimos crear tu cuenta. Intentá de nuevo.',
   },

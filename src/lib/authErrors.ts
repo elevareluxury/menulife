@@ -21,3 +21,15 @@ export function authErrorMessage(err: unknown, errors: AuthDict['errors'], fallb
   if (raw.includes('failed to fetch') || raw.includes('network')) return errors.offline
   return fallback
 }
+
+/**
+ * El registro falló del lado del servidor (5xx, por ejemplo si el mail tarda y se corta la respuesta), pero la cuenta
+ * suele quedar creada y el mail de confirmación sale igual: conviene pedir que revise el email, no decir que falló.
+ */
+export function signupMaybeCreated(err: unknown): boolean {
+  const raw = ((err as { message?: string })?.message ?? '').toLowerCase()
+  const status = (err as { status?: number })?.status
+  if (raw.includes('failed to fetch') || raw.includes('network')) return false
+  return (typeof status === 'number' && status >= 500 && status < 600)
+    || raw.includes('error sending confirmation') || raw.includes('gateway timeout')
+}
