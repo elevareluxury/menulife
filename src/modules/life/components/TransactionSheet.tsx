@@ -87,6 +87,17 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
   // Sin conexión, el movimiento simple queda en la cola del dispositivo; fijos, cuotas y compartidos no (no se pierden datos)
   const { offline } = useOutbox()
 
+  // Si se escribió la descripción antes de que llegara la memoria de categorías, sugerir al llegar
+  useEffect(() => {
+    if (initial || catTouched || !memory) return
+    /* eslint-disable-next-line react-hooks/set-state-in-effect -- sugerencia al llegar la memoria */
+    setForm(f => {
+      const suggested = f.description ? suggestCategory(memory, f.type, f.description) : null
+      return suggested && suggested !== f.category && keysFor(f.type).includes(suggested) ? { ...f, category: suggested } : f
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sólo cuando llega la memoria
+  }, [memory])
+
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reinicia el formulario al abrir */
     if (open) {
