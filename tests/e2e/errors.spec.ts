@@ -35,7 +35,8 @@ test('el super-admin ve los errores, los resuelve y se reabren si vuelven a pasa
   await installSupabaseMock(context, state, { signedIn: true })
 
   await page.goto('/super-admin')
-  await page.getByRole('button', { name: /1 error abierto/ }).click()
+  // El resumen lista lo pendiente con su link (antes era un aviso aparte)
+  await page.getByRole('link', { name: /Errores abiertos: 1/ }).click()
   await expect(page).toHaveURL(/\/super-admin\/errores$/)
 
   const item = page.getByRole('listitem', { name: 'TypeError: x is undefined' })

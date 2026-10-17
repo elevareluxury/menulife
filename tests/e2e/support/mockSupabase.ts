@@ -338,6 +338,29 @@ function publicProfile(state: MockState, handle: string, isOwner: boolean): unkn
   }
 }
 
+// Cuentas del panel: una por dueña de perfil (la de la sesión es ana@example.com)
+function mockAccounts(state: MockState) {
+  const users = [...new Set(state.tables.profiles.map(p => String(p.user_id)))]
+  return users.map(uid => {
+    const primary = state.tables.profiles.find(p => p.user_id === uid && p.is_primary) ?? state.tables.profiles.find(p => p.user_id === uid)!
+    return {
+      user_id: uid, email: uid === OWNER_ID ? 'ana@example.com' : `${primary.username ?? 'persona'}@example.com`,
+      created_at: String(primary.created_at), last_sign_in_at: String(primary.updated_at),
+      display_name: primary.display_name, username: primary.username, status: primary.status,
+      suspended: state.tables.profiles.some(p => p.user_id === uid && p.suspended_at), verified: false,
+      spaces: state.tables.profiles.filter(p => p.user_id === uid && p.status !== 'archived').length, has_business: false,
+    }
+  })
+}
+
+// La base anota sola cada acción del equipo (admin_audit_log); el mock hace lo mismo con las que simula
+function audit(state: MockState, action: string, targetType: string, targetId: string, details: Row) {
+  ;(state.tables.admin_audit_log ??= []).push({
+    id: `aud-${(state.tables.admin_audit_log?.length ?? 0) + 1}`, action, target_type: targetType, target_id: targetId,
+    details, created_at: new Date(Date.now() + (state.tables.admin_audit_log?.length ?? 0)).toISOString(), admin_email: 'ana@example.com',
+  })
+}
+
 function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown {
   state.rpcCalls.push({ fn, args })
   switch (fn) {
@@ -571,6 +594,7 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       if (!p) throw new Error('NOT_FOUND')
       p.suspended_at = args.p_suspended ? (p.suspended_at ?? new Date().toISOString()) : null
       p.suspension_reason = args.p_suspended ? (args.p_reason ?? null) : null
+      audit(state, args.p_suspended ? 'space_suspended' : 'space_unsuspended', 'profiles', String(p.id), { handle: handleOf(state, p), reason: p.suspension_reason })
       return null
     }
     case 'admin_resolve_report': {
@@ -756,11 +780,66 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       state.tables.life_calendar_feeds = []
       return null
     }
+    // Panel del equipo (auditoría del panel)
+    case 'admin_pending_counts': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      return {
+        reports: state.tables.profile_reports.filter(r => r.status === 'open').length,
+        verifications: (state.tables.verification_requests ?? []).filter(r => r.status === 'pending').length,
+        errors: (state.tables.app_errors ?? []).filter(e => e.status === 'open').length,
+      }
+    }
+    case 'admin_overview': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const accounts = mockAccounts(state)
+      const day = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10)
+      const published = state.tables.profiles.filter(p => p.status === 'published' && !p.suspended_at)
+      return {
+        days: 30, accounts: accounts.length, accounts_7d: accounts.length, accounts_30d: accounts.length,
+        published: published.length, published_7d: published.length,
+        suspended: state.tables.profiles.filter(p => p.suspended_at).length, verified: 0, life_active_7d: 0,
+        pending_reports: state.tables.profile_reports.filter(r => r.status === 'open').length,
+        pending_verifications: (state.tables.verification_requests ?? []).filter(r => r.status === 'pending').length,
+        open_errors: (state.tables.app_errors ?? []).filter(e => e.status === 'open').length,
+        series: Array.from({ length: 30 }, (_, i) => ({ day: day(29 - i), signups: i === 29 ? accounts.length : 0, published: i === 29 ? published.length : 0 })),
+      }
+    }
+    case 'admin_search_accounts': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const q = String(args.p_query ?? '').trim().toLowerCase()
+      if (q.length < 2) return []
+      return mockAccounts(state).filter(a => [a.email, a.username, a.display_name].some(v => String(v ?? '').toLowerCase().includes(q)))
+    }
+    case 'admin_account_detail': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const a = mockAccounts(state).find(x => x.user_id === args.p_user_id)
+      if (!a) return null
+      return {
+        user_id: a.user_id, email: a.email, created_at: a.created_at, last_sign_in_at: a.last_sign_in_at,
+        is_admin: state.tables.super_admins.some(s => s.user_id === a.user_id), verified_at: null, has_business: false,
+        verification_pending: false,
+        spaces: state.tables.profiles.filter(p => p.user_id === a.user_id).map(p => ({
+          id: p.id, handle: handleOf(state, p), display_name: p.display_name, status: p.status, is_primary: p.is_primary,
+          published_at: p.published_at, suspended_at: p.suspended_at, suspension_reason: p.suspension_reason,
+          open_reports: state.tables.profile_reports.filter(r => r.profile_id === p.id && r.status === 'open').length,
+          messages: state.tables.profile_messages.filter(m => m.profile_id === p.id).length,
+          subscribers: state.tables.profile_subscribers.filter(m => m.profile_id === p.id).length,
+        })),
+        life: { tasks: 3, captures: 2, habits: 1, transactions: 4, last_activity: a.created_at },
+      }
+    }
+    case 'admin_list_audit': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const rows = [...(state.tables.admin_audit_log ?? [])].reverse()
+      const before = args.p_before ? String(args.p_before) : null
+      return rows.filter(r => !before || String(r.created_at) < before).slice(0, Number(args.p_limit ?? 100))
+    }
     case 'get_site_flags': return { business: state.siteFlags?.business === true }
     case 'admin_set_site_flag': {
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
       if (args.p_key !== 'business' || typeof args.p_enabled !== 'boolean') throw new Error('INVALID_FLAG')
       state.siteFlags = { business: args.p_enabled }
+      audit(state, args.p_enabled ? 'flag_on' : 'flag_off', 'mycen_site_flags', 'business', {})
       return { business: args.p_enabled }
     }
     case 'check_username': {

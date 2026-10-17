@@ -531,6 +531,17 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   La landing en el celular muestra idioma y cuenta (sin menú hamburguesa). E2E en `swipe-sheets.spec.ts`.
 - Pantallas de acceso (login, registro, recuperar, cambiar contraseña, aceptar términos): `AuthBrand` (huella de la
   marca de `src/lib/brandMark.ts`, la misma de la pantalla de carga, y "mycen.id" debajo); sin link al panel del equipo.
+- Panel del equipo (auditoría del panel): menú en dos grupos — Mycen (Resumen, Personas, Denuncias, Verificaciones,
+  Errores, Producto, Actividad del equipo, Landing, Testimonios) y Business (plegable; abierto si Business está prendido)
+  —, contadores de pendientes (`admin_pending_counts`), huella de la marca y, en el celular, barra de abajo (Resumen,
+  Personas, Denuncias, Errores, Más) sin hamburguesa. Resumen (`HomeTab`, `admin_overview`): cuentas, publicados, Life OS
+  activo, verificadas/suspendidos, "Para revisar" con links y barras de 30 días; el resumen viejo de Business va debajo
+  sólo con Business prendido. Personas (`PeopleTab`, `?q=`/`?id=`): `admin_search_accounts` (email, usuario o nombre;
+  comodines como texto) y `admin_account_detail` (Spaces con denuncias/mensajes/suscriptores, verificar, suspender con
+  motivo, Life OS sólo en cantidades). Actividad (`ActivityTab`): triggers `mycen_audit` anotan solos en
+  `admin_audit_log` (nadie lee la tabla; `admin_list_audit`) cada suspensión, verificación, denuncia o pedido resuelto,
+  error y interruptor que cambia un super-admin. Migración `20261105000001_admin_console.sql`, tests en
+  `admin_console.test.sql` y `admin-console.spec.ts`; textos en `src/i18n/app/admin/` (12 idiomas).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea
