@@ -7,6 +7,7 @@ import { moduleDef, type FieldDef } from '../lib/moduleCatalog'
 import type { StudioModule } from '../lib/studioTypes'
 import { isTemplatePending, withoutTemplateMark } from '../lib/templates'
 import { Button, Drawer, ImageField, SelectField, TextField } from './ui'
+import { urlOnBlur } from '../lib/urlInput'
 import { useStudioT, type StudioDict } from '@/i18n/app/studio'
 
 const str = (v: unknown) => (v == null ? '' : String(v))
@@ -73,16 +74,19 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
   const set = (k: string, v: string) => { setValues(prev => ({ ...prev, [k]: v })); setError(null); setSaved(false) }
   const translatable = def.fields.filter(f => f.translatable)
 
+  // Un link que quedó sólo con "https://" (guardado con Enter sin salir del campo) cuenta como vacío
+  const fieldValue = (f: FieldDef) => f.kind === 'url' ? urlOnBlur(values[f.key] ?? '') : values[f.key]?.trim() ?? ''
+
   function fieldError(f: FieldDef): string | null {
     if (!submitted) return null
-    if (f.required && !values[f.key]?.trim()) return e.required
+    if (f.required && !fieldValue(f)) return e.required
     if (f.kind === 'number' && values[f.key] && Number.isNaN(Number(values[f.key].replace(',', '.')))) return e.number
     return null
   }
 
   function validate(): string | null {
     for (const f of def.fields) {
-      if (f.required && !values[f.key]?.trim()) return e.complete(f.label)
+      if (f.required && !fieldValue(f)) return e.complete(f.label)
     }
     const extraProblem = def.extra?.validate(extra)
     if (extraProblem) return extraProblem
@@ -96,7 +100,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
     let title: string | null = module?.title ?? null
     const content: Record<string, unknown> = { ...(module?.content ?? {}) }
     for (const f of def.fields) {
-      const v = values[f.key]?.trim() ?? ''
+      const v = fieldValue(f)
       if (f.isTitle) { title = v || null; continue }
       if (f.kind === 'number') {
         if (v) content[f.key] = Number(v.replace(',', '.'))

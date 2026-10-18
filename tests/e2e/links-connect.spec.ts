@@ -65,6 +65,36 @@ test('crear un grupo de links y programar un módulo desde Studio', async ({ pag
   await expect(page.getByRole('button', { name: 'Editar Comprá mi curso' })).toContainText('Desde')
 })
 
+test('los campos de link arrancan con https:// y completan un dominio suelto', async ({ page, context }) => {
+  const state = seed()
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/studio/modules')
+  await page.getByRole('button', { name: 'Agregar', exact: true }).click()
+  await page.getByRole('button', { name: /Grupo de links/ }).click()
+
+  const url = page.getByRole('textbox', { name: 'URL' })
+  // Al tocarlo queda "https://" y se sigue escribiendo detrás
+  await url.click()
+  await expect(url).toHaveValue('https://')
+  await url.press('End')
+  await url.pressSequentially('instagram.com/ana')
+  await expect(url).toHaveValue('https://instagram.com/ana')
+
+  // Sólo el prefijo, al salir, queda vacío; pegar un link completo encima no lo duplica
+  await url.fill('https://')
+  await url.blur()
+  await expect(url).toHaveValue('')
+  await url.click()
+  await url.press('End')
+  await url.pressSequentially('https://clarin.com/ana')
+  await expect(url).toHaveValue('https://clarin.com/ana')
+
+  // Un dominio suelto se completa al salir
+  await url.fill('mitienda.com.ar')
+  await page.getByRole('textbox', { name: 'Texto del link' }).click()
+  await expect(url).toHaveValue('https://mitienda.com.ar')
+})
+
 test('Connect: tarjeta de identidad clara/oscura y presentación corta', async ({ page, context }) => {
   await installSupabaseMock(context, seed(), { signedIn: true })
   await page.goto('/studio/exchange')
