@@ -198,7 +198,7 @@ export function ResetPassword() {
   const isDisabled = loading || password.length < 8 || confirm.length === 0
 
   return (
-    <div className="my-tap-root" style={S.page}>
+    <main className="my-tap-root" style={S.page}>
       <div style={S.card}>
         <div style={S.logo}>
           <AuthBrand />
@@ -293,7 +293,7 @@ export function ResetPassword() {
           </button>
         </form>
       </div>
-    </div>
+    </main>
   )
 }
 
