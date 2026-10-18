@@ -117,7 +117,13 @@ function whenIdle(defer: boolean): Promise<void> {
   if (!defer) return Promise.resolve()
   return new Promise(resolve => {
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }
-    if (w.requestIdleCallback) w.requestIdleCallback(() => resolve(), { timeout: 3000 })
-    else setTimeout(resolve, 1500)
+    const idle = () => {
+      if (w.requestIdleCallback) w.requestIdleCallback(() => resolve(), { timeout: 3000 })
+      else setTimeout(resolve, 1500)
+    }
+    // Después del evento load: en el perfil público, lo que pide index.html (página, estructura, imágenes) lo
+    // demora, así que el cliente no le saca ancho de banda a la primera pantalla en un 4G lento
+    if (document.readyState === 'complete') idle()
+    else window.addEventListener('load', idle, { once: true })
   })
 }
