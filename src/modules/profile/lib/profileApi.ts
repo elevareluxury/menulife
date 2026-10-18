@@ -1,14 +1,25 @@
 import { publicRpc } from '@/lib/publicRpc'
+import { takePrefetchedProfile } from './profilePrefetch'
 import type { ProfileEventType, ProfileLookup, PublicProfile } from './profileTypes'
 import type { ProjectLookup, PublicProject } from './projectTypes'
 
 // Sólo RPC públicas: van con `publicRpc` (un fetch), sin el cliente de Supabase, para que la página pública pese menos
 const rpc = (fn: string, args: Record<string, unknown>) => publicRpc(fn, args)
 
-/** `handle`: "ana" o "ana/estudio" (Space secundario, Fase 10) */
-export async function fetchPublicProfile(handle: string): Promise<ProfileLookup> {
+/** La respuesta del pedido que salió desde index.html (si es de este handle) o, si no hay o falló, un pedido nuevo */
+async function publicProfileData(handle: string): Promise<unknown> {
+  const early = takePrefetchedProfile(handle)
+  if (early) {
+    try { return await early } catch { /* se repite abajo con el pedido de siempre */ }
+  }
   const { data, error } = await rpc('get_public_profile', { p_username: handle })
   if (error) throw new Error(error.message)
+  return data
+}
+
+/** `handle`: "ana" o "ana/estudio" (Space secundario, Fase 10) */
+export async function fetchPublicProfile(handle: string): Promise<ProfileLookup> {
+  const data = await publicProfileData(handle)
   if (!data) return { kind: 'not_found' }
 
   const result = data as Record<string, unknown>

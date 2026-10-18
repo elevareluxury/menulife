@@ -1,6 +1,5 @@
 import { shareLink } from '@/lib/nativeFiles'
-import { lazy, Suspense, useMemo, useRef } from 'react'
-import type { ComponentType, LazyExoticComponent } from 'react'
+import { Suspense, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { BadgeCheck, Calendar, Globe, Share2, UserPlus } from 'lucide-react'
 import { huellaSeed } from '@/lib/huella'
@@ -11,8 +10,9 @@ import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref } from '../lib/safeUrl'
 import { isOpenNow } from '../lib/schedule'
 import { downloadVCard } from '../lib/vcard'
-import { lookVars, profileLook, type ProfileLayout } from '../lib/profileLook'
+import { lookVars, profileLook } from '../lib/profileLook'
 import { profileHandle, signupLink, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
+import { LAYOUTS } from './profileLayouts'
 import { bentoSize, publicModuleDef, type BentoSize, type GroupProps } from './moduleRegistry'
 import { ProfileModuleContext } from './profileModuleContext'
 import type { ModuleProps } from './ProfileModules'
@@ -24,15 +24,6 @@ import '@/design/components/design.css'
 import '../profile.css'
 import '../layouts/layouts.css'
 import { webOrigin } from '@/lib/platform'
-
-// Cada estructura (V1 · sistema de diseño §9) en su propio chunk: el perfil baja sólo la que usa
-const LAYOUTS: Record<ProfileLayout, LazyExoticComponent<ComponentType<LayoutParts>>> = {
-  credencial: lazy(() => import('../layouts/Credencial')),
-  portada: lazy(() => import('../layouts/Portada')),
-  editorial: lazy(() => import('../layouts/Editorial')),
-  bento: lazy(() => import('../layouts/Bento')),
-  clasica: lazy(() => import('../layouts/Clasica')),
-}
 
 /** Bloques a dibujar: los tipos con `Group` (ej.: redes) se juntan si son consecutivos. */
 type Block =

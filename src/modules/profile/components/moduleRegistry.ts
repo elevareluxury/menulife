@@ -1,4 +1,5 @@
-import { lazy, type ComponentType } from 'react'
+import type { ComponentType } from 'react'
+import { preloadable, type Preloadable } from '../lib/preloadable'
 import type { ModuleType, ProfileLang, ProfileModule } from '../lib/profileTypes'
 import {
   CardsModule, ContactModule, LinkGroupModule, FeaturedActionModule, GalleryModule, HoursModule, ImageModule, LinkModule,
@@ -6,15 +7,15 @@ import {
 } from './ProfileModules'
 import { PortfolioModule, ProjectModule } from './ProjectModules'
 // Video y música en su propio chunk: sólo lo baja un perfil que lo usa (la huella de la fachada pesa)
-const ContactFormModule = lazy(() => import('./ContactFormModule').then(m => ({ default: m.ContactFormModule })))
-const CollabModule = lazy(() => import('./CollabModule').then(m => ({ default: m.CollabModule })))
-const MediaModule = lazy(() => import('./MediaModule').then(m => ({ default: m.MediaModule })))
-const SubscribeModule = lazy(() => import('./SubscribeModule').then(m => ({ default: m.SubscribeModule })))
+const ContactFormModule = preloadable<ModuleProps>(() => import('./ContactFormModule').then(m => ({ default: m.ContactFormModule })))
+const CollabModule = preloadable<ModuleProps>(() => import('./CollabModule').then(m => ({ default: m.CollabModule })))
+const MediaModule = preloadable<ModuleProps>(() => import('./MediaModule').then(m => ({ default: m.MediaModule })))
+const SubscribeModule = preloadable<ModuleProps>(() => import('./SubscribeModule').then(m => ({ default: m.SubscribeModule })))
 // "Último video" (bio): chunk propio, pide los datos a /api/youtube-latest
-const LatestVideoModule = lazy(() => import('./LatestVideoModule').then(m => ({ default: m.LatestVideoModule })))
+const LatestVideoModule = preloadable<ModuleProps>(() => import('./LatestVideoModule').then(m => ({ default: m.LatestVideoModule })))
 // Módulos de bio (V1.1): cada uno con su chunk, sus textos y su CSS
-const SupportModule = lazy(() => import('./SupportModule').then(m => ({ default: m.SupportModule })))
-const ListenOnModule = lazy(() => import('./ListenOnModule').then(m => ({ default: m.ListenOnModule })))
+const SupportModule = preloadable<ModuleProps>(() => import('./SupportModule').then(m => ({ default: m.SupportModule })))
+const ListenOnModule = preloadable<ModuleProps>(() => import('./ListenOnModule').then(m => ({ default: m.ListenOnModule })))
 import { parseMediaUrl } from '../lib/media'
 
 export interface GroupProps {
@@ -74,4 +75,10 @@ export function bentoSize(def: PublicModuleDef, module: ProfileModule): BentoSiz
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */
 export function publicModuleDef(type: string): PublicModuleDef | undefined {
   return (PUBLIC_MODULES as Record<string, PublicModuleDef | undefined>)[type]
+}
+
+/** Baja antes de dibujar los módulos con chunk propio que usa el perfil (ver `preloadable`) */
+export function preloadModuleViews(modules: ProfileModule[]): Promise<void> {
+  const views = new Set(modules.map(m => publicModuleDef(m.type)?.View))
+  return Promise.all([...views].map(v => (v as Partial<Preloadable<ModuleProps>> | undefined)?.preload?.())).then(() => undefined)
 }

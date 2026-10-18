@@ -17,6 +17,12 @@ export function fitWithin(width: number, height: number, maxSide: number): { wid
   return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) }
 }
 
+/** Píxeles RGBA (`ImageData.data`) sin ninguna transparencia */
+export function isOpaque(rgba: ArrayLike<number>): boolean {
+  for (let i = 3; i < rgba.length; i += 4) if (rgba[i] < 255) return false
+  return true
+}
+
 /** GIF (pueden ser animados) y SVG se suben tal cual */
 const KEEP_AS_IS = new Set(['image/gif', 'image/svg+xml'])
 
@@ -46,14 +52,15 @@ export async function optimizeImage(file: File, { maxSide, quality = 0.82 }: Opt
 
     let blob = await toBlob(canvas, 'image/webp', quality)
     if (!blob || blob.type !== 'image/webp') {
-      // Sin WebP: un PNG puede tener transparencia (logos) y en JPEG quedaría con fondo negro
-      if (file.type === 'image/png') return file
-      blob = await toBlob(canvas, 'image/jpeg', quality)
+      // Sin WebP (Safari en iPhone): un PNG con transparencia (logos) en JPEG quedaría con fondo negro, así que queda
+      // PNG pero achicado. Antes se subía el original: una captura de iPhone llegaba al perfil con 2,2 MB.
+      const keepPng = file.type === 'image/png' && !isOpaque(ctx.getImageData(0, 0, width, height).data)
+      blob = await toBlob(canvas, keepPng ? 'image/png' : 'image/jpeg', quality)
     }
     if (!blob) return file
     const resized = width !== original.width || height !== original.height
     if (!resized && blob.size >= file.size) return file
-    const ext = blob.type === 'image/webp' ? 'webp' : 'jpg'
+    const ext = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg'
     const name = file.name.replace(/\.[^.]+$/, '') + '.' + ext
     return new File([blob], name, { type: blob.type, lastModified: Date.now() })
   } catch {
