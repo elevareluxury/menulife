@@ -7,7 +7,7 @@ import { ModuleStack } from './ModuleStack'
 export default function Clasica(p: LayoutParts) {
   return (
     <div className="my-enter">
-      {p.coverUrl && <div className="mp-cover"><SafeImage src={p.coverUrl} alt="" /></div>}
+      {p.coverUrl && <div className="mp-cover"><SafeImage sizing="column" src={p.coverUrl} alt="" /></div>}
       {p.identity(<>
         <section className={`mp-header mp-cl-header${p.coverUrl ? ' has-cover' : ''}`}>
           <div className="mp-cl-orbit my-enter-item" style={{ '--my-i': 0 } as React.CSSProperties}>

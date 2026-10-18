@@ -16,7 +16,7 @@ export default function Portada(p: LayoutParts) {
         <section className="mp-header mp-cover-hero">
           <div className="mp-cover-art" aria-hidden="true">
             {image
-              ? <SafeImage src={image} alt="" />
+              ? <SafeImage sizing="cover" src={image} alt="" />
               : <Huella seed={p.seed} variant={p.look.huellaVariant} spin draw className="mp-cover-huella" />}
           </div>
           <div className="mp-cover-fade" aria-hidden="true" />

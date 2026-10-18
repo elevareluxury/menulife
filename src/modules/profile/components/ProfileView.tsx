@@ -206,7 +206,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
     name,
     descriptor,
     bio,
-    avatar: <SafeImage src={avatarSrc ?? undefined} alt={name}
+    avatar: <SafeImage sizing="avatar" src={avatarSrc ?? undefined} alt={name}
       fallback={<span aria-hidden="true">{name.trim()[0]?.toUpperCase() ?? '·'}</span>} />,
     hasAvatar: !!avatarSrc,
     coverUrl: coverSrc,
