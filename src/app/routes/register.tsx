@@ -132,7 +132,7 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="my-tap-root" style={{
+    <main className="my-tap-root" style={{
       minHeight: '100vh', background: '#0F1115',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '24px', position: 'relative', overflow: 'hidden',
@@ -252,6 +252,6 @@ export function RegisterPage() {
           </Link>
         </p>
       </div>
-    </div>
+    </main>
   )
 }
