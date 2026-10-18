@@ -13,8 +13,65 @@ const it: LegalDict = {
     seeOther: { terms: 'Informativa sulla privacy', privacy: 'Termini e condizioni' },
     language: 'Lingua',
     back: 'Torna a Mycen',
+    supportTitle: 'Aiuto e assistenza',
+    supportIntro: 'Come scriverci e risposte alle domande più frequenti.',
+    deletionTitle: 'Eliminare il tuo account Mycen',
+    deletionIntro: 'Come eliminare il tuo account e i tuoi dati Mycen (app e web), cosa viene cancellato e cosa può restare.',
   },
   updated: es.updated,
+  support: [
+    { id: 'contacto', title: 'Scrivici', body: [
+      'Per qualsiasi domanda, problema o richiesta scrivi a **team@mycen.id**. Indicaci il tuo nome utente Mycen (o l’email dell’account) e, se puoi, invia uno screenshot. Rispondiamo il prima possibile.',
+    ] },
+    { id: 'acceso', title: 'Entrare nel tuo account', body: [
+      { list: [
+        '**Ho dimenticato la password:** nella schermata di accesso tocca “Password dimenticata?” e segui il link che ricevi via email.',
+        '**Non mi è arrivata l’email di conferma:** controlla spam e promozioni. Se non c’è, registrati di nuovo con la stessa email e te la rimandiamo.',
+        '**Sono entrato con Google:** usa sempre lo stesso pulsante; non serve una password.',
+      ] },
+    ] },
+    { id: 'datos', title: 'I tuoi dati', body: [
+      { list: [
+        '**Scaricarli:** Studio → Impostazioni → “Scarica i miei dati” (profilo, moduli e Life OS in un file). In Life OS → Impostazioni → “I tuoi dati” puoi scaricare anche Soldi in CSV.',
+        '**Eliminare l’account:** da Studio → Impostazioni o Life OS → Impostazioni → Account. Tutti i passaggi, e cosa viene cancellato, su **mycen.id/eliminar-cuenta**.',
+      ] },
+    ] },
+    { id: 'seguridad', title: 'Segnalare o bloccare', body: [
+      { list: [
+        '**Un profilo:** in qualsiasi profilo pubblico tocca “Segnala”. Lo esamina il team di Mycen e il proprietario non sa chi ha segnalato.',
+        '**Un messaggio:** in Studio → Messaggi, “Segnala” invia il messaggio al team e blocca chi l’ha scritto; “Blocca” smette solo di ricevere i suoi messaggi.',
+      ] },
+      'Se è urgente o qualcuno è in pericolo, scrivi a **team@mycen.id** con oggetto “Urgente”.',
+    ] },
+  ],
+  deletion: [
+    { id: 'app', title: 'Dall’app o dal web', body: [
+      'Accedi e scegli una di queste opzioni:',
+      { list: [
+        '**Life OS → Impostazioni → Account → “Elimina il mio account”**',
+        '**Studio → Impostazioni → “Elimina il mio account”**',
+      ] },
+      'Per confermare scrivi la parola che ti chiediamo. L’account viene cancellato subito.',
+    ] },
+    { id: 'sin-acceso', title: 'Se non riesci ad accedere', body: [
+      'Scrivi a **team@mycen.id** dall’email del tuo account, con oggetto “Elimina il mio account”. Lo cancelliamo entro i termini di legge (in Argentina, 5 giorni lavorativi) e ti avvisiamo quando è fatto.',
+    ] },
+    { id: 'que-se-borra', title: 'Cosa viene cancellato', body: [
+      { list: [
+        'Il tuo account e l’email di accesso.',
+        'La tua identità: profili, Spaces, moduli, progetti, immagini, versioni pubblicate, statistiche, messaggi e iscritti.',
+        'Tutto Life OS: attività, abitudini, obiettivi, La mia giornata, revisioni, Soldi e diario.',
+      ] },
+    ] },
+    { id: 'que-queda', title: 'Cosa può restare', body: [
+      { list: [
+        'Le copie di sicurezza dei fornitori, che vengono sovrascritte nei loro cicli abituali.',
+        'I registri degli errori, che non sono collegati al tuo account.',
+        'Ciò che la legge obbliga a conservare (per esempio, i dati di fatturazione), per il periodo che stabilisce.',
+        'Se il tuo account ha un’attività in Mycen Business, scrivici: la chiudiamo insieme a te per proteggere i dati di clienti e vendite.',
+      ] },
+    ] },
+  ],
   terms: [
     { id: 'quien', title: 'Chi fornisce il servizio', body: [
       'Mycen è un servizio gestito da **Resilio**, con sede nella Repubblica Argentina. Puoi scriverci a **team@mycen.id**.',
@@ -86,7 +143,7 @@ const it: LegalDict = {
         '**Mycen Business:** i dati della tua attività e ciò che inserisci sui tuoi clienti e sulle vendite.',
         '**Statistiche delle visite:** eventi anonimi (visite e clic sul tuo profilo) con un identificativo che cambia ogni giorno. Non conserviamo indirizzi IP né dati del dispositivo e non contiamo i bot. Conserviamo anche da quale sito o link è arrivata la visita (per esempio Instagram o il QR).',
         '**Segnalazioni:** il motivo e i dettagli scritti da chi segnala, con un identificativo anonimo giornaliero per evitare abusi. Se chi segnala ha effettuato l’accesso, conserviamo anche il suo account: lo vede solo il team di Mycen, mai la persona segnalata.',
-        '**Messaggi del modulo di contatto:** il nome, il contatto (email o WhatsApp) e il messaggio lasciati da un visitatore. Se il profilo ha il modulo Collaborazioni, un brand indica anche l’azienda e cosa cerca e, se vuole, il sito web, un budget e una scadenza. Li vede solo la persona proprietaria del profilo, in Studio; non vengono pubblicati né inviati per email. Per evitare abusi usiamo un identificatore anonimo che cambia ogni giorno, senza IP né dati del dispositivo.',
+        '**Messaggi del modulo di contatto:** il nome, il contatto (email o WhatsApp) e il messaggio lasciati da un visitatore. Se il profilo ha il modulo Collaborazioni, un brand indica anche l’azienda e cosa cerca e, se vuole, il sito web, un budget e una scadenza. Li vede solo la persona proprietaria del profilo, in Studio; non vengono pubblicati né inviati per email. Per evitare abusi usiamo un identificatore anonimo che cambia ogni giorno, senza IP né dati del dispositivo. Se il proprietario del profilo segnala un messaggio, ne conserviamo una copia perché la verifichi il team di Mycen e quel contatto viene bloccato sul profilo.',
         '**Iscrizioni:** se ti iscrivi dal modulo “Iscriviti” di un profilo, conserviamo la tua email (e il tuo nome, se il profilo lo chiede), la data in cui hai dato il consenso e la tua lingua, e li diamo alla persona proprietaria di quel profilo, che li vede in Studio e può esportarli. Mycen non invia nulla a quella lista: la persona proprietaria del profilo decide come usarla ed è responsabile di farlo correttamente. Per uscire, chiedilo a quella persona o scrivici a team@mycen.id e la cancelliamo. Per evitare abusi usiamo un identificatore anonimo che cambia ogni giorno, senza IP né dati del dispositivo.',
         '**Inviti:** se crei il tuo account da “Crea la tua identità” sul profilo di un’altra persona, salviamo quale profilo ti ha portato e il suo tipo, per capire come cresce Mycen. Quella persona non vede i tuoi dati.',
         '**Uso dell’app:** per capire se Mycen funziona, salviamo eventi d’uso (per esempio, che hai pubblicato il profilo, aperto “La mia giornata” o segnato un’abitudine) con il tuo account, la data e dati brevi come la struttura scelta o un numero di giorni. Non salviamo mai il contenuto di attività, abitudini, note o messaggi. Non usiamo servizi di analisi di terze parti.',

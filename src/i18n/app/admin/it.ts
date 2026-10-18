@@ -39,7 +39,7 @@ const it: AdminDict = {
     noneOpen: 'Nessuna segnalazione aperta.', noneResolved: 'Ancora nessuna segnalazione risolta.', list: 'Segnalazioni',
     reportOf: (name) => `Segnalazione su ${name}`, project: (title) => `Progetto: ${title}`, suspendedTag: 'SOSPESO',
     openCount: (n) => (n === 1 ? '1 segnalazione aperta su questo profilo' : `${n} segnalazioni aperte su questo profilo`),
-    noteLabel: 'Nota (il titolare vede il motivo della sospensione)', dismiss: 'Archivia', suspend: 'Sospendi profilo',
+    noteLabel: 'Nota (il titolare vede il motivo della sospensione)', dismiss: 'Archivia', suspend: 'Sospendi profilo', msgTitle: 'Messaggi segnalati', msgIntro: 'Messaggi segnalati da Studio dal proprietario di un profilo. Chi ha scritto è già bloccato su quel profilo; qui si verifica se serve altro (per esempio, avvisare le autorità).', msgNone: 'Nessun messaggio segnalato.', msgFrom: 'Da', msgTo: 'Per', msgReviewed: 'Verificato',
     suspendedTitle: 'Profili sospesi', noneSuspended: 'Nessun profilo sospeso.', since: (date) => `Dal ${date}`,
     lift: 'Revoca sospensione',
     reasons: {

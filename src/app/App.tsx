@@ -194,6 +194,8 @@ function App() {
           </Route>
           <Route path="/terminos"   element={<LegalPage doc="terms" />} />
           <Route path="/privacidad" element={<LegalPage doc="privacy" />} />
+          <Route path="/soporte"    element={<LegalPage doc="support" />} />
+          <Route path="/eliminar-cuenta" element={<LegalPage doc="deletion" />} />
           {/* ── Mycen Studio — edición de la identidad (Profile) ── */}
           <Route path="/studio" element={<ErrorBoundary label="studio"><StudioShell /></ErrorBoundary>}>
             <Route index element={<StudioOverview />} />

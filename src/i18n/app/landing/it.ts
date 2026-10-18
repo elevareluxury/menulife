@@ -173,7 +173,7 @@ const it: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Sì. Il tuo profilo ha una struttura pensata per le attività, con WhatsApp, posizione, orari, prodotti e modulo di contatto, gratis. Gli strumenti di gestione (menu digitale, ordini, prenotazioni) arriveranno più avanti con Mycen Business.',
   },
-  footer: { product: 'Prodotto', pricing: 'Prezzi', faq: 'Domande', contact: 'Contatti', terms: 'Termini', privacy: 'Privacy', madeBy: 'Realizzato da Resilio' },
+  footer: { product: 'Prodotto', pricing: 'Prezzi', faq: 'Domande', contact: 'Contatti', terms: 'Termini', privacy: 'Privacy', support: 'Aiuto', madeBy: 'Realizzato da Resilio' },
 }
 
 export default it

@@ -51,7 +51,8 @@ for m in \
   20261102000001_audit2_db \
   20261103000002_life_task_next_once \
   20261104000001_site_flags \
-  20261105000001_admin_console; do
+  20261105000001_admin_console \
+  20261106000001_message_block_report; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

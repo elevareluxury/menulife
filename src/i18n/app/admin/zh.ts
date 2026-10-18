@@ -36,7 +36,7 @@ const zh: AdminDict = {
     noneOpen: '没有未处理的举报。', noneResolved: '还没有已处理的举报。', list: '举报',
     reportOf: (name) => `关于 ${name} 的举报`, project: (title) => `项目：${title}`, suspendedTag: '已停用',
     openCount: (n) => `该主页有 ${n} 条未处理的举报`,
-    noteLabel: '备注（所有者会看到停用原因）', dismiss: '驳回', suspend: '停用主页',
+    noteLabel: '备注（所有者会看到停用原因）', dismiss: '驳回', suspend: '停用主页', msgTitle: '被举报的留言', msgIntro: '主页所有者在 Studio 中举报的留言。发送者已在该主页被屏蔽；这里确认是否需要进一步处理（例如通知有关部门）。', msgNone: '没有被举报的留言。', msgFrom: '来自', msgTo: '发给', msgReviewed: '已审核',
     suspendedTitle: '已停用的主页', noneSuspended: '没有已停用的主页。', since: (date) => `自 ${date} 起`,
     lift: '解除停用',
     reasons: {

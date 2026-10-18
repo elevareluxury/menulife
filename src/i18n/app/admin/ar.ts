@@ -36,7 +36,7 @@ const ar: AdminDict = {
     noneOpen: 'لا توجد بلاغات مفتوحة.', noneResolved: 'لا توجد بلاغات محلولة بعد.', list: 'البلاغات',
     reportOf: (name) => `بلاغ عن ${name}`, project: (title) => `المشروع: ${title}`, suspendedTag: 'معلّق',
     openCount: (n) => `بلاغات مفتوحة عن هذا الملف: ${n}`,
-    noteLabel: 'ملاحظة (يرى صاحب الملف سبب التعليق)', dismiss: 'رفض', suspend: 'تعليق الملف',
+    noteLabel: 'ملاحظة (يرى صاحب الملف سبب التعليق)', dismiss: 'رفض', suspend: 'تعليق الملف', msgTitle: 'رسائل مُبلّغ عنها', msgIntro: 'رسائل أبلغ عنها صاحب ملف شخصي من Studio. كاتب الرسالة محظور بالفعل في ذلك الملف؛ هنا نتحقق إن كان يلزم شيء آخر (مثل إبلاغ السلطات).', msgNone: 'لا توجد رسائل مُبلّغ عنها.', msgFrom: 'من', msgTo: 'إلى', msgReviewed: 'تمت المراجعة',
     suspendedTitle: 'الملفات المعلّقة', noneSuspended: 'لا توجد ملفات معلّقة.', since: (date) => `منذ ${date}`,
     lift: 'رفع التعليق',
     reasons: {

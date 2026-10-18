@@ -39,7 +39,7 @@ const fr: AdminDict = {
     noneOpen: 'Aucun signalement ouvert.', noneResolved: 'Aucun signalement traité pour l’instant.', list: 'Signalements',
     reportOf: (name) => `Signalement concernant ${name}`, project: (title) => `Projet : ${title}`, suspendedTag: 'SUSPENDU',
     openCount: (n) => (n === 1 ? '1 signalement ouvert sur ce profil' : `${n} signalements ouverts sur ce profil`),
-    noteLabel: 'Note (le propriétaire voit le motif de la suspension)', dismiss: 'Rejeter', suspend: 'Suspendre le profil',
+    noteLabel: 'Note (le propriétaire voit le motif de la suspension)', dismiss: 'Rejeter', suspend: 'Suspendre le profil', msgTitle: 'Messages signalés', msgIntro: 'Messages signalés depuis Studio par le propriétaire d’un profil. L’expéditeur est déjà bloqué sur ce profil ; ici on vérifie s’il faut faire autre chose (par exemple, prévenir les autorités).', msgNone: 'Aucun message signalé.', msgFrom: 'De', msgTo: 'Pour', msgReviewed: 'Vérifié',
     suspendedTitle: 'Profils suspendus', noneSuspended: 'Aucun profil suspendu.', since: (date) => `Depuis le ${date}`,
     lift: 'Lever la suspension',
     reasons: {

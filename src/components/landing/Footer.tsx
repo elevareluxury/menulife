@@ -22,6 +22,7 @@ export function Footer() {
   const pages = [
     { label: t.terms,   to: '/terminos' },
     { label: t.privacy, to: '/privacidad' },
+    { label: t.support, to: '/soporte' },
   ]
 
   return (

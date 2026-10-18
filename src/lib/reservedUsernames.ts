@@ -9,7 +9,7 @@ export const RESERVED_USERNAMES: ReadonlySet<string> = new Set([
   // Rutas de Mycen (actuales y futuras)
   'studio', 'profile', 'profiles', 'exchange', 'analytics', 'settings', 'business', 'hub',
   'intelligence', 'explore', 'pricing', 'precios', 'planes', 'about', 'acerca', 'help', 'ayuda',
-  'support', 'soporte', 'contact', 'contacto', 'terms', 'terminos', 'privacy', 'privacidad',
+  'support', 'soporte', 'contact', 'contacto', 'terms', 'terminos', 'privacy', 'privacidad', 'eliminar-cuenta',
   'legal', 'blog', 'docs', 'status', 'jobs',
   // Técnicas
   'api', 'cal', 'app', 'www', 'admin', 'root', 'static', 'assets', 'public', 'cdn', 'offline', 'sw',

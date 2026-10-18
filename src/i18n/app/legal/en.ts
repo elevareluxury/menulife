@@ -13,8 +13,65 @@ const en: LegalDict = {
     seeOther: { terms: 'Privacy policy', privacy: 'Terms and conditions' },
     language: 'Language',
     back: 'Back to Mycen',
+    supportTitle: 'Help and support',
+    supportIntro: 'How to reach us and answers to the most common questions.',
+    deletionTitle: 'Delete your Mycen account',
+    deletionIntro: 'How to delete your Mycen account and data (app and web), what gets deleted and what may remain.',
   },
   updated: es.updated,
+  support: [
+    { id: 'contacto', title: 'Write to us', body: [
+      'For any question, problem or request, write to **team@mycen.id**. Tell us your Mycen username (or your account email) and, if you can, send a screenshot. We reply as soon as possible.',
+    ] },
+    { id: 'acceso', title: 'Getting into your account', body: [
+      { list: [
+        '**I forgot my password:** on the login screen tap “Forgot your password?” and follow the link we email you.',
+        '**I didn’t get the confirmation email:** check spam and promotions. If it isn’t there, sign up again with the same email and we’ll send it again.',
+        '**I signed in with Google:** always use the same button; you don’t need a password.',
+      ] },
+    ] },
+    { id: 'datos', title: 'Your data', body: [
+      { list: [
+        '**Download it:** Studio → Settings → “Download my data” (your profile, modules and Life OS in one file). In Life OS → Settings → “Your data” you can also download Money as CSV.',
+        '**Delete your account:** from Studio → Settings or Life OS → Settings → Account. All the steps, and what gets deleted, at **mycen.id/eliminar-cuenta**.',
+      ] },
+    ] },
+    { id: 'seguridad', title: 'Report or block', body: [
+      { list: [
+        '**A profile:** on any public profile tap “Report”. The Mycen team reviews it and the owner won’t know who reported.',
+        '**A message:** in Studio → Messages, “Report” sends the message to the team and blocks the sender; “Block” just stops their messages.',
+      ] },
+      'If something is urgent or puts someone at risk, write to **team@mycen.id** with the subject “Urgent”.',
+    ] },
+  ],
+  deletion: [
+    { id: 'app', title: 'From the app or the web', body: [
+      'Log in and choose one of these options:',
+      { list: [
+        '**Life OS → Settings → Account → “Delete my account”**',
+        '**Studio → Settings → “Delete my account”**',
+      ] },
+      'To confirm, type the word we ask for. The account is deleted right away.',
+    ] },
+    { id: 'sin-acceso', title: 'If you can’t log in', body: [
+      'Write to **team@mycen.id** from your account email with the subject “Delete my account”. We delete it within the legal deadlines (in Argentina, 5 business days) and let you know when it’s done.',
+    ] },
+    { id: 'que-se-borra', title: 'What gets deleted', body: [
+      { list: [
+        'Your account and your login email.',
+        'Your identity: profiles, Spaces, modules, projects, images, published versions, stats, messages and subscribers.',
+        'All of Life OS: tasks, habits, goals, My day, reviews, Money and journal.',
+      ] },
+    ] },
+    { id: 'que-queda', title: 'What may remain', body: [
+      { list: [
+        'Our providers’ backups, which are overwritten in their usual cycles.',
+        'Error logs, which are not linked to your account.',
+        'Anything the law requires us to keep (for example, billing data), for the period it sets.',
+        'If your account has a business in Mycen Business, write to us: we close it with you to protect your customers’ and sales data.',
+      ] },
+    ] },
+  ],
   terms: [
     { id: 'quien', title: 'Who provides the service', body: [
       'Mycen is a service operated by **Resilio**, based in the Argentine Republic. You can write to us at **team@mycen.id**.',
@@ -86,7 +143,7 @@ const en: LegalDict = {
         '**Mycen Business:** your business data and what you add about your customers and sales.',
         '**Visit statistics:** anonymous events (visits and clicks on your profile) with an identifier that changes every day. We don’t store IP addresses or device data, and we don’t count bots. We also store which site or link the visit came from (for example, Instagram or the QR code).',
         '**Reports:** the reason and details written by the person reporting, with a daily anonymous identifier to prevent abuse. If the person reporting is signed in, we also store their account: only the Mycen team sees it, never the reported person.',
-        '**Contact form messages:** the name, contact (email or WhatsApp) and message a visitor leaves. If the profile has the Collaborations module, a brand also leaves its company and what it is looking for, and optionally its website, a budget and a deadline. Only the profile owner sees them, in Studio; they are not published or emailed. To prevent abuse we use an anonymous identifier that changes every day, with no IP or device data.',
+        '**Contact form messages:** the name, contact (email or WhatsApp) and message a visitor leaves. If the profile has the Collaborations module, a brand also leaves its company and what it is looking for, and optionally its website, a budget and a deadline. Only the profile owner sees them, in Studio; they are not published or emailed. To prevent abuse we use an anonymous identifier that changes every day, with no IP or device data. If the profile owner reports a message, we keep a copy for the Mycen team to review and that contact is blocked on their profile.',
         '**Subscriptions:** if you subscribe through a profile’s “Subscribe” module, we store your email (and your name, if the profile asks for it), the date you gave your consent and your language, and we give them to the owner of that profile, who sees them in Studio and can export them. Mycen sends nothing to that list: the profile owner decides how to use it and is responsible for doing so properly. To leave, ask that person or write to us at team@mycen.id and we will delete it. To prevent abuse we use an anonymous identifier that changes every day, with no IP address or device data.',
         '**Invitations:** if you create your account from “Create your identity” on someone else’s profile, we save which profile brought you and its type, to understand how Mycen grows. That person can’t see your data.',
         '**App usage:** to know whether Mycen works, we save usage events (for example, that you published your profile, opened “My day” or checked off a habit) with your account, the date and short details such as the layout you chose or a number of days. We never save the content of your tasks, habits, notes or messages. We don’t use third-party analytics services.',

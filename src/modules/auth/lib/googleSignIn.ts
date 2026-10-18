@@ -94,4 +94,4 @@ export function needsTerms(user: { app_metadata?: Record<string, unknown>; user_
 }
 
 /** Pantallas que se pueden ver sin haber aceptado (para leer los textos o terminar el ingreso). */
-export const TERMS_FREE_PATHS = ['/auth/terms', '/auth/callback', '/terminos', '/privacidad', '/login', '/register']
+export const TERMS_FREE_PATHS = ['/auth/terms', '/auth/callback', '/terminos', '/privacidad', '/soporte', '/eliminar-cuenta', '/login', '/register']

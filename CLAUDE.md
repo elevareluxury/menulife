@@ -583,6 +583,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (E2E en `delete-account.spec.ts`; `oauthProviders()` en `googleSignIn.test.ts`),
   sin dictado en Android ni huella del diario en la app (sólo PIN), permisos de micrófono/voz en `Info.plist` (12
   idiomas en `*.lproj/InfoPlist.strings`) y `PrivacyInfo.xcprivacy` (igual a `docs/app/STORE.md`).
+  Páginas públicas para las tiendas: `/soporte` y `/eliminar-cuenta` (el link de Google Play), con `LegalPage` en 12
+  idiomas (`support` / `deletion` en `src/i18n/app/legal/*`). En Studio → Mensajes, "Reportar" (copia al equipo en
+  `profile_message_reports`, panel → Denuncias) y "Bloquear" (`profile_blocked_senders`; un trigger descarta lo que
+  llega de ese contacto y al visitante se le responde "ok"), migración `20261106000001_message_block_report.sql`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

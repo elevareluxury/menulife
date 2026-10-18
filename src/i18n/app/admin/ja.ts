@@ -36,7 +36,7 @@ const ja: AdminDict = {
     noneOpen: '未対応の通報はありません。', noneResolved: '対応済みの通報はまだありません。', list: '通報',
     reportOf: (name) => `${name} への通報`, project: (title) => `プロジェクト：${title}`, suspendedTag: '停止中',
     openCount: (n) => `このプロフィールへの未対応の通報 ${n} 件`,
-    noteLabel: 'メモ（停止の理由は持ち主に表示されます）', dismiss: '却下', suspend: 'プロフィールを停止',
+    noteLabel: 'メモ（停止の理由は持ち主に表示されます）', dismiss: '却下', suspend: 'プロフィールを停止', msgTitle: '報告されたメッセージ', msgIntro: 'プロフィールの持ち主が Studio から報告したメッセージです。送信者はそのプロフィールですでにブロックされています。ここでは追加の対応（当局への連絡など）が必要か確認します。', msgNone: '報告されたメッセージはありません。', msgFrom: '送信者', msgTo: '宛先', msgReviewed: '確認済み',
     suspendedTitle: '停止中のプロフィール', noneSuspended: '停止中のプロフィールはありません。', since: (date) => `${date} から`,
     lift: '停止を解除',
     reasons: {

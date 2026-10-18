@@ -148,6 +148,8 @@ export function ReportsTab() {
         ))}
       </ul>
 
+      <MessageReports filter={filter} />
+
       <h2 style={{ fontSize: 18, margin: '28px 0 10px' }}>{tr.suspendedTitle}</h2>
       {suspended.length === 0
         ? <div style={CARD}><p style={{ margin: 0, color: MUTED }}>{tr.noneSuspended}</p></div>
@@ -170,5 +172,91 @@ export function ReportsTab() {
           </ul>
         )}
     </div>
+  )
+}
+
+interface MessageReport {
+  id: string
+  reason: string
+  status: 'open' | 'dismissed' | 'actioned'
+  created_at: string
+  sender_name: string
+  sender_contact: string
+  message: string
+  resolution_note: string | null
+  resolved_at: string | null
+  profile: { id: string; handle: string | null; display_name: string }
+}
+
+/** Mensajes que la persona dueña reportó desde Studio → Mensajes (tiendas, App Store 1.2). Quien escribió ya quedó
+ *  bloqueado en ese perfil; acá se marca como revisado o se descarta. */
+function MessageReports({ filter }: { filter: 'open' | 'resolved' }) {
+  const t = useAdminT()
+  const { dateTime: fmt } = useAdminFormat()
+  const tr = t.reports
+  const reasonOf = (reason: string) => (tr.reasons as Record<string, string>)[reason] ?? reason
+  const [reload, setReload] = useState(0)
+  const key = `${filter}#${reload}`
+  const [result, setResult] = useState<{ key: string; items: MessageReport[]; failed: boolean } | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    rpc('admin_list_message_reports', { p_status: filter }).then(r => {
+      if (!cancelled) setResult({ key, failed: !!r.error, items: r.error ? [] : r.data as MessageReport[] })
+    })
+    return () => { cancelled = true }
+  }, [filter, key])
+
+  const current = result?.key === key ? result : null
+  const resolve = async (id: string, action: 'dismiss' | 'action') => {
+    setBusy(true); setFailed(false)
+    const { error } = await rpc('admin_resolve_message_report', { p_report_id: id, p_action: action })
+    setBusy(false)
+    if (error) { setFailed(true); return }
+    setReload(n => n + 1)
+  }
+
+  return (
+    <section aria-labelledby="message-reports-title">
+      <h2 id="message-reports-title" style={{ fontSize: 18, margin: '28px 0 6px' }}>{tr.msgTitle}</h2>
+      <p style={{ color: MUTED, margin: '0 0 12px', fontSize: 14 }}>{tr.msgIntro}</p>
+      {(current?.failed || failed) && <p role="alert" style={{ color: ACCENT }}>{current?.failed ? tr.loadFailed : t.common.actionFailed}</p>}
+      {!current && <p role="status" style={{ color: MUTED }}>{t.common.loading}</p>}
+      {current && current.items.length === 0 && !current.failed && (
+        <div style={CARD}><p style={{ margin: 0, color: MUTED }}>{tr.msgNone}</p></div>
+      )}
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }} aria-label={tr.msgTitle}>
+        {current?.items.map(r => (
+          <li key={r.id} style={CARD}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <div>
+                <strong dir="auto">{tr.msgFrom}: {r.sender_name}</strong>{' '}
+                <span style={{ color: MUTED }} dir="ltr">{r.sender_contact}</span>
+                <div style={{ color: MUTED, fontSize: 13 }}>
+                  {tr.msgTo}: {r.profile.handle
+                    ? <a href={`/${r.profile.handle}`} target="_blank" rel="noopener noreferrer" style={{ color: MUTED }}>@{r.profile.handle}</a>
+                    : r.profile.display_name}
+                </div>
+              </div>
+              <span style={{ color: MUTED, fontSize: 13 }}>{fmt(r.created_at)}</span>
+            </div>
+            <p style={{ margin: '10px 0 4px', fontWeight: 600 }}>{reasonOf(r.reason)}</p>
+            <p style={{ margin: '0 0 6px', color: '#D0D5DD', whiteSpace: 'pre-line', overflowWrap: 'anywhere' }} dir="auto">{r.message}</p>
+            {r.status === 'open' ? (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                <button type="button" style={BTN} disabled={busy} onClick={() => { void resolve(r.id, 'dismiss') }}>{tr.dismiss}</button>
+                <button type="button" style={BTN} disabled={busy} onClick={() => { void resolve(r.id, 'action') }}>{tr.msgReviewed}</button>
+              </div>
+            ) : (
+              <p style={{ margin: 0, color: MUTED, fontSize: 13 }}>
+                {`${tr.status[r.status]}${r.resolved_at ? ` · ${fmt(r.resolved_at)}` : ''}${r.resolution_note ? ` · ${r.resolution_note}` : ''}`}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }

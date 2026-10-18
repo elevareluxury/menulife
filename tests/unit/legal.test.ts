@@ -12,6 +12,10 @@ describe('textos legales', () => {
     const dict = (await import(`../../src/i18n/app/legal/${lang}.ts`)).default as typeof es
     expect(shape(dict.terms)).toEqual(shape(es.terms))
     expect(shape(dict.privacy)).toEqual(shape(es.privacy))
+    // Ayuda y eliminar la cuenta (los links que piden las tiendas)
+    expect(shape(dict.support)).toEqual(shape(es.support))
+    expect(shape(dict.deletion)).toEqual(shape(es.deletion))
+    expect(JSON.stringify(dict.deletion)).toContain('team@mycen.id')
     expect(dict.updated).toBe(es.updated)
     const all = JSON.stringify(dict)
     expect(all).toContain('team@mycen.id')
