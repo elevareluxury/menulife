@@ -5,6 +5,7 @@ import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 import { heroShellPlugin } from './scripts/heroShell'
 import { bootSplashPlugin } from './scripts/bootSplash'
+import { profilePrefetchPlugin } from './scripts/profilePrefetch'
 import { businessI18nPlugin } from './scripts/businessI18n'
 import { readFileSync } from 'fs'
 
@@ -20,6 +21,7 @@ export default defineConfig({
     tailwindcss(),
     heroShellPlugin(),
     bootSplashPlugin(),
+    profilePrefetchPlugin(),
     businessI18nPlugin(),
     VitePWA({
       // Use our custom service worker — VitePWA injects the precache manifest

@@ -7,7 +7,9 @@ import { useAppLang } from '@/i18n/app/store'
 import { setLocalLanguage } from '@/lib/prefs'
 import { LOOK_PAGE_BG, lookVars, profileLook, type ProfileLook } from '../lib/profileLook'
 import type { ProfileLang, ProfileLookup } from '../lib/profileTypes'
+import { firstScreenImages, preloadImages } from '../lib/profilePrefetch'
 import { ProfileView } from '../components/ProfileView'
+import { preloadProfileView } from '../components/profileLayouts'
 import '../profile.css'
 
 type LoadState = { kind: 'loading' } | { kind: 'error' } | ProfileLookup
@@ -39,11 +41,18 @@ export function ProfilePublicPage() {
     let cancelled = false
     const key = `${handle}#${attempt}`
     fetchPublicProfile(handle)
-      .then(result => {
+      .then(async result => {
         if (cancelled) return
         if (result.kind === 'redirect') {
           navigate(`/${result.username}${window.location.search}`, { replace: true })
           return
+        }
+        if (result.kind === 'found') {
+          // Con el esqueleto a la vista: imágenes de la primera pantalla y los chunks de la estructura y los módulos.
+          // El perfil aparece completo de una vez (sin saltos) y la imagen principal ya viene en camino (LCP).
+          preloadImages(firstScreenImages(result.profile))
+          await preloadProfileView(result.profile)
+          if (cancelled) return
         }
         setLoaded({ key, state: result })
       })
