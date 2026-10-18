@@ -16,14 +16,14 @@ import ru from '../src/i18n/app/landing/ru'
 // se ven apenas llega el HTML, sin esperar a que cargue la app. Es una capa encima con las mismas clases que el hero
 // de React (CinematicHero), que la saca al montarse. Los textos salen de los diccionarios de la landing al compilar
 // (nunca quedan desfasados) y el idioma se elige igual que en la app: ?lang, el guardado y el del navegador.
+// Los textos van aparte, en un bloque JSON que no se ejecuta: así el script es siempre el mismo y su hash en la CSP
+// de vercel.json (script-src) no cambia al tocar un texto (lo verifica scripts/check-csp.mjs al compilar).
 
 const DICTS = { es, en, pt, fr, de, it, zh, ja, ko, hi, ar, ru }
 
-export function heroShellPlugin(): Plugin {
-  const texts = Object.fromEntries(Object.entries(DICTS).map(([l, d]) => [l, [d.hero.line1, d.hero.line2, d.hero.subtitle]]))
-  const script = `(function(){
+export const HERO_SHELL_SCRIPT = `(function(){
 if (location.pathname !== '/') return
-var T = ${JSON.stringify(texts)}
+var T = JSON.parse(document.getElementById('boot-hero-texts').textContent)
 var l = new URLSearchParams(location.search).get('lang')
 if (!T[l]) { l = null; try { var s = localStorage.getItem('mycen_lang'); if (T[s]) l = s } catch (e) {} }
 if (!l) { var ls = navigator.languages || [navigator.language]; for (var i = 0; i < ls.length; i++) { var b = (ls[i] || '').toLowerCase().split('-')[0]; if (T[b]) { l = b; break } } }
@@ -37,6 +37,11 @@ intro.appendChild(h1); intro.appendChild(el('p', 'ch-subtitle', t[2])); shell.ap
 document.body.insertBefore(shell, document.getElementById('root'))
 setTimeout(function () { shell.remove() }, 12000)
 })()`
+
+export function heroShellPlugin(): Plugin {
+  const texts = Object.fromEntries(Object.entries(DICTS).map(([l, d]) => [l, [d.hero.line1, d.hero.line2, d.hero.subtitle]]))
+  // "<" escapado: un texto nunca puede cerrar la etiqueta
+  const json = JSON.stringify(texts).replace(/</g, '\\u003c')
   return {
     name: 'mycen-hero-shell',
     transformIndexHtml(html, ctx) {
@@ -48,7 +53,7 @@ setTimeout(function () { shell.remove() }, 12000)
       const preload = fonts.map(f => `<link rel="preload" href="/${f}" as="font" type="font/woff2" crossorigin />`).join('\n    ')
       return html
         .replace('</head>', preload ? `  ${preload}\n  </head>` : '</head>')
-        .replace('<div id="root"></div>', `<div id="root"></div>\n    <script>${script}</script>`)
+        .replace('<div id="root"></div>', `<div id="root"></div>\n    <script type="application/json" id="boot-hero-texts">${json}</script>\n    <script>${HERO_SHELL_SCRIPT}</script>`)
     },
   }
 }

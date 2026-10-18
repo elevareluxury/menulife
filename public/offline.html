@@ -28,7 +28,7 @@
     }
     h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
     p { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.6; }
-    button {
+    .retry {
       margin-top: 28px;
       padding: 12px 28px;
       background: #FF6B7A;
@@ -38,6 +38,8 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
     }
   </style>
 </head>
@@ -45,6 +47,7 @@
   <div class="logo">M</div>
   <h1>Sin conexión</h1>
   <p>Revisá tu conexión a internet<br>e intentá de nuevo.</p>
-  <button onclick="location.reload()">Reintentar</button>
+  <!-- Un link a la misma dirección (sin onclick: la CSP no deja manejadores en línea) -->
+  <a class="retry" href="">Reintentar</a>
 </body>
 </html>
