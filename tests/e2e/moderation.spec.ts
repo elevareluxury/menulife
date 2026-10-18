@@ -95,3 +95,20 @@ test('las reglas de contenido están en /terminos', async ({ page }) => {
   await page.goto('/terminos#reglas')
   await expect(page.getByRole('heading', { name: 'Reglas de contenido' })).toBeVisible()
 })
+
+// Tiendas (App Store 1.2): los mensajes que reporta la persona dueña desde Studio llegan al equipo
+test('Denuncias: el equipo ve los mensajes reportados y los marca como revisados', async ({ page, context }) => {
+  const state = seed({ super_admins: [{ id: 'sa-1', user_id: OWNER_ID }] })
+  state.tables.profile_message_reports = [{
+    id: 'mr-1', profile_id: 'p-ana', reason: 'scam', sender_name: 'Oferta', sender_contact: '+54 9 11 5555-0000',
+    message: 'Ganaste un premio', details: null, status: 'open', created_at: new Date().toISOString(),
+  }]
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/super-admin/denuncias')
+  const section = page.getByRole('region', { name: 'Mensajes denunciados' })
+  await expect(section.getByText('Ganaste un premio')).toBeVisible()
+  await expect(section.getByText('+54 9 11 5555-0000')).toBeVisible()
+  await section.getByRole('button', { name: 'Revisado' }).click()
+  await expect(section.getByText('No hay mensajes denunciados.')).toBeVisible()
+  expect(state.tables.profile_message_reports[0].status).toBe('actioned')
+})

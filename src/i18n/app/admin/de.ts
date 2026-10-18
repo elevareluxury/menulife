@@ -39,7 +39,7 @@ const de: AdminDict = {
     noneOpen: 'Keine offenen Meldungen.', noneResolved: 'Noch keine erledigten Meldungen.', list: 'Meldungen',
     reportOf: (name) => `Meldung zu ${name}`, project: (title) => `Projekt: ${title}`, suspendedTag: 'GESPERRT',
     openCount: (n) => (n === 1 ? '1 offene Meldung zu diesem Profil' : `${n} offene Meldungen zu diesem Profil`),
-    noteLabel: 'Notiz (der Inhaber sieht den Sperrgrund)', dismiss: 'Verwerfen', suspend: 'Profil sperren',
+    noteLabel: 'Notiz (der Inhaber sieht den Sperrgrund)', dismiss: 'Verwerfen', suspend: 'Profil sperren', msgTitle: 'Gemeldete Nachrichten', msgIntro: 'Nachrichten, die Profilinhaber in Studio gemeldet haben. Der Absender ist auf diesem Profil schon blockiert; hier prüfst du, ob noch etwas nötig ist (zum Beispiel die Behörden zu informieren).', msgNone: 'Keine gemeldeten Nachrichten.', msgFrom: 'Von', msgTo: 'An', msgReviewed: 'Geprüft',
     suspendedTitle: 'Gesperrte Profile', noneSuspended: 'Keine gesperrten Profile.', since: (date) => `Seit ${date}`,
     lift: 'Sperre aufheben',
     reasons: {

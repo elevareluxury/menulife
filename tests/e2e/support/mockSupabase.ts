@@ -361,6 +361,17 @@ function audit(state: MockState, action: string, targetType: string, targetId: s
   })
 }
 
+/** = mycen_contact_key: email en minúsculas; un teléfono, sólo sus dígitos */
+function contactKey(contact: string): string {
+  if (contact.includes('@')) return contact.trim().toLowerCase()
+  const digits = contact.replace(/\D/g, '')
+  return digits.length >= 6 ? digits : contact.trim().toLowerCase()
+}
+
+function senderBlocked(state: MockState, profileId: string, contact: string): boolean {
+  return (state.tables.profile_blocked_senders ?? []).some(b => b.profile_id === profileId && b.contact_key === contactKey(contact))
+}
+
 function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown {
   state.rpcCalls.push({ fn, args })
   switch (fn) {
@@ -480,6 +491,44 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       for (const name of Object.keys(state.tables)) state.tables[name] = state.tables[name].filter(r => r.user_id !== OWNER_ID)
       return null
     }
+    // = block_message_sender / report_profile_message (tiendas, App Store 1.2): sólo la dueña; bloquea y borra sus mensajes
+    case 'block_message_sender':
+    case 'report_profile_message': {
+      const reasons = ['spam', 'scam', 'impersonation', 'hate', 'violence', 'sexual', 'illegal', 'other']
+      if (fn === 'report_profile_message' && !reasons.includes(String(args.p_reason))) return 'invalid'
+      const m = state.tables.profile_messages.find(x => x.id === args.p_message_id)
+      const owner = m && state.tables.profiles.find(x => x.id === m.profile_id && x.user_id === OWNER_ID)
+      if (!m || !owner || !isOwner) throw new Error('NOT_OWNER')
+      const key = contactKey(String(m.contact))
+      if (fn === 'report_profile_message') {
+        (state.tables.profile_message_reports ??= []).push({
+          id: `mr-${Math.random().toString(36).slice(2, 8)}`, profile_id: m.profile_id, reason: args.p_reason, sender_name: m.name,
+          sender_contact: m.contact, message: m.message, details: m.details ?? null, status: 'open', created_at: new Date().toISOString(),
+        })
+      }
+      const blocked = (state.tables.profile_blocked_senders ??= [])
+      if (!blocked.some(b => b.profile_id === m.profile_id && b.contact_key === key)) blocked.push({ profile_id: m.profile_id, contact_key: key })
+      state.tables.profile_messages = state.tables.profile_messages.filter(x => !(x.profile_id === m.profile_id && contactKey(String(x.contact)) === key))
+      return 'ok'
+    }
+    case 'admin_list_message_reports': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const status = String(args.p_status ?? 'open')
+      return (state.tables.profile_message_reports ?? [])
+        .filter(r => status === 'open' ? r.status === 'open' : status === 'resolved' ? r.status !== 'open' : true)
+        .map(r => {
+          const pr = state.tables.profiles.find(x => x.id === r.profile_id)
+          return { ...r, profile: { id: r.profile_id, handle: pr ? handleOf(state, pr) : null, display_name: pr?.display_name ?? '' } }
+        })
+    }
+    case 'admin_resolve_message_report': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const r = (state.tables.profile_message_reports ?? []).find(x => x.id === args.p_report_id && x.status === 'open')
+      if (!r) throw new Error('NOT_FOUND')
+      r.status = args.p_action === 'dismiss' ? 'dismissed' : 'actioned'
+      r.resolution_note = args.p_note ?? null
+      return null
+    }
     // = record_referral (V1 · etapa 08): una por cuenta, sólo a perfiles publicados de otra persona
     case 'record_referral': {
       if (!isOwner) throw new Error('NOT_SIGNED_IN')
@@ -503,6 +552,7 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       if ((message.match(/(https?:\/\/|www\.)/gi) ?? []).length > 3) return 'too_many_links'
       if (String(args.p_trap ?? '').trim() || Number(args.p_elapsed_ms ?? 0) < 3000) return 'ok'
       if (state.tables.profile_messages.filter(m => m.profile_id === p.id && m.sender_hash === 'mock-visitor').length >= 5) return 'rate_limited'
+      if (senderBlocked(state, String(p.id), contact)) return 'ok'
       state.tables.profile_messages.push({
         id: `msg-${Math.random().toString(36).slice(2, 8)}`, profile_id: p.id, kind: 'message', name, contact, message, details: null,
         sender_hash: 'mock-visitor', created_at: new Date().toISOString(), read_at: null,
@@ -526,6 +576,7 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       if ((message.match(/(https?:\/\/|www\.)/gi) ?? []).length > 3) return 'too_many_links'
       if (s('p_trap') || Number(args.p_elapsed_ms ?? 0) < 3000) return 'ok'
       if (state.tables.profile_messages.filter(m => m.profile_id === p.id && m.sender_hash === 'mock-visitor').length >= 5) return 'rate_limited'
+      if (senderBlocked(state, String(p.id), email)) return 'ok'
       const details: Row = { company, deliverable }
       if (website) details.website = website
       if (budget) details.budget = budget

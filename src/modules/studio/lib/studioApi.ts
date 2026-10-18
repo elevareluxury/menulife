@@ -384,6 +384,26 @@ export async function deleteMessage(id: string): Promise<void> {
   if (error) throw error
 }
 
+/** Igual que mycen_contact_key en la base: email en minúsculas; un teléfono, sólo sus dígitos */
+export function contactKey(contact: string): string {
+  if (contact.includes('@')) return contact.trim().toLowerCase()
+  const digits = contact.replace(/\D/g, '')
+  return digits.length >= 6 ? digits : contact.trim().toLowerCase()
+}
+
+/** Bloquea a quien escribió (lo que mande después no llega) y borra sus mensajes de ese perfil (App Store 1.2) */
+export async function blockMessageSender(id: string): Promise<void> {
+  const { error } = await db.rpc('block_message_sender', { p_message_id: id })
+  if (error) throw error
+}
+
+/** Manda el mensaje al equipo de Mycen para revisarlo, bloquea a quien lo escribió y borra sus mensajes */
+export async function reportMessage(id: string, reason: string): Promise<void> {
+  const { data, error } = await db.rpc('report_profile_message', { p_message_id: id, p_reason: reason })
+  if (error) throw error
+  if (data !== 'ok') throw new Error(String(data))
+}
+
 // ── Suscriptores del módulo "Suscribirse" (módulos de bio, V1.1) ────────────
 // La RLS deja ver sólo los de los Spaces de la cuenta; el dueño lee y borra (no cambia nada).
 

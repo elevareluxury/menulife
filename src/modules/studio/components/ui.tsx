@@ -225,7 +225,7 @@ export function Drawer({ title, onClose, children, footer }: {
 
 // ── Diálogo de confirmación ─────────────────────────────────────────────────
 
-export function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm, onCancel, loading }: {
+export function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm, onCancel, loading, children }: {
   title: string
   message: string
   confirmLabel: string
@@ -233,6 +233,8 @@ export function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm,
   onConfirm: () => void
   onCancel: () => void
   loading?: boolean
+  /** Algo más entre el texto y los botones (por ejemplo, el motivo de un reporte) */
+  children?: ReactNode
 }) {
   const titleId = useId()
   const t = useStudioT().common
@@ -243,6 +245,7 @@ export function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm,
       <div className="st-dialog" role="alertdialog" aria-modal="true" aria-labelledby={titleId}>
         <h2 id={titleId}>{title}</h2>
         <p>{message}</p>
+        {children}
         <div className="st-row" style={{ justifyContent: 'flex-end' }}>
           <Button variant="ghost" onClick={onCancel} autoFocus>{t.cancel}</Button>
           <Button variant={danger ? 'danger' : 'primary'} loading={loading} onClick={onConfirm}>{confirmLabel}</Button>

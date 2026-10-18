@@ -1,7 +1,8 @@
 # Fichas de las tiendas (App Store y Google Play)
 
-Nombre: **Mycen** · Categoría principal: **Productividad** (secundaria: Estilo de vida) · Edad: 4+ / Para todos.
-Sitio: https://mycen.id · Soporte y privacidad: https://mycen.id/privacidad · Contacto: team@mycen.id.
+Nombre: **Mycen** · Categoría principal: **Productividad** (secundaria: Estilo de vida) · Edad: la que dé el cuestionario de cada tienda (declarar contenido de otras personas: perfiles públicos y mensajes; probablemente 12+ / Adolescentes).
+Sitio: https://mycen.id · Soporte: https://mycen.id/soporte · Privacidad: https://mycen.id/privacidad · Borrar la cuenta
+(Google Play → Seguridad de los datos): https://mycen.id/eliminar-cuenta · Contacto: team@mycen.id.
 Precio: gratis, sin compras dentro de la app (nada de precios ni planes adentro de la app).
 
 Límites: subtítulo de Apple ≤ 30 caracteres · descripción corta de Google ≤ 80 · palabras clave de Apple ≤ 100.
@@ -49,5 +50,7 @@ Palabras clave (es): `link en bio,perfil,hábitos,tareas,metas,diario,presupuest
 ## Revisión de Apple: notas para el revisor
 - Cuenta de prueba: crear una con email (sin datos reales) y ponerla en "App Review Information".
 - "La app no cobra nada; los módulos Apoyame/Mercado Pago son links del dueño del perfil a sus propios medios."
+- Contenido de otras personas (guía 1.2): denunciar un perfil ("Denunciar" en cada perfil público) y, en Studio →
+  Mensajes, reportar un mensaje al equipo o bloquear a quien lo escribió. El equipo lo revisa en el panel (Denuncias).
 - "Entrar con Apple" está junto a "Continuar con Google" (guía 4.8). Mientras `appleSignIn` esté apagado, la app de
   iPhone no muestra Google (`oauthProviders()` en `googleSignIn.ts`): se entra con email.
