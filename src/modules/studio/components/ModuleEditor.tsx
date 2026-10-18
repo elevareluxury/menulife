@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CalendarClock } from 'lucide-react'
 import type { ModuleType, Translations } from '@/modules/profile/lib/profileTypes'
 import { useStudio } from '../StudioContext'
@@ -8,7 +8,10 @@ import type { StudioModule } from '../lib/studioTypes'
 import { isTemplatePending, withoutTemplateMark } from '../lib/templates'
 import { Button, Drawer, ImageField, SelectField, TextField } from './ui'
 import { urlOnBlur } from '../lib/urlInput'
+import { clearDraft, readDraft, writeDraft } from '@/lib/editDraft'
 import { useStudioT, type StudioDict } from '@/i18n/app/studio'
+
+interface ModuleDraft { values: Record<string, string>; en: Record<string, string>; extra?: unknown; showFrom: string; showUntil: string }
 
 const str = (v: unknown) => (v == null ? '' : String(v))
 
@@ -58,13 +61,22 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
   const t = useStudioT()
   const e = t.editor
   const def = moduleDef(type, t)
-  const [values, setValues] = useState(() => initialValues(type, module, t))
-  const [en, setEn] = useState(() => initialEn(module))
-  const [showEn, setShowEn] = useState(() => Object.keys(initialEn(module)).length > 0)
-  const [extra, setExtra] = useState<unknown>(() => def.extra?.init(module))
+  // Borrador sin guardar: si el celular recarga la pestaña al volver, se sigue donde quedó (editDraft.ts)
+  const draftKey = `module:${profile.id}:${module?.id ?? `new-${type}`}`
+  const [draft] = useState(() => readDraft<ModuleDraft>(draftKey))
+  const [values, setValues] = useState(() => draft?.values ?? initialValues(type, module, t))
+  const [en, setEn] = useState(() => draft?.en ?? initialEn(module))
+  const [showEn, setShowEn] = useState(() => Object.keys(draft?.en ?? initialEn(module)).length > 0)
+  const [extra, setExtra] = useState<unknown>(() => (draft && 'extra' in draft ? draft.extra : def.extra?.init(module)))
   // Programación (Fase 7): se guarda en config.show_from / show_until
-  const [showFrom, setShowFrom] = useState(() => toLocalInput(module?.config?.show_from))
-  const [showUntil, setShowUntil] = useState(() => toLocalInput(module?.config?.show_until))
+  const [showFrom, setShowFrom] = useState(() => draft?.showFrom ?? toLocalInput(module?.config?.show_from))
+  const [showUntil, setShowUntil] = useState(() => draft?.showUntil ?? toLocalInput(module?.config?.show_until))
+  const touched = useRef(!!draft)
+  useEffect(() => {
+    if (!touched.current) { touched.current = true; return }
+    writeDraft(draftKey, { values, en, extra, showFrom, showUntil } satisfies ModuleDraft)
+  }, [draftKey, values, en, extra, showFrom, showUntil])
+  const close = () => { clearDraft(draftKey); onClose() }
   const [showSchedule, setShowSchedule] = useState(() => !!(module?.config?.show_from || module?.config?.show_until))
   const [submitted, setSubmitted] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -142,6 +154,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
         row = await createModule({ profile_id: profile.id, type, position, ...payload })
         setModules(prev => [...prev, row])
       }
+      clearDraft(draftKey)
       onSaved?.(row)
       if (inline) { setSaving(false); setSubmitted(false); setSaved(true) }
       else onClose()
@@ -153,7 +166,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
 
   const heading = module ? e.titleEdit(def.label) : e.titleNew(def.label)
   const actions = <>
-    <Button variant="ghost" onClick={onClose}>{inline ? t.common.close : t.common.cancel}</Button>
+    <Button variant="ghost" onClick={close}>{inline ? t.common.close : t.common.cancel}</Button>
     <Button variant="primary" loading={saving} onClick={save}>{module ? e.saveChanges : t.common.add}</Button>
   </>
   const form = (
@@ -239,5 +252,5 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
       </section>
     )
   }
-  return <Drawer title={heading} onClose={onClose} footer={actions}>{form}</Drawer>
+  return <Drawer title={heading} onClose={close} footer={actions}>{form}</Drawer>
 }
