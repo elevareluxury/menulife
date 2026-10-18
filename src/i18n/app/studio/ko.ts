@@ -183,6 +183,8 @@ const ko: StudioDict = {
     universoHelp: '어두운 깊은 우주',
     amanecer: '새벽',
     amanecerHelp: '밝은 새벽 하늘',
+    tone: '배경 톤',
+    tones: { noche: '밤', abismo: '심연', nebulosa: '성운', oceano: '바다', alba: '새벽', bruma: '안개', arena: '모래', jardin: '정원' },
     mode: '테마',
     accent: '강조 색',
     huella: '시그니처',

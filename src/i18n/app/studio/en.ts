@@ -183,6 +183,8 @@ const en: StudioDict = {
     universoHelp: 'Dark, deep space',
     amanecer: 'Dawn',
     amanecerHelp: 'Light, the sky at dawn',
+    tone: 'Background tone',
+    tones: { noche: 'Night', abismo: 'Abyss', nebulosa: 'Nebula', oceano: 'Ocean', alba: 'Dawn', bruma: 'Mist', arena: 'Sand', jardin: 'Garden' },
     mode: 'Theme',
     accent: 'Accent',
     huella: 'Signature',

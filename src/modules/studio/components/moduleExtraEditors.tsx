@@ -341,7 +341,7 @@ export function MediaUrlEditor({ value, onChange, userId }: ExtraEditorProps<Med
             onUpload={async file => onChange({ url, cover: await uploadMedia(userId, file) })}
             onClear={() => onChange({ url, cover: '' })} />
           {/* Vista previa de la fachada con el tema y la huella del perfil (no carga nada del proveedor) */}
-          <div className="mp-root my-profile st-media-preview" data-mycen-theme={look.mode} data-mycen-accent={look.accent}
+          <div className="mp-root my-profile st-media-preview" data-mycen-theme={look.mode} data-mycen-tone={look.tone} data-mycen-accent={look.accent}
             style={{ ...lookVars(look), minHeight: 0, padding: 12, borderRadius: 16 }} inert>
             <ProfileModuleContext.Provider value={{ seed: huellaSeed(profile), variant: look.huellaVariant, handle: '', preview: true }}>
               <MediaModule module={{ id: 'preview', type: 'media', title: null, content: { url, cover_url: cover || undefined }, config: {}, translations: {} }}

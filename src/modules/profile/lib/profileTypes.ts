@@ -45,6 +45,9 @@ export interface ProfileTheme {
   layout?: 'credencial' | 'portada' | 'editorial' | 'bento' | 'clasica'
   /** V1: 'universo' | 'amanecer'. Los de antes ('dark' | 'light' | 'auto') se leen con profileLook(). */
   mode?: 'universo' | 'amanecer' | 'dark' | 'light' | 'auto'
+  /** Tono de fondo del tema (MYCEN_TONES: noche, abismo, nebulosa, oceano · alba, bruma, arena, jardin). Sin valor o de
+   *  otro tema = el de siempre. */
+  tone?: string
   /** V1: estilo de la huella */
   huella_variant?: 'orbitas' | 'hilos' | 'constelacion' | 'pulso'
   /** V1: portada de la estructura Portada (huella o imagen propia) */

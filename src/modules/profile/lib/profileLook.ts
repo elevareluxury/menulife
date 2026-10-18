@@ -3,7 +3,7 @@
 // migración 20261015000001_v1_profile_look.sql: las versiones ya publicadas no se tocan y se interpretan acá.
 // Imports relativos (sin @/): también la usa la función Edge de api/og/[slug].tsx.
 import type { CSSProperties } from 'react'
-import { MYCEN_ACCENTS, MYCEN_THEMES, type MycenAccent, type MycenTheme } from '../../../design/themes'
+import { DEFAULT_TONE, MYCEN_ACCENTS, MYCEN_THEMES, MYCEN_TONES, type MycenAccent, type MycenTheme, type MycenTone } from '../../../design/themes'
 import { HUELLA_VARIANTS, type HuellaVariant } from '../../../lib/huella'
 import type { ProfileTheme } from './profileTypes'
 
@@ -15,6 +15,7 @@ export interface ProfileCover { type: 'huella' | 'imagen'; url?: string }
 export interface ProfileLook {
   layout: ProfileLayout
   mode: MycenTheme
+  tone: MycenTone
   accent: MycenAccent
   huellaVariant: HuellaVariant
   cover: ProfileCover
@@ -52,6 +53,7 @@ export function profileLook(theme: ProfileTheme | null | undefined): ProfileLook
   return {
     layout: oneOf(PROFILE_LAYOUTS, t.layout) ? t.layout : 'clasica',
     mode,
+    tone: oneOf(MYCEN_TONES[mode], t.tone) ? t.tone : DEFAULT_TONE[mode],
     accent,
     huellaVariant: oneOf(HUELLA_VARIANTS, t.huella_variant) ? t.huella_variant : 'orbitas',
     cover: t.cover?.type === 'imagen' && url ? { type: 'imagen', url } : { type: 'huella' },

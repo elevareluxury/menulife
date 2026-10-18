@@ -183,6 +183,8 @@ const it: StudioDict = {
     universoHelp: 'Scuro, lo spazio profondo',
     amanecer: 'Alba',
     amanecerHelp: 'Chiaro, il cielo all’alba',
+    tone: 'Tono dello sfondo',
+    tones: { noche: 'Notte', abismo: 'Abisso', nebulosa: 'Nebulosa', oceano: 'Oceano', alba: 'Alba', bruma: 'Foschia', arena: 'Sabbia', jardin: 'Giardino' },
     mode: 'Tema',
     accent: 'Accento',
     huella: 'Impronta',

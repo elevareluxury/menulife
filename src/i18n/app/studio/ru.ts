@@ -189,6 +189,8 @@ const ru: StudioDict = {
     universoHelp: 'Тёмная, глубокий космос',
     amanecer: 'Рассвет',
     amanecerHelp: 'Светлая, небо на рассвете',
+    tone: 'Оттенок фона',
+    tones: { noche: 'Ночь', abismo: 'Бездна', nebulosa: 'Туманность', oceano: 'Океан', alba: 'Рассвет', bruma: 'Дымка', arena: 'Песок', jardin: 'Сад' },
     mode: 'Тема',
     accent: 'Акцент',
     huella: 'Подпись',

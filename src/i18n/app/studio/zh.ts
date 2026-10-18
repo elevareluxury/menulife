@@ -183,6 +183,8 @@ const zh: StudioDict = {
     universoHelp: '深色，深邃的太空',
     amanecer: '黎明',
     amanecerHelp: '浅色，黎明的天空',
+    tone: '背景色调',
+    tones: { noche: '夜', abismo: '深渊', nebulosa: '星云', oceano: '海洋', alba: '黎明', bruma: '薄雾', arena: '沙', jardin: '花园' },
     mode: '主题',
     accent: '强调色',
     huella: '印记',

@@ -183,6 +183,8 @@ const de: StudioDict = {
     universoHelp: 'Dunkel, der tiefe Weltraum',
     amanecer: 'Morgenrot',
     amanecerHelp: 'Hell, der Himmel im Morgengrauen',
+    tone: 'Hintergrundton',
+    tones: { noche: 'Nacht', abismo: 'Abgrund', nebulosa: 'Nebula', oceano: 'Ozean', alba: 'Morgengrauen', bruma: 'Dunst', arena: 'Sand', jardin: 'Garten' },
     mode: 'Thema',
     accent: 'Akzent',
     huella: 'Signatur',

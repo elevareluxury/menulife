@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { RefreshCw, Undo2 } from 'lucide-react'
 import { Huella } from '@/design/components/Huella'
-import { ACCENT_COLORS, MYCEN_ACCENTS, MYCEN_THEMES, SECONDARY_COLORS, type MycenAccent, type MycenTheme } from '@/design/themes'
+import { ACCENT_COLORS, MYCEN_ACCENTS, MYCEN_THEMES, MYCEN_TONES, SECONDARY_COLORS, type MycenAccent, type MycenTheme } from '@/design/themes'
 import { HUELLA_VARIANTS, huellaSeed, type HuellaVariant } from '@/lib/huella'
 import { PROFILE_LAYOUTS, profileLook, type ProfileLayout } from '@/modules/profile/lib/profileLook'
 import type { ProfileTheme } from '@/modules/profile/lib/profileTypes'
@@ -101,6 +101,17 @@ export function AppearancePage({ embedded = false }: { embedded?: boolean }) {
               <span className="st-mode-sky my-sky" data-mycen-theme={m} aria-hidden="true" />
               <span><strong>{m === 'universo' ? t.universo : t.amanecer}</strong>
                 <span className="st-help" style={{ display: 'block' }}>{m === 'universo' ? t.universoHelp : t.amanecerHelp}</span></span>
+            </button>
+          ))}
+        </div>
+        {/* Tono de fondo del tema elegido (el de otro tema queda guardado para cuando se vuelva) */}
+        <h3 className="st-label" style={{ margin: '4px 0 0' }}>{t.tone}</h3>
+        <div className="st-tones" role="radiogroup" aria-label={t.tone}>
+          {MYCEN_TONES[look.mode].map(tone => (
+            <button key={tone} type="button" role="radio" aria-checked={look.tone === tone} className="st-tone-option"
+              onClick={() => setLook({ tone })}>
+              <span className="st-tone-sky my-sky" data-mycen-theme={look.mode} data-mycen-tone={tone} aria-hidden="true" />
+              <span>{t.tones[tone]}</span>
             </button>
           ))}
         </div>

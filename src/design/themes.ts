@@ -2,6 +2,15 @@
 export const MYCEN_THEMES = ['universo', 'amanecer'] as const
 export type MycenTheme = (typeof MYCEN_THEMES)[number]
 
+/** Tonos de fondo de cada tema (data-mycen-tone; el primero es el de siempre). Cambian el fondo, el cielo y las
+ *  superficies, no los textos: el contraste queda igual (lo mide designTokens.test.ts). */
+export const MYCEN_TONES = {
+  universo: ['noche', 'abismo', 'nebulosa', 'oceano'],
+  amanecer: ['alba', 'bruma', 'arena', 'jardin'],
+} as const
+export type MycenTone = (typeof MYCEN_TONES)[MycenTheme][number]
+export const DEFAULT_TONE: Record<MycenTheme, MycenTone> = { universo: 'noche', amanecer: 'alba' }
+
 export const MYCEN_ACCENTS = [
   'plasma', 'ion', 'nebulosa', 'aurora',
   // Sumados después de la etapa 15: con color (sol, rosa, lima) y sobrios (luna, mono, grafito, pizarra, arena)
