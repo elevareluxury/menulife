@@ -73,17 +73,21 @@ function profileAssets(bundle: Rollup.OutputBundle, root: string): ProfileAssets
   return { page, layouts, types }
 }
 
-function script(url: string, key: string, assets: ProfileAssets): string {
-  const reserved = JSON.stringify([...RESERVED_USERNAMES])
-  return `(function(){try{` +
+// Los datos (Supabase, archivos del build, nombres reservados) van aparte, en un bloque JSON que no se ejecuta: así el
+// script es siempre el mismo y su hash en la CSP de vercel.json (script-src) no cambia con cada build ni con cada
+// entorno (lo verifica scripts/check-csp.mjs al compilar)
+const DATA_ID = 'mycen-profile-prefetch'
+
+export const PROFILE_PREFETCH_SCRIPT = `(function(){try{` +
     `var m=location.pathname.match(/^\\/([^/.]+)(?:\\/([^/.]+))?\\/?$/);if(!m)return;` +
+    `var D=JSON.parse(document.getElementById('${DATA_ID}').textContent);` +
     `var s=decodeURIComponent(m[1]),sp=m[2]&&decodeURIComponent(m[2]);` +
-    `if(${reserved}.indexOf(s.trim().toLowerCase())>=0)return;` +
-    `var A=${JSON.stringify(assets)};` +
+    `if(D.reserved.indexOf(s.trim().toLowerCase())>=0)return;` +
+    `var A=D.assets;` +
     `var add=function(a){var l=document.createElement('link');l.rel=a[0];l.href=a[1];if(a[2])l.as=a[2];` +
     `if(a[2]==='image')l.fetchPriority='high';else l.crossOrigin='';document.head.appendChild(l)};` +
     `A.page.forEach(add);` +
-    `var u=${JSON.stringify(url)},k=${JSON.stringify(key)};` +
+    `var u=D.url,k=D.key;` +
     `if(localStorage.getItem('sb-'+new URL(u).hostname.split('.')[0]+'-auth-token'))return;` +
     `var h=sp?s+'/'+sp:s;` +
     `var d=fetch(u+'/rest/v1/rpc/get_public_profile',{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'Content-Type':'application/json'},` +
@@ -97,6 +101,10 @@ function script(url: string, key: string, assets: ProfileAssets): string {
     `x.type==='cards'&&c.items&&c.items[0]?c.items[0].image_url:null)});` +
     `img.forEach(function(i){if(typeof i==='string'&&/^https:\\/\\//.test(i))add(['preload',i,'image'])})}).catch(function(){});` +
     `window.__mycenProfile={handle:h,data:d}}catch(e){}})()`
+
+function data(url: string, key: string, assets: ProfileAssets): string {
+  // "<" escapado: nada del bloque puede cerrar la etiqueta
+  return JSON.stringify({ url, key, reserved: [...RESERVED_USERNAMES], assets }).replace(/</g, '\\u003c')
 }
 
 export function profilePrefetchPlugin(): Plugin {
@@ -109,7 +117,11 @@ export function profilePrefetchPlugin(): Plugin {
       const url = env.VITE_SUPABASE_URL, key = env.VITE_SUPABASE_ANON_KEY
       if (!url || !key) return []
       const assets = ctx.bundle ? profileAssets(ctx.bundle, root) : { page: [], layouts: {}, types: {} }
-      return [{ tag: 'script', children: script(url, key, assets), injectTo: 'head-prepend' }]
+      // Primero los datos y después el script que los lee
+      return [
+        { tag: 'script', attrs: { type: 'application/json', id: DATA_ID }, children: data(url, key, assets), injectTo: 'head-prepend' },
+        { tag: 'script', children: PROFILE_PREFETCH_SCRIPT, injectTo: 'head-prepend' },
+      ]
     },
   }
 }

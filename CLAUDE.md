@@ -158,8 +158,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 
 ## Seguridad
 - CSP en `vercel.json` (regla `/(.*)`): `script-src 'self'` + un `'sha256-…'` por cada `<script>` en línea de `index.html`
-  (esqueleto del hero y pantalla de carga; los textos del hero van en un bloque JSON que no se ejecuta, así el hash no
-  cambia). `npm run build` termina con `scripts/check-csp.mjs`, que falla si falta o sobra un hash (y dice cuál poner) o si
+  (datos del perfil desde el HTML, esqueleto del hero y pantalla de carga). Lo que cambia (textos, Supabase, archivos del
+  build) va en un `<script type="application/json">` que no se ejecuta: el script queda fijo y su hash no cambia entre
+  builds ni entornos. `npm run build` termina con `scripts/check-csp.mjs`, que falla si falta o sobra un hash (y dice cuál poner) o si
   aparece un `<script src>` de otro origen o un `on…=` en línea. Nunca `'unsafe-inline'` en scripts. Único origen externo
   de scripts: `https://challenges.cloudflare.com` (Turnstile, CAPTCHA del registro; también en `frame-src`). Un iframe o una
   conexión de un tercero nuevo se suma en `frame-src`/`connect-src`. `vite preview` manda la misma CSP y

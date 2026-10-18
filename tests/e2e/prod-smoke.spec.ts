@@ -57,6 +57,21 @@ test('la landing pinta el esqueleto del hero con la CSP (script en línea con ha
   expect(seen.csp).toEqual([])
 })
 
+test('el perfil pide sus datos desde el HTML con la CSP (script en línea con hash, datos en JSON)', async ({ page, context }) => {
+  const state = rich()
+  await installSupabaseMock(context, state)
+  const seen = watch(page)
+  await page.goto('/ana')
+  const data = await page.evaluate(async () => {
+    const pre = (window as unknown as { __mycenProfile?: { handle: string; data: Promise<{ username?: string } | null> } }).__mycenProfile
+    return pre ? { handle: pre.handle, username: (await pre.data)?.username } : null
+  })
+  expect(data).toEqual({ handle: 'ana', username: 'ana' })
+  await expect(page.locator('#root')).not.toBeEmpty()
+  expect(seen.errors).toEqual([])
+  expect(seen.csp).toEqual([])
+})
+
 test('los reproductores integrados (YouTube, Spotify, Vimeo, SoundCloud, TikTok) cargan con la CSP', async ({ page, context }) => {
   const urls = [
     'https://youtu.be/dQw4w9WgXcQ', 'https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC', 'https://vimeo.com/76979871',
