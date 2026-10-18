@@ -212,7 +212,8 @@ function page(origin: string, path: string, title: string, description: string, 
   })
 }
 
-/** La app tal cual (index.html), para rutas que no son perfiles. */
+/** La app tal cual (index.html) para todo lo que no es un perfil o proyecto publicado: las páginas de la app (soporte,
+ * privacidad…) llegan con su contenido a los buscadores, y una dirección sin perfil muestra la app (que la marca noindex). */
 async function spa(origin: string): Promise<Response> {
   try {
     const res = await fetch(`${origin}/index.html`)
@@ -231,23 +232,22 @@ export default async function handler(req: Request): Promise<Response> {
   // Space secundario: /{username}/{space} (Fase 10)
   const space = reqUrl.searchParams.get('space')?.toLowerCase().trim() ?? null
   const handle = space ? `${slug}/${space}` : slug
-  const generic = () => page(origin, `/${handle}`, 'Mycen', 'Tu identidad digital, todo en un solo lugar.', null)
 
   if (space !== null) {
     // Las rutas de la app con dos segmentos (/r/{menú}, /dashboard/…, /life/…) siguen siendo la app
     if (RESERVED.has(slug) || !/^[a-z0-9][a-z0-9_-]{0,62}$/.test(slug)) return spa(origin)
-    if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(space)) return generic()
+    if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(space)) return spa(origin)
   }
-  if (!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(slug) || RESERVED.has(slug)) return generic()
+  if (!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(slug) || RESERVED.has(slug)) return spa(origin)
 
   const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {}
   const supabaseUrl = env.VITE_SUPABASE_URL ?? env.SUPABASE_URL
   const anonKey = env.VITE_SUPABASE_ANON_KEY ?? env.SUPABASE_ANON_KEY
-  if (!supabaseUrl || !anonKey) return generic()
+  if (!supabaseUrl || !anonKey) return spa(origin)
 
   if (projectSlug !== null) {
-    if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(projectSlug)) return generic()
-    return projectPage(origin, supabaseUrl, anonKey, slug, projectSlug, generic)
+    if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(projectSlug)) return spa(origin)
+    return projectPage(origin, supabaseUrl, anonKey, slug, projectSlug)
   }
 
   try {
@@ -256,11 +256,11 @@ export default async function handler(req: Request): Promise<Response> {
       headers: { apikey: anonKey, authorization: `Bearer ${anonKey}`, 'content-type': 'application/json' },
       body: JSON.stringify({ p_username: handle }),
     })
-    if (!res.ok) return generic()
+    if (!res.ok) return spa(origin)
     const data = (await res.json()) as (PublicProfile & { redirect?: string }) | null
-    if (!data) return generic()
+    if (!data) return spa(origin)
     if (data.redirect) return Response.redirect(`${origin}/${data.redirect}`, 301)
-    if (!data.display_name || data.status === 'unavailable' || data.status !== 'published') return generic()
+    if (!data.display_name || data.status === 'unavailable' || data.status !== 'published') return spa(origin)
 
     const title = data.descriptor ? `${data.display_name} · ${data.descriptor}` : data.display_name
     const description = (data.bio ?? data.descriptor ?? 'Mi identidad en Mycen.').slice(0, 200)
@@ -269,24 +269,23 @@ export default async function handler(req: Request): Promise<Response> {
     return page(origin, path, title, description, ogImage(origin, data, space),
       { body: html, jsonLd, noindex: data.visibility === 'unlisted', lang: data.default_locale, imageAlt: data.display_name })
   } catch {
-    return generic()
+    return spa(origin)
   }
 }
 
 /** /{username}/projects/{slug} para previsualizadores y buscadores (Fase 5). */
-async function projectPage(origin: string, supabaseUrl: string, anonKey: string, slug: string, projectSlug: string,
-  generic: () => Response): Promise<Response> {
+async function projectPage(origin: string, supabaseUrl: string, anonKey: string, slug: string, projectSlug: string): Promise<Response> {
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/rpc/get_public_project`, {
       method: 'POST',
       headers: { apikey: anonKey, authorization: `Bearer ${anonKey}`, 'content-type': 'application/json' },
       body: JSON.stringify({ p_username: slug, p_slug: projectSlug }),
     })
-    if (!res.ok) return generic()
+    if (!res.ok) return spa(origin)
     const data = (await res.json()) as (PublicProject & { redirect?: string }) | null
-    if (!data) return generic()
+    if (!data) return spa(origin)
     if (data.redirect) return Response.redirect(`${origin}/${data.redirect}/projects/${projectSlug}`, 301)
-    if (!data.title || !data.space || data.status !== 'published') return generic()
+    if (!data.title || !data.space || data.status !== 'published') return spa(origin)
 
     const owner = data.space.display_name || data.space.username
     const path = `/${data.space.username}/projects/${data.slug}`
@@ -297,6 +296,6 @@ async function projectPage(origin: string, supabaseUrl: string, anonKey: string,
       noindex: data.visibility === 'unlisted' || data.space.visibility === 'unlisted',
     })
   } catch {
-    return generic()
+    return spa(origin)
   }
 }

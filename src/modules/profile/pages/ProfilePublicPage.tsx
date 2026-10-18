@@ -79,12 +79,13 @@ export function ProfilePublicPage() {
     return () => { document.title = prevTitle }
   }, [profile, lang])
 
-  // Un Space "no listado" se ve con el link, pero los buscadores no lo indexan
+  // Un Space "no listado" se ve con el link, pero los buscadores no lo indexan; tampoco una dirección sin perfil
+  const hidden = profile?.visibility === 'unlisted' || state.kind === 'not_found' || state.kind === 'unavailable'
   useEffect(() => {
-    if (profile?.visibility !== 'unlisted') return
+    if (!hidden) return
     setMeta('robots', 'noindex')
     return () => { document.querySelector('meta[name="robots"]')?.remove() }
-  }, [profile?.visibility])
+  }, [hidden])
 
   // Tema del perfil (V1: Universo / Amanecer). Mientras carga, Universo.
   const look = profileLook(profile?.theme)
