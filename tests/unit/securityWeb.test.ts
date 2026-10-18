@@ -101,6 +101,8 @@ describe('vercel.json: encabezados de seguridad', () => {
     expect(frames.sort()).toEqual([
       "'self'", 'https://open.spotify.com', 'https://player.vimeo.com', 'https://w.soundcloud.com', 'https://www.tiktok.com',
       'https://www.youtube-nocookie.com',
+      // CAPTCHA del acceso (Turnstile, docs/lanzamiento/captcha.md)
+      'https://challenges.cloudflare.com',
     ].sort())
   })
 

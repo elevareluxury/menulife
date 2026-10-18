@@ -7,6 +7,9 @@ import { useAuthT } from '@/i18n/app/auth'
 import { postLoginRoute } from '@/modules/auth/lib/postLoginRoute'
 import { GoogleButton } from '@/modules/auth/components/GoogleButton'
 import { featureOn } from '@/lib/features'
+import { withCaptcha } from '@/lib/turnstile'
+import { CaptchaField } from '@/modules/auth/components/Captcha'
+import { useCaptcha } from '@/modules/auth/lib/useCaptcha'
 
 const BASE_INPUT: React.CSSProperties = {
   width: '100%',
@@ -51,19 +54,24 @@ export function LoginForm() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const captcha = useCaptcha()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    if (!captcha.check()) return
     try {
       setLoading(true)
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email, password, options: withCaptcha({}, captcha.token),
+      })
       if (signInError) throw signInError
 
       toast.success(t.login.welcome)
       navigate(await postLoginRoute(data.user.id))
     } catch (err: unknown) {
       setError(authErrorMessage(err, t.errors, t.login.failed))
+      captcha.reset()
     } finally {
       setLoading(false)
     }
@@ -115,6 +123,8 @@ export function LoginForm() {
           </Link>
         </div>
       </div>
+
+      <CaptchaField captcha={captcha} t={t.captcha} />
 
       {/* Primary CTA */}
       <button

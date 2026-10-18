@@ -13,6 +13,9 @@ import { trackOncePerSession } from '@/lib/productEvents'
 import { featureOn } from '@/lib/features'
 import { GoogleButton } from '@/modules/auth/components/GoogleButton'
 import { AuthBrand } from '@/components/ui/AuthBrand'
+import { CaptchaField } from '@/modules/auth/components/Captcha'
+import { useCaptcha } from '@/modules/auth/lib/useCaptcha'
+import { withCaptcha } from '@/lib/turnstile'
 
 const CORAL = '#F4705A'
 
@@ -74,6 +77,7 @@ export function RegisterPage() {
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
   const [accepted, setAccepted] = useState(false)
+  const captcha = useCaptcha()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -84,20 +88,21 @@ export function RegisterPage() {
       return
     }
     if (!accepted) { setError(r.needTerms); return }
+    if (!captcha.check()) return
 
     setLoading(true)
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
+        options: withCaptcha({
           // locale: el idioma de los mails de Supabase (plantillas en supabase/templates)
           data: {
             name: name.trim(), terms_accepted_at: new Date().toISOString(), locale: useAppLang.getState().lang,
             ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
           },
           emailRedirectTo: authCallbackUrl(),
-        },
+        }, captcha.token),
       })
       if (authError) throw authError
       if (!authData.user) throw new Error('signup without user')
@@ -120,6 +125,7 @@ export function RegisterPage() {
         return
       }
       setError(authErrorMessage(err, t.errors, r.failed))
+      captcha.reset()
     } finally {
       setLoading(false)
     }
@@ -214,6 +220,8 @@ export function RegisterPage() {
               <Link to="/privacidad" target="_blank" style={{ color: '#fff', textDecoration: 'underline' }}>{r.privacy}</Link>{r.acceptEnd}
             </span>
           </label>
+
+          <CaptchaField captcha={captcha} t={t.captcha} />
 
           <button
             type="submit"

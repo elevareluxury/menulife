@@ -103,6 +103,18 @@ const es = {
     rateLimit: 'Demasiados intentos. Esperá unos minutos y volvé a probar.',
     expired: 'Tu sesión venció. Iniciá sesión de nuevo.',
     offline: 'Sin conexión. Revisá internet e intentá de nuevo.',
+    captcha: "La verificación anti-bots falló o venció. Hacela de nuevo y volvé a intentar.",
+    /** En la app sin widget (VITE_TURNSTILE_IN_APP): Google y Apple no piden CAPTCHA */
+    captchaApp: "Por ahora, en la app no se puede entrar con email. Usá Google o Apple, o entrá desde mycen.id en el navegador.",
+  },
+  /** CAPTCHA (Cloudflare Turnstile) en registro, acceso y recuperar contraseña */
+  captcha: {
+    label: "Verificación anti-bots",
+    pending: "Esperá a que termine la verificación anti-bots y volvé a intentar.",
+    expired: "La verificación venció. Se está renovando sola: esperá un momento.",
+    failed: "No pudimos verificar que sos una persona. Probá de nuevo.",
+    unavailable: "No pudimos cargar la verificación anti-bots. Revisá tu conexión o desactivá el bloqueador de contenido y probá de nuevo.",
+    retry: "Reintentar verificación",
   },
 }
 

@@ -100,6 +100,18 @@ const ja: AuthDict = {
     rateLimit: "試行回数が多すぎます。数分待ってからもう一度お試しください。",
     expired: "セッションの期限が切れました。もう一度ログインしてください。",
     offline: "接続されていません。インターネットを確認してもう一度お試しください。",
+    captcha: "ボット対策の確認に失敗したか、期限が切れました。もう一度確認してからお試しください。",
+    /** En la app sin widget (VITE_TURNSTILE_IN_APP): Google y Apple no piden CAPTCHA */
+    captchaApp: "現在、アプリではメールでログインできません。Google か Apple を使うか、ブラウザで mycen.id からログインしてください。",
+  },
+  /** CAPTCHA (Cloudflare Turnstile) en registro, acceso y recuperar contraseña */
+  captcha: {
+    label: "ボット対策の確認",
+    pending: "ボット対策の確認が終わるまでお待ちになり、もう一度お試しください。",
+    expired: "確認の期限が切れました。自動で更新しています。少しお待ちください。",
+    failed: "人間であることを確認できませんでした。もう一度お試しください。",
+    unavailable: "ボット対策の確認を読み込めませんでした。接続を確認するか、コンテンツブロッカーをオフにしてもう一度お試しください。",
+    retry: "確認をやり直す",
   },
 }
 

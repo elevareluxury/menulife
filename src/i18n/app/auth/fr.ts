@@ -100,6 +100,18 @@ const fr: AuthDict = {
     rateLimit: "Trop de tentatives. Attendez quelques minutes et réessayez.",
     expired: "Votre session a expiré. Reconnectez-vous.",
     offline: "Pas de connexion. Vérifiez internet et réessayez.",
+    captcha: "La vérification anti-robots a échoué ou expiré. Refaites-la et réessayez.",
+    /** En la app sin widget (VITE_TURNSTILE_IN_APP): Google y Apple no piden CAPTCHA */
+    captchaApp: "Pour l’instant, la connexion par e-mail n’est pas disponible dans l’app. Utilisez Google ou Apple, ou connectez-vous sur mycen.id dans votre navigateur.",
+  },
+  /** CAPTCHA (Cloudflare Turnstile) en registro, acceso y recuperar contraseña */
+  captcha: {
+    label: "Vérification anti-robots",
+    pending: "Attendez la fin de la vérification anti-robots, puis réessayez.",
+    expired: "La vérification a expiré. Elle se renouvelle toute seule : patientez un instant.",
+    failed: "Nous n’avons pas pu vérifier que vous êtes une personne. Réessayez.",
+    unavailable: "Impossible de charger la vérification anti-robots. Vérifiez votre connexion ou désactivez votre bloqueur de contenu, puis réessayez.",
+    retry: "Relancer la vérification",
   },
 }
 

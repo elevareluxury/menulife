@@ -100,6 +100,18 @@ const ko: AuthDict = {
     rateLimit: "시도 횟수가 너무 많습니다. 몇 분 후 다시 시도해 주세요.",
     expired: "세션이 만료되었습니다. 다시 로그인하세요.",
     offline: "인터넷에 연결되어 있지 않습니다. 연결을 확인하고 다시 시도해 주세요.",
+    captcha: "봇 방지 확인에 실패했거나 만료되었습니다. 다시 확인한 뒤 시도해 주세요.",
+    /** En la app sin widget (VITE_TURNSTILE_IN_APP): Google y Apple no piden CAPTCHA */
+    captchaApp: "지금은 앱에서 이메일로 로그인할 수 없습니다. Google 또는 Apple을 사용하거나 브라우저에서 mycen.id로 로그인해 주세요.",
+  },
+  /** CAPTCHA (Cloudflare Turnstile) en registro, acceso y recuperar contraseña */
+  captcha: {
+    label: "봇 방지 확인",
+    pending: "봇 방지 확인이 끝날 때까지 기다린 뒤 다시 시도해 주세요.",
+    expired: "확인이 만료되었습니다. 자동으로 갱신 중이니 잠시만 기다려 주세요.",
+    failed: "사람인지 확인하지 못했습니다. 다시 시도해 주세요.",
+    unavailable: "봇 방지 확인을 불러오지 못했습니다. 연결을 확인하거나 콘텐츠 차단기를 끄고 다시 시도해 주세요.",
+    retry: "다시 확인하기",
   },
 }
 
