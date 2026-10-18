@@ -83,3 +83,15 @@ test('el visitante guarda el contacto (vCard) sólo con los datos autorizados', 
   expect(vcf).toContain('URL;TYPE=Mycen:')
   expect(vcf).not.toContain('enabled')
 })
+
+test('una dirección sin perfil avisa que no existe y los buscadores no la indexan', async ({ page, context }) => {
+  await installSupabaseMock(context, createState({ profiles: [profileRow()] }))
+  await page.goto('/nadie-con-este-nombre')
+  await expect(page.getByText('Este perfil no existe')).toBeVisible()
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex')
+
+  // Un perfil que sí existe no queda marcado
+  await page.goto('/ana')
+  await expect(page.getByRole('heading', { name: 'Ana Pérez' })).toBeVisible()
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0)
+})

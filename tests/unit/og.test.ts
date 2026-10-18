@@ -11,8 +11,12 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllGlobals())
 
+// La app (index.html) que se sirve cuando no hay un perfil publicado
+const APP = '<!doctype html><div id="root"></div>'
+
 function mockRpc(body: unknown) {
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify(body), { status: 200 }))
+  const fetchMock = vi.fn(async (url: string) =>
+    new Response(String(url).endsWith('/index.html') ? APP : JSON.stringify(body), { status: 200 }))
   vi.stubGlobal('fetch', fetchMock)
   return fetchMock
 }
@@ -46,13 +50,24 @@ describe('api/og', () => {
     expect(res.headers.get('location')).toBe('https://mycen.id/ana-studio')
   })
 
-  it('no expone perfiles sin publicar ni consulta usernames reservados', async () => {
+  it('no expone perfiles sin publicar ni consulta usernames reservados: sirve la app', async () => {
     mockRpc({ status: 'unavailable' })
-    expect(await (await handler(req('ana'))).text()).toContain('<title>Mycen</title>')
+    expect(await (await handler(req('ana'))).text()).toBe(APP)
 
     const fetchMock = mockRpc({})
-    expect(await (await handler(req('studio'))).text()).toContain('<title>Mycen</title>')
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(await (await handler(req('studio'))).text()).toBe(APP)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledWith('https://mycen.id/index.html')
+  })
+
+  // Antes los buscadores recibían una página vacía "Mycen" en /soporte, /privacidad… (no son perfiles)
+  it('las páginas de la app que no son perfiles llegan como la app', async () => {
+    mockRpc(null)
+    const res = await handler(req('soporte'))
+    expect(res.status).toBe(200)
+    expect(await res.text()).toBe(APP)
+    mockRpc(null)
+    expect(await (await handler(req('privacidad'))).text()).toBe(APP)
   })
 
   it('sirve a los buscadores el contenido publicado, sin links peligrosos', async () => {
@@ -139,7 +154,7 @@ describe('api/og · proyectos', () => {
 
   it('no expone proyectos sin publicar y redirige usernames viejos', async () => {
     mockRpc({ status: 'unavailable' })
-    expect(await (await handler(projectReq('ana', 'cafe-luna'))).text()).toContain('<title>Mycen</title>')
+    expect(await (await handler(projectReq('ana', 'cafe-luna'))).text()).toBe(APP)
 
     mockRpc({ redirect: 'ana-studio' })
     const res = await handler(projectReq('ana', 'cafe-luna'))
