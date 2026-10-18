@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, ShoppingBag, X, MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { PUBLIC_RESTAURANT_SELECT } from '../lib/publicRestaurant'
 import type { Restaurant } from '@/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -75,7 +76,7 @@ export default function CatalogoPublic() {
 
       const { data: rest } = await db
         .from('restaurants')
-        .select('*')
+        .select(PUBLIC_RESTAURANT_SELECT)
         .eq('slug', slug)
         .eq('is_active', true)
         .maybeSingle()

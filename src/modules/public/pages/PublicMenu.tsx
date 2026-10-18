@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { Search, Globe, DollarSign, ShoppingCart, Bell, X, Receipt, ArrowLeft, CalendarDays } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { PUBLIC_RESTAURANT_SELECT } from '../lib/publicRestaurant'
 import { useMenuStore } from '@/store/menuStore'
 import { useCartStore } from '@/store/cartStore'
 import { CartSheet } from '../components/CartSheet'
@@ -499,7 +500,7 @@ export function PublicMenu() {
       try {
         const { data: rest, error: restErr } = await supabase
           .from('restaurants')
-          .select('*')
+          .select(PUBLIC_RESTAURANT_SELECT)
           .eq('slug', slug as string)
           .eq('is_active', true)
           .single()

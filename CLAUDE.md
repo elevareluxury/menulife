@@ -56,6 +56,11 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `admin_set_error_status`, `admin_error_summary`). Un error resuelto que vuelve a pasar se reabre solo.
 - Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()`. La página pública vieja y su editor ya no
   existen; quedan las tablas, la importación y `src/modules/hub/lib/` (plantillas que usa el onboarding de Business, `/onboarding`).
+- `restaurants` (Business) sin sesión: `anon` tiene SELECT sólo de las columnas de `PUBLIC_RESTAURANT_COLUMNS`
+  (`src/modules/public/lib/publicRestaurant.ts` = la lista de `20261108000001_restaurants_public_columns.sql`, un test lo
+  verifica). Las pantallas públicas (menú `/r/:slug`, reservas, catálogo, seguimiento, presupuesto, logins de mozo/delivery/
+  cocina, landing de referidos) piden columnas, nunca `*`; email, teléfono, dirección, dueño, plan y notas no salen.
+  Tests en `restaurants_public_columns.test.sql` y `business-public-menu.spec.ts` (el mock aplica la misma regla).
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
 ## Código
