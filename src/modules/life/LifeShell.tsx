@@ -21,6 +21,7 @@ import { colors } from './design-system'
 import { THEME_BG } from '@/design/themes'
 import { usePrefersLight } from '@/modules/profile/lib/usePrefersLight'
 import { usePrefs } from '@/lib/prefs'
+import { useH1Title } from '@/lib/useH1Title'
 import './life.css'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +37,8 @@ export function LifeShell() {
   useTaskReminders(user?.id)
   useHabitReminders(user?.id)
   const dir = langDir(useAppLang(s => s.lang))
+  // Título de la pestaña con el de la pantalla ("Brain · Mycen")
+  useH1Title('Mycen')
 
   // Tema del sistema de diseño según el celular (Amanecer con el modo claro, Universo con el oscuro). Va en <html>
   // para que lo hereden también las hojas y diálogos que se abren en un portal.
