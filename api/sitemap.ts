@@ -4,7 +4,7 @@
 
 export const config = { runtime: 'edge' }
 
-const STATIC_PATHS = ['/', '/terminos', '/privacidad']
+const STATIC_PATHS = ['/', '/terminos', '/privacidad', '/soporte', '/eliminar-cuenta']
 /** Límite de URLs por sitemap (protocolo sitemaps.org) */
 const MAX_URLS = 50000
 

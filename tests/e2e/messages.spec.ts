@@ -97,3 +97,60 @@ test('Studio: en el celular el contador de no leídos está en "Más" y la Whats
   await page.getByRole('button', { name: /Sofi/ }).click()
   await expect(page.getByRole('link', { name: 'Responder por WhatsApp' })).toHaveAttribute('href', 'https://wa.me/5493415550000')
 })
+
+// Tiendas (App Store 1.2): bloquear a quien escribe y reportar un mensaje al equipo
+const msg = (id: string, name: string, contact: string, message: string) => ({
+  id, profile_id: 'p-ana', kind: 'message', name, contact, message, details: null, sender_hash: 'otro',
+  created_at: new Date().toISOString(), read_at: null,
+})
+
+test('bloquear a quien escribe: se van sus mensajes y lo que mande después no llega', async ({ page, context, browser }) => {
+  const state = seed()
+  state.tables.profile_messages = [
+    msg('m1', 'Juan', 'juan@mail.com', 'Hola'), msg('m2', 'Juan', 'Juan@Mail.com ', 'Otra vez'), msg('m3', 'Lu', 'lu@mail.com', 'Me encanta'),
+  ]
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/studio/messages')
+  await page.getByRole('button', { name: /Juan/ }).first().click()
+  await page.getByRole('button', { name: 'Bloquear' }).click()
+  const dialog = page.getByRole('alertdialog', { name: '¿Bloquear a quien escribió?' })
+  await dialog.getByRole('button', { name: 'Bloquear' }).click()
+  await expect(dialog).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /Juan/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /Lu/ })).toBeVisible()
+  expect(state.tables.profile_messages.map(m => m.id)).toEqual(['m3'])
+  expect(state.tables.profile_blocked_senders).toEqual([{ profile_id: 'p-ana', contact_key: 'juan@mail.com' }])
+
+  // Juan vuelve a escribir desde el perfil: se le dice "enviado", pero no llega
+  const visitor = await browser.newContext()
+  await installSupabaseMock(visitor, state)
+  const v = await visitor.newPage()
+  await v.clock.install()
+  await v.goto('/ana')
+  const form = v.getByRole('region', { name: 'Contame tu proyecto' })
+  await form.getByRole('textbox', { name: 'Tu nombre' }).fill('Juan')
+  await form.getByRole('textbox', { name: 'Email o WhatsApp' }).fill('JUAN@mail.com')
+  await form.getByRole('textbox', { name: 'Mensaje' }).fill('¿Me leíste?')
+  await v.clock.fastForward(5000)
+  await form.getByRole('button', { name: 'Enviar mensaje' }).click()
+  await expect(form.getByRole('status')).toHaveText('Mensaje enviado. Te van a responder pronto.')
+  expect(state.tables.profile_messages.map(m => m.id)).toEqual(['m3'])
+  await visitor.close()
+})
+
+test('reportar un mensaje: elige el motivo, llega al equipo y bloquea a quien lo escribió', async ({ page, context }) => {
+  const state = seed()
+  state.tables.profile_messages = [msg('m1', 'Oferta', '+54 9 11 5555-0000', 'Ganaste un premio'), msg('m2', 'Lu', 'lu@mail.com', 'Hola')]
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/studio/messages')
+  await page.getByRole('button', { name: /Oferta/ }).click()
+  await page.getByRole('button', { name: 'Reportar' }).click()
+  const dialog = page.getByRole('alertdialog', { name: '¿Reportar este mensaje?' })
+  await expect(dialog.getByRole('radio', { name: /Spam/ })).toBeChecked()
+  await dialog.getByRole('radio', { name: 'Estafa o fraude' }).check()
+  await dialog.getByRole('button', { name: 'Reportar y bloquear' }).click()
+  await expect(dialog).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /Oferta/ })).toHaveCount(0)
+  expect(state.tables.profile_message_reports).toMatchObject([{ reason: 'scam', sender_contact: '+54 9 11 5555-0000', message: 'Ganaste un premio' }])
+  expect(state.tables.profile_blocked_senders).toEqual([{ profile_id: 'p-ana', contact_key: '5491155550000' }])
+})

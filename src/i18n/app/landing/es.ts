@@ -193,6 +193,7 @@ const es = {
     contact: 'Contacto',
     terms: 'Términos',
     privacy: 'Privacidad',
+    support: 'Ayuda',
     madeBy: 'Hecho por Resilio',
   },
 }

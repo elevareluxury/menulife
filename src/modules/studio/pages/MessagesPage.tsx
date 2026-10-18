@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Handshake, Mail, MessageCircle, Trash2 } from 'lucide-react'
+import { Ban, Flag, Handshake, Mail, MessageCircle, Trash2 } from 'lucide-react'
 import { useStudioT } from '@/i18n/app/studio'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { readCollabDetails, type CollabDetails } from '@/modules/profile/lib/collab'
+import { REPORT_REASONS, ui as profileUi, type ReportReason } from '@/modules/profile/lib/profileI18n'
 import { Button, ConfirmDialog, PageHeader } from '../components/ui'
 import { useStudio } from '../StudioContext'
-import { deleteMessage, loadMessages, setMessageRead, type ProfileMessage } from '../lib/studioApi'
+import { blockMessageSender, contactKey, deleteMessage, loadMessages, reportMessage, setMessageRead, type ProfileMessage } from '../lib/studioApi'
 import { notifyMessagesChanged, replyLinks } from '../lib/useUnreadMessages'
 
 type Filter = 'all' | 'message' | 'collab'
@@ -30,6 +31,11 @@ export function MessagesPage() {
   const [deleting, setDeleting] = useState(false)
   const [status, setStatus] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
+  const [action, setAction] = useState<{ kind: 'report' | 'block'; m: ProfileMessage } | null>(null)
+  const [reason, setReason] = useState<ReportReason>('spam')
+  const [acting, setActing] = useState(false)
+  const [actionError, setActionError] = useState(false)
+  const reasonLabels = profileUi(useAppLang(s => s.lang)).reportReasons
 
   useEffect(() => {
     let alive = true
@@ -82,6 +88,26 @@ export function MessagesPage() {
   async function markUnread(m: ProfileMessage) {
     update(m.id, { read_at: null })
     try { await setMessageRead(m.id, false); notifyMessagesChanged() } catch { update(m.id, { read_at: m.read_at }) }
+  }
+
+  // Reportar (al equipo, y bloquea) o sólo bloquear a quien escribió: se van todos sus mensajes de ese perfil
+  async function runAction() {
+    if (!action) return
+    const { kind, m } = action
+    setActing(true); setActionError(false)
+    try {
+      if (kind === 'report') await reportMessage(m.id, reason)
+      else await blockMessageSender(m.id)
+      const key = contactKey(m.contact)
+      setItems(prev => Array.isArray(prev) ? prev.filter(x => !(x.profile_id === m.profile_id && contactKey(x.contact) === key)) : prev)
+      setStatus(kind === 'report' ? t.reported : t.blocked)
+      notifyMessagesChanged()
+      setAction(null)
+    } catch {
+      setActionError(true)
+    } finally {
+      setActing(false)
+    }
   }
 
   async function remove(m: ProfileMessage) {
@@ -172,6 +198,12 @@ export function MessagesPage() {
                         )}
                         <Button size="sm" variant="ghost" onClick={() => { void markUnread(m) }}>{t.markUnread}</Button>
                         <Button size="sm" variant="ghost" onClick={() => setConfirm(m)}><Trash2 size={15} aria-hidden="true" /> {t.delete}</Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setReason('spam'); setActionError(false); setAction({ kind: 'report', m }) }}>
+                          <Flag size={15} aria-hidden="true" /> {t.report}
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setActionError(false); setAction({ kind: 'block', m }) }}>
+                          <Ban size={15} aria-hidden="true" /> {t.block}
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -185,6 +217,26 @@ export function MessagesPage() {
       {confirm && (
         <ConfirmDialog title={t.deleteTitle} message={t.deleteText} confirmLabel={t.delete} danger loading={deleting}
           onConfirm={() => { void remove(confirm) }} onCancel={() => setConfirm(null)} />
+      )}
+
+      {action && (
+        <ConfirmDialog title={action.kind === 'report' ? t.reportTitle : t.blockTitle}
+          message={action.kind === 'report' ? t.reportText : t.blockText}
+          confirmLabel={action.kind === 'report' ? t.reportSend : t.block} danger loading={acting}
+          onConfirm={() => { void runAction() }} onCancel={() => { if (!acting) setAction(null) }}>
+          {action.kind === 'report' && (
+            <fieldset className="st-report-reasons">
+              <legend className="st-label">{t.reportReason}</legend>
+              {REPORT_REASONS.map(r => (
+                <label key={r} className="st-radio-row">
+                  <input type="radio" name="message-report-reason" value={r} checked={reason === r} onChange={() => setReason(r)} />
+                  {reasonLabels[r]}
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {actionError && <p role="alert" className="st-error">{t.actionError}</p>}
+        </ConfirmDialog>
       )}
     </>
   )

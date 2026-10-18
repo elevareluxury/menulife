@@ -36,7 +36,7 @@ const ko: AdminDict = {
     noneOpen: '열린 신고가 없어요.', noneResolved: '아직 처리된 신고가 없어요.', list: '신고',
     reportOf: (name) => `${name}에 대한 신고`, project: (title) => `프로젝트: ${title}`, suspendedTag: '정지됨',
     openCount: (n) => `이 프로필에 대한 열린 신고 ${n}건`,
-    noteLabel: '메모 (정지 사유는 주인에게 보여요)', dismiss: '기각', suspend: '프로필 정지',
+    noteLabel: '메모 (정지 사유는 주인에게 보여요)', dismiss: '기각', suspend: '프로필 정지', msgTitle: '신고된 메시지', msgIntro: '프로필 주인이 Studio에서 신고한 메시지예요. 보낸 사람은 이미 그 프로필에서 차단됐어요. 여기서는 추가 조치(예: 당국에 알리기)가 필요한지 확인해요.', msgNone: '신고된 메시지가 없어요.', msgFrom: '보낸 사람', msgTo: '받는 사람', msgReviewed: '검토 완료',
     suspendedTitle: '정지된 프로필', noneSuspended: '정지된 프로필이 없어요.', since: (date) => `${date}부터`,
     lift: '정지 해제',
     reasons: {

@@ -39,7 +39,7 @@ const pt: AdminDict = {
     noneOpen: 'Não há denúncias abertas.', noneResolved: 'Ainda não há denúncias resolvidas.', list: 'Denúncias',
     reportOf: (name) => `Denúncia sobre ${name}`, project: (title) => `Projeto: ${title}`, suspendedTag: 'SUSPENSO',
     openCount: (n) => (n === 1 ? '1 denúncia aberta sobre este perfil' : `${n} denúncias abertas sobre este perfil`),
-    noteLabel: 'Nota (o dono vê o motivo da suspensão)', dismiss: 'Descartar', suspend: 'Suspender perfil',
+    noteLabel: 'Nota (o dono vê o motivo da suspensão)', dismiss: 'Descartar', suspend: 'Suspender perfil', msgTitle: 'Mensagens denunciadas', msgIntro: 'Mensagens que o dono de um perfil denunciou pelo Studio. Quem escreveu já foi bloqueado nesse perfil; aqui você vê se é preciso algo mais (por exemplo, avisar as autoridades).', msgNone: 'Não há mensagens denunciadas.', msgFrom: 'De', msgTo: 'Para', msgReviewed: 'Revisado',
     suspendedTitle: 'Perfis suspensos', noneSuspended: 'Não há perfis suspensos.', since: (date) => `Desde ${date}`,
     lift: 'Retirar suspensão',
     reasons: {

@@ -39,7 +39,7 @@ const en: AdminDict = {
     noneOpen: 'No open reports.', noneResolved: 'No resolved reports yet.', list: 'Reports',
     reportOf: (name) => `Report about ${name}`, project: (title) => `Project: ${title}`, suspendedTag: 'SUSPENDED',
     openCount: (n) => (n === 1 ? '1 open report about this profile' : `${n} open reports about this profile`),
-    noteLabel: 'Note (the owner sees the suspension reason)', dismiss: 'Dismiss', suspend: 'Suspend profile',
+    noteLabel: 'Note (the owner sees the suspension reason)', dismiss: 'Dismiss', suspend: 'Suspend profile', msgTitle: 'Reported messages', msgIntro: 'Messages a profile owner reported from Studio. The sender is already blocked on that profile; here you check whether anything else is needed (for example, alerting the authorities).', msgNone: 'No reported messages.', msgFrom: 'From', msgTo: 'To', msgReviewed: 'Reviewed',
     suspendedTitle: 'Suspended profiles', noneSuspended: 'No suspended profiles.', since: (date) => `Since ${date}`,
     lift: 'Lift suspension',
     reasons: {

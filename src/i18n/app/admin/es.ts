@@ -85,6 +85,8 @@ const es = {
     noteLabel: 'Nota (el motivo de la suspensión lo ve el dueño)',
     dismiss: 'Descartar',
     suspend: 'Suspender perfil',
+    // Mensajes que reportó la persona dueña desde Studio → Mensajes (tiendas, App Store 1.2)
+    msgTitle: 'Mensajes denunciados', msgIntro: 'Mensajes que la persona dueña de un perfil reportó desde Studio. Quien lo escribió ya quedó bloqueado en ese perfil; acá se revisa si hace falta algo más (por ejemplo, avisar a la autoridad).', msgNone: 'No hay mensajes denunciados.', msgFrom: 'De', msgTo: 'Para', msgReviewed: 'Revisado',
     suspendedTitle: 'Perfiles suspendidos',
     noneSuspended: 'No hay perfiles suspendidos.',
     since: (date: string) => `Desde ${date}`,
