@@ -53,7 +53,8 @@ for m in \
   20261104000001_site_flags \
   20261105000001_admin_console \
   20261106000001_message_block_report \
-  20261107000001_testimonials_rls; do
+  20261107000001_testimonials_rls \
+  20261108000001_restaurants_public_columns; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, ChevronLeft, ChevronRight, Users, Check, Plus, Minus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { PUBLIC_RESTAURANT_SELECT } from '../lib/publicRestaurant'
 import toast from 'react-hot-toast'
 import type { Restaurant, Reservation } from '@/types'
 
@@ -213,7 +214,7 @@ export function ReservationFormPage() {
 
   useEffect(() => {
     if (!slug) return
-    db.from('restaurants').select('*').eq('slug', slug).eq('is_active', true).single()
+    db.from('restaurants').select(PUBLIC_RESTAURANT_SELECT).eq('slug', slug).eq('is_active', true).single()
       .then(({ data }: { data: Restaurant | null }) => {
         if (data) setRestaurant(data)
         else toast.error('Restaurante no encontrado')
