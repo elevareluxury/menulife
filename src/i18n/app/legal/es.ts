@@ -20,8 +20,66 @@ const es = {
     seeOther: { terms: 'Política de privacidad', privacy: 'Términos y condiciones' },
     language: 'Idioma',
     back: 'Volver a Mycen',
+    supportTitle: 'Ayuda y soporte',
+    supportIntro: 'Cómo escribirnos y respuestas a lo que más se pregunta.',
+    deletionTitle: 'Eliminar tu cuenta de Mycen',
+    deletionIntro: 'Cómo eliminar tu cuenta y tus datos de Mycen (app y web), qué se borra y qué puede quedar.',
   },
   updated: UPDATED,
+  // Ayuda (/soporte) y cómo eliminar la cuenta (/eliminar-cuenta, el link que piden Google Play y la App Store)
+  support: [
+    { id: 'contacto', title: 'Escribinos', body: [
+      'Para cualquier consulta, problema o pedido escribinos a **team@mycen.id**. Contanos tu usuario de Mycen (o el email de tu cuenta) y, si podés, mandá una captura. Respondemos lo antes posible.',
+    ] },
+    { id: 'acceso', title: 'Entrar a tu cuenta', body: [
+      { list: [
+        '**Olvidé mi contraseña:** en la pantalla de acceso tocá “¿Olvidaste tu contraseña?” y seguí el link que te llega por email.',
+        '**No me llegó el mail de confirmación:** revisá spam y promociones. Si no está, registrate de nuevo con el mismo email y te lo mandamos otra vez.',
+        '**Entré con Google:** usá siempre el mismo botón; no hace falta contraseña.',
+      ] },
+    ] },
+    { id: 'datos', title: 'Tus datos', body: [
+      { list: [
+        '**Descargarlos:** Studio → Ajustes → “Descargar mis datos” (tu perfil, módulos y Life OS en un archivo). En Life OS → Ajustes → “Tus datos” también podés bajar Dinero en CSV.',
+        '**Eliminar tu cuenta:** desde Studio → Ajustes o Life OS → Ajustes → Cuenta. Todos los pasos, y qué se borra, en **mycen.id/eliminar-cuenta**.',
+      ] },
+    ] },
+    { id: 'seguridad', title: 'Denunciar o bloquear', body: [
+      { list: [
+        '**Un perfil:** en cualquier perfil público tocá “Denunciar”. Lo revisa el equipo de Mycen y el dueño no sabe quién denunció.',
+        '**Un mensaje:** en Studio → Mensajes, “Reportar” manda el mensaje al equipo y bloquea a quien lo escribió; “Bloquear” sólo deja de recibir sus mensajes.',
+      ] },
+      'Si algo es urgente o pone en riesgo a alguien, escribinos a **team@mycen.id** con el asunto “Urgente”.',
+    ] },
+  ] as LegalSection[],
+  deletion: [
+    { id: 'app', title: 'Desde la app o la web', body: [
+      'Entrá a tu cuenta y elegí una de estas opciones:',
+      { list: [
+        '**Life OS → Ajustes → Cuenta → “Eliminar mi cuenta”**',
+        '**Studio → Ajustes → “Eliminar mi cuenta”**',
+      ] },
+      'Para confirmar escribí la palabra que te pedimos. La cuenta se borra en el momento.',
+    ] },
+    { id: 'sin-acceso', title: 'Si no podés entrar', body: [
+      'Escribinos a **team@mycen.id** desde el email de tu cuenta, con el asunto “Eliminar mi cuenta”. La borramos dentro de los plazos de la ley (en Argentina, 5 días hábiles) y te avisamos cuando esté hecho.',
+    ] },
+    { id: 'que-se-borra', title: 'Qué se borra', body: [
+      { list: [
+        'Tu cuenta y tu email de acceso.',
+        'Tu identidad: perfiles, Spaces, módulos, proyectos, imágenes, versiones publicadas, estadísticas, mensajes y suscriptores.',
+        'Todo Life OS: tareas, hábitos, metas, Mi día, revisiones, Dinero y diario.',
+      ] },
+    ] },
+    { id: 'que-queda', title: 'Qué puede quedar', body: [
+      { list: [
+        'Las copias de seguridad de los proveedores, que se sobrescriben en sus ciclos habituales.',
+        'Los registros de errores, que no están vinculados a tu cuenta.',
+        'Lo que la ley obligue a conservar (por ejemplo, datos de facturación), por el plazo que fije.',
+        'Si tu cuenta tiene un negocio en Mycen Business, escribinos: lo damos de baja con vos para cuidar los datos de tus clientes y ventas.',
+      ] },
+    ] },
+  ] as LegalSection[],
   terms: [
     { id: 'quien', title: 'Quién presta el servicio', body: [
       'Mycen es un servicio operado por **Resilio**, con domicilio en la República Argentina. Podés escribirnos a **team@mycen.id**.',

@@ -13,8 +13,65 @@ const pt: LegalDict = {
     seeOther: { terms: 'Política de privacidade', privacy: 'Termos e condições' },
     language: 'Idioma',
     back: 'Voltar ao Mycen',
+    supportTitle: 'Ajuda e suporte',
+    supportIntro: 'Como falar com a gente e respostas às perguntas mais comuns.',
+    deletionTitle: 'Excluir sua conta Mycen',
+    deletionIntro: 'Como excluir sua conta e seus dados do Mycen (app e web), o que é apagado e o que pode ficar.',
   },
   updated: es.updated,
+  support: [
+    { id: 'contacto', title: 'Escreva para a gente', body: [
+      'Para qualquer dúvida, problema ou pedido, escreva para **team@mycen.id**. Diga seu usuário do Mycen (ou o e-mail da conta) e, se puder, mande uma captura de tela. Respondemos o quanto antes.',
+    ] },
+    { id: 'acceso', title: 'Entrar na sua conta', body: [
+      { list: [
+        '**Esqueci minha senha:** na tela de acesso toque em “Esqueceu sua senha?” e siga o link que chega por e-mail.',
+        '**Não recebi o e-mail de confirmação:** confira spam e promoções. Se não estiver lá, cadastre-se de novo com o mesmo e-mail e enviamos outra vez.',
+        '**Entrei com o Google:** use sempre o mesmo botão; não precisa de senha.',
+      ] },
+    ] },
+    { id: 'datos', title: 'Seus dados', body: [
+      { list: [
+        '**Baixar:** Studio → Ajustes → “Baixar meus dados” (seu perfil, módulos e Life OS em um arquivo). Em Life OS → Ajustes → “Seus dados” você também pode baixar Dinheiro em CSV.',
+        '**Excluir sua conta:** em Studio → Ajustes ou Life OS → Ajustes → Conta. Todos os passos, e o que é apagado, em **mycen.id/eliminar-cuenta**.',
+      ] },
+    ] },
+    { id: 'seguridad', title: 'Denunciar ou bloquear', body: [
+      { list: [
+        '**Um perfil:** em qualquer perfil público toque em “Denunciar”. A equipe do Mycen revisa e o dono não sabe quem denunciou.',
+        '**Uma mensagem:** em Studio → Mensagens, “Denunciar” envia a mensagem para a equipe e bloqueia quem escreveu; “Bloquear” só para de receber as mensagens dessa pessoa.',
+      ] },
+      'Se algo for urgente ou colocar alguém em risco, escreva para **team@mycen.id** com o assunto “Urgente”.',
+    ] },
+  ],
+  deletion: [
+    { id: 'app', title: 'Pelo app ou pela web', body: [
+      'Entre na sua conta e escolha uma destas opções:',
+      { list: [
+        '**Life OS → Ajustes → Conta → “Excluir minha conta”**',
+        '**Studio → Ajustes → “Excluir minha conta”**',
+      ] },
+      'Para confirmar, digite a palavra que pedimos. A conta é apagada na hora.',
+    ] },
+    { id: 'sin-acceso', title: 'Se você não consegue entrar', body: [
+      'Escreva para **team@mycen.id** a partir do e-mail da sua conta, com o assunto “Excluir minha conta”. Apagamos dentro dos prazos da lei (na Argentina, 5 dias úteis) e avisamos quando estiver feito.',
+    ] },
+    { id: 'que-se-borra', title: 'O que é apagado', body: [
+      { list: [
+        'Sua conta e seu e-mail de acesso.',
+        'Sua identidade: perfis, Spaces, módulos, projetos, imagens, versões publicadas, estatísticas, mensagens e inscritos.',
+        'Todo o Life OS: tarefas, hábitos, metas, Meu dia, revisões, Dinheiro e diário.',
+      ] },
+    ] },
+    { id: 'que-queda', title: 'O que pode ficar', body: [
+      { list: [
+        'As cópias de segurança dos fornecedores, que são sobrescritas nos ciclos habituais.',
+        'Os registros de erros, que não estão vinculados à sua conta.',
+        'O que a lei obrigar a guardar (por exemplo, dados de faturamento), pelo prazo que ela fixar.',
+        'Se sua conta tem um negócio no Mycen Business, escreva para a gente: encerramos junto com você para cuidar dos dados de clientes e vendas.',
+      ] },
+    ] },
+  ],
   terms: [
     { id: 'quien', title: 'Quem presta o serviço', body: [
       'O Mycen é um serviço operado por **Resilio**, com domicílio na República Argentina. Você pode nos escrever em **team@mycen.id**.',

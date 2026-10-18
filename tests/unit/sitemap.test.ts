@@ -34,7 +34,9 @@ describe('sitemap', () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('caída') }))
     const xml = await (await handler(new Request('https://mycen.id/api/sitemap'))).text()
     expect(xml).toContain('<loc>https://mycen.id/</loc>')
-    expect(xml.match(/<url>/g)).toHaveLength(3)
+    expect(xml.match(/<url>/g)).toHaveLength(5)
+    expect(xml).toContain('<loc>https://mycen.id/soporte</loc>')
+    expect(xml).toContain('<loc>https://mycen.id/eliminar-cuenta</loc>')
   })
 
   it('descarta direcciones raras y escapa el XML', () => {

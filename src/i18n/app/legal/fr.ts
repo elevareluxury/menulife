@@ -13,8 +13,65 @@ const fr: LegalDict = {
     seeOther: { terms: 'Politique de confidentialité', privacy: 'Conditions générales' },
     language: 'Langue',
     back: 'Retour à Mycen',
+    supportTitle: 'Aide et assistance',
+    supportIntro: 'Comment nous écrire et réponses aux questions les plus fréquentes.',
+    deletionTitle: 'Supprimer votre compte Mycen',
+    deletionIntro: 'Comment supprimer votre compte et vos données Mycen (app et web), ce qui est supprimé et ce qui peut rester.',
   },
   updated: es.updated,
+  support: [
+    { id: 'contacto', title: 'Écrivez-nous', body: [
+      'Pour toute question, problème ou demande, écrivez à **team@mycen.id**. Indiquez votre nom d’utilisateur Mycen (ou l’e-mail du compte) et, si possible, joignez une capture d’écran. Nous répondons au plus vite.',
+    ] },
+    { id: 'acceso', title: 'Accéder à votre compte', body: [
+      { list: [
+        '**J’ai oublié mon mot de passe :** sur l’écran de connexion, touchez « Mot de passe oublié ? » et suivez le lien reçu par e-mail.',
+        '**Je n’ai pas reçu l’e-mail de confirmation :** vérifiez les spams et les promotions. S’il n’y est pas, inscrivez-vous à nouveau avec le même e-mail et nous le renverrons.',
+        '**Je me suis connecté avec Google :** utilisez toujours le même bouton ; aucun mot de passe n’est nécessaire.',
+      ] },
+    ] },
+    { id: 'datos', title: 'Vos données', body: [
+      { list: [
+        '**Les télécharger :** Studio → Réglages → « Télécharger mes données » (votre profil, vos modules et Life OS dans un fichier). Dans Life OS → Réglages → « Vos données », vous pouvez aussi télécharger Argent en CSV.',
+        '**Supprimer votre compte :** depuis Studio → Réglages ou Life OS → Réglages → Compte. Toutes les étapes, et ce qui est supprimé, sur **mycen.id/eliminar-cuenta**.',
+      ] },
+    ] },
+    { id: 'seguridad', title: 'Signaler ou bloquer', body: [
+      { list: [
+        '**Un profil :** sur n’importe quel profil public, touchez « Signaler ». L’équipe Mycen l’examine et le propriétaire ne sait pas qui a signalé.',
+        '**Un message :** dans Studio → Messages, « Signaler » envoie le message à l’équipe et bloque l’expéditeur ; « Bloquer » arrête seulement ses messages.',
+      ] },
+      'Si c’est urgent ou si quelqu’un est en danger, écrivez à **team@mycen.id** avec l’objet « Urgent ».',
+    ] },
+  ],
+  deletion: [
+    { id: 'app', title: 'Depuis l’app ou le web', body: [
+      'Connectez-vous et choisissez l’une de ces options :',
+      { list: [
+        '**Life OS → Réglages → Compte → « Supprimer mon compte »**',
+        '**Studio → Réglages → « Supprimer mon compte »**',
+      ] },
+      'Pour confirmer, tapez le mot demandé. Le compte est supprimé immédiatement.',
+    ] },
+    { id: 'sin-acceso', title: 'Si vous ne pouvez pas vous connecter', body: [
+      'Écrivez à **team@mycen.id** depuis l’e-mail de votre compte, avec l’objet « Supprimer mon compte ». Nous le supprimons dans les délais légaux (en Argentine, 5 jours ouvrables) et vous prévenons quand c’est fait.',
+    ] },
+    { id: 'que-se-borra', title: 'Ce qui est supprimé', body: [
+      { list: [
+        'Votre compte et votre e-mail de connexion.',
+        'Votre identité : profils, Spaces, modules, projets, images, versions publiées, statistiques, messages et abonnés.',
+        'Tout Life OS : tâches, habitudes, objectifs, Ma journée, bilans, Argent et journal.',
+      ] },
+    ] },
+    { id: 'que-queda', title: 'Ce qui peut rester', body: [
+      { list: [
+        'Les sauvegardes de nos prestataires, écrasées selon leurs cycles habituels.',
+        'Les journaux d’erreurs, qui ne sont pas liés à votre compte.',
+        'Ce que la loi impose de conserver (par exemple, les données de facturation), pendant la durée qu’elle fixe.',
+        'Si votre compte a une entreprise dans Mycen Business, écrivez-nous : nous la fermons avec vous pour protéger les données de vos clients et de vos ventes.',
+      ] },
+    ] },
+  ],
   terms: [
     { id: 'quien', title: 'Qui fournit le service', body: [
       'Mycen est un service exploité par **Resilio**, domicilié en République argentine. Vous pouvez nous écrire à **team@mycen.id**.',

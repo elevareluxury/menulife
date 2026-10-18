@@ -173,7 +173,7 @@ const ja: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'はい。プロフィールにはビジネス向けのレイアウトがあり、WhatsApp、所在地、営業時間、商品、問い合わせフォームを無料で載せられます。運営ツール（デジタルメニュー、注文、予約）は今後 Mycen Business で提供予定です。',
   },
-  footer: { product: '製品', pricing: '料金', faq: 'よくある質問', contact: 'お問い合わせ', terms: '利用規約', privacy: 'プライバシー', madeBy: 'Resilio 制作' },
+  footer: { product: '製品', pricing: '料金', faq: 'よくある質問', contact: 'お問い合わせ', terms: '利用規約', privacy: 'プライバシー', support: 'ヘルプ', madeBy: 'Resilio 制作' },
 }
 
 export default ja

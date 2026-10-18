@@ -173,7 +173,7 @@ const ko: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: '네. 프로필에 사업용 레이아웃이 있어 WhatsApp, 위치, 영업시간, 상품, 문의 양식을 무료로 넣을 수 있어요. 운영 도구(디지털 메뉴, 주문, 예약)는 나중에 Mycen Business로 제공될 예정이에요.',
   },
-  footer: { product: '제품', pricing: '요금', faq: '질문', contact: '문의', terms: '약관', privacy: '개인정보', madeBy: 'Resilio 제작' },
+  footer: { product: '제품', pricing: '요금', faq: '질문', contact: '문의', terms: '약관', privacy: '개인정보', support: '도움말', madeBy: 'Resilio 제작' },
 }
 
 export default ko

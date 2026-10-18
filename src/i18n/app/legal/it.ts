@@ -13,8 +13,65 @@ const it: LegalDict = {
     seeOther: { terms: 'Informativa sulla privacy', privacy: 'Termini e condizioni' },
     language: 'Lingua',
     back: 'Torna a Mycen',
+    supportTitle: 'Aiuto e assistenza',
+    supportIntro: 'Come scriverci e risposte alle domande più frequenti.',
+    deletionTitle: 'Eliminare il tuo account Mycen',
+    deletionIntro: 'Come eliminare il tuo account e i tuoi dati Mycen (app e web), cosa viene cancellato e cosa può restare.',
   },
   updated: es.updated,
+  support: [
+    { id: 'contacto', title: 'Scrivici', body: [
+      'Per qualsiasi domanda, problema o richiesta scrivi a **team@mycen.id**. Indicaci il tuo nome utente Mycen (o l’email dell’account) e, se puoi, invia uno screenshot. Rispondiamo il prima possibile.',
+    ] },
+    { id: 'acceso', title: 'Entrare nel tuo account', body: [
+      { list: [
+        '**Ho dimenticato la password:** nella schermata di accesso tocca “Password dimenticata?” e segui il link che ricevi via email.',
+        '**Non mi è arrivata l’email di conferma:** controlla spam e promozioni. Se non c’è, registrati di nuovo con la stessa email e te la rimandiamo.',
+        '**Sono entrato con Google:** usa sempre lo stesso pulsante; non serve una password.',
+      ] },
+    ] },
+    { id: 'datos', title: 'I tuoi dati', body: [
+      { list: [
+        '**Scaricarli:** Studio → Impostazioni → “Scarica i miei dati” (profilo, moduli e Life OS in un file). In Life OS → Impostazioni → “I tuoi dati” puoi scaricare anche Soldi in CSV.',
+        '**Eliminare l’account:** da Studio → Impostazioni o Life OS → Impostazioni → Account. Tutti i passaggi, e cosa viene cancellato, su **mycen.id/eliminar-cuenta**.',
+      ] },
+    ] },
+    { id: 'seguridad', title: 'Segnalare o bloccare', body: [
+      { list: [
+        '**Un profilo:** in qualsiasi profilo pubblico tocca “Segnala”. Lo esamina il team di Mycen e il proprietario non sa chi ha segnalato.',
+        '**Un messaggio:** in Studio → Messaggi, “Segnala” invia il messaggio al team e blocca chi l’ha scritto; “Blocca” smette solo di ricevere i suoi messaggi.',
+      ] },
+      'Se è urgente o qualcuno è in pericolo, scrivi a **team@mycen.id** con oggetto “Urgente”.',
+    ] },
+  ],
+  deletion: [
+    { id: 'app', title: 'Dall’app o dal web', body: [
+      'Accedi e scegli una di queste opzioni:',
+      { list: [
+        '**Life OS → Impostazioni → Account → “Elimina il mio account”**',
+        '**Studio → Impostazioni → “Elimina il mio account”**',
+      ] },
+      'Per confermare scrivi la parola che ti chiediamo. L’account viene cancellato subito.',
+    ] },
+    { id: 'sin-acceso', title: 'Se non riesci ad accedere', body: [
+      'Scrivi a **team@mycen.id** dall’email del tuo account, con oggetto “Elimina il mio account”. Lo cancelliamo entro i termini di legge (in Argentina, 5 giorni lavorativi) e ti avvisiamo quando è fatto.',
+    ] },
+    { id: 'que-se-borra', title: 'Cosa viene cancellato', body: [
+      { list: [
+        'Il tuo account e l’email di accesso.',
+        'La tua identità: profili, Spaces, moduli, progetti, immagini, versioni pubblicate, statistiche, messaggi e iscritti.',
+        'Tutto Life OS: attività, abitudini, obiettivi, La mia giornata, revisioni, Soldi e diario.',
+      ] },
+    ] },
+    { id: 'que-queda', title: 'Cosa può restare', body: [
+      { list: [
+        'Le copie di sicurezza dei fornitori, che vengono sovrascritte nei loro cicli abituali.',
+        'I registri degli errori, che non sono collegati al tuo account.',
+        'Ciò che la legge obbliga a conservare (per esempio, i dati di fatturazione), per il periodo che stabilisce.',
+        'Se il tuo account ha un’attività in Mycen Business, scrivici: la chiudiamo insieme a te per proteggere i dati di clienti e vendite.',
+      ] },
+    ] },
+  ],
   terms: [
     { id: 'quien', title: 'Chi fornisce il servizio', body: [
       'Mycen è un servizio gestito da **Resilio**, con sede nella Repubblica Argentina. Puoi scriverci a **team@mycen.id**.',

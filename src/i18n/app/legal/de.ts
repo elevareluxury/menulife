@@ -13,8 +13,65 @@ const de: LegalDict = {
     seeOther: { terms: 'Datenschutzerklärung', privacy: 'Nutzungsbedingungen' },
     language: 'Sprache',
     back: 'Zurück zu Mycen',
+    supportTitle: 'Hilfe und Support',
+    supportIntro: 'So erreichst du uns, und Antworten auf die häufigsten Fragen.',
+    deletionTitle: 'Dein Mycen-Konto löschen',
+    deletionIntro: 'So löschst du dein Mycen-Konto und deine Daten (App und Web), was gelöscht wird und was bleiben kann.',
   },
   updated: es.updated,
+  support: [
+    { id: 'contacto', title: 'Schreib uns', body: [
+      'Bei Fragen, Problemen oder Wünschen schreib an **team@mycen.id**. Nenne deinen Mycen-Benutzernamen (oder die E-Mail deines Kontos) und schick, wenn möglich, einen Screenshot. Wir antworten so schnell wie möglich.',
+    ] },
+    { id: 'acceso', title: 'In dein Konto kommen', body: [
+      { list: [
+        '**Passwort vergessen:** Tippe auf dem Anmeldebildschirm auf „Passwort vergessen?“ und folge dem Link aus der E-Mail.',
+        '**Die Bestätigungs-E-Mail ist nicht angekommen:** Sieh im Spam- und Werbeordner nach. Wenn sie nicht da ist, registriere dich noch einmal mit derselben E-Mail, dann schicken wir sie erneut.',
+        '**Ich habe mich mit Google angemeldet:** Nutze immer denselben Button; ein Passwort brauchst du nicht.',
+      ] },
+    ] },
+    { id: 'datos', title: 'Deine Daten', body: [
+      { list: [
+        '**Herunterladen:** Studio → Einstellungen → „Meine Daten herunterladen“ (Profil, Module und Life OS in einer Datei). Unter Life OS → Einstellungen → „Deine Daten“ kannst du Geld auch als CSV laden.',
+        '**Konto löschen:** über Studio → Einstellungen oder Life OS → Einstellungen → Konto. Alle Schritte, und was gelöscht wird, auf **mycen.id/eliminar-cuenta**.',
+      ] },
+    ] },
+    { id: 'seguridad', title: 'Melden oder blockieren', body: [
+      { list: [
+        '**Ein Profil:** Tippe auf einem öffentlichen Profil auf „Melden“. Das Mycen-Team prüft es, und der Inhaber erfährt nicht, wer gemeldet hat.',
+        '**Eine Nachricht:** In Studio → Nachrichten schickt „Melden“ die Nachricht ans Team und blockiert den Absender; „Blockieren“ stoppt nur seine Nachrichten.',
+      ] },
+      'Wenn etwas dringend ist oder jemanden gefährdet, schreib an **team@mycen.id** mit dem Betreff „Dringend“.',
+    ] },
+  ],
+  deletion: [
+    { id: 'app', title: 'In der App oder im Web', body: [
+      'Melde dich an und wähle eine dieser Optionen:',
+      { list: [
+        '**Life OS → Einstellungen → Konto → „Mein Konto löschen“**',
+        '**Studio → Einstellungen → „Mein Konto löschen“**',
+      ] },
+      'Zur Bestätigung tippst du das Wort ein, um das wir bitten. Das Konto wird sofort gelöscht.',
+    ] },
+    { id: 'sin-acceso', title: 'Wenn du dich nicht anmelden kannst', body: [
+      'Schreib von der E-Mail deines Kontos an **team@mycen.id** mit dem Betreff „Mein Konto löschen“. Wir löschen es innerhalb der gesetzlichen Fristen (in Argentinien 5 Werktage) und sagen dir Bescheid, wenn es erledigt ist.',
+    ] },
+    { id: 'que-se-borra', title: 'Was gelöscht wird', body: [
+      { list: [
+        'Dein Konto und deine Anmelde-E-Mail.',
+        'Deine Identität: Profile, Spaces, Module, Projekte, Bilder, veröffentlichte Versionen, Statistiken, Nachrichten und Abonnenten.',
+        'Ganz Life OS: Aufgaben, Gewohnheiten, Ziele, Mein Tag, Rückblicke, Geld und Tagebuch.',
+      ] },
+    ] },
+    { id: 'que-queda', title: 'Was bleiben kann', body: [
+      { list: [
+        'Die Sicherungskopien unserer Anbieter, die in ihren üblichen Zyklen überschrieben werden.',
+        'Fehlerprotokolle, die nicht mit deinem Konto verknüpft sind.',
+        'Was das Gesetz aufzubewahren verlangt (zum Beispiel Rechnungsdaten), für die vorgeschriebene Dauer.',
+        'Wenn dein Konto ein Geschäft in Mycen Business hat, schreib uns: Wir schließen es gemeinsam mit dir, um die Daten deiner Kunden und Verkäufe zu schützen.',
+      ] },
+    ] },
+  ],
   terms: [
     { id: 'quien', title: 'Wer den Dienst anbietet', body: [
       'Mycen ist ein Dienst von **Resilio** mit Sitz in der Argentinischen Republik. Du erreichst uns unter **team@mycen.id**.',

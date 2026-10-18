@@ -6,9 +6,10 @@ import { langLocale } from '@/i18n/app/languages'
 import { useLangDir } from '@/i18n/app/useLangDir'
 import { LanguageSelect } from '@/components/ui/LanguageSelect'
 
-// Términos y privacidad (Lanzamiento L4) en los 12 idiomas; el español es la versión de referencia.
+// Términos y privacidad (Lanzamiento L4), ayuda (/soporte) y cómo eliminar la cuenta (/eliminar-cuenta, el link que
+// piden las tiendas) en los 12 idiomas; el español es la versión de referencia.
 
-type Doc = 'terms' | 'privacy'
+type Doc = 'terms' | 'privacy' | 'support' | 'deletion'
 
 const h1: React.CSSProperties = { fontSize: 30, letterSpacing: '-0.02em', margin: '28px 0 8px' }
 const h2: React.CSSProperties = { fontSize: 18, margin: '32px 0 6px', scrollMarginTop: 16 }
@@ -29,8 +30,8 @@ export function LegalPage({ doc }: { doc: Doc }) {
   const t = useLegalT()
   const lang = useAppLang(s => s.lang)
   useLangDir()
-  const sections = doc === 'terms' ? t.terms : t.privacy
-  const title = doc === 'terms' ? t.ui.termsTitle : t.ui.privacyTitle
+  const sections = { terms: t.terms, privacy: t.privacy, support: t.support, deletion: t.deletion }[doc]
+  const title = { terms: t.ui.termsTitle, privacy: t.ui.privacyTitle, support: t.ui.supportTitle, deletion: t.ui.deletionTitle }[doc]
   const updated = new Date(`${t.updated}T12:00:00`).toLocaleDateString(langLocale(lang), { dateStyle: 'long' })
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export function LegalPage({ doc }: { doc: Doc }) {
         </div>
 
         <h1 style={h1}>{title}</h1>
-        <p style={muted}>{doc === 'terms' ? t.ui.termsIntro : t.ui.privacyIntro}</p>
+        <p style={muted}>{{ terms: t.ui.termsIntro, privacy: t.ui.privacyIntro, support: t.ui.supportIntro, deletion: t.ui.deletionIntro }[doc]}</p>
         <p style={{ ...muted, fontSize: 13.5 }}>{t.ui.updated}: <time dateTime={t.updated}>{updated}</time></p>
         {lang !== 'es' && <p style={{ ...muted, fontSize: 13.5, borderInlineStart: '3px solid #F4705A', paddingInlineStart: 10 }}>{t.ui.reference}</p>}
 
@@ -73,7 +74,7 @@ export function LegalPage({ doc }: { doc: Doc }) {
         ))}
 
         <p style={{ ...muted, fontSize: 13.5, marginTop: 40 }}>
-          <Link to={doc === 'terms' ? '/privacidad' : '/terminos'} style={{ color: '#F1F0E9' }}>{t.ui.seeOther[doc]}</Link>
+          <Link to={doc === 'privacy' ? '/terminos' : '/privacidad'} style={{ color: '#F1F0E9' }}>{t.ui.seeOther[doc === 'privacy' ? 'privacy' : 'terms']}</Link>
           {' · '}
           <a href="mailto:team@mycen.id" style={{ color: '#F1F0E9' }}>team@mycen.id</a>
         </p>
