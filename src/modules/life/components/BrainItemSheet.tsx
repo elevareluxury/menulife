@@ -85,7 +85,8 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
         <label htmlFor="brain-title" style={label}>{titleLabel}</label>
         <input id="brain-title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
           placeholder={titlePlaceholder} maxLength={100} aria-invalid={!!error && !form.title.trim()}
-          ref={focusOnMount}
+          // Al abrir una existente no se abre el teclado: taparía el texto que se quiere leer
+          ref={initial ? undefined : focusOnMount}
           style={{
             width: '100%', padding: '12px 14px', boxSizing: 'border-box', borderRadius: radius.md,
             background: colors.surface.high,
@@ -99,7 +100,9 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
           <label htmlFor="brain-content" style={label}>{form.type === 'note' ? s.content : s.detail}</label>
           <textarea id="brain-content" value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
             placeholder={form.type === 'note' ? s.contentPlaceholder : s.detailPlaceholder}
-            rows={form.type === 'note' ? 6 : 3} maxLength={2000}
+            // Crece con el texto (hasta 14 líneas) para leer la nota entera sin achicar el cuadro
+            rows={Math.min(14, Math.max(form.type === 'note' ? 6 : 3, (form.content ?? '').split('\n').length + Math.floor((form.content ?? '').length / 40)))}
+            maxLength={2000}
             style={{
               width: '100%', padding: '12px 14px', boxSizing: 'border-box', borderRadius: radius.md,
               background: colors.surface.high, border: `1px solid ${colors.border.medium}`,

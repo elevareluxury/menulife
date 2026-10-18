@@ -65,7 +65,11 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
   const meta = TYPE_META[item.type]
   const Icon = meta.icon
   const isTask = item.type === 'task'
-  const long = (item.content?.length ?? 0) > 90 || (item.content ?? '').includes('\n')
+  // Ideas y notas: tocarlas abre la hoja con el texto entero (en la tarjeta queda en una línea)
+  const opens = !isTask && !archived
+  const Box = opens ? 'button' : 'div'
+  const Line = opens ? 'span' : 'p'
+  const long = !opens && ((item.content?.length ?? 0) > 90 || (item.content ?? '').includes('\n'))
 
   return (
     <LifeCard style={{ padding: '10px 12px', position: 'relative' }}>
@@ -94,24 +98,29 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
           </span>
         )}
 
-        <div style={{ flex: 1, minWidth: 0, paddingTop: 9 }}>
-          <p style={{
+        <Box {...(opens ? { type: 'button' as const, onClick: onEdit, 'data-testid': 'brain-open' } : {})} style={{
+          flex: 1, minWidth: 0, paddingTop: 9,
+          ...(opens && { padding: '9px 0 4px', background: 'none', border: 'none', textAlign: 'start', color: 'inherit', cursor: 'pointer', font: 'inherit' }),
+        }}>
+          <Line style={{
+            display: 'block',
             fontFamily: font, fontSize: '14px', fontWeight: 600,
             color: item.is_completed ? colors.text.tertiary : colors.text.primary,
             margin: '0 0 2px', textDecoration: item.is_completed ? 'line-through' : 'none',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: expanded ? 'normal' : 'nowrap', overflowWrap: 'anywhere',
           }}>
             {item.title}
-          </p>
+          </Line>
           {item.content && (
-            <p style={{
+            <Line style={{
+              display: 'block',
               fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: 0, lineHeight: 1.5,
               ...(expanded
                 ? { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }
                 : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
             }}>
               {item.content}
-            </p>
+            </Line>
           )}
           {isTask && (item.due_date || item.is_focus) && (
             <p style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary, margin: '2px 0 0' }}>
@@ -135,7 +144,7 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
               {expanded ? t.brain.readLess : t.brain.readMore}
             </button>
           )}
-        </div>
+        </Box>
 
         <ActionMenu label={t.brain.options} actions={archived ? [
           { icon: ArchiveRestore, label: t.brain.unarchive, onSelect: onArchive },
