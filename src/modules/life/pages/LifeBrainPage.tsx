@@ -1,5 +1,5 @@
 import { focusOnMount } from '@/lib/viewportVars'
-import { useSwipeNav } from '../hooks/useSwipeNav'
+import { useSwipeNav } from '@/lib/useSwipeNav'
 import { useState, useMemo, useRef, useEffect, type KeyboardEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'

@@ -1,13 +1,14 @@
 import type { TouchEvent } from 'react'
 
-// Deslizar el dedo de costado para pasar a la vista de al lado (Brain: Capturas · Tareas · Archivo).
+// Deslizar el dedo de costado para pasar a la vista de al lado (Brain: Capturas · Tareas · Archivo; Studio: secciones).
 // Sólo cuenta un gesto claramente horizontal (≥ 60 px, el doble de lo que bajó o subió, en menos de 0,8 s), así el
 // scroll para arriba y abajo nunca cambia de vista. No arranca sobre campos, controles deslizables ni zonas que se
-// mueven de costado por su cuenta (`data-no-swipe`). En árabe (RTL) las direcciones se invierten.
+// mueven de costado por su cuenta (`data-no-swipe`), ni dentro de una hoja o panel abierto (lo de atrás no cambia).
+// En árabe (RTL) las direcciones se invierten.
 
 const MIN_DX = 60
 const MAX_MS = 800
-const SKIP = 'input, textarea, select, [contenteditable="true"], [data-no-swipe], [role="slider"]'
+const SKIP = 'input, textarea, select, [contenteditable="true"], [data-no-swipe], [role="slider"], [role="dialog"], [role="alertdialog"]'
 
 export function useSwipeNav(onNext: () => void, onPrev: () => void) {
   // El final del gesto se escucha en la ventana: si la lista se vuelve a dibujar mientras el dedo se mueve, el
