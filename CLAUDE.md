@@ -175,6 +175,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Acceso (L3b): login, registro, recuperar y cambiar contraseña con `useAuthT` (`src/i18n/app/auth/`), selector
   `components/ui/LanguageSelect.tsx` y `useLangDir` (RTL). Los errores de Supabase pasan por `authErrorMessage(err, t.errors, …)`
   y entre pantallas viajan códigos (`?message=password_updated`, `?error=expired|invalid`), nunca texto.
+  CAPTCHA (Turnstile): `useCaptcha`/`CaptchaField` en registro, acceso y recuperar contraseña; apagado sin
+  `VITE_TURNSTILE_SITE_KEY`, no se muestra en la app (Capacitor). Orden para prenderlo: `docs/lanzamiento/captcha.md`.
   El registro guarda `user_metadata.locale` (y `savePrefs` lo actualiza al cambiar de idioma): lo usan los mails.
 - Mails (L3c): plantillas de Supabase Auth en `supabase/templates/` (12 idiomas por `.Data.locale`, español por defecto),
   generadas con `node scripts/build-email-templates.mjs` (no editar los `.html` a mano; un test lo verifica). SMTP: Resend

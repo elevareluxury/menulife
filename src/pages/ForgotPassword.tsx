@@ -7,6 +7,10 @@ import { LanguageSelect } from '@/components/ui/LanguageSelect'
 import { useAuthT } from '@/i18n/app/auth'
 import { useLangDir } from '@/i18n/app/useLangDir'
 import { AuthBrand } from '@/components/ui/AuthBrand'
+import { authErrorMessage, isCaptchaError } from '@/lib/authErrors'
+import { withCaptcha } from '@/lib/turnstile'
+import { CaptchaField } from '@/modules/auth/components/Captcha'
+import { useCaptcha } from '@/modules/auth/lib/useCaptcha'
 
 const S = {
   page: {
@@ -117,6 +121,8 @@ export function ForgotPassword() {
   const [loading, setLoading]     = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [error, setError]         = useState('')
+  const [resendError, setResendError] = useState('')
+  const captcha = useCaptcha()
   // ?error=expired | invalid (códigos que manda AuthCallback; cualquier otro valor se trata como inválido)
   const urlErrorCode = new URLSearchParams(location.search).get('error')
   const urlError = !urlErrorCode ? '' : urlErrorCode === 'expired' ? f.expired : f.invalid
@@ -130,30 +136,40 @@ export function ForgotPassword() {
       return
     }
     setError('')
+    if (!captcha.check()) return
     setLoading(true)
     try {
-      const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error: authError } = await supabase.auth.resetPasswordForEmail(email, withCaptcha({
         redirectTo: authCallbackUrl(),
-      })
-      // Siempre mostramos éxito aunque el email no exista (no revela qué emails tienen cuenta)
-      void authError
-      setEmailSent(true)
+      }, captcha.token))
+      // Siempre mostramos éxito aunque el email no exista (no revela qué emails tienen cuenta); sólo el CAPTCHA
+      // rechazado se dice, porque ahí el mail no salió y no revela nada de la cuenta
+      if (isCaptchaError(authError)) {
+        setError(authErrorMessage(authError, t.errors, f.invalid))
+      } else {
+        setEmailSent(true)
+      }
     } catch {
       // Mostrar éxito de todas formas
       setEmailSent(true)
     } finally {
       setLoading(false)
+      captcha.reset()
     }
   }
 
   const handleResend = async () => {
+    setResendError('')
+    if (!captcha.check()) return
     setLoading(true)
     try {
-      await supabase.auth.resetPasswordForEmail(email, {
+      const { error: authError } = await supabase.auth.resetPasswordForEmail(email, withCaptcha({
         redirectTo: authCallbackUrl(),
-      })
+      }, captcha.token))
+      if (isCaptchaError(authError)) setResendError(authErrorMessage(authError, t.errors, f.invalid))
     } finally {
       setLoading(false)
+      captcha.reset()
     }
   }
 
@@ -176,6 +192,11 @@ export function ForgotPassword() {
           <p style={{ ...S.subtitle, textAlign: 'center', marginBottom: '0.75rem' }}>
             {f.notArrived}
           </p>
+
+          {resendError && <p role="alert" style={{ ...S.errorMsg, marginBottom: '0.75rem' }}>{resendError}</p>}
+          <div style={{ marginBottom: captcha.enabled ? '0.75rem' : 0 }}>
+            <CaptchaField captcha={captcha} t={t.captcha} />
+          </div>
 
           <button
             onClick={handleResend}
@@ -250,6 +271,12 @@ export function ForgotPassword() {
             />
             {error && <p role="alert" style={S.errorMsg}>{error}</p>}
           </div>
+
+          {captcha.enabled && (
+            <div style={{ marginTop: '1rem' }}>
+              <CaptchaField captcha={captcha} t={t.captcha} />
+            </div>
+          )}
 
           <button
             type="submit"

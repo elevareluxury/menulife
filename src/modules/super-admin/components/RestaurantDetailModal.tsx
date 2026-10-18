@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { X, ExternalLink, Eye, Mail, MessageCircle, RefreshCw, Plus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { isCaptchaError } from '@/lib/authErrors'
 import toast from 'react-hot-toast'
 import {
   PLAN_COLORS, PLAN_LABELS, PLAN_FEATURES, PLAN_PRICES,
@@ -368,7 +369,10 @@ export function RestaurantDetailModal({ restaurant, onClose, onUpdate }: Props) 
     try {
       const email = (full?.email ?? '')
       if (!email) { toast.error('Sin email registrado'); return }
-      await supabase.auth.resetPasswordForEmail(email)
+      // Con el CAPTCHA de Supabase prendido esto se rechaza (no hay widget acá): se avisa en vez de decir "enviado"
+      const { error } = await supabase.auth.resetPasswordForEmail(email)
+      if (error) throw new Error(isCaptchaError(error)
+        ? 'Con el CAPTCHA activo, la persona tiene que pedirlo desde "¿Olvidaste tu contraseña?"' : error.message)
       await logAdminAction('reset_password', 'restaurant', r.id)
       toast.success(`📧 Email de reset enviado a ${email}`)
     } catch (err) {

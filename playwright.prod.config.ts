@@ -8,6 +8,8 @@ const PORT = Number(process.env.E2E_PORT) || 5190
 
 export default defineConfig({
   ...base,
+  // Sin los proyectos de la base (el de CAPTCHA usa otro servidor)
+  projects: undefined,
   testMatch: /prod-smoke\.spec\.ts$/,
   use: { ...base.use, baseURL: `http://localhost:${PORT}` },
   webServer: {

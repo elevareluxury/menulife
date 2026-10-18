@@ -100,6 +100,18 @@ const it: AuthDict = {
     rateLimit: "Troppi tentativi. Aspetta qualche minuto e riprova.",
     expired: "La sessione è scaduta. Accedi di nuovo.",
     offline: "Nessuna connessione. Controlla internet e riprova.",
+    captcha: "La verifica anti-bot non è riuscita o è scaduta. Ripetila e riprova.",
+    /** En la app sin widget (VITE_TURNSTILE_IN_APP): Google y Apple no piden CAPTCHA */
+    captchaApp: "Per ora nell’app non si può accedere con l’email. Usa Google o Apple, oppure accedi da mycen.id nel browser.",
+  },
+  /** CAPTCHA (Cloudflare Turnstile) en registro, acceso y recuperar contraseña */
+  captcha: {
+    label: "Verifica anti-bot",
+    pending: "Aspetta che la verifica anti-bot finisca e riprova.",
+    expired: "La verifica è scaduta. Si sta rinnovando da sola: attendi un momento.",
+    failed: "Non siamo riusciti a verificare che sei una persona. Riprova.",
+    unavailable: "Non siamo riusciti a caricare la verifica anti-bot. Controlla la connessione o disattiva il blocco contenuti e riprova.",
+    retry: "Riprova la verifica",
   },
 }
 

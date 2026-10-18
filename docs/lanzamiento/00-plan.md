@@ -68,7 +68,8 @@ Tomadas por el dueño (4/10/2026):
 - **Mails**: Resend, remitente y contacto `team@mycen.id`.
 - **Precios de Mycen Business**: en dólares (US$70 / US$150).
 - **Errores**: registro propio en Supabase visible para el super-admin, **sin proveedores externos** (L5).
-- **Captcha**: por ahora no.
+- **Captcha**: por ahora no. Actualización 18/10/2026 (auditoría de seguridad): Turnstile listo en el código, apagado hasta
+  cargar la clave; orden para prenderlo y limitación de la app en `docs/lanzamiento/captcha.md`.
 - **Legales**: responsable "Resilio", Argentina; todavía sin sociedad inscripta ni abogado → los textos de L4 salen
   como borrador marcado para revisión y se actualizan cuando haya razón social.
 
