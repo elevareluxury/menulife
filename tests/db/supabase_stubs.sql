@@ -85,3 +85,20 @@ create table public.life_transactions (
 alter table public.life_transactions enable row level security;
 create policy ltx_owner on public.life_transactions for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 grant all on public.life_transactions to authenticated;
+
+-- Landing: testimonios como en producción antes de 20261107000001 (una política consultaba la tabla vieja
+-- `superadmins`, cuya política se consulta a sí misma: "infinite recursion detected in policy")
+create table public.superadmins (user_id uuid primary key);
+alter table public.superadmins enable row level security;
+create policy superadmins_self on public.superadmins for select
+  using (exists (select 1 from public.superadmins s where s.user_id = auth.uid()));
+grant select on public.superadmins to anon, authenticated;
+create table public.testimonials (
+  id uuid primary key default gen_random_uuid(), name text not null, role text, business text, content text not null,
+  content_en text, avatar_url text, sort_order int not null default 0, is_active boolean not null default true,
+  created_at timestamptz not null default now());
+alter table public.testimonials enable row level security;
+create policy "Anyone can read testimonials" on public.testimonials for select using (true);
+create policy "Admins manage testimonials" on public.testimonials for all
+  using (exists (select 1 from public.superadmins where user_id = auth.uid()));
+grant select on public.testimonials to anon, authenticated;
