@@ -36,7 +36,9 @@ declare
     'delivery_zones',
     'takeaway_enabled', 'takeaway_time_estimate',
     'reservations_enabled', 'reservations_collect_guests', 'reservations_advance_days', 'reservations_min_hours',
-    'reservations_max_party', 'reservations_time_slots', 'reservations_message'];
+    'reservations_max_party', 'reservations_time_slots', 'reservations_message',
+    -- Hub viejo: las políticas públicas de hub_config, hub_analytics y hub_contact_submissions lo consultan
+    'hub_enabled'];
   r record;
   v_bad text;
   v_col text;
