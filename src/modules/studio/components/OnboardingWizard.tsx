@@ -12,7 +12,7 @@ import type { Referral } from '@/lib/referral'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { socialUrl } from '../lib/moduleCatalog'
 import { toPublicProfile, publicBaseUrl } from '../lib/preview'
-import { normalizeUsername, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
+import { normalizeUsername, usernameFromName, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
 import type { StudioModule, StudioProfile } from '../lib/studioTypes'
 import { isTemplatePending, PURPOSE_TEMPLATE, TEMPLATES } from '../lib/templates'
 import { addTemplateModules } from '../lib/applyTemplate'
@@ -99,7 +99,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
   }, [initialProfile, userId, referral])
   useEffect(() => { trackEvent('onboarding_step', { step }) }, [step])
 
-  const effectiveUsername = profile ? profile.username ?? '' : touchedUsername ? username : normalizeUsername(name)
+  const effectiveUsername = profile ? profile.username ?? '' : touchedUsername ? username : usernameFromName(name)
   const status = useUsernameCheck(profile ? '' : effectiveUsername)
   const host = publicBaseUrl().replace(/^https?:\/\//, '')
   const publicUrl = `${publicBaseUrl()}/${effectiveUsername}`

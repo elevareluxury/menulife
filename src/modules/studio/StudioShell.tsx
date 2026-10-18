@@ -27,6 +27,8 @@ import './studio.css'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { useVerification } from './lib/useVerification'
 import { useH1Title } from '@/lib/useH1Title'
+import { useSiteFlags } from '@/lib/siteFlags'
+import { looksLikeEmail } from './lib/useUsernameCheck'
 import { useSwipeNav } from '@/lib/useSwipeNav'
 
 type NavKey = keyof StudioDict['nav']
@@ -129,7 +131,9 @@ export function StudioShell() {
   // Onboarding guiado: sin perfil, o con un onboarding a medio terminar (pasos 3–4)
   const resuming = load.kind === 'ready' && (load.profile.onboarding_step === 3 || load.profile.onboarding_step === 4)
   if (load.kind === 'empty' || resuming) {
-    const suggestedName = (user.user_metadata as { name?: string } | undefined)?.name
+    // Si en el registro escribió su mail como nombre, no se propone (terminaría público en el perfil)
+    const metaName = (user.user_metadata as { name?: string } | undefined)?.name
+    const suggestedName = metaName && !looksLikeEmail(metaName) ? metaName : undefined
     return (
       <div className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}>
         <OnboardingWizard
@@ -208,6 +212,7 @@ function StudioReady({ userId, initial, switchSpace }: {
     bottomNav.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
   }, [location.pathname])
   const signOut = useAuthStore(s => s.signOut)
+  const siteFlags = useSiteFlags()
   const t = useStudioT()
   // Mensajes sin leer del formulario de contacto (V1 · etapa 05): en la navegación y en el Inicio
   const { count: unread } = useUnreadMessages()
@@ -427,7 +432,8 @@ function StudioReady({ userId, initial, switchSpace }: {
               </NavLink>
             ))}
             <div className="st-sidebar-footer">
-              {initial.business && (
+              {/* Business oculto hasta prenderlo en el panel del equipo (interruptor "business") */}
+              {initial.business && siteFlags.business && (
                 <a className="st-nav-item" href="/dashboard"><LayoutGrid size={18} aria-hidden="true" /> {t.nav.business}</a>
               )}
               <a className="st-nav-item" href="/life"><UserRound size={18} aria-hidden="true" /> {t.nav.life}</a>

@@ -12,6 +12,16 @@ export function normalizeUsername(raw: string): string {
     .replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-').replace(/^-+/, '').slice(0, 30)
 }
 
+/** Un mail escrito donde va el nombre (pasa en el registro): nunca debe terminar público en el perfil ni en su dirección. */
+export function looksLikeEmail(s: string): boolean {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s.trim())
+}
+
+/** Usuario sugerido a partir del nombre; si el nombre es un mail, sólo lo de antes de la @. */
+export function usernameFromName(name: string): string {
+  return normalizeUsername(looksLikeEmail(name) ? name.trim().split('@')[0] : name)
+}
+
 /** Valida formato al instante y disponibilidad contra la base (con espera de 400 ms). */
 export function useUsernameCheck(value: string, current?: string): UsernameStatus {
   const [result, setResult] = useState<{ value: string; status: UsernameStatus } | null>(null)

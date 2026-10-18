@@ -6,6 +6,7 @@ import { useUnreadMessages } from '../lib/useUnreadMessages'
 import { FullscreenPreviewButton, PreviewSwitcher } from '../components/PreviewPane'
 import { PageHeader } from '../components/ui'
 import { useStudioT } from '@/i18n/app/studio'
+import { useSiteFlags } from '@/lib/siteFlags'
 
 export function PreviewPage() {
   const { publicUrl } = useStudio()
@@ -24,6 +25,8 @@ export function PreviewPage() {
 
 export function MorePage() {
   const { business } = useStudio()
+  // Business oculto hasta prenderlo en el panel del equipo (interruptor "business")
+  const siteFlags = useSiteFlags()
   const { count: unread } = useUnreadMessages()
   const signOut = useAuthStore(s => s.signOut)
   const t = useStudioT()
@@ -53,7 +56,7 @@ export function MorePage() {
         ))}
       </nav>
       <nav className="st-card" style={{ padding: 6 }} aria-label={t.more.others}>
-        {business && <a className="st-nav-item" href="/dashboard"><LayoutGrid size={18} aria-hidden="true" /> {t.nav.business}</a>}
+        {business && siteFlags.business && <a className="st-nav-item" href="/dashboard"><LayoutGrid size={18} aria-hidden="true" /> {t.nav.business}</a>}
         <a className="st-nav-item" href="/life"><UserRound size={18} aria-hidden="true" /> {t.nav.life}</a>
         <button type="button" className="st-nav-item" style={{ border: 0, background: 'none', width: '100%', cursor: 'pointer', fontFamily: 'inherit' }}
           onClick={() => { void signOut() }}>
