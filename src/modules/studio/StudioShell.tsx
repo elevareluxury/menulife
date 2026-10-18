@@ -26,6 +26,7 @@ import { referralFromMetadata } from '@/lib/referral'
 import './studio.css'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { useVerification } from './lib/useVerification'
+import { useH1Title } from '@/lib/useH1Title'
 import { useSwipeNav } from '@/lib/useSwipeNav'
 
 type NavKey = keyof StudioDict['nav']
@@ -77,6 +78,8 @@ export function StudioShell() {
   const userId = user?.id
   const t = useStudioT()
   const dir = langDir(useAppLang(s => s.lang))
+  // Título de la pestaña con el de la pantalla ("Analítica · Mycen Studio")
+  useH1Title('Mycen Studio')
 
   useEffect(() => {
     if (!userId) return

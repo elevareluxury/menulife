@@ -100,6 +100,18 @@ const de: AuthDict = {
     rateLimit: "Zu viele Versuche. Warte ein paar Minuten und versuch es dann noch einmal.",
     expired: "Deine Sitzung ist abgelaufen. Melde dich erneut an.",
     offline: "Keine Verbindung. Prüf dein Internet und versuch es noch einmal.",
+    captcha: "Die Anti-Bot-Prüfung ist fehlgeschlagen oder abgelaufen. Bitte erneut durchführen und noch einmal versuchen.",
+    /** En la app sin widget (VITE_TURNSTILE_IN_APP): Google y Apple no piden CAPTCHA */
+    captchaApp: "In der App ist die Anmeldung per E-Mail vorerst nicht möglich. Nutze Google oder Apple oder melde dich im Browser auf mycen.id an.",
+  },
+  /** CAPTCHA (Cloudflare Turnstile) en registro, acceso y recuperar contraseña */
+  captcha: {
+    label: "Anti-Bot-Prüfung",
+    pending: "Warte, bis die Anti-Bot-Prüfung fertig ist, und versuche es dann erneut.",
+    expired: "Die Prüfung ist abgelaufen. Sie erneuert sich automatisch: einen Moment bitte.",
+    failed: "Wir konnten nicht bestätigen, dass du ein Mensch bist. Versuche es erneut.",
+    unavailable: "Die Anti-Bot-Prüfung konnte nicht geladen werden. Prüfe deine Verbindung oder deaktiviere den Inhaltsblocker und versuche es erneut.",
+    retry: "Prüfung wiederholen",
   },
 }
 

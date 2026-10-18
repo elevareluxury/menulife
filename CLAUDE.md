@@ -56,6 +56,11 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `admin_set_error_status`, `admin_error_summary`). Un error resuelto que vuelve a pasar se reabre solo.
 - Las tablas `hub_*` y `restaurants.hub_*` son legado: se importan con `mycen_import_hub()`. La página pública vieja y su editor ya no
   existen; quedan las tablas, la importación y `src/modules/hub/lib/` (plantillas que usa el onboarding de Business, `/onboarding`).
+- `restaurants` (Business) sin sesión: `anon` tiene SELECT sólo de las columnas de `PUBLIC_RESTAURANT_COLUMNS`
+  (`src/modules/public/lib/publicRestaurant.ts` = la lista de `20261108000001_restaurants_public_columns.sql`, un test lo
+  verifica). Las pantallas públicas (menú `/r/:slug`, reservas, catálogo, seguimiento, presupuesto, logins de mozo/delivery/
+  cocina, landing de referidos) piden columnas, nunca `*`; email, teléfono, dirección, dueño, plan y notas no salen.
+  Tests en `restaurants_public_columns.test.sql` y `business-public-menu.spec.ts` (el mock aplica la misma regla).
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
 ## Código
@@ -180,6 +185,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Acceso (L3b): login, registro, recuperar y cambiar contraseña con `useAuthT` (`src/i18n/app/auth/`), selector
   `components/ui/LanguageSelect.tsx` y `useLangDir` (RTL). Los errores de Supabase pasan por `authErrorMessage(err, t.errors, …)`
   y entre pantallas viajan códigos (`?message=password_updated`, `?error=expired|invalid`), nunca texto.
+  CAPTCHA (Turnstile): `useCaptcha`/`CaptchaField` en registro, acceso y recuperar contraseña; apagado sin
+  `VITE_TURNSTILE_SITE_KEY`, no se muestra en la app (Capacitor). Orden para prenderlo: `docs/lanzamiento/captcha.md`.
   El registro guarda `user_metadata.locale` (y `savePrefs` lo actualiza al cambiar de idioma): lo usan los mails.
 - Mails (L3c): plantillas de Supabase Auth en `supabase/templates/` (12 idiomas por `.Data.locale`, español por defecto),
   generadas con `node scripts/build-email-templates.mjs` (no editar los `.html` a mano; un test lo verifica). SMTP: Resend

@@ -170,6 +170,7 @@ const it: LegalDict = {
         '**Supabase:** database, accesso e file.',
         '**Vercel:** hosting dell’applicazione e consegna delle pagine.',
         '**Resend:** invio delle email del tuo account.',
+        '**Cloudflare (Turnstile):** la verifica anti-bot della registrazione, dell’accesso e del recupero della password. Quando apri quelle schermate, Cloudflare riceve dati tecnici del tuo browser (come l’indirizzo IP) solo per verificare che tu non sia un bot.',
         '**YouTube, Vimeo, TikTok, Spotify e SoundCloud:** solo se un profilo integra un video o un brano e tocchi "Riproduci". Prima non ci colleghiamo a loro; da quel momento valgono le loro politiche. Se un profilo mostra il suo "Ultimo video", il server di Mycen consulta l’elenco pubblico dei video del canale YouTube scelto dal proprietario, senza inviare alcun tuo dato. Quando il titolare di un profilo incolla uno di questi link in Studio, il server di Mycen recupera la copertina pubblica di quel video o di quella canzone e la salva come un’altra foto del profilo: così la pagina la mostra senza collegarti al fornitore.',
         '**Anthropic:** solo se un’attività usa l’importazione del menu da un PDF; viene elaborato quel file.',
         '**Mercado Pago:** solo se un’attività lo configura per incassare; il pagamento avviene su Mercado Pago.',

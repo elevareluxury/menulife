@@ -19,15 +19,25 @@ alter table storage.objects enable row level security;
 grant usage on schema storage to anon, authenticated;
 grant select, insert, update, delete on storage.objects to anon, authenticated;
 create function storage.foldername(name text) returns text[] language sql as $$ select string_to_array(name, '/') $$;
--- Tablas de Mycen Business / Life OS que las migraciones de Identity referencian
+-- Tablas de Mycen Business / Life OS que las migraciones de Identity referencian.
+-- restaurants como en producción: datos públicos del menú y privados del negocio en la misma fila, RLS con lectura
+-- pública de los activos (filas) y el dueño a cargo de la suya. Las columnas las cierra 20261108000001.
 create table public.restaurants (
   id uuid primary key default gen_random_uuid(), owner_id uuid references auth.users(id), slug text, name text,
   logo_url text, hub_enabled boolean default true, plan text, business_type text, hub_category_tags text[] default '{}',
-  updated_at timestamptz default now());
+  updated_at timestamptz default now(),
+  email text, phone text, address text, city text, notes text, subscription_status text default 'trial',
+  trial_ends_at timestamptz, daily_sales_goal numeric, is_active boolean not null default true, cover_image_url text,
+  description text, social_links jsonb, default_language text default 'ES', default_currency text default 'ARS',
+  menu_accent_color text, reservations_enabled boolean default false, created_at timestamptz default now());
 create table public.life_goals (id uuid primary key default gen_random_uuid(), user_id uuid);
 grant usage on schema public to anon, authenticated;
 alter default privileges in schema public grant all on tables to anon, authenticated;
 grant all on all tables in schema public to anon, authenticated;
+alter table public.restaurants enable row level security;
+create policy "Public can view active restaurants" on public.restaurants for select using (is_active = true);
+create policy "Owners manage their restaurant" on public.restaurants for all to authenticated
+  using (owner_id = auth.uid()) with check (owner_id = auth.uid());
 -- Panel super-admin (existe en producción)
 create table public.super_admins (
   id uuid primary key default gen_random_uuid(), user_id uuid not null unique references auth.users(id) on delete cascade,

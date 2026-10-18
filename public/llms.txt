@@ -1,0 +1,19 @@
+# Mycen
+
+> Mycen is your digital identity in one link (mycen.id/your-name) plus a personal space to organize your day (Life OS: tasks, habits, goals, money and journal). Available on the web in 12 languages; iOS and Android apps coming soon.
+
+Mycen has two parts:
+- **Mycen Identity**: a public profile page at `https://mycen.id/{username}` with links, social networks, contact, video and music, projects, a contact form and more. People edit it in Mycen Studio.
+- **Life OS**: a private space (`/life`) for "My day", tasks, habits, goals, money and a private journal. Private: never indexed.
+
+## Public pages
+- [Home](https://mycen.id/): what Mycen is and how to create your identity
+- [Help and support](https://mycen.id/soporte): how to contact us and common questions
+- [Delete your account](https://mycen.id/eliminar-cuenta): how to delete your account and data, what is deleted and what may remain
+- [Terms](https://mycen.id/terminos) and [Privacy](https://mycen.id/privacidad)
+- [Sitemap](https://mycen.id/sitemap.xml): every published public profile
+
+## Notes for assistants
+- Public profiles (`/{username}`, `/{username}/{space}`, `/{username}/projects/{slug}`) are published by their owners and can be cited.
+- `/studio`, `/life` and everything behind login is private.
+- Contact: team@mycen.id

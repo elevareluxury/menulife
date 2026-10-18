@@ -1,5 +1,6 @@
 import type { BrowserContext, Route } from '@playwright/test'
 import { isModuleLive } from '../../../src/modules/profile/lib/moduleSchedule'
+import { PUBLIC_RESTAURANT_COLUMNS } from '../../../src/modules/public/lib/publicRestaurant'
 
 // Supabase simulado para los E2E: PostgREST en memoria (filtros básicos) + las RPC públicas de
 // Identity con la misma lógica que la base (supabase/migrations/20261001000001… a 20261012000001…).
@@ -239,6 +240,7 @@ const UNIQUE: Record<string, string[]> = {
 }
 
 const NON_FILTERS = new Set(['select', 'order', 'limit', 'offset', 'on_conflict', 'columns', 'or'])
+const PUBLIC_COLUMNS = new Set<string>(PUBLIC_RESTAURANT_COLUMNS)
 
 function filterRows(rows: Row[], params: URLSearchParams): Row[] {
   let out = rows.filter(r => [...params.entries()].every(([k, v]) => NON_FILTERS.has(k) || matches(r, k, v)))
@@ -961,6 +963,18 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
       return route.fulfill({ status: 200, headers: { 'content-range': `0-${Math.max(n - 1, 0)}/${n}`, 'access-control-expose-headers': 'content-range', 'access-control-allow-origin': '*' }, body: '' })
     }
     if (method === 'GET') {
+      // Como 20261108000001: sin sesión, restaurants sólo deja leer (y filtrar por) las columnas públicas
+      // (sin sesión = el token del pedido es la clave pública, como decide la base el rol anon)
+      const anon = (headers['authorization'] ?? '').replace(/^Bearer\s+/i, '') === (headers['apikey'] ?? '')
+      if (table === 'restaurants' && anon) {
+        const cols = (params.get('select') ?? '*').split(',').map(c => c.trim())
+        const used = [...cols, ...[...params.keys()].filter(k => !NON_FILTERS.has(k))]
+        if (used.some(c => !PUBLIC_COLUMNS.has(c))) {
+          return json({ code: '42501', message: 'permission denied for table restaurants' }, 401)
+        }
+        const out = filterRows(rows, params).map(r => Object.fromEntries(cols.map(c => [c, r[c] ?? null])))
+        return single ? json(out[0] ?? null) : json(out)
+      }
       const out = filterRows(rows, params)
       return single ? json(out[0] ?? null) : json(out)
     }

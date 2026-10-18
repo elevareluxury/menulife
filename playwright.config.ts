@@ -20,16 +20,38 @@ export default defineConfig({
     ...devices['Pixel 7'],
     launchOptions: existsSync(LOCAL_CHROMIUM) ? { executablePath: LOCAL_CHROMIUM } : {},
   },
-  webServer: {
-    command: `npx vite --port ${PORT} --strictPort`,
-    port: PORT,
-    reuseExistingServer: !process.env.CI,
-    env: {
-      VITE_SUPABASE_URL: 'https://mock.supabase.co',
-      VITE_SUPABASE_ANON_KEY: 'test-anon-key',
-      VITE_PUBLIC_PROFILE_BASE: `http://localhost:${PORT}`,
-      // El registro de errores (L5) sólo manda en producción; en los E2E se prende para probarlo
-      VITE_REPORT_ERRORS: '1',
+  // captcha.spec.ts necesita la app con VITE_TURNSTILE_SITE_KEY (la clave se fija al arrancar Vite): corre en su propio
+  // servidor para que el resto de los E2E sigan sin CAPTCHA, como la app hoy
+  // Las capturas (visual, modules) se llaman sin el nombre del proyecto, como antes de tener proyectos
+  expect: { toHaveScreenshot: { pathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-snapshotSuffix}{ext}' } },
+  projects: [
+    { name: 'app', testIgnore: /captcha\.spec\.ts$/ },
+    { name: 'captcha', testMatch: /captcha\.spec\.ts$/, use: { baseURL: `http://localhost:${PORT + 1}` } },
+  ],
+  webServer: [
+    {
+      command: `npx vite --port ${PORT} --strictPort`,
+      port: PORT,
+      reuseExistingServer: !process.env.CI,
+      env: {
+        VITE_SUPABASE_URL: 'https://mock.supabase.co',
+        VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+        VITE_PUBLIC_PROFILE_BASE: `http://localhost:${PORT}`,
+        // El registro de errores (L5) sólo manda en producción; en los E2E se prende para probarlo
+        VITE_REPORT_ERRORS: '1',
+      },
     },
-  },
+    {
+      command: `npx vite --port ${PORT + 1} --strictPort`,
+      port: PORT + 1,
+      reuseExistingServer: !process.env.CI,
+      env: {
+        VITE_SUPABASE_URL: 'https://mock.supabase.co',
+        VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+        VITE_PUBLIC_PROFILE_BASE: `http://localhost:${PORT + 1}`,
+        // Clave de prueba de Cloudflare (siempre pasa); igual el script se simula en captcha.spec.ts
+        VITE_TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
+      },
+    },
+  ],
 })

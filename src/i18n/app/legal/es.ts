@@ -178,6 +178,7 @@ const es = {
         '**Supabase:** base de datos, inicio de sesión y archivos.',
         '**Vercel:** alojamiento de la aplicación y entrega de las páginas.',
         '**Resend:** envío de los mails de tu cuenta.',
+        '**Cloudflare (Turnstile):** la verificación anti-bots del registro, el inicio de sesión y la recuperación de contraseña. Al abrir esas pantallas, Cloudflare recibe datos técnicos de tu navegador (como la dirección IP) sólo para comprobar que no sos un bot.',
         '**YouTube, Vimeo, TikTok, Spotify y SoundCloud:** sólo si un perfil integra un video o una canción y tocás "Reproducir". Antes de eso no nos conectamos con ellos; desde ese momento se aplican sus propias políticas. Si un perfil muestra su "Último video", el servidor de Mycen consulta el listado público de videos del canal de YouTube que eligió su dueño, sin enviar ningún dato tuyo. Cuando el dueño de un perfil pega uno de esos links en Studio, el servidor de Mycen trae la portada pública de ese video o esa canción y la guarda como una foto más de su perfil: así la página la muestra sin conectarte con el proveedor.',
         '**Anthropic:** sólo si un negocio usa la importación de su menú desde un PDF; se procesa ese archivo.',
         '**Mercado Pago:** sólo si un negocio lo configura para cobrar; el pago se hace en Mercado Pago.',

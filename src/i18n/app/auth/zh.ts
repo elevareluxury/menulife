@@ -100,6 +100,18 @@ const zh: AuthDict = {
     rateLimit: "尝试次数过多。请稍等几分钟再试。",
     expired: "会话已过期，请重新登录。",
     offline: "没有网络。请检查网络后重试。",
+    captcha: "防机器人验证失败或已过期。请重新验证后再试。",
+    /** En la app sin widget (VITE_TURNSTILE_IN_APP): Google y Apple no piden CAPTCHA */
+    captchaApp: "目前无法在 App 中使用邮箱登录。请使用 Google 或 Apple，或在浏览器中访问 mycen.id 登录。",
+  },
+  /** CAPTCHA (Cloudflare Turnstile) en registro, acceso y recuperar contraseña */
+  captcha: {
+    label: "防机器人验证",
+    pending: "请等待防机器人验证完成后再试。",
+    expired: "验证已过期，正在自动更新，请稍候。",
+    failed: "我们无法确认你是真人。请重试。",
+    unavailable: "无法加载防机器人验证。请检查网络或关闭内容拦截器后重试。",
+    retry: "重新验证",
   },
 }
 
