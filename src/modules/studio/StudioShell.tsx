@@ -27,6 +27,7 @@ import './studio.css'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { useVerification } from './lib/useVerification'
 import { useH1Title } from '@/lib/useH1Title'
+import { useSiteFlags } from '@/lib/siteFlags'
 import { useSwipeNav } from '@/lib/useSwipeNav'
 
 type NavKey = keyof StudioDict['nav']
@@ -208,6 +209,7 @@ function StudioReady({ userId, initial, switchSpace }: {
     bottomNav.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
   }, [location.pathname])
   const signOut = useAuthStore(s => s.signOut)
+  const siteFlags = useSiteFlags()
   const t = useStudioT()
   // Mensajes sin leer del formulario de contacto (V1 · etapa 05): en la navegación y en el Inicio
   const { count: unread } = useUnreadMessages()
@@ -427,7 +429,8 @@ function StudioReady({ userId, initial, switchSpace }: {
               </NavLink>
             ))}
             <div className="st-sidebar-footer">
-              {initial.business && (
+              {/* Business oculto hasta prenderlo en el panel del equipo (interruptor "business") */}
+              {initial.business && siteFlags.business && (
                 <a className="st-nav-item" href="/dashboard"><LayoutGrid size={18} aria-hidden="true" /> {t.nav.business}</a>
               )}
               <a className="st-nav-item" href="/life"><UserRound size={18} aria-hidden="true" /> {t.nav.life}</a>

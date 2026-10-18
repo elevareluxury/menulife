@@ -31,6 +31,7 @@ import { InstallAppButton } from '@/components/ui/InstallAppButton'
 import { InsightCard } from '../components/InsightCard'
 import { colors, font, fontDisplay, radius, shadow, fadeInUp, stagger, tint, ink } from '../design-system'
 import { FEATURES } from '@/lib/features'
+import { useSiteFlags } from '@/lib/siteFlags'
 import { useHomePrefs } from '../lib/homePrefs'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -441,6 +442,7 @@ export function LifePage() {
   const showIdentity = useHomePrefs(s => s.showIdentity)
   const { user } = useAuthStore()
   const { hasRestaurant, restaurantSlug, restaurantPlan } = useLifeStore()
+  const siteFlags = useSiteFlags()
   const t = useLifeT()
   const locale = langLocale(useAppLang(s => s.lang))
   const today = useToday()
@@ -489,7 +491,8 @@ export function LifePage() {
                 {firstName}
               </p>
             </div>
-            {(FEATURES.businessInLife || (restaurantPlan?.startsWith('os_') ?? false)) && (
+            {/* Business oculto hasta prenderlo en el panel del equipo (interruptor del sitio "business") */}
+            {siteFlags.business && (FEATURES.businessInLife || (restaurantPlan?.startsWith('os_') ?? false)) && (
               <button
                 type="button"
                 onClick={() => navigate('/dashboard')}
