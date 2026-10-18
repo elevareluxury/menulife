@@ -28,6 +28,7 @@ import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { useVerification } from './lib/useVerification'
 import { useH1Title } from '@/lib/useH1Title'
 import { useSiteFlags } from '@/lib/siteFlags'
+import { looksLikeEmail } from './lib/useUsernameCheck'
 import { useSwipeNav } from '@/lib/useSwipeNav'
 
 type NavKey = keyof StudioDict['nav']
@@ -130,7 +131,9 @@ export function StudioShell() {
   // Onboarding guiado: sin perfil, o con un onboarding a medio terminar (pasos 3–4)
   const resuming = load.kind === 'ready' && (load.profile.onboarding_step === 3 || load.profile.onboarding_step === 4)
   if (load.kind === 'empty' || resuming) {
-    const suggestedName = (user.user_metadata as { name?: string } | undefined)?.name
+    // Si en el registro escribió su mail como nombre, no se propone (terminaría público en el perfil)
+    const metaName = (user.user_metadata as { name?: string } | undefined)?.name
+    const suggestedName = metaName && !looksLikeEmail(metaName) ? metaName : undefined
     return (
       <div className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}>
         <OnboardingWizard

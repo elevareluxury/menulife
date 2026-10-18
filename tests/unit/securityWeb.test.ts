@@ -113,3 +113,19 @@ describe('vercel.json: encabezados de seguridad', () => {
     expect(all['Referrer-Policy']).toBe('strict-origin-when-cross-origin')
   })
 })
+
+describe('vercel.json: rutas', () => {
+  const config = JSON.parse(readFileSync(join(__dirname, '../../vercel.json'), 'utf8')) as {
+    rewrites: { source: string; destination: string }[]
+  }
+
+  // Vercel aplica las reescrituras antes que las funciones con segmento dinámico (api/og/[slug].tsx): si la de la app
+  // tomara /api/…, la imagen al compartir (/api/og/{usuario}) devolvería index.html y las vistas previas quedarían sin foto
+  it('la reescritura a la app no toma /api/', () => {
+    const app = config.rewrites.find(r => r.destination === '/index.html')!
+    const re = new RegExp(`^${app.source}$`)
+    expect(re.test('/api/og/ana')).toBe(false)
+    expect(re.test('/ana')).toBe(true)
+    expect(re.test('/studio/more')).toBe(true)
+  })
+})

@@ -47,7 +47,7 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ],
