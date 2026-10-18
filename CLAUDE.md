@@ -155,7 +155,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - CSP en `vercel.json` (regla `/(.*)`): `script-src 'self'` + un `'sha256-…'` por cada `<script>` en línea de `index.html`
   (esqueleto del hero y pantalla de carga; los textos del hero van en un bloque JSON que no se ejecuta, así el hash no
   cambia). `npm run build` termina con `scripts/check-csp.mjs`, que falla si falta o sobra un hash (y dice cuál poner) o si
-  aparece un `<script src>` de otro origen o un `on…=` en línea. Nunca `'unsafe-inline'` en scripts. Un iframe o una
+  aparece un `<script src>` de otro origen o un `on…=` en línea. Nunca `'unsafe-inline'` en scripts. Único origen externo
+  de scripts: `https://challenges.cloudflare.com` (Turnstile, CAPTCHA del registro; también en `frame-src`). Un iframe o una
   conexión de un tercero nuevo se suma en `frame-src`/`connect-src`. `vite preview` manda la misma CSP y
   `npm run test:e2e:prod` falla con cualquier violación. El service worker no intercepta otros orígenes (salvo Supabase).
 - Límite de pedidos en `/api`: reglas del Vercel Firewall (panel), pasos en `docs/lanzamiento/firewall-api.md`.
