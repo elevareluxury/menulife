@@ -1,0 +1,24 @@
+# Dependabot: avisa (con un PR) cuando una dependencia tiene una falla de seguridad o una versión nueva.
+# Las menores y de parche van agrupadas en un solo PR por semana; las mayores, de a una (se revisan a mano).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Argentina/Buenos_Aires
+    open-pull-requests-limit: 5
+    groups:
+      menores:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
