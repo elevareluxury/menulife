@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CalendarClock } from 'lucide-react'
 import type { ModuleType, Translations } from '@/modules/profile/lib/profileTypes'
 import { useStudio } from '../StudioContext'
@@ -7,7 +7,11 @@ import { moduleDef, type FieldDef } from '../lib/moduleCatalog'
 import type { StudioModule } from '../lib/studioTypes'
 import { isTemplatePending, withoutTemplateMark } from '../lib/templates'
 import { Button, Drawer, ImageField, SelectField, TextField } from './ui'
+import { urlOnBlur } from '../lib/urlInput'
+import { clearDraft, readDraft, writeDraft } from '@/lib/editDraft'
 import { useStudioT, type StudioDict } from '@/i18n/app/studio'
+
+interface ModuleDraft { values: Record<string, string>; en: Record<string, string>; extra?: unknown; showFrom: string; showUntil: string }
 
 const str = (v: unknown) => (v == null ? '' : String(v))
 
@@ -57,13 +61,22 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
   const t = useStudioT()
   const e = t.editor
   const def = moduleDef(type, t)
-  const [values, setValues] = useState(() => initialValues(type, module, t))
-  const [en, setEn] = useState(() => initialEn(module))
-  const [showEn, setShowEn] = useState(() => Object.keys(initialEn(module)).length > 0)
-  const [extra, setExtra] = useState<unknown>(() => def.extra?.init(module))
+  // Borrador sin guardar: si el celular recarga la pestaña al volver, se sigue donde quedó (editDraft.ts)
+  const draftKey = `module:${profile.id}:${module?.id ?? `new-${type}`}`
+  const [draft] = useState(() => readDraft<ModuleDraft>(draftKey))
+  const [values, setValues] = useState(() => draft?.values ?? initialValues(type, module, t))
+  const [en, setEn] = useState(() => draft?.en ?? initialEn(module))
+  const [showEn, setShowEn] = useState(() => Object.keys(draft?.en ?? initialEn(module)).length > 0)
+  const [extra, setExtra] = useState<unknown>(() => (draft && 'extra' in draft ? draft.extra : def.extra?.init(module)))
   // Programación (Fase 7): se guarda en config.show_from / show_until
-  const [showFrom, setShowFrom] = useState(() => toLocalInput(module?.config?.show_from))
-  const [showUntil, setShowUntil] = useState(() => toLocalInput(module?.config?.show_until))
+  const [showFrom, setShowFrom] = useState(() => draft?.showFrom ?? toLocalInput(module?.config?.show_from))
+  const [showUntil, setShowUntil] = useState(() => draft?.showUntil ?? toLocalInput(module?.config?.show_until))
+  const touched = useRef(!!draft)
+  useEffect(() => {
+    if (!touched.current) { touched.current = true; return }
+    writeDraft(draftKey, { values, en, extra, showFrom, showUntil } satisfies ModuleDraft)
+  }, [draftKey, values, en, extra, showFrom, showUntil])
+  const close = () => { clearDraft(draftKey); onClose() }
   const [showSchedule, setShowSchedule] = useState(() => !!(module?.config?.show_from || module?.config?.show_until))
   const [submitted, setSubmitted] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -73,16 +86,19 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
   const set = (k: string, v: string) => { setValues(prev => ({ ...prev, [k]: v })); setError(null); setSaved(false) }
   const translatable = def.fields.filter(f => f.translatable)
 
+  // Un link que quedó sólo con "https://" (guardado con Enter sin salir del campo) cuenta como vacío
+  const fieldValue = (f: FieldDef) => f.kind === 'url' ? urlOnBlur(values[f.key] ?? '') : values[f.key]?.trim() ?? ''
+
   function fieldError(f: FieldDef): string | null {
     if (!submitted) return null
-    if (f.required && !values[f.key]?.trim()) return e.required
+    if (f.required && !fieldValue(f)) return e.required
     if (f.kind === 'number' && values[f.key] && Number.isNaN(Number(values[f.key].replace(',', '.')))) return e.number
     return null
   }
 
   function validate(): string | null {
     for (const f of def.fields) {
-      if (f.required && !values[f.key]?.trim()) return e.complete(f.label)
+      if (f.required && !fieldValue(f)) return e.complete(f.label)
     }
     const extraProblem = def.extra?.validate(extra)
     if (extraProblem) return extraProblem
@@ -96,7 +112,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
     let title: string | null = module?.title ?? null
     const content: Record<string, unknown> = { ...(module?.content ?? {}) }
     for (const f of def.fields) {
-      const v = values[f.key]?.trim() ?? ''
+      const v = fieldValue(f)
       if (f.isTitle) { title = v || null; continue }
       if (f.kind === 'number') {
         if (v) content[f.key] = Number(v.replace(',', '.'))
@@ -138,6 +154,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
         row = await createModule({ profile_id: profile.id, type, position, ...payload })
         setModules(prev => [...prev, row])
       }
+      clearDraft(draftKey)
       onSaved?.(row)
       if (inline) { setSaving(false); setSubmitted(false); setSaved(true) }
       else onClose()
@@ -149,7 +166,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
 
   const heading = module ? e.titleEdit(def.label) : e.titleNew(def.label)
   const actions = <>
-    <Button variant="ghost" onClick={onClose}>{inline ? t.common.close : t.common.cancel}</Button>
+    <Button variant="ghost" onClick={close}>{inline ? t.common.close : t.common.cancel}</Button>
     <Button variant="primary" loading={saving} onClick={save}>{module ? e.saveChanges : t.common.add}</Button>
   </>
   const form = (
@@ -235,5 +252,5 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
       </section>
     )
   }
-  return <Drawer title={heading} onClose={onClose} footer={actions}>{form}</Drawer>
+  return <Drawer title={heading} onClose={close} footer={actions}>{form}</Drawer>
 }

@@ -183,6 +183,8 @@ const ar: StudioDict = {
     universoHelp: 'داكن، الفضاء العميق',
     amanecer: 'الفجر',
     amanecerHelp: 'فاتح، سماء الفجر',
+    tone: 'درجة الخلفية',
+    tones: { noche: 'ليل', abismo: 'هاوية', nebulosa: 'سديم', oceano: 'محيط', alba: 'فجر', bruma: 'ضباب', arena: 'رمل', jardin: 'حديقة' },
     mode: 'السمة',
     accent: 'لون التمييز',
     huella: 'البصمة',

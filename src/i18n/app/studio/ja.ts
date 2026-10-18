@@ -183,6 +183,8 @@ const ja: StudioDict = {
     universoHelp: 'ダーク、深い宇宙',
     amanecer: '夜明け',
     amanecerHelp: 'ライト、夜明けの空',
+    tone: '背景のトーン',
+    tones: { noche: '夜', abismo: '深淵', nebulosa: '星雲', oceano: '海', alba: '夜明け', bruma: '霧', arena: '砂', jardin: '庭' },
     mode: 'テーマ',
     accent: 'アクセント',
     huella: 'シグネチャー',

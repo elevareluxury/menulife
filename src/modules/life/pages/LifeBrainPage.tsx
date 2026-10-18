@@ -1,6 +1,6 @@
 import { focusOnMount } from '@/lib/viewportVars'
-import { useSwipeNav } from '../hooks/useSwipeNav'
-import { useState, useMemo, useRef, type KeyboardEvent } from 'react'
+import { useSwipeNav } from '@/lib/useSwipeNav'
+import { useState, useMemo, useRef, useEffect, type KeyboardEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -14,6 +14,7 @@ import { langDir, langLocale } from '@/i18n/app/languages'
 import { LifeScreenContainer, LifeCard, LifeSectionHeader, LifeEmptyState, colors, font, radius, stagger, fadeInUp, tint, ink } from '../design-system'
 import { useBrain, type BrainItem, type BrainItemType } from '../hooks/useBrain'
 import { BrainItemSheet } from '../components/BrainItemSheet'
+import { clearDraft, readDraft, writeDraft } from '@/lib/editDraft'
 import { ActionMenu } from '../components/ActionMenu'
 import { deleteWithUndo } from '../lib/undo'
 import { useToday } from '../hooks/useToday'
@@ -28,6 +29,7 @@ const TYPE_META = {
   task: { icon: CheckSquare, color: colors.semantic.success },
 } as const
 
+const BRAIN_OPEN_KEY = 'brain-open'
 const FILTERS = ['todo', 'idea', 'note'] as const
 type Filter = typeof FILTERS[number]
 
@@ -65,7 +67,11 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
   const meta = TYPE_META[item.type]
   const Icon = meta.icon
   const isTask = item.type === 'task'
-  const long = (item.content?.length ?? 0) > 90 || (item.content ?? '').includes('\n')
+  // Ideas y notas: tocarlas abre la hoja con el texto entero (en la tarjeta queda en una línea)
+  const opens = !isTask && !archived
+  const Box = opens ? 'button' : 'div'
+  const Line = opens ? 'span' : 'p'
+  const long = !opens && ((item.content?.length ?? 0) > 90 || (item.content ?? '').includes('\n'))
 
   return (
     <LifeCard style={{ padding: '10px 12px', position: 'relative' }}>
@@ -94,24 +100,29 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
           </span>
         )}
 
-        <div style={{ flex: 1, minWidth: 0, paddingTop: 9 }}>
-          <p style={{
+        <Box {...(opens ? { type: 'button' as const, onClick: onEdit, 'data-testid': 'brain-open' } : {})} style={{
+          flex: 1, minWidth: 0, paddingTop: 9,
+          ...(opens && { padding: '9px 0 4px', background: 'none', border: 'none', textAlign: 'start', color: 'inherit', cursor: 'pointer', font: 'inherit' }),
+        }}>
+          <Line style={{
+            display: 'block',
             fontFamily: font, fontSize: '14px', fontWeight: 600,
             color: item.is_completed ? colors.text.tertiary : colors.text.primary,
             margin: '0 0 2px', textDecoration: item.is_completed ? 'line-through' : 'none',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: expanded ? 'normal' : 'nowrap', overflowWrap: 'anywhere',
           }}>
             {item.title}
-          </p>
+          </Line>
           {item.content && (
-            <p style={{
+            <Line style={{
+              display: 'block',
               fontFamily: font, fontSize: '13px', color: colors.text.secondary, margin: 0, lineHeight: 1.5,
               ...(expanded
                 ? { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }
                 : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
             }}>
               {item.content}
-            </p>
+            </Line>
           )}
           {isTask && (item.due_date || item.is_focus) && (
             <p style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: font, fontSize: '11.5px', color: colors.text.tertiary, margin: '2px 0 0' }}>
@@ -135,7 +146,7 @@ function BrainCard({ item, archived, onToggle, onEdit, onArchive, onDelete }: {
               {expanded ? t.brain.readLess : t.brain.readMore}
             </button>
           )}
-        </div>
+        </Box>
 
         <ActionMenu label={t.brain.options} actions={archived ? [
           { icon: ArchiveRestore, label: t.brain.unarchive, onSelect: onArchive },
@@ -229,6 +240,27 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
     ideasCount, notesCount, tasksCount, totalCount,
     createItem, updateItem, deleteItem, setArchived, hideLocally, toggleComplete,
   } = useBrain({ archived, query: searchQ, types })
+
+  // La hoja abierta se recuerda: si el celular recarga la pestaña al volver, se reabre (editDraft.ts)
+  const restored = useRef(false)
+  useEffect(() => {
+    if (archived || loading || restored.current) return
+    restored.current = true
+    const open = readDraft<{ id: string | null }>(BRAIN_OPEN_KEY)
+    if (!open) return
+    const item = open.id ? items.find(i => i.id === open.id) ?? null : null
+    if (open.id && !item) { clearDraft(BRAIN_OPEN_KEY); return }
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setEditItem(item)
+    setSheetOpen(true)
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [archived, loading, items])
+  const openSheet = (item: BrainItem | null) => {
+    setEditItem(item)
+    setSheetOpen(true)
+    writeDraft(BRAIN_OPEN_KEY, { id: item?.id ?? null })
+  }
+  const closeSheet = () => { setSheetOpen(false); clearDraft(BRAIN_OPEN_KEY) }
 
   const today = useToday()
   const grouped = useMemo(() => {
@@ -330,7 +362,7 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
                 {groupItems.map(item => (
                   <BrainCard key={item.id} item={item} archived={archived}
                     onToggle={() => { toggleComplete(item).catch(() => toast.error(t.common.saveError)) }}
-                    onEdit={() => { setEditItem(item); setSheetOpen(true) }}
+                    onEdit={() => openSheet(item)}
                     onArchive={() => toggleArchive(item)}
                     onDelete={() => remove(item)} />
                 ))}
@@ -348,7 +380,7 @@ function BrainItemsView({ archived, searchQ, onShowTasks }: { archived: boolean;
 
       <BrainItemSheet
         open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
+        onClose={closeSheet}
         initial={editItem}
         onSave={async data => {
           if (editItem) await updateItem(editItem.id, data)

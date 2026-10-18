@@ -15,6 +15,9 @@ const THEMES = [
   { mode: 'light', background: 'tint', card_style: 'flat', corners: 'sharp', accent: '#3B82F6' },
   { mode: 'light', background: 'glow', card_style: 'outline', accent: '#22C55E' },
   { mode: 'dark', background: 'tint', card_style: 'filled', accent: '#A78BFA' },
+  // Tonos de fondo (MYCEN_TONES)
+  { mode: 'universo', tone: 'nebulosa', accent: 'rosa' },
+  { mode: 'amanecer', tone: 'arena', accent: 'grafito' },
 ] as const
 
 for (const theme of THEMES) {
@@ -94,4 +97,26 @@ test('Studio: en pantallas angostas la vista previa en vivo está en la misma p�
   const preview = page.getByRole('region', { name: 'Vista previa' }).locator('main.mp-root')
   await page.getByRole('radiogroup', { name: 'Estructura' }).getByRole('radio', { name: /Bento/ }).click()
   await expect(preview).toHaveClass(/mp-layout-bento/)
+})
+
+test('Studio: el tono de fondo se elige por tema, se ve en la vista previa y se guarda', async ({ page, context }) => {
+  const state = createState({ profiles: [profileRow({ theme: { mode: 'universo' } })] })
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.setViewportSize({ width: 1400, height: 900 })
+  await page.goto('/studio/appearance')
+  const preview = page.locator('.st-preview-pane main.mp-root')
+  const tones = page.getByRole('radiogroup', { name: 'Tono de fondo' })
+
+  await expect(tones.getByRole('radio')).toHaveText(['Noche', 'Abismo', 'Nebulosa', 'Océano'])
+  await expect(tones.getByRole('radio', { name: 'Noche' })).toHaveAttribute('aria-checked', 'true')
+  await tones.getByRole('radio', { name: 'Océano' }).click()
+  await expect(preview).toHaveAttribute('data-mycen-tone', 'oceano')
+  await expect.poll(() => state.tables.profiles[0].theme).toMatchObject({ mode: 'universo', tone: 'oceano' })
+
+  // En Amanecer aparecen sus tonos, con el de siempre elegido
+  await page.getByRole('radiogroup', { name: 'Tema' }).getByRole('radio', { name: /Amanecer/ }).click()
+  await expect(tones.getByRole('radio')).toHaveText(['Alba', 'Bruma', 'Arena', 'Jardín'])
+  await expect(preview).toHaveAttribute('data-mycen-tone', 'alba')
+  await tones.getByRole('radio', { name: 'Jardín' }).click()
+  await expect.poll(() => state.tables.profiles[0].theme).toMatchObject({ mode: 'amanecer', tone: 'jardin' })
 })

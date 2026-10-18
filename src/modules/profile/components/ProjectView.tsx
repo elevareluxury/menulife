@@ -41,7 +41,7 @@ export function ProjectView({ project, lang, onLang, look, onToast, toast }: {
   }
 
   return (
-    <main className="mp-root my-profile" data-mycen-theme={look.mode} data-mycen-accent={look.accent} style={lookVars(look)}
+    <main className="mp-root my-profile" data-mycen-theme={look.mode} data-mycen-tone={look.tone} data-mycen-accent={look.accent} style={lookVars(look)}
       lang={lang} dir={langDir(lang)}>
       {project.status !== 'published' && <div className="mp-banner" role="status">{t.projectDraftBanner}</div>}
 

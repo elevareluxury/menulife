@@ -183,6 +183,8 @@ const hi: StudioDict = {
     universoHelp: 'डार्क, गहरा अंतरिक्ष',
     amanecer: 'भोर',
     amanecerHelp: 'लाइट, भोर का आकाश',
+    tone: 'बैकग्राउंड का टोन',
+    tones: { noche: 'रात', abismo: 'गहराई', nebulosa: 'नीहारिका', oceano: 'सागर', alba: 'भोर', bruma: 'धुंध', arena: 'रेत', jardin: 'बगीचा' },
     mode: 'थीम',
     accent: 'एक्सेंट',
     huella: 'सिग्नेचर',

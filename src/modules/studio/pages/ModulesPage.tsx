@@ -11,17 +11,30 @@ import { Button, ConfirmDialog, Menu, PageHeader } from '../components/ui'
 import { DragHandle, SortableList } from '../components/SortableList'
 import { EditTabs } from '../components/shared'
 import { ModuleEditor } from '../components/ModuleEditor'
+import { clearDraft, readDraft, writeDraft } from '@/lib/editDraft'
 import { ModuleLibrary } from '../components/ModuleLibrary'
 import { TemplatePicker } from '../components/TemplatePicker'
 import { isTemplatePending } from '../lib/templates'
 import { EDITABLE_MODULES, MODULE_ICONS, useScheduleBadge } from '../lib/moduleUi'
 
 export function ModulesPage() {
-  const { modules } = useStudio()
+  const { modules, profile } = useStudio()
   const [library, setLibrary] = useState(false)
   const [templates, setTemplates] = useState(false)
   const [templateNote, setTemplateNote] = useState('')
-  const [editing, setEditing] = useState<{ type: ModuleType; module: StudioModule | null } | null>(null)
+  // El editor abierto se recuerda: si el celular recarga la pestaña al volver, se reabre (editDraft.ts)
+  const openKey = `studio-open:${profile.id}`
+  const [editing, setEditingState] = useState<{ type: ModuleType; module: StudioModule | null } | null>(() => {
+    const open = readDraft<{ type: ModuleType; moduleId: string | null }>(openKey)
+    if (!open) return null
+    const module = open.moduleId ? modules.find(m => m.id === open.moduleId) ?? null : null
+    return open.moduleId && !module ? null : { type: open.type, module }
+  })
+  const setEditing = (next: { type: ModuleType; module: StudioModule | null } | null) => {
+    setEditingState(next)
+    if (next) writeDraft(openKey, { type: next.type, moduleId: next.module?.id ?? null })
+    else clearDraft(openKey)
+  }
   const [confirmDelete, setConfirmDelete] = useState<StudioModule | null>(null)
   const [deleting, setDeleting] = useState(false)
   const { toggleVisibility, moveTo, duplicate, remove, busyId, error, announce, title } = useModuleActions()

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MailPlus, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
+import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MailPlus, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, Sparkles, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { StudioContext, type StudioContextValue } from './StudioContext'
 import {
@@ -26,6 +26,7 @@ import { referralFromMetadata } from '@/lib/referral'
 import './studio.css'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { useVerification } from './lib/useVerification'
+import { useSwipeNav } from '@/lib/useSwipeNav'
 
 type NavKey = keyof StudioDict['nav']
 
@@ -48,13 +49,18 @@ const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean; deskto
   { to: '/studio/spaces',     label: 'spaces',     icon: Layers },
 ]
 
+// Barra de abajo del celular: se desliza de costado si no entra; al final, Life OS
 const MOBILE_NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
-  { to: '/studio',          label: 'home',     icon: Home, end: true },
-  { to: '/studio/identity', label: 'edit',     icon: PenLine },
-  { to: '/studio/spaces',   label: 'spaces',   icon: Layers },
-  { to: '/studio/exchange', label: 'exchange', icon: Share2 },
-  { to: '/studio/more',     label: 'more',     icon: MoreHorizontal },
+  { to: '/studio',            label: 'home',       icon: Home, end: true },
+  { to: '/studio/identity',   label: 'edit',       icon: PenLine },
+  { to: '/studio/modules',    label: 'modules',    icon: LayoutGrid },
+  { to: '/studio/appearance', label: 'appearance', icon: Palette },
+  { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
+  { to: '/studio/spaces',     label: 'spaces',     icon: Layers },
+  { to: '/studio/more',       label: 'more',       icon: MoreHorizontal },
 ]
+// Deslizar la página de costado pasa a la sección de al lado, en el orden de la barra (sin "Más")
+const SWIPE_ORDER = MOBILE_NAV.filter(item => item.label !== 'more').map(item => item.to)
 
 type Load =
   | { kind: 'loading' }
@@ -186,6 +192,18 @@ function StudioReady({ userId, initial, switchSpace }: {
   const inFlight = useRef(false)
   const flushRef = useRef<() => Promise<void>>(async () => undefined)
   const location = useLocation()
+  const navigate = useNavigate()
+  const swipeAt = SWIPE_ORDER.indexOf(location.pathname)
+  const swipeTo = (step: 1 | -1) => {
+    const next = SWIPE_ORDER[swipeAt + step]
+    if (swipeAt >= 0 && next) navigate(next)
+  }
+  const swipe = useSwipeNav(() => swipeTo(1), () => swipeTo(-1))
+  // El botón de la sección actual siempre a la vista en la barra que se desliza
+  const bottomNav = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    bottomNav.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+  }, [location.pathname])
   const signOut = useAuthStore(s => s.signOut)
   const t = useStudioT()
   // Mensajes sin leer del formulario de contacto (V1 · etapa 05): en la navegación y en el Inicio
@@ -417,7 +435,7 @@ function StudioReady({ userId, initial, switchSpace }: {
             </div>
           </nav>
 
-          <main className="st-main">
+          <main className="st-main" {...(swipeAt >= 0 ? swipe : {})}>
             <div className={`st-main-inner${inDesktopEditor ? ' is-wide' : ''}`}>
               {profile.suspended_at && (
                 <div className="st-card st-suspended" role="alert">
@@ -438,7 +456,7 @@ function StudioReady({ userId, initial, switchSpace }: {
         </div>
 
         {/* En un portal a <body>: ningún contenedor puede alterar su position: fixed */}
-        {createPortal(<nav className="st-bottom-nav" aria-label="Studio" data-mycen-theme={theme} dir={dir}>
+        {createPortal(<nav ref={bottomNav} className="st-bottom-nav" aria-label="Studio" data-mycen-theme={theme} dir={dir}>
           {MOBILE_NAV.map(item => (
             <NavLink key={item.to} to={item.to} end={item.end} title={t.nav[item.label]}
               aria-label={item.label === 'more' && unread ? `${t.nav.more}, ${t.messages.unread.replace('{n}', String(unread))}` : t.nav[item.label]}>
@@ -448,6 +466,11 @@ function StudioReady({ userId, initial, switchSpace }: {
               {item.label === 'more' && <UnreadBadge count={unread} label={t.messages.unread} />}
             </NavLink>
           ))}
+          {/* De la identidad a Life OS sin pasar por "Más" */}
+          <a href="/life" title={t.nav.life}>
+            <Sparkles size={21} aria-hidden="true" />
+            <span className="st-nav-label">{t.nav.life}</span>
+          </a>
         </nav>, document.body)}
       </div>
     </StudioContext.Provider>

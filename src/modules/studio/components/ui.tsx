@@ -5,6 +5,7 @@ import { useStudioT } from '@/i18n/app/studio'
 import { useScrollLock } from '@/lib/scrollLock'
 import { PickerWrap } from '@/components/ui/PickerWrap'
 import { pickerKind } from '@/lib/pickerKind'
+import { urlOnBlur, urlOnChange, urlOnFocus } from '../lib/urlInput'
 
 // ── Botón ───────────────────────────────────────────────────────────────────
 
@@ -73,11 +74,17 @@ export function TextField({ label, value, onChange, required, help, error, maxLe
   onEnter?: () => void
 }) {
   const id = useId()
+  // Links: "https://" ya escrito al tocar y completado al salir (urlInput.ts)
+  const isUrl = type === 'url' && !multiline
   const common = {
     id, value, placeholder, maxLength, autoFocus,
     'aria-invalid': error ? true : undefined,
     'aria-required': required || undefined,
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value),
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(isUrl ? urlOnChange(e.target.value) : e.target.value),
+    ...(isUrl && {
+      onFocus: () => { if (!value.trim()) onChange(urlOnFocus(value)) },
+      onBlur: () => { const next = urlOnBlur(value); if (next !== value) onChange(next) },
+    }),
   }
   return (
     <Field label={label} required={required} help={help} error={error} htmlFor={id}

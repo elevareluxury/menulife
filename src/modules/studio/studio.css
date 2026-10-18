@@ -360,13 +360,18 @@
   font-family: var(--my-font-ui);
   left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom));
   margin-inline: auto; width: fit-content;
+  /* Ocho botones: si no entran, la píldora se desliza de costado (sin barra de scroll visible) */
+  max-width: calc(100% - 24px); overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity; scrollbar-width: none;
   gap: 2px; padding: 6px 8px;
   border-radius: var(--my-r-pill);
   border: 1px solid var(--st-glass-border);
   background: var(--my-glass-strong-solid);
   box-shadow: var(--st-glass-highlight), var(--my-shadow-float);
 }
+.st-bottom-nav::-webkit-scrollbar { display: none; }
 .st-bottom-nav a {
+  scroll-snap-align: center;
   flex: 0 0 auto; min-width: 52px; min-height: 44px; padding: 10px 14px;
   border-radius: var(--my-r-pill); justify-content: center; color: var(--st-faint);
 }

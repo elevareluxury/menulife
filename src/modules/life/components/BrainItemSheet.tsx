@@ -1,10 +1,11 @@
 import { focusOnMount } from '@/lib/viewportVars'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Lightbulb, StickyNote, CheckSquare } from 'lucide-react'
 import { useLifeT } from '@/i18n/app/life'
 import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import type { BrainItem, BrainFormData, BrainItemType } from '../hooks/useBrain'
 import { GoalSelect } from './GoalSelect'
+import { clearDraft, readDraft, writeDraft } from '@/lib/editDraft'
 
 interface BrainItemSheetProps {
   open: boolean
@@ -34,21 +35,31 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState('')
 
+  // Borrador sin guardar: si el celular recarga la pestaña al volver, sigue lo escrito (editDraft.ts)
+  const draftKey = `brain:${initial?.id ?? 'new'}`
+  const loaded = useRef(false)
   useEffect(() => {
-    if (!open) return
+    if (!open) { loaded.current = false; return }
     /* eslint-disable react-hooks/set-state-in-effect */
-    setForm(initial
+    setForm(readDraft<BrainFormData>(draftKey) ?? (initial
       ? { type: initial.type, title: initial.title, content: initial.content ?? '', goal_id: initial.goal_id ?? null }
-      : { ...DEFAULT, type: initialType ?? 'idea' })
+      : { ...DEFAULT, type: initialType ?? 'idea' }))
     setError('')
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [open, initial, initialType])
+  }, [open, initial, initialType, draftKey])
+  useEffect(() => {
+    if (!open) return
+    if (!loaded.current) { loaded.current = true; return }
+    writeDraft(draftKey, form)
+  }, [open, draftKey, form])
+  const close = () => { clearDraft(draftKey); onClose() }
 
   const handleSave = async () => {
     if (!form.title.trim()) { setError(s.titleRequired); return }
     setSaving(true)
     try {
       await onSave({ type: form.type, title: form.title.trim(), content: form.content?.trim() || undefined, goal_id: form.goal_id ?? null })
+      clearDraft(draftKey)
       onClose()
     } catch { setError(t.common.saveError) }
     finally { setSaving(false) }
@@ -59,7 +70,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
   const titlePlaceholder = form.type === 'idea' ? s.placeholderIdea : form.type === 'note' ? s.placeholderNote : s.placeholderTask
 
   return (
-    <LifeSheet open={open} onClose={onClose} title={initial ? s.editTitle : s.newTitle}>
+    <LifeSheet open={open} onClose={close} title={initial ? s.editTitle : s.newTitle}>
       <div role="radiogroup" aria-label={t.brain.captureType} style={{
         display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '6px', marginBottom: '20px',
         padding: '4px', background: colors.surface.high, borderRadius: radius.md,
@@ -85,7 +96,8 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
         <label htmlFor="brain-title" style={label}>{titleLabel}</label>
         <input id="brain-title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
           placeholder={titlePlaceholder} maxLength={100} aria-invalid={!!error && !form.title.trim()}
-          ref={focusOnMount}
+          // Al abrir una existente no se abre el teclado: taparía el texto que se quiere leer
+          ref={initial ? undefined : focusOnMount}
           style={{
             width: '100%', padding: '12px 14px', boxSizing: 'border-box', borderRadius: radius.md,
             background: colors.surface.high,
@@ -99,7 +111,9 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
           <label htmlFor="brain-content" style={label}>{form.type === 'note' ? s.content : s.detail}</label>
           <textarea id="brain-content" value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
             placeholder={form.type === 'note' ? s.contentPlaceholder : s.detailPlaceholder}
-            rows={form.type === 'note' ? 6 : 3} maxLength={2000}
+            // Crece con el texto (hasta 14 líneas) para leer la nota entera sin achicar el cuadro
+            rows={Math.min(14, Math.max(form.type === 'note' ? 6 : 3, (form.content ?? '').split('\n').length + Math.floor((form.content ?? '').length / 40)))}
+            maxLength={2000}
             style={{
               width: '100%', padding: '12px 14px', boxSizing: 'border-box', borderRadius: radius.md,
               background: colors.surface.high, border: `1px solid ${colors.border.medium}`,

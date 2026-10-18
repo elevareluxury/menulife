@@ -20,11 +20,20 @@ describe('profileLook', () => {
   })
 
   it('perfiles de antes: Clásica, Universo (Amanecer si eran claros) y el acento más cercano', () => {
-    expect(profileLook({})).toEqual({ layout: 'clasica', mode: 'universo', accent: 'plasma', huellaVariant: 'orbitas', cover: { type: 'huella' } })
+    expect(profileLook({})).toEqual({ layout: 'clasica', mode: 'universo', tone: 'noche', accent: 'plasma', huellaVariant: 'orbitas', cover: { type: 'huella' } })
     expect(profileLook(undefined).layout).toBe('clasica')
     expect(profileLook({ mode: 'light', accent: '#3B82F6' })).toMatchObject({ mode: 'amanecer', accent: 'ion' })
     expect(profileLook({ mode: 'auto' }).mode).toBe('universo')
     expect(profileLook({ mode: 'dark' }).mode).toBe('universo')
+  })
+
+  it('tono de fondo: el del tema elegido; de otro tema o desconocido, el de siempre', () => {
+    expect(profileLook({ mode: 'universo', tone: 'oceano' }).tone).toBe('oceano')
+    expect(profileLook({ mode: 'amanecer', tone: 'jardin' }).tone).toBe('jardin')
+    // Guardado con Universo y después pasado a Amanecer: Alba (y si vuelve a Universo, otra vez Océano)
+    expect(profileLook({ mode: 'amanecer', tone: 'oceano' }).tone).toBe('alba')
+    expect(profileLook({ mode: 'light', tone: 'x' }).tone).toBe('alba')
+    expect(profileLook({ tone: '"><script>' }).tone).toBe('noche')
   })
 
   it('valores nuevos tal cual; desconocidos o inseguros, los de por defecto', () => {

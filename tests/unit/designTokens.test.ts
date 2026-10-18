@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { ACCENT_COLORS, MYCEN_ACCENTS, QR_COLORS, THEME_BG, THEME_TEXT } from '../../src/design/themes'
+import { ACCENT_COLORS, MYCEN_ACCENTS, MYCEN_TONES, QR_COLORS, THEME_BG, THEME_TEXT } from '../../src/design/themes'
 
 const css = readFileSync(join(__dirname, '../../src/design/tokens.css'), 'utf8')
 
@@ -66,8 +66,8 @@ const THEMES = {
   amanecer: block("[data-mycen-theme='amanecer']"),
 }
 
-function worstBackgrounds(theme: keyof typeof THEMES): RGBA[] {
-  const v = THEMES[theme]
+function worstBackgrounds(theme: keyof typeof THEMES, vars: Record<string, string> = THEMES[theme]): RGBA[] {
+  const v = vars
   const layers = skyLayers(v['--my-sky'])
   if (theme === 'universo') {
     const base = parse(v['--my-bg'])
@@ -148,6 +148,36 @@ describe('sistema de diseño: contraste (AA)', () => {
         const a = accent(theme, name)
         const t = ACCENT_COLORS[name][theme as 'universo' | 'amanecer']
         expect([t.accent, t.onAccent].map(x => x.toUpperCase())).toEqual([a.accent, a.on].map(x => x.trim().toUpperCase()))
+      })
+    }
+  }
+})
+
+// Tonos de fondo (MYCEN_TONES): cambian fondo, cielo y superficies; el texto y los acentos del tema se siguen leyendo
+describe('sistema de diseño: tonos de fondo', () => {
+  for (const theme of ['universo', 'amanecer'] as const) {
+    for (const tone of MYCEN_TONES[theme].slice(1)) {
+      const v = { ...THEMES[theme], ...block(`[data-mycen-theme='${theme}'][data-mycen-tone='${tone}']`) }
+      it(`${theme} · ${tone}: texto sobre el vidrio (peor fondo) y sobre el vidrio sólido ≥ 4.5:1`, () => {
+        for (const bg of worstBackgrounds(theme, v)) {
+          for (const glass of ['--my-glass', '--my-glass-strong']) {
+            for (const token of ['--my-text', '--my-muted', '--my-subtle']) {
+              expect(contrast(parse(v[token]), over(parse(v[glass]), bg)), `${token} sobre ${glass}`).toBeGreaterThanOrEqual(4.5)
+            }
+          }
+        }
+        for (const solid of ['--my-glass-solid', '--my-glass-strong-solid']) {
+          for (const token of ['--my-text', '--my-muted', '--my-subtle']) {
+            expect(contrast(parse(v[token]), parse(v[solid])), `${token} sobre ${solid}`).toBeGreaterThanOrEqual(4.5)
+          }
+        }
+      })
+      it(`${theme} · ${tone}: cada acento se distingue del fondo (≥ 3:1)`, () => {
+        for (const name of MYCEN_ACCENTS) {
+          for (const bg of worstBackgrounds(theme, v)) {
+            expect(contrast(parse(ACCENT_COLORS[name][theme].accent), bg), `${name}`).toBeGreaterThanOrEqual(3)
+          }
+        }
       })
     }
   }

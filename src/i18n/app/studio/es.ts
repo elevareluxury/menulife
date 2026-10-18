@@ -333,6 +333,9 @@ const es = {
     universoHelp: 'Oscuro, el espacio profundo',
     amanecer: 'Amanecer',
     amanecerHelp: 'Claro, el cielo al amanecer',
+    /** Tonos de fondo de cada tema (themes.ts MYCEN_TONES) */
+    tone: 'Tono de fondo',
+    tones: { noche: 'Noche', abismo: 'Abismo', nebulosa: 'Nebulosa', oceano: 'Océano', alba: 'Alba', bruma: 'Bruma', arena: 'Arena', jardin: 'Jardín' },
     mode: 'Tema',
     accent: 'Acento',
     huella: 'Huella',
