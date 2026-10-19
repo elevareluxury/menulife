@@ -11,7 +11,7 @@
   background: var(--my-stars) 0 0 / 480px 480px repeat, var(--my-sky); background-color: var(--my-bg);
 }
 .ob-huella-art { width: min(78vw, 360px); }
-.ob-huella-title { margin: 8px 0 0; font: 700 var(--my-fs-name) / var(--my-lh-title) var(--my-font-display); }
+.ob-huella-title { margin: 8px 0 0; font: 700 var(--my-fs-name) / var(--my-lh-title) var(--my-font-ui); letter-spacing: -0.02em; }
 .ob-huella-text { margin: 0; color: var(--my-muted); font-size: var(--my-fs-lead); }
 .ob-huella-next { width: auto; min-width: 220px; margin-top: 18px; }
 @media (prefers-reduced-motion: no-preference) {

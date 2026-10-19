@@ -45,7 +45,8 @@ const DUMP_ACTION = { id: 'dump', icon: Brain, color: colors.area.brain } as con
 
 type ActionId = typeof ACTIONS[number]['id'] | 'voice' | 'dump'
 
-export function CaptureButton() {
+/** `inBar`: el + va dentro de la barra de abajo (LifeNav); el menú y las hojas siguen en un portal a <body>. */
+export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
   const { user } = useAuthStore()
   const t = useLifeT()
 
@@ -208,8 +209,40 @@ export function CaptureButton() {
     return failed
   }
 
-  // Portal a <body>: el botón fijo no depende de ningún contenedor
-  return createPortal(
+  const trigger = (
+    <motion.button
+      onClick={() => setOpen(v => !v)}
+      whileTap={{ scale: 0.92 }}
+      className={inBar ? 'life-nav-plus' : undefined}
+      data-open={open ? '' : undefined}
+      style={inBar ? undefined : {
+        position: 'fixed',
+        bottom: 'calc(84px + env(safe-area-inset-bottom))',
+        right: '16px',
+        width: '52px', height: '52px',
+        borderRadius: '9999px', border: 'none', cursor: 'pointer',
+        background: open ? colors.surface.elevated : colors.accent.default,
+        color: colors.accent.on,
+        boxShadow: open ? shadow.elevated : shadow.coralGlow,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 49,
+        transition: 'background 0.22s ease, box-shadow 0.22s ease',
+      }}
+      aria-label={open ? t.capture.close : t.capture.open}
+      aria-expanded={open}
+    >
+      <motion.div
+        animate={{ rotate: open ? 45 : 0 }}
+        transition={{ type: 'spring', stiffness: 340, damping: 22 }}
+        style={{ display: 'flex' }}
+      >
+        {open ? <X size={inBar ? 19 : 20} strokeWidth={2.5} /> : <Plus size={inBar ? 21 : 22} strokeWidth={2.5} />}
+      </motion.div>
+    </motion.button>
+  )
+
+  // Portal a <body>: el menú y las hojas no dependen de ningún contenedor
+  const layers = createPortal(
     <>
       {/* Backdrop */}
       <AnimatePresence>
@@ -234,7 +267,7 @@ export function CaptureButton() {
         {open && (
           <div style={{
             position: 'fixed',
-            bottom: 'calc(148px + env(safe-area-inset-bottom))',
+            bottom: inBar ? 'calc(88px + env(safe-area-inset-bottom))' : 'calc(148px + env(safe-area-inset-bottom))',
             right: '16px',
             display: 'flex',
             flexDirection: 'column',
@@ -283,36 +316,7 @@ export function CaptureButton() {
         )}
       </AnimatePresence>
 
-      {/* Main ➕ button */}
-      <motion.button
-        onClick={() => setOpen(v => !v)}
-        whileTap={{ scale: 0.92 }}
-        style={{
-          position: 'fixed',
-          bottom: 'calc(84px + env(safe-area-inset-bottom))',
-          right: '16px',
-          width: '52px', height: '52px',
-          borderRadius: '9999px', border: 'none', cursor: 'pointer',
-          background: open
-            ? colors.surface.elevated
-            : colors.accent.default,
-          color: colors.accent.on,
-          boxShadow: open
-            ? shadow.elevated
-            : shadow.coralGlow,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 49,
-          transition: 'background 0.22s ease, box-shadow 0.22s ease',
-        }}
-        aria-label={open ? t.capture.close : t.capture.open}
-      >
-        <motion.div
-          animate={{ rotate: open ? 45 : 0 }}
-          transition={{ type: 'spring', stiffness: 340, damping: 22 }}
-        >
-          {open ? <X size={20} strokeWidth={2.5} /> : <Plus size={22} strokeWidth={2.5} />}
-        </motion.div>
-      </motion.button>
+      {!inBar && trigger}
 
       {/* Sheets */}
       <BrainItemSheet
@@ -342,4 +346,6 @@ export function CaptureButton() {
     </>,
     document.body,
   )
+
+  return inBar ? <>{trigger}{layers}</> : layers
 }

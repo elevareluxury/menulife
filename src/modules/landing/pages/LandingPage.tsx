@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import '@/components/landing/landingLibs'
 import '@/components/landing/landing-motion.css'
 import { reducedMotion, useLandingMotion } from '@/components/landing/motion'
-import { ScrollProgress }       from '@/components/landing/ScrollProgress'
 import { LanguageMarquee }      from '@/components/landing/LanguageMarquee'
 import { useAppLang }           from '@/i18n/app/store'
 import { Navbar }               from '@/components/landing/Navbar'
@@ -20,7 +19,6 @@ import { FinalCTA }             from '@/components/landing/FinalCTA'
 import { FAQSection }           from '@/components/landing/FAQSection'
 import { Footer }               from '@/components/landing/Footer'
 import { ReferralHeroSection } from '@/components/landing/ReferralHeroSection'
-import { SectionLink }          from '@/components/landing/SectionLink'
 import { useLandingLocale }     from '../lib/useLandingLocale'
 import { useSiteFlags }         from '@/lib/siteFlags'
 
@@ -70,7 +68,6 @@ export function LandingPage() {
 
   return (
     <div ref={rootRef} style={{ background: 'var(--ml-dark)', minHeight: '100vh' }}>
-      <ScrollProgress />
       <Navbar />
 
       <main>
@@ -83,18 +80,17 @@ export function LandingPage() {
         {/* Cinta con los 12 idiomas */}
         {shown > 0 && <LanguageMarquee />}
 
-        {/* Entre sección y sección, un hilo (SectionLink) une la página en un solo recorrido */}
         {/* Section 2 — Problema / Fragmentación */}
-        {shown > 1 && <><SectionLink /><FragmentationSection /></>}
+        {shown > 1 && <FragmentationSection />}
 
         {/* Section 3 — Solución / Todo conectado */}
-        {shown > 2 && <><SectionLink /><div id="soluciones"><SolutionSection /></div></>}
+        {shown > 2 && <div id="soluciones"><SolutionSection /></div>}
 
         {/* Las cinco estructuras del perfil y los dos temas (imágenes de ejemplo) */}
-        {shown > 3 && <><SectionLink /><StructuresSection /></>}
+        {shown > 3 && <StructuresSection />}
 
         {/* Section 4 — Mycen Personal / Life OS (con "Mi día") */}
-        {shown > 4 && <><SectionLink /><LifeOSSection /></>}
+        {shown > 4 && <LifeOSSection />}
 
         {/* Section 5 — Mycen Business */}
         {shown > 5 && business && <BusinessSection />}
@@ -106,13 +102,13 @@ export function LandingPage() {
         {shown > 7 && business && <div id="pricing"><PricingSection /></div>}
 
         {/* Section 7 — Visión */}
-        {shown > 8 && <><SectionLink /><VisionSection /></>}
+        {shown > 8 && <VisionSection />}
 
         {/* Section 8 — CTA Final */}
-        {shown > 9 && <><SectionLink /><FinalCTA /></>}
+        {shown > 9 && <FinalCTA />}
 
         {/* Section 9 — FAQ */}
-        {shown > 10 && <><SectionLink /><FAQSection /></>}
+        {shown > 10 && <FAQSection />}
       </main>
 
       {ready && <Footer />}

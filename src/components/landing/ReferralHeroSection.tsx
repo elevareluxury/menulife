@@ -76,7 +76,7 @@ export function ReferralHeroSection() {
 
           <h1 style={{
             fontSize: 'clamp(32px, 5vw, 48px)',
-            fontWeight: 800, color: '#fff',
+            fontWeight: 700, color: '#fff',
             lineHeight: 1.1, margin: '0 0 20px',
             letterSpacing: '-0.02em',
           }}>

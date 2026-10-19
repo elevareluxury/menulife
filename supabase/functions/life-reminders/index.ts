@@ -9,14 +9,36 @@ import { pushPayload, sameSecret, type DueReminder } from './payload.ts'
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
+// Los secretos pegados a mano pueden traer espacios o comillas de más
+const secret = (name: string) => Deno.env.get(name)?.trim().replace(/^["']|["']$/g, '') || undefined
+
+// Cualquier error sale con su mensaje (en los registros de la función y en net._http_response), nunca con las claves
 Deno.serve(async (req) => {
-  if (!sameSecret(req.headers.get('x-cron-secret'), Deno.env.get('REMINDERS_CRON_SECRET'))) {
+  try {
+    return await run(req)
+  } catch (e) {
+    console.error('[life-reminders]', e)
+    return json({ error: e instanceof Error ? e.message : String(e) }, 500)
+  }
+})
+
+async function run(req: Request): Promise<Response> {
+  if (!sameSecret(req.headers.get('x-cron-secret'), secret('REMINDERS_CRON_SECRET'))) {
     return json({ error: 'unauthorized' }, 401)
   }
-  const publicKey = Deno.env.get('VAPID_PUBLIC_KEY')
-  const privateKey = Deno.env.get('VAPID_PRIVATE_KEY')
+  const publicKey = secret('VAPID_PUBLIC_KEY')
+  const privateKey = secret('VAPID_PRIVATE_KEY')
   if (!publicKey || !privateKey) return json({ skipped: true, reason: 'VAPID keys not set' })
-  webpush.setVapidDetails('mailto:team@mycen.id', publicKey, privateKey)
+  // Antes de marcar nada: con una clave mal cargada no se pierde ningún recordatorio
+  try {
+    webpush.setVapidDetails('mailto:team@mycen.id', publicKey, privateKey)
+  } catch (e) {
+    return json({
+      error: 'invalid VAPID keys',
+      detail: e instanceof Error ? e.message : String(e),
+      hint: 'VAPID_PUBLIC_KEY ~87 caracteres (la de Vercel), VAPID_PRIVATE_KEY ~43, sin comillas ni espacios',
+    }, 500)
+  }
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
     auth: { persistSession: false },
@@ -54,4 +76,4 @@ Deno.serve(async (req) => {
   const ok = (subs ?? []).filter(s => !gone.has(s.id) && !failed.has(s.id)).map(s => s.id)
   if (ok.length) await db.from('life_push_subscriptions').update({ last_sent_at: new Date().toISOString(), failures: 0 }).in('id', ok)
   return json({ reminders: reminders.length, sent, removed: gone.size, failed: failed.size })
-})
+}
