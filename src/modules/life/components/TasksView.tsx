@@ -17,7 +17,7 @@ import { ActionMenu } from './ActionMenu'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
-import { appServiceWorker } from '@/lib/notifications'
+import { syncPushSubscription } from '@/lib/webPush'
 import { usePrefs } from '@/lib/prefs'
 
 function monthMatrix(year: number, month: number, weekStart: 0 | 1): (Date | null)[] {
@@ -144,8 +144,8 @@ export function TasksView() {
     if (typeof Notification === 'undefined') return
     const next = await Notification.requestPermission()
     setPermission(next)
-    // Los avisos del celular salen desde el service worker: queda listo apenas se permiten
-    if (next === 'granted') void appServiceWorker()
+    // Los avisos del celular salen desde el service worker; con push, llegan también con la app cerrada
+    if (next === 'granted') void syncPushSubscription()
   }
 
   const navBtn: React.CSSProperties = {
