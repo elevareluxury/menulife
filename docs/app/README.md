@@ -21,8 +21,8 @@ Qué cambia en la app respecto de la web:
 - Las descargas abren el menú nativo de compartir (Guardar en Archivos, AirDrop, WhatsApp…).
 - Los recordatorios de tareas y hábitos se programan en el teléfono: llegan aunque la app esté cerrada.
 - Sin service worker (la app ya está instalada).
-- "Dictar" no aparece en iPhone (el reconocimiento de voz del navegador no existe adentro de una app) y el Diario se
-  desbloquea con el PIN (la huella o cara del navegador tampoco). Quedan para una versión nativa (V1.1).
+- "Dictar" no se ofrece en la app, ni en iPhone ni en Android (`speechSupported()` en `useSpeech.ts`): no pide micrófono ni voz. El Diario se
+  desbloquea con el PIN (la huella o cara del navegador no existe en la app). Quedan para una versión nativa (V1.1).
 
 ## Lo que tenés que hacer vos (una sola vez)
 

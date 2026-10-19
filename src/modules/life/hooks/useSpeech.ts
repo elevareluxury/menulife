@@ -23,8 +23,9 @@ type RecognitionCtor = new () => Recognition
 
 function ctor(): RecognitionCtor | null {
   if (typeof window === 'undefined') return null
-  // En la app de Android el WebView trae el objeto pero no reconoce nada: ahí no se ofrece dictar
-  if (nativePlatform() === 'android') return null
+  // En la app (iOS y Android) no se ofrece dictar: el WebView de Android trae el objeto pero no reconoce nada, y la
+  // de iOS no declara permisos de micrófono ni de voz (pedirlos sin declararlos cierra la app). Vuelve nativo en V1.1
+  if (nativePlatform() !== 'web') return null
   const w = window as unknown as { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor }
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }

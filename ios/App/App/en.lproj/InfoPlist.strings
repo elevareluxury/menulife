@@ -1,7 +1,5 @@
 /* Textos de los permisos de iOS (en). Mantener los 12 idiomas (docs/app/README.md). */
 "CFBundleDisplayName" = "Mycen";
-"NSCameraUsageDescription" = "Mycen uses the camera so you can take a photo for your profile or your projects.";
-"NSPhotoLibraryUsageDescription" = "Mycen accesses your photos so you can choose an image for your profile or your projects.";
+"NSCameraUsageDescription" = "Mycen uses the camera only when you take a photo for your profile picture, cover or projects.";
+"NSPhotoLibraryUsageDescription" = "Mycen opens your photos only when you choose an image for your profile picture, cover or projects.";
 "NSPhotoLibraryAddUsageDescription" = "Mycen saves your QR code and identity card to Photos when you ask it to.";
-"NSMicrophoneUsageDescription" = "Mycen uses the microphone only while you dictate an expense, a task or an idea.";
-"NSSpeechRecognitionUsageDescription" = "Mycen turns what you dictate into text so you can review it before saving.";
