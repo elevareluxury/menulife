@@ -1,17 +1,16 @@
 /// <reference lib="webworker" />
 
-// Service worker for MenuLife PWA
-// Combines Workbox precache manifest (injected by VitePWA) with:
-//   - Runtime caching for Supabase API, images and fonts
-//   - Offline fallback to /offline.html
-//   - Push notification handler (preserved from original sw.js)
+// Service worker de Mycen (lo registran Life OS instalado en el inicio o con avisos permitidos, y los mozos de Business)
+// Junta el precache que inyecta VitePWA con:
+//   - Caché de imágenes y fuentes propias
+//   - /offline.html sin conexión
+//   - Avisos: los que muestra la app (showSystemNotification) y los push (Web Push); al tocarlos abre su pantalla
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<{ url: string; revision: string | null }>
 }
 
 const PRECACHE   = 'menulife-precache-v1'
-const API_CACHE  = 'menulife-api'
 const IMG_CACHE  = 'menulife-images'
 const FONT_CACHE = 'menulife-fonts'
 
@@ -35,7 +34,8 @@ self.addEventListener('install', (event) => {
 
 // ── Activate: clean stale caches ─────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
-  const CURRENT = new Set([PRECACHE, API_CACHE, IMG_CACHE, FONT_CACHE])
+  // Se borra también la caché vieja de respuestas de Supabase ('menulife-api')
+  const CURRENT = new Set([PRECACHE, IMG_CACHE, FONT_CACHE])
   event.waitUntil(
     caches
       .keys()
@@ -53,11 +53,9 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url)
 
-  // Supabase API — Network First (5 min TTL)
-  if (url.hostname.endsWith('.supabase.co')) {
-    event.respondWith(networkFirst(request, API_CACHE, 10_000))
-    return
-  }
+  // Supabase: directo a la red, sin guardar. Las respuestas son datos privados de la cuenta y la caché las guardaría por
+  // URL, sin la sesión: en un celular compartido, otra persona podría verlas sin conexión.
+  if (url.hostname.endsWith('.supabase.co')) return
 
   // Otros orígenes (portadas de YouTube/Spotify, imágenes de terceros…): los pide el navegador directo. Desde acá
   // serían un fetch() del service worker, que la CSP limita con connect-src (sólo Mycen y Supabase) y fallaría.
@@ -94,31 +92,6 @@ self.addEventListener('fetch', (event) => {
 })
 
 // ── Cache helpers ─────────────────────────────────────────────────────────────
-async function networkFirst(
-  request: Request,
-  cacheName: string,
-  timeoutMs: number
-): Promise<Response> {
-  const cache = await caches.open(cacheName)
-  try {
-    const response = await Promise.race<Response>([
-      fetch(request.clone()),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), timeoutMs)
-      ),
-    ])
-    if (response.ok) cache.put(request, response.clone())
-    return response
-  } catch {
-    const cached = await cache.match(request)
-    if (cached) return cached
-    return new Response(JSON.stringify({ error: 'offline' }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
-}
-
 async function cacheFirst(request: Request, cacheName: string): Promise<Response> {
   const cached = await caches.match(request)
   if (cached) return cached
@@ -134,41 +107,49 @@ async function cacheFirst(request: Request, cacheName: string): Promise<Response
   }
 }
 
-// ── Push Notifications ────────────────────────────────────────────────────────
+// ── Avisos ────────────────────────────────────────────────────────────────────
+// Push (Web Push): { title, body, tag, url }. Sin datos, un aviso genérico de Mycen.
 self.addEventListener('push', (event) => {
-  if (!event.data) return
-  let data: { title: string; body: string; tag: string } = {
-    title: '🔔 MenuLife',
-    body: 'Nueva notificación',
-    tag: 'waiter',
-  }
-  try {
-    data = { ...data, ...(event.data.json() as typeof data) }
-  } catch {
-    data.body = event.data.text()
+  let data: { title: string; body?: string; tag?: string; url?: string } = { title: 'Mycen' }
+  if (event.data) {
+    try {
+      data = { ...data, ...(event.data.json() as typeof data) }
+    } catch {
+      data.body = event.data.text()
+    }
   }
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      tag: data.tag,
+      tag: data.tag ?? 'mycen',
       icon: '/web-app-manifest-192x192.png',
       badge: '/web-app-manifest-192x192.png',
-      requireInteraction: true,
-      vibrate: [200, 100, 200],
+      data: { url: data.url },
     })
   )
 })
 
+// Al tocar un aviso: su pantalla (data.url, siempre de Mycen) en la ventana abierta, o una nueva. Sin url, los mozos
+// vuelven a su pantalla y el resto a Life OS.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
+  const raw = (event.notification.data as { url?: string } | null)?.url
+  const target = raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : null
   event.waitUntil(
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
-      .then((clientList) => {
-        for (const client of clientList) {
-          if (client.url.includes('/waiter/') && 'focus' in client) return client.focus()
+      .then(async (clientList) => {
+        if (!target) {
+          const waiter = clientList.find((c) => c.url.includes('/waiter/'))
+          if (waiter) return waiter.focus()
         }
-        return self.clients.openWindow('/')
+        const url = new URL(target ?? '/life', self.location.origin).href
+        const open = clientList.find((c) => new URL(c.url).origin === self.location.origin)
+        if (open) {
+          await open.focus()
+          return open.navigate(url).catch(() => self.clients.openWindow(url))
+        }
+        return self.clients.openWindow(url)
       })
   )
 })

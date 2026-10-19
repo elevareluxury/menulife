@@ -22,6 +22,7 @@ import { THEME_BG } from '@/design/themes'
 import { usePrefersLight } from '@/modules/profile/lib/usePrefersLight'
 import { usePrefs } from '@/lib/prefs'
 import { useH1Title } from '@/lib/useH1Title'
+import { appServiceWorker, isInstalledApp } from '@/lib/notifications'
 import './life.css'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +37,11 @@ export function LifeShell() {
   const prefsReady = usePrefs(s => !!user && s.loadedFor === user.id)
   useTaskReminders(user?.id)
   useHabitReminders(user?.id)
+  // Service worker para los avisos (en el celular sólo salen desde ahí): instalada en el inicio o con avisos permitidos
+  useEffect(() => {
+    const granted = typeof Notification !== 'undefined' && Notification.permission === 'granted'
+    if (isInstalledApp() || granted) void appServiceWorker()
+  }, [])
   const dir = langDir(useAppLang(s => s.lang))
   // Título de la pestaña con el de la pantalla ("Brain · Mycen")
   useH1Title('Mycen')

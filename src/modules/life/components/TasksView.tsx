@@ -17,6 +17,7 @@ import { ActionMenu } from './ActionMenu'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
+import { appServiceWorker } from '@/lib/notifications'
 import { usePrefs } from '@/lib/prefs'
 
 function monthMatrix(year: number, month: number, weekStart: 0 | 1): (Date | null)[] {
@@ -141,7 +142,10 @@ export function TasksView() {
 
   async function askPermission() {
     if (typeof Notification === 'undefined') return
-    setPermission(await Notification.requestPermission())
+    const next = await Notification.requestPermission()
+    setPermission(next)
+    // Los avisos del celular salen desde el service worker: queda listo apenas se permiten
+    if (next === 'granted') void appServiceWorker()
   }
 
   const navBtn: React.CSSProperties = {

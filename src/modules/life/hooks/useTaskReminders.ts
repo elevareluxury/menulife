@@ -8,6 +8,7 @@ import { taskDueAt, localDateKey, type LifeTask } from './useTasks'
 import { lifeTReady } from '@/i18n/app/life'
 import { electLeader, reminderLoop } from '../lib/reminderLeader'
 import { lifeNow } from '../lib/zonedTime'
+import { showSystemNotification } from '@/lib/notifications'
 
 const db = supabase as unknown as SupabaseClient
 
@@ -77,11 +78,11 @@ export function useTaskReminders(userId: string | undefined) {
 
         const ts = (await lifeTReady()).taskSheet
         const when = task.due_time ? ts.reminderAt(task.due_time.slice(0, 5)) : ts.reminderToday
-        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-          new Notification(task.title, { body: ts.reminderBody(when), tag: `life-task-${task.id}` })
-        } else {
-          toast(`⏰ ${task.title} · ${when}`, { duration: 8000 })
-        }
+        // Ya quedó marcada: si el aviso del sistema no sale (sin permiso o el teléfono no lo deja), va en pantalla
+        const shown = await showSystemNotification(task.title, {
+          body: ts.reminderBody(when), tag: `life-task-${task.id}`, url: '/life/brain?vista=tareas',
+        })
+        if (!shown) toast(`⏰ ${task.title} · ${when}`, { duration: 8000 })
       }
     }
 
