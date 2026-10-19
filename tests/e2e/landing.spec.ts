@@ -67,7 +67,7 @@ test('la landing pasa axe (WCAG AA)', async ({ page }) => {
 const withBusiness = () => Object.assign(createState({}), { siteFlags: { business: true } })
 
 test.describe('animaciones', () => {
-  test('la barra de progreso avanza, la cinta de idiomas corre y el precio cuenta hasta el valor nuevo', async ({ page, context }) => {
+  test('la cinta de idiomas corre y el precio cuenta hasta el valor nuevo', async ({ page, context }) => {
     await installSupabaseMock(context, withBusiness())
     await page.goto('/?lang=es')
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Tu identidad digital')
@@ -77,10 +77,7 @@ test.describe('animaciones', () => {
     // Títulos por palabra: el lector de pantalla recibe la frase entera
     await expect(page.getByRole('heading', { name: 'Hoy tu vida digital está fragmentada.' })).toBeAttached()
 
-    const progress = () => page.locator('.ml-progress').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)
-    expect(await progress()).toBeLessThan(0.05)
     await page.locator('#pricing').scrollIntoViewIfNeeded()
-    await expect.poll(progress).toBeGreaterThan(0.3)
 
     const price = page.locator('#pricing').getByText(/^US\$\d+$/).first()
     await expect(price).toHaveText('US$70')

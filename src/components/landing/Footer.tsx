@@ -17,7 +17,6 @@ export function Footer() {
   const anchors = [
     { label: t.product, href: '#soluciones' },
     ...(business ? [{ label: t.pricing, href: '#pricing' }] : []),
-    { label: t.faq,     href: '#faq' },
     { label: t.contact, href: `mailto:${CONTACT_EMAIL}` },
   ]
   const pages = [
@@ -46,7 +45,8 @@ export function Footer() {
           </span>
         </Link>
 
-        <nav data-rise style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 24px', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Una sola línea también en el celular (entra en 320 px); en pantallas muy angostas baja a dos */}
+        <nav data-rise style={{ display: 'flex', flexWrap: 'wrap', gap: '10px clamp(12px, 3.5vw, 24px)', alignItems: 'center', justifyContent: 'center' }}>
           {anchors.map(link => (
             <a key={link.href} href={link.href} style={linkStyle} {...hover}>{link.label}</a>
           ))}
