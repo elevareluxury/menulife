@@ -73,12 +73,14 @@ const de: LegalDict = {
     ] },
   ],
   terms: [
+    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
     { id: 'quien', title: 'Wer den Dienst anbietet', body: [
       'Mycen ist ein Dienst von **Resilio** mit Sitz in der Argentinischen Republik. Du erreichst uns unter **team@mycen.id**.',
       'Mit Mycen erstellst du eine öffentliche digitale Identität (Mycen Identity), verwaltest sie in Mycen Studio, organisierst dein Privatleben in Life OS und führst, wenn du ein Unternehmen hast, dieses mit Mycen Business.',
     ] },
     { id: 'edad', title: 'Wer Mycen nutzen darf', body: [
-      'Du musst mindestens **13 Jahre** alt sein. Ist in deinem Land das Mindestalter für die Zustimmung zu diesen Bedingungen oder für die Verarbeitung deiner Daten höher (in Deutschland zum Beispiel 16 Jahre), musst du dieses Alter haben oder die Zustimmung deiner Eltern oder Erziehungsberechtigten.',
+      'Um Mycen zu nutzen, musst du mindestens **13 Jahre** alt sein. Lebst du in einem Land der Europäischen Union oder des Europäischen Wirtschaftsraums, das für die Nutzung eines solchen Dienstes ohne Zustimmung deiner Eltern oder Erziehungsberechtigten **16 Jahre** verlangt (zum Beispiel Deutschland), musst du mindestens 16 sein. Und wenn das Recht deines Landes ein höheres Mindestalter festlegt, gilt dieses.',
+      'Mit der Erstellung eines Kontos bestätigst du, dass du das nötige Alter hast. Erfahren wir, dass ein Konto jemandem gehört, der es nicht hat, löschen wir es.',
       'Um Mycen Business für ein Unternehmen zu nutzen, musst du volljährig und berechtigt sein, es zu vertreten.',
     ] },
     { id: 'cuenta', title: 'Dein Konto', body: [
@@ -103,9 +105,16 @@ const de: LegalDict = {
       ] },
       'Jede Person kann ein Profil oder Projekt über den Link „Melden“ unten auf der Seite melden, ohne Konto und anonym. Wir prüfen jede Meldung. Verstößt ein Profil gegen die Regeln, sperren wir es: Es ist nicht mehr sichtbar (Seite, Projekte und Kontaktkarte), und der Inhaber sieht den Grund in Studio. Wenn du meinst, dass es ein Fehler war, schreib uns von dem Konto aus, mit dem du es erstellt hast, und wir prüfen es erneut.',
     ] },
-    { id: 'derechos-de-autor', title: 'Urheberrecht und Marken', body: [
-      'Wenn du meinst, dass etwas auf Mycen dein Werk oder deine Marke ohne Erlaubnis nutzt, schreib an **team@mycen.id** mit: deinen Kontaktdaten, welches Werk oder welche Marke dir gehört, der genauen Adresse des Inhalts auf Mycen und der Erklärung, dass die Angaben stimmen und du Rechteinhaber bist oder in dessen Namen handelst.',
-      'Ist die Beschwerde berechtigt, entfernen oder sperren wir den Inhalt und informieren die Person, die ihn veröffentlicht hat; sie kann ihre Sicht darlegen. Wer wiederholt fremde Inhalte ohne Erlaubnis veröffentlicht, kann sein Konto verlieren.',
+    { id: 'derechos-de-autor', title: 'Urheberrecht und andere Rechte', body: [
+      'Wenn du meinst, dass etwas auf Mycen dein Urheberrecht oder andere Rechte verletzt (zum Beispiel deine Marke oder dein Recht am eigenen Bild), kannst du uns bitten, es zu entfernen. Schreib an **team@mycen.id** mit:',
+      { list: [
+        '**Dem Link zum Inhalt:** der genauen Adresse des Profils, Projekts oder Bildes auf Mycen.',
+        '**Wer Rechteinhaber ist** und wie man ihn erreicht. Wenn du im Namen einer anderen Person oder Firma handelst, sag es.',
+        '**Warum es eine Verletzung ist:** um welches Werk, welche Marke oder welches andere Recht es geht und wie es ohne Erlaubnis genutzt wird.',
+        '**Einer Erklärung in gutem Glauben:** dass du in gutem Glauben davon ausgehst, dass die Nutzung nicht erlaubt ist, und dass deine Angaben stimmen.',
+      ] },
+      'Wir prüfen jede Meldung. Wenn sie berechtigt ist, entfernen oder sperren wir den Inhalt und informieren die Person, die ihn veröffentlicht hat, über den Grund. Sie kann uns ihre Sicht schildern (zum Beispiel, wenn sie eine Erlaubnis hat) und wir prüfen erneut.',
+      'Konten, die wiederholt Inhalte veröffentlichen, die Rechte anderer verletzen, können gesperrt oder geschlossen werden.',
     ] },
     { id: 'usernames', title: 'Benutzernamen', body: [
       'Manche Namen sind reserviert. Es ist nicht erlaubt, Namen zu registrieren, um sich als andere Person oder Marke auszugeben oder um sie weiterzuverkaufen; in solchen Fällen können wir sie zurückholen. Wenn du deinen Benutzernamen änderst, leitet die alte Adresse auf die neue weiter, damit deine Links und QR-Codes weiter funktionieren.',
@@ -131,6 +140,7 @@ const de: LegalDict = {
     ] },
   ],
   privacy: [
+    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
     { id: 'responsable', title: 'Wer für deine Daten verantwortlich ist', body: [
       'Verantwortlicher ist **Resilio** mit Sitz in der Argentinischen Republik, der Betreiber von Mycen. Bei Fragen zu deinen Daten schreib an **team@mycen.id**.',
       'Nutzt ein Unternehmen Mycen Business für Daten seiner eigenen Kunden (Bestellungen, Reservierungen, Termine), ist dieses Unternehmen für diese Daten verantwortlich, und Mycen verarbeitet sie in seinem Auftrag und nach seinen Weisungen.',
@@ -208,7 +218,7 @@ const de: LegalDict = {
       'Wenn du in Kalifornien lebst: Wir verkaufen deine personenbezogenen Daten nicht und teilen sie nicht für Werbung, und wir behandeln dich nicht anders, weil du deine Rechte ausübst.',
     ] },
     { id: 'menores', title: 'Minderjährige', body: [
-      'Mycen richtet sich nicht an Kinder unter 13 Jahren. Erfahren wir, dass ein Konto ohne Zustimmung jemandem unter diesem Alter (oder dem im jeweiligen Land geltenden) gehört, löschen wir es. Wenn du als Elternteil oder Erziehungsberechtigter meinst, dass das passiert ist, schreib uns.',
+      'Mycen richtet sich nicht an Kinder unter 13 Jahren und auch nicht an Personen unter 16 in Ländern der Europäischen Union oder des Europäischen Wirtschaftsraums, die dieses Alter für die Verarbeitung ihrer Daten ohne Zustimmung der Eltern verlangen (und nicht an Personen unter einem höheren Alter, das das Recht ihres Landes festlegt). Wir erheben nicht wissentlich Daten von Personen unter diesem Alter: Erfahren wir, dass ein Konto einer solchen Person gehört, löschen wir das Konto und seine Daten. Wenn du als Elternteil oder Erziehungsberechtigter meinst, dass das passiert ist, schreib uns an **team@mycen.id**.',
     ] },
     { id: 'cambios', title: 'Änderungen dieser Erklärung', body: [
       'Ändern wir diese Erklärung wesentlich, informieren wir dich per E-Mail oder in Mycen, bevor sie gilt. Oben siehst du immer das Datum der letzten Aktualisierung.',
