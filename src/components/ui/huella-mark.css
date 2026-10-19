@@ -1,0 +1,25 @@
+/* Huella de la marca (HuellaMark): giro lento de las órbitas y un brillo que respira detrás */
+.huella-mark { position: relative; display: inline-flex; flex-shrink: 0; }
+.huella-mark-svg { position: relative; z-index: 1; display: block; width: 100%; height: 100%; }
+.huella-mark-svg svg { display: block; width: 100%; height: 100%; }
+/* La huella está hecha de puntos; en chico (36–54 px) cada punto queda por debajo de un píxel y en pantallas de
+   densidad 1 no se dibuja: acá las órbitas van en línea continua (se ven nítidas en cualquier pantalla) */
+.huella-mark-svg path { stroke-dasharray: none; }
+
+.huella-mark.is-animated::before {
+  content: ''; position: absolute; inset: 12%; border-radius: 50%; z-index: 0;
+  background: radial-gradient(circle, rgba(255, 122, 89, 0.55) 0%, rgba(125, 211, 252, 0.25) 45%, transparent 70%);
+  filter: blur(6px); opacity: 0.55;
+  animation: huella-breathe 3.2s ease-in-out infinite;
+}
+.huella-mark.is-animated .huella-mark-svg { animation: huella-orbit 18s linear infinite; }
+
+@keyframes huella-orbit { to { transform: rotate(360deg); } }
+@keyframes huella-breathe {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 0.8; transform: scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .huella-mark.is-animated::before, .huella-mark.is-animated .huella-mark-svg { animation: none; }
+}

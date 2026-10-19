@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
 import { LanguageSelect } from '@/components/ui/LanguageSelect'
 import { useSiteFlags } from '@/lib/siteFlags'
+import { HuellaMark } from '@/components/ui/HuellaMark'
 
 export function Navbar() {
   const l = useLandingT()
@@ -32,22 +33,26 @@ export function Navbar() {
       <div style={{
         maxWidth: '1280px', margin: '0 auto',
         padding: '0 24px', height: '68px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        // Tres columnas: lo de los costados no corre la huella del centro
+        display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '12px',
       }}>
-        {/* Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <img src="/logo.png" alt="Mycen" width={36} height={36} style={{ height: '36px', width: '36px', objectFit: 'contain', flexShrink: 0 }} />
-        </Link>
-
-        {/* Desktop links */}
-        <div className="hidden lg:flex" style={{ gap: '32px', alignItems: 'center' }}>
-          {NAV_LINKS.map(link => (
-            <NavLink key={link.href} href={link.href}>{link.label}</NavLink>
-          ))}
+        {/* Izquierda: links (escritorio) o idioma (celular) */}
+        <div style={{ display: 'flex', alignItems: 'center', justifySelf: 'start' }}>
+          <div className="hidden lg:flex" style={{ gap: '32px', alignItems: 'center' }}>
+            {NAV_LINKS.map(link => (
+              <NavLink key={link.href} href={link.href}>{link.label}</NavLink>
+            ))}
+          </div>
+          <div className="flex lg:hidden"><LanguageSelect label={l.nav.language} /></div>
         </div>
 
+        {/* Centro: la huella de Mycen, animada */}
+        <Link to="/" aria-label="Mycen" className="nav-huella" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+          <HuellaMark id="nav" size={44} animated />
+        </Link>
+
         {/* Desktop CTAs */}
-        <div className="hidden lg:flex" style={{ gap: '12px', alignItems: 'center' }}>
+        <div className="hidden lg:flex" style={{ gap: '12px', alignItems: 'center', justifySelf: 'end' }}>
           <LanguageSelect label={l.nav.language} />
           <Link to="/login" style={{ textDecoration: 'none' }}>
             <button style={{
@@ -65,9 +70,8 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Celular: idioma y cuenta a la vista, sin menú escondido (el resto está en la página) */}
-        <div className="flex lg:hidden" style={{ gap: '10px', alignItems: 'center' }}>
-          <LanguageSelect label={l.nav.language} />
+        {/* Celular: cuenta a la vista, sin menú escondido (el idioma va a la izquierda; el resto está en la página) */}
+        <div className="flex lg:hidden" style={{ gap: '10px', alignItems: 'center', justifySelf: 'end' }}>
           <Link to="/login" aria-label={l.nav.login} title={l.nav.login} style={{
             width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff',

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MailPlus, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, Sparkles, UserRound } from 'lucide-react'
+import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MailPlus, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { StudioContext, type StudioContextValue } from './StudioContext'
 import {
@@ -30,6 +30,7 @@ import { useH1Title } from '@/lib/useH1Title'
 import { useSiteFlags } from '@/lib/siteFlags'
 import { looksLikeEmail } from './lib/useUsernameCheck'
 import { useSwipeNav } from '@/lib/useSwipeNav'
+import { HuellaMark } from '@/components/ui/HuellaMark'
 
 type NavKey = keyof StudioDict['nav']
 
@@ -52,7 +53,7 @@ const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean; deskto
   { to: '/studio/spaces',     label: 'spaces',     icon: Layers },
 ]
 
-// Barra de abajo del celular: se desliza de costado si no entra; al final, Life OS
+// Barra de abajo del celular: se desliza de costado si no entra. Life OS va aparte, en la huella de arriba al medio
 const MOBILE_NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
   { to: '/studio',            label: 'home',       icon: Home, end: true },
   { to: '/studio/identity',   label: 'edit',       icon: PenLine },
@@ -206,11 +207,33 @@ function StudioReady({ userId, initial, switchSpace }: {
     if (swipeAt >= 0 && next) navigate(next)
   }
   const swipe = useSwipeNav(() => swipeTo(1), () => swipeTo(-1))
-  // El botón de la sección actual siempre a la vista en la barra que se desliza
+  // El botón de la sección actual siempre a la vista en la barra que se desliza, y la cápsula de luz que lo marca
+  // viaja hasta él (posición en --st-ind-x / --st-ind-w; is-moving dispara el barrido de luz)
   const bottomNav = useRef<HTMLElement | null>(null)
-  useEffect(() => {
+  const placeIndicator = useCallback((animate: boolean) => {
+    const nav = bottomNav.current
+    if (!nav) return
+    const active = nav.querySelector<HTMLElement>('a[aria-current="page"]')
+    nav.classList.toggle('has-active', !!active)
+    if (!active) return
+    nav.style.setProperty('--st-ind-x', `${active.offsetLeft}px`)
+    nav.style.setProperty('--st-ind-w', `${active.offsetWidth}px`)
+    if (!animate) return
+    nav.classList.remove('is-moving')
+    void nav.offsetWidth
+    nav.classList.add('is-moving')
+  }, [])
+  const firstPlace = useRef(true)
+  useLayoutEffect(() => {
+    placeIndicator(!firstPlace.current)
+    firstPlace.current = false
     bottomNav.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
-  }, [location.pathname])
+  }, [location.pathname, placeIndicator])
+  useEffect(() => {
+    const onResize = () => placeIndicator(false)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [placeIndicator])
   const signOut = useAuthStore(s => s.signOut)
   const siteFlags = useSiteFlags()
   const t = useStudioT()
@@ -465,7 +488,14 @@ function StudioReady({ userId, initial, switchSpace }: {
         </div>
 
         {/* En un portal a <body>: ningún contenedor puede alterar su position: fixed */}
-        {createPortal(<nav ref={bottomNav} className="st-bottom-nav" aria-label="Studio" data-mycen-theme={theme} dir={dir}>
+        {createPortal(<>
+        {/* De la identidad a Life OS: la huella flotando arriba de la barra, al medio */}
+        <a href="/life" className="st-life-fab" aria-label={t.nav.life} title={t.nav.life} data-mycen-theme={theme}>
+          <span className="st-life-fab-ring" aria-hidden="true" />
+          <HuellaMark id="studio-life" size={36} animated />
+        </a>
+        <nav ref={bottomNav} className="st-bottom-nav" aria-label="Studio" data-mycen-theme={theme} dir={dir}>
+          <span className="st-nav-indicator" aria-hidden="true" />
           {MOBILE_NAV.map(item => (
             <NavLink key={item.to} to={item.to} end={item.end} title={t.nav[item.label]}
               aria-label={item.label === 'more' && unread ? `${t.nav.more}, ${t.messages.unread.replace('{n}', String(unread))}` : t.nav[item.label]}>
@@ -475,12 +505,8 @@ function StudioReady({ userId, initial, switchSpace }: {
               {item.label === 'more' && <UnreadBadge count={unread} label={t.messages.unread} />}
             </NavLink>
           ))}
-          {/* De la identidad a Life OS sin pasar por "Más" */}
-          <a href="/life" title={t.nav.life}>
-            <Sparkles size={21} aria-hidden="true" />
-            <span className="st-nav-label">{t.nav.life}</span>
-          </a>
-        </nav>, document.body)}
+        </nav>
+        </>, document.body)}
       </div>
     </StudioContext.Provider>
   )

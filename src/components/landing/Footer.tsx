@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
 import { useSiteFlags } from '@/lib/siteFlags'
+import { HuellaMark } from '@/components/ui/HuellaMark'
 
 const CONTACT_EMAIL = 'team@mycen.id'
 
@@ -28,23 +29,24 @@ export function Footer() {
   return (
     <footer style={{
       background: '#0F1115',
-      padding: '32px 24px',
+      padding: '40px 24px calc(32px + env(safe-area-inset-bottom))',
       fontFamily: 'var(--font-jakarta)',
     }}>
+      {/* Todo centrado en columna: la huella, los links y la firma */}
       <div style={{
         maxWidth: '1280px', margin: '0 auto',
-        display: 'flex', flexWrap: 'wrap',
-        alignItems: 'center', justifyContent: 'space-between',
-        gap: '16px',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', textAlign: 'center',
+        gap: '20px',
       }}>
-        <Link to="/" data-rise style={{ display: 'flex', flexDirection: 'column', gap: '6px', textDecoration: 'none' }}>
-          <img src="/logo.png" alt="Mycen" width={28} height={28} loading="lazy" style={{ height: '28px', width: '28px', objectFit: 'contain', flexShrink: 0, opacity: 0.7 }} />
+        <Link to="/" aria-label="Mycen" data-rise style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          <HuellaMark id="footer" size={44} animated />
           <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-jakarta)' }}>
             © Mycen 2026
           </span>
         </Link>
 
-        <nav data-rise style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' }}>
+        <nav data-rise style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 24px', alignItems: 'center', justifyContent: 'center' }}>
           {anchors.map(link => (
             <a key={link.href} href={link.href} style={linkStyle} {...hover}>{link.label}</a>
           ))}

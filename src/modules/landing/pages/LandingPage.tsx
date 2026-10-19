@@ -20,6 +20,7 @@ import { FinalCTA }             from '@/components/landing/FinalCTA'
 import { FAQSection }           from '@/components/landing/FAQSection'
 import { Footer }               from '@/components/landing/Footer'
 import { ReferralHeroSection } from '@/components/landing/ReferralHeroSection'
+import { SectionLink }          from '@/components/landing/SectionLink'
 import { useLandingLocale }     from '../lib/useLandingLocale'
 import { useSiteFlags }         from '@/lib/siteFlags'
 
@@ -43,6 +44,14 @@ export function LandingPage() {
   const ready = shown >= REST
   // Los efectos de movimiento se enganchan cuando ya está toda la página
   useLandingMotion(rootRef, ready ? lang : null)
+  // La página entera del color del footer: al llegar al final (o con el rebote del celular) no aparece el fondo claro
+  // de la app debajo
+  useEffect(() => {
+    const html = document.documentElement.style, body = document.body.style
+    const prev = [html.background, body.background]
+    html.background = body.background = 'var(--ml-dark)'
+    return () => { html.background = prev[0]; body.background = prev[1] }
+  }, [])
   // Anclas (#soluciones, #pricing, #faq) con desplazamiento suave por JS. No se usa `scroll-behavior: smooth` en <html>:
   // con el hero fijado por ScrollTrigger hace que el scroll se trabe y salte.
   useEffect(() => {
@@ -74,17 +83,18 @@ export function LandingPage() {
         {/* Cinta con los 12 idiomas */}
         {shown > 0 && <LanguageMarquee />}
 
+        {/* Entre sección y sección, un hilo (SectionLink) une la página en un solo recorrido */}
         {/* Section 2 — Problema / Fragmentación */}
-        {shown > 1 && <FragmentationSection />}
+        {shown > 1 && <><SectionLink /><FragmentationSection /></>}
 
         {/* Section 3 — Solución / Todo conectado */}
-        {shown > 2 && <div id="soluciones"><SolutionSection /></div>}
+        {shown > 2 && <><SectionLink /><div id="soluciones"><SolutionSection /></div></>}
 
         {/* Las cinco estructuras del perfil y los dos temas (imágenes de ejemplo) */}
-        {shown > 3 && <StructuresSection />}
+        {shown > 3 && <><SectionLink /><StructuresSection /></>}
 
         {/* Section 4 — Mycen Personal / Life OS (con "Mi día") */}
-        {shown > 4 && <LifeOSSection />}
+        {shown > 4 && <><SectionLink /><LifeOSSection /></>}
 
         {/* Section 5 — Mycen Business */}
         {shown > 5 && business && <BusinessSection />}
@@ -96,13 +106,13 @@ export function LandingPage() {
         {shown > 7 && business && <div id="pricing"><PricingSection /></div>}
 
         {/* Section 7 — Visión */}
-        {shown > 8 && <VisionSection />}
+        {shown > 8 && <><SectionLink /><VisionSection /></>}
 
         {/* Section 8 — CTA Final */}
-        {shown > 9 && <FinalCTA />}
+        {shown > 9 && <><SectionLink /><FinalCTA /></>}
 
         {/* Section 9 — FAQ */}
-        {shown > 10 && <FAQSection />}
+        {shown > 10 && <><SectionLink /><FAQSection /></>}
       </main>
 
       {ready && <Footer />}

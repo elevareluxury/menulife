@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
 
-// Studio en el celular: la barra de abajo trae Módulos, Apariencia y Life OS (se desliza de costado si no entra) y
+// Studio en el celular: la barra de abajo trae Módulos y Apariencia (se desliza de costado si no entra), Life OS es la
+// huella que flota arriba de la barra al medio, y
 // deslizar la página pasa a la sección de al lado.
 
 async function swipe(page: Page, from: number, to: number, y = 160) {
@@ -16,18 +17,35 @@ async function swipe(page: Page, from: number, to: number, y = 160) {
 
 test.use({ viewport: { width: 375, height: 667 }, hasTouch: true, isMobile: true })
 
-test('la barra de abajo trae Módulos, Apariencia y Life OS, y se desliza si no entra', async ({ page, context }) => {
+test('la barra de abajo trae Módulos y Apariencia, se desliza si no entra, y Life OS está en la huella', async ({ page, context }) => {
   await installSupabaseMock(context, createState({ profiles: [profileRow()] }), { signedIn: true })
   await page.goto('/studio')
   const nav = page.getByRole('navigation', { name: 'Studio' }).last()
-  for (const name of ['Inicio', 'Editar', 'Módulos', 'Apariencia', 'Compartir', 'Mis Spaces', 'Más', 'Life OS']) {
+  for (const name of ['Inicio', 'Editar', 'Módulos', 'Apariencia', 'Compartir', 'Mis Spaces', 'Más']) {
     await expect(nav.getByRole('link', { name, exact: true })).toHaveCount(1)
   }
   expect(await nav.evaluate(el => el.scrollWidth > el.clientWidth)).toBe(true)
 
+  await expect(nav.getByRole('link', { name: 'Life OS' })).toHaveCount(0)
+
+  // La cápsula de luz marca la sección y viaja al botón que se toca
+  const indicator = page.locator('.st-nav-indicator')
+  const x0 = await indicator.evaluate(el => el.getBoundingClientRect().x)
   await nav.getByRole('link', { name: 'Módulos', exact: true }).click()
   await expect(page).toHaveURL(/\/studio\/modules$/)
-  await expect(nav.getByRole('link', { name: 'Life OS' })).toHaveAttribute('href', '/life')
+  const target = (await nav.getByRole('link', { name: 'Módulos', exact: true }).boundingBox())!
+  await expect.poll(async () => Math.round(await indicator.evaluate(el => el.getBoundingClientRect().x))).toBe(Math.round(target.x))
+  expect(Math.round(target.x)).not.toBe(Math.round(x0))
+
+  // Life OS: la huella arriba de la barra, al medio
+  const life = page.locator('.st-life-fab')
+  await expect(life).toHaveAttribute('href', '/life')
+  await expect(life).toHaveAccessibleName('Life OS')
+  const fab = (await life.boundingBox())!
+  const bar = (await nav.boundingBox())!
+  expect(fab.y + fab.height).toBeLessThan(bar.y)
+  expect(Math.abs(fab.x + fab.width / 2 - 375 / 2)).toBeLessThan(2)
+  await page.screenshot({ path: 'test-results/studio-nav-huella.png' })
 })
 
 test('deslizar la página pasa a la sección de al lado; dentro de un editor abierto, no', async ({ page, context }) => {
