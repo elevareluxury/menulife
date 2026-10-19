@@ -25,7 +25,8 @@ export default defineConfig({
   // Las capturas (visual, modules) se llaman sin el nombre del proyecto, como antes de tener proyectos
   expect: { toHaveScreenshot: { pathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-snapshotSuffix}{ext}' } },
   projects: [
-    { name: 'app', testIgnore: /captcha\.spec\.ts$/ },
+    // prod-smoke.spec.ts es para el build (vite preview, con la CSP): corre con npm run test:e2e:prod
+    { name: 'app', testIgnore: [/captcha\.spec\.ts$/, /prod-smoke\.spec\.ts$/] },
     { name: 'captcha', testMatch: /captcha\.spec\.ts$/, use: { baseURL: `http://localhost:${PORT + 1}` } },
   ],
   webServer: [

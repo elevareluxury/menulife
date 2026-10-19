@@ -7,6 +7,13 @@ import { heroShellPlugin } from './scripts/heroShell'
 import { bootSplashPlugin } from './scripts/bootSplash'
 import { profilePrefetchPlugin } from './scripts/profilePrefetch'
 import { businessI18nPlugin } from './scripts/businessI18n'
+import { readFileSync } from 'fs'
+
+// La CSP de producción (vercel.json) también en `vite preview`: el humo del build (npm run test:e2e:prod) corre con
+// ella y falla si algo la viola. scripts/check-csp.mjs verifica al compilar que cubre los scripts en línea del HTML.
+type VercelConfig = { headers?: { source: string; headers: { key: string; value: string }[] }[] }
+const vercelCsp = (JSON.parse(readFileSync(path.resolve(__dirname, 'vercel.json'), 'utf8')) as VercelConfig).headers
+  ?.find(r => r.source === '/(.*)')?.headers.find(h => h.key === 'Content-Security-Policy')?.value
 
 export default defineConfig({
   plugins: [
@@ -74,6 +81,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  preview: {
+    headers: vercelCsp ? { 'Content-Security-Policy': vercelCsp } : {},
   },
   build: {
     // manifest.json: lo usa scripts/check-bundle-budget.mjs para medir lo que descarga cada página

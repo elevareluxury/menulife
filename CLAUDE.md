@@ -156,6 +156,17 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   las rutas privadas terminan en `/` o `$` para no bloquear usernames que empiezan igual (lo verifica `tests/unit/sitemap.test.ts`).
 - El HTML para buscadores (`api/og.ts`) declara `<html lang>` con el `default_locale` del perfil.
 
+## Seguridad
+- CSP en `vercel.json` (regla `/(.*)`): `script-src 'self'` + un `'sha256-…'` por cada `<script>` en línea de `index.html`
+  (datos del perfil desde el HTML, esqueleto del hero y pantalla de carga). Lo que cambia (textos, Supabase, archivos del
+  build) va en un `<script type="application/json">` que no se ejecuta: el script queda fijo y su hash no cambia entre
+  builds ni entornos. `npm run build` termina con `scripts/check-csp.mjs`, que falla si falta o sobra un hash (y dice cuál poner) o si
+  aparece un `<script src>` de otro origen o un `on…=` en línea. Nunca `'unsafe-inline'` en scripts. Único origen externo
+  de scripts: `https://challenges.cloudflare.com` (Turnstile, CAPTCHA del registro; también en `frame-src`). Un iframe o una
+  conexión de un tercero nuevo se suma en `frame-src`/`connect-src`. `vite preview` manda la misma CSP y
+  `npm run test:e2e:prod` falla con cualquier violación. El service worker no intercepta otros orígenes (salvo Supabase).
+- Límite de pedidos en `/api`: reglas del Vercel Firewall (panel), pasos en `docs/lanzamiento/firewall-api.md`.
+
 ## Idioma y región
 - 12 idiomas: es, en, pt, fr, de, it, zh, ja, ko, hi, ar (RTL), ru — lista en `src/i18n/app/languages.ts`
   (sincronizada con los checks de `user_settings.language` y `profiles.default_locale`).

@@ -59,6 +59,10 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  // Otros orígenes (portadas de YouTube/Spotify, imágenes de terceros…): los pide el navegador directo. Desde acá
+  // serían un fetch() del service worker, que la CSP limita con connect-src (sólo Mycen y Supabase) y fallaría.
+  if (url.origin !== self.location.origin) return
+
   // Fuentes (servidas por Mycen) — Cache First
   if (request.destination === 'font') {
     event.respondWith(cacheFirst(request, FONT_CACHE))

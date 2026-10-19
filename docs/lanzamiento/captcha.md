@@ -16,8 +16,8 @@ Frena cuentas creadas por bots (auditoría de seguridad del 18/10/2026, B11 del 
   verificación". Si Supabase lo rechaza ("captcha verification process failed") se explica y se pide un token nuevo.
 - El "Enviar email de reset" del super-admin no tiene recuadro: con el CAPTCHA prendido avisa que la persona lo pida
   desde "¿Olvidaste tu contraseña?" (antes decía "enviado" aunque fallara).
-- La CSP (`vercel.json`) permite el iframe de `https://challenges.cloudflare.com` (`frame-src`); si se agrega `script-src`,
-  tiene que incluir ese origen.
+- La CSP (`vercel.json`) permite `https://challenges.cloudflare.com` en `script-src` (el script del widget) y en
+  `frame-src` (su iframe).
 - Privacidad: Cloudflare (Turnstile) figura entre los proveedores en los 12 idiomas.
 - Código: `src/lib/turnstile.ts`, `src/modules/auth/components/Captcha.tsx`. Tests: `tests/unit/turnstile.test.ts` y
   `tests/e2e/captcha.spec.ts` (proyecto "captcha" de Playwright, con la clave y el widget simulado).
