@@ -5,11 +5,13 @@ on:
   push:
     branches: [main]
 
+# Los E2E de Playwright (~380 pruebas, 12 a 16 min en una sola máquina) se reparten en 4 partes que corren a la vez,
+# en paralelo con lint, unitarias, build y humo. El job final "checks" junta todo: es el nombre que se mira para mergear.
 jobs:
-  checks:
+  estatico:
+    name: Lint, unitarias, build y humo
     runs-on: ubuntu-latest
-    # Los E2E solos ya tardan ~17 min: con 20 el trabajo se cortaba al final aunque todo pasara
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,6 +28,7 @@ jobs:
       - name: Tests unitarios (+ tipos de los tests)
         run: npm test
 
+      # Incluye el chequeo de la CSP (scripts/check-csp.mjs)
       - name: Build
         run: npm run build
         env:
@@ -35,23 +38,64 @@ jobs:
       - name: Peso de las páginas públicas (presupuesto)
         run: node scripts/check-bundle-budget.mjs
 
-      - name: Navegador para E2E
-        run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/playwright-chromium
 
-      - name: Tests E2E
-        run: npm run test:e2e
-
-      # El build de producción (el de recién): cada pantalla abre sin "Algo salió mal" (los E2E de arriba usan el
-      # servidor de desarrollo, que no empaqueta; así se escapó Analítica rota en 2026-10)
+      # El build de producción (el de recién): cada pantalla abre sin "Algo salió mal" (los E2E usan el servidor de
+      # desarrollo, que no empaqueta; así se escapó Analítica rota en 2026-10)
       - name: Humo del build de producción
         run: npm run test:e2e:prod
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-traces
+          name: playwright-traces-humo
           path: test-results/
           retention-days: 7
+
+  e2e:
+    name: E2E ${{ matrix.shard }}/4
+    runs-on: ubuntu-latest
+    # Cada parte tarda ~4 min; el margen es para un día lento de los runners
+    timeout-minutes: 15
+    strategy:
+      # Que terminen todas las partes aunque falle una, para ver todas las fallas de una vez
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - uses: ./.github/actions/playwright-chromium
+
+      # Los E2E corren contra el servidor de desarrollo (Vite): no necesitan el build
+      - name: Tests E2E (parte ${{ matrix.shard }} de 4)
+        run: npx playwright test --shard=${{ matrix.shard }}/4
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 7
+
+  # El check que se mira en los PR (antes era un solo job con todo): pasa sólo si pasaron todas las partes
+  checks:
+    if: always()
+    needs: [estatico, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Resultado de todas las partes
+        run: |
+          echo "Lint, unitarias, build y humo: ${{ needs.estatico.result }}"
+          echo "E2E (4 partes): ${{ needs.e2e.result }}"
+          test "${{ needs.estatico.result }}" = success
+          test "${{ needs.e2e.result }}" = success
 
   database:
     # Migraciones de Identity sobre un Postgres real + tests/db/*.test.sql (RPC, permisos, versiones)

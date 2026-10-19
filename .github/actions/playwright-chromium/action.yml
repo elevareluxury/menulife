@@ -1,0 +1,28 @@
+name: Chromium de Playwright
+description: Instala el Chromium de Playwright con caché (la versión sale de node_modules) y las dependencias del sistema
+
+runs:
+  using: composite
+  steps:
+    - name: Versión de Playwright
+      id: version
+      shell: bash
+      run: echo "playwright=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    - name: Caché del navegador
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-chromium-${{ runner.os }}-${{ steps.version.outputs.playwright }}
+
+    - name: Navegador para E2E
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: npx playwright install --with-deps chromium
+
+    # Con el navegador en caché faltan sólo las librerías del sistema (no se guardan en la caché)
+    - name: Dependencias del sistema para el navegador
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: npx playwright install-deps chromium
