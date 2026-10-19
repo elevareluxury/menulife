@@ -1,7 +1,10 @@
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { describe, expect, it } from 'vitest'
-import { RESERVED_USERNAMES } from '@/lib/reservedUsernames'
+import {
+  BLOCKED_USERNAMES, BRAND_USERNAMES, RESERVED_USERNAMES, STAFF_USERNAMES, SYSTEM_USERNAMES, isReservedUsername,
+  isSystemUsername,
+} from '@/lib/reservedUsernames'
 
 // La lista de usernames reservados vive en 3 lugares (docs/identity/03, R11). Este test falla si se desincronizan.
 
@@ -37,9 +40,25 @@ describe('usernames reservados', () => {
     expect([...RESERVED_USERNAMES].sort()).toEqual([...sqlReserved()].sort())
   })
 
-  it('api/og.ts no reserva nada que la app permita', () => {
-    const extra = [...ogReserved()].filter(u => !RESERVED_USERNAMES.has(u))
+  it('api/og.ts sólo saltea rutas del sistema (no marcas ni insultos: esos perfiles viejos siguen visibles)', () => {
+    const extra = [...ogReserved()].filter(u => !SYSTEM_USERNAMES.has(u))
     expect(extra).toEqual([])
+  })
+
+  it('las listas nuevas no se pisan y cada nombre podría ser un username (si no, reservarlo no sirve)', () => {
+    const lists = [STAFF_USERNAMES, BRAND_USERNAMES, BLOCKED_USERNAMES]
+    const all = [...SYSTEM_USERNAMES, ...lists.flatMap(l => [...l])]
+    expect(all.length).toBe(RESERVED_USERNAMES.size)
+    const format = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/
+    const bad = lists.flatMap(l => [...l]).filter(u => !format.test(u) || u.includes('--'))
+    expect(bad).toEqual([])
+  })
+
+  it('reserva marcas, equipo e insultos, pero sólo las rutas cuentan como página del sistema', () => {
+    for (const u of ['PayPal', 'mycen-support', 'verificado', 'hitler', 'dashboard']) expect(isReservedUsername(u)).toBe(true)
+    expect(isReservedUsername('ana-garcia')).toBe(false)
+    expect(isSystemUsername('dashboard')).toBe(true)
+    expect(isSystemUsername('apple')).toBe(false)
   })
 
   it('cada ruta de primer nivel de la app está reservada (nadie puede tomarla como username)', () => {

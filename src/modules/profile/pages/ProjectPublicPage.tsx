@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { isReservedUsername } from '@/lib/reservedUsernames'
+import { isSystemUsername } from '@/lib/reservedUsernames'
 import { useAppLang } from '@/i18n/app/store'
 import { setLocalLanguage } from '@/lib/prefs'
 import { fetchPublicProject } from '../lib/profileApi'
@@ -33,7 +33,7 @@ export function ProjectPublicPage() {
   const key = `${slug}/${projectSlug}#${attempt}`
 
   useEffect(() => {
-    if (isReservedUsername(slug)) { navigate('/', { replace: true }); return }
+    if (isSystemUsername(slug)) { navigate('/', { replace: true }); return }
     let cancelled = false
     fetchPublicProject(slug, projectSlug)
       .then(result => {
