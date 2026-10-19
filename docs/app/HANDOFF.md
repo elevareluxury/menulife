@@ -23,8 +23,8 @@ Android") y `docs/app/README.md`.
 4. App Store 4.8: `oauthProviders()` en `googleSignIn.ts` — en iPhone, Google sólo si `appleSignIn` está prendido.
 5. App Store 5.1.1(v): "Eliminar mi cuenta" también en Life OS → Ajustes → Cuenta (con palabra de confirmación;
    `LifeConfirmDialog` suma `confirmDisabled`; textos en los 12 idiomas en `src/i18n/app/life/*`).
-6. Dictado apagado en Android (el WebView no reconoce voz); huella del diario apagada en la app (sólo PIN).
-7. iOS: `NSMicrophoneUsageDescription` y `NSSpeechRecognitionUsageDescription` en `Info.plist` + 12 `InfoPlist.strings`;
+6. Dictado apagado en la app (iOS y Android); huella del diario apagada en la app (sólo PIN).
+7. iOS: sin `NSMicrophoneUsageDescription` ni `NSSpeechRecognitionUsageDescription` (sin dictado en la app); textos de cámara y fotos en `Info.plist` + 12 `InfoPlist.strings`;
    `PrivacyInfo.xcprivacy` (registrado en el pbxproj) igual a `docs/app/STORE.md`.
 8. Versión 1.0.0 en iOS (`MARKETING_VERSION`) y Android (`versionName`).
 9. Sesión respaldada en las preferencias nativas: `src/lib/nativeAuthStorage.ts` (dependencia nueva

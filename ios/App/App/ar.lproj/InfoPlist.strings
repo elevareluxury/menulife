@@ -1,7 +1,5 @@
 /* Textos de los permisos de iOS (ar). Mantener los 12 idiomas (docs/app/README.md). */
 "CFBundleDisplayName" = "Mycen";
-"NSCameraUsageDescription" = "يستخدم Mycen الكاميرا لتلتقط صورة لملفك الشخصي أو لمشاريعك.";
-"NSPhotoLibraryUsageDescription" = "يصل Mycen إلى صورك لتختار صورة لملفك الشخصي أو لمشاريعك.";
+"NSCameraUsageDescription" = "يستخدم Mycen الكاميرا فقط عندما تلتقط صورة لملفك الشخصي أو صورة الغلاف أو مشاريعك.";
+"NSPhotoLibraryUsageDescription" = "يفتح Mycen صورك فقط عندما تختار صورة لملفك الشخصي أو صورة الغلاف أو مشاريعك.";
 "NSPhotoLibraryAddUsageDescription" = "يحفظ Mycen رمز QR وبطاقة هويتك في الصور عندما تطلب ذلك.";
-"NSMicrophoneUsageDescription" = "يستخدم Mycen الميكروفون فقط أثناء إملاء مصروف أو مهمة أو فكرة.";
-"NSSpeechRecognitionUsageDescription" = "يحوّل Mycen ما تمليه إلى نص لتراجعه قبل الحفظ.";

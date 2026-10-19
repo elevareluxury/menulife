@@ -47,10 +47,113 @@ Palabras clave (es): `link en bio,perfil,hábitos,tareas,metas,diario,presupuest
   financiera de Dinero, id de cuenta, uso de la app y errores no vinculados); si cambia esta lista, cambiarlo también.
 - Export compliance: sólo cifrado estándar (`ITSAppUsesNonExemptEncryption = false` ya está en Info.plist).
 
-## Revisión de Apple: notas para el revisor
-- Cuenta de prueba: crear una con email (sin datos reales) y ponerla en "App Review Information".
-- "La app no cobra nada; los módulos Apoyame/Mercado Pago son links del dueño del perfil a sus propios medios."
+## Revisión de Apple
 - Contenido de otras personas (guía 1.2): denunciar un perfil ("Denunciar" en cada perfil público) y, en Studio →
   Mensajes, reportar un mensaje al equipo o bloquear a quien lo escribió. El equipo lo revisa en el panel (Denuncias).
-- "Entrar con Apple" está junto a "Continuar con Google" (guía 4.8). Mientras `appleSignIn` esté apagado, la app de
-  iPhone no muestra Google (`oauthProviders()` en `googleSignIn.ts`): se entra con email.
+- "Entrar con Apple" va junto a "Continuar con Google" (guía 4.8). Mientras `appleSignIn` esté apagado, la app de
+  iPhone no muestra Google (`oauthProviders()` en `googleSignIn.ts`): se entra con email. Si prendés Apple, cambiá el
+  párrafo "SIGN-IN" de las notas de abajo.
+- Permisos de iOS (`Info.plist` y los 12 `InfoPlist.strings`): sólo cámara y fotos (foto de perfil, portada e imágenes
+  de proyectos) y guardar en Fotos (QR y tarjeta). Sin micrófono ni reconocimiento de voz: "Dictar" no se ofrece en la
+  app (`speechSupported()` en `useSpeech.ts`). Si vuelve el dictado nativo, declarar los dos permisos de nuevo.
+
+### Antes de mandar a revisión
+- [ ] **Cuenta de prueba** con email (sin datos reales) y con contenido: perfil publicado con foto, portada y algunos
+      módulos; en Life OS, tareas, hábitos, una meta y movimientos de dinero. Que **tenga al menos un mensaje
+      recibido** en Studio → Mensajes (mandalo desde el formulario de contacto de su perfil) para probar reportar y bloquear.
+- [ ] **Un segundo perfil publicado** (de otra cuenta tuya) para que el revisor pruebe "Report": en el perfil propio
+      el botón no aparece. Reemplazá `<PERFIL_DE_EJEMPLO>` en las notas.
+- [ ] La cuenta de prueba entra **en la build de TestFlight** (no sólo en la web), con el email y la contraseña tal
+      cual van en "App Review Information".
+- [ ] **TestFlight probado en un iPhone real:** entrar, crear una tarea con recordatorio y recibirlo con la app
+      cerrada, compartir el perfil, subir una foto (cámara y galería), modo avión y volver, borrar una cuenta de prueba.
+- [ ] Links universales: `https://mycen.id/.well-known/apple-app-site-association` responde con tu Team ID y un link
+      de mycen.id abre la app.
+- [ ] **team@mycen.id recibe mails** (mandá uno de prueba desde otra casilla) y https://mycen.id/soporte,
+      /privacidad y /eliminar-cuenta abren sin entrar a la cuenta.
+- [ ] Capturas subidas (iPhone 6,9" obligatorias) y ficha completa: subtítulo, descripción, palabras clave,
+      categoría, clasificación por edad, URL de soporte y de privacidad, etiqueta de privacidad igual a la de arriba.
+- [ ] "App Review Information": nombre, teléfono y email de contacto, la cuenta de prueba y las notas de abajo con
+      los marcadores reemplazados.
+- [ ] Versión y build en Xcode (`MARKETING_VERSION` 1.0.0, número de build mayor al último que subiste).
+
+### Notas para el revisor (copiar y pegar en "App Review Information → Notes")
+En inglés porque los revisores leen inglés. Reemplazá `<EMAIL_DE_PRUEBA>`, `<CONTRASEÑA>` y `<PERFIL_DE_EJEMPLO>`.
+El campo admite hasta 4000 caracteres y este bloque entra.
+
+```text
+ABOUT THE APP
+Mycen has two parts in one app:
+- Studio: you build your own public page (mycen.id/your-name) with links, social profiles, projects, music, videos and a contact form, and share it with a link or QR code.
+- Life OS: a private daily planner with your top 3 priorities, tasks with reminders, habits, goals, a private journal and a money tracker with budgets.
+The app uses the device language (12 languages). Everything is free.
+
+SIGN-IN
+Use this demo account (email and password):
+Email: <EMAIL_DE_PRUEBA>
+Password: <CONTRASEÑA>
+In this version the iPhone app only offers email sign-in. It shows no third-party login (Google or other) on iOS, so guideline 4.8 does not apply. Sign in with Apple will be added next to Google in a later version.
+
+ACCOUNT DELETION (5.1.1(v))
+Inside the app, from either part:
+- Studio > Settings > "Delete my account"
+- Life OS > Settings > Account > "Delete my account"
+After typing a confirmation word, the account and all its data are deleted right away. It is also available on the web at https://mycen.id/eliminar-cuenta.
+
+USER-GENERATED CONTENT (1.2)
+- Report a profile: open any public profile, for example https://mycen.id/<PERFIL_DE_EJEMPLO> (it opens in the app), scroll to the footer and tap "Report". Choose a reason and send it. The button is not shown on your own profile.
+- Report or block a message: Studio > Messages, open a message and tap "Report" (sends it to our team and blocks the sender) or "Block". The demo account already has a message to try this.
+- Our team reviews every report in an internal moderation panel and removes content or accounts that break our content rules. Contact: team@mycen.id.
+
+PAYMENTS (3.1)
+The app sells nothing: no subscriptions, no in-app purchases, no digital goods, and no prices or plans in the app. The optional "Support me" module on a profile only shows links and bank aliases added by the profile owner (Mercado Pago, PayPal, Ko-fi, etc.), which open outside the app. Mycen does not process these payments or take any part of them.
+
+NATIVE FEATURES (4.2)
+- Task and habit reminders are scheduled as local notifications on the device and arrive even when the app is closed.
+- The native share sheet is used to share the profile, QR code, contact card (vCard), calendar file and data export.
+- Universal Links: mycen.id links open directly in the app.
+- Offline mode: quick capture in Life OS works without a connection and syncs when the network returns.
+- The session is kept in native storage. Camera and photo library are used for the profile picture, cover and project images, and Photos to save the QR code and identity card.
+
+PERMISSIONS
+Only camera, photo library and "add to Photos", each requested when you use that feature. The app does not use the microphone, location or tracking.
+```
+
+### Las mismas notas en español (para vos; no se pegan)
+```text
+SOBRE LA APP
+Mycen tiene dos partes en una app:
+- Studio: armás tu página pública (mycen.id/tu-nombre) con links, redes, proyectos, música, videos y un formulario de contacto, y la compartís con un link o un QR.
+- Life OS: un planificador privado del día con tus 3 prioridades, tareas con recordatorios, hábitos, metas, un diario privado y tu dinero con presupuestos.
+La app usa el idioma del teléfono (12 idiomas). Todo es gratis.
+
+CÓMO ENTRAR
+Con esta cuenta de prueba (email y contraseña):
+Email: <EMAIL_DE_PRUEBA>
+Contraseña: <CONTRASEÑA>
+En esta versión la app de iPhone sólo ofrece entrar con email. No muestra ningún acceso de terceros (Google ni otro) en iOS, así que la guía 4.8 no aplica. "Entrar con Apple" se suma junto a Google en una próxima versión.
+
+BORRAR LA CUENTA (5.1.1(v))
+Desde la app, en cualquiera de las dos partes:
+- Studio > Ajustes > "Eliminar mi cuenta"
+- Life OS > Ajustes > Cuenta > "Eliminar mi cuenta"
+Después de escribir una palabra de confirmación, la cuenta y todos sus datos se borran en el momento. También en la web: https://mycen.id/eliminar-cuenta.
+
+CONTENIDO DE OTRAS PERSONAS (1.2)
+- Denunciar un perfil: abrí cualquier perfil público, por ejemplo https://mycen.id/<PERFIL_DE_EJEMPLO> (se abre en la app), bajá al pie y tocá "Denunciar". Elegí un motivo y enviá. En el perfil propio el botón no aparece.
+- Reportar o bloquear un mensaje: Studio > Mensajes, abrí un mensaje y tocá "Reportar" (lo manda al equipo y bloquea a quien lo escribió) o "Bloquear". La cuenta de prueba ya tiene un mensaje para probarlo.
+- El equipo revisa cada denuncia en un panel interno de moderación y saca el contenido o las cuentas que no cumplen las reglas. Contacto: team@mycen.id.
+
+PAGOS (3.1)
+La app no vende nada: ni suscripciones, ni compras dentro de la app, ni bienes digitales, ni precios o planes adentro. El módulo opcional "Apoyame" de un perfil sólo muestra links y alias que carga el dueño del perfil (Mercado Pago, PayPal, Ko-fi, etc.), que se abren fuera de la app. Mycen no procesa esos pagos ni se queda con nada.
+
+LO NATIVO (4.2)
+- Los recordatorios de tareas y hábitos se programan como notificaciones locales en el teléfono y llegan con la app cerrada.
+- El menú nativo de compartir se usa para el perfil, el QR, la tarjeta de contacto (vCard), el calendario y la exportación de datos.
+- Links universales: los links de mycen.id abren directo la app.
+- Sin conexión: la captura rápida de Life OS funciona sin red y se sincroniza cuando vuelve.
+- La sesión se guarda en el almacenamiento nativo. La cámara y las fotos se usan para la foto de perfil, la portada y las imágenes de proyectos, y Fotos para guardar el QR y la tarjeta de identidad.
+
+PERMISOS
+Sólo cámara, fotos y "agregar a Fotos", cada uno cuando usás esa función. La app no usa el micrófono, la ubicación ni el rastreo.
+```
