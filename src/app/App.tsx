@@ -143,7 +143,12 @@ function App() {
       <TermsGate />
       <PrefsInit />
       <OfflineBanner />
-      <Toaster position="top-right" containerStyle={{ bottom: 'calc(96px + env(safe-area-inset-bottom))' }} />
+      {/* Abierta desde el inicio, la app ocupa también la zona de la hora y la cámara: los avisos bajan lo justo para no
+          quedar tapados (sin muesca, safe-area-inset-top es 0 y quedan donde estaban) */}
+      <Toaster position="top-right" containerStyle={{
+        top: 'calc(16px + env(safe-area-inset-top))',
+        bottom: 'calc(96px + env(safe-area-inset-bottom))',
+      }} />
 
       <Suspense fallback={<RouteLoading />}>
         <BootSplashDone />
