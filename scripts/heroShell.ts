@@ -45,10 +45,10 @@ export function heroShellPlugin(): Plugin {
   return {
     name: 'mycen-hero-shell',
     transformIndexHtml(html, ctx) {
-      // En el build, precarga Geist (latin 300 y 700, las del hero) para que el esqueleto ya se pinte con la fuente
+      // En el build, precarga Geist (latin 300 y 600, las del hero) para que el esqueleto ya se pinte con la fuente
       // final: así el hero de React no cambia de tamaño al reemplazarlo
       const fonts = ctx.bundle
-        ? Object.keys(ctx.bundle).filter(f => /geist-latin-(300|700)-normal-[\w-]+\.woff2$/.test(f))
+        ? Object.keys(ctx.bundle).filter(f => /geist-latin-(300|600)-normal-[\w-]+\.woff2$/.test(f))
         : []
       const preload = fonts.map(f => `<link rel="preload" href="/${f}" as="font" type="font/woff2" crossorigin />`).join('\n    ')
       return html

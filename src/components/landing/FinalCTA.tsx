@@ -59,7 +59,7 @@ export function FinalCTA() {
 
         <h2 ref={titleRef} data-split style={{
           fontFamily:    'var(--font-syne)',
-          fontWeight:    800,
+          fontWeight:    700,
           fontSize:      'clamp(44px, 7vw, 80px)',
           lineHeight:    1.06,
           color:         '#fff',

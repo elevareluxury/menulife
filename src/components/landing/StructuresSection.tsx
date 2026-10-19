@@ -22,7 +22,7 @@ export function StructuresSection() {
             color: 'var(--ml-salmon)', fontFamily: 'var(--font-jakarta)', marginBottom: '12px',
           }}>{t.label}</p>
           <h2 id="ml-structures" data-split style={{
-            fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
+            fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: 'clamp(32px,5vw,56px)', color: '#fff',
             lineHeight: 1.1, margin: '0 0 16px',
           }}>
             <SplitText text={t.title} />{' '}

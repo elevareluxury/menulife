@@ -62,7 +62,7 @@ export function TestimonialsSection() {
           {t.label}
         </p>
         <h2 style={{
-          fontFamily: 'var(--font-syne)', fontWeight: 800,
+          fontFamily: 'var(--font-syne)', fontWeight: 700,
           fontSize: 'clamp(36px,5vw,56px)', color: '#fff', lineHeight: 1.1, margin: 0,
         }} data-split>
           <SplitText text={t.title} />{' '}
