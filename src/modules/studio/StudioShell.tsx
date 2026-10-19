@@ -210,6 +210,29 @@ function StudioReady({ userId, initial, switchSpace }: {
   // El botón de la sección actual siempre a la vista en la barra que se desliza, y la cápsula de luz que lo marca
   // viaja hasta él (posición en --st-ind-x / --st-ind-w; is-moving dispara el barrido de luz)
   const bottomNav = useRef<HTMLElement | null>(null)
+  // La huella de Life se achica mientras se baja (deja ver lo que pasa por debajo) y vuelve al subir o arriba de todo.
+  // Studio scrollea .st-root, no la página.
+  const scrollRoot = useRef<HTMLDivElement | null>(null)
+  const lifeFab = useRef<HTMLAnchorElement | null>(null)
+  useEffect(() => {
+    const root = scrollRoot.current
+    if (!root) return
+    let last = root.scrollTop
+    let frame = 0
+    const onScroll = () => {
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        const top = root.scrollTop
+        const delta = top - last
+        if (Math.abs(delta) < 4) return
+        lifeFab.current?.classList.toggle('is-compact', top > 60 && delta > 0)
+        last = top
+      })
+    }
+    root.addEventListener('scroll', onScroll, { passive: true })
+    return () => { root.removeEventListener('scroll', onScroll); cancelAnimationFrame(frame) }
+  }, [])
   const placeIndicator = useCallback((animate: boolean) => {
     const nav = bottomNav.current
     if (!nav) return
@@ -444,7 +467,7 @@ function StudioReady({ userId, initial, switchSpace }: {
 
   return (
     <StudioContext.Provider value={value}>
-      <div className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}>
+      <div ref={scrollRoot} className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}>
         <div className="st-layout">
           <nav className="st-sidebar" aria-label="Studio">
             <a className="st-logo" href="/studio">mycen.<small>Studio</small></a>
@@ -490,7 +513,7 @@ function StudioReady({ userId, initial, switchSpace }: {
         {/* En un portal a <body>: ningún contenedor puede alterar su position: fixed */}
         {createPortal(<>
         {/* De la identidad a Life OS: la huella flotando arriba de la barra, al medio */}
-        <a href="/life" className="st-life-fab" aria-label={t.nav.life} title={t.nav.life} data-mycen-theme={theme}>
+        <a ref={lifeFab} href="/life" className="st-life-fab" aria-label={t.nav.life} title={t.nav.life} data-mycen-theme={theme}>
           <span className="st-life-fab-core">
             <span className="st-life-fab-ring" aria-hidden="true" />
             <HuellaMark id="studio-life" size={34} animated />
