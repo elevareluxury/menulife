@@ -73,12 +73,14 @@ const fr: LegalDict = {
     ] },
   ],
   terms: [
+    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
     { id: 'quien', title: 'Qui fournit le service', body: [
       'Mycen est un service exploité par **Resilio**, domicilié en République argentine. Vous pouvez nous écrire à **team@mycen.id**.',
       'Mycen vous permet de créer une identité numérique publique (Mycen Identity), de la gérer depuis Mycen Studio, d’organiser votre vie personnelle dans Life OS et, si vous avez une entreprise, de la gérer avec Mycen Business.',
     ] },
     { id: 'edad', title: 'Qui peut utiliser Mycen', body: [
-      'Vous devez avoir au moins **13 ans**. Si, dans votre pays, l’âge minimum pour accepter ces conditions ou pour le traitement de vos données est plus élevé (par exemple 15 ou 16 ans dans certains pays de l’Union européenne), vous devez avoir cet âge ou l’autorisation de votre parent ou tuteur.',
+      'Pour utiliser Mycen, vous devez avoir au moins **13 ans**. Si vous vivez dans un pays de l’Union européenne ou de l’Espace économique européen qui exige **16 ans** pour utiliser un service comme celui-ci sans le consentement d’un parent ou tuteur, vous devez avoir au moins 16 ans. Et si la loi de votre pays fixe un âge minimum plus élevé, c’est cet âge qui s’applique.',
+      'En créant un compte, vous confirmez avoir l’âge requis. Si nous apprenons qu’un compte appartient à une personne qui ne l’a pas, nous le supprimons.',
       'Pour utiliser Mycen Business au nom d’une entreprise, vous devez être majeur et autorisé à la représenter.',
     ] },
     { id: 'cuenta', title: 'Votre compte', body: [
@@ -103,9 +105,16 @@ const fr: LegalDict = {
       ] },
       'Toute personne peut signaler un profil ou un projet avec le lien « Signaler » en bas de la page, sans compte et anonymement. Nous examinons chaque signalement. Si un profil enfreint les règles, nous le suspendons : il n’est plus visible (page, projets et carte de contact) et son propriétaire voit le motif dans Studio. Si vous pensez qu’il s’agit d’une erreur, écrivez-nous depuis le compte avec lequel vous l’avez créé et nous le réexaminerons.',
     ] },
-    { id: 'derechos-de-autor', title: 'Droits d’auteur et marques', body: [
-      'Si vous pensez qu’un contenu publié sur Mycen utilise votre œuvre ou votre marque sans autorisation, écrivez à **team@mycen.id** en indiquant : vos coordonnées, l’œuvre ou la marque qui vous appartient, l’adresse exacte du contenu sur Mycen et une déclaration attestant que les informations sont exactes et que vous êtes titulaire des droits ou agissez en son nom.',
-      'Si la réclamation est fondée, nous retirons ou bloquons le contenu et prévenons la personne qui l’a publié, qui peut répondre. Quiconque publie à plusieurs reprises le contenu d’autrui sans autorisation peut perdre son compte.',
+    { id: 'derechos-de-autor', title: 'Droits d’auteur et autres droits', body: [
+      'Si vous pensez qu’un contenu publié sur Mycen porte atteinte à vos droits d’auteur ou à d’autres droits (par exemple votre marque ou votre image), vous pouvez nous demander de le retirer. Écrivez à **team@mycen.id** en indiquant :',
+      { list: [
+        '**Le lien vers le contenu :** l’adresse exacte sur Mycen du profil, du projet ou de l’image.',
+        '**Le titulaire** du droit et comment le contacter. Si vous agissez au nom d’une autre personne ou d’une entreprise, précisez-le.',
+        '**En quoi il y a atteinte :** de quelle œuvre, marque ou autre droit il s’agit et comment il est utilisé sans autorisation.',
+        '**Une déclaration de bonne foi :** que vous pensez de bonne foi que cette utilisation n’est pas autorisée et que les informations fournies sont exactes.',
+      ] },
+      'Nous examinons chaque demande. Le cas échéant, nous retirons ou bloquons le contenu et prévenons la personne qui l’a publié, en lui indiquant le motif. Elle peut nous répondre avec sa version (par exemple si elle a l’autorisation de l’utiliser) et nous réexaminons la situation.',
+      'Les comptes qui publient de manière répétée des contenus portant atteinte aux droits d’autrui peuvent être suspendus ou fermés.',
     ] },
     { id: 'usernames', title: 'Noms d’utilisateur', body: [
       'Certains noms sont réservés. Il est interdit d’enregistrer des noms pour se faire passer pour une autre personne ou une marque, ou pour les revendre ; dans ces cas, nous pouvons les récupérer. Si vous changez de nom d’utilisateur, l’ancienne adresse redirige vers la nouvelle pour que vos liens et QR codes continuent de fonctionner.',
@@ -131,6 +140,7 @@ const fr: LegalDict = {
     ] },
   ],
   privacy: [
+    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
     { id: 'responsable', title: 'Qui est responsable de vos données', body: [
       'Le responsable du traitement est **Resilio**, domicilié en République argentine, qui exploite Mycen. Pour toute question sur vos données, écrivez à **team@mycen.id**.',
       'Lorsqu’une entreprise utilise Mycen Business pour gérer les données de ses propres clients (commandes, réservations, rendez-vous), cette entreprise est responsable de ces données et Mycen les traite pour son compte et selon ses instructions.',
@@ -208,7 +218,7 @@ const fr: LegalDict = {
       'Si vous vivez en Californie : nous ne vendons ni ne partageons vos données personnelles à des fins publicitaires, et nous ne vous traiterons pas différemment parce que vous exercez vos droits.',
     ] },
     { id: 'menores', title: 'Mineurs', body: [
-      'Mycen ne s’adresse pas aux moins de 13 ans. Si nous apprenons qu’un compte appartient à une personne n’ayant pas cet âge (ou celui fixé par la loi de son pays) sans autorisation, nous le supprimons. Si vous êtes parent ou tuteur et pensez que c’est le cas, écrivez-nous.',
+      'Mycen ne s’adresse pas aux moins de 13 ans, ni aux moins de 16 ans dans les pays de l’Union européenne ou de l’Espace économique européen qui exigent cet âge pour traiter leurs données sans le consentement des parents (ni aux personnes n’ayant pas l’âge plus élevé fixé par la loi de leur pays). Nous ne collectons pas sciemment de données de personnes n’ayant pas cet âge : si nous apprenons qu’un compte appartient à l’une d’elles, nous supprimons le compte et ses données. Si vous êtes parent ou tuteur et pensez que c’est le cas, écrivez-nous à **team@mycen.id**.',
     ] },
     { id: 'cambios', title: 'Modifications de cette politique', body: [
       'Si nous modifions cette politique de manière importante, nous vous prévenons par e-mail ou dans Mycen avant son application. La date de la dernière mise à jour figure toujours en haut.',

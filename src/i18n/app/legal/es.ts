@@ -6,7 +6,7 @@
 export type LegalBlock = string | { list: string[] }
 export interface LegalSection { id: string; title: string; body: LegalBlock[] }
 
-const UPDATED = '2026-10-17'
+const UPDATED = '2026-10-19'
 
 const es = {
   ui: {
@@ -81,12 +81,14 @@ const es = {
     ] },
   ] as LegalSection[],
   terms: [
+    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
     { id: 'quien', title: 'Quién presta el servicio', body: [
       'Mycen es un servicio operado por **Resilio**, con domicilio en la República Argentina. Podés escribirnos a **team@mycen.id**.',
       'Mycen te permite crear una identidad digital pública (Mycen Identity), administrarla desde Mycen Studio, organizar tu vida personal en Life OS y, si tenés un negocio, gestionarlo con Mycen Business.',
     ] },
     { id: 'edad', title: 'Quién puede usar Mycen', body: [
-      'Tenés que tener al menos **13 años**. Si en tu país la edad mínima para aceptar estas condiciones o para el tratamiento de tus datos es mayor (por ejemplo, 16 en algunos países de la Unión Europea), necesitás esa edad o la autorización de tu madre, padre o tutor.',
+      'Para usar Mycen tenés que tener al menos **13 años**. Si vivís en un país de la Unión Europea o del Espacio Económico Europeo que exige **16 años** para usar un servicio como este sin el consentimiento de tu madre, padre o tutor, tenés que tener al menos 16. Y si la ley de tu país fija una edad mínima mayor, vale esa.',
+      'Al crear una cuenta confirmás que tenés la edad necesaria. Si sabemos que una cuenta es de alguien que no la tiene, la eliminamos.',
       'Para usar Mycen Business en nombre de un negocio tenés que ser mayor de edad y tener autorización para representarlo.',
     ] },
     { id: 'cuenta', title: 'Tu cuenta', body: [
@@ -111,9 +113,16 @@ const es = {
       ] },
       'Cualquier persona puede denunciar un perfil o un proyecto con el link "Denunciar" al pie de la página, sin cuenta y de forma anónima. Revisamos cada denuncia. Si un perfil no cumple las reglas, lo suspendemos: deja de verse (página, proyectos y tarjeta de contacto) y su dueño ve el motivo en Studio. Si creés que fue un error, escribinos desde la cuenta con la que lo creaste y lo revisamos de nuevo.',
     ] },
-    { id: 'derechos-de-autor', title: 'Derechos de autor y marcas', body: [
-      'Si creés que algo publicado en Mycen usa tu obra o tu marca sin permiso, escribinos a **team@mycen.id** con: tus datos de contacto, qué obra o marca es tuya, la dirección exacta del contenido en Mycen y una declaración de que la información es correcta y de que sos titular o actuás en su nombre.',
-      'Si el reclamo es válido, quitamos o bloqueamos el contenido y avisamos a quien lo publicó, que puede responder con su versión. Quien publique reiteradamente contenido de otros sin permiso puede perder su cuenta.',
+    { id: 'derechos-de-autor', title: 'Derechos de autor y otros derechos', body: [
+      'Si creés que algo publicado en Mycen infringe tus derechos de autor u otros derechos (por ejemplo, tu marca o tu imagen), podés pedirnos que lo bajemos. Escribinos a **team@mycen.id** con:',
+      { list: [
+        '**El link al contenido:** la dirección exacta en Mycen del perfil, proyecto o imagen.',
+        '**Quién es el titular** del derecho y cómo contactarlo. Si actuás en nombre de otra persona o empresa, decilo.',
+        '**Por qué infringe:** qué obra, marca u otro derecho es y cómo se está usando sin permiso.',
+        '**Una declaración de buena fe:** que creés de buena fe que ese uso no está autorizado y que la información que nos das es correcta.',
+      ] },
+      'Revisamos cada pedido. Si corresponde, bajamos o bloqueamos el contenido y le avisamos a quien lo publicó, con el motivo. Esa persona puede respondernos con su versión (por ejemplo, si tiene permiso para usarlo) y lo revisamos de nuevo.',
+      'Las cuentas que publican una y otra vez contenido que infringe derechos de otros pueden ser suspendidas o cerradas.',
     ] },
     { id: 'usernames', title: 'Nombres de usuario', body: [
       'Algunos nombres están reservados. No se permite registrar nombres para hacerse pasar por otra persona o marca, ni para revenderlos; podemos recuperarlos en esos casos. Si cambiás tu username, la dirección anterior redirige a la nueva para que tus links y QR sigan funcionando.',
@@ -139,6 +148,7 @@ const es = {
     ] },
   ] as LegalSection[],
   privacy: [
+    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
     { id: 'responsable', title: 'Quién es responsable de tus datos', body: [
       'El responsable del tratamiento es **Resilio**, con domicilio en la República Argentina, que opera Mycen. Para cualquier consulta sobre tus datos escribinos a **team@mycen.id**.',
       'Cuando un negocio usa Mycen Business para gestionar datos de sus propios clientes (pedidos, reservas, turnos), ese negocio es el responsable de esos datos y Mycen los trata por su cuenta y siguiendo sus instrucciones.',
@@ -216,7 +226,7 @@ const es = {
       'Si vivís en California: no vendemos ni compartimos tus datos personales para publicidad, y no te vamos a tratar distinto por ejercer tus derechos.',
     ] },
     { id: 'menores', title: 'Menores', body: [
-      'Mycen no está dirigido a menores de 13 años. Si sabemos que una cuenta es de alguien menor de esa edad (o de la que fije la ley de su país) sin autorización, la eliminamos. Si sos madre, padre o tutor y creés que pasó, escribinos.',
+      'Mycen no está dirigido a menores de 13 años, ni a menores de 16 en los países de la Unión Europea o del Espacio Económico Europeo que exigen esa edad para tratar sus datos sin el consentimiento de los padres (ni a quienes no tengan la edad mayor que fije la ley de su país). No recolectamos a sabiendas datos de personas menores de esa edad: si sabemos que una cuenta es de alguien que no la tiene, la eliminamos junto con sus datos. Si sos madre, padre o tutor y creés que pasó, escribinos a **team@mycen.id**.',
     ] },
     { id: 'cambios', title: 'Cambios en esta política', body: [
       'Si cambiamos esta política de forma importante, te avisamos por email o dentro de Mycen antes de que se aplique. Arriba vas a ver siempre la fecha de la última actualización.',

@@ -73,12 +73,14 @@ const en: LegalDict = {
     ] },
   ],
   terms: [
+    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
     { id: 'quien', title: 'Who provides the service', body: [
       'Mycen is a service operated by **Resilio**, based in the Argentine Republic. You can write to us at **team@mycen.id**.',
       'Mycen lets you create a public digital identity (Mycen Identity), manage it from Mycen Studio, organize your personal life in Life OS and, if you have a business, run it with Mycen Business.',
     ] },
     { id: 'edad', title: 'Who can use Mycen', body: [
-      'You must be at least **13 years old**. If the minimum age to accept these terms or for the processing of your data is higher in your country (for example, 16 in some European Union countries), you need to be that age or have permission from your parent or guardian.',
+      'To use Mycen you must be at least **13 years old**. If you live in a European Union or European Economic Area country that requires you to be **16** to use a service like this without your parent’s or guardian’s consent, you must be at least 16. And if the law of your country sets a higher minimum age, that age applies.',
+      'By creating an account you confirm that you meet the required age. If we learn that an account belongs to someone who does not, we delete it.',
       'To use Mycen Business on behalf of a business you must be of legal age and be authorized to represent it.',
     ] },
     { id: 'cuenta', title: 'Your account', body: [
@@ -103,9 +105,16 @@ const en: LegalDict = {
       ] },
       'Anyone can report a profile or a project with the "Report" link at the bottom of the page, without an account and anonymously. We review every report. If a profile breaks the rules, we suspend it: it stops being visible (page, projects and contact card) and its owner sees the reason in Studio. If you think it was a mistake, write to us from the account you created it with and we will review it again.',
     ] },
-    { id: 'derechos-de-autor', title: 'Copyright and trademarks', body: [
-      'If you believe something published on Mycen uses your work or your trademark without permission, write to **team@mycen.id** with: your contact details, which work or trademark is yours, the exact address of the content on Mycen, and a statement that the information is accurate and that you are the owner or act on their behalf.',
-      'If the claim is valid, we remove or block the content and notify the person who published it, who can respond with their side. Anyone who repeatedly publishes other people’s content without permission may lose their account.',
+    { id: 'derechos-de-autor', title: 'Copyright and other rights', body: [
+      'If you believe something published on Mycen infringes your copyright or other rights (for example, your trademark or your image), you can ask us to take it down. Write to **team@mycen.id** with:',
+      { list: [
+        '**The link to the content:** the exact address on Mycen of the profile, project or image.',
+        '**Who owns the right** and how to contact them. If you are acting on behalf of another person or company, say so.',
+        '**Why it infringes:** which work, trademark or other right it is and how it is being used without permission.',
+        '**A good-faith statement:** that you believe in good faith that the use is not authorized and that the information you give us is accurate.',
+      ] },
+      'We review every request. When appropriate, we take down or block the content and notify the person who published it, with the reason. That person can reply with their side (for example, if they have permission to use it) and we review it again.',
+      'Accounts that repeatedly publish content that infringes other people’s rights may be suspended or closed.',
     ] },
     { id: 'usernames', title: 'Usernames', body: [
       'Some names are reserved. Registering names to impersonate another person or brand, or to resell them, is not allowed; in those cases we may reclaim them. If you change your username, the old address redirects to the new one so your links and QR codes keep working.',
@@ -131,6 +140,7 @@ const en: LegalDict = {
     ] },
   ],
   privacy: [
+    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
     { id: 'responsable', title: 'Who is responsible for your data', body: [
       'The data controller is **Resilio**, based in the Argentine Republic, which operates Mycen. For any question about your data, write to **team@mycen.id**.',
       'When a business uses Mycen Business to manage data about its own customers (orders, reservations, appointments), that business is responsible for that data and Mycen processes it on its behalf and following its instructions.',
@@ -208,7 +218,7 @@ const en: LegalDict = {
       'If you live in California: we don’t sell or share your personal data for advertising, and we will not treat you differently for exercising your rights.',
     ] },
     { id: 'menores', title: 'Children', body: [
-      'Mycen is not directed at children under 13. If we learn that an account belongs to someone under that age (or the age set by the law of their country) without permission, we delete it. If you are a parent or guardian and believe this happened, write to us.',
+      'Mycen is not directed at children under 13, nor at anyone under 16 in European Union or European Economic Area countries that require that age to process their data without parental consent (nor at anyone below a higher age set by the law of their country). We do not knowingly collect data from people under that age: if we learn that an account belongs to someone who does not meet it, we delete the account and its data. If you are a parent or guardian and believe this happened, write to us at **team@mycen.id**.',
     ] },
     { id: 'cambios', title: 'Changes to this policy', body: [
       'If we change this policy in an important way, we will notify you by email or within Mycen before it applies. You will always see the date of the last update at the top.',
