@@ -6,6 +6,7 @@ import { safeHref } from '../lib/safeUrl'
 import { tr, ui } from '../lib/profileI18n'
 import type { ModuleProps } from './ProfileModules'
 import { useProfileModule } from './profileModuleContext'
+import { SizedImage } from './SafeImage'
 
 /**
  * Video y música (V1 · etapa 04) con fachada: al abrir el perfil sólo se dibuja una tarjeta liviana con la huella del
@@ -44,7 +45,7 @@ export function MediaModule({ module, lang, onAction }: ModuleProps) {
         <button type="button" className="mp-media-facade" style={video ? { aspectRatio: String(Math.max(embed.ratio, 16 / 9)) } : undefined}
           onClick={() => { setPlaying(true); onAction(module.id) }}>
           {cover
-            ? <img className="mp-media-cover" src={cover} alt="" loading="lazy" decoding="async" />
+            ? <SizedImage className="mp-media-cover" sizing="column" src={cover} alt="" loading="lazy" decoding="async" />
             : huella && (
               <span className="mp-media-art" aria-hidden="true">
                 <Huella seed={huella.seed} variant={huella.variant} />

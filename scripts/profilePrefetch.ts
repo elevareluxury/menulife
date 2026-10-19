@@ -2,6 +2,7 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import type { Plugin, Rollup } from 'vite'
 import { RESERVED_USERNAMES } from '../src/lib/reservedUsernames'
+import { IMAGE_QUALITY, IMAGE_SIZES, IMAGE_WIDTHS, MEDIA_PATH, imageCdnOn, imageSrcset } from '../src/modules/profile/lib/imageCdn'
 
 // Perfil público más rápido (LCP). Lo más compartido de Mycen es `/{username}`; antes, en un celular con 4G lento, los
 // datos salían recién cuando habían bajado React, la página y ProfileView (~6 s), y cada pieza (la página, la
@@ -12,7 +13,7 @@ import { RESERVED_USERNAMES } from '../src/lib/reservedUsernames'
 //   Sólo sin sesión guardada (con sesión, la RPC distingue al dueño y va con su token: pedido normal);
 // - en el build, se precargan el JS y el CSS de ProfilePublicPage y la fuente del nombre (Unbounded 700), y cuando
 //   llegan los datos, la estructura, los módulos con chunk propio y las imágenes de la primera pantalla (las mismas
-//   que `firstScreenImages`).
+//   que `firstScreenImages`, con el mismo `srcset` que va a elegir el `<img>`).
 // Las rutas de la app tienen el nombre reservado (`RESERVED_USERNAMES`), así que no disparan nada.
 
 const PROFILE_DIR = /[\\/]src[\\/]modules[\\/]profile[\\/]/
@@ -81,6 +82,7 @@ function script(url: string, key: string, assets: ProfileAssets): string {
     `if(${reserved}.indexOf(s.trim().toLowerCase())>=0)return;` +
     `var A=${JSON.stringify(assets)};` +
     `var add=function(a){var l=document.createElement('link');l.rel=a[0];l.href=a[1];if(a[2])l.as=a[2];` +
+    `if(a[3]){l.imageSrcset=a[3];l.imageSizes=a[4]}` +
     `if(a[2]==='image')l.fetchPriority='high';else l.crossOrigin='';document.head.appendChild(l)};` +
     `A.page.forEach(add);` +
     `var u=${JSON.stringify(url)},k=${JSON.stringify(key)};` +
@@ -92,10 +94,13 @@ function script(url: string, key: string, assets: ProfileAssets): string {
     // Con los datos: estructura, módulos con chunk propio e imágenes de la primera pantalla
     `d.then(function(p){if(!p||!p.modules)return;var t=p.theme||{},L=A.layouts[t.layout]||A.layouts.clasica,mods=p.modules,seen={};` +
     `(L||[]).forEach(add);mods.forEach(function(x){if(!seen[x.type]){seen[x.type]=1;(A.types[x.type]||[]).forEach(add)}});` +
-    `var img=[p.avatar_url,t.layout==='portada'?p.cover_url:null];` +
-    `mods.slice(0,3).forEach(function(x){var c=x.content||{};img.push(x.type==='media'?c.cover_url:x.type==='image'?c.url:` +
-    `x.type==='cards'&&c.items&&c.items[0]?c.items[0].image_url:null)});` +
-    `img.forEach(function(i){if(typeof i==='string'&&/^https:\\/\\//.test(i))add(['preload',i,'image'])})}).catch(function(){});` +
+    // Cada imagen con el `srcset`/`sizes` de su `SafeImage` (src/modules/profile/lib/imageCdn.ts, mismas funciones)
+    `var Z=${JSON.stringify(IMAGE_SIZES)},S=(${String(imageCdnOn)})(location.protocol,location.hostname)?${String(imageSrcset)}:null;` +
+    `var img=[[p.avatar_url,'avatar'],[t.layout==='portada'?p.cover_url:null,'cover']];` +
+    `mods.slice(0,3).forEach(function(x){var c=x.content||{};img.push([x.type==='media'?c.cover_url:x.type==='image'?c.url:` +
+    `x.type==='cards'&&c.items&&c.items[0]?c.items[0].image_url:null,'column'])});` +
+    `img.forEach(function(i){var s=i[0];if(typeof s==='string'&&/^https:\\/\\//.test(s))` +
+    `add(['preload',s,'image',S?S(s,u+${JSON.stringify(MEDIA_PATH)},${JSON.stringify(IMAGE_WIDTHS)},${IMAGE_QUALITY}):'',Z[i[1]]])})}).catch(function(){});` +
     `window.__mycenProfile={handle:h,data:d}}catch(e){}})()`
 }
 

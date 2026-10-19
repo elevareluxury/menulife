@@ -7,7 +7,7 @@ import { todayKey, WEEK_DAYS } from '../lib/schedule'
 import { NETWORK_LABELS } from '../lib/networks'
 import { urlKey } from '../lib/clickKeys'
 import { SocialIcon } from './SocialIcon'
-import { SafeImage } from './SafeImage'
+import { SafeImage, SizedImage } from './SafeImage'
 
 export interface ModuleProps {
   module: ProfileModule
@@ -36,7 +36,7 @@ export function LinkModule({ module, lang, onAction }: ModuleProps) {
   if (module.content.style === 'card' && image) {
     return (
       <a className="mp-link-card" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>
-        <SafeImage className="mp-link-card-img" src={image} alt="" loading="lazy" />
+        <SafeImage className="mp-link-card-img" sizing="column" src={image} alt="" loading="lazy" />
         <span className="mp-link-card-body">
           <span className="mp-link-title">{title}</span>
           {subtitle && <span className="mp-link-sub" style={{ whiteSpace: 'normal' }}>{subtitle}</span>}
@@ -58,7 +58,7 @@ function LinkRow({ href, title, subtitle, image, linkType, highlight, onClick }:
   return (
     <a className={`mp-link${highlight ? ' is-highlight' : ''}`} href={href} {...linkProps(href)} onClick={onClick}>
       <span className="mp-link-icon">
-        {image ? <SafeImage src={image} alt="" loading="lazy" fallback={<SocialIcon network={linkType ?? ''} />} /> : <SocialIcon network={linkType ?? ''} />}
+        {image ? <SafeImage sizing="thumb" src={image} alt="" loading="lazy" fallback={<SocialIcon network={linkType ?? ''} />} /> : <SocialIcon network={linkType ?? ''} />}
       </span>
       <span className="mp-link-body">
         <span className="mp-link-title">{title}</span>
@@ -172,7 +172,7 @@ export function TextModule({ module, lang }: ModuleProps) {
   if (!title && !body && !image) return null
   return (
     <article className="mp-card">
-      {image && <SafeImage className="mp-text-image" src={image} alt="" loading="lazy" />}
+      {image && <SafeImage className="mp-text-image" sizing="column" src={image} alt="" loading="lazy" />}
       {title && <h2 className="mp-text-heading">{title}</h2>}
       {body && <p className="mp-text-body">{body}</p>}
     </article>
@@ -185,7 +185,7 @@ export function ImageModule({ module, lang }: ModuleProps) {
   const caption = tr(str(module.content.caption), module.translations, 'caption', lang)
   return (
     <figure className="mp-card" style={{ padding: 0, margin: 0 }}>
-      <img src={src} alt={str(module.content.alt) || caption} loading="lazy" style={{ width: '100%', display: 'block' }} />
+      <SizedImage sizing="column" src={src} alt={str(module.content.alt) || caption} loading="lazy" style={{ width: '100%', display: 'block' }} />
       {caption && <figcaption style={{ padding: '12px 16px', fontSize: 14, color: 'var(--p-muted)' }}>{caption}</figcaption>}
     </figure>
   )
@@ -217,7 +217,7 @@ export function ProductModule({ module, lang, onAction }: ModuleProps) {
   return (
     <article className="mp-card">
       <div className="mp-product">
-        {image && <SafeImage src={image} alt="" loading="lazy" />}
+        {image && <SafeImage sizing="thumb" src={image} alt="" loading="lazy" />}
         <div style={{ minWidth: 0 }}>
           {tag && <span className="mp-product-tag">{tag}</span>}
           <h2 className="mp-product-name">{name}</h2>
@@ -275,7 +275,7 @@ export function GalleryModule({ module, lang }: ModuleProps) {
             <button key={item.url + i} type="button" onClick={() => setOpen(i)}
               aria-label={item.caption || `${t.gallery} ${i + 1}`}>
               {thumb
-                ? <SafeImage src={thumb} alt="" loading="lazy" />
+                ? <SafeImage sizing="third" src={thumb} alt="" loading="lazy" />
                 : <video src={item.url} muted playsInline preload="metadata" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
             </button>
           )
@@ -404,7 +404,7 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
           const subtitle = (lang === 'en' && item.en?.subtitle) || item.subtitle || ''
           const body = (
             <>
-              {safeHref(item.image_url) && <SafeImage className="mp-cards-img" src={safeHref(item.image_url)!} alt="" loading="lazy" />}
+              {safeHref(item.image_url) && <SafeImage className="mp-cards-img" sizing="column" src={safeHref(item.image_url)!} alt="" loading="lazy" />}
               <div className="mp-cards-body">
                 {item.date && <span className="mp-cards-date">{formatCardDate(item.date, lang)}</span>}
                 {title && <span className="mp-cards-title">{title}</span>}

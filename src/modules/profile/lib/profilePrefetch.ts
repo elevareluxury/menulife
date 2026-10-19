@@ -3,6 +3,9 @@
 import { safeHref } from './safeUrl'
 import { profileLook } from './profileLook'
 import type { PublicProfile } from './profileTypes'
+import { responsiveImage, type ImageRole } from './responsiveImage'
+
+export interface ScreenImage { url: string; sizing: ImageRole }
 
 declare global {
   interface Window { __mycenProfile?: { handle: string; data: Promise<unknown> } }
@@ -26,28 +29,32 @@ function moduleImage(m: PublicProfile['modules'][number]): unknown {
 
 /**
  * Foto, portada (estructura Portada) e imagen principal de los primeros módulos. Las mismas que pide index.html al
- * llegar los datos (scripts/profilePrefetch.ts): si cambia una, cambiar la otra.
+ * llegar los datos (scripts/profilePrefetch.ts): si cambia una, cambiar la otra. `sizing` = el de su `SafeImage`.
  */
-export function firstScreenImages(profile: PublicProfile): string[] {
-  const urls = [
-    safeHref(profile.avatar_url),
-    profileLook(profile.theme).layout === 'portada' ? safeHref(profile.cover_url) : null,
-    ...profile.modules.slice(0, 3).map(m => safeHref(moduleImage(m))),
+export function firstScreenImages(profile: PublicProfile): ScreenImage[] {
+  const images: Array<{ url: string | null; sizing: ImageRole }> = [
+    { url: safeHref(profile.avatar_url), sizing: 'avatar' },
+    { url: profileLook(profile.theme).layout === 'portada' ? safeHref(profile.cover_url) : null, sizing: 'cover' },
+    ...profile.modules.slice(0, 3).map(m => ({ url: safeHref(moduleImage(m)), sizing: 'column' as const })),
   ]
-  return [...new Set(urls.filter((u): u is string => !!u))]
+  const seen = new Set<string>()
+  return images.filter((i): i is ScreenImage => !!i.url && !seen.has(i.url) && !!seen.add(i.url))
 }
 
 /**
  * Pide las imágenes apenas se conocen, mientras bajan la estructura y los módulos (antes esperaban a que se
  * dibujaran y una portada `loading="lazy"` era el LCP). El `<img>` después las toma de la caché.
  */
-export function preloadImages(urls: string[]) {
-  for (const href of urls) {
+export function preloadImages(images: ScreenImage[]) {
+  for (const { url: href, sizing } of images) {
     if (document.head.querySelector(`link[rel="preload"][href="${CSS.escape(href)}"]`)) continue
     const link = document.createElement('link')
     link.rel = 'preload'
     link.as = 'image'
     link.href = href
+    // Con `srcset`, el mismo tamaño que va a elegir el <img> (si no, se bajaría dos veces)
+    const { srcSet, sizes } = responsiveImage(href, sizing)
+    if (srcSet && sizes) { link.imageSrcset = srcSet; link.imageSizes = sizes }
     link.fetchPriority = 'high'
     document.head.appendChild(link)
   }
