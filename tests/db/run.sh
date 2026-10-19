@@ -14,6 +14,7 @@ PSQL=(psql -d "$DB" -q -v ON_ERROR_STOP=1 -X)
 for m in \
   20261001000001_mycen_profiles_foundation \
   20261002000001_profile_cards_tags_life_tasks \
+  20261004000001_user_settings \
   20261007000001_identity_spaces_expand \
   20261008000001_identity_versioned_publishing \
   20261009000001_identity_projects \
@@ -55,7 +56,8 @@ for m in \
   20261106000001_message_block_report \
   20261107000001_testimonials_rls \
   20261107000002_business_owner_policies_authenticated \
-  20261108000001_restaurants_public_columns; do
+  20261108000001_restaurants_public_columns \
+  20261109000001_life_web_push; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

@@ -45,6 +45,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOut: async () => {
+    // Antes de cerrar la sesión: este dispositivo deja de recibir los avisos de la cuenta (Web Push)
+    await import('@/lib/webPush').then(m => m.dropPushSubscription()).catch(() => undefined)
     await (await loadSupabase()).auth.signOut()
     set({ user: null, role: null })
   },

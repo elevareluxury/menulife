@@ -23,6 +23,7 @@ import { usePrefersLight } from '@/modules/profile/lib/usePrefersLight'
 import { usePrefs } from '@/lib/prefs'
 import { useH1Title } from '@/lib/useH1Title'
 import { appServiceWorker, isInstalledApp } from '@/lib/notifications'
+import { syncPushSubscription } from '@/lib/webPush'
 import './life.css'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,11 +38,14 @@ export function LifeShell() {
   const prefsReady = usePrefs(s => !!user && s.loadedFor === user.id)
   useTaskReminders(user?.id)
   useHabitReminders(user?.id)
-  // Service worker para los avisos (en el celular sólo salen desde ahí): instalada en el inicio o con avisos permitidos
+  // Service worker para los avisos (en el celular sólo salen desde ahí): instalada en el inicio o con avisos permitidos.
+  // Con avisos permitidos, el dispositivo queda suscrito para recibirlos con la app cerrada (Web Push)
   useEffect(() => {
+    if (!user?.id) return
     const granted = typeof Notification !== 'undefined' && Notification.permission === 'granted'
-    if (isInstalledApp() || granted) void appServiceWorker()
-  }, [])
+    if (granted) void syncPushSubscription()
+    else if (isInstalledApp()) void appServiceWorker()
+  }, [user?.id])
   const dir = langDir(useAppLang(s => s.lang))
   // Título de la pestaña con el de la pantalla ("Brain · Mycen")
   useH1Title('Mycen')
