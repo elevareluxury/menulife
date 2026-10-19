@@ -11,8 +11,11 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
 function showNotification(title: string, options?: NotificationOptions) {
   if (Notification.permission !== 'granted') return
-  const notification = new Notification(title, { icon: '/icon-192.png', ...options })
-  setTimeout(() => notification.close(), 5000)
+  // En el celular el constructor tira error (ahí sólo se puede desde el service worker): sin aviso, pero sin romper
+  try {
+    const notification = new Notification(title, { icon: APP_ICON, ...options })
+    setTimeout(() => notification.close(), 5000)
+  } catch { /* sin aviso del sistema */ }
 }
 
 function playAlertBeep() {
@@ -73,6 +76,55 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return registration
   } catch {
     return null
+  }
+}
+
+let appSw: Promise<ServiceWorkerRegistration | null> | null = null
+
+/**
+ * Service worker de la app (una vez por carga). Sólo lo piden Life OS instalado en el inicio o con avisos permitidos:
+ * al instalarse baja la app entera, y quien sólo mira la landing o un perfil no tiene por qué cargarla.
+ */
+export function appServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (!appSw) appSw = registerServiceWorker()
+  return appSw
+}
+
+/** Abierta desde el ícono del inicio (PWA instalada) */
+export function isInstalledApp(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia?.('(display-mode: standalone)').matches
+    || (navigator as Navigator & { standalone?: boolean }).standalone === true
+}
+
+const APP_ICON = '/web-app-manifest-192x192.png'
+
+/**
+ * Aviso del sistema. En el celular (Android y la app instalada en iPhone) sólo se puede mostrar desde el service worker:
+ * `new Notification()` tira error ahí. Devuelve si se mostró, para que quien llama avise en pantalla si no.
+ * `url`: adónde lleva al tocarlo (sw.ts → notificationclick).
+ */
+export async function showSystemNotification(title: string, opts: { body?: string; tag?: string; url?: string } = {}): Promise<boolean> {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return false
+  try {
+    const reg = await appServiceWorker()
+    if (reg) {
+      // Recién registrado puede no estar activo todavía: se espera un poco y si no, se prueba lo del navegador
+      const ready = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<null>(resolve => setTimeout(() => resolve(null), 3000)),
+      ])
+      if (ready) {
+        await ready.showNotification(title, { body: opts.body, tag: opts.tag, icon: APP_ICON, badge: APP_ICON, data: { url: opts.url } })
+        return true
+      }
+    }
+  } catch { /* abajo: lo del navegador */ }
+  try {
+    new Notification(title, { body: opts.body, tag: opts.tag, icon: APP_ICON })
+    return true
+  } catch {
+    return false
   }
 }
 
