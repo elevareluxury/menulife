@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 import type { Plugin, Rollup } from 'vite'
-import { RESERVED_USERNAMES } from '../src/lib/reservedUsernames'
+import { SYSTEM_USERNAMES } from '../src/lib/reservedUsernames'
 import { IMAGE_QUALITY, IMAGE_SIZES, IMAGE_WIDTHS, MEDIA_PATH, imageCdnOn, imageSrcset } from '../src/modules/profile/lib/imageCdn'
 
 // Perfil público más rápido (LCP). Lo más compartido de Mycen es `/{username}`; antes, en un celular con 4G lento, los
@@ -14,7 +14,7 @@ import { IMAGE_QUALITY, IMAGE_SIZES, IMAGE_WIDTHS, MEDIA_PATH, imageCdnOn, image
 // - en el build, se precargan el JS y el CSS de ProfilePublicPage y la fuente del nombre (Unbounded 700), y cuando
 //   llegan los datos, la estructura, los módulos con chunk propio y las imágenes de la primera pantalla (las mismas
 //   que `firstScreenImages`, con el mismo `srcset` que va a elegir el `<img>`).
-// Las rutas de la app tienen el nombre reservado (`RESERVED_USERNAMES`), así que no disparan nada.
+// Las rutas de la app tienen el nombre reservado (`SYSTEM_USERNAMES`), así que no disparan nada.
 
 const PROFILE_DIR = /[\\/]src[\\/]modules[\\/]profile[\\/]/
 const PROFILE_PAGE = /[\\/]pages[\\/]ProfilePublicPage\.tsx$/
@@ -109,7 +109,7 @@ export const PROFILE_PREFETCH_SCRIPT = `(function(){try{` +
 
 function data(url: string, key: string, assets: ProfileAssets): string {
   // "<" escapado: nada del bloque puede cerrar la etiqueta
-  return JSON.stringify({ url, key, reserved: [...RESERVED_USERNAMES], assets }).replace(/</g, '\\u003c')
+  return JSON.stringify({ url, key, reserved: [...SYSTEM_USERNAMES], assets }).replace(/</g, '\\u003c')
 }
 
 export function profilePrefetchPlugin(): Plugin {

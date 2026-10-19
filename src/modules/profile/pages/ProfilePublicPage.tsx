@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { isReservedUsername } from '@/lib/reservedUsernames'
+import { isSystemUsername } from '@/lib/reservedUsernames'
 import { fetchPublicProfile, trackProfileEvent } from '../lib/profileApi'
 import { tr, ui } from '../lib/profileI18n'
 import { useAppLang } from '@/i18n/app/store'
@@ -37,7 +37,7 @@ export function ProfilePublicPage() {
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
-    if (isReservedUsername(slug)) { navigate('/', { replace: true }); return }
+    if (isSystemUsername(slug)) { navigate('/', { replace: true }); return }
     let cancelled = false
     const key = `${handle}#${attempt}`
     fetchPublicProfile(handle)

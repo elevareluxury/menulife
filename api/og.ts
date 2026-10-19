@@ -46,6 +46,8 @@ interface PublicProfile {
 
 const PERSON_PURPOSES = new Set(['personal', 'professional', 'creator', 'artist'])
 
+// Rutas de la app (subconjunto de SYSTEM_USERNAMES en src/lib/reservedUsernames.ts): `/{slug}` es la SPA, no un perfil.
+// Las marcas e insultos reservados no van acá: sólo impiden registrarlos, y quien ya tenía uno conserva su perfil.
 const RESERVED = new Set([
   'dashboard', 'login', 'logout', 'register', 'signup', 'auth', 'forgot-password', 'reset-password',
   'solicitar-acceso', 'onboarding', 'life', 'portal', 'q', 'r', 'kitchen', 'mozo', 'waiter', 'delivery',
