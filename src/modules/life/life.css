@@ -24,3 +24,73 @@
     100% { transform: scale(1); opacity: 1; }
   }
 }
+
+/* ── Barra de abajo (LifeNav): píldora de vidrio con la misma cápsula de luz que Studio (studio.css) ─────────── */
+.life-nav {
+  position: fixed; z-index: 50; left: 0; right: 0; bottom: calc(16px + env(safe-area-inset-bottom));
+  margin-inline: auto; width: fit-content; max-width: calc(100% - 24px);
+  display: flex; align-items: center; gap: 2px; padding: 6px 8px;
+  background: var(--my-glass-strong-solid);
+  -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+  border: 1px solid var(--my-border); border-radius: 9999px;
+  box-shadow: var(--my-inset-top), var(--my-shadow-float);
+  user-select: none;
+}
+.life-nav-link {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 48px; min-height: 44px; padding: 11px 14px; border-radius: 9999px;
+  color: var(--my-muted); text-decoration: none; transition: color 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+.life-nav-link[aria-current='page'] { color: var(--my-on-accent); }
+/* Sin la cápsula todavía, la sección activa se marca sola */
+.life-nav:not(.has-active) .life-nav-link[aria-current='page'] { background: var(--my-accent); }
+
+.life-nav-indicator {
+  position: absolute; z-index: 0; top: 6px; bottom: 6px; left: 0;
+  width: var(--life-ind-w, 0px); transform: translateX(var(--life-ind-x, 0px));
+  border-radius: 9999px; overflow: hidden; opacity: 0; pointer-events: none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--my-accent) 82%, #fff), var(--my-accent) 55%, color-mix(in srgb, var(--my-accent) 70%, #8B5CF6));
+  box-shadow: 0 0 0 1px color-mix(in srgb, #fff 22%, transparent) inset, 0 6px 22px -6px var(--my-glow), 0 0 24px -4px var(--my-accent);
+}
+.life-nav.has-active .life-nav-indicator { opacity: 1; }
+.life-nav-indicator::before {
+  content: ''; position: absolute; inset: -40% -10%; border-radius: inherit;
+  background: radial-gradient(closest-side, color-mix(in srgb, #fff 45%, transparent), transparent); opacity: 0;
+}
+.life-nav-indicator::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 60%; left: -70%;
+  background: linear-gradient(100deg, transparent, color-mix(in srgb, #fff 70%, transparent), transparent); transform: skewX(-18deg);
+}
+
+/* El + al final de la barra, separado por una línea fina */
+.life-nav-sep { width: 1px; height: 24px; margin-inline: 4px; background: var(--my-border); flex-shrink: 0; }
+.life-nav-plus {
+  position: relative; z-index: 1; flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 9999px; border: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--my-accent); color: var(--my-on-accent);
+  box-shadow: 0 6px 18px -6px var(--my-glow);
+  transition: background 0.22s, color 0.22s, box-shadow 0.22s;
+  -webkit-tap-highlight-color: transparent;
+}
+.life-nav-plus[data-open] { background: var(--my-glass-strong); color: var(--my-text); box-shadow: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .life-nav-indicator {
+    transition: transform 0.55s cubic-bezier(0.34, 1.32, 0.5, 1), width 0.55s cubic-bezier(0.34, 1.32, 0.5, 1), opacity 0.2s;
+  }
+  .life-nav.is-moving .life-nav-indicator { animation: life-ind-stretch 0.55s cubic-bezier(0.34, 1.32, 0.5, 1); }
+  .life-nav.is-moving .life-nav-indicator::after { animation: life-ind-sweep 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.18s; }
+  .life-nav.is-moving .life-nav-indicator::before { animation: life-ind-glow 0.75s ease-out; }
+  .life-nav-link[aria-current='page'] svg { animation: life-icon-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+}
+@keyframes life-ind-sweep { to { left: 120%; } }
+@keyframes life-ind-glow { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+@keyframes life-ind-stretch { 0% { scale: 1 1; } 35% { scale: 1.14 0.86; } 70% { scale: 0.97 1.04; } 100% { scale: 1 1; } }
+@keyframes life-icon-pop {
+  0% { transform: scale(0.7) translateY(3px); }
+  60% { transform: scale(1.18) translateY(-1px); }
+  100% { transform: scale(1) translateY(0); }
+}

@@ -6,7 +6,6 @@ import { useLifeStore } from '@/store/lifeStore'
 import { supabase } from '@/lib/supabase'
 import { Spinner } from '@/components/ui/Spinner'
 import { LifeNav } from './components/LifeNav'
-import { CaptureButton } from './components/CaptureButton'
 import { AchievementToast } from './components/AchievementToast'
 import { OfflineBanner } from './components/OfflineBanner'
 import { flushOutbox } from './lib/outbox'
@@ -118,15 +117,14 @@ export function LifeShell() {
       WebkitOverflowScrolling: 'touch',
       background: colors.bg,
       color: colors.text.primary,
-      // Lo último de cada pantalla ("⋯" de la última fila, "Cerrar sesión") tiene que quedar arriba del botón +
-      // (84 px desde abajo + 56 de alto), no sólo arriba del menú
-      paddingBottom: 'calc(156px + env(safe-area-inset-bottom))',
+      // Lo último de cada pantalla ("⋯" de la última fila, "Cerrar sesión") queda arriba de la barra de abajo
+      // (16 px desde abajo + 56 de alto; el + va adentro de la barra)
+      paddingBottom: 'calc(104px + env(safe-area-inset-bottom))',
     }}>
       {/* "Reducir movimiento" apaga las animaciones de Life OS (también las de framer-motion) */}
       <MotionConfig reducedMotion="user">
         <OfflineBanner />
         <Outlet />
-        <CaptureButton />
         <AchievementToast />
         <LifeNav />
       </MotionConfig>

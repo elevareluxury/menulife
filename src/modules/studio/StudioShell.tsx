@@ -491,8 +491,10 @@ function StudioReady({ userId, initial, switchSpace }: {
         {createPortal(<>
         {/* De la identidad a Life OS: la huella flotando arriba de la barra, al medio */}
         <a href="/life" className="st-life-fab" aria-label={t.nav.life} title={t.nav.life} data-mycen-theme={theme}>
-          <span className="st-life-fab-ring" aria-hidden="true" />
-          <HuellaMark id="studio-life" size={36} animated />
+          <span className="st-life-fab-core">
+            <span className="st-life-fab-ring" aria-hidden="true" />
+            <HuellaMark id="studio-life" size={34} animated />
+          </span>
         </a>
         <nav ref={bottomNav} className="st-bottom-nav" aria-label="Studio" data-mycen-theme={theme} dir={dir}>
           <span className="st-nav-indicator" aria-hidden="true" />

@@ -3,7 +3,7 @@
    celular) y las --st-* sólo traducen nombres. Lo que va en un portal a <body> (barra móvil, pantalla completa)
    lleva el mismo atributo. */
 
-.st-root, .st-bottom-nav, .st-fullscreen {
+.st-root, .st-bottom-nav, .st-life-fab, .st-fullscreen {
   --st-bg: var(--my-bg);
   --st-panel: var(--my-glass-strong-solid);
   --st-surface: var(--my-glass);
@@ -422,17 +422,37 @@
   100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 transparent); }
 }
 
-/* Botón a Life OS: la huella flotando arriba de la barra, al medio, con un anillo de luz que gira */
+/* Botón a Life OS: la huella arriba de la barra, al medio, unida a ella por un cuello del mismo vidrio (como una gota
+   que sale de la barra). Adentro, el núcleo oscuro con la huella y un anillo de luz que gira. */
 .st-life-fab {
-  position: fixed; z-index: 31; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom));
-  width: 56px; height: 56px; margin-left: -28px; border-radius: 50%;
+  position: fixed; z-index: 31; left: 50%; bottom: calc(80px + env(safe-area-inset-bottom));
+  width: 62px; height: 62px; margin-left: -31px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; text-decoration: none;
-  /* Núcleo oscuro en los dos temas: la huella (colores de Universo) se lee igual sobre Amanecer */
-  background: radial-gradient(circle at 32% 26%, #2B2547 0%, #14131F 58%, #0B0A12 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), var(--my-shadow-float), 0 0 28px -4px var(--my-glow);
+  /* El mismo vidrio que la barra: barra, cuello y círculo se ven como una sola pieza */
+  background: var(--my-glass-strong-solid);
+  /* El mismo borde que la barra: el cuello lo tapa donde se unen */
+  border: 1px solid var(--st-glass-border);
+  box-shadow: var(--st-glass-highlight), var(--my-shadow-float);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   -webkit-tap-highlight-color: transparent;
+}
+/* Cuello: cubre los 8 px hasta la barra (y se mete 3 px en cada lado); los costados curvos lo hacen "líquido" */
+.st-life-fab::before {
+  content: ''; position: absolute; left: 50%; bottom: -12px; width: 40px; height: 16px; margin-left: -20px;
+  background: var(--my-glass-strong-solid);
+  -webkit-mask:
+    radial-gradient(circle at 0 50%, transparent 8.5px, #000 9px) left / 50% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 8.5px, #000 9px) right / 50% 100% no-repeat;
+  mask:
+    radial-gradient(circle at 0 50%, transparent 8.5px, #000 9px) left / 50% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 8.5px, #000 9px) right / 50% 100% no-repeat;
+}
+/* Núcleo oscuro en los dos temas: la huella (colores de Universo) se lee igual sobre Amanecer */
+.st-life-fab-core {
+  position: relative; width: 50px; height: 50px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 32% 26%, #2B2547 0%, #14131F 58%, #0B0A12 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 22px -4px var(--my-glow);
 }
 .st-life-fab-ring {
   position: absolute; inset: -3px; border-radius: 50%; padding: 2px;
@@ -441,19 +461,21 @@
   -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
   opacity: 0.9;
 }
-.st-life-fab:hover { transform: translateY(-2px) scale(1.06); }
-.st-life-fab:active { transform: scale(0.9); }
+/* Al tocarlo se hunde un poco hacia la barra (sigue unida) */
+.st-life-fab:active .st-life-fab-core { transform: scale(0.9); }
+.st-life-fab-core { transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@media (hover: hover) { .st-life-fab:hover .st-life-fab-core { transform: scale(1.06); } }
 @media (prefers-reduced-motion: no-preference) {
   .st-life-fab-ring { animation: st-fab-spin 3.6s linear infinite; }
-  /* Onda que sale cada tanto: invita a tocar */
-  .st-life-fab::after {
+  /* Onda que sale cada tanto del núcleo: invita a tocar */
+  .st-life-fab-core::after {
     content: ''; position: absolute; inset: 0; border-radius: 50%;
     border: 1.5px solid var(--my-accent); opacity: 0;
     animation: st-fab-wave 3.6s ease-out 1s infinite;
   }
 }
 @keyframes st-fab-spin { to { transform: rotate(360deg); } }
-@keyframes st-fab-wave { 0% { opacity: 0.6; transform: scale(1); } 60%, 100% { opacity: 0; transform: scale(1.7); } }
+@keyframes st-fab-wave { 0% { opacity: 0.6; transform: scale(1); } 60%, 100% { opacity: 0; transform: scale(1.6); } }
 
 /* Con un panel o diálogo abierto la barra se esconde: está en un portal y si no taparía sus botones */
 body:has(.st-overlay, .st-dialog-wrap, .st-fullscreen) .st-bottom-nav,
