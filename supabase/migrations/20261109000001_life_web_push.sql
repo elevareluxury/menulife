@@ -78,7 +78,7 @@ grant execute on function public.life_push_unsubscribe(text) to authenticated;
 --   hábitos: hora del recordatorio, los días que tocan, si hoy no se cumplió todavía, hasta 2 h tarde
 create or replace function public.life_claim_due_reminders(p_now timestamptz default now())
 returns table (user_id uuid, kind text, item_id uuid, title text, body text, url text, tag text)
-language plpgsql security definer set search_path = public as $
+language plpgsql security definer set search_path = public as $$
 #variable_conflict use_column
 begin
   return query
