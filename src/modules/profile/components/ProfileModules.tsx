@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowUpRight, Clock, Mail, MapPin, MessageCircle, Navigation, Phone, X } from 'lucide-react'
 import type { ProfileLang, ProfileModule, WeekSchedule } from '../lib/profileTypes'
 import { tr, trLabel, ui } from '../lib/profileI18n'
@@ -392,9 +392,10 @@ function ticketDate(date: string | undefined, lang: ProfileLang) {
 }
 
 /**
- * Diseño Flyers (tickets): flyers en formato historia (9:16) que se deslizan de a uno, centrados, con un talón de
- * entrada troquelado (fecha, hora, lugar y botón "Entradas"). La tarjeta del centro se agranda; las de los costados
- * quedan atrás. Puntos abajo para saber cuántos hay y saltar a uno.
+ * Diseño Flyers (tickets): entradas que se deslizan de a uno, centradas. Arriba fecha, hora, título y lugar; en el
+ * medio el flyer entero (9:16, sin recortes); abajo un talón troquelado con el botón "Entradas" (si hay link).
+ * Coverflow (la del centro al frente, las de los costados giradas), entrada escalonada y brillo al quedar al frente.
+ * Puntos abajo para saber cuántas hay y saltar a una.
  */
 function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: CardItem[] }) {
   const heading = tr(module.title, module.translations, 'title', lang)
@@ -429,8 +430,19 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
     el.scrollTo({ left: card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2, behavior: 'smooth' })
   }
 
+  // Entrada: las tarjetas suben una tras otra cuando la sección aparece en pantalla
+  const section = useRef<HTMLElement>(null)
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    const el = section.current
+    if (!el || typeof IntersectionObserver === 'undefined') { setShown(true); return }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setShown(true); io.disconnect() } }, { threshold: 0.15 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
   return (
-    <section className="mp-tix" aria-label={heading || t.cards}>
+    <section ref={section} className={`mp-tix${shown ? ' is-in' : ''}`} aria-label={heading || t.cards}>
       {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
       <div ref={track} className="mp-tix-track" tabIndex={0} role="region" aria-label={`${heading || t.cards} — ${t.swipeHint}`}>
         {items.map((item, i) => {
@@ -441,34 +453,42 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
           const when = ticketDate(item.date, lang)
           const body = (
             <>
-              <div className="mp-tix-flyer">
-                {img
-                  ? <SafeImage className="mp-tix-img" sizing="column" src={img} alt={title} loading={i < 2 ? 'eager' : 'lazy'} />
-                  : <span className="mp-tix-blank" aria-hidden="true">{title}</span>}
-                {when && (
-                  <span className="mp-tix-chip" aria-hidden="true">
-                    <span>{when.weekday}</span><strong>{when.day}</strong><span>{when.month}</span>
-                  </span>
-                )}
-              </div>
-              <div className="mp-tix-stub">
-                <div className="mp-tix-info">
+              {/* Arriba: fecha, título y lugar · el flyer entero (sin recortes: si no es 9:16, el fondo es el mismo flyer difuminado) */}
+              <div className="mp-tix-top">
+                <div className="mp-tix-head">
                   {(when || item.time) && (
                     <span className="mp-tix-when">
                       {[when && `${when.weekday} ${when.day} ${when.month}`, item.time].filter(Boolean).join(' · ')}
                     </span>
                   )}
                   {title && <span className="mp-tix-title">{title}</span>}
-                  {subtitle && <span className="mp-tix-sub">{subtitle}</span>}
+                  {subtitle && <span className="mp-tix-sub"><MapPin size={13} aria-hidden="true" />{subtitle}</span>}
                 </div>
-                {href && <span className="mp-tix-cta">{t.tickets} <ArrowUpRight size={15} aria-hidden="true" /></span>}
+                <div className="mp-tix-flyer">
+                  {img
+                    ? <>
+                        <SafeImage className="mp-tix-backdrop" sizing="column" src={img} alt="" aria-hidden="true" loading={i < 2 ? 'eager' : 'lazy'} />
+                        <SafeImage className="mp-tix-img" sizing="column" src={img} alt={title} loading={i < 2 ? 'eager' : 'lazy'} />
+                      </>
+                    : <span className="mp-tix-blank" aria-hidden="true">{title}</span>}
+                  <span className="mp-tix-sheen" aria-hidden="true" />
+                </div>
               </div>
+              {/* Abajo: el talón troquelado con el botón de entradas */}
+              {href && (
+                <div className="mp-tix-stub">
+                  <span className="mp-tix-cta">{t.tickets} <ArrowUpRight size={17} aria-hidden="true" /></span>
+                </div>
+              )}
             </>
           )
-          const cls = `mp-tix-card${i === active ? ' is-active' : ''}`
+          const pos = i === active ? ' is-active' : i < active ? ' is-before' : ' is-after'
+          const cls = `mp-tix-card${pos}${href ? ' has-stub' : ''}`
+          // --i: orden para la entrada escalonada
+          const style = { '--i': i } as CSSProperties
           return href
-            ? <a key={i} className={cls} href={href} {...linkProps(href)} onClick={() => onAction(module.id, urlKey(item.url))}>{body}</a>
-            : <article key={i} className={cls}>{body}</article>
+            ? <a key={i} className={cls} style={style} href={href} {...linkProps(href)} onClick={() => onAction(module.id, urlKey(item.url))}>{body}</a>
+            : <article key={i} className={cls} style={style}>{body}</article>
         })}
       </div>
       {items.length > 1 && (
