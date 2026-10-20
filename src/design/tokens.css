@@ -58,7 +58,7 @@
   --my-glass-strong: rgba(255, 255, 255, 0.09);
   --my-border: rgba(255, 255, 255, 0.14);
   --my-field: rgba(4, 5, 13, 0.6);
-  --my-tile: #0A0C1F;
+  --my-tile: #0C0D12;
   --my-track: rgba(255, 255, 255, 0.12);
   --my-shadow-float: 0 30px 60px -28px rgba(0, 0, 0, 0.9);
   --my-star: #FFFFFF;
@@ -69,9 +69,10 @@
   --my-danger: #FCA5A5;
   --my-ok: #86EFAC;
   --my-warn: #FCD34D;
-  /* Vidrio sin desenfoque (reducir transparencia / equipos lentos): el color que se ve con el vidrio encima */
-  --my-glass-solid: #12142A;
-  --my-glass-strong-solid: #181A31;
+  /* Vidrio sin desenfoque (hojas, barras, reducir transparencia): negro neutro, el mismo tono que se ve en las tarjetas
+     de vidrio sobre el fondo (antes un azul marino que desentonaba con el resto) */
+  --my-glass-solid: #15161B;
+  --my-glass-strong-solid: #1C1D23;
   --my-sky:
     radial-gradient(60% 30% at 88% 6%, rgba(255, 122, 89, 0.20), transparent 70%),
     radial-gradient(75% 35% at 6% 30%, rgba(99, 76, 224, 0.30), transparent 70%),
