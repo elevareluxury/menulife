@@ -9,6 +9,8 @@ import { lifeTReady } from '@/i18n/app/life'
 import { electLeader, reminderLoop } from '../lib/reminderLeader'
 import { lifeNow } from '../lib/zonedTime'
 import { showSystemNotification } from '@/lib/notifications'
+import { trackEvent } from '@/lib/productEvents'
+import { reminderUrl } from '../lib/reminderOpen'
 
 const db = supabase as unknown as SupabaseClient
 
@@ -80,9 +82,11 @@ export function useTaskReminders(userId: string | undefined) {
         const when = task.due_time ? ts.reminderAt(task.due_time.slice(0, 5)) : ts.reminderToday
         // Ya quedó marcada: si el aviso del sistema no sale (sin permiso o el teléfono no lo deja), va en pantalla
         const shown = await showSystemNotification(task.title, {
-          body: ts.reminderBody(when), tag: `life-task-${task.id}`, url: '/life/brain?vista=tareas',
+          body: ts.reminderBody(when), tag: `life-task-${task.id}`, url: reminderUrl('/life/brain?vista=tareas', 'task', 'app'),
         })
-        if (!shown) toast(`⏰ ${task.title} · ${when}`, { duration: 8000 })
+        // Sólo cuenta el aviso del sistema (el que se puede tocar); el de pantalla no tiene "abrir"
+        if (shown) trackEvent('reminder_shown', { kind: 'task', channel: 'app' })
+        else toast(`⏰ ${task.title} · ${when}`, { duration: 8000 })
       }
     }
 

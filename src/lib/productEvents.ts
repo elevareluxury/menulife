@@ -9,6 +9,7 @@ export type ProductEvent =
   | 'signup_started' | 'signup_completed' | 'onboarding_step' | 'profile_published' | 'share_tool_used'
   | 'qr_downloaded' | 'appearance_changed'
   | 'life_my_day_opened' | 'life_priorities_set' | 'life_day_closed' | 'habit_logged' | 'task_completed' | 'life_returned'
+  | 'goal_created' | 'item_linked_to_goal' | 'capture_used' | 'weekly_review_done' | 'reminder_shown' | 'reminder_opened'
   | 'life_onboarding_started' | 'life_onboarding_completed' | 'life_onboarding_skipped'
 
 /** Claves permitidas (las mismas que valida la base en mycen_valid_event_props) */
@@ -24,7 +25,20 @@ export interface ProductEventProps {
   count?: number
   achieved?: number
   days?: number
+  /** Recordatorios: task | habit */
+  kind?: ReminderKind
+  /** Recordatorios: app (con la app abierta) | push (con la app cerrada) */
+  channel?: ReminderChannel
+  /** Captura: adónde fue lo capturado */
+  dest?: CaptureDest
 }
+
+export type ReminderKind = 'task' | 'habit'
+export type ReminderChannel = 'app' | 'push'
+/** Lo que se vincula a una meta (las ideas cuentan como notas) */
+export type GoalLinkType = 'task' | 'habit' | 'money' | 'note'
+export type CaptureType = 'quick' | 'voice' | 'dump'
+export type CaptureDest = 'task' | 'idea' | 'note' | 'goal' | 'money'
 
 
 export function trackEvent(event: ProductEvent, props: ProductEventProps = {}): void {
@@ -43,6 +57,16 @@ export function trackOncePerSession(key: string, event: ProductEvent, props: Pro
     sessionStorage.setItem(k, '1')
   } catch { /* sin almacenamiento: se manda igual */ }
   trackEvent(event, props)
+}
+
+/** Después de guardar algo con meta: cuenta sólo si la meta es nueva para ese ítem (no al reeditarlo con la misma) */
+export function trackGoalLink(tipo: GoalLinkType, goalId: string | null | undefined, before?: string | null): void {
+  if (goalId && goalId !== (before ?? null)) trackEvent('item_linked_to_goal', { tipo })
+}
+
+/** Una captura guardada (o en la cola sin conexión). `count`: cuántas cosas guardó de una vez (vaciar la cabeza). */
+export function trackCapture(tipo: CaptureType, dest: CaptureDest, count?: number): void {
+  trackEvent('capture_used', { tipo, dest, count: count && count > 1 ? Math.min(count, 200) : undefined })
 }
 
 /** Segundos desde que se creó la cuenta (para "tiempo hasta publicar") */

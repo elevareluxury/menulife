@@ -1,4 +1,5 @@
 import { focusOnMount } from '@/lib/viewportVars'
+import { trackGoalLink } from '@/lib/productEvents'
 import { useEffect, useState } from 'react'
 import { LifeSheet, LifeButton, colors, font, radius } from '../design-system'
 import { Star } from 'lucide-react'
@@ -79,6 +80,7 @@ export function TaskSheet({ open, onClose, onSave, initial, defaultDate, default
         recurrence: date ? recurrenceFor(repeat, date, custom) : null,
         subtasks,
       })
+      trackGoalLink('task', goalId || null, initial?.goal_id)
       onClose()
     } catch {
       setError(t.common.saveError)

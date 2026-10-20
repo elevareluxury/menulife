@@ -4,7 +4,7 @@
 // Secretos: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, REMINDERS_CRON_SECRET (SUPABASE_URL y la service role los pone Supabase).
 import webpush from 'npm:web-push@3.6.7'
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { pushPayload, sameSecret, type DueReminder } from './payload.ts'
+import { pushPayload, sameSecret, shownEvents, type DueReminder } from './payload.ts'
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -56,6 +56,7 @@ async function run(req: Request): Promise<Response> {
   let sent = 0
   const gone = new Set<string>()
   const failed = new Set<string>()
+  const delivered = new Set<DueReminder>()
   await Promise.all(reminders.flatMap(r => (subs ?? []).filter(s => s.user_id === r.user_id).map(async s => {
     try {
       await webpush.sendNotification(
@@ -64,6 +65,7 @@ async function run(req: Request): Promise<Response> {
         { TTL: 3600, urgency: 'high' },
       )
       sent++
+      delivered.add(r)
     } catch (e) {
       // 404/410: el navegador dio de baja la suscripción (se desinstaló, se quitó el permiso…)
       const status = (e as { statusCode?: number }).statusCode
@@ -75,5 +77,10 @@ async function run(req: Request): Promise<Response> {
   if (gone.size) await db.from('life_push_subscriptions').delete().in('id', [...gone])
   const ok = (subs ?? []).filter(s => !gone.has(s.id) && !failed.has(s.id)).map(s => s.id)
   if (ok.length) await db.from('life_push_subscriptions').update({ last_sent_at: new Date().toISOString(), failures: 0 }).in('id', ok)
+  // Métricas (product_events): uno por recordatorio entregado, aunque llegue a varios dispositivos. Si falla, no importa.
+  if (delivered.size) {
+    const { error: evError } = await db.from('product_events').insert(shownEvents([...delivered]))
+    if (evError) console.warn('[life-reminders] product_events', evError.message)
+  }
   return json({ reminders: reminders.length, sent, removed: gone.size, failed: failed.size })
 }
