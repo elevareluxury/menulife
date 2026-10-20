@@ -14,7 +14,7 @@ const pt: StudioDict = {
   common: {
     cancel: 'Cancelar', save: 'Salvar', saving: 'Salvando…', saved: 'Salvo', saveError: 'Erro ao salvar', retry: 'Tentar novamente',
     close: 'Fechar', chooseOption: 'Escolha uma opção', upload: 'Enviar imagem', change: 'Trocar', remove: 'Remover',
-    removeLabel: l => `Remover ${l}`, uploadError: 'Não foi possível enviar a imagem.', open: 'Abrir', edit: 'Editar', hide: 'Ocultar',
+    removeLabel: l => `Remover ${l}`, uploadError: 'Não foi possível enviar a imagem.', recommendedSize: s => `Recomendado: ${s} px`, open: 'Abrir', edit: 'Editar', hide: 'Ocultar',
     add: 'Adicionar', delete: 'Excluir', loading: 'Carregando…', done: 'feito', pending: 'pendente',
   },
   status: { published: 'Publicado', draft: 'Rascunho', unpublished: 'Pausado', archived: 'Arquivado' },
@@ -122,8 +122,8 @@ const pt: StudioDict = {
     dayOpen: d => `${d} aberto`, dayOpens: d => `${d} abertura`, dayCloses: d => `${d} fechamento`, closed: 'Fechado',
     photos: n => `Fotos (${n})`, photoN: n => `Foto ${n}`, removePhoto: n => `Remover foto ${n}`, newPhoto: 'Nova foto', addPhoto: 'Adicionar foto',
     cards: n => `Cartões (${n})`, cardN: n => `Cartão ${n}`, upCard: n => `Subir cartão ${n}`, downCard: n => `Descer cartão ${n}`,
-    removeCard: n => `Remover cartão ${n}`, photo: 'Foto', cardTitle: 'Título', cardTitlePlaceholder: 'Noite de jazz',
-    cardDescription: 'Descrição (opcional)', cardDate: 'Data (opcional)', cardLink: 'Link (opcional)',
+    removeCard: n => `Remover cartão ${n}`, photo: 'Foto', flyer: 'Flyer', cardTitle: 'Título', cardTitlePlaceholder: 'Noite de jazz',
+    cardDescription: 'Descrição (opcional)', cardDate: 'Data (opcional)', cardLink: 'Link (opcional)', cardTime: 'Horário (opcional)', ticketsLink: 'Link dos ingressos (opcional)',
     enTitle: 'Título (EN)', enDescription: 'Descrição (EN)', addCard: 'Adicionar cartão', google: 'Google', rating: 'Nota (1 a 5)',
     ratingCount: 'Quantidade de avaliações', googleLink: 'Link para suas avaliações no Google', featured: n => `Avaliações em destaque (${n})`,
     realReviews: 'Use opiniões reais dos seus clientes.', starsOf: n => `Estrelas da avaliação ${n}`, stars: n => `${n} estrelas`,
@@ -371,7 +371,7 @@ const pt: StudioDict = {
   catalog: {
     styleHighlight: 'Destaque (cor de destaque)',
     styleButton: 'Botão (ícone ou miniatura ao lado)', styleCard: 'Cartão com foto grande',
-    layoutCarousel: 'Deslizáveis (carrossel)', layoutStack: 'Um abaixo do outro',
+    layoutCarousel: 'Deslizáveis (carrossel)', layoutStack: 'Um abaixo do outro', layoutTickets: 'Flyers de eventos (formato story)',
     types: {
       link: { label: 'Link', description: 'Um botão para seu site, loja, portfólio ou o que quiser.' },
       social: { label: 'Rede social', description: 'Instagram, TikTok, LinkedIn… aparecem como ícones.' },

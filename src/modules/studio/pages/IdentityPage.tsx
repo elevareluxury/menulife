@@ -46,7 +46,7 @@ export function IdentityPage({ embedded = false }: { embedded?: boolean }) {
         <ImageField label={id.avatar} shape="round" value={profile.avatar_url}
           onUpload={f => upload('avatar_url', f)} onClear={() => patchProfile({ avatar_url: null })}
           help={id.avatarHelp} />
-        <ImageField label={id.cover} shape="wide" value={profile.cover_url}
+        <ImageField label={id.cover} shape="wide" size="1500 × 500" value={profile.cover_url}
           onUpload={f => upload('cover_url', f)} onClear={() => patchProfile({ cover_url: null })}
           help={id.coverHelp} />
       </section>

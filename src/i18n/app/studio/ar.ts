@@ -14,7 +14,7 @@ const ar: StudioDict = {
   common: {
     cancel: 'إلغاء', save: 'حفظ', saving: 'جارٍ الحفظ…', saved: 'تم الحفظ', saveError: 'خطأ في الحفظ', retry: 'إعادة المحاولة',
     close: 'إغلاق', chooseOption: 'اختر خيارًا', upload: 'رفع صورة', change: 'تغيير', remove: 'إزالة',
-    removeLabel: l => `إزالة ${l}`, uploadError: 'تعذّر رفع الصورة.', open: 'فتح', edit: 'تعديل', hide: 'إخفاء',
+    removeLabel: l => `إزالة ${l}`, uploadError: 'تعذّر رفع الصورة.', recommendedSize: s => `المقاس المقترح: ${s} px`, open: 'فتح', edit: 'تعديل', hide: 'إخفاء',
     add: 'إضافة', delete: 'حذف', loading: 'جارٍ التحميل…', done: 'مكتمل', pending: 'معلّق',
   },
   status: { published: 'منشور', draft: 'مسودة', unpublished: 'متوقف مؤقتًا', archived: 'مؤرشف' },
@@ -122,8 +122,8 @@ const ar: StudioDict = {
     dayOpen: d => `${d} مفتوح`, dayOpens: d => `${d} الافتتاح`, dayCloses: d => `${d} الإغلاق`, closed: 'مغلق',
     photos: n => `الصور (${n})`, photoN: n => `صورة ${n}`, removePhoto: n => `إزالة الصورة ${n}`, newPhoto: 'صورة جديدة', addPhoto: 'إضافة صورة',
     cards: n => `البطاقات (${n})`, cardN: n => `بطاقة ${n}`, upCard: n => `نقل البطاقة ${n} للأعلى`, downCard: n => `نقل البطاقة ${n} للأسفل`,
-    removeCard: n => `إزالة البطاقة ${n}`, photo: 'صورة', cardTitle: 'العنوان', cardTitlePlaceholder: 'ليلة جاز',
-    cardDescription: 'الوصف (اختياري)', cardDate: 'التاريخ (اختياري)', cardLink: 'الرابط (اختياري)',
+    removeCard: n => `إزالة البطاقة ${n}`, photo: 'صورة', flyer: 'الملصق', cardTitle: 'العنوان', cardTitlePlaceholder: 'ليلة جاز',
+    cardDescription: 'الوصف (اختياري)', cardDate: 'التاريخ (اختياري)', cardLink: 'الرابط (اختياري)', cardTime: 'الوقت (اختياري)', ticketsLink: 'رابط التذاكر (اختياري)',
     enTitle: 'العنوان (EN)', enDescription: 'الوصف (EN)', addCard: 'إضافة بطاقة', google: 'Google', rating: 'التقييم (من 1 إلى 5)',
     ratingCount: 'عدد التقييمات', googleLink: 'رابط تقييماتك على Google', featured: n => `تقييمات مميزة (${n})`,
     realReviews: 'استخدم آراء حقيقية من عملائك.', starsOf: n => `نجوم التقييم ${n}`, stars: n => `${n} نجوم`,
@@ -371,7 +371,7 @@ const ar: StudioDict = {
   catalog: {
     styleHighlight: 'مميّز (لون التمييز)',
     styleButton: 'زر (أيقونة أو صورة مصغّرة بجانبه)', styleCard: 'بطاقة بصورة كبيرة',
-    layoutCarousel: 'قابلة للتمرير (عرض دوّار)', layoutStack: 'واحدة تحت الأخرى',
+    layoutCarousel: 'قابلة للتمرير (عرض دوّار)', layoutStack: 'واحدة تحت الأخرى', layoutTickets: 'ملصقات الفعاليات (بتنسيق القصة)',
     types: {
       link: { label: 'رابط', description: 'زر إلى موقعك أو متجرك أو أعمالك أو أي شيء تريده.' },
       social: { label: 'شبكة اجتماعية', description: 'إنستغرام وتيك توك ولينكدإن… تظهر كأيقونات.' },

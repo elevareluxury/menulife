@@ -159,19 +159,26 @@ export function SaveIndicator({ state, error, onRetry }: { state: SaveState; err
 
 // ── Subida de imagen ────────────────────────────────────────────────────────
 
-export function ImageField({ label, value, onUpload, onClear, shape = 'square', help }: {
+/** Tamaño recomendado en px de cada forma (se muestra debajo del botón; `size` lo cambia) */
+const IMAGE_SIZES = { square: '1080 × 1080', round: '400 × 400', wide: '1600 × 900', story: '1080 × 1920' } as const
+
+export function ImageField({ label, value, onUpload, onClear, shape = 'square', help, size }: {
   label: string
   value: string | null | undefined
   onUpload: (file: File) => Promise<void>
   onClear: () => void
-  shape?: 'square' | 'round' | 'wide'
+  /** story = formato historia (9:16), para flyers */
+  shape?: 'square' | 'round' | 'wide' | 'story'
   help?: string
+  /** Tamaño recomendado sin "px" (ej. '1200 × 900'); sin valor, el de la forma */
+  size?: string
 }) {
   const ref = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const id = useId()
   const t = useStudioT().common
+  const thumb = `st-image-thumb${shape === 'square' ? '' : ` is-${shape}`}`
 
   async function handle(file: File | undefined) {
     if (!file) return
@@ -185,10 +192,10 @@ export function ImageField({ label, value, onUpload, onClear, shape = 'square', 
     <Field label={label} help={help} error={error} htmlFor={id}>
       <div className="st-image-field">
         {value
-          ? <img className={`st-image-thumb${shape === 'round' ? ' is-round' : shape === 'wide' ? ' is-wide' : ''}`} src={value} alt="" />
-          : <div className={`st-image-thumb${shape === 'round' ? ' is-round' : shape === 'wide' ? ' is-wide' : ''}`} aria-hidden="true" />}
+          ? <img className={thumb} src={value} alt="" />
+          : <div className={thumb} aria-hidden="true" />}
         <div className="st-row" style={{ flexWrap: 'wrap' }}>
-          <Button size="sm" loading={busy} onClick={() => ref.current?.click()}>
+          <Button size="sm" loading={busy} onClick={() => ref.current?.click()} aria-describedby={`${id}-size`}>
             <ImagePlus size={15} aria-hidden="true" /> {value ? t.change : t.upload}
           </Button>
           {value && !busy && (
@@ -196,6 +203,7 @@ export function ImageField({ label, value, onUpload, onClear, shape = 'square', 
               <Trash2 size={15} aria-hidden="true" /> {t.remove}
             </Button>
           )}
+          <span id={`${id}-size`} className="st-image-size">{t.recommendedSize(size ?? IMAGE_SIZES[shape])}</span>
         </div>
         <input id={id} ref={ref} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden
           onChange={e => { void handle(e.target.files?.[0]); e.target.value = '' }} />

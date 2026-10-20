@@ -14,7 +14,7 @@ const ko: StudioDict = {
   common: {
     cancel: '취소', save: '저장', saving: '저장 중…', saved: '저장됨', saveError: '저장 오류', retry: '다시 시도',
     close: '닫기', chooseOption: '선택하세요', upload: '이미지 업로드', change: '변경', remove: '삭제',
-    removeLabel: l => `${l} 삭제`, uploadError: '이미지를 업로드하지 못했습니다.', open: '열기', edit: '편집', hide: '숨기기',
+    removeLabel: l => `${l} 삭제`, uploadError: '이미지를 업로드하지 못했습니다.', recommendedSize: s => `권장 크기: ${s} px`, open: '열기', edit: '편집', hide: '숨기기',
     add: '추가', delete: '삭제', loading: '불러오는 중…', done: '완료', pending: '미완료',
   },
   status: { published: '공개됨', draft: '임시저장', unpublished: '일시중지됨', archived: '보관됨' },
@@ -122,8 +122,8 @@ const ko: StudioDict = {
     dayOpen: d => `${d} 영업`, dayOpens: d => `${d} 오픈`, dayCloses: d => `${d} 마감`, closed: '휴무',
     photos: n => `사진(${n})`, photoN: n => `사진 ${n}`, removePhoto: n => `사진 ${n} 삭제`, newPhoto: '새 사진', addPhoto: '사진 추가',
     cards: n => `카드(${n})`, cardN: n => `카드 ${n}`, upCard: n => `카드 ${n} 위로 이동`, downCard: n => `카드 ${n} 아래로 이동`,
-    removeCard: n => `카드 ${n} 삭제`, photo: '사진', cardTitle: '제목', cardTitlePlaceholder: '재즈 나이트',
-    cardDescription: '설명(선택)', cardDate: '날짜(선택)', cardLink: '링크(선택)',
+    removeCard: n => `카드 ${n} 삭제`, photo: '사진', flyer: '플라이어', cardTitle: '제목', cardTitlePlaceholder: '재즈 나이트',
+    cardDescription: '설명(선택)', cardDate: '날짜(선택)', cardLink: '링크(선택)', cardTime: '시간(선택)', ticketsLink: '티켓 링크(선택)',
     enTitle: '제목(EN)', enDescription: '설명(EN)', addCard: '카드 추가', google: 'Google', rating: '평점(1~5)',
     ratingCount: '리뷰 수', googleLink: 'Google 리뷰 링크', featured: n => `추천 리뷰(${n})`,
     realReviews: '실제 고객의 의견을 사용하세요.', starsOf: n => `리뷰 ${n}의 별점`, stars: n => `별 ${n}개`,
@@ -371,7 +371,7 @@ const ko: StudioDict = {
   catalog: {
     styleHighlight: '강조(포인트 색상)',
     styleButton: '버튼(옆에 아이콘 또는 썸네일)', styleCard: '큰 사진 카드',
-    layoutCarousel: '스와이프(캐러셀)', layoutStack: '세로로 나열',
+    layoutCarousel: '스와이프(캐러셀)', layoutStack: '세로로 나열', layoutTickets: '이벤트 플라이어(스토리 형식)',
     types: {
       link: { label: '링크', description: '웹사이트, 스토어, 포트폴리오 등으로 연결되는 버튼.' },
       social: { label: 'SNS', description: 'Instagram, TikTok, LinkedIn 등을 아이콘으로 표시.' },

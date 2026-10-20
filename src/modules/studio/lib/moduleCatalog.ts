@@ -262,6 +262,7 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         { key: 'layout', label: f.layout, kind: 'select', required: true, options: [
           { value: 'carousel', label: c.layoutCarousel },
           { value: 'stack', label: c.layoutStack },
+          { value: 'tickets', label: c.layoutTickets },
         ] },
       ],
       prefill: x => { if (!x.layout) x.layout = 'carousel' },
@@ -278,6 +279,7 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
             .filter(i => i.title?.trim() || i.image_url)
             .map(i => Object.fromEntries(Object.entries({
               image_url: i.image_url, title: i.title?.trim(), subtitle: i.subtitle?.trim(), date: i.date,
+              time: /^\d{2}:\d{2}$/.test(i.time ?? '') ? i.time : undefined,
               url: i.url?.trim() ? safeHref(i.url) : undefined,
               en: i.en?.title?.trim() || i.en?.subtitle?.trim() ? { title: i.en?.title?.trim() || undefined, subtitle: i.en?.subtitle?.trim() || undefined } : undefined,
             }).filter(([, val]) => val)))
