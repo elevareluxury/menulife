@@ -190,6 +190,10 @@ test('revisión semanal completa: lo que salió bien, qué soltar y 3 cosas para
     ['text', 'Caminar tres veces'], ['task', 'Llamar a Ana'], ['text', 'Ordenar el escritorio'],
   ])
   await expect(card).toHaveCount(0)
+  // Métricas: una revisión terminada, sin lo escrito
+  const done = () => (state.tables.product_events ?? []).filter(e => e.event === 'weekly_review_done')
+  await expect.poll(() => done().map(e => e.props)).toEqual([{}])
+  expect(JSON.stringify(state.tables.product_events)).not.toContain('informe')
 
   // Las semanas anteriores se ven en Insights
   await page.goto('/life/insights')

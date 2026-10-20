@@ -3,6 +3,7 @@ import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
 import { langLocale } from '@/i18n/app/languages'
 import { usePrefs } from '@/lib/prefs'
+import { trackGoalLink } from '@/lib/productEvents'
 import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import { LIFE_COLORS, HABIT_ICONS, getHabitIcon } from '../lib/lifePalette'
 import type { Habit, HabitFormData } from '../hooks/useHabits'
@@ -106,6 +107,7 @@ export function HabitSheet({ open, onClose, onSave, initial }: HabitSheetProps) 
         why: whyValue(form.why),
         reminder_time: form.reminder_enabled ? form.reminder_time : form.reminder_time || null,
       })
+      trackGoalLink('habit', form.goal_id, initial?.goal_id)
       onClose()
     } catch { setError(t.common.saveError) }
     finally { setSaving(false) }

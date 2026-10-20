@@ -11,6 +11,8 @@ import { lifeT, lifeTReady } from '@/i18n/app/life'
 import { anchorHasPrefix, anchorLabel } from '../lib/habitAnchor'
 import { claimMark, cleanOldMarks, electLeader, reminderLoop } from '../lib/reminderLeader'
 import { showSystemNotification } from '@/lib/notifications'
+import { trackEvent } from '@/lib/productEvents'
+import { reminderUrl } from '../lib/reminderOpen'
 
 const db = supabase as unknown as SupabaseClient
 /** Si la app se abre tarde, avisa igual hasta 2 h después de la hora elegida */
@@ -75,8 +77,10 @@ export function useHabitReminders(userId: string | undefined) {
         if (isDone(todayValue.get(h.id), h.target_value)) continue
         const text = reminderText(h)
         // Ya quedó anotado: si el aviso del sistema no sale (sin permiso o el teléfono no lo deja), va en pantalla
-        const shown = await showSystemNotification(text, { tag: `life-habit-${h.id}-${today}`, url: '/life/habits' })
-        if (!shown) toast(`⏰ ${text}`, { duration: 8000 })
+        const shown = await showSystemNotification(text, { tag: `life-habit-${h.id}-${today}`, url: reminderUrl('/life/habits', 'habit', 'app') })
+        // Sólo cuenta el aviso del sistema (el que se puede tocar); el de pantalla no tiene "abrir"
+        if (shown) trackEvent('reminder_shown', { kind: 'habit', channel: 'app' })
+        else toast(`⏰ ${text}`, { duration: 8000 })
       }
     }
 

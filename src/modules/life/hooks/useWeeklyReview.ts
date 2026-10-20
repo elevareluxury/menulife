@@ -6,6 +6,7 @@ import { isDone, shiftDate } from '../lib/habitStreak'
 import { summarizeWeek, weekEndOf, MAX_FOCUS, WEEKLY_TEXT_MAX, type WeekSummary } from '../lib/weeklyReview'
 import { prioritiesOf } from './useDailyReview'
 import { lifeDayOf, lifeTimeZone, startOfLocalDayISO } from '../lib/zonedTime'
+import { trackEvent } from '@/lib/productEvents'
 
 // Revisión semanal: una fila de life_weekly_reviews por persona y semana (week_start).
 const db = supabase as unknown as SupabaseClient
@@ -106,8 +107,12 @@ export function useWeeklyReview(week: string) {
     if (err) { setReview(prev); throw err }
   }, [user, week, review])
 
-  const finish = useCallback((data: { wins: string; let_go: string; next_focus: FocusItem[] }) =>
-    save({ ...data, closed_at: new Date().toISOString() }), [save])
+  // Terminar una semana que ya estaba terminada (volver a guardarla) no es otra revisión
+  const finish = useCallback(async (data: { wins: string; let_go: string; next_focus: FocusItem[] }) => {
+    const first = !review.closed_at
+    await save({ ...data, closed_at: new Date().toISOString() })
+    if (first) trackEvent('weekly_review_done')
+  }, [save, review.closed_at])
 
   return { review, summary, loading, error, save, finish }
 }

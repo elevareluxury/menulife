@@ -11,6 +11,7 @@ import { TaskList } from './TasksView'
 import { useGoalLinks } from '../hooks/useGoalLinks'
 import { getHabitIcon } from '../lib/lifePalette'
 import { formatMoney } from '@/lib/currencies'
+import { trackGoalLink } from '@/lib/productEvents'
 import { WhyQuote } from './Why'
 
 interface GoalDetailSheetProps {
@@ -258,6 +259,7 @@ function GoalTasks({ goal }: { goal: Goal }) {
     setAdding(true); setFailed(false)
     try {
       await createTask({ title: title.trim(), goal_id: goal.id })
+      trackGoalLink('task', goal.id)
       setTitle('')
     } catch { setFailed(true) } finally { setAdding(false) }
   }

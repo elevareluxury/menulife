@@ -55,4 +55,10 @@ test('con el aviso del navegador disponible, sale como aviso del sistema (y no e
   await page.goto('/life')
   await expect.poll(() => page.evaluate(() => (window as unknown as { __shown: string[] }).__shown)).toEqual(['Pagar la luz'])
   await expect(page.getByText('⏰ Pagar la luz', { exact: false })).toHaveCount(0)
+  // Métricas: un reminder_shown con la app abierta, sin el título
+  const shown = () => (state.tables.product_events ?? []).filter(e => e.event === 'reminder_shown')
+  await expect.poll(() => shown().map(e => e.props)).toEqual([{ kind: 'task', channel: 'app' }])
+  await page.waitForTimeout(500)
+  expect(shown()).toHaveLength(1)
+  expect(JSON.stringify(state.tables.product_events)).not.toContain('Pagar la luz')
 })

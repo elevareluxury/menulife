@@ -11,6 +11,11 @@ type Rpc = { rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ 
 const rpc = (fn: string, args?: Record<string, unknown>) => (supabase as unknown as Rpc).rpc(fn, args)
 
 interface Cohort { week: string; users: number; d1: number | null; d7: number | null; d30: number | null }
+type CaptureType = 'quick' | 'voice' | 'dump'
+type CaptureDest = 'task' | 'idea' | 'note' | 'goal' | 'money'
+type LinkType = 'task' | 'habit' | 'money' | 'note'
+interface CaptureRow { tipo: CaptureType; dest: CaptureDest; uses: number; items: number }
+interface ReminderRow { kind: 'task' | 'habit'; channel: 'app' | 'push'; shown: number; opened: number }
 export interface ProductMetrics {
   days: number
   events_total: number
@@ -25,6 +30,17 @@ export interface ProductMetrics {
   return_median_days: number | null
   referral_signups: number
   referrals: Array<{ ref: string; signups: number }>
+  // Life OS: ¿cumple su promesa? (migración 20261111000001_life_os_metrics; con la base vieja no vienen)
+  goals_created?: number
+  goal_linked_users?: number
+  goal_links?: Partial<Record<LinkType, number>>
+  capture_users?: number
+  captures?: CaptureRow[]
+  weekly_reviews?: number
+  weekly_review_users?: number
+  reminders?: ReminderRow[]
+  first_value_users?: number
+  first_value_median_seconds?: number | null
 }
 
 const PERIODS = [30, 90, 365] as const
@@ -58,6 +74,76 @@ function Kpi({ label, value, sub }: { label: string; value: string; sub: string 
       <p style={{ margin: '4px 0 0', fontSize: 13, fontWeight: 600, color: TEXT }}>{label}</p>
       <p style={{ margin: '2px 0 0', fontSize: 12, color: MUTED }}>{sub}</p>
     </div>
+  )
+}
+
+/** Integración con metas, primer valor, captura, revisiones y recordatorios (sin contenido: sólo conteos) */
+function LifePromise({ m }: { m: ProductMetrics }) {
+  const tp = useAdminT().product
+  const { number } = useAdminFormat()
+  const captures = m.captures ?? []
+  const reminders = m.reminders ?? []
+  const shown = reminders.reduce((s, r) => s + r.shown, 0)
+  const opened = reminders.reduce((s, r) => s + r.opened, 0)
+  const links = (['task', 'habit', 'money', 'note'] as const)
+    .filter(k => m.goal_links?.[k]).map(k => `${tp.linkTypes[k]} ${number(m.goal_links![k]!)}`)
+  return (
+    <section aria-labelledby="pt-life" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div>
+        <h2 id="pt-life" style={{ margin: 0, fontSize: 16, color: TEXT }}>{tp.lifeTitle}</h2>
+        <p style={{ margin: '4px 0 0', fontSize: 12.5, color: MUTED }}>{tp.lifeHelp}</p>
+      </div>
+      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+        <Kpi label={tp.firstValue} value={duration(m.first_value_median_seconds ?? null, tp, number)}
+          sub={tp.firstValueSub(m.first_value_users ?? 0, m.signups)} />
+        <Kpi label={tp.goalLinked} value={pct(m.goal_linked_users ?? 0, m.period_life_users)}
+          sub={tp.goalLinkedSub(m.goal_linked_users ?? 0, m.period_life_users, m.goals_created ?? 0)
+            + (links.length ? ` · ${tp.linksBy}: ${links.join(', ')}` : '')} />
+        <Kpi label={tp.weeklyReviews} value={number(m.weekly_reviews ?? 0)} sub={tp.weeklyReviewsSub(m.weekly_review_users ?? 0)} />
+        <Kpi label={tp.reminderOpen} value={pct(opened, shown)} sub={tp.reminderOpenSub(opened, shown)} />
+      </div>
+
+      <div style={CARD} aria-labelledby="pt-capture" role="group">
+        <h3 id="pt-capture" style={{ margin: '0 0 4px', fontSize: 15, color: TEXT }}>{tp.captureTitle}</h3>
+        <p style={{ margin: '0 0 10px', fontSize: 12.5, color: MUTED }}>{tp.captureHelp}</p>
+        {captures.length === 0 ? <p style={{ color: MUTED, fontSize: 13.5, margin: 0 }}>{tp.noCapture}</p> : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead><tr><th style={TH}>{tp.captureType}</th><th style={TH}>{tp.captureDest}</th><th style={TH}>{tp.uses}</th><th style={TH}>{tp.items}</th></tr></thead>
+            <tbody>
+              {captures.map(c => (
+                <tr key={`${c.tipo}-${c.dest}`}>
+                  <td style={TD}>{tp.captureTypes[c.tipo] ?? c.tipo}</td>
+                  <td style={TD}>{tp.dests[c.dest] ?? c.dest}</td>
+                  <td style={TD}>{number(c.uses)}</td>
+                  <td style={TD}>{number(c.items)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div style={CARD} aria-labelledby="pt-reminders" role="group">
+        <h3 id="pt-reminders" style={{ margin: '0 0 4px', fontSize: 15, color: TEXT }}>{tp.remindersTitle}</h3>
+        <p style={{ margin: '0 0 10px', fontSize: 12.5, color: MUTED }}>{tp.remindersHelp}</p>
+        {reminders.length === 0 ? <p style={{ color: MUTED, fontSize: 13.5, margin: 0 }}>{tp.noReminders}</p> : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead><tr><th style={TH}>{tp.kind}</th><th style={TH}>{tp.channel}</th><th style={TH}>{tp.shown}</th><th style={TH}>{tp.opened}</th><th style={TH}>{tp.openRate}</th></tr></thead>
+            <tbody>
+              {reminders.map(r => (
+                <tr key={`${r.kind}-${r.channel}`}>
+                  <td style={TD}>{tp.kinds[r.kind] ?? r.kind}</td>
+                  <td style={TD}>{tp.channels[r.channel] ?? r.channel}</td>
+                  <td style={TD}>{number(r.shown)}</td>
+                  <td style={TD}>{number(r.opened)}</td>
+                  <td style={TD}>{pct(r.opened, r.shown)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </section>
   )
 }
 
@@ -114,6 +200,8 @@ export function ProductTab() {
                 <Kpi label={tp.returnRate} value={pct(m.returned_users, m.period_life_users)}
                   sub={tp.returnSub(m.return_median_days == null ? '—' : tp.days(number(m.return_median_days, 1)))} />
               </section>
+
+              <LifePromise m={m} />
 
               <section style={CARD} aria-labelledby="pt-retention">
                 <h2 id="pt-retention" style={{ margin: '0 0 4px', fontSize: 16, color: TEXT }}>{tp.retentionTitle}</h2>

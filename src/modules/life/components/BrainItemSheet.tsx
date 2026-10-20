@@ -6,6 +6,7 @@ import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../desig
 import type { BrainItem, BrainFormData, BrainItemType } from '../hooks/useBrain'
 import { GoalSelect } from './GoalSelect'
 import { clearDraft, readDraft, writeDraft } from '@/lib/editDraft'
+import { trackGoalLink } from '@/lib/productEvents'
 
 interface BrainItemSheetProps {
   open: boolean
@@ -59,6 +60,7 @@ export function BrainItemSheet({ open, onClose, onSave, initial, initialType }: 
     setSaving(true)
     try {
       await onSave({ type: form.type, title: form.title.trim(), content: form.content?.trim() || undefined, goal_id: form.goal_id ?? null })
+      trackGoalLink(form.type === 'task' ? 'task' : 'note', form.goal_id, initial?.goal_id)
       clearDraft(draftKey)
       onClose()
     } catch { setError(t.common.saveError) }

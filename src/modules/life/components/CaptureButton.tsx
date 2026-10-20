@@ -26,6 +26,7 @@ import { VoiceCaptureSheet } from './VoiceCaptureSheet'
 import type { VoiceResult } from '../lib/voiceParse'
 import { BrainDumpSheet, type DumpSaveItem } from './BrainDumpSheet'
 import { lifeTimeZone, lifeToday, noonOfLocalDayISO } from '../lib/zonedTime'
+import { trackCapture, trackEvent, type CaptureDest, type CaptureType } from '@/lib/productEvents'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -113,16 +114,21 @@ export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
     }
   }
 
-  const handleBrainSave = async (data: { type: BrainItemType; title: string; content?: string; goal_id?: string | null }) => {
+  // Cada guardado cuenta como un uso de la captura (también si quedó en la cola sin conexión): `via` dice cuál
+  const handleBrainSave = async (data: { type: BrainItemType; title: string; content?: string; goal_id?: string | null }, via: CaptureType = 'quick') => {
     if (!user) return
     const row = { id: crypto.randomUUID(), ...data, user_id: user.id, is_completed: false, is_archived: false }
-    if (await saveOrQueue({ table: 'life_brain_items', row, module: 'brain' })) void awardFirstCapture(user.id, data.type)
+    const saved = await saveOrQueue({ table: 'life_brain_items', row, module: 'brain' })
+    trackCapture(via, data.type)
+    if (saved) void awardFirstCapture(user.id, data.type)
   }
 
-  const handleTaskSave = async (data: TaskFormData) => {
+  const handleTaskSave = async (data: TaskFormData, via: CaptureType = 'quick') => {
     if (!user) return
     const row = { id: crypto.randomUUID(), ...taskColumns(data), type: 'task', user_id: user.id, is_completed: false, is_archived: false }
-    if (await saveOrQueue({ table: 'life_brain_items', row, module: 'brain' })) void awardFirstCapture(user.id, 'task')
+    const saved = await saveOrQueue({ table: 'life_brain_items', row, module: 'brain' })
+    trackCapture(via, 'task')
+    if (saved) void awardFirstCapture(user.id, 'task')
   }
 
   const handleGoalSave = async (data: GoalFormData) => {
@@ -133,16 +139,21 @@ export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
       existing = count ?? 0
     } catch { /* sin conexión: va al final igual */ }
     const row = { id: crypto.randomUUID(), ...data, user_id: user.id, sort_order: existing }
-    if (await saveOrQueue({ table: 'life_goals', row, module: 'goals' })) {
+    const saved = await saveOrQueue({ table: 'life_goals', row, module: 'goals' })
+    trackEvent('goal_created')
+    trackCapture('quick', 'goal')
+    if (saved) {
       void award(user.id, 'first_goal', 'Primera meta definida')
       if (existing + 1 >= 5) void award(user.id, 'goals_5', 'Cinco metas')
     }
   }
 
-  const handleMoneySave = async (data: TransactionFormData) => {
+  const handleMoneySave = async (data: TransactionFormData, via: CaptureType = 'quick') => {
     if (!user) return
     const row = { id: crypto.randomUUID(), ...data, user_id: user.id }
-    if (await saveOrQueue({ table: 'life_transactions', row, module: 'money' })) {
+    const saved = await saveOrQueue({ table: 'life_transactions', row, module: 'money' })
+    trackCapture(via, 'money')
+    if (saved) {
       void (async () => {
         const { count } = await db.from('life_transactions')
           .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
@@ -158,11 +169,11 @@ export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
       await handleMoneySave({
         type: r.kind, amount: r.amount ?? 0, category: 'Otros', description: r.text, currency: mainCurrency,
         occurred_at: noonOfLocalDayISO(r.date ?? today, lifeTimeZone()),
-      })
+      }, 'voice')
     } else if (r.kind === 'task') {
-      await handleTaskSave({ title: r.text, due_date: r.date, due_time: r.date ? r.time : null })
+      await handleTaskSave({ title: r.text, due_date: r.date, due_time: r.date ? r.time : null }, 'voice')
     } else {
-      await handleBrainSave({ type: 'idea', title: r.text })
+      await handleBrainSave({ type: 'idea', title: r.text }, 'voice')
     }
     toast.success(t.voice.saved)
   }
@@ -179,6 +190,7 @@ export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
     let saved = 0
     let queued = 0
     let firstBrain: BrainItemType | null = null
+    const byDest = new Map<CaptureDest, number>()
     for (const it of items) {
       let item: OutboxItem
       if (it.kind === 'expense' || it.kind === 'income') {
@@ -194,8 +206,11 @@ export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
       } else {
         item = { table: 'life_brain_items', module: 'brain', row: { id: it.id, type: 'idea', title: it.text, user_id: user.id, is_completed: false, is_archived: false } }
       }
+      const dest: CaptureDest = item.module === 'money' ? 'money' : it.kind === 'task' ? 'task' : 'idea'
       try {
-        if (await saveOrQueue(item, true)) {
+        const ok = await saveOrQueue(item, true)
+        byDest.set(dest, (byDest.get(dest) ?? 0) + 1)
+        if (ok) {
           saved++
           modules.add(item.module)
           if (item.module === 'brain' && !firstBrain) firstBrain = it.kind === 'task' ? 'task' : 'idea'
@@ -203,6 +218,9 @@ export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
       } catch { failed.push(it.id) }
     }
     modules.forEach(module => window.dispatchEvent(new CustomEvent(LIFE_DATA_UPDATED, { detail: { module } })))
+    // Un evento por destino, con cuántas cosas fueron ahí (sólo lo guardado o en cola; un reintento de lo que
+    // falló es otro uso)
+    byDest.forEach((count, dest) => trackCapture('dump', dest, count))
     if (firstBrain) void awardFirstCapture(user.id, firstBrain)
     if (saved + queued > 0) toast.success(t.dump.saved(saved + queued))
     if (queued > 0) toast(t.offline.queued, { icon: '☁️' })
@@ -323,12 +341,12 @@ export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
         open={brainOpen}
         onClose={() => setBrainOpen(false)}
         initialType={brainType}
-        onSave={handleBrainSave}
+        onSave={data => handleBrainSave(data)}
       />
       <TaskSheet
         open={taskOpen}
         onClose={() => setTaskOpen(false)}
-        onSave={handleTaskSave}
+        onSave={data => handleTaskSave(data)}
       />
       <GoalSheet
         open={goalOpen}
@@ -341,7 +359,7 @@ export function CaptureButton({ inBar = false }: { inBar?: boolean } = {}) {
       <TransactionSheet
         open={moneyOpen}
         onClose={() => setMoneyOpen(false)}
-        onSave={handleMoneySave}
+        onSave={data => handleMoneySave(data)}
       />
     </>,
     document.body,
