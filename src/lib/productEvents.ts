@@ -9,6 +9,7 @@ export type ProductEvent =
   | 'signup_started' | 'signup_completed' | 'onboarding_step' | 'profile_published' | 'share_tool_used'
   | 'qr_downloaded' | 'appearance_changed'
   | 'life_my_day_opened' | 'life_priorities_set' | 'life_day_closed' | 'habit_logged' | 'task_completed' | 'life_returned'
+  | 'life_onboarding_started' | 'life_onboarding_completed' | 'life_onboarding_skipped'
 
 /** Claves permitidas (las mismas que valida la base en mycen_valid_event_props) */
 export interface ProductEventProps {

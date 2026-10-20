@@ -19,6 +19,8 @@ import { useHabits } from '../hooks/useHabits'
 import { MyDaySection } from '../components/MyDay'
 import { FreshStart, WelcomeBack } from '../components/KindMoments'
 import { useWelcomeBack } from '../hooks/useWelcomeBack'
+import { useLifeOnboarding } from '../hooks/useLifeOnboarding'
+import { LifeOnboarding, OnboardingCelebration } from '../components/LifeOnboarding'
 import { trackOncePerSession } from '@/lib/productEvents'
 import { HabitMeta, QuantityButton } from '../components/HabitControls'
 import { useStreakText } from '../hooks/useStreakText'
@@ -448,6 +450,8 @@ export function LifePage() {
   const today = useToday()
   const [langOpen, setLangOpen] = useState(false)
   const [welcome, closeWelcome] = useWelcomeBack()
+  const onboarding = useLifeOnboarding()
+  const [celebrating, setCelebrating] = useState(false)
   // Métricas (etapa 14): abrió "Mi día" (una vez por día y sesión)
   useEffect(() => { trackOncePerSession(`myday-${today}`, 'life_my_day_opened') }, [today])
 
@@ -456,6 +460,20 @@ export function LifePage() {
   const avatarUrl = getAvatarUrl(user)
   const rawDate = new Date(`${today}T12:00:00`).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })
   const dateLabel = rawDate.charAt(0).toUpperCase() + rawDate.slice(1)
+
+  // Primera vez en Life OS (sin metas, hábitos ni tareas): el onboarding ocupa el lugar de Mi día
+  if (onboarding.status !== 'hidden') {
+    return (
+      <>
+        <StarfieldBackground />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '480px', margin: '0 auto', padding: '14px 16px 24px' }}>
+          {onboarding.status === 'show' && onboarding.userId && (
+            <LifeOnboarding userId={onboarding.userId} onDone={done => { onboarding.finish(); setCelebrating(done) }} />
+          )}
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
@@ -537,7 +555,8 @@ export function LifePage() {
             </h1>
             <p style={{ fontFamily: font, fontSize: '13px', color: colors.text.tertiary, margin: '2px 0 0' }}>{dateLabel}</p>
           </motion.div>
-          {welcome ? <WelcomeBack onClose={closeWelcome} /> : <FreshStart />}
+          {celebrating ? <OnboardingCelebration onClose={() => setCelebrating(false)} />
+            : welcome ? <WelcomeBack onClose={closeWelcome} /> : <FreshStart />}
           <MyDaySection />
           <motion.div variants={fadeInUp}><TodayTasksCard /></motion.div>
           <motion.div variants={fadeInUp}><TodayHabitsCard hideStreaks={welcome} /></motion.div>
