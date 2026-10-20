@@ -78,3 +78,48 @@ test('el panel de producto muestra las métricas', async ({ page, context }) => 
   await expect(cohort).toContainText('…')
   await expect(page.getByRole('cell', { name: '/ana' })).toBeVisible()
 })
+
+test('el panel muestra si Life OS cumple su promesa: metas, primer valor, captura, revisiones y recordatorios', async ({ page, context }) => {
+  const state = createState({ super_admins: [{ id: 'sa-1', user_id: OWNER_ID }] })
+  state.tables.product_metrics = [{
+    days: 90, events_total: 500, signups: 40, published: 30, publish_median_seconds: 300, retention: [],
+    week_life_users: 20, habit4_users: 5, period_life_users: 25, returned_users: 10, return_median_days: 5,
+    referral_signups: 0, referrals: [],
+    goals_created: 12, goal_linked_users: 10, goal_links: { task: 7, habit: 3 },
+    capture_users: 9, captures: [
+      { tipo: 'dump', dest: 'task', uses: 4, items: 11 },
+      { tipo: 'quick', dest: 'idea', uses: 6, items: 6 },
+    ],
+    weekly_reviews: 8, weekly_review_users: 6,
+    reminders: [
+      { kind: 'habit', channel: 'app', shown: 10, opened: 2 },
+      { kind: 'task', channel: 'push', shown: 30, opened: 18 },
+    ],
+    first_value_users: 32, first_value_median_seconds: 5400,
+  }]
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/super-admin/producto')
+  const life = page.getByRole('region', { name: 'Life OS: ¿cumple su promesa?' })
+  await expect(life).toBeVisible()
+  await expect(life.getByText('1,5 h')).toBeVisible()                                // mediana hasta el primer valor
+  await expect(life.getByText('Mediana · 32 de 40 registros llegaron')).toBeVisible()
+  await expect(life.getByText('40 %').first()).toBeVisible()                           // 10 de 25 activos vinculan a una meta
+  await expect(life.getByText(/10 de 25 activos · 12 metas creadas · Vínculos: tareas 7, hábitos 3/)).toBeVisible()
+  await expect(life.getByText('De 6 personas en el período')).toBeVisible()
+  await expect(life.getByText('20 de 40 mostrados')).toBeVisible()                      // tasa de apertura total: 50 %
+  const capture = life.getByRole('group', { name: 'Uso de la captura' })
+  await expect(capture.getByRole('row', { name: /Vaciar la cabeza/ })).toContainText('11')
+  await expect(capture.getByRole('row', { name: /Rápida/ })).toContainText('Idea')
+  const reminders = life.getByRole('group', { name: 'Recordatorios' })
+  await expect(reminders.getByRole('row', { name: /Push \(app cerrada\)/ })).toContainText('60 %')
+  await expect(reminders.getByRole('row', { name: /App abierta/ })).toContainText('20 %')
+})
+
+test('con la base sin la migración nueva, el panel sigue y la sección de Life OS queda vacía', async ({ page, context }) => {
+  const state = createState({ super_admins: [{ id: 'sa-1', user_id: OWNER_ID }] })
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/super-admin/producto')
+  const life = page.getByRole('region', { name: 'Life OS: ¿cumple su promesa?' })
+  await expect(life.getByText('Nadie usó la captura en este período.')).toBeVisible()
+  await expect(life.getByText('No se mostró ningún recordatorio en este período.')).toBeVisible()
+})

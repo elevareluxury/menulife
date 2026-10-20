@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown, Repeat, Plus, CreditCard } from 'lucide-react
 import { LifeSheet, LifeButton, colors, font, radius, ink, tint } from '../design-system'
 import { useLocaleStore } from '@/store/localeStore'
 import { usePrefs } from '@/lib/prefs'
+import { trackGoalLink } from '@/lib/productEvents'
 import { currencySymbol, formatMoney } from '@/lib/currencies'
 import { useLifeT } from '@/i18n/app/life'
 import { useAppLang } from '@/i18n/app/store'
@@ -161,6 +162,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
           ? (/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO())
           : noonOfLocalDayISO(/^\d{4}-\d{2}-\d{2}$/.test(form.occurred_at) ? form.occurred_at : todayISO(), lifeTimeZone()),
       }, !inInstallments && !!(repeatable && repeat && !initial), inInstallments ? count : null, sharing?.ok ? { debts: sharing.debts } : null)
+      trackGoalLink('money', form.goal_id, initial?.goal_id)
       onClose()
     } catch { setError(t.common.saveError) }
     finally { setSaving(false) }

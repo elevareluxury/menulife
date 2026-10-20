@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { award } from '../lib/checkMilestone'
 import { LIFE_DATA_UPDATED } from './useBrain'
+import { trackEvent } from '@/lib/productEvents'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -112,6 +113,7 @@ export function useGoals() {
     if (!user) return
     const { error } = await db.from('life_goals').insert({ ...data, user_id: user.id, sort_order: rawGoals.length })
     if (error) throw error
+    trackEvent('goal_created')
     await load()
     void award(user.id, 'first_goal', 'Primera meta definida')
     const { count } = await db.from('life_goals').select('*', { count: 'exact', head: true }).eq('user_id', user.id)

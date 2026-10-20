@@ -500,6 +500,16 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   falla se ignora). Panel `/super-admin/producto` (`ProductTab`) con `admin_product_metrics(days)`: mediana hasta
   publicar, % publicadas, retención de Life OS por cohorte semanal (día 1, días 7–13, días 30–36), hábito 4+ días por
   semana, tasa de regreso y registros por referido. Privacidad: "Uso de la app" (12 idiomas). E2E en `metrics.spec.ts`.
+- Métricas de Life OS (`20261111000001_life_os_metrics`): la lista de eventos vive en la tabla `product_event_types`
+  (FK desde `product_events`); para sumar uno: `insert into product_event_types … on conflict do nothing` (no redefinir
+  `track_product_event`). Eventos: `goal_created`, `item_linked_to_goal {tipo}` (`trackGoalLink` en las hojas, sólo si la
+  meta es nueva para el ítem), `capture_used {tipo: quick|voice|dump, dest, count?}` (`trackCapture` en `CaptureButton`),
+  `weekly_review_done` (primera vez que se termina la semana), `reminder_shown`/`reminder_opened {kind, channel: app|push}`.
+  Sus props se validan con valores fijos (`mycen_valid_event_shape`). Los push mostrados los registra la Edge Function
+  `life-reminders` (service role, uno por recordatorio entregado); al tocar un aviso la URL lleva `?aviso=<kind>.<channel>`
+  y `useReminderOpened` (`lib/reminderOpen.ts`, en LifeShell) lo registra y lo saca. El panel suma integración con metas,
+  captura por tipo y destino, revisiones, tasa de apertura por canal y mediana hasta el primer valor (del registro al
+  primer `life_priorities_set`, `habit_logged` o `task_completed`, calculado en la RPC). E2E en `life-metrics.spec.ts`.
 - Constancia de hábitos (Metas, Insights, Replay): `habitConsistency` (`lib/habitStreak.ts`), la misma regla que Hábitos:
   días programados, o "X veces por semana" por semana (hasta X; la semana en curso sólo suma lo hecho), y con cantidad sólo
   los días que llegaron a la meta (`isDone`).
