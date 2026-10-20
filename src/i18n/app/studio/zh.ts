@@ -14,7 +14,7 @@ const zh: StudioDict = {
   common: {
     cancel: '取消', save: '保存', saving: '正在保存…', saved: '已保存', saveError: '保存出错', retry: '重试',
     close: '关闭', chooseOption: '请选择', upload: '上传图片', change: '更换', remove: '移除',
-    removeLabel: l => `移除${l}`, uploadError: '图片上传失败。', open: '打开', edit: '编辑', hide: '收起',
+    removeLabel: l => `移除${l}`, uploadError: '图片上传失败。', recommendedSize: s => `建议尺寸：${s} px`, open: '打开', edit: '编辑', hide: '收起',
     add: '添加', delete: '删除', loading: '加载中…', done: '已完成', pending: '待完成',
   },
   status: { published: '已发布', draft: '草稿', unpublished: '已暂停', archived: '已归档' },
@@ -122,8 +122,8 @@ const zh: StudioDict = {
     dayOpen: d => `${d}营业`, dayOpens: d => `${d}开始时间`, dayCloses: d => `${d}结束时间`, closed: '休息',
     photos: n => `照片（${n}）`, photoN: n => `照片 ${n}`, removePhoto: n => `移除照片 ${n}`, newPhoto: '新照片', addPhoto: '添加照片',
     cards: n => `卡片（${n}）`, cardN: n => `卡片 ${n}`, upCard: n => `上移卡片 ${n}`, downCard: n => `下移卡片 ${n}`,
-    removeCard: n => `移除卡片 ${n}`, photo: '照片', cardTitle: '标题', cardTitlePlaceholder: '爵士之夜',
-    cardDescription: '描述（可选）', cardDate: '日期（可选）', cardLink: '链接（可选）',
+    removeCard: n => `移除卡片 ${n}`, photo: '照片', flyer: '海报', cardTitle: '标题', cardTitlePlaceholder: '爵士之夜',
+    cardDescription: '描述（可选）', cardDate: '日期（可选）', cardLink: '链接（可选）', cardTime: '时间（可选）', ticketsLink: '购票链接（可选）',
     enTitle: '标题（EN）', enDescription: '描述（EN）', addCard: '添加卡片', google: 'Google', rating: '评分（1 到 5）',
     ratingCount: '评价数量', googleLink: '你的 Google 评价链接', featured: n => `精选评价（${n}）`,
     realReviews: '请使用客户的真实评价。', starsOf: n => `评价 ${n} 的星级`, stars: n => `${n} 星`,
@@ -371,7 +371,7 @@ const zh: StudioDict = {
   catalog: {
     styleHighlight: '突出显示（强调色）',
     styleButton: '按钮（侧边带图标或缩略图）', styleCard: '大图卡片',
-    layoutCarousel: '可滑动（轮播）', layoutStack: '上下排列',
+    layoutCarousel: '可滑动（轮播）', layoutStack: '上下排列', layoutTickets: '活动海报（快拍格式）',
     types: {
       link: { label: '链接', description: '指向你的网站、店铺、作品集或任何地方的按钮。' },
       social: { label: '社交媒体', description: 'Instagram、TikTok、LinkedIn…以图标显示。' },

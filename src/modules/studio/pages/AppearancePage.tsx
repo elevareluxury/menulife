@@ -161,7 +161,7 @@ export function AppearancePage({ embedded = false }: { embedded?: boolean }) {
             ))}
           </div>
           {theme.cover?.type === 'imagen' && (
-            <ImageField label={t.coverUpload} shape="wide" value={theme.cover.url ?? null}
+            <ImageField label={t.coverUpload} shape="story" value={theme.cover.url ?? null}
               onUpload={async f => { const url = await uploadMedia(userId, f, 'image'); setLook({ cover: { type: 'imagen', url } }) }}
               onClear={() => setLook({ cover: { type: 'imagen' } })} />
           )}

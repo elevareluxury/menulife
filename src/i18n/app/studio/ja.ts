@@ -14,7 +14,7 @@ const ja: StudioDict = {
   common: {
     cancel: 'キャンセル', save: '保存', saving: '保存中…', saved: '保存しました', saveError: '保存エラー', retry: '再試行',
     close: '閉じる', chooseOption: '選択してください', upload: '画像をアップロード', change: '変更', remove: '削除',
-    removeLabel: l => `${l}を削除`, uploadError: '画像をアップロードできませんでした。', open: '開く', edit: '編集', hide: '閉じる',
+    removeLabel: l => `${l}を削除`, uploadError: '画像をアップロードできませんでした。', recommendedSize: s => `推奨サイズ：${s} px`, open: '開く', edit: '編集', hide: '閉じる',
     add: '追加', delete: '削除', loading: '読み込み中…', done: '完了', pending: '未完了',
   },
   status: { published: '公開中', draft: '下書き', unpublished: '一時停止中', archived: 'アーカイブ済み' },
@@ -122,8 +122,8 @@ const ja: StudioDict = {
     dayOpen: d => `${d} 営業`, dayOpens: d => `${d} 開店`, dayCloses: d => `${d} 閉店`, closed: '定休日',
     photos: n => `写真（${n}）`, photoN: n => `写真 ${n}`, removePhoto: n => `写真 ${n} を削除`, newPhoto: '新しい写真', addPhoto: '写真を追加',
     cards: n => `カード（${n}）`, cardN: n => `カード ${n}`, upCard: n => `カード ${n} を上へ`, downCard: n => `カード ${n} を下へ`,
-    removeCard: n => `カード ${n} を削除`, photo: '写真', cardTitle: 'タイトル', cardTitlePlaceholder: 'ジャズナイト',
-    cardDescription: '説明（任意）', cardDate: '日付（任意）', cardLink: 'リンク（任意）',
+    removeCard: n => `カード ${n} を削除`, photo: '写真', flyer: 'フライヤー', cardTitle: 'タイトル', cardTitlePlaceholder: 'ジャズナイト',
+    cardDescription: '説明（任意）', cardDate: '日付（任意）', cardLink: 'リンク（任意）', cardTime: '時間（任意）', ticketsLink: 'チケットのリンク（任意）',
     enTitle: 'タイトル（EN）', enDescription: '説明（EN）', addCard: 'カードを追加', google: 'Google', rating: '評価（1〜5）',
     ratingCount: 'レビュー数', googleLink: 'Google レビューへのリンク', featured: n => `注目のレビュー（${n}）`,
     realReviews: 'お客さまの実際の声を使ってください。', starsOf: n => `レビュー ${n} の星の数`, stars: n => `星 ${n} つ`,
@@ -371,7 +371,7 @@ const ja: StudioDict = {
   catalog: {
     styleHighlight: '強調（アクセントカラー）',
     styleButton: 'ボタン（横にアイコンかサムネイル）', styleCard: '大きな写真のカード',
-    layoutCarousel: 'スワイプ（カルーセル）', layoutStack: '縦に並べる',
+    layoutCarousel: 'スワイプ（カルーセル）', layoutStack: '縦に並べる', layoutTickets: 'イベントフライヤー（ストーリー形式）',
     types: {
       link: { label: 'リンク', description: 'ウェブサイト、ショップ、ポートフォリオなどへのボタン。' },
       social: { label: 'SNS', description: 'Instagram、TikTok、LinkedIn などをアイコンで表示。' },

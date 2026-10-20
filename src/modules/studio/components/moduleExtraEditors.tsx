@@ -94,7 +94,10 @@ export function GalleryEditor({ value: items, onChange, userId }: ExtraEditorPro
 
 // ── Tarjetas ────────────────────────────────────────────────────────────────
 
-export function CardsEditor({ value: items, onChange, userId }: ExtraEditorProps<CardItem[]>) {
+export function CardsEditor({ value: items, onChange, userId, fields }: ExtraEditorProps<CardItem[]>) {
+  // Diseño Flyers: el flyer va en formato historia (9:16); carrusel 4:3, apiladas 16:9
+  const layout = fields?.layout
+  const flyer = layout === 'tickets'
   const e = useStudioT().editor
   const update = (i: number, patch: Partial<CardItem>) => onChange(items.map((c, j) => (j === i ? { ...c, ...patch } : c)))
   const move = (i: number, d: -1 | 1) => {
@@ -118,15 +121,18 @@ export function CardsEditor({ value: items, onChange, userId }: ExtraEditorProps
             </div>
           </div>
           <div className="st-stack" style={{ gap: 12 }}>
-            <ImageField label={e.photo} shape="wide" value={card.image_url}
+            <ImageField label={flyer ? e.flyer : e.photo} shape={flyer ? 'story' : 'wide'} size={layout === 'carousel' ? '1200 × 900' : undefined} value={card.image_url}
               onUpload={async f => update(i, { image_url: await uploadMedia(userId, f) })}
               onClear={() => update(i, { image_url: undefined })} />
             <TextField label={e.cardTitle} value={card.title ?? ''} maxLength={80} onChange={v => update(i, { title: v })} placeholder={e.cardTitlePlaceholder} />
             <TextField label={e.cardDescription} value={card.subtitle ?? ''} maxLength={160} onChange={v => update(i, { subtitle: v })} />
             <div className="st-grid-2">
               <TextField label={e.cardDate} type="date" value={card.date ?? ''} onChange={v => update(i, { date: v || undefined })} />
-              <TextField label={e.cardLink} type="url" value={card.url ?? ''} onChange={v => update(i, { url: v })} placeholder="https://…" />
+              {flyer
+                ? <TextField label={e.cardTime} type="time" value={card.time ?? ''} onChange={v => update(i, { time: v || undefined })} />
+                : <TextField label={e.cardLink} type="url" value={card.url ?? ''} onChange={v => update(i, { url: v })} placeholder="https://…" />}
             </div>
+            {flyer && <TextField label={e.ticketsLink} type="url" value={card.url ?? ''} onChange={v => update(i, { url: v })} placeholder="https://…" />}
             <details>
               <summary className="st-help" style={{ cursor: 'pointer' }}><span className="st-en-tag">EN</span>{e.enOptional}</summary>
               <div className="st-stack" style={{ gap: 10, marginTop: 10 }}>

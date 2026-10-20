@@ -14,7 +14,7 @@ const hi: StudioDict = {
   common: {
     cancel: 'रद्द करें', save: 'सहेजें', saving: 'सहेजा जा रहा है…', saved: 'सहेजा गया', saveError: 'सहेजने में त्रुटि', retry: 'फिर से कोशिश करें',
     close: 'बंद करें', chooseOption: 'एक विकल्प चुनें', upload: 'इमेज अपलोड करें', change: 'बदलें', remove: 'हटाएँ',
-    removeLabel: l => `${l} हटाएँ`, uploadError: 'इमेज अपलोड नहीं हो सकी।', open: 'खोलें', edit: 'संपादित करें', hide: 'छिपाएँ',
+    removeLabel: l => `${l} हटाएँ`, uploadError: 'इमेज अपलोड नहीं हो सकी।', recommendedSize: s => `सुझाया गया: ${s} px`, open: 'खोलें', edit: 'संपादित करें', hide: 'छिपाएँ',
     add: 'जोड़ें', delete: 'हटाएँ', loading: 'लोड हो रहा है…', done: 'पूरा', pending: 'बाकी',
   },
   status: { published: 'प्रकाशित', draft: 'ड्राफ़्ट', unpublished: 'रुका हुआ', archived: 'संग्रहीत' },
@@ -122,8 +122,8 @@ const hi: StudioDict = {
     dayOpen: d => `${d} खुला`, dayOpens: d => `${d} खुलने का समय`, dayCloses: d => `${d} बंद होने का समय`, closed: 'बंद',
     photos: n => `फ़ोटो (${n})`, photoN: n => `फ़ोटो ${n}`, removePhoto: n => `फ़ोटो ${n} हटाएँ`, newPhoto: 'नई फ़ोटो', addPhoto: 'फ़ोटो जोड़ें',
     cards: n => `कार्ड (${n})`, cardN: n => `कार्ड ${n}`, upCard: n => `कार्ड ${n} ऊपर ले जाएँ`, downCard: n => `कार्ड ${n} नीचे ले जाएँ`,
-    removeCard: n => `कार्ड ${n} हटाएँ`, photo: 'फ़ोटो', cardTitle: 'शीर्षक', cardTitlePlaceholder: 'जैज़ नाइट',
-    cardDescription: 'विवरण (वैकल्पिक)', cardDate: 'तारीख (वैकल्पिक)', cardLink: 'लिंक (वैकल्पिक)',
+    removeCard: n => `कार्ड ${n} हटाएँ`, photo: 'फ़ोटो', flyer: 'फ़्लायर', cardTitle: 'शीर्षक', cardTitlePlaceholder: 'जैज़ नाइट',
+    cardDescription: 'विवरण (वैकल्पिक)', cardDate: 'तारीख (वैकल्पिक)', cardLink: 'लिंक (वैकल्पिक)', cardTime: 'समय (वैकल्पिक)', ticketsLink: 'टिकट लिंक (वैकल्पिक)',
     enTitle: 'शीर्षक (EN)', enDescription: 'विवरण (EN)', addCard: 'कार्ड जोड़ें', google: 'Google', rating: 'रेटिंग (1 से 5)',
     ratingCount: 'समीक्षाओं की संख्या', googleLink: 'आपकी Google समीक्षाओं का लिंक', featured: n => `चुनी हुई समीक्षाएँ (${n})`,
     realReviews: 'अपने ग्राहकों की असली राय इस्तेमाल करें।', starsOf: n => `समीक्षा ${n} के सितारे`, stars: n => `${n} सितारे`,
@@ -371,7 +371,7 @@ const hi: StudioDict = {
   catalog: {
     styleHighlight: 'हाइलाइट (एक्सेंट रंग)',
     styleButton: 'बटन (बगल में आइकन या थंबनेल)', styleCard: 'बड़ी फ़ोटो वाला कार्ड',
-    layoutCarousel: 'स्वाइप करने योग्य (कैरोसेल)', layoutStack: 'एक के नीचे एक',
+    layoutCarousel: 'स्वाइप करने योग्य (कैरोसेल)', layoutStack: 'एक के नीचे एक', layoutTickets: 'इवेंट फ़्लायर (स्टोरी फ़ॉर्मेट)',
     types: {
       link: { label: 'लिंक', description: 'आपकी वेबसाइट, स्टोर, पोर्टफ़ोलियो या किसी भी चीज़ का बटन।' },
       social: { label: 'सोशल मीडिया', description: 'Instagram, TikTok, LinkedIn… आइकन के रूप में दिखते हैं।' },

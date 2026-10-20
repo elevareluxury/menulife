@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, Clock, Mail, MapPin, MessageCircle, Navigation, Phone, X } from 'lucide-react'
 import type { ProfileLang, ProfileModule, WeekSchedule } from '../lib/profileTypes'
 import { tr, trLabel, ui } from '../lib/profileI18n'
@@ -373,9 +373,114 @@ export interface CardItem {
   title?: string
   subtitle?: string
   date?: string
+  /** Hora del evento HH:MM (diseño Flyers) */
+  time?: string
   url?: string
   /** Traducciones por tarjeta: { en: { title, subtitle } } */
   en?: { title?: string; subtitle?: string }
+}
+
+const dateLocale = (lang: ProfileLang) => (lang === 'es' ? 'es-AR' : lang === 'en' ? 'en-US' : lang)
+
+/** Fecha del flyer en partes (VIE · 14 · NOV); null si no hay fecha o no es válida */
+function ticketDate(date: string | undefined, lang: ProfileLang) {
+  if (!date) return null
+  const d = new Date(`${date}T12:00:00`)
+  if (Number.isNaN(d.getTime())) return null
+  const part = (o: Intl.DateTimeFormatOptions) => d.toLocaleDateString(dateLocale(lang), o).replace('.', '')
+  return { weekday: part({ weekday: 'short' }), day: part({ day: 'numeric' }), month: part({ month: 'short' }) }
+}
+
+/**
+ * Diseño Flyers (tickets): flyers en formato historia (9:16) que se deslizan de a uno, centrados, con un talón de
+ * entrada troquelado (fecha, hora, lugar y botón "Entradas"). La tarjeta del centro se agranda; las de los costados
+ * quedan atrás. Puntos abajo para saber cuántos hay y saltar a uno.
+ */
+function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: CardItem[] }) {
+  const heading = tr(module.title, module.translations, 'title', lang)
+  const t = ui(lang)
+  const track = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(0)
+
+  useEffect(() => {
+    const el = track.current
+    if (!el) return
+    let frame = 0
+    const onScroll = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const cards = Array.from(el.children) as HTMLElement[]
+        const center = el.scrollLeft + el.clientWidth / 2
+        let best = 0
+        cards.forEach((c, i) => {
+          if (Math.abs(c.offsetLeft + c.offsetWidth / 2 - center) < Math.abs(cards[best].offsetLeft + cards[best].offsetWidth / 2 - center)) best = i
+        })
+        setActive(best)
+      })
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => { el.removeEventListener('scroll', onScroll); cancelAnimationFrame(frame) }
+  }, [])
+
+  const goTo = (i: number) => {
+    const el = track.current
+    const card = el?.children[i] as HTMLElement | undefined
+    if (!el || !card) return
+    el.scrollTo({ left: card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2, behavior: 'smooth' })
+  }
+
+  return (
+    <section className="mp-tix" aria-label={heading || t.cards}>
+      {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
+      <div ref={track} className="mp-tix-track" tabIndex={0} role="region" aria-label={`${heading || t.cards} — ${t.swipeHint}`}>
+        {items.map((item, i) => {
+          const href = safeHref(item.url)
+          const img = safeHref(item.image_url)
+          const title = (lang === 'en' && item.en?.title) || item.title || ''
+          const subtitle = (lang === 'en' && item.en?.subtitle) || item.subtitle || ''
+          const when = ticketDate(item.date, lang)
+          const body = (
+            <>
+              <div className="mp-tix-flyer">
+                {img
+                  ? <SafeImage className="mp-tix-img" sizing="column" src={img} alt={title} loading={i < 2 ? 'eager' : 'lazy'} />
+                  : <span className="mp-tix-blank" aria-hidden="true">{title}</span>}
+                {when && (
+                  <span className="mp-tix-chip" aria-hidden="true">
+                    <span>{when.weekday}</span><strong>{when.day}</strong><span>{when.month}</span>
+                  </span>
+                )}
+              </div>
+              <div className="mp-tix-stub">
+                <div className="mp-tix-info">
+                  {(when || item.time) && (
+                    <span className="mp-tix-when">
+                      {[when && `${when.weekday} ${when.day} ${when.month}`, item.time].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
+                  {title && <span className="mp-tix-title">{title}</span>}
+                  {subtitle && <span className="mp-tix-sub">{subtitle}</span>}
+                </div>
+                {href && <span className="mp-tix-cta">{t.tickets} <ArrowUpRight size={15} aria-hidden="true" /></span>}
+              </div>
+            </>
+          )
+          const cls = `mp-tix-card${i === active ? ' is-active' : ''}`
+          return href
+            ? <a key={i} className={cls} href={href} {...linkProps(href)} onClick={() => onAction(module.id, urlKey(item.url))}>{body}</a>
+            : <article key={i} className={cls}>{body}</article>
+        })}
+      </div>
+      {items.length > 1 && (
+        <div className="mp-tix-dots">
+          {items.map((item, i) => (
+            <button key={i} type="button" data-touch-exempt className={i === active ? 'is-active' : undefined} aria-current={i === active || undefined}
+              aria-label={`${i + 1} / ${items.length}${item.title ? ` · ${item.title}` : ''}`} onClick={() => goTo(i)} />
+          ))}
+        </div>
+      )}
+    </section>
+  )
 }
 
 function formatCardDate(date: string, lang: ProfileLang): string {
@@ -388,6 +493,7 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
   const items = (Array.isArray(module.content.items) ? module.content.items : []) as CardItem[]
   const visible = items.filter(i => i && (i.title || i.image_url))
   if (!visible.length) return null
+  if (module.content.layout === 'tickets') return <TicketCards module={module} lang={lang} onAction={onAction} items={visible} />
   const layout = module.content.layout === 'stack' ? 'stack' : 'carousel'
   const heading = tr(module.title, module.translations, 'title', lang)
 

@@ -20,7 +20,7 @@ const ru: StudioDict = {
   common: {
     cancel: 'Отмена', save: 'Сохранить', saving: 'Сохранение…', saved: 'Сохранено', saveError: 'Ошибка сохранения', retry: 'Повторить',
     close: 'Закрыть', chooseOption: 'Выберите вариант', upload: 'Загрузить изображение', change: 'Заменить', remove: 'Убрать',
-    removeLabel: l => `Убрать: ${l}`, uploadError: 'Не удалось загрузить изображение.', open: 'Открыть', edit: 'Изменить', hide: 'Скрыть',
+    removeLabel: l => `Убрать: ${l}`, uploadError: 'Не удалось загрузить изображение.', recommendedSize: s => `Рекомендуется: ${s} px`, open: 'Открыть', edit: 'Изменить', hide: 'Скрыть',
     add: 'Добавить', delete: 'Удалить', loading: 'Загрузка…', done: 'готово', pending: 'не сделано',
   },
   status: { published: 'Опубликован', draft: 'Черновик', unpublished: 'Приостановлен', archived: 'В архиве' },
@@ -128,8 +128,8 @@ const ru: StudioDict = {
     dayOpen: d => `${d}: открыто`, dayOpens: d => `${d}: открытие`, dayCloses: d => `${d}: закрытие`, closed: 'Выходной',
     photos: n => `Фото (${n})`, photoN: n => `Фото ${n}`, removePhoto: n => `Удалить фото ${n}`, newPhoto: 'Новое фото', addPhoto: 'Добавить фото',
     cards: n => `Карточки (${n})`, cardN: n => `Карточка ${n}`, upCard: n => `Поднять карточку ${n}`, downCard: n => `Опустить карточку ${n}`,
-    removeCard: n => `Удалить карточку ${n}`, photo: 'Фото', cardTitle: 'Заголовок', cardTitlePlaceholder: 'Джазовый вечер',
-    cardDescription: 'Описание (необязательно)', cardDate: 'Дата (необязательно)', cardLink: 'Ссылка (необязательно)',
+    removeCard: n => `Удалить карточку ${n}`, photo: 'Фото', flyer: 'Афиша', cardTitle: 'Заголовок', cardTitlePlaceholder: 'Джазовый вечер',
+    cardDescription: 'Описание (необязательно)', cardDate: 'Дата (необязательно)', cardLink: 'Ссылка (необязательно)', cardTime: 'Время (необязательно)', ticketsLink: 'Ссылка на билеты (необязательно)',
     enTitle: 'Заголовок (EN)', enDescription: 'Описание (EN)', addCard: 'Добавить карточку', google: 'Google', rating: 'Рейтинг (от 1 до 5)',
     ratingCount: 'Количество отзывов', googleLink: 'Ссылка на ваши отзывы в Google', featured: n => `Избранные отзывы (${n})`,
     realReviews: 'Используйте настоящие отзывы клиентов.', starsOf: n => `Звёзды отзыва ${n}`, stars: n => `Звёзд: ${n}`,
@@ -377,7 +377,7 @@ const ru: StudioDict = {
   catalog: {
     styleHighlight: 'Выделенная (акцентный цвет)',
     styleButton: 'Кнопка (значок или миниатюра сбоку)', styleCard: 'Карточка с большим фото',
-    layoutCarousel: 'Листаемые (карусель)', layoutStack: 'Одна под другой',
+    layoutCarousel: 'Листаемые (карусель)', layoutStack: 'Одна под другой', layoutTickets: 'Афиши событий (формат сторис)',
     types: {
       link: { label: 'Ссылка', description: 'Кнопка на ваш сайт, магазин, портфолио — куда угодно.' },
       social: { label: 'Соцсеть', description: 'Instagram, TikTok, LinkedIn… показываются значками.' },

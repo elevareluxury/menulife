@@ -14,7 +14,7 @@ const en: StudioDict = {
   common: {
     cancel: 'Cancel', save: 'Save', saving: 'Saving…', saved: 'Saved', saveError: 'Could not save', retry: 'Try again',
     close: 'Close', chooseOption: 'Choose an option', upload: 'Upload image', change: 'Change', remove: 'Remove',
-    removeLabel: l => `Remove ${l}`, uploadError: 'Could not upload the image.', open: 'Open', edit: 'Edit', hide: 'Hide',
+    removeLabel: l => `Remove ${l}`, uploadError: 'Could not upload the image.', recommendedSize: s => `Recommended: ${s} px`, open: 'Open', edit: 'Edit', hide: 'Hide',
     add: 'Add', delete: 'Delete', loading: 'Loading…', done: 'done', pending: 'pending',
   },
   status: { published: 'Published', draft: 'Draft', unpublished: 'Paused', archived: 'Archived' },
@@ -122,8 +122,8 @@ const en: StudioDict = {
     dayOpen: d => `${d} open`, dayOpens: d => `${d} opening`, dayCloses: d => `${d} closing`, closed: 'Closed',
     photos: n => `Photos (${n})`, photoN: n => `Photo ${n}`, removePhoto: n => `Remove photo ${n}`, newPhoto: 'New photo', addPhoto: 'Add photo',
     cards: n => `Cards (${n})`, cardN: n => `Card ${n}`, upCard: n => `Move card ${n} up`, downCard: n => `Move card ${n} down`,
-    removeCard: n => `Remove card ${n}`, photo: 'Photo', cardTitle: 'Title', cardTitlePlaceholder: 'Jazz night',
-    cardDescription: 'Description (optional)', cardDate: 'Date (optional)', cardLink: 'Link (optional)',
+    removeCard: n => `Remove card ${n}`, photo: 'Photo', flyer: 'Flyer', cardTitle: 'Title', cardTitlePlaceholder: 'Jazz night',
+    cardDescription: 'Description (optional)', cardDate: 'Date (optional)', cardLink: 'Link (optional)', cardTime: 'Time (optional)', ticketsLink: 'Tickets link (optional)',
     enTitle: 'Title (EN)', enDescription: 'Description (EN)', addCard: 'Add card', google: 'Google', rating: 'Rating (1 to 5)',
     ratingCount: 'Number of reviews', googleLink: 'Link to your Google reviews', featured: n => `Featured reviews (${n})`,
     realReviews: 'Use real reviews from your customers.', starsOf: n => `Stars for review ${n}`, stars: n => `${n} stars`,
@@ -371,7 +371,7 @@ const en: StudioDict = {
   catalog: {
     styleHighlight: 'Highlighted (accent color)',
     styleButton: 'Button (icon or thumbnail on the side)', styleCard: 'Card with a large photo',
-    layoutCarousel: 'Swipeable (carousel)', layoutStack: 'One below the other',
+    layoutCarousel: 'Swipeable (carousel)', layoutStack: 'One below the other', layoutTickets: 'Event flyers (story format)',
     types: {
       link: { label: 'Link', description: 'A button to your website, shop, portfolio or anything you want.' },
       social: { label: 'Social network', description: 'Instagram, TikTok, LinkedIn… shown as icons.' },

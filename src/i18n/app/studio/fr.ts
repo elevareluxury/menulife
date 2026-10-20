@@ -14,7 +14,7 @@ const fr: StudioDict = {
   common: {
     cancel: 'Annuler', save: 'Enregistrer', saving: 'Enregistrement…', saved: 'Enregistré', saveError: 'Erreur d’enregistrement', retry: 'Réessayer',
     close: 'Fermer', chooseOption: 'Choisissez une option', upload: 'Importer une image', change: 'Changer', remove: 'Retirer',
-    removeLabel: l => `Retirer ${l}`, uploadError: 'Impossible d’importer l’image.', open: 'Ouvrir', edit: 'Modifier', hide: 'Masquer',
+    removeLabel: l => `Retirer ${l}`, uploadError: 'Impossible d’importer l’image.', recommendedSize: s => `Recommandé : ${s} px`, open: 'Ouvrir', edit: 'Modifier', hide: 'Masquer',
     add: 'Ajouter', delete: 'Supprimer', loading: 'Chargement…', done: 'fait', pending: 'à faire',
   },
   status: { published: 'Publié', draft: 'Brouillon', unpublished: 'En pause', archived: 'Archivé' },
@@ -122,8 +122,8 @@ const fr: StudioDict = {
     dayOpen: d => `${d} ouvert`, dayOpens: d => `${d} ouverture`, dayCloses: d => `${d} fermeture`, closed: 'Fermé',
     photos: n => `Photos (${n})`, photoN: n => `Photo ${n}`, removePhoto: n => `Retirer la photo ${n}`, newPhoto: 'Nouvelle photo', addPhoto: 'Ajouter une photo',
     cards: n => `Cartes (${n})`, cardN: n => `Carte ${n}`, upCard: n => `Monter la carte ${n}`, downCard: n => `Descendre la carte ${n}`,
-    removeCard: n => `Retirer la carte ${n}`, photo: 'Photo', cardTitle: 'Titre', cardTitlePlaceholder: 'Soirée jazz',
-    cardDescription: 'Description (facultatif)', cardDate: 'Date (facultatif)', cardLink: 'Lien (facultatif)',
+    removeCard: n => `Retirer la carte ${n}`, photo: 'Photo', flyer: 'Flyer', cardTitle: 'Titre', cardTitlePlaceholder: 'Soirée jazz',
+    cardDescription: 'Description (facultatif)', cardDate: 'Date (facultatif)', cardLink: 'Lien (facultatif)', cardTime: 'Heure (facultatif)', ticketsLink: 'Lien de billetterie (facultatif)',
     enTitle: 'Titre (EN)', enDescription: 'Description (EN)', addCard: 'Ajouter une carte', google: 'Google', rating: 'Note (1 à 5)',
     ratingCount: 'Nombre d’avis', googleLink: 'Lien vers vos avis Google', featured: n => `Avis mis en avant (${n})`,
     realReviews: 'Utilisez de vrais avis de vos clients.', starsOf: n => `Étoiles de l’avis ${n}`, stars: n => `${n} étoiles`,
@@ -371,7 +371,7 @@ const fr: StudioDict = {
   catalog: {
     styleHighlight: 'Mis en avant (couleur d’accent)',
     styleButton: 'Bouton (icône ou miniature sur le côté)', styleCard: 'Carte avec grande photo',
-    layoutCarousel: 'À faire défiler (carrousel)', layoutStack: 'Les unes sous les autres',
+    layoutCarousel: 'À faire défiler (carrousel)', layoutStack: 'Les unes sous les autres', layoutTickets: 'Flyers d’événements (format story)',
     types: {
       link: { label: 'Lien', description: 'Un bouton vers votre site, boutique, portfolio ou ce que vous voulez.' },
       social: { label: 'Réseau social', description: 'Instagram, TikTok, LinkedIn… affichés en icônes.' },
