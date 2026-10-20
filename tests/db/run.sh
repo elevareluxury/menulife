@@ -59,7 +59,8 @@ for m in \
   20261108000001_restaurants_public_columns \
   20261109000001_life_web_push \
   20261110000001_reserved_usernames_expand \
-  20261111000001_life_os_metrics; do
+  20261111000001_life_os_metrics \
+  20261112000001_life_onboarding; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

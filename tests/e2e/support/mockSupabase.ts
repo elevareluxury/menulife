@@ -20,6 +20,11 @@ export interface MockState {
   trafficSources?: { source: string | null; referrer_host: string | null; visits: number; visitors: number }[]
   /** Interruptores del sitio (get_site_flags / admin_set_site_flag) */
   siteFlags?: { business: boolean }
+  /**
+   * Onboarding de Life OS (user_settings.life_onboarding_at): las cuentas de las pruebas ya lo vieron, salvo con
+   * 'pending' (la cuenta nunca lo vio y, sin metas, hábitos ni tareas, se muestra al entrar a Life).
+   */
+  lifeOnboarding?: 'pending'
   /** Escrituras por PostgREST, en orden */
   writes: { method: 'POST' | 'PATCH' | 'DELETE'; table: string; body: unknown }[]
 }
@@ -976,6 +981,12 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
         return single ? json(out[0] ?? null) : json(out)
       }
       const out = filterRows(rows, params)
+      if (table === 'user_settings' && state.lifeOnboarding !== 'pending') {
+        // Ya vieron el onboarding de Life OS (sin tocar las filas: las pruebas de preferencias las comparan)
+        const seen = out.length ? out.map(r => ({ life_onboarding_at: '2026-01-01T00:00:00.000Z', ...r }))
+          : (params.get('select') ?? '').includes('life_onboarding_at') ? [{ user_id: OWNER_ID, life_onboarding_at: '2026-01-01T00:00:00.000Z' }] : []
+        return single ? json(seen[0] ?? null) : json(seen)
+      }
       return single ? json(out[0] ?? null) : json(out)
     }
     if (method === 'POST') {
