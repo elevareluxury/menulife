@@ -111,7 +111,7 @@ test('vaciar la cabeza: un capture_used por destino, con cuántas cosas fueron a
   await sheet.getByRole('button', { name: 'Guardar todo (4)' }).click()
   await expect(page.getByText('Guardaste 4 cosas')).toBeVisible()
 
-  await expect.poll(() => events(state, 'capture_used').map(e => e.props)
+  await expect.poll(() => events(state, 'capture_used').map(e => e.props as { dest?: string })
     .sort((a, b) => String(a.dest).localeCompare(String(b.dest)))).toEqual([
     { tipo: 'dump', dest: 'idea' },
     { tipo: 'dump', dest: 'money' },
