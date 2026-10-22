@@ -4,10 +4,11 @@ import { createState, installSupabaseMock, moduleRow, profileRow } from './suppo
 // Tarjetas · diseño Flyers: flyers en formato historia que se deslizan de a uno, con talón de entrada (fecha, hora,
 // lugar y botón "Entradas"). En Studio, cada subida de imagen dice el tamaño recomendado en px.
 
-const flyer = (from: string, to: string, text: string) => `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920">
+// Un flyer de ejemplo; `h` = alto (1920 = formato historia; 1350 = 4:5, para ver que no se recorta)
+const flyer = (from: string, to: string, text: string, h = 1920) => `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="${h}">
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient></defs>
-  <rect width="1080" height="1920" fill="url(#g)"/>
-  <text x="80" y="1600" font-family="sans-serif" font-weight="800" font-size="150" fill="#fff">${text}</text>
+  <rect width="1080" height="${h}" fill="url(#g)"/>
+  <text x="80" y="${h - 320}" font-family="sans-serif" font-weight="800" font-size="150" fill="#fff">${text}</text>
 </svg>`
 
 const FLYERS_MODULE = () => moduleRow({
@@ -25,7 +26,7 @@ const FLYERS_MODULE = () => moduleRow({
 async function serveFlyers(context: BrowserContext) {
   const art: Record<string, string> = {
     'flyer-1.svg': flyer('#7C3AED', '#0B0B14', 'UNIVERSO'),
-    'flyer-2.svg': flyer('#F97316', '#831843', 'SUNSET'),
+    'flyer-2.svg': flyer('#F97316', '#831843', 'SUNSET', 1350),
   }
   await context.route('https://cdn.example.com/flyer-*', route => {
     const name = new URL(route.request().url()).pathname.slice(1)
@@ -50,6 +51,9 @@ test('perfil público: los flyers se deslizan como entradas, con fecha, hora y b
   await expect(ticket).toContainText('Entradas')
   // Sin link: tarjeta sin botón; sin imagen: el título sobre el color de acento
   await expect(cards.nth(2)).not.toContainText('Entradas')
+  await expect(cards.nth(2).locator('.mp-tix-stub')).toHaveCount(0)
+  // Un flyer que no es 9:16 se ve entero (contain) sobre su versión difuminada
+  await expect(cards.nth(1).locator('img.mp-tix-img')).toHaveCSS('object-fit', 'contain')
   await expect(cards.nth(2).locator('.mp-tix-blank')).toHaveText('Fiesta de fin de año')
 
   // Los puntos llevan a cada flyer
