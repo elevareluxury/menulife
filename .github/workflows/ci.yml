@@ -45,7 +45,7 @@ jobs:
       - name: Humo del build de producción
         run: npm run test:e2e:prod
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-traces-humo
@@ -76,7 +76,7 @@ jobs:
       - name: Tests E2E (parte ${{ matrix.shard }} de 4)
         run: npx playwright test --shard=${{ matrix.shard }}/4
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-traces-${{ matrix.shard }}
