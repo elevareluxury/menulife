@@ -79,6 +79,27 @@ test('el panel de producto muestra las métricas', async ({ page, context }) => 
   await expect(page.getByRole('cell', { name: '/ana' })).toBeVisible()
 })
 
+test('el panel muestra desde dónde se registra la gente ("Elegí tu nombre")', async ({ page, context }) => {
+  const state = createState({
+    super_admins: [{ id: 'sa-1', user_id: OWNER_ID }],
+    product_events: [
+      { id: 'e1', user_id: null, event: 'signup_started', props: { channel: 'hero' } },
+      { id: 'e2', user_id: null, event: 'signup_started', props: { channel: 'hero' } },
+      { id: 'e3', user_id: null, event: 'signup_started', props: { channel: 'hero' } },
+      { id: 'e4', user_id: null, event: 'signup_started', props: { channel: 'hero' } },
+      { id: 'e5', user_id: 'u1', event: 'signup_completed', props: { channel: 'hero' } },
+      { id: 'e6', user_id: null, event: 'signup_started', props: {} },
+    ],
+  })
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/super-admin/producto')
+  await expect(page.getByRole('heading', { name: 'Desde dónde se registran' })).toBeVisible()
+  const hero = page.getByRole('row', { name: /Arriba de la landing/ })
+  await expect(hero).toContainText('4')
+  await expect(hero).toContainText('25 %')
+  await expect(page.getByRole('row', { name: /Otro/ })).toContainText('1')
+})
+
 test('el panel muestra si Life OS cumple su promesa: metas, primer valor, captura, revisiones y recordatorios', async ({ page, context }) => {
   const state = createState({ super_admins: [{ id: 'sa-1', user_id: OWNER_ID }] })
   state.tables.product_metrics = [{

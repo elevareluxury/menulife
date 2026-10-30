@@ -737,6 +737,20 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       events.push({ user_id: isOwner ? OWNER_ID : null, event: args.p_event, props: args.p_props ?? {}, created_at: new Date().toISOString() })
       return 'ok'
     }
+    case 'admin_signup_sources': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      // Como 20261113000001_signup_sources: registros abiertos y cuentas creadas por lugar del campo "Elegí tu nombre"
+      const events = state.tables.product_events ?? []
+      const placeOf = (e: Row) => {
+        const c = (e.props as Row | undefined)?.channel
+        return typeof c === 'string' && ['hero', 'cierre', 'perfil', 'pie'].includes(c) ? c : 'otro'
+      }
+      return ['hero', 'cierre', 'perfil', 'pie', 'otro'].map(place => ({
+        place,
+        started: events.filter(e => e.event === 'signup_started' && placeOf(e) === place).length,
+        completed: new Set(events.filter(e => e.event === 'signup_completed' && e.user_id && placeOf(e) === place).map(e => e.user_id)).size,
+      }))
+    }
     case 'admin_product_metrics': {
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
       // Un resumen armado en el test (state.tables.product_metrics[0]) o uno mínimo con los eventos guardados

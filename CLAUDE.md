@@ -546,7 +546,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   del perfil ("Creá tu identidad" lo abre; conserva ref y tipo). Lleva a `/register?u=&desde=hero|cierre|perfil|pie`
   (`src/lib/claim.ts`); el registro (email o Google/Apple, `PendingSignup`) guarda `claimed_username`/`claim_from` en la
   cuenta y el onboarding salta el paso de la dirección si sigue libre (si no, lo muestra). `signup_started` y
-  `signup_completed` llevan `channel` = el lugar. Reglas del username sin dependencias en `src/lib/username.ts`.
+  `signup_completed` llevan `channel` = el lugar; el panel → Producto lo muestra en "Desde dónde se registran"
+  (`admin_signup_sources`, migración `20261113000001_signup_sources.sql`, tests en `signup_sources.test.sql`). Reglas del username sin dependencias en `src/lib/username.ts`.
   No reserva: el nombre es de la persona al crear su perfil. E2E en `claim.spec.ts`.
 - "Poné tu Mycen en todos lados": sólo botones de copiar (general y uno por plataforma con `?src=`), sin pasos por app.
 - Verificación de cuenta (antes V1.1, sumada antes del freeze): Studio → Ajustes → "Verificación" (`useVerification`,
