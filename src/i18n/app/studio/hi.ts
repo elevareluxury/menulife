@@ -14,7 +14,7 @@ const hi: StudioDict = {
   common: {
     cancel: 'रद्द करें', save: 'सहेजें', saving: 'सहेजा जा रहा है…', saved: 'सहेजा गया', saveError: 'सहेजने में त्रुटि', retry: 'फिर से कोशिश करें',
     close: 'बंद करें', chooseOption: 'एक विकल्प चुनें', upload: 'इमेज अपलोड करें', change: 'बदलें', remove: 'हटाएँ',
-    removeLabel: l => `${l} हटाएँ`, uploadError: 'इमेज अपलोड नहीं हो सकी।', recommendedSize: s => `सुझाया गया: ${s} px`, open: 'खोलें', edit: 'संपादित करें', hide: 'छिपाएँ',
+    removeLabel: l => `${l} हटाएँ`, imageBroken: 'यह इमेज अब लोड नहीं होती: इसे बदलें या हटाएँ।', uploadError: 'इमेज अपलोड नहीं हो सकी।', recommendedSize: s => `सुझाया गया: ${s} px`, open: 'खोलें', edit: 'संपादित करें', hide: 'छिपाएँ',
     add: 'जोड़ें', delete: 'हटाएँ', loading: 'लोड हो रहा है…', done: 'पूरा', pending: 'बाकी',
   },
   status: { published: 'प्रकाशित', draft: 'ड्राफ़्ट', unpublished: 'रुका हुआ', archived: 'संग्रहीत' },

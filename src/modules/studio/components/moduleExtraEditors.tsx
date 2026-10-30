@@ -7,7 +7,7 @@ import type { CardItem } from '@/modules/profile/components/ProfileModules'
 import { uploadMedia } from '../lib/studioApi'
 import { useAutoCover } from '../lib/autoCover'
 import { useStudio } from '../StudioContext'
-import { Button, ImageField, SelectField, TextField, Toggle } from './ui'
+import { Button, ImageField, SelectField, StudioThumb, TextField, Toggle } from './ui'
 import { PickerWrap } from '@/components/ui/PickerWrap'
 import { useStudioT } from '@/i18n/app/studio'
 import { huellaSeed } from '@/lib/huella'
@@ -77,8 +77,7 @@ export function GalleryEditor({ value: items, onChange, userId }: ExtraEditorPro
       <span className="st-label">{e.photos(items.length)}</span>
       {items.map((item, i) => (
         <div key={item.url + i} className="st-row">
-          <img className="st-image-thumb" src={item.url} alt="" />
-          <span className="st-help" style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.photoN(i + 1)}</span>
+          <GalleryThumb url={item.url} label={e.photoN(i + 1)} />
           <button type="button" className="st-icon-btn" aria-label={e.removePhoto(i + 1)}
             onClick={() => onChange(items.filter((_, j) => j !== i))}><Trash2 size={16} /></button>
         </div>
@@ -358,5 +357,17 @@ export function MediaUrlEditor({ value, onChange, userId }: ExtraEditorProps<Med
         </div>
       )}
     </div>
+  )
+}
+
+/** Fila de la galería: la miniatura y su nombre; si la foto ya no carga, lo dice para quitarla o reemplazarla */
+function GalleryThumb({ url, label }: { url: string; label: string }) {
+  const t = useStudioT().common
+  const [broken, setBroken] = useState(false)
+  return (
+    <>
+      <StudioThumb key={url} src={url} onBroken={setBroken} />
+      <span className={`st-help${broken ? ' st-help-warn' : ''}`} style={{ flex: 1, minWidth: 0 }}>{broken ? `${label} · ${t.imageBroken}` : label}</span>
+    </>
   )
 }

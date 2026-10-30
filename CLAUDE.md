@@ -549,6 +549,13 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `signup_completed` llevan `channel` = el lugar; el panel → Producto lo muestra en "Desde dónde se registran"
   (`admin_signup_sources`, migración `20261113000001_signup_sources.sql`, tests en `signup_sources.test.sql`). Reglas del username sin dependencias en `src/lib/username.ts`.
   No reserva: el nombre es de la persona al crear su perfil. E2E en `claim.spec.ts`.
+- Fotos en los módulos (auditoría): una foto suelta (`ImageModule`) muy alta se recorta a 4:5 y una chica (< 320 px) no se
+  agranda; una que ya no carga no deja ícono roto (`SafeImage` con `onFail`: la foto suelta y la de un texto se ocultan,
+  la galería saca la miniatura, la portada de video/música vuelve a la huella). Texto con foto = `.mp-card-media` (la foto
+  llega a los bordes en las 5 estructuras). Visor de la galería con flechas táctiles, contador y página quieta. Studio
+  marca la foto guardada que ya no carga (`StudioThumb`, `imageBroken`). Una HEIC que el navegador no convirtió no se
+  sube. Pruebas con fotos reales: `tests/e2e/support/testImages.ts` (PNG de cualquier tamaño, transparente o rota),
+  `imageStress.ts` y `images.spec.ts`; el mock sirve imágenes de verdad para el almacenamiento y `cdn.example.com`.
 - "Poné tu Mycen en todos lados": sólo botones de copiar (general y uno por plataforma con `?src=`), sin pasos por app.
 - Verificación de cuenta (antes V1.1, sumada antes del freeze): Studio → Ajustes → "Verificación" (`useVerification`,
   RPC `request_verification`: mensaje 10–1000, link https opcional, uno pendiente por vez, 3 cada 30 días) →

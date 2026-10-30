@@ -2,6 +2,7 @@ import type { BrowserContext, Route } from '@playwright/test'
 import { isModuleLive } from '../../../src/modules/profile/lib/moduleSchedule'
 import { PUBLIC_RESTAURANT_COLUMNS } from '../../../src/modules/public/lib/publicRestaurant'
 import { isReservedUsername } from '../../../src/lib/reservedUsernames'
+import { testPng } from './testImages'
 
 // Supabase simulado para los E2E: PostgREST en memoria (filtros básicos) + las RPC públicas de
 // Identity con la misma lógica que la base (supabase/migrations/20261001000001… a 20261012000001…).
@@ -947,6 +948,9 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
     await context.addInitScript(s => localStorage.setItem('sb-mock-auth-token', s), JSON.stringify(session))
   }
 
+  // Las fotos de ejemplo de los módulos (moduleFixtures) cargan de verdad
+  await context.route('https://cdn.example.com/**', route => route.fulfill({ status: 200, contentType: 'image/png', body: testPng(1200, 800) }))
+
   await context.route('https://mock.supabase.co/**', async (route: Route) => {
     const req = route.request()
     const url = new URL(req.url())
@@ -960,6 +964,10 @@ export async function installSupabaseMock(context: BrowserContext, state: MockSt
     }
     if (url.pathname.startsWith('/auth/v1/user')) {
       return opts.signedIn ? json({ id: OWNER_ID, email: 'ana@example.com', aud: 'authenticated', role: 'authenticated' }) : json({}, 401)
+    }
+    // Fotos subidas: se ven como fotos de verdad (una imagen rota ya no se muestra en el perfil)
+    if (method === 'GET' && url.pathname.startsWith('/storage/v1/object/public/')) {
+      return route.fulfill({ status: 200, contentType: 'image/png', headers: { 'access-control-allow-origin': '*' }, body: testPng(1200, 800) })
     }
     if (url.pathname.startsWith('/auth/') || url.pathname.startsWith('/storage/')) return json({})
 

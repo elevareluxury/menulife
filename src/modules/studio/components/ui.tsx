@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { AlertCircle, Check, ImagePlus, MoreHorizontal, Trash2, X, type LucideIcon } from 'lucide-react'
+import { AlertCircle, Check, ImageOff, ImagePlus, MoreHorizontal, Trash2, X, type LucideIcon } from 'lucide-react'
 import type { SaveState } from '../lib/studioTypes'
 import { useStudioT } from '@/i18n/app/studio'
 import { useScrollLock } from '@/lib/scrollLock'
@@ -179,6 +179,10 @@ export function ImageField({ label, value, onUpload, onClear, shape = 'square', 
   const id = useId()
   const t = useStudioT().common
   const thumb = `st-image-thumb${shape === 'square' ? '' : ` is-${shape}`}`
+  // La foto guardada ya no existe (se borró del almacenamiento): se avisa para cambiarla
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null)
+  const setBroken = (b: boolean) => setBrokenSrc(b ? value ?? null : null)
+  const broken = !!value && brokenSrc === value
 
   async function handle(file: File | undefined) {
     if (!file) return
@@ -189,10 +193,10 @@ export function ImageField({ label, value, onUpload, onClear, shape = 'square', 
   }
 
   return (
-    <Field label={label} help={help} error={error} htmlFor={id}>
+    <Field label={label} help={help} error={error ?? (broken ? t.imageBroken : null)} htmlFor={id}>
       <div className="st-image-field">
         {value
-          ? <img className={thumb} src={value} alt="" />
+          ? <StudioThumb key={value} className={thumb} src={value} onBroken={setBroken} />
           : <div className={thumb} aria-hidden="true" />}
         <div className="st-row" style={{ flexWrap: 'wrap' }}>
           <Button size="sm" loading={busy} onClick={() => ref.current?.click()} aria-describedby={`${id}-size`}>
@@ -367,4 +371,14 @@ export function Menu({ label, items }: { label: string; items: MenuItem[] }) {
       )}
     </div>
   )
+}
+
+/** Miniatura de Studio: si la foto ya no carga, un ícono con el aviso (nunca la imagen rota del navegador) */
+export function StudioThumb({ src, className = 'st-image-thumb', onBroken }: { src: string; className?: string; onBroken?: (b: boolean) => void }) {
+  const t = useStudioT().common
+  const [broken, setBroken] = useState(false)
+  if (broken) {
+    return <div className={`${className} st-thumb-broken`} role="img" aria-label={t.imageBroken} title={t.imageBroken}><ImageOff size={18} aria-hidden="true" /></div>
+  }
+  return <img className={className} src={src} alt="" onError={() => { setBroken(true); onBroken?.(true) }} />
 }

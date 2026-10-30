@@ -173,6 +173,8 @@
 
 .st-image-field { display: flex; align-items: center; gap: 12px; }
 .st-image-thumb { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; background: var(--st-surface-2); flex-shrink: 0; }
+.st-thumb-broken { display: grid; place-items: center; color: var(--st-muted); border: 1px dashed var(--st-border); }
+.st-help-warn { color: var(--my-warn); }
 .st-image-thumb.is-round { border-radius: 50%; }
 .st-image-thumb.is-wide { width: 120px; }
 .st-image-thumb.is-story { width: 54px; height: 96px; border-radius: 10px; }

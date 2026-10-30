@@ -14,7 +14,7 @@ const zh: StudioDict = {
   common: {
     cancel: '取消', save: '保存', saving: '正在保存…', saved: '已保存', saveError: '保存出错', retry: '重试',
     close: '关闭', chooseOption: '请选择', upload: '上传图片', change: '更换', remove: '移除',
-    removeLabel: l => `移除${l}`, uploadError: '图片上传失败。', recommendedSize: s => `建议尺寸：${s} px`, open: '打开', edit: '编辑', hide: '收起',
+    removeLabel: l => `移除${l}`, imageBroken: '这张图片无法加载：请更换或移除。', uploadError: '图片上传失败。', recommendedSize: s => `建议尺寸：${s} px`, open: '打开', edit: '编辑', hide: '收起',
     add: '添加', delete: '删除', loading: '加载中…', done: '已完成', pending: '待完成',
   },
   status: { published: '已发布', draft: '草稿', unpublished: '已暂停', archived: '已归档' },

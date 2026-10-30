@@ -14,7 +14,7 @@ const de: StudioDict = {
   common: {
     cancel: 'Abbrechen', save: 'Speichern', saving: 'Wird gespeichert…', saved: 'Gespeichert', saveError: 'Fehler beim Speichern', retry: 'Erneut versuchen',
     close: 'Schließen', chooseOption: 'Option wählen', upload: 'Bild hochladen', change: 'Ändern', remove: 'Entfernen',
-    removeLabel: l => `${l} entfernen`, uploadError: 'Das Bild konnte nicht hochgeladen werden.', recommendedSize: s => `Empfohlen: ${s} px`, open: 'Öffnen', edit: 'Bearbeiten', hide: 'Ausblenden',
+    removeLabel: l => `${l} entfernen`, imageBroken: 'Dieses Bild lädt nicht mehr: ersetze oder entferne es.', uploadError: 'Das Bild konnte nicht hochgeladen werden.', recommendedSize: s => `Empfohlen: ${s} px`, open: 'Öffnen', edit: 'Bearbeiten', hide: 'Ausblenden',
     add: 'Hinzufügen', delete: 'Löschen', loading: 'Wird geladen…', done: 'erledigt', pending: 'offen',
   },
   status: { published: 'Veröffentlicht', draft: 'Entwurf', unpublished: 'Pausiert', archived: 'Archiviert' },

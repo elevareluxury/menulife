@@ -14,7 +14,7 @@ const fr: StudioDict = {
   common: {
     cancel: 'Annuler', save: 'Enregistrer', saving: 'Enregistrement…', saved: 'Enregistré', saveError: 'Erreur d’enregistrement', retry: 'Réessayer',
     close: 'Fermer', chooseOption: 'Choisissez une option', upload: 'Importer une image', change: 'Changer', remove: 'Retirer',
-    removeLabel: l => `Retirer ${l}`, uploadError: 'Impossible d’importer l’image.', recommendedSize: s => `Recommandé : ${s} px`, open: 'Ouvrir', edit: 'Modifier', hide: 'Masquer',
+    removeLabel: l => `Retirer ${l}`, imageBroken: 'Cette image ne se charge plus : changez-la ou retirez-la.', uploadError: 'Impossible d’importer l’image.', recommendedSize: s => `Recommandé : ${s} px`, open: 'Ouvrir', edit: 'Modifier', hide: 'Masquer',
     add: 'Ajouter', delete: 'Supprimer', loading: 'Chargement…', done: 'fait', pending: 'à faire',
   },
   status: { published: 'Publié', draft: 'Brouillon', unpublished: 'En pause', archived: 'Archivé' },

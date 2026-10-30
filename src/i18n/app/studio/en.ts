@@ -14,7 +14,7 @@ const en: StudioDict = {
   common: {
     cancel: 'Cancel', save: 'Save', saving: 'Saving…', saved: 'Saved', saveError: 'Could not save', retry: 'Try again',
     close: 'Close', chooseOption: 'Choose an option', upload: 'Upload image', change: 'Change', remove: 'Remove',
-    removeLabel: l => `Remove ${l}`, uploadError: 'Could not upload the image.', recommendedSize: s => `Recommended: ${s} px`, open: 'Open', edit: 'Edit', hide: 'Hide',
+    removeLabel: l => `Remove ${l}`, imageBroken: 'This image no longer loads: change or remove it.', uploadError: 'Could not upload the image.', recommendedSize: s => `Recommended: ${s} px`, open: 'Open', edit: 'Edit', hide: 'Hide',
     add: 'Add', delete: 'Delete', loading: 'Loading…', done: 'done', pending: 'pending',
   },
   status: { published: 'Published', draft: 'Draft', unpublished: 'Paused', archived: 'Archived' },

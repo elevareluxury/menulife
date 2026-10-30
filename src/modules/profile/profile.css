@@ -167,7 +167,14 @@
 .mp-row span { overflow-wrap: anywhere; }
 
 .mp-text-body { font-size: 15px; line-height: 1.6; margin: 0; white-space: pre-line; }
-.mp-text-image { width: calc(100% + 36px); margin: -18px -18px 16px; aspect-ratio: 16/9; object-fit: cover; display: block; }
+.mp-text-image { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+/* Tarjeta con foto arriba: la foto llega a los bordes en cualquier estructura y el texto lleva su margen */
+.mp-card.mp-card-media { padding: 0; }
+.mp-card-media-body { padding: 16px 18px 18px; }
+/* Foto suelta: ancho completo; muy alta, recortada a 4:5; chica, a su tamaño (no se pixela) */
+.mp-image { display: block; width: 100%; height: auto; }
+.mp-image-tall { aspect-ratio: 4 / 5; object-fit: cover; }
+.mp-image-small { width: auto; max-width: 100%; margin: 24px auto; }
 .mp-text-heading { font-family: var(--p-title-font); font-size: 20px; font-weight: 700; margin: 0 0 8px; }
 
 .mp-product { display: flex; gap: 14px; align-items: center; }
@@ -186,7 +193,14 @@
   display: flex; align-items: center; justify-content: center; padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 20px;
 }
 .mp-lightbox img, .mp-lightbox video { max-width: 100%; max-height: 86svh; border-radius: calc(12px * var(--p-rs, 1)); }
-.mp-lightbox .mp-icon-btn { position: absolute; top: 16px; right: 16px; color: #fff; }
+.mp-lightbox .mp-icon-btn { position: absolute; color: #fff; background: rgba(255,255,255,0.12); }
+.mp-lightbox-close { top: calc(16px + env(safe-area-inset-top, 0px)); inset-inline-end: 16px; }
+.mp-lightbox-nav { top: 50%; transform: translateY(-50%); }
+.mp-lightbox-nav.is-prev { inset-inline-start: 12px; }
+.mp-lightbox-nav.is-next { inset-inline-end: 12px; }
+[dir="rtl"] .mp-lightbox-nav svg { transform: scaleX(-1); }
+.mp-lightbox-count { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; text-align: center;
+  color: rgba(255,255,255,0.8); font-size: 13px; font-variant-numeric: tabular-nums; }
 
 .mp-review { padding: 12px 0; border-top: 1px solid var(--p-border); }
 .mp-review:first-of-type { border-top: 0; padding-top: 0; }

@@ -14,7 +14,7 @@ const ar: StudioDict = {
   common: {
     cancel: 'إلغاء', save: 'حفظ', saving: 'جارٍ الحفظ…', saved: 'تم الحفظ', saveError: 'خطأ في الحفظ', retry: 'إعادة المحاولة',
     close: 'إغلاق', chooseOption: 'اختر خيارًا', upload: 'رفع صورة', change: 'تغيير', remove: 'إزالة',
-    removeLabel: l => `إزالة ${l}`, uploadError: 'تعذّر رفع الصورة.', recommendedSize: s => `المقاس المقترح: ${s} px`, open: 'فتح', edit: 'تعديل', hide: 'إخفاء',
+    removeLabel: l => `إزالة ${l}`, imageBroken: 'لم تعد هذه الصورة تُحمَّل: غيّرها أو أزلها.', uploadError: 'تعذّر رفع الصورة.', recommendedSize: s => `المقاس المقترح: ${s} px`, open: 'فتح', edit: 'تعديل', hide: 'إخفاء',
     add: 'إضافة', delete: 'حذف', loading: 'جارٍ التحميل…', done: 'مكتمل', pending: 'معلّق',
   },
   status: { published: 'منشور', draft: 'مسودة', unpublished: 'متوقف مؤقتًا', archived: 'مؤرشف' },

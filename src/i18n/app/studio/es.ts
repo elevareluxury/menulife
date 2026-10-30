@@ -37,7 +37,7 @@ const es = {
     change: 'Cambiar',
     remove: 'Quitar',
     removeLabel: (label: string) => `Quitar ${label}`,
-    uploadError: 'No se pudo subir la imagen.',
+    imageBroken: 'Esta imagen ya no carga: cambiala o quitala.', uploadError: 'No se pudo subir la imagen.',
     recommendedSize: (s: string) => `Recomendado: ${s} px`,
     open: 'Abrir',
     edit: 'Editar',

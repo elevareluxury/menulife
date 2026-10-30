@@ -14,7 +14,7 @@ const ko: StudioDict = {
   common: {
     cancel: '취소', save: '저장', saving: '저장 중…', saved: '저장됨', saveError: '저장 오류', retry: '다시 시도',
     close: '닫기', chooseOption: '선택하세요', upload: '이미지 업로드', change: '변경', remove: '삭제',
-    removeLabel: l => `${l} 삭제`, uploadError: '이미지를 업로드하지 못했습니다.', recommendedSize: s => `권장 크기: ${s} px`, open: '열기', edit: '편집', hide: '숨기기',
+    removeLabel: l => `${l} 삭제`, imageBroken: '이 이미지를 불러올 수 없어요. 바꾸거나 삭제하세요.', uploadError: '이미지를 업로드하지 못했습니다.', recommendedSize: s => `권장 크기: ${s} px`, open: '열기', edit: '편집', hide: '숨기기',
     add: '추가', delete: '삭제', loading: '불러오는 중…', done: '완료', pending: '미완료',
   },
   status: { published: '공개됨', draft: '임시저장', unpublished: '일시중지됨', archived: '보관됨' },

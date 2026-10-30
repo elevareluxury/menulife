@@ -14,7 +14,7 @@ const pt: StudioDict = {
   common: {
     cancel: 'Cancelar', save: 'Salvar', saving: 'Salvando…', saved: 'Salvo', saveError: 'Erro ao salvar', retry: 'Tentar novamente',
     close: 'Fechar', chooseOption: 'Escolha uma opção', upload: 'Enviar imagem', change: 'Trocar', remove: 'Remover',
-    removeLabel: l => `Remover ${l}`, uploadError: 'Não foi possível enviar a imagem.', recommendedSize: s => `Recomendado: ${s} px`, open: 'Abrir', edit: 'Editar', hide: 'Ocultar',
+    removeLabel: l => `Remover ${l}`, imageBroken: 'Esta imagem não carrega mais: troque ou remova.', uploadError: 'Não foi possível enviar a imagem.', recommendedSize: s => `Recomendado: ${s} px`, open: 'Abrir', edit: 'Editar', hide: 'Ocultar',
     add: 'Adicionar', delete: 'Excluir', loading: 'Carregando…', done: 'feito', pending: 'pendente',
   },
   status: { published: 'Publicado', draft: 'Rascunho', unpublished: 'Pausado', archived: 'Arquivado' },
