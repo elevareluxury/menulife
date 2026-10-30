@@ -1,4 +1,4 @@
-import { authCallbackUrl } from '@/lib/platform'
+import { authCallbackUrl, webOrigin } from '@/lib/platform'
 import { useEffect, useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
@@ -9,6 +9,8 @@ import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
 import { useLangDir } from '@/i18n/app/useLangDir'
 import { parseReferral } from '@/lib/referral'
+import { claimMetadata, parseClaim } from '@/lib/claim'
+import { useClaimT } from '@/i18n/app/claim'
 import { trackOncePerSession } from '@/lib/productEvents'
 import { featureOn } from '@/lib/features'
 import { GoogleButton } from '@/modules/auth/components/GoogleButton'
@@ -69,8 +71,13 @@ export function RegisterPage() {
   const navigate = useNavigate()
   // Llegó desde el pie de un perfil ("Creá tu identidad"): se guarda con la cuenta y se atribuye en el onboarding
   const [referral] = useState(() => parseReferral(window.location.search))
-  // Métricas (etapa 14): alguien abrió el registro (una vez por sesión del navegador)
-  useEffect(() => { trackOncePerSession('signup_started', 'signup_started', { ref: referral?.ref }) }, [referral])
+  // "Elegí tu nombre" (landing o perfil): el nombre viaja con la cuenta y el onboarding no lo vuelve a preguntar
+  const [claim] = useState(() => parseClaim(window.location.search))
+  const c = useClaimT()
+  // Métricas (etapa 14): alguien abrió el registro (una vez por sesión del navegador); channel = desde qué campo
+  useEffect(() => {
+    trackOncePerSession('signup_started', 'signup_started', { ref: referral?.ref, channel: claim?.from ?? undefined })
+  }, [referral, claim])
   const [name,     setName]     = useState('')
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
@@ -100,6 +107,7 @@ export function RegisterPage() {
           data: {
             name: name.trim(), terms_accepted_at: new Date().toISOString(), locale: useAppLang.getState().lang,
             ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
+            ...claimMetadata(claim),
           },
           emailRedirectTo: authCallbackUrl(),
         }, captcha.token),
@@ -163,6 +171,12 @@ export function RegisterPage() {
           <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.7)', margin: 0 }}>
             {r.subtitle}
           </p>
+          {claim && (
+            <p style={{ fontFamily: 'var(--font-jakarta)', fontSize: '14px', color: 'rgba(255,255,255,0.7)', margin: '12px 0 0' }}>
+              {c.yourAddress}{' '}
+              <strong dir="ltr" style={{ color: '#fff', fontWeight: 600 }}>{webOrigin().replace(/^https?:\/\//, '')}/{claim.username}</strong>
+            </p>
+          )}
         </div>
 
         {error && (
@@ -243,7 +257,7 @@ export function RegisterPage() {
           </button>
         </form>
 
-        {featureOn('googleSignIn') && <GoogleButton referral={referral} accepted={accepted} />}
+        {featureOn('googleSignIn') && <GoogleButton referral={referral} claim={claim} accepted={accepted} />}
 
         <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.65)' }}>
           {r.haveAccount}{' '}

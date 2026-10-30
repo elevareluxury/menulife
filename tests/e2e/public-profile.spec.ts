@@ -84,9 +84,14 @@ test('el visitante guarda el contacto (vCard) sólo con los datos autorizados', 
   expect(vcf).not.toContain('enabled')
 })
 
-test('una dirección sin perfil avisa que no existe y los buscadores no la indexan', async ({ page, context }) => {
+test('una dirección sin perfil no se indexa: si el nombre está libre lo ofrece, si no avisa que no existe', async ({ page, context }) => {
   await installSupabaseMock(context, createState({ profiles: [profileRow()] }))
   await page.goto('/nadie-con-este-nombre')
+  await expect(page.getByRole('heading', { name: /\/nadie-con-este-nombre está libre/ })).toBeVisible()
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex')
+
+  // Un nombre reservado no se ofrece
+  await page.goto('/linktree')
   await expect(page.getByText('Este perfil no existe')).toBeVisible()
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex')
 

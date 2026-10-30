@@ -1,27 +1,28 @@
 import { Huella } from '@/design/components/Huella'
 import type { LayoutParts } from './types'
 import { ModuleStack } from './ModuleStack'
+import { inAt } from './motion'
 
 /** Editorial: nombre enorme en Instrument Serif sobre la huella, texto con aire. Menos vidrio, más tipografía. */
 export default function Editorial(p: LayoutParts) {
   return (
-    <div className="my-enter mp-editorial">
+    <div className="mp-editorial">
       {p.identity(<>
         <section className="mp-header mp-ed-header">
           <Huella seed={p.seed} variant={p.look.huellaVariant} spin draw className="mp-ed-huella" />
-          {p.hasAvatar && <div className="mp-avatar mp-ed-avatar">{p.avatar}</div>}
-          <h1 className="mp-name mp-ed-name my-enter-item" style={{ '--my-i': 0 } as React.CSSProperties}>{p.name}{p.verifiedBadge}</h1>
-          {p.descriptor && <p className="mp-ed-descriptor my-enter-item" style={{ '--my-i': 1 } as React.CSSProperties}>{p.descriptor}</p>}
+          {p.hasAvatar && <div className="mp-avatar mp-ed-avatar mp-in mp-in-pop" style={inAt(0)}>{p.avatar}</div>}
+          <h1 className="mp-name mp-ed-name mp-in mp-in-name" style={inAt(1)}>{p.name}{p.verifiedBadge}</h1>
+          {p.descriptor && <p className="mp-ed-descriptor mp-in" style={inAt(2)}>{p.descriptor}</p>}
           {p.chips}
           {p.tags}
         </section>
-        {p.bio && <p className="mp-ed-bio my-enter-item" style={{ '--my-i': 2 } as React.CSSProperties}>{p.bio}</p>}
-        <div className="mp-actions my-enter-item" style={{ '--my-i': 3 } as React.CSSProperties}>
+        {p.bio && <p className="mp-ed-bio mp-in" style={inAt(5)}>{p.bio}</p>}
+        <div className="mp-actions mp-in" style={inAt(6)}>
           {p.primary}
           {p.secondary}
         </div>
       </>)}
-      <ModuleStack blocks={p.blocks} className="mp-ed-modules" />
+      <ModuleStack blocks={p.blocks} className="mp-ed-modules" preview={p.preview} />
     </div>
   )
 }

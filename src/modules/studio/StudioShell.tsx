@@ -23,6 +23,7 @@ import { useAppLang } from '@/i18n/app/store'
 import { langDir } from '@/i18n/app/languages'
 import { useUnreadMessages } from './lib/useUnreadMessages'
 import { referralFromMetadata } from '@/lib/referral'
+import { claimFromMetadata } from '@/lib/claim'
 import './studio.css'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { useVerification } from './lib/useVerification'
@@ -143,6 +144,7 @@ export function StudioShell() {
           initialModules={load.kind === 'ready' ? load.modules : []}
           suggestedName={suggestedName}
           referral={referralFromMetadata(user.user_metadata as Record<string, unknown> | undefined)}
+          claim={claimFromMetadata(user.user_metadata as Record<string, unknown> | undefined)}
           onDone={(profile, modules) => setLoad({
             kind: 'ready', profile, modules,
             business: load.kind === 'ready' ? load.business : null,

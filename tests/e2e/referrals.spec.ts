@@ -4,27 +4,31 @@ import { createState, installSupabaseMock, profileRow } from './support/mockSupa
 // "Creá tu identidad" (V1 · etapa 08): el pie de cada perfil lleva al registro con ?ref y ?tipo; la cuenta nueva
 // queda atribuida al crear su perfil y el onboarding arranca con el mismo tipo elegido.
 
-test('el pie del perfil lleva al registro con el perfil y su tipo, y el registro los guarda', async ({ page, context }) => {
+test('el pie del perfil abre "Elegí tu nombre" y el registro guarda el nombre, el perfil y su tipo', async ({ page, context }) => {
   await installSupabaseMock(context, createState({ profiles: [profileRow()] }))
   await page.goto('/ana')
-  const link = page.getByRole('link', { name: 'Creá tu identidad' })
-  await expect(link).toHaveAttribute('href', '/register?ref=ana&tipo=professional')
+  const toggle = page.getByRole('button', { name: 'Creá tu identidad' })
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await page.getByRole('textbox', { name: 'Elegí tu nombre en Mycen' }).fill('Lucía')
+  await expect(page.getByText('Está libre')).toBeVisible()
 
-  let body: { data?: { ref?: string; ref_purpose?: string } } = {}
+  let body: { data?: { ref?: string; ref_purpose?: string; claimed_username?: string; claim_from?: string } } = {}
   await page.route('**/auth/v1/signup**', route => {
     body = route.request().postDataJSON()
     return route.fulfill({ status: 422, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
       body: JSON.stringify({ code: 422, msg: 'User already registered', error_code: 'user_already_exists' }) })
   })
-  await link.click()
-  await expect(page).toHaveURL(/\/register\?ref=ana&tipo=professional$/)
-  await page.getByLabel('Tu nombre').fill('Lucía Gómez')
+  await page.getByRole('button', { name: 'Crear mi Mycen' }).click()
+  await expect(page).toHaveURL(/\/register\?u=lucia&desde=pie&ref=ana&tipo=professional$/)
+  await expect(page.getByText('Tu dirección va a ser')).toBeVisible()
+  await page.getByLabel('Tu nombre', { exact: true }).fill('Lucía Gómez')
   await page.getByLabel('Email').fill('lucia@example.com')
   await page.getByLabel('Contraseña').fill('secreta123')
   await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Crear mi cuenta gratis' }).click()
   await expect(page.getByRole('alert')).toBeVisible()
-  expect(body.data).toMatchObject({ ref: 'ana', ref_purpose: 'professional' })
+  expect(body.data).toMatchObject({ ref: 'ana', ref_purpose: 'professional', claimed_username: 'lucia', claim_from: 'pie' })
 })
 
 test('una cuenta que llegó desde un perfil arranca con su tipo y queda atribuida al crear el perfil', async ({ page, context }) => {

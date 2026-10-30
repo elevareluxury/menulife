@@ -30,6 +30,13 @@ describe('pendingUpdates (volver de Google)', () => {
     expect(pendingUpdates({ at: pending.at, locale: 'es', terms: true }, undefined, now)).toEqual({ terms_accepted_at: pending.at, locale: 'es' })
   })
 
+  it('completa el nombre elegido antes del registro, sin pisar uno guardado ni aceptar uno inválido', () => {
+    const p = { at: pending.at, locale: 'es', terms: true, claimed_username: 'ana-luz', claim_from: 'hero' }
+    expect(pendingUpdates(p, { locale: 'es', terms_accepted_at: 'x' }, now)).toEqual({ claimed_username: 'ana-luz', claim_from: 'hero' })
+    expect(pendingUpdates(p, { locale: 'es', terms_accepted_at: 'x', claimed_username: 'otra' }, now)).toBeNull()
+    expect(pendingUpdates({ ...p, claimed_username: 'A B' }, { locale: 'es', terms_accepted_at: 'x' }, now)).toBeNull()
+  })
+
   it('desde el login (sin casilla) no marca los términos como aceptados', () => {
     expect(pendingUpdates({ at: pending.at, locale: 'es', terms: false }, {}, now)).toEqual({ locale: 'es' })
   })

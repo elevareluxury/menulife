@@ -1,0 +1,94 @@
+/* "Elegí tu nombre": campo mycen.id/<nombre> + botón. Sólo variables del sistema de diseño (el formulario lleva
+   data-mycen-theme). 16 px en el campo para que iOS no haga zoom. */
+.my-claim {
+  width: 100%;
+  max-width: 560px;
+  margin-inline: auto;
+  font-family: var(--my-font-ui);
+  color: var(--my-text);
+  background: transparent;
+  text-align: start;
+}
+.my-claim-row { display: flex; gap: 10px; align-items: stretch; }
+.my-claim-field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding-inline: 18px;
+  border-radius: var(--my-r-pill);
+  background: var(--my-glass-strong);
+  border: 1px solid var(--my-border);
+  backdrop-filter: blur(var(--my-blur));
+  -webkit-backdrop-filter: blur(var(--my-blur));
+  cursor: text;
+  direction: ltr;
+  transition: border-color var(--my-dur-fast) var(--my-ease), box-shadow var(--my-dur-fast) var(--my-ease);
+}
+[data-mycen-lowfx] .my-claim-field { background: var(--my-glass-strong-solid); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.my-claim-field:focus-within { border-color: var(--my-accent); box-shadow: 0 0 0 3px var(--my-glow); }
+.my-claim[data-status="available"] .my-claim-field { border-color: var(--my-ok); }
+.my-claim-prefix { color: var(--my-muted); font-size: 16px; white-space: nowrap; flex: none; }
+.my-claim-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--my-text);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0;
+}
+.my-claim-field input::placeholder { color: var(--my-subtle); opacity: 1; }
+/* El foco se marca en todo el campo (:focus-within), no sólo alrededor del texto */
+.my-claim .my-claim-field input:focus-visible { outline: none; }
+.my-claim-submit {
+  flex: none;
+  min-height: 56px;
+  padding-inline: 26px;
+  border: 0;
+  border-radius: var(--my-r-pill);
+  background: var(--my-accent);
+  color: var(--my-on-accent);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--my-dur-fast) var(--my-ease), opacity var(--my-dur-fast) var(--my-ease);
+}
+.my-claim-submit:active { transform: scale(0.98); }
+.my-claim-submit:focus-visible, .my-claim-alt:focus-visible { outline: 2px solid var(--my-text); outline-offset: 3px; }
+.my-claim-status {
+  min-height: 24px;
+  margin: 10px 4px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--my-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+}
+.my-claim[data-status="available"] .my-claim-msg { color: var(--my-ok); font-weight: 600; }
+.my-claim[data-status="available"] .my-claim-msg::before { content: '✓ '; }
+.my-claim-alts { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.my-claim-alt {
+  min-height: 44px;
+  padding-inline: 14px;
+  border-radius: var(--my-r-pill);
+  border: 1px solid var(--my-border);
+  background: var(--my-glass);
+  color: var(--my-text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Celular y lugares angostos: campo arriba, botón abajo a todo el ancho */
+@media (max-width: 520px) {
+  .my-claim-row { flex-direction: column; }
+}
+.my-claim-compact .my-claim-row { flex-direction: column; }

@@ -7,8 +7,9 @@ import { ProfileView } from '@/modules/profile/components/ProfileView'
 import { Huella } from '@/design/components/Huella'
 import { huellaSeed } from '@/lib/huella'
 import { profileLook, type ProfileLayout } from '@/modules/profile/lib/profileLook'
-import { createModule, createProfile, friendlyError, loadProfile, publishSpace, recordReferral, updateProfile, uploadMedia } from '../lib/studioApi'
+import { checkUsername, createModule, createProfile, friendlyError, loadProfile, publishSpace, recordReferral, updateProfile, uploadMedia } from '../lib/studioApi'
 import type { Referral } from '@/lib/referral'
+import type { Claim } from '@/lib/claim'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { socialUrl } from '../lib/moduleCatalog'
 import { toPublicProfile, publicBaseUrl } from '../lib/preview'
@@ -58,7 +59,7 @@ function writeDraft(d: Draft) {
 /** Paso desde donde se retoma un onboarding a medio hacer */
 const resumeStep = (p: StudioProfile | null | undefined) => (!p ? 1 : (p.onboarding_step ?? 3) >= 4 ? 6 : 4)
 
-export function OnboardingWizard({ userId, initialProfile, initialModules = [], suggestedName, referral, onDone }: {
+export function OnboardingWizard({ userId, initialProfile, initialModules = [], suggestedName, referral, claim, onDone }: {
   userId: string
   /** Perfil ya creado (se retoma) */
   initialProfile?: StudioProfile | null
@@ -66,6 +67,8 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
   suggestedName?: string
   /** Llegó desde el pie de un perfil (V1 · etapa 08): preselecciona el tipo y se atribuye al crear el perfil */
   referral?: Referral | null
+  /** Nombre elegido antes del registro ("Elegí tu nombre"): se usa sin volver a preguntarlo si sigue libre */
+  claim?: Claim | null
   onDone: (profile: StudioProfile, modules: StudioModule[]) => void
 }) {
   const draft = readDraft()
@@ -76,8 +79,8 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
   const lang = useAppLang(st => st.lang)
   const [step, setStep] = useState(() => resumeStep(initialProfile))
   const [name, setName] = useState(initialProfile?.display_name ?? draft.name ?? suggestedName ?? '')
-  const [username, setUsername] = useState(initialProfile?.username ?? draft.username ?? '')
-  const [touchedUsername, setTouchedUsername] = useState(!!draft.username)
+  const [username, setUsername] = useState(initialProfile?.username ?? draft.username ?? claim?.username ?? '')
+  const [touchedUsername, setTouchedUsername] = useState(!!draft.username || !!claim)
   const [purpose, setPurpose] = useState<Purpose | undefined>(
     (PURPOSES.some(p => p.value === initialProfile?.purpose) ? initialProfile?.purpose as Purpose : undefined) ?? draft.purpose
     ?? (referral?.purpose ? REFERRAL_PURPOSE[referral.purpose] : undefined))
@@ -95,8 +98,8 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
     if (initialProfile) return
     const key = `mycen.ev.signup.${userId}`
     try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1') } catch { /* se manda igual */ }
-    trackEvent('signup_completed', { ref: referral?.ref, tipo: referral?.purpose ?? undefined })
-  }, [initialProfile, userId, referral])
+    trackEvent('signup_completed', { ref: referral?.ref, tipo: referral?.purpose ?? undefined, channel: claim?.from ?? undefined })
+  }, [initialProfile, userId, referral, claim])
   useEffect(() => { trackEvent('onboarding_step', { step }) }, [step])
 
   const effectiveUsername = profile ? profile.username ?? '' : touchedUsername ? username : usernameFromName(name)
@@ -109,7 +112,14 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
     setError(null)
     if (step === 1) {
       if (name.trim().length < 2) { setError(w.nameRequired); return }
-      save(); setStep(2); return
+      save()
+      // Ya eligió su nombre antes de registrarse y sigue libre: no se lo volvemos a preguntar (puede volver a cambiarlo).
+      // Si alguien lo tomó mientras tanto, se muestra el paso de la dirección con el aviso.
+      if (!profile && claim && effectiveUsername === claim.username) {
+        const now = status === 'checking' ? await checkUsername(claim.username).catch(() => 'error' as const) : status
+        setStep(now === 'available' ? 3 : 2); return
+      }
+      setStep(2); return
     }
     if (step === 2) {
       if (!profile && status !== 'available') { setError(usernameMessage(t, status === 'idle' ? 'invalid' : status)); return }

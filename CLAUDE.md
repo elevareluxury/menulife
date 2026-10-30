@@ -539,6 +539,16 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
 - Acentos (después de la etapa 15): 12 (`MYCEN_ACCENTS` en `design/themes.ts` = `tokens.css`, un test compara): los 4
   originales + sol, rosa, lima y los sobrios luna, mono, grafito, pizarra y arena. La base valida los nombres
   (`20261024000001_v1_more_accents.sql`); la conversión de colores viejos sigue eligiendo entre los 4 originales.
+- "Elegí tu nombre" (registro más rápido): `ClaimName` (`src/components/claim/`, textos en `src/i18n/app/claim.ts`, 12
+  idiomas) = campo `mycen.id/<nombre>` que consulta `check_username` por `publicRpc` (sin Supabase) y ofrece alternativas
+  libres (`claimSuggestions`). Está arriba de la landing (`CinematicHero`), en el cierre (`FinalCTA`), en un perfil que
+  no existe si el nombre está libre (`FreeName`, chunk propio; reservado o con dueño = el aviso de siempre) y en el pie
+  del perfil ("Creá tu identidad" lo abre; conserva ref y tipo). Lleva a `/register?u=&desde=hero|cierre|perfil|pie`
+  (`src/lib/claim.ts`); el registro (email o Google/Apple, `PendingSignup`) guarda `claimed_username`/`claim_from` en la
+  cuenta y el onboarding salta el paso de la dirección si sigue libre (si no, lo muestra). `signup_started` y
+  `signup_completed` llevan `channel` = el lugar; el panel → Producto lo muestra en "Desde dónde se registran"
+  (`admin_signup_sources`, migración `20261113000001_signup_sources.sql`, tests en `signup_sources.test.sql`). Reglas del username sin dependencias en `src/lib/username.ts`.
+  No reserva: el nombre es de la persona al crear su perfil. E2E en `claim.spec.ts`.
 - "Poné tu Mycen en todos lados": sólo botones de copiar (general y uno por plataforma con `?src=`), sin pasos por app.
 - Verificación de cuenta (antes V1.1, sumada antes del freeze): Studio → Ajustes → "Verificación" (`useVerification`,
   RPC `request_verification`: mensaje 10–1000, link https opcional, uno pendiente por vez, 3 cada 30 días) →

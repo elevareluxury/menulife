@@ -4,6 +4,8 @@ import { authCallbackUrl, isNativeApp, nativePlatform } from '@/lib/platform'
 // anota antes de salir y se completa al volver, sin pisar lo que la cuenta ya tenga.
 import { loadSupabase } from '@/lib/supabaseLazy'
 import type { Referral } from '@/lib/referral'
+import { claimMetadata, type Claim } from '@/lib/claim'
+import { validUsername } from '@/lib/username'
 import { featureOn } from '@/lib/features'
 
 /** Qué botones de acceso con otra cuenta se muestran. App Store (regla 4.8): en la app de iPhone, Google sólo va
@@ -24,6 +26,9 @@ export interface PendingSignup {
   terms?: boolean
   ref?: string
   ref_purpose?: string | null
+  /** Nombre elegido en "Elegí tu nombre" (landing o perfil) y desde dónde */
+  claimed_username?: string
+  claim_from?: string
 }
 
 export async function startGoogleSignIn(locale: string, referral: Referral | null, terms: boolean): Promise<void> {
@@ -31,10 +36,13 @@ export async function startGoogleSignIn(locale: string, referral: Referral | nul
 }
 
 /** Google o Apple: mismo camino (se anota idioma, términos y referido; vuelve a /auth/callback) */
-export async function startOAuthSignIn(provider: 'google' | 'apple', locale: string, referral: Referral | null, terms: boolean): Promise<void> {
+export async function startOAuthSignIn(
+  provider: 'google' | 'apple', locale: string, referral: Referral | null, terms: boolean, claim: Claim | null = null,
+): Promise<void> {
   const pending: PendingSignup = {
     at: new Date().toISOString(), locale, terms,
     ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
+    ...claimMetadata(claim),
   }
   try { localStorage.setItem(KEY, JSON.stringify(pending)) } catch { /* sin almacenamiento: se entra igual */ }
   const supabase = await loadSupabase()
@@ -66,6 +74,10 @@ export function pendingUpdates(
   if (!m.ref && typeof pending.ref === 'string') {
     out.ref = pending.ref
     if (typeof pending.ref_purpose === 'string') out.ref_purpose = pending.ref_purpose
+  }
+  if (!m.claimed_username && typeof pending.claimed_username === 'string' && validUsername(pending.claimed_username)) {
+    out.claimed_username = pending.claimed_username
+    if (typeof pending.claim_from === 'string') out.claim_from = pending.claim_from
   }
   return Object.keys(out).length ? out : null
 }

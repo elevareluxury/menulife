@@ -1,3 +1,4 @@
+import type { ClaimPlace } from './claim'
 import { publicRpc } from '@/lib/publicRpc'
 import { useAuthStore } from '@/store/authStore'
 
@@ -27,8 +28,9 @@ export interface ProductEventProps {
   days?: number
   /** Recordatorios: task | habit */
   kind?: ReminderKind
-  /** Recordatorios: app (con la app abierta) | push (con la app cerrada) */
-  channel?: ReminderChannel
+  /** Recordatorios: app (con la app abierta) | push (con la app cerrada). Registro: desde qué campo "Elegí tu nombre"
+   *  llegó (hero | cierre | perfil | pie) */
+  channel?: ReminderChannel | ClaimPlace
   /** Captura: adónde fue lo capturado */
   dest?: CaptureDest
 }

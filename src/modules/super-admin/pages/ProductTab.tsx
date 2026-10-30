@@ -16,6 +16,8 @@ type CaptureDest = 'task' | 'idea' | 'note' | 'goal' | 'money'
 type LinkType = 'task' | 'habit' | 'money' | 'note'
 interface CaptureRow { tipo: CaptureType; dest: CaptureDest; uses: number; items: number }
 interface ReminderRow { kind: 'task' | 'habit'; channel: 'app' | 'push'; shown: number; opened: number }
+type SourcePlace = 'hero' | 'cierre' | 'perfil' | 'pie' | 'otro'
+interface SourceRow { place: SourcePlace; started: number; completed: number }
 export interface ProductMetrics {
   days: number
   events_total: number
@@ -153,14 +155,20 @@ export function ProductTab() {
   const { date, number } = useAdminFormat()
   const [days, setDays] = useState<(typeof PERIODS)[number]>(90)
   const [result, setResult] = useState<{ days: number; data: ProductMetrics | null; failed: boolean } | null>(null)
+  // "Elegí tu nombre" (migración 20261113000001_signup_sources): sin la migración no viene y la sección no se muestra
+  const [sources, setSources] = useState<{ days: number; rows: SourceRow[] } | null>(null)
 
   useEffect(() => {
     let cancelled = false
     rpc('admin_product_metrics', { p_days: days }).then(r => {
       if (!cancelled) setResult({ days, data: r.error ? null : r.data as ProductMetrics, failed: !!r.error })
     })
+    rpc('admin_signup_sources', { p_days: days }).then(r => {
+      if (!cancelled) setSources({ days, rows: r.error || !Array.isArray(r.data) ? [] : r.data as SourceRow[] })
+    })
     return () => { cancelled = true }
   }, [days])
+  const sourceRows = sources?.days === days ? sources.rows : []
 
   const loading = !result || result.days !== days
   const m = result?.data
@@ -237,6 +245,26 @@ export function ProductTab() {
                   </table>
                 )}
               </section>
+
+              {sourceRows.length > 0 && (
+                <section style={CARD} aria-labelledby="pt-sources">
+                  <h2 id="pt-sources" style={{ margin: '0 0 4px', fontSize: 16, color: TEXT }}>{tp.sourcesTitle}</h2>
+                  <p style={{ margin: '0 0 10px', fontSize: 12.5, color: MUTED }}>{tp.sourcesHelp}</p>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead><tr><th style={TH}>{tp.sourcePlace}</th><th style={TH}>{tp.sourceStarted}</th><th style={TH}>{tp.sourceCompleted}</th><th style={TH}>%</th></tr></thead>
+                    <tbody>
+                      {sourceRows.map(r => (
+                        <tr key={r.place}>
+                          <td style={TD}>{tp.sourcePlaces[r.place] ?? r.place}</td>
+                          <td style={TD}>{number(r.started)}</td>
+                          <td style={TD}>{number(r.completed)}</td>
+                          <td style={TD}>{pct(r.completed, r.started)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+              )}
             </>
           )}
     </div>

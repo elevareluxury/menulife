@@ -30,6 +30,13 @@
 
 .my-profile .mp-footer { text-align: center; color: var(--my-muted); font-size: var(--my-fs-small); padding: 36px 0 12px; }
 .my-profile .mp-footer a { color: var(--my-text); }
+/* "Creá tu identidad": se ve como el link de siempre y abre el campo "Elegí tu nombre" debajo */
+.my-profile .mp-footer-claim {
+  border: 0; background: none; padding: 0 4px; min-height: 44px; display: inline-flex; align-items: center; vertical-align: middle;
+  color: var(--my-text); font: inherit; font-weight: 600; cursor: pointer;
+}
+.my-profile .mp-footer-claim:focus-visible { outline: 2px solid var(--my-text); outline-offset: 3px; border-radius: 4px; }
+.my-profile .mp-footer-claim-box { max-width: 420px; margin: 20px auto 8px; }
 
 /* ── Clásica: foto con la huella orbitando ───────────────────── */
 .mp-cl-orbit { position: relative; width: 176px; height: 176px; margin: 0 auto 12px; }
@@ -73,10 +80,11 @@
 .mp-cover-body { position: relative; padding: 0 20px 22px; }
 .mp-cover-name { font-size: var(--my-fs-cover) !important; margin-bottom: 8px; }
 .mp-cover-avatar { width: 72px !important; height: 72px !important; margin-bottom: 14px !important; font-size: 26px; }
+/* Flecha a lo de abajo: sólo el ícono (sin el texto "Más sobre mí" a la vista; queda como nombre accesible) */
 .mp-more {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 14px; padding: 0 16px;
+  display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-top: 14px; padding: 0;
   border-radius: var(--my-r-pill); border: 1px solid var(--my-border); background: var(--my-glass);
-  color: var(--my-text); font-weight: 500; text-decoration: none;
+  color: var(--my-text); text-decoration: none;
 }
 .mp-cover-rest { padding-top: 28px; text-align: center; scroll-margin-top: 64px; }
 
