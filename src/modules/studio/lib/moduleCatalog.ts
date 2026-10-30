@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react'
 import type { ModuleType, WeekSchedule } from '@/modules/profile/lib/profileTypes'
 import { WEEK_DAYS } from '@/modules/profile/lib/schedule'
-import { safeHref } from '@/modules/profile/lib/safeUrl'
+import { safeHref, telHref, withWebScheme, whatsappHref, whatsappNeedsCountry } from '@/modules/profile/lib/safeUrl'
 import { inspectMediaUrl, MEDIA_PROVIDER_NAME, parseMediaUrl } from '@/modules/profile/lib/media'
 import { inspectChannelUrl, parseChannelUrl } from '@/modules/profile/lib/latestVideo'
 import { featureOn } from '@/lib/features'
@@ -100,11 +100,13 @@ export const SOCIAL_NETWORKS = [
 export function socialUrl(network: string, handle: string): string | null {
   const v = handle.trim()
   if (!v) return null
-  if (/^https?:\/\//i.test(v)) return safeHref(v)
   const net = SOCIAL_NETWORKS.find(n => n.value === network)
-  if (!net) return safeHref(v)
-  const clean = network === 'whatsapp' ? v.replace(/\D/g, '') : v.replace(/^@/, '')
-  return clean ? net.base + clean : null
+  if (network === 'whatsapp') return whatsappNeedsCountry(v) ? null : whatsappHref(v)
+  // Link entero, con o sin https:// ("instagram.com/ana", "www.tiktok.com/@ana"): se usa tal cual
+  if (!net || /^https?:\/\//i.test(v) || /^[^@\s/]+\.[a-z]{2,}\//i.test(v)) return safeHref(v)
+  const clean = v.replace(/^@+/, '').replace(/\/+$/, '')
+  // Un usuario no tiene espacios ni barras: "ana perez" no abre ningún perfil
+  return clean && /^[\p{L}\p{N}._-]+$/u.test(clean) ? net.base + clean : null
 }
 
 const urlOk = (v: string | undefined) => !v || !!safeHref(v)
@@ -151,7 +153,8 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         { key: 'network', label: f.network, kind: 'select', required: true, options: SOCIAL_NETWORKS.map(n => ({ value: n.value, label: n.label })) },
         { key: 'handle', label: f.handle, kind: 'text', required: true, placeholder: p.handle },
       ],
-      validate: x => (socialUrl(x.network, x.handle ?? '') ? null : v.badHandle),
+      validate: x => (socialUrl(x.network, x.handle ?? '') ? null
+        : x.network === 'whatsapp' && whatsappNeedsCountry(x.handle) ? v.badWhatsapp : v.badHandle),
       // Módulos viejos sin handle: se edita a partir de la URL
       prefill: (x, content) => { if (content && !x.handle) x.handle = text(content.url) },
       finalize: (content, x) => { content.url = socialUrl(x.network, x.handle ?? '') },
@@ -168,7 +171,9 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       ],
       validate: x => {
         if (!x.whatsapp && !x.phone && !x.email) return v.contactEmpty
-        if (x.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.email)) return v.badEmail
+        if (x.whatsapp && (whatsappNeedsCountry(x.whatsapp) || !whatsappHref(x.whatsapp))) return v.badWhatsapp
+        if (x.phone && !telHref(x.phone)) return v.badPhone
+        if (x.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.email.trim())) return v.badEmail
         return null
       },
       summary: x => [text(x.whatsapp), text(x.phone), text(x.email)].filter(Boolean).join(' · '),
@@ -411,7 +416,7 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         },
         apply: ({ url, cover }, content) => {
           const embed = parseMediaUrl(url)
-          content.url = url.trim()
+          content.url = withWebScheme(url)
           if (embed) { content.provider = embed.provider; content.kind = embed.kind }
           if (cover) content.cover_url = cover
           else delete content.cover_url

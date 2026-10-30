@@ -14,7 +14,7 @@ const fr: StudioDict = {
   common: {
     cancel: 'Annuler', save: 'Enregistrer', saving: 'Enregistrement…', saved: 'Enregistré', saveError: 'Erreur d’enregistrement', retry: 'Réessayer',
     close: 'Fermer', chooseOption: 'Choisissez une option', upload: 'Importer une image', change: 'Changer', remove: 'Retirer',
-    removeLabel: l => `Retirer ${l}`, uploadError: 'Impossible d’importer l’image.', recommendedSize: s => `Recommandé : ${s} px`, open: 'Ouvrir', edit: 'Modifier', hide: 'Masquer',
+    removeLabel: l => `Retirer ${l}`, imageBroken: 'Cette image ne se charge plus : changez-la ou retirez-la.', uploadError: 'Impossible d’importer l’image.', recommendedSize: s => `Recommandé : ${s} px`, open: 'Ouvrir', edit: 'Modifier', hide: 'Masquer',
     add: 'Ajouter', delete: 'Supprimer', loading: 'Chargement…', done: 'fait', pending: 'à faire',
   },
   status: { published: 'Publié', draft: 'Brouillon', unpublished: 'En pause', archived: 'Archivé' },
@@ -412,7 +412,7 @@ const fr: StudioDict = {
     },
     validation: {
       badUrl: 'L’URL n’est pas valide.', cardNeedsImage: 'Importez une image pour l’afficher en carte.', badHandle: 'Vérifiez le nom d’utilisateur ou l’URL.',
-      contactEmpty: 'Remplissez au moins une coordonnée.', badEmail: 'L’e-mail n’est pas valide.',
+      contactEmpty: 'Remplissez au moins une coordonnée.', badEmail: 'L’e-mail n’est pas valide.', badWhatsapp: 'Pour WhatsApp, saisissez le numéro complet avec l’indicatif du pays, par exemple +33 6 12 34 56 78.', badPhone: 'Le numéro de téléphone n’est pas valide.',
       locationEmpty: 'Remplissez l’adresse ou le lien Maps.', badMaps: 'Le lien Maps n’est pas valide.', badCta: 'L’URL du bouton n’est pas valide.',
     },
     summary: {

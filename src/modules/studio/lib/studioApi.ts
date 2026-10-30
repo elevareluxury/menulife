@@ -233,6 +233,8 @@ export async function uploadMedia(userId: string, original: File, kind: 'avatar'
   if (!original.type.startsWith('image/')) throw new Error(studioT().errors.notImage)
   if (original.size > MAX_SOURCE_BYTES) throw new Error(studioT().errors.tooBig)
   const file = await optimizeImage(original, { maxSide: kind === 'avatar' ? 640 : 1920 })
+  // Una foto HEIC/HEIF que el navegador no pudo convertir no se vería en la mayoría de los navegadores: mejor pedir otra
+  if (/^image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name)) throw new Error(studioT().errors.notImage)
   if (file.size > MAX_UPLOAD_BYTES) throw new Error(studioT().errors.tooBig)
   const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
   const path = `${userId}/${crypto.randomUUID()}.${ext}`

@@ -6,7 +6,7 @@ import { safeHref } from '../lib/safeUrl'
 import { tr, ui } from '../lib/profileI18n'
 import type { ModuleProps } from './ProfileModules'
 import { useProfileModule } from './profileModuleContext'
-import { SizedImage } from './SafeImage'
+import { SafeImage } from './SafeImage'
 
 /**
  * Video y música (V1 · etapa 04) con fachada: al abrir el perfil sólo se dibuja una tarjeta liviana con la huella del
@@ -16,6 +16,11 @@ import { SizedImage } from './SafeImage'
 export function MediaModule({ module, lang, onAction }: ModuleProps) {
   const t = ui(lang)
   const huella = useProfileModule()
+  const art = huella && (
+    <span className="mp-media-art" aria-hidden="true">
+      <Huella seed={huella.seed} variant={huella.variant} />
+    </span>
+  )
   const [playing, setPlaying] = useState(false)
   const embed = parseMediaUrl(module.content.url)
   if (!embed) return null
@@ -44,13 +49,10 @@ export function MediaModule({ module, lang, onAction }: ModuleProps) {
       ) : (
         <button type="button" className="mp-media-facade" style={video ? { aspectRatio: String(Math.max(embed.ratio, 16 / 9)) } : undefined}
           onClick={() => { setPlaying(true); onAction(module.id) }}>
+          {/* Portada guardada; si ya no existe, la huella (nunca un ícono de imagen rota) */}
           {cover
-            ? <SizedImage className="mp-media-cover" sizing="column" src={cover} alt="" loading="lazy" decoding="async" />
-            : huella && (
-              <span className="mp-media-art" aria-hidden="true">
-                <Huella seed={huella.seed} variant={huella.variant} />
-              </span>
-            )}
+            ? <SafeImage className="mp-media-cover" sizing="column" src={cover} alt="" loading="lazy" decoding="async" fallback={art} />
+            : art}
           <span className="mp-media-play" aria-hidden="true"><Play size={22} fill="currentColor" /></span>
           <span className="mp-media-text">
             <span className="mp-media-title">{title}</span>

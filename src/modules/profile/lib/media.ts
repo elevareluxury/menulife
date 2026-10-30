@@ -2,6 +2,7 @@
 // Igual que en video.ts, nunca se usa la URL pegada como src: el iframe se arma con el id validado.
 // El iframe se carga recién cuando el visitante toca "Reproducir" (fachada: MediaModule).
 import { parseVideoUrl } from './video'
+import { withWebScheme } from './safeUrl'
 
 export const MEDIA_PROVIDERS = ['youtube', 'vimeo', 'spotify', 'soundcloud', 'tiktok'] as const
 export type MediaProvider = typeof MEDIA_PROVIDERS[number]
@@ -32,7 +33,7 @@ const SPOTIFY_TYPES = ['track', 'album', 'playlist', 'episode', 'show'] as const
 
 function asUrl(raw: string): URL | null {
   try {
-    const url = new URL(raw.trim())
+    const url = new URL(withWebScheme(raw))
     return url.protocol === 'https:' || url.protocol === 'http:' ? url : null
   } catch {
     return null

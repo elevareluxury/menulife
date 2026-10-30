@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { ArrowUpRight, Clock, Mail, MapPin, MessageCircle, Navigation, Phone, X } from 'lucide-react'
+import { ArrowUpRight, ChevronLeft, ChevronRight, Clock, Mail, MapPin, MessageCircle, Navigation, Phone, X } from 'lucide-react'
 import type { ProfileLang, ProfileModule, WeekSchedule } from '../lib/profileTypes'
 import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref, telHref, whatsappHref } from '../lib/safeUrl'
@@ -7,7 +7,8 @@ import { todayKey, WEEK_DAYS } from '../lib/schedule'
 import { NETWORK_LABELS } from '../lib/networks'
 import { urlKey } from '../lib/clickKeys'
 import { SocialIcon } from './SocialIcon'
-import { SafeImage, SizedImage } from './SafeImage'
+import { SafeImage } from './SafeImage'
+import { useScrollLock } from '@/lib/scrollLock'
 
 export interface ModuleProps {
   module: ProfileModule
@@ -169,23 +170,44 @@ export function TextModule({ module, lang }: ModuleProps) {
   const title = tr(module.title, module.translations, 'title', lang)
   const body = tr(str(module.content.body), module.translations, 'body', lang)
   const image = safeHref(module.content.image_url)
+  const [imageFailed, setImageFailed] = useState(false)
   if (!title && !body && !image) return null
-  return (
-    <article className="mp-card">
-      {image && <SafeImage className="mp-text-image" sizing="column" src={image} alt="" loading="lazy" />}
+  const showImage = !!image && !imageFailed
+  if (!title && !body && !showImage) return null
+  const text = (title || body) && (
+    <>
       {title && <h2 className="mp-text-heading">{title}</h2>}
       {body && <p className="mp-text-body">{body}</p>}
-    </article>
+    </>
   )
+  // Con foto: la foto ocupa todo el ancho de la tarjeta (en cualquier estructura) y el texto va debajo con su margen
+  if (showImage) {
+    return (
+      <article className="mp-card mp-card-media">
+        <SafeImage className="mp-text-image" sizing="column" src={image!} alt="" loading="lazy" onFail={() => setImageFailed(true)} />
+        {text && <div className="mp-card-media-body">{text}</div>}
+      </article>
+    )
+  }
+  return <article className="mp-card">{text}</article>
 }
+
+/** Proporción de una foto suelta: muy alta se recorta a 4:5 (como en las redes), chica no se agranda */
+type ImageShape = 'normal' | 'tall' | 'small'
+const imageShape = (img: HTMLImageElement): ImageShape =>
+  img.naturalWidth < 320 && img.naturalHeight < 320 ? 'small' : img.naturalHeight / Math.max(1, img.naturalWidth) > 1.25 ? 'tall' : 'normal'
 
 export function ImageModule({ module, lang }: ModuleProps) {
   const src = safeHref(module.content.url)
-  if (!src) return null
+  const [failed, setFailed] = useState(false)
+  const [shape, setShape] = useState<ImageShape>('normal')
+  // Una foto que ya no existe no deja un ícono roto: el bloque no se muestra
+  if (!src || failed) return null
   const caption = tr(str(module.content.caption), module.translations, 'caption', lang)
   return (
-    <figure className="mp-card" style={{ padding: 0, margin: 0 }}>
-      <SizedImage sizing="column" src={src} alt={str(module.content.alt) || caption} loading="lazy" style={{ width: '100%', display: 'block' }} />
+    <figure className="mp-card mp-image-card" style={{ padding: 0, margin: 0 }}>
+      <SafeImage className={`mp-image mp-image-${shape}`} sizing="column" src={src} alt={str(module.content.alt) || caption} loading="lazy"
+        onLoad={e => setShape(imageShape(e.currentTarget))} onFail={() => setFailed(true)} />
       {caption && <figcaption style={{ padding: '12px 16px', fontSize: 14, color: 'var(--p-muted)' }}>{caption}</figcaption>}
     </figure>
   )
@@ -248,8 +270,11 @@ const isVideo = (item: GalleryItem) => item.type === 'video' || /\.(mp4|webm|mov
 export function GalleryModule({ module, lang }: ModuleProps) {
   const t = ui(lang)
   const [open, setOpen] = useState<number | null>(null)
+  // Fotos que no cargaron: se sacan de la grilla y del visor
+  const [broken, setBroken] = useState<ReadonlySet<string>>(() => new Set())
   const items = (Array.isArray(module.content.items) ? module.content.items : [])
     .filter((i): i is GalleryItem => !!i && typeof (i as GalleryItem).url === 'string' && !!safeHref((i as GalleryItem).url))
+    .filter(i => !broken.has(i.url))
 
   useEffect(() => {
     if (open == null) return
@@ -262,8 +287,11 @@ export function GalleryModule({ module, lang }: ModuleProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [open, items.length])
 
+  // Con el visor abierto, la página de atrás queda quieta
+  useScrollLock(open != null)
+
   if (!items.length) return null
-  const current = open != null ? items[open] : null
+  const current = open != null ? items[Math.min(open, items.length - 1)] : null
 
   return (
     <section className="mp-card" aria-label={t.gallery}>
@@ -275,17 +303,31 @@ export function GalleryModule({ module, lang }: ModuleProps) {
             <button key={item.url + i} type="button" onClick={() => setOpen(i)}
               aria-label={item.caption || `${t.gallery} ${i + 1}`}>
               {thumb
-                ? <SafeImage sizing="third" src={thumb} alt="" loading="lazy" />
+                ? <SafeImage sizing="third" src={thumb} alt="" loading="lazy" onFail={() => setBroken(b => new Set(b).add(item.url))} />
                 : <video src={item.url} muted playsInline preload="metadata" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
             </button>
           )
         })}
       </div>
       {current && (
-        <div className="mp-lightbox" role="dialog" aria-modal="true" onClick={() => setOpen(null)}>
-          <button type="button" className="mp-icon-btn" aria-label={ui(lang).close} onClick={() => setOpen(null)}>
+        <div className="mp-lightbox" role="dialog" aria-modal="true" aria-label={`${open! + 1} / ${items.length}`} onClick={() => setOpen(null)}>
+          <button type="button" className="mp-icon-btn mp-lightbox-close" aria-label={ui(lang).close} onClick={() => setOpen(null)}>
             <X size={20} />
           </button>
+          {items.length > 1 && (
+            <>
+              {/* En el celular no hay flechas del teclado: botones para pasar de foto */}
+              <button type="button" className="mp-icon-btn mp-lightbox-nav is-prev" aria-label={t.prevPhoto}
+                onClick={e => { e.stopPropagation(); setOpen(i => (i == null ? i : (i - 1 + items.length) % items.length)) }}>
+                <ChevronLeft size={22} aria-hidden="true" />
+              </button>
+              <button type="button" className="mp-icon-btn mp-lightbox-nav is-next" aria-label={t.nextPhoto}
+                onClick={e => { e.stopPropagation(); setOpen(i => (i == null ? i : (i + 1) % items.length)) }}>
+                <ChevronRight size={22} aria-hidden="true" />
+              </button>
+              <span className="mp-lightbox-count" aria-hidden="true">{open! + 1} / {items.length}</span>
+            </>
+          )}
           {isVideo(current)
             ? <video src={current.url} controls autoPlay playsInline onClick={e => e.stopPropagation()} />
             : <img src={current.url} alt={current.caption ?? ''} onClick={e => e.stopPropagation()} />}

@@ -20,7 +20,7 @@ const ru: StudioDict = {
   common: {
     cancel: 'Отмена', save: 'Сохранить', saving: 'Сохранение…', saved: 'Сохранено', saveError: 'Ошибка сохранения', retry: 'Повторить',
     close: 'Закрыть', chooseOption: 'Выберите вариант', upload: 'Загрузить изображение', change: 'Заменить', remove: 'Убрать',
-    removeLabel: l => `Убрать: ${l}`, uploadError: 'Не удалось загрузить изображение.', recommendedSize: s => `Рекомендуется: ${s} px`, open: 'Открыть', edit: 'Изменить', hide: 'Скрыть',
+    removeLabel: l => `Убрать: ${l}`, imageBroken: 'Это изображение больше не загружается: замените или удалите его.', uploadError: 'Не удалось загрузить изображение.', recommendedSize: s => `Рекомендуется: ${s} px`, open: 'Открыть', edit: 'Изменить', hide: 'Скрыть',
     add: 'Добавить', delete: 'Удалить', loading: 'Загрузка…', done: 'готово', pending: 'не сделано',
   },
   status: { published: 'Опубликован', draft: 'Черновик', unpublished: 'Приостановлен', archived: 'В архиве' },
@@ -418,7 +418,7 @@ const ru: StudioDict = {
     },
     validation: {
       badUrl: 'Некорректный URL.', cardNeedsImage: 'Чтобы показать как карточку, загрузите изображение.', badHandle: 'Проверьте имя пользователя или URL.',
-      contactEmpty: 'Укажите хотя бы один контакт.', badEmail: 'Некорректный e-mail.',
+      contactEmpty: 'Укажите хотя бы один контакт.', badEmail: 'Некорректный e-mail.', badWhatsapp: 'Для WhatsApp укажите полный номер с кодом страны, например +7 912 345-67-89.', badPhone: 'Номер телефона указан неверно.',
       locationEmpty: 'Укажите адрес или ссылку на карту.', badMaps: 'Некорректная ссылка на карту.', badCta: 'Некорректная ссылка кнопки.',
     },
     summary: {

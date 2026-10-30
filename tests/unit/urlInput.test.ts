@@ -29,6 +29,18 @@ describe('urlInput', () => {
 
   it('lo que no es un dominio queda como está (lo valida quien lo usa)', () => {
     expect(urlOnBlur('hola')).toBe('hola')
-    expect(urlOnBlur('ana@mail.com')).toBe('ana@mail.com')
+  })
+
+  it('un email (suelto o escrito después del https:// que ya estaba) pasa a mailto:', () => {
+    expect(urlOnBlur('ana@mail.com')).toBe('mailto:ana@mail.com')
+    expect(urlOnBlur('https://ana@mail.com')).toBe('mailto:ana@mail.com')
+  })
+
+  it('saca lo que se pega sin querer y arregla el comienzo mal escrito', () => {
+    expect(urlOnBlur('"https://mycen.id/ana".')).toBe('https://mycen.id/ana')
+    expect(urlOnBlur('<www.tienda.com>')).toBe('https://www.tienda.com')
+    expect(urlOnBlur('https//tienda.com')).toBe('https://tienda.com')
+    expect(urlOnBlur('https://"paypal.me/ana".')).toBe('https://paypal.me/ana')
+    expect(urlOnBlur('instagram.com?igsh=abc')).toBe('https://instagram.com?igsh=abc')
   })
 })

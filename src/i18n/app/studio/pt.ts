@@ -14,7 +14,7 @@ const pt: StudioDict = {
   common: {
     cancel: 'Cancelar', save: 'Salvar', saving: 'Salvando…', saved: 'Salvo', saveError: 'Erro ao salvar', retry: 'Tentar novamente',
     close: 'Fechar', chooseOption: 'Escolha uma opção', upload: 'Enviar imagem', change: 'Trocar', remove: 'Remover',
-    removeLabel: l => `Remover ${l}`, uploadError: 'Não foi possível enviar a imagem.', recommendedSize: s => `Recomendado: ${s} px`, open: 'Abrir', edit: 'Editar', hide: 'Ocultar',
+    removeLabel: l => `Remover ${l}`, imageBroken: 'Esta imagem não carrega mais: troque ou remova.', uploadError: 'Não foi possível enviar a imagem.', recommendedSize: s => `Recomendado: ${s} px`, open: 'Abrir', edit: 'Editar', hide: 'Ocultar',
     add: 'Adicionar', delete: 'Excluir', loading: 'Carregando…', done: 'feito', pending: 'pendente',
   },
   status: { published: 'Publicado', draft: 'Rascunho', unpublished: 'Pausado', archived: 'Arquivado' },
@@ -412,7 +412,7 @@ const pt: StudioDict = {
     },
     validation: {
       badUrl: 'A URL não é válida.', cardNeedsImage: 'Para aparecer como cartão, envie uma imagem.', badHandle: 'Confira o usuário ou a URL.',
-      contactEmpty: 'Preencha pelo menos um contato.', badEmail: 'O e-mail não é válido.',
+      contactEmpty: 'Preencha pelo menos um contato.', badEmail: 'O e-mail não é válido.', badWhatsapp: 'Para o WhatsApp, coloque o número completo com o código do país, por exemplo +55 11 91234 5678.', badPhone: 'O telefone não é válido.',
       locationEmpty: 'Preencha o endereço ou o link do Maps.', badMaps: 'O link do Maps não é válido.', badCta: 'A URL do botão não é válida.',
     },
     summary: {

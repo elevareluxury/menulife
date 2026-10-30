@@ -14,7 +14,7 @@ const hi: StudioDict = {
   common: {
     cancel: 'रद्द करें', save: 'सहेजें', saving: 'सहेजा जा रहा है…', saved: 'सहेजा गया', saveError: 'सहेजने में त्रुटि', retry: 'फिर से कोशिश करें',
     close: 'बंद करें', chooseOption: 'एक विकल्प चुनें', upload: 'इमेज अपलोड करें', change: 'बदलें', remove: 'हटाएँ',
-    removeLabel: l => `${l} हटाएँ`, uploadError: 'इमेज अपलोड नहीं हो सकी।', recommendedSize: s => `सुझाया गया: ${s} px`, open: 'खोलें', edit: 'संपादित करें', hide: 'छिपाएँ',
+    removeLabel: l => `${l} हटाएँ`, imageBroken: 'यह इमेज अब लोड नहीं होती: इसे बदलें या हटाएँ।', uploadError: 'इमेज अपलोड नहीं हो सकी।', recommendedSize: s => `सुझाया गया: ${s} px`, open: 'खोलें', edit: 'संपादित करें', hide: 'छिपाएँ',
     add: 'जोड़ें', delete: 'हटाएँ', loading: 'लोड हो रहा है…', done: 'पूरा', pending: 'बाकी',
   },
   status: { published: 'प्रकाशित', draft: 'ड्राफ़्ट', unpublished: 'रुका हुआ', archived: 'संग्रहीत' },
@@ -412,7 +412,7 @@ const hi: StudioDict = {
     },
     validation: {
       badUrl: 'URL मान्य नहीं है।', cardNeedsImage: 'कार्ड की तरह दिखाने के लिए इमेज अपलोड करें।', badHandle: 'यूज़रनेम या URL जाँचें।',
-      contactEmpty: 'कम से कम एक संपर्क जानकारी भरें।', badEmail: 'ईमेल मान्य नहीं है।',
+      contactEmpty: 'कम से कम एक संपर्क जानकारी भरें।', badEmail: 'ईमेल मान्य नहीं है।', badWhatsapp: 'WhatsApp के लिए देश कोड के साथ पूरा नंबर लिखें, जैसे +91 98765 43210।', badPhone: 'फ़ोन नंबर सही नहीं है।',
       locationEmpty: 'पता या Maps लिंक भरें।', badMaps: 'Maps लिंक मान्य नहीं है।', badCta: 'बटन का URL मान्य नहीं है।',
     },
     summary: {

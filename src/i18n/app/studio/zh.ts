@@ -14,7 +14,7 @@ const zh: StudioDict = {
   common: {
     cancel: '取消', save: '保存', saving: '正在保存…', saved: '已保存', saveError: '保存出错', retry: '重试',
     close: '关闭', chooseOption: '请选择', upload: '上传图片', change: '更换', remove: '移除',
-    removeLabel: l => `移除${l}`, uploadError: '图片上传失败。', recommendedSize: s => `建议尺寸：${s} px`, open: '打开', edit: '编辑', hide: '收起',
+    removeLabel: l => `移除${l}`, imageBroken: '这张图片无法加载：请更换或移除。', uploadError: '图片上传失败。', recommendedSize: s => `建议尺寸：${s} px`, open: '打开', edit: '编辑', hide: '收起',
     add: '添加', delete: '删除', loading: '加载中…', done: '已完成', pending: '待完成',
   },
   status: { published: '已发布', draft: '草稿', unpublished: '已暂停', archived: '已归档' },
@@ -412,7 +412,7 @@ const zh: StudioDict = {
     },
     validation: {
       badUrl: '链接无效。', cardNeedsImage: '要以卡片形式显示，请上传图片。', badHandle: '请检查用户名或链接。',
-      contactEmpty: '请至少填写一种联系方式。', badEmail: '邮箱无效。',
+      contactEmpty: '请至少填写一种联系方式。', badEmail: '邮箱无效。', badWhatsapp: 'WhatsApp 请填写带国家代码的完整号码，例如 +86 138 0013 8000。', badPhone: '电话号码无效。',
       locationEmpty: '请填写地址或地图链接。', badMaps: '地图链接无效。', badCta: '按钮链接无效。',
     },
     summary: {

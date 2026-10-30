@@ -14,7 +14,7 @@ const en: StudioDict = {
   common: {
     cancel: 'Cancel', save: 'Save', saving: 'Saving…', saved: 'Saved', saveError: 'Could not save', retry: 'Try again',
     close: 'Close', chooseOption: 'Choose an option', upload: 'Upload image', change: 'Change', remove: 'Remove',
-    removeLabel: l => `Remove ${l}`, uploadError: 'Could not upload the image.', recommendedSize: s => `Recommended: ${s} px`, open: 'Open', edit: 'Edit', hide: 'Hide',
+    removeLabel: l => `Remove ${l}`, imageBroken: 'This image no longer loads: change or remove it.', uploadError: 'Could not upload the image.', recommendedSize: s => `Recommended: ${s} px`, open: 'Open', edit: 'Edit', hide: 'Hide',
     add: 'Add', delete: 'Delete', loading: 'Loading…', done: 'done', pending: 'pending',
   },
   status: { published: 'Published', draft: 'Draft', unpublished: 'Paused', archived: 'Archived' },
@@ -412,7 +412,7 @@ const en: StudioDict = {
     },
     validation: {
       badUrl: 'The URL is not valid.', cardNeedsImage: 'Upload an image to show it as a card.', badHandle: 'Check the username or URL.',
-      contactEmpty: 'Fill in at least one contact detail.', badEmail: 'The email is not valid.',
+      contactEmpty: 'Fill in at least one contact detail.', badEmail: 'The email is not valid.', badWhatsapp: 'For WhatsApp, enter the full number with the country code, for example +1 415 555 0000.', badPhone: 'The phone number is not valid.',
       locationEmpty: 'Fill in the address or the Maps link.', badMaps: 'The Maps link is not valid.', badCta: 'The button URL is not valid.',
     },
     summary: {

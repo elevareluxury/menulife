@@ -14,7 +14,7 @@ const it: StudioDict = {
   common: {
     cancel: 'Annulla', save: 'Salva', saving: 'Salvataggio…', saved: 'Salvato', saveError: 'Errore di salvataggio', retry: 'Riprova',
     close: 'Chiudi', chooseOption: 'Scegli un’opzione', upload: 'Carica immagine', change: 'Cambia', remove: 'Rimuovi',
-    removeLabel: l => `Rimuovi ${l}`, uploadError: 'Impossibile caricare l’immagine.', recommendedSize: s => `Consigliato: ${s} px`, open: 'Apri', edit: 'Modifica', hide: 'Nascondi',
+    removeLabel: l => `Rimuovi ${l}`, imageBroken: 'Questa immagine non si carica più: cambiala o rimuovila.', uploadError: 'Impossibile caricare l’immagine.', recommendedSize: s => `Consigliato: ${s} px`, open: 'Apri', edit: 'Modifica', hide: 'Nascondi',
     add: 'Aggiungi', delete: 'Elimina', loading: 'Caricamento…', done: 'fatto', pending: 'da fare',
   },
   status: { published: 'Pubblicato', draft: 'Bozza', unpublished: 'In pausa', archived: 'Archiviato' },
@@ -412,7 +412,7 @@ const it: StudioDict = {
     },
     validation: {
       badUrl: 'L’URL non è valido.', cardNeedsImage: 'Per mostrarlo come scheda, carica un’immagine.', badHandle: 'Controlla l’utente o l’URL.',
-      contactEmpty: 'Compila almeno un contatto.', badEmail: 'L’email non è valida.',
+      contactEmpty: 'Compila almeno un contatto.', badEmail: 'L’email non è valida.', badWhatsapp: 'Per WhatsApp inserisci il numero completo con il prefisso internazionale, per esempio +39 333 123 4567.', badPhone: 'Il numero di telefono non è valido.',
       locationEmpty: 'Compila l’indirizzo o il link di Maps.', badMaps: 'Il link di Maps non è valido.', badCta: 'L’URL del pulsante non è valido.',
     },
     summary: {

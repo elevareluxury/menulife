@@ -14,7 +14,7 @@ const de: StudioDict = {
   common: {
     cancel: 'Abbrechen', save: 'Speichern', saving: 'Wird gespeichert…', saved: 'Gespeichert', saveError: 'Fehler beim Speichern', retry: 'Erneut versuchen',
     close: 'Schließen', chooseOption: 'Option wählen', upload: 'Bild hochladen', change: 'Ändern', remove: 'Entfernen',
-    removeLabel: l => `${l} entfernen`, uploadError: 'Das Bild konnte nicht hochgeladen werden.', recommendedSize: s => `Empfohlen: ${s} px`, open: 'Öffnen', edit: 'Bearbeiten', hide: 'Ausblenden',
+    removeLabel: l => `${l} entfernen`, imageBroken: 'Dieses Bild lädt nicht mehr: ersetze oder entferne es.', uploadError: 'Das Bild konnte nicht hochgeladen werden.', recommendedSize: s => `Empfohlen: ${s} px`, open: 'Öffnen', edit: 'Bearbeiten', hide: 'Ausblenden',
     add: 'Hinzufügen', delete: 'Löschen', loading: 'Wird geladen…', done: 'erledigt', pending: 'offen',
   },
   status: { published: 'Veröffentlicht', draft: 'Entwurf', unpublished: 'Pausiert', archived: 'Archiviert' },
@@ -412,7 +412,7 @@ const de: StudioDict = {
     },
     validation: {
       badUrl: 'Die URL ist ungültig.', cardNeedsImage: 'Lade ein Bild hoch, damit es als Karte erscheint.', badHandle: 'Prüfe Benutzername oder URL.',
-      contactEmpty: 'Gib mindestens eine Kontaktmöglichkeit an.', badEmail: 'Die E-Mail ist ungültig.',
+      contactEmpty: 'Gib mindestens eine Kontaktmöglichkeit an.', badEmail: 'Die E-Mail ist ungültig.', badWhatsapp: 'Gib für WhatsApp die vollständige Nummer mit Ländervorwahl ein, zum Beispiel +49 151 23456789.', badPhone: 'Die Telefonnummer ist ungültig.',
       locationEmpty: 'Gib die Adresse oder den Maps-Link an.', badMaps: 'Der Maps-Link ist ungültig.', badCta: 'Die Button-URL ist ungültig.',
     },
     summary: {

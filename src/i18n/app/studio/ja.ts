@@ -14,7 +14,7 @@ const ja: StudioDict = {
   common: {
     cancel: 'キャンセル', save: '保存', saving: '保存中…', saved: '保存しました', saveError: '保存エラー', retry: '再試行',
     close: '閉じる', chooseOption: '選択してください', upload: '画像をアップロード', change: '変更', remove: '削除',
-    removeLabel: l => `${l}を削除`, uploadError: '画像をアップロードできませんでした。', recommendedSize: s => `推奨サイズ：${s} px`, open: '開く', edit: '編集', hide: '閉じる',
+    removeLabel: l => `${l}を削除`, imageBroken: 'この画像は読み込めません。変更するか削除してください。', uploadError: '画像をアップロードできませんでした。', recommendedSize: s => `推奨サイズ：${s} px`, open: '開く', edit: '編集', hide: '閉じる',
     add: '追加', delete: '削除', loading: '読み込み中…', done: '完了', pending: '未完了',
   },
   status: { published: '公開中', draft: '下書き', unpublished: '一時停止中', archived: 'アーカイブ済み' },
@@ -412,7 +412,7 @@ const ja: StudioDict = {
     },
     validation: {
       badUrl: 'URL が正しくありません。', cardNeedsImage: 'カード表示にするには画像をアップロードしてください。', badHandle: 'ユーザー名か URL を確認してください。',
-      contactEmpty: '連絡先を 1 つ以上入力してください。', badEmail: 'メールアドレスが正しくありません。',
+      contactEmpty: '連絡先を 1 つ以上入力してください。', badEmail: 'メールアドレスが正しくありません。', badWhatsapp: 'WhatsApp は国番号付きの番号を入力してください（例：+81 90 1234 5678）。', badPhone: '電話番号が正しくありません。',
       locationEmpty: '住所かマップのリンクを入力してください。', badMaps: 'マップのリンクが正しくありません。', badCta: 'ボタンの URL が正しくありません。',
     },
     summary: {
