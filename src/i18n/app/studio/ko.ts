@@ -412,7 +412,7 @@ const ko: StudioDict = {
     },
     validation: {
       badUrl: 'URL이 올바르지 않습니다.', cardNeedsImage: '카드로 보이게 하려면 이미지를 업로드하세요.', badHandle: '사용자 이름이나 URL을 확인하세요.',
-      contactEmpty: '연락처를 하나 이상 입력하세요.', badEmail: '이메일이 올바르지 않습니다.',
+      contactEmpty: '연락처를 하나 이상 입력하세요.', badEmail: '이메일이 올바르지 않습니다.', badWhatsapp: 'WhatsApp은 국가 번호를 포함한 전체 번호를 입력하세요. 예: +82 10 1234 5678', badPhone: '전화번호가 올바르지 않아요.',
       locationEmpty: '주소나 지도 링크를 입력하세요.', badMaps: '지도 링크가 올바르지 않습니다.', badCta: '버튼 URL이 올바르지 않습니다.',
     },
     summary: {

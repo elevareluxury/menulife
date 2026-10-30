@@ -1,6 +1,7 @@
 // Módulo "Escuchá en" (listen_on, V1.1): un link inteligente de música. Una canción o un disco con un botón por
 // plataforma. No se carga nada de terceros (ni reproductores ni íconos remotos): son links comunes.
 // Reglas puras (sin DOM): las usan el editor de Studio, la página pública y los tests.
+import { cleanLinkInput } from './safeUrl'
 
 export const LISTEN_PLATFORMS = [
   'spotify', 'apple_music', 'youtube_music', 'youtube', 'deezer', 'tidal', 'soundcloud', 'amazon_music',
@@ -43,7 +44,7 @@ export function isListenPlatform(v: unknown): v is ListenPlatform {
 
 /** https (o sin protocolo, se completa), sin usuario/contraseña y con algo después del dominio */
 function asUrl(raw: string): URL | null {
-  const v = raw.trim()
+  const v = cleanLinkInput(raw)
   if (!v || /\s/.test(v) || v.length > URL_MAX) return null
   const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(v) ? v : `https://${v}`
   try {

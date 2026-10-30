@@ -556,6 +556,17 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   marca la foto guardada que ya no carga (`StudioThumb`, `imageBroken`). Una HEIC que el navegador no convirtió no se
   sube. Pruebas con fotos reales: `tests/e2e/support/testImages.ts` (PNG de cualquier tamaño, transparente o rota),
   `imageStress.ts` y `images.spec.ts`; el mock sirve imágenes de verdad para el almacenamiento y `cdn.example.com`.
+- Links en los módulos (auditoría): una sola regla en `profile/lib/safeUrl.ts` valida en Studio y dibuja en la página.
+  `cleanLinkInput` saca comillas, `<…>`, el punto o coma final y lo pegado encima del "https://"; arregla "https//".
+  `safeHref` acepta un dominio suelto (también con letras de otros idiomas, puerto, `?` o `#`) y un email suelto
+  (→ `mailto:`), y rechaza lo que no abriría nada o engaña: dominio sin punto o con espacios, `usuario@sitio`,
+  `localhost`, `mailto:`/`tel:` vacíos. `withWebScheme` sirve para video y música (`youtube.com/watch…` sin https,
+  también music.youtube.com). WhatsApp necesita el código de país (`whatsappNeedsCountry`: con `+`/`00` o un link
+  wa.me alcanza con 8 dígitos; sin eso, 11): Contacto, Red social → WhatsApp y el onboarding lo piden con
+  `badWhatsapp`; el teléfono con `badPhone`. Red social: un link pegado en "Usuario" se usa tal cual y un usuario con
+  espacios se rechaza (`socialUrl`). Al salir de un campo de link (`urlOnBlur`), un email pasa a `mailto:`. Tests en
+  `safeUrl.test.ts`, `urlInput.test.ts` y `modules-create.spec.ts` (cada tipo de módulo creado desde Studio con links
+  pegados como vienen, publicado y con cada botón llevando al lugar correcto).
 - "Poné tu Mycen en todos lados": sólo botones de copiar (general y uno por plataforma con `?src=`), sin pasos por app.
 - Verificación de cuenta (antes V1.1, sumada antes del freeze): Studio → Ajustes → "Verificación" (`useVerification`,
   RPC `request_verification`: mensaje 10–1000, link https opcional, uno pendiente por vez, 3 cada 30 días) →

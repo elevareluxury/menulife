@@ -412,7 +412,7 @@ const fr: StudioDict = {
     },
     validation: {
       badUrl: 'L’URL n’est pas valide.', cardNeedsImage: 'Importez une image pour l’afficher en carte.', badHandle: 'Vérifiez le nom d’utilisateur ou l’URL.',
-      contactEmpty: 'Remplissez au moins une coordonnée.', badEmail: 'L’e-mail n’est pas valide.',
+      contactEmpty: 'Remplissez au moins une coordonnée.', badEmail: 'L’e-mail n’est pas valide.', badWhatsapp: 'Pour WhatsApp, saisissez le numéro complet avec l’indicatif du pays, par exemple +33 6 12 34 56 78.', badPhone: 'Le numéro de téléphone n’est pas valide.',
       locationEmpty: 'Remplissez l’adresse ou le lien Maps.', badMaps: 'Le lien Maps n’est pas valide.', badCta: 'L’URL du bouton n’est pas valide.',
     },
     summary: {

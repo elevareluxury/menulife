@@ -12,6 +12,7 @@ import type { Referral } from '@/lib/referral'
 import type { Claim } from '@/lib/claim'
 import { secondsSinceSignup, trackEvent } from '@/lib/productEvents'
 import { socialUrl } from '../lib/moduleCatalog'
+import { whatsappDigits, whatsappNeedsCountry } from '@/modules/profile/lib/safeUrl'
 import { toPublicProfile, publicBaseUrl } from '../lib/preview'
 import { normalizeUsername, usernameFromName, usernameMessage, useUsernameCheck } from '../lib/useUsernameCheck'
 import type { StudioModule, StudioProfile } from '../lib/studioTypes'
@@ -154,13 +155,16 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
     }
     if (step === 4) { setStep(5); return }
     if (step === 5 && profile) {
+      const ig = instagram.trim()
+      // Un número local o un usuario con espacios armaban un link que no abría nada: se pide corregirlo
+      if (whatsapp.trim() && (whatsappNeedsCountry(whatsapp) || !whatsappDigits(whatsapp))) { setError(t.catalog.validation.badWhatsapp); return }
+      if (ig && ig !== '@' && !socialUrl('instagram', ig)) { setError(t.catalog.validation.badHandle); return }
       setBusy(true)
       try {
-        const wa = whatsapp.replace(/\D/g, '')
-        const ig = instagram.trim()
+        const wa = whatsappDigits(whatsapp) ?? ''
         const created: StudioModule[] = []
         let primary = profile.primary_action
-        if (ig) {
+        if (ig && ig !== '@') {
           const url = socialUrl('instagram', ig)
           if (url) {
             created.push(await createModule({ profile_id: profile.id, type: 'social', title: 'Instagram',

@@ -412,7 +412,7 @@ const en: StudioDict = {
     },
     validation: {
       badUrl: 'The URL is not valid.', cardNeedsImage: 'Upload an image to show it as a card.', badHandle: 'Check the username or URL.',
-      contactEmpty: 'Fill in at least one contact detail.', badEmail: 'The email is not valid.',
+      contactEmpty: 'Fill in at least one contact detail.', badEmail: 'The email is not valid.', badWhatsapp: 'For WhatsApp, enter the full number with the country code, for example +1 415 555 0000.', badPhone: 'The phone number is not valid.',
       locationEmpty: 'Fill in the address or the Maps link.', badMaps: 'The Maps link is not valid.', badCta: 'The button URL is not valid.',
     },
     summary: {

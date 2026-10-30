@@ -1,6 +1,7 @@
 // Módulo "Apoyame" (support, V1.1): la persona muestra cómo apoyarla o pagarle. Mycen nunca procesa pagos ni cobra
 // montos: los links llevan a la cuenta de la persona en cada plataforma y el alias o la clave Pix se copian.
 // Reglas puras (sin DOM): las usan el editor de Studio, la página pública y los tests.
+import { cleanLinkInput } from './safeUrl'
 
 export const SUPPORT_KINDS = ['mercadopago', 'paypal', 'kofi', 'buymeacoffee', 'pix', 'alias', 'link'] as const
 export type SupportKind = typeof SUPPORT_KINDS[number]
@@ -53,7 +54,7 @@ const CONTROL = /[\u0000-\u001f\u007f]/
 
 /** Lee un link: https (o sin protocolo, se completa), sin usuario/contraseña. null si no sirve. */
 function asHttpsUrl(raw: string): URL | null {
-  const v = raw.trim()
+  const v = cleanLinkInput(raw)
   if (!v || /\s/.test(v) || v.length > SUPPORT_URL_MAX) return null
   const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(v) ? v : `https://${v}`
   try {

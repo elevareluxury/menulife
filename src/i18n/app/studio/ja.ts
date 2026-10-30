@@ -412,7 +412,7 @@ const ja: StudioDict = {
     },
     validation: {
       badUrl: 'URL が正しくありません。', cardNeedsImage: 'カード表示にするには画像をアップロードしてください。', badHandle: 'ユーザー名か URL を確認してください。',
-      contactEmpty: '連絡先を 1 つ以上入力してください。', badEmail: 'メールアドレスが正しくありません。',
+      contactEmpty: '連絡先を 1 つ以上入力してください。', badEmail: 'メールアドレスが正しくありません。', badWhatsapp: 'WhatsApp は国番号付きの番号を入力してください（例：+81 90 1234 5678）。', badPhone: '電話番号が正しくありません。',
       locationEmpty: '住所かマップのリンクを入力してください。', badMaps: 'マップのリンクが正しくありません。', badCta: 'ボタンの URL が正しくありません。',
     },
     summary: {

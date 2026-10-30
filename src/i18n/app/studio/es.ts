@@ -603,6 +603,8 @@ const es = {
       badHandle: 'Revisá el usuario o la URL.',
       contactEmpty: 'Completá al menos un dato de contacto.',
       badEmail: 'El email no es válido.',
+      badWhatsapp: 'Para WhatsApp poné el número completo con el código de país, por ejemplo +54 9 341 555 0000.',
+      badPhone: 'El teléfono no es válido.',
       locationEmpty: 'Completá la dirección o el link de Maps.',
       badMaps: 'El link de Maps no es válido.',
       badCta: 'La URL del botón no es válida.',

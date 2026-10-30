@@ -1,5 +1,6 @@
 // Video embebido (P6): sólo YouTube y Vimeo, a partir del link que pega el dueño.
 // Nunca se usa la URL tal cual como src del iframe: se arma desde el id validado.
+import { withWebScheme } from './safeUrl'
 
 export interface VideoEmbed {
   provider: 'youtube' | 'vimeo'
@@ -12,12 +13,12 @@ export function parseVideoUrl(raw: unknown): VideoEmbed | null {
   if (typeof raw !== 'string') return null
   let url: URL
   try {
-    url = new URL(raw.trim())
+    url = new URL(withWebScheme(raw))
   } catch {
     return null
   }
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
-  const host = url.hostname.replace(/^www\.|^m\./, '')
+  const host = url.hostname.replace(/^www\.|^m\.|^music\./, '')
 
   let yt: string | null = null
   if (host === 'youtu.be') yt = url.pathname.slice(1).split('/')[0]

@@ -412,7 +412,7 @@ const hi: StudioDict = {
     },
     validation: {
       badUrl: 'URL मान्य नहीं है।', cardNeedsImage: 'कार्ड की तरह दिखाने के लिए इमेज अपलोड करें।', badHandle: 'यूज़रनेम या URL जाँचें।',
-      contactEmpty: 'कम से कम एक संपर्क जानकारी भरें।', badEmail: 'ईमेल मान्य नहीं है।',
+      contactEmpty: 'कम से कम एक संपर्क जानकारी भरें।', badEmail: 'ईमेल मान्य नहीं है।', badWhatsapp: 'WhatsApp के लिए देश कोड के साथ पूरा नंबर लिखें, जैसे +91 98765 43210।', badPhone: 'फ़ोन नंबर सही नहीं है।',
       locationEmpty: 'पता या Maps लिंक भरें।', badMaps: 'Maps लिंक मान्य नहीं है।', badCta: 'बटन का URL मान्य नहीं है।',
     },
     summary: {

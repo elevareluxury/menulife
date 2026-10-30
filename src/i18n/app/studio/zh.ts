@@ -412,7 +412,7 @@ const zh: StudioDict = {
     },
     validation: {
       badUrl: '链接无效。', cardNeedsImage: '要以卡片形式显示，请上传图片。', badHandle: '请检查用户名或链接。',
-      contactEmpty: '请至少填写一种联系方式。', badEmail: '邮箱无效。',
+      contactEmpty: '请至少填写一种联系方式。', badEmail: '邮箱无效。', badWhatsapp: 'WhatsApp 请填写带国家代码的完整号码，例如 +86 138 0013 8000。', badPhone: '电话号码无效。',
       locationEmpty: '请填写地址或地图链接。', badMaps: '地图链接无效。', badCta: '按钮链接无效。',
     },
     summary: {
