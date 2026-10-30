@@ -3,6 +3,7 @@ import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
 import { authErrorMessage } from '@/lib/authErrors'
 import type { Referral } from '@/lib/referral'
+import type { Claim } from '@/lib/claim'
 import { oauthProviders, startOAuthSignIn } from '@/modules/auth/lib/googleSignIn'
 
 // Logo de Google con sus colores oficiales (lo piden sus pautas de marca para el botón de acceso)
@@ -31,7 +32,7 @@ function AppleLogo() {
  * de los Términos y la Privacidad la pide Mycen. En el registro (`accepted` = la casilla del formulario) no se va a Google
  * sin tildarla. En el login no se pide: quien ya tiene cuenta entra directo y una cuenta nueva acepta en `/auth/terms`.
  */
-export function GoogleButton({ referral = null, accepted }: { referral?: Referral | null; accepted?: boolean }) {
+export function GoogleButton({ referral = null, claim = null, accepted }: { referral?: Referral | null; claim?: Claim | null; accepted?: boolean }) {
   const t = useAuthT()
   const g = t.google
   const r = t.register
@@ -47,7 +48,7 @@ export function GoogleButton({ referral = null, accepted }: { referral?: Referra
     setLoading(provider)
     try {
       // Si sale bien, el navegador se va a Google o Apple; no hace falta apagar "loading"
-      await startOAuthSignIn(provider, useAppLang.getState().lang, referral, signup)
+      await startOAuthSignIn(provider, useAppLang.getState().lang, referral, signup, claim)
     } catch (err: unknown) {
       setError(authErrorMessage(err, t.errors, provider === 'apple' ? a.failed : g.failed))
       setLoading(null)

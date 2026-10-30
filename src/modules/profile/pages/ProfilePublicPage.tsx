@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { publicRpc } from '@/lib/publicRpc'
 import { isSystemUsername } from '@/lib/reservedUsernames'
 import { fetchPublicProfile, trackProfileEvent } from '../lib/profileApi'
 import { tr, ui } from '../lib/profileI18n'
@@ -11,6 +12,9 @@ import { firstScreenImages, preloadImages } from '../lib/profilePrefetch'
 import { ProfileView } from '../components/ProfileView'
 import { preloadProfileView } from '../components/profileLayouts'
 import '../profile.css'
+
+// El campo "Elegí tu nombre" sólo se baja cuando hace falta (no pesa en un perfil que existe)
+const FreeName = lazy(() => import('@/components/claim/FreeName').then(m => ({ default: m.FreeName })))
 
 type LoadState = { kind: 'loading' } | { kind: 'error' } | ProfileLookup
 
@@ -108,6 +112,8 @@ export function ProfilePublicPage() {
   const t = ui(lang)
 
   if (state.kind === 'loading') return <ProfileSkeleton look={look} />
+  // Una dirección principal sin perfil: si el nombre está libre, se ofrece ("mycen.id/juan está libre")
+  if (state.kind === 'not_found' && !space) return <FreeNameOrMissing slug={slug} look={look} lang={lang} />
   if (state.kind !== 'found' || !profile) {
     const copy = state.kind === 'unavailable'
       ? { title: t.unavailableTitle, text: t.unavailableText }
@@ -132,6 +138,37 @@ export function ProfilePublicPage() {
       profile={profile} lang={lang} onLang={changeLang}
       onToast={showToast} toast={toast}
     />
+  )
+}
+
+/** Perfil que no existe: si el nombre está libre, la invitación a tomarlo con el campo ya completo; si no (reservado,
+ *  de un perfil sin publicar o de un nombre viejo), el aviso de siempre. Mientras consulta, el esqueleto. */
+function FreeNameOrMissing({ slug, look, lang }: { slug: string; look: ProfileLook; lang: ProfileLang }) {
+  const [free, setFree] = useState<{ slug: string; free: boolean } | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void publicRpc<string>('check_username', { p_username: slug.toLowerCase() })
+      .then(r => { if (!cancelled) setFree({ slug, free: r.data === 'available' }) })
+    return () => { cancelled = true }
+  }, [slug])
+  const t = ui(lang)
+  if (free?.slug !== slug) return <ProfileSkeleton look={look} />
+  return (
+    <main className="mp-root my-profile" {...lookAttrs(look)}>
+      <div className="mp-state">
+        {free.free ? (
+          <Suspense fallback={null}>
+            <FreeName slug={slug.toLowerCase()} theme={look.mode} accent={look.accent} lang={lang} />
+          </Suspense>
+        ) : (
+          <>
+            <h1>{t.notFoundTitle}</h1>
+            <p>{t.notFoundText}</p>
+            <Link className="mp-primary" style={{ width: 'auto' }} to="/register">{t.createYours}</Link>
+          </>
+        )}
+      </div>
+    </main>
   )
 }
 

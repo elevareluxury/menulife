@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLandingT } from '@/i18n/app/landing'
 import { useSiteFlags } from '@/lib/siteFlags'
-import { ShimmerButton } from './Navbar'
+import { ClaimName } from '@/components/claim/ClaimName'
 
 import { reducedMotion } from './motion'
 import { SplitText } from './SplitText'
@@ -83,12 +83,9 @@ export function FinalCTA() {
           {business ? t.subtitle : t.subtitlePersonal}
         </p>
 
-        <div data-cta-btns style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
-          <Link to="/register" style={{ textDecoration: 'none' }}>
-            <ShimmerButton magnetic style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '50px' }}>
-              {t.primary}
-            </ShimmerButton>
-          </Link>
+        <div data-cta-btns style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+          {/* "Elegí tu nombre": el cierre lleva al registro con la dirección ya elegida */}
+          <ClaimName from="cierre" />
           <Link to="/login" data-magnetic className="liquid-glass-btn-ghost" style={{
             display: 'inline-block',
             padding: '16px 36px',

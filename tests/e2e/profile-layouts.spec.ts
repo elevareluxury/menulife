@@ -46,9 +46,9 @@ for (const layout of LAYOUTS) {
     // La huella es decorativa
     await expect(page.locator('svg[aria-hidden="true"] linearGradient').first()).toBeAttached()
 
-    // Pie "mycen · Creá tu identidad"
+    // Pie "mycen · Creá tu identidad" (abre "Elegí tu nombre")
     const footer = page.locator('footer.mp-footer')
-    await expect(footer.getByRole('link', { name: 'Creá tu identidad' })).toHaveAttribute('href', /^\/register\?ref=/)
+    await expect(footer.getByRole('button', { name: 'Creá tu identidad' })).toHaveAttribute('aria-expanded', 'false')
 
     // Sin contenedores con scroll interno (atrapan el gesto en iOS)
     const traps = await page.evaluate(() => [...document.querySelectorAll('main *')].filter(el => {

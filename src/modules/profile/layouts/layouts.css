@@ -30,6 +30,13 @@
 
 .my-profile .mp-footer { text-align: center; color: var(--my-muted); font-size: var(--my-fs-small); padding: 36px 0 12px; }
 .my-profile .mp-footer a { color: var(--my-text); }
+/* "Creá tu identidad": se ve como el link de siempre y abre el campo "Elegí tu nombre" debajo */
+.my-profile .mp-footer-claim {
+  border: 0; background: none; padding: 0 4px; min-height: 44px; display: inline-flex; align-items: center; vertical-align: middle;
+  color: var(--my-text); font: inherit; font-weight: 600; cursor: pointer;
+}
+.my-profile .mp-footer-claim:focus-visible { outline: 2px solid var(--my-text); outline-offset: 3px; border-radius: 4px; }
+.my-profile .mp-footer-claim-box { max-width: 420px; margin: 20px auto 8px; }
 
 /* ── Clásica: foto con la huella orbitando ───────────────────── */
 .mp-cl-orbit { position: relative; width: 176px; height: 176px; margin: 0 auto 12px; }

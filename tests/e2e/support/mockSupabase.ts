@@ -1,6 +1,7 @@
 import type { BrowserContext, Route } from '@playwright/test'
 import { isModuleLive } from '../../../src/modules/profile/lib/moduleSchedule'
 import { PUBLIC_RESTAURANT_COLUMNS } from '../../../src/modules/public/lib/publicRestaurant'
+import { isReservedUsername } from '../../../src/lib/reservedUsernames'
 
 // Supabase simulado para los E2E: PostgREST en memoria (filtros básicos) + las RPC públicas de
 // Identity con la misma lógica que la base (supabase/migrations/20261001000001… a 20261012000001…).
@@ -910,6 +911,7 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
     case 'check_username': {
       const u = String(args.p_username ?? '')
       if (!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(u)) return 'invalid'
+      if (isReservedUsername(u)) return 'reserved'
       return state.tables.profiles.some(x => x.username === u) ? 'taken' : 'available'
     }
     default: return null

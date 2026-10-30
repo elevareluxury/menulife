@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react'
 import { isReservedUsername } from '@/lib/reservedUsernames'
+import { normalizeUsername, validUsername } from '@/lib/username'
 import { checkUsername, type UsernameCheck } from './studioApi'
 import type { StudioDict } from '@/i18n/app/studio'
 
+export { normalizeUsername }
+
 export type UsernameStatus = UsernameCheck | 'idle' | 'checking' | 'same' | 'error'
-
-const FORMAT = /^[a-z0-9](?:[a-z0-9-]{1,28})[a-z0-9]$/
-
-export function normalizeUsername(raw: string): string {
-  return raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-').replace(/^-+/, '').slice(0, 30)
-}
 
 /** Un mail escrito donde va el nombre (pasa en el registro): nunca debe terminar público en el perfil ni en su dirección. */
 export function looksLikeEmail(s: string): boolean {
@@ -29,7 +25,7 @@ export function useUsernameCheck(value: string, current?: string): UsernameStatu
   const local: UsernameStatus | null =
     !value ? 'idle'
       : value === current ? 'same'
-        : !FORMAT.test(value) || value.includes('--') ? 'invalid'
+        : !validUsername(value) ? 'invalid'
           : isReservedUsername(value) ? 'reserved'
             : null
 

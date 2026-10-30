@@ -109,6 +109,5 @@
   - link "mycen":
     - /url: /
   - text: ·
-  - link "Creá tu identidad":
-    - /url: /register?ref=ana&tipo=professional
+  - button "Creá tu identidad"
   - button "Denunciar"

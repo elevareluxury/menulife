@@ -1,5 +1,5 @@
 import { shareLink } from '@/lib/nativeFiles'
-import { Suspense, useMemo, useRef } from 'react'
+import { lazy, Suspense, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BadgeCheck, Calendar, Globe, Share2, UserPlus } from 'lucide-react'
 import { huellaSeed } from '@/lib/huella'
@@ -25,6 +25,9 @@ import '../profile.css'
 import '../layouts/layouts.css'
 import '../profile-motion.css'
 import { webOrigin } from '@/lib/platform'
+
+// "Elegí tu nombre" del pie: se baja sólo si alguien toca "Creá tu identidad"
+const ClaimName = lazy(() => import('@/components/claim/ClaimName').then(m => ({ default: m.ClaimName })))
 
 /** Bloques a dibujar: los tipos con `Group` (ej.: redes) se juntan si son consecutivos. */
 type Block =
@@ -256,7 +259,9 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
         </ProfileModuleContext.Provider>
 
         <footer className="mp-footer">
-          <Link to="/" className="mp-footer-brand">mycen</Link> · <Link to={signupLink(handle, profile.purpose)}>{t.createIdentity}</Link>
+          <Link to="/" className="mp-footer-brand">mycen</Link> · {preview
+            ? <Link to={signupLink(handle, profile.purpose)}>{t.createIdentity}</Link>
+            : <FooterClaim label={t.createIdentity} handle={handle} purpose={profile.purpose} look={look} lang={lang} />}
           {!preview && !profile.is_owner && profile.status === 'published' && (
             <div><ReportButton username={profileHandle(profile)} lang={lang} /></div>
           )}
@@ -265,5 +270,28 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
 
       {toast && <div className="mp-toast" role="status">{toast}</div>}
     </main>
+  )
+}
+
+/** Pie del perfil: "Creá tu identidad" abre el campo para elegir el nombre; el registro sigue atribuido a este perfil. */
+function FooterClaim({ label, handle, purpose, look, lang }: {
+  label: string
+  handle: string
+  purpose: string | null | undefined
+  look: ReturnType<typeof profileLook>
+  lang: ProfileLang
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button type="button" className="mp-footer-claim" aria-expanded={open} onClick={() => setOpen(o => !o)}>{label}</button>
+      {open && (
+        <div className="mp-footer-claim-box">
+          <Suspense fallback={null}>
+            <ClaimName from="pie" referral={{ ref: handle, purpose: purpose ?? null }} theme={look.mode} accent={look.accent} lang={lang} compact />
+          </Suspense>
+        </div>
+      )}
+    </>
   )
 }
