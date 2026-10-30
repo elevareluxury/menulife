@@ -63,8 +63,10 @@ test('portada: la tapa ocupa la primera pantalla y avisa que hay más abajo', as
   const state = createState({ profiles: [profile({ layout: 'portada', mode: 'amanecer', accent: 'ion' })], profile_modules: rows() })
   await installSupabaseMock(context, state)
   await page.goto('/ana')
+  // Sólo la flecha: el texto "Más sobre mí" ya no se ve, queda como nombre accesible
   const more = page.getByRole('link', { name: /Más sobre mí/ })
   await expect(more).toBeInViewport()
+  await expect(more).toHaveText('')
   const hero = await page.locator('.mp-cover-hero').boundingBox()
   expect(hero!.height).toBeGreaterThan(page.viewportSize()!.height * 0.8)
   await more.click()
@@ -84,6 +86,8 @@ test('portada con foto: la foto cubre toda la tapa (sin franja vacía arriba)', 
     const img = page.locator('.mp-cover-art img')
     await expect(img).toBeVisible()
     await expect.poll(() => img.evaluate(el => (el as HTMLImageElement).complete)).toBe(true)
+    // La tapa entra con una escala suave: se mide cuando terminó (el lugar final es lo que importa)
+    await page.locator('.mp-cover-art').evaluate(el => Promise.all(el.getAnimations().map(a => a.finished)))
     const hero = (await page.locator('.mp-cover-hero').boundingBox())!
     const box = (await img.boundingBox())!
     expect(Math.abs(box.y - hero.y)).toBeLessThan(1)

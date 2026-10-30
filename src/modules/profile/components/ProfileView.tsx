@@ -23,6 +23,7 @@ import '@/design/motion.css'
 import '@/design/components/design.css'
 import '../profile.css'
 import '../layouts/layouts.css'
+import '../profile-motion.css'
 import { webOrigin } from '@/lib/platform'
 
 /** Bloques a dibujar: los tipos con `Group` (ej.: redes) se juntan si son consecutivos. */
@@ -144,7 +145,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   ) : null
   const statusText = profile.status_text?.trim()
   const chips = (statusText || profile.available || open != null) ? (
-    <ul className="mp-chips">
+    <ul className="mp-chips mp-in">
       {statusText && <li className="my-chip"><span className="my-status-dot my-pulse" aria-hidden="true" />{statusText}</li>}
       {profile.available && <li className="my-chip mp-chip-available"><span className="my-status-dot my-pulse" aria-hidden="true" />{t.available}</li>}
       {open != null && (
@@ -211,7 +212,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
     hasAvatar: !!avatarSrc,
     coverUrl: coverSrc,
     tags: profile.tags?.length ? (
-      <ul className="mp-tags" aria-label={t.tags}>
+      <ul className="mp-tags mp-in" aria-label={t.tags}>
         {profile.tags.map(tag => <li key={tag}>{tag}</li>)}
       </ul>
     ) : null,
@@ -227,7 +228,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   }
 
   return (
-    <main className={`mp-root my-profile mp-layout-${look.layout}`} data-mycen-theme={look.mode} data-mycen-tone={look.tone} data-mycen-accent={look.accent}
+    <main className={`mp-root my-profile mp-layout-${look.layout}`} data-motion={preview ? 'calm' : 'full'} data-mycen-theme={look.mode} data-mycen-tone={look.tone} data-mycen-accent={look.accent}
       style={lookVars(look)} lang={lang} dir={langDir(lang)}>
       {profile.status !== 'published' && <div className="mp-banner" role="status">{t.draftBanner}</div>}
 
