@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useMarkActive } from '@/lib/activity'
 import { MotionConfig } from 'framer-motion'
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
@@ -39,6 +40,8 @@ export function LifeShell() {
   useTaskReminders(user?.id)
   useHabitReminders(user?.id)
   useReminderOpened(user?.id)
+  // "Usé Mycen hoy" para el panel → Crecimiento (una vez por día; sin contenido)
+  useMarkActive(user?.id, 'life')
   // Service worker para los avisos (en el celular sólo salen desde ahí): instalada en el inicio o con avisos permitidos.
   // Con avisos permitidos, el dispositivo queda suscrito para recibirlos con la app cerrada (Web Push)
   useEffect(() => {

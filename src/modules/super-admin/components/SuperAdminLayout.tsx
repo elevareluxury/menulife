@@ -1,6 +1,6 @@
 import { useId, useMemo, useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote, MoreHorizontal, X, Flag, Bug, TrendingUp, BadgeCheck, Users, History, ChevronDown, HeartPulse } from 'lucide-react'
+import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote, MoreHorizontal, X, Flag, Bug, TrendingUp, BadgeCheck, Users, History, ChevronDown, HeartPulse, Rocket } from 'lucide-react'
 import { brandMarkSvg } from '@/lib/brandMark'
 import { useSiteFlags } from '@/lib/siteFlags'
 import { usePendingCounts, type PendingCounts } from '../lib/adminRpc'
@@ -23,6 +23,7 @@ type NavItem = { label: (t: AdminDict) => string; icon: typeof Store; to: string
 const mycenItems: NavItem[] = [
   { label: t => t.nav.overview,      icon: LayoutDashboard,    to: '/super-admin',                end: true  },
   { label: t => t.nav.status,        icon: HeartPulse,         to: '/super-admin/estado',         end: false },
+  { label: t => t.nav.growth,        icon: Rocket,             to: '/super-admin/crecimiento',    end: false },
   { label: t => t.shell.people,      icon: Users,              to: '/super-admin/personas',       end: false },
   { label: t => t.nav.reports,       icon: Flag,               to: '/super-admin/denuncias',      end: false, badge: 'reports' },
   { label: t => t.nav.verifications, icon: BadgeCheck,         to: '/super-admin/verificaciones', end: false, badge: 'verifications' },

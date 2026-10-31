@@ -664,6 +664,20 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `admin_set_status_setting` (queda en la actividad). Se revisa sola cada minuto con la pestaña visible. Migración
   `20261115000001_admin_system_status.sql` (también la serie de `admin_overview` en una pasada + índices por fecha),
   tests en `admin_status.test.sql`, `health.test.ts` y `admin-status.spec.ts`.
+- Crecimiento (panel del equipo, después del Estado): `/super-admin/crecimiento` (`CrecimientoTab`, 3.º del menú de
+  Mycen). "Usé Mycen hoy": `useMarkActive` (`src/lib/activity.ts`, en `LifeShell` y `StudioShell`) llama una vez por
+  día UTC y zona a `mycen_mark_active(area, platform, lang, tz)` → `user_activity_days` (una fila por persona y día;
+  plataforma web|pwa|ios|android, idioma de la app, zona horaria del dispositivo; nunca IP ni contenido; nadie lee la
+  tabla; la migración la llena hacia atrás con fechas reales de eventos, Brain, hábitos, movimientos, diario y cierres).
+  RPC: `admin_growth_overview(días)` (DAU/WAU/MAU, stickiness, serie diaria y mensual, crecimiento contra el período
+  anterior, ciclo de vida de la semana, plataforma/idioma/región/ciudad, Life OS vs Studio, visitas a perfiles),
+  `admin_growth_retention()` (12 cohortes semanales × 12 semanas, las que no pasaron = null),
+  `admin_growth_funnel(días)` (registro → onboarding → publicó → compartió → primera visita → primer mensaje, "volvió"
+  aparte; referidos y factor K; fuentes de visitas y de registro) y `admin_growth_adoption(días)` (módulos,
+  estructuras y tema de los perfiles publicados, partes de Life OS, perfiles más visitados). Cuentas puras en
+  `super-admin/lib/growth.ts` (`change`/`pct` sin base = null, `funnelRows` marca la caída más grande, `toCsv`); cada
+  tabla se exporta a CSV. Privacidad ("Uso de la app", 12 idiomas). Migración `20261116000001_admin_growth.sql`, tests
+  en `admin_growth.test.sql`, `growth.test.ts` y `admin-growth.spec.ts`.
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,
