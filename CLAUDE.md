@@ -567,6 +567,15 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   espacios se rechaza (`socialUrl`). Al salir de un campo de link (`urlOnBlur`), un email pasa a `mailto:`. Tests en
   `safeUrl.test.ts`, `urlInput.test.ts` y `modules-create.spec.ts` (cada tipo de módulo creado desde Studio con links
   pegados como vienen, publicado y con cada botón llevando al lugar correcto).
+- Supabase → Advisors (auditoría de lanzamiento, `20261114000001_advisor_hardening.sql`, tests en
+  `advisor_hardening.test.sql`): las vistas `view_*` de Business pasan a `security_invoker` y sin lectura anónima; toda
+  función propia lleva `set search_path = public, extensions, pg_temp`; triggers sin EXECUTE para nadie y `admin_*` sólo
+  para `authenticated` (Supabase da EXECUTE a `anon` por defecto: una función del panel nueva necesita
+  `revoke … from public, anon`); buckets públicos de Business sin listado (`business_media_owner_select`); las políticas
+  usan `(select auth.uid())` (se calcula una vez por consulta). Política nueva: escribirla ya con `(select auth.uid())`.
+  Lo que queda en el panel de Supabase: "Leaked password protection" (Auth → Providers → Email) y `pg_trgm` en public.
+- Movimiento del perfil: las entradas arrancan con opacidad 0,01 (no 0): Chrome no cuenta como visible (LCP) un
+  elemento en 0 hasta que termina la animación (con 0, el LCP real del perfil era 2,3 s; con 0,01, 0,6 s).
 - "Poné tu Mycen en todos lados": sólo botones de copiar (general y uno por plataforma con `?src=`), sin pasos por app.
 - Verificación de cuenta (antes V1.1, sumada antes del freeze): Studio → Ajustes → "Verificación" (`useVerification`,
   RPC `request_verification`: mensaje 10–1000, link https opcional, uno pendiente por vez, 3 cada 30 días) →

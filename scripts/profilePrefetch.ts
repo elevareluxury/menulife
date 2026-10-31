@@ -11,7 +11,8 @@ import { IMAGE_QUALITY, IMAGE_SIZES, IMAGE_WIDTHS, MEDIA_PATH, imageCdnOn, image
 // - se piden los datos (`get_public_profile`); la página los toma con `takePrefetchedProfile`
 //   (src/modules/profile/lib/profilePrefetch.ts) si son del mismo handle; si no hay o falló, hace el pedido de siempre.
 //   Sólo sin sesión guardada (con sesión, la RPC distingue al dueño y va con su token: pedido normal);
-// - en el build, se precargan el JS y el CSS de ProfilePublicPage y la fuente del nombre (Unbounded 700), y cuando
+// - en el build, se precargan el JS y el CSS de ProfilePublicPage, la fuente del nombre (Unbounded 700) y la del texto
+//   (Geist 400 y 500), y cuando
 //   llegan los datos, la estructura, los módulos con chunk propio y las imágenes de la primera pantalla (las mismas
 //   que `firstScreenImages`, con el mismo `srcset` que va a elegir el `<img>`).
 // Las rutas de la app tienen el nombre reservado (`SYSTEM_USERNAMES`), así que no disparan nada.
@@ -21,6 +22,8 @@ const PROFILE_PAGE = /[\\/]pages[\\/]ProfilePublicPage\.tsx$/
 const LAYOUT_FILE = /[\\/]layouts[\\/](\w+)\.tsx$/
 const MODULE_FILE = /[\\/]components[\\/](\w+Module)\.tsx$/
 const TITLE_FONT = /unbounded-latin-700-normal-[\w-]+\.woff2$/
+// Texto del perfil (Geist 400 y 500): sin esto se pedían recién al dibujar la página (la 300 y 600 las precarga el hero)
+const BODY_FONT = /geist-latin-(400|500)-normal-[\w-]+\.woff2$/
 
 /** [rel, href, as] de un `<link>` */
 type Link = [string, string, string]
@@ -59,7 +62,7 @@ function profileAssets(bundle: Rollup.OutputBundle, root: string): ProfileAssets
   if (!pageChunk) return { page: [], layouts: {}, types: {} }
   const page = links(pageChunk)
   page.forEach(l => known.add(l[1].slice(1)))
-  page.push(...Object.keys(bundle).filter(f => TITLE_FONT.test(f)).map((f): Link => ['preload', `/${f}`, 'font']))
+  page.push(...Object.keys(bundle).filter(f => TITLE_FONT.test(f) || BODY_FONT.test(f)).map((f): Link => ['preload', `/${f}`, 'font']))
 
   const layouts = Object.fromEntries(profileChunk(LAYOUT_FILE).map(c => [LAYOUT_FILE.exec(c.facadeModuleId!)![1].toLowerCase(), links(c)]))
   // Un módulo puede quedar en un chunk compartido (sin facade): se busca el chunk que lo contiene
@@ -118,15 +121,15 @@ export function profilePrefetchPlugin(): Plugin {
   return {
     name: 'mycen-profile-prefetch',
     configResolved(config) { env = config.env; root = config.root },
-    transformIndexHtml(_html, ctx) {
+    transformIndexHtml(html, ctx) {
       const url = env.VITE_SUPABASE_URL, key = env.VITE_SUPABASE_ANON_KEY
-      if (!url || !key) return []
+      if (!url || !key) return html
       const assets = ctx.bundle ? profileAssets(ctx.bundle, root) : { page: [], layouts: {}, types: {} }
-      // Primero los datos y después el script que los lee
-      return [
-        { tag: 'script', attrs: { type: 'application/json', id: DATA_ID }, children: data(url, key, assets), injectTo: 'head-prepend' },
-        { tag: 'script', children: PROFILE_PREFETCH_SCRIPT, injectTo: 'head-prepend' },
-      ]
+      // Primero los datos y después el script que los lee, apenas después del charset (tiene que estar en los primeros
+      // 1024 bytes del HTML: antes iba debajo de este bloque) y antes que todo lo demás
+      const charset = /<meta charset="[^"]+"\s*\/?>/i
+      const blocks = `<script type="application/json" id="${DATA_ID}">${data(url, key, assets)}</script>\n    <script>${PROFILE_PREFETCH_SCRIPT}</script>`
+      return charset.test(html) ? html.replace(charset, m => `${m}\n    ${blocks}`) : html.replace('<head>', `<head>\n    ${blocks}`)
     },
   }
 }
