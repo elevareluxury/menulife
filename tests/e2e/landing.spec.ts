@@ -20,6 +20,10 @@ test('?lang=en muestra la landing en inglés, con título, idioma y hreflang', a
   await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', 'https://mycen.id/')
   await expect(page.locator('link[hreflang="ja"]')).toHaveAttribute('href', 'https://mycen.id/?lang=ja')
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://mycen.id/?lang=en')
+  // Datos para buscadores (schema.org) en el idioma activo
+  const ld = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? '[]') as Array<Record<string, unknown>>
+  expect(ld.map(x => x['@type'])).toEqual(['Organization', 'WebSite'])
+  expect(ld[1]).toMatchObject({ url: 'https://mycen.id/?lang=en', inLanguage: 'en', description: expect.stringMatching(/Create your digital identity/) })
 
   // Pie con los legales y preguntas frecuentes con su ancla
   await expect(page.getByRole('link', { name: 'Terms' })).toHaveAttribute('href', '/terminos')

@@ -2,9 +2,13 @@
 // public_sitemap: Spaces publicados y públicos (no los "no listados" ni privados, ni suspendidos) y sus proyectos.
 // vercel.json manda /sitemap.xml acá. Si la base no responde, igual devuelve las páginas fijas.
 
+import { APP_LANGS } from '../src/i18n/app/languages'
+
 export const config = { runtime: 'edge' }
 
 const STATIC_PATHS = ['/', '/terminos', '/privacidad', '/soporte', '/eliminar-cuenta']
+/** La landing en cada idioma (`?lang=xx`, el español sin parámetro): la misma regla que `landingUrl` */
+const landingPath = (lang: string) => (lang === 'es' ? '/' : `/?lang=${lang}`)
 /** Límite de URLs por sitemap (protocolo sitemaps.org) */
 const MAX_URLS = 50000
 
@@ -22,11 +26,15 @@ export function buildSitemap(origin: string, rows: Row[]): string {
     ...STATIC_PATHS.map(path => ({ path, lastmod: null as string | null })),
     ...rows.filter(r => SAFE_PATH.test(r.path)),
   ].slice(0, MAX_URLS)
-  const body = urls.map(u => {
+  // La landing en los 12 idiomas, cada una con sus versiones (hreflang) para que el buscador muestre la de cada país
+  const alternates = [...APP_LANGS.map(l => [l, landingPath(l)]), ['x-default', '/']]
+    .map(([l, path]) => `<xhtml:link rel="alternate" hreflang="${l}" href="${xmlEscape(origin + path)}"/>`).join('')
+  const landing = APP_LANGS.map(l => `<url><loc>${xmlEscape(origin + landingPath(l))}</loc>${alternates}</url>`)
+  const body = [...landing, ...urls.filter(u => u.path !== '/').map(u => {
     const lastmod = u.lastmod && !Number.isNaN(Date.parse(u.lastmod)) ? `<lastmod>${new Date(u.lastmod).toISOString()}</lastmod>` : ''
     return `<url><loc>${xmlEscape(origin + u.path)}</loc>${lastmod}</url>`
-  }).join('\n')
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`
+  })].join('\n')
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${body}\n</urlset>\n`
 }
 
 export default async function handler(req: Request): Promise<Response> {
@@ -42,7 +50,7 @@ export default async function handler(req: Request): Promise<Response> {
       const res = await fetch(`${supabaseUrl}/rest/v1/rpc/public_sitemap`, {
         method: 'POST',
         headers: { apikey: anonKey, authorization: `Bearer ${anonKey}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ p_offset: 0, p_limit: MAX_URLS - STATIC_PATHS.length }),
+        body: JSON.stringify({ p_offset: 0, p_limit: MAX_URLS - STATIC_PATHS.length - APP_LANGS.length }),
       })
       if (res.ok) rows = ((await res.json()) as Row[] | null) ?? []
     } catch { /* sin base: sólo las páginas fijas */ }

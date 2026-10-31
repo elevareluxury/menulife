@@ -1,0 +1,6 @@
+# Para avisar de un problema de seguridad en Mycen (RFC 9116). Respondemos en español o inglés.
+Contact: mailto:team@mycen.id
+Expires: 2027-10-31T00:00:00.000Z
+Preferred-Languages: es, en
+Canonical: https://mycen.id/.well-known/security.txt
+Policy: https://mycen.id/soporte

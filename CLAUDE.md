@@ -156,6 +156,12 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   las rutas privadas terminan en `/` o `$` para no bloquear usernames que empiezan igual (lo verifica `tests/unit/sitemap.test.ts`).
 - El HTML para buscadores (`api/og.ts`) declara `<html lang>` con el `default_locale` del perfil.
 
+- Salida de la web: guía del dueño en `docs/lanzamiento/salida-web.md` (planes, Auth, Resend, Google, Turnstile, Search
+  Console, monitor, DNS, 2FA, prueba final). `/sitemap.xml` lista la landing en los 12 idiomas con `xhtml:link`
+  (hreflang) además de las páginas fijas y lo público; la landing agrega JSON-LD (`Organization` + `WebSite`) desde
+  `useLandingLocale`. `/api/health` (Edge, sin caché): 200 si responde `get_site_flags`, 503 si no (lo mira el monitor
+  externo; tests en `health.test.ts`). `public/.well-known/security.txt` (contacto de seguridad, vence cada año).
+
 ## Seguridad
 - CSP en `vercel.json` (regla `/(.*)`): `script-src 'self'` + un `'sha256-…'` por cada `<script>` en línea de `index.html`
   (datos del perfil desde el HTML, esqueleto del hero y pantalla de carga). Lo que cambia (textos, Supabase, archivos del
