@@ -2,7 +2,8 @@ import { useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
-import { authErrorMessage } from '@/lib/authErrors'
+import { authErrorMessage, authFailureForReport } from '@/lib/authErrors'
+import { reportError } from '@/lib/errorReporter'
 import { useAuthT } from '@/i18n/app/auth'
 import { postLoginRoute } from '@/modules/auth/lib/postLoginRoute'
 import { GoogleButton } from '@/modules/auth/components/GoogleButton'
@@ -70,7 +71,9 @@ export function LoginForm() {
       toast.success(t.login.welcome)
       navigate(await postLoginRoute(data.user.id))
     } catch (err: unknown) {
-      setError(authErrorMessage(err, t.errors, t.login.failed))
+      const message = authErrorMessage(err, t.errors, t.login.failed)
+      if (message.startsWith(t.login.failed)) reportError(authFailureForReport(err, 'login'), { area: 'auth' })
+      setError(message)
       captcha.reset()
     } finally {
       setLoading(false)

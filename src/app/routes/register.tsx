@@ -3,7 +3,8 @@ import { useEffect, useId, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
-import { authErrorMessage, signupMaybeCreated } from '@/lib/authErrors'
+import { authErrorMessage, authFailureForReport, signupMaybeCreated } from '@/lib/authErrors'
+import { reportError } from '@/lib/errorReporter'
 import { LanguageSelect } from '@/components/ui/LanguageSelect'
 import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
@@ -132,7 +133,10 @@ export function RegisterPage() {
         navigate('/login')
         return
       }
-      setError(authErrorMessage(err, t.errors, r.failed))
+      const message = authErrorMessage(err, t.errors, r.failed)
+      // Un error que no sabemos explicar queda en el registro del equipo (sin el email) para poder arreglarlo
+      if (message.startsWith(r.failed)) reportError(authFailureForReport(err, 'register'), { area: 'auth' })
+      setError(message)
       captcha.reset()
     } finally {
       setLoading(false)
