@@ -5,6 +5,8 @@
 const URL_BASE = import.meta.env.VITE_SUPABASE_URL as string
 const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
+const TIMEOUT_MS = 12_000
+
 export interface RpcResult<T = unknown> { data: T | null; error: { message: string; code?: string } | null }
 
 /** Token de la sesión que guarda supabase-js en este dispositivo (sb-<ref>-auth-token), si hay */
@@ -26,6 +28,8 @@ async function call(fn: string, args: Record<string, unknown>, token: string): P
     method: 'POST',
     headers: { apikey: ANON, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(args),
+    // Si la base no contesta, se corta: la página muestra su error en vez de quedar cargando para siempre
+    signal: typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal ? AbortSignal.timeout(TIMEOUT_MS) : undefined,
   })
 }
 

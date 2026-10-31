@@ -11,6 +11,10 @@ declare const self: ServiceWorkerGlobalScope & {
 }
 
 const PRECACHE   = 'menulife-precache-v1'
+
+// Lo que este deploy precachea (rutas absolutas): lo demás de PRECACHE es de deploys viejos y se borra al activar
+const MANIFEST_URLS = (self.__WB_MANIFEST ?? []).map((e) => e.url)
+const PRECACHED = new Set([...MANIFEST_URLS, '/offline.html'].map((u) => new URL(u, self.location.origin).pathname))
 const IMG_CACHE  = 'menulife-images'
 const FONT_CACHE = 'menulife-fonts'
 
@@ -19,7 +23,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting()
   event.waitUntil(
     caches.open(PRECACHE).then((cache) => {
-      const urls = (self.__WB_MANIFEST ?? []).map((e) => e.url)
+      const urls = MANIFEST_URLS
       return cache.addAll([...urls, '/offline.html']).catch(() => {
         // Individual failures shouldn't abort install
         return Promise.all(
@@ -42,6 +46,11 @@ self.addEventListener('activate', (event) => {
       .then((keys) =>
         Promise.all(keys.filter((k) => !CURRENT.has(k)).map((k) => caches.delete(k)))
       )
+      // Archivos de deploys anteriores (y respuestas de /api/ que guardaban versiones viejas): fuera
+      .then(() => caches.open(PRECACHE))
+      .then((cache) => cache.keys().then((reqs) => Promise.all(
+        reqs.filter((r) => !PRECACHED.has(new URL(r.url).pathname)).map((r) => cache.delete(r))
+      )))
       .then(() => self.clients.claim())
   )
 })
@@ -60,6 +69,10 @@ self.addEventListener('fetch', (event) => {
   // Otros orígenes (portadas de YouTube/Spotify, imágenes de terceros…): los pide el navegador directo. Desde acá
   // serían un fetch() del service worker, que la CSP limita con connect-src (sólo Mycen y Supabase) y fallaría.
   if (url.origin !== self.location.origin) return
+
+  // Funciones del servidor (/api, calendario, sitemap): siempre a la red. Guardarlas dejaba "Último video", el estado
+  // del sistema y las portadas congelados en la primera respuesta.
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/cal/') || url.pathname === '/sitemap.xml') return
 
   // Fuentes (servidas por Mycen) — Cache First
   if (request.destination === 'font') {
@@ -87,8 +100,12 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Static assets — Cache First with network fallback
-  event.respondWith(cacheFirst(request, PRECACHE))
+  // Archivos del build (con hash en el nombre): Cache First. Lo demás: la red primero y, sin conexión, lo guardado.
+  if (url.pathname.startsWith('/assets/') || PRECACHED.has(url.pathname)) {
+    event.respondWith(cacheFirst(request, PRECACHE))
+    return
+  }
+  event.respondWith(fetch(request).catch(() => caches.match(request).then((r) => r ?? new Response('', { status: 503 }))))
 })
 
 // ── Cache helpers ─────────────────────────────────────────────────────────────

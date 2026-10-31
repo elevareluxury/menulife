@@ -33,8 +33,15 @@ describe('sitemap', () => {
     expect(String((fetchMock.mock.calls[0] as unknown as [string])[0])).toContain('/rpc/public_sitemap')
   })
 
-  it('si la base falla, igual responde con las páginas fijas', async () => {
+  it('si la base falla, 503 sin caché (un sitemap vacío no queda guardado en la CDN)', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('caída') }))
+    const res = await handler(new Request('https://mycen.id/api/sitemap'))
+    expect(res.status).toBe(503)
+    expect(res.headers.get('cache-control')).toBe('no-store')
+  })
+
+  it('sin perfiles todavía, igual responde con las páginas fijas', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('[]', { status: 200 })))
     const xml = await (await handler(new Request('https://mycen.id/api/sitemap'))).text()
     expect(xml).toContain('<loc>https://mycen.id/</loc>')
     // La landing en 12 idiomas + 4 páginas fijas
@@ -57,6 +64,7 @@ describe('sitemap', () => {
   })
   it('robots.txt no bloquea usernames que empiezan como una ruta privada (ej. /lifestyle)', () => {
     const robots = readFileSync(join(__dirname, '..', '..', 'public', 'robots.txt'), 'utf8')
+    expect(robots).toMatch(/Allow: \/api\/og\/\nDisallow: \/api\//)
     const rules = robots.split('\n').filter(l => l.startsWith('Disallow:')).map(l => l.slice('Disallow:'.length).trim())
     expect(rules.length).toBeGreaterThan(0)
     for (const r of rules) expect(r, r).toMatch(/\/$|\$$/)

@@ -678,6 +678,17 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `super-admin/lib/growth.ts` (`change`/`pct` sin base = null, `funnelRows` marca la caída más grande, `toCsv`); cada
   tabla se exporta a CSV. Privacidad ("Uso de la app", 12 idiomas). Migración `20261116000001_admin_growth.sql`, tests
   en `admin_growth.test.sql`, `growth.test.ts` y `admin-growth.spec.ts`.
+- Blindaje de lanzamiento (auditorías del 31/10/2026, `20261117000001_launch_hardening.sql`, tests en
+  `launch_hardening.test.sql`): el portal de clientes de Business no entrega códigos (ingreso cerrado hasta mandarlos
+  por mail), archivos de Business sólo los cambia quien los subió y sin listado, `country_configs`/`date_dimension` con
+  RLS, el plan/suscripción/prueba de un negocio lo cambia sólo el equipo o el servidor (`restaurants_plan_guard`),
+  índice `app_error_hits (hash, day)`. App: `publicRpc` corta a los 12 s y `api/og.ts` a los 3,5 s; `/sitemap.xml`
+  responde 503 sin caché si la base falla; `robots.txt` deja pasar `/api/og/` (imagen al compartir en X y LinkedIn);
+  más previsualizadores en `vercel.json` (KakaoTalk, Naver, Yandex, Baidu, LINE, Viber, Snapchat, Bluesky, Mastodon…);
+  el service worker no toca `/api/`, `/cal/` ni el sitemap y borra lo de deploys viejos (`/sw.js` sin caché); Studio
+  espera el guardado en curso antes de publicar y Ajustes actualiza la revisión del autosave; quien dejó el onboarding
+  a medias vuelve a Studio al entrar; la cola sin conexión reintenta al volver a la app y cada minuto; exportar pagina
+  con orden fijo.
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,

@@ -158,7 +158,7 @@ function UsernameSection({ current }: { current: string }) {
     setSaving(true); setError(null)
     try {
       const saved = await updateProfile(profile.id, { username })
-      replaceProfile({ ...profile, username: saved.username })
+      replaceProfile({ ...profile, username: saved.username, revision: saved.revision })
       void reloadSpaces()
       setDone(true)
       setConfirm(false)
@@ -207,7 +207,7 @@ function SpaceAddressSection({ current }: { current: string }) {
     setSaving(true); setError(null)
     try {
       const saved = await updateProfile(profile.id, { space_slug: slug })
-      replaceProfile({ ...profile, space_slug: saved.space_slug })
+      replaceProfile({ ...profile, space_slug: saved.space_slug, revision: saved.revision })
       void reloadSpaces()
       setDone(true)
     } catch (e) {

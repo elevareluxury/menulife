@@ -18,8 +18,12 @@ const PAGE = 1000
 
 async function readAll(table: string, userId: string): Promise<Record<string, unknown>[]> {
   const rows: Record<string, unknown>[] = []
+  // Con orden fijo (id): sin él, Postgres puede repetir o saltear filas entre páginas
+  let ordered = true
   for (let from = 0; ; from += PAGE) {
-    const { data, error } = await db.from(table).select('*').eq('user_id', userId).range(from, from + PAGE - 1)
+    const q = db.from(table).select('*').eq('user_id', userId)
+    const { data, error } = await (ordered ? q.order('id') : q).range(from, from + PAGE - 1)
+    if (error && ordered && error.code === '42703' && from === 0) { ordered = false; from -= PAGE; continue }
     if (error) {
       // Tablas legado que pueden no existir en todas las bases: se omiten
       if (error.code === '42P01' || error.code === 'PGRST205') return rows
