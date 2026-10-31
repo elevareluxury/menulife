@@ -18,7 +18,7 @@ export function authErrorMessage(err: unknown, errors: AuthDict['errors'], fallb
   const code = (err as { code?: string })?.code
   // "captcha verification process failed": en la app sin widget (captchaMissingInApp) se ofrece otro camino
   if (isCaptchaError(err)) return captchaMissingInApp() ? errors.captchaApp : errors.captcha
-  if (raw.includes('already registered') || raw.includes('already been registered') || raw.includes('user already exists'))
+  if (code === 'user_already_exists' || code === 'email_exists' || raw.includes('already registered') || raw.includes('already been registered') || raw.includes('user already exists'))
     return errors.alreadyRegistered
   if (raw.includes('invalid login credentials')) return errors.invalidCredentials
   if (raw.includes('email not confirmed')) return errors.notConfirmed

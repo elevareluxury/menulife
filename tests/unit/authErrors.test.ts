@@ -15,6 +15,7 @@ describe('authErrorMessage', () => {
     expect(authErrorMessage({ status: 400, code: 'email_address_not_authorized', message: 'Email address "a@b.com" cannot be used' }, e, 'genérico'))
       .toBe('genérico (email_address_not_authorized)')
     expect(authErrorMessage({ status: 403, message: 'x' }, e, 'genérico')).toBe('genérico (HTTP 403)')
+    expect(authErrorMessage({ status: 422, code: 'email_exists', message: 'x' }, e, 'genérico')).toBe(e.alreadyRegistered)
     expect(authErrorRef({ code: 'Raro con espacios' })).toBeNull()
   })
   it('un email que Supabase da por inválido lo dice', () => {
