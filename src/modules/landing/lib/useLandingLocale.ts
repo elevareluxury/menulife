@@ -84,4 +84,20 @@ export function useLandingLocale() {
     add('canonical', landingUrl(lang))
     return () => links.forEach(el => el.remove())
   }, [lang])
+
+  // Datos para buscadores (schema.org): qué es Mycen, su logo y su contacto, en el idioma activo. Es un bloque de datos
+  // (no se ejecuta), así que la CSP no lo frena
+  useEffect(() => {
+    const el = document.createElement('script')
+    el.type = 'application/ld+json'
+    el.dataset.landing = ''
+    el.textContent = JSON.stringify([
+      { '@context': 'https://schema.org', '@type': 'Organization', '@id': `${SITE}/#org`, name: 'Mycen', url: `${SITE}/`,
+        logo: `${SITE}/web-app-manifest-512x512.png`, email: 'team@mycen.id' },
+      { '@context': 'https://schema.org', '@type': 'WebSite', name: 'Mycen', url: landingUrl(lang), inLanguage: lang,
+        description: l.meta.description, publisher: { '@id': `${SITE}/#org` } },
+    ]).replace(/</g, '\\u003c')
+    document.head.appendChild(el)
+    return () => el.remove()
+  }, [lang, l])
 }
