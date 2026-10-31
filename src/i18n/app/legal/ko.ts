@@ -73,9 +73,9 @@ const ko: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: '서비스 제공자', body: [
-      'Mycen은 아르헨티나 공화국에 소재한 **Resilio**가 운영하는 서비스입니다. 문의는 **team@mycen.id**로 보내 주세요.',
+      'Mycen은 아르헨티나 공화국에 거주하는 **Luca Cazzoli**(아르헨티나 납세자 번호 CUIT 20-42325961-3)가 상호 **Resilio**로 운영하는 서비스입니다. 문의는 **team@mycen.id**로 보내 주세요.',
       'Mycen에서는 공개 디지털 아이덴티티(Mycen Identity)를 만들어 Mycen Studio에서 관리하고, Life OS로 개인 생활을 정리하며, 사업을 한다면 Mycen Business로 운영할 수 있습니다.',
     ] },
     { id: 'edad', title: '이용할 수 있는 사람', body: [
@@ -140,9 +140,9 @@ const ko: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: '개인정보 처리 책임자', body: [
-      '개인정보 처리 책임자는 Mycen을 운영하는, 아르헨티나 공화국에 소재한 **Resilio**입니다. 개인정보에 관한 문의는 **team@mycen.id**로 보내 주세요.',
+      '개인정보 처리 책임자는 상호 **Resilio**로 Mycen을 운영하는, 아르헨티나 공화국에 거주하는 **Luca Cazzoli**(아르헨티나 납세자 번호 CUIT 20-42325961-3)입니다. 개인정보에 관한 문의는 **team@mycen.id**로 보내 주세요.',
       '사업체가 Mycen Business로 자기 고객의 데이터(주문, 예약, 방문 예약)를 관리하는 경우, 그 데이터의 책임자는 해당 사업체이며 Mycen은 그 위탁을 받아 지시에 따라 처리합니다.',
     ] },
     { id: 'datos', title: '이용하는 데이터', body: [

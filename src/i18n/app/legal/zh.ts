@@ -73,9 +73,9 @@ const zh: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: '谁提供本服务', body: [
-      'Mycen 由 **Resilio** 运营，住所位于阿根廷共和国。你可以发邮件至 **team@mycen.id** 联系我们。',
+      'Mycen 由 **Luca Cazzoli**（阿根廷税号 CUIT 20-42325961-3）以商号 **Resilio** 运营，住所位于阿根廷共和国。你可以发邮件至 **team@mycen.id** 联系我们。',
       'Mycen 让你创建公开的数字身份（Mycen Identity），在 Mycen Studio 中管理，在 Life OS 中规划个人生活；如果你有生意，还可以用 Mycen Business 来经营。',
     ] },
     { id: 'edad', title: '谁可以使用 Mycen', body: [
@@ -140,9 +140,9 @@ const zh: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: '谁对你的数据负责', body: [
-      '数据控制者是运营 Mycen 的 **Resilio**，住所位于阿根廷共和国。关于你的数据的任何问题，请写信至 **team@mycen.id**。',
+      '数据控制者是 **Luca Cazzoli**（阿根廷税号 CUIT 20-42325961-3），他以商号 **Resilio** 运营 Mycen，住所位于阿根廷共和国。关于你的数据的任何问题，请写信至 **team@mycen.id**。',
       '当企业使用 Mycen Business 管理其客户的数据（订单、预订、预约）时，该企业是这些数据的负责方，Mycen 代表其并按照其指示处理这些数据。',
     ] },
     { id: 'datos', title: '我们使用哪些数据', body: [

@@ -73,9 +73,9 @@ const ru: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'Кто предоставляет сервис', body: [
-      'Mycen — сервис, которым управляет **Resilio**, находящаяся в Аргентинской Республике. Пишите нам на **team@mycen.id**.',
+      'Mycen — сервис, которым управляет **Luca Cazzoli** (аргентинский налоговый номер CUIT 20-42325961-3) под коммерческим названием **Resilio**, проживающий в Аргентинской Республике. Пишите нам на **team@mycen.id**.',
       'Mycen позволяет создать публичную цифровую идентичность (Mycen Identity), управлять ею в Mycen Studio, организовать личную жизнь в Life OS, а если у вас есть бизнес — вести его в Mycen Business.',
     ] },
     { id: 'edad', title: 'Кто может пользоваться Mycen', body: [
@@ -140,9 +140,9 @@ const ru: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'Кто отвечает за ваши данные', body: [
-      'Оператор данных — **Resilio**, находящаяся в Аргентинской Республике и управляющая Mycen. По любым вопросам о ваших данных пишите на **team@mycen.id**.',
+      'Оператор данных — **Luca Cazzoli** (аргентинский налоговый номер CUIT 20-42325961-3), который управляет Mycen под коммерческим названием **Resilio** и проживает в Аргентинской Республике. По любым вопросам о ваших данных пишите на **team@mycen.id**.',
       'Когда бизнес использует Mycen Business для данных своих клиентов (заказы, бронирования, записи), за эти данные отвечает этот бизнес, а Mycen обрабатывает их по его поручению и в соответствии с его указаниями.',
     ] },
     { id: 'datos', title: 'Какие данные мы используем', body: [

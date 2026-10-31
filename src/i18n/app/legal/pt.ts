@@ -73,9 +73,9 @@ const pt: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'Quem presta o serviço', body: [
-      'O Mycen é um serviço operado por **Resilio**, com domicílio na República Argentina. Você pode nos escrever em **team@mycen.id**.',
+      'O Mycen é um serviço operado por **Luca Cazzoli** (CUIT 20-42325961-3, identificação fiscal argentina), sob o nome fantasia **Resilio**, com domicílio na República Argentina. Você pode nos escrever em **team@mycen.id**.',
       'O Mycen permite criar uma identidade digital pública (Mycen Identity), administrá-la pelo Mycen Studio, organizar sua vida pessoal no Life OS e, se você tem um negócio, geri-lo com o Mycen Business.',
     ] },
     { id: 'edad', title: 'Quem pode usar o Mycen', body: [
@@ -140,9 +140,9 @@ const pt: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'Quem é responsável pelos seus dados', body: [
-      'O controlador dos dados é **Resilio**, com domicílio na República Argentina, que opera o Mycen. Para qualquer dúvida sobre seus dados, escreva para **team@mycen.id**.',
+      'O controlador dos dados é **Luca Cazzoli** (CUIT 20-42325961-3, identificação fiscal argentina), que opera o Mycen sob o nome fantasia **Resilio**, com domicílio na República Argentina. Para qualquer dúvida sobre seus dados, escreva para **team@mycen.id**.',
       'Quando um negócio usa o Mycen Business para gerir dados dos próprios clientes (pedidos, reservas, horários), esse negócio é o controlador desses dados e o Mycen os trata em seu nome e seguindo suas instruções.',
     ] },
     { id: 'datos', title: 'Quais dados usamos', body: [

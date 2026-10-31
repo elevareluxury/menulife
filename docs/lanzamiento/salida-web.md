@@ -229,8 +229,8 @@ Si alguien más tiene acceso a alguna de estas cuentas, revisá que siga necesit
 - Lo ideal es la revisión de un abogado antes de abrir (los textos son buenos, pero no tienen esa revisión). Qué
   mandarle y qué preguntarle está en el mensaje que te pasó Claude (7 preguntas). Cuando devuelva cambios, pasáselos a
   Claude y los aplica en los 12 idiomas.
-- Si abrís antes: decidí al menos quién figura como responsable (hoy dice "Resilio", Argentina) y que
-  `team@mycen.id` reciba mails (bloque 3.2): es el contacto que piden las leyes de datos personales.
+- Responsable (decidido el 31/10/2026): Luca Cazzoli, monotributo (CUIT 20-42325961-3), nombre de fantasía Resilio,
+  Argentina. `team@mycen.id` recibe mails (bloque 3.2): es el contacto que piden las leyes de datos personales.
 
 ---
 

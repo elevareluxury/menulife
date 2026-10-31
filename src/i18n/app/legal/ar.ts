@@ -73,9 +73,9 @@ const ar: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'من يقدّم الخدمة', body: [
-      'Mycen خدمة تديرها **Resilio**، ومقرها جمهورية الأرجنتين. يمكنك مراسلتنا على **team@mycen.id**.',
+      'Mycen خدمة يديرها **Luca Cazzoli** (الرقم الضريبي الأرجنتيني CUIT 20-42325961-3) تحت الاسم التجاري **Resilio**، ومقر إقامته جمهورية الأرجنتين. يمكنك مراسلتنا على **team@mycen.id**.',
       'يتيح لك Mycen إنشاء هوية رقمية عامة (Mycen Identity) وإدارتها من Mycen Studio، وتنظيم حياتك الشخصية في Life OS، وإن كان لديك نشاط تجاري فيمكنك إدارته عبر Mycen Business.',
     ] },
     { id: 'edad', title: 'من يمكنه استخدام Mycen', body: [
@@ -140,9 +140,9 @@ const ar: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'من المسؤول عن بياناتك', body: [
-      'المسؤول عن معالجة البيانات هو **Resilio**، ومقرها جمهورية الأرجنتين، وهي التي تدير Mycen. لأي استفسار عن بياناتك راسلنا على **team@mycen.id**.',
+      'المسؤول عن معالجة البيانات هو **Luca Cazzoli** (الرقم الضريبي الأرجنتيني CUIT 20-42325961-3)، الذي يدير Mycen تحت الاسم التجاري **Resilio**، ومقر إقامته جمهورية الأرجنتين. لأي استفسار عن بياناتك راسلنا على **team@mycen.id**.',
       'عندما يستخدم نشاط تجاري Mycen Business لإدارة بيانات عملائه (الطلبات، الحجوزات، المواعيد)، يكون ذلك النشاط هو المسؤول عن تلك البيانات، ويعالجها Mycen نيابة عنه ووفق تعليماته.',
     ] },
     { id: 'datos', title: 'البيانات التي نستخدمها', body: [
