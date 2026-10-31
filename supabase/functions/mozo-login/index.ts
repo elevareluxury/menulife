@@ -65,9 +65,17 @@ serve(async (req) => {
       )
     }
 
+    // Sin el secreto configurado no se firma nada (antes usaba una clave fija conocida)
+    const jwtSecret = Deno.env.get('JWT_SECRET')
+    if (!jwtSecret) {
+      return new Response(
+        JSON.stringify({ error: 'Servicio no configurado' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
     const key = await crypto.subtle.importKey(
       'raw',
-      new TextEncoder().encode(Deno.env.get('JWT_SECRET') ?? 'your-secret-key'),
+      new TextEncoder().encode(jwtSecret),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
       ['sign']

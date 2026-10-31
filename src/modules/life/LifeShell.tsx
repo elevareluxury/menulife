@@ -9,7 +9,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { LifeNav } from './components/LifeNav'
 import { AchievementToast } from './components/AchievementToast'
 import { OfflineBanner } from './components/OfflineBanner'
-import { flushOutbox } from './lib/outbox'
+import { flushOutbox, pendingFor } from './lib/outbox'
 import { registerVisit } from './lib/kindMoments'
 import { dayKey } from './hooks/useToday'
 import { useTaskReminders } from './hooks/useTaskReminders'
@@ -75,13 +75,21 @@ export function LifeShell() {
   // Anota la visita del día (para dar la bienvenida a quien vuelve después de unos días; lib/kindMoments.ts)
   useEffect(() => { if (user && (prefsReady || timedOut)) registerVisit(user.id, dayKey()) }, [user, prefsReady, timedOut])
 
-  // Capturas guardadas sin conexión: se suben al entrar y cada vez que vuelve la red
+  // Capturas guardadas sin conexión: se suben al entrar, cuando vuelve la red, al volver a la app y cada minuto mientras
+  // quede algo (en iPhone el evento "online" a veces no llega: señal débil o sesión renovada al volver de segundo plano)
   useEffect(() => {
     if (!user) return
-    const flush = () => { void flushOutbox(user.id) }
-    flush()
+    const flush = () => { if (pendingFor(user.id) > 0) void flushOutbox(user.id) }
+    const onVisible = () => { if (document.visibilityState === 'visible') flush() }
+    void flushOutbox(user.id)
     window.addEventListener('online', flush)
-    return () => window.removeEventListener('online', flush)
+    document.addEventListener('visibilitychange', onVisible)
+    const id = window.setInterval(flush, 60_000)
+    return () => {
+      window.removeEventListener('online', flush)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.clearInterval(id)
+    }
   }, [user])
 
   // Detect if user has a business restaurant (for showing the "Mi negocio" link)

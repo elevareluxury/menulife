@@ -203,6 +203,7 @@ function StudioReady({ userId, initial, switchSpace }: {
   }), [])
   const timer = useRef<number | null>(null)
   const inFlight = useRef(false)
+  const savingRef = useRef<Promise<void>>(Promise.resolve())
   const flushRef = useRef<() => Promise<void>>(async () => undefined)
   const location = useLocation()
   const navigate = useNavigate()
@@ -271,7 +272,11 @@ function StudioReady({ userId, initial, switchSpace }: {
 
   const flush = useCallback(async () => {
     if (timer.current) { window.clearTimeout(timer.current); timer.current = null }
-    if (inFlight.current || Object.keys(pending.current).length === 0) return
+    // Un guardado en curso: esperarlo (publicar justo después de editar no congela una versión sin lo último)
+    if (inFlight.current) { await savingRef.current; if (!inFlight.current && Object.keys(pending.current).length) await flushRef.current(); return }
+    if (Object.keys(pending.current).length === 0) return
+    let done: () => void = () => undefined
+    savingRef.current = new Promise<void>(r => { done = r })
     const toSave = pending.current
     pending.current = {}
     inFlight.current = true
@@ -281,11 +286,13 @@ function StudioReady({ userId, initial, switchSpace }: {
       revision.current = saved.revision
       setProfile(p => ({ ...p, updated_at: saved.updated_at, published_at: saved.published_at, revision: saved.revision }))
       inFlight.current = false
+      done()
       // Si se editó mientras se guardaba, guardar lo nuevo
       if (Object.keys(pending.current).length) void flushRef.current()
       else setSaveState('saved')
     } catch (e) {
       inFlight.current = false
+      done()
       pending.current = { ...toSave, ...pending.current }
       if ((e as Error)?.message === 'REVISION_CONFLICT') setConflict(true)
       setSaveError(friendlyError(e))
@@ -448,7 +455,8 @@ function StudioReady({ userId, initial, switchSpace }: {
     redo,
     canUndo: historyCounts.past > 0,
     canRedo: historyCounts.future > 0,
-    replaceProfile: setProfile,
+    // Ajustes (username, dirección del Space) guardan por su cuenta y suben la revisión: el autosave sigue con la nueva
+    replaceProfile: (p: StudioProfile) => { if (typeof p.revision === 'number') revision.current = p.revision; setProfile(p) },
     setModules,
     projects,
     setProjects,

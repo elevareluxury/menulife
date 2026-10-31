@@ -57,7 +57,9 @@ with checks(migracion, aplicada) as (values
   ('20261112000001_life_onboarding',                 exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'user_settings' and column_name = 'life_onboarding_at')),
   ('20261113000001_signup_sources',                  exists (select 1 from pg_proc where proname = 'admin_signup_sources')),
   ('20261114000001_advisor_hardening',               exists (select 1 from pg_policies where schemaname = 'storage' and policyname = 'business_media_owner_select')),
-  ('20261115000001_admin_system_status',             exists (select 1 from pg_proc where proname = 'admin_system_status'))
+  ('20261115000001_admin_system_status',             exists (select 1 from pg_proc where proname = 'admin_system_status')),
+  ('20261116000001_admin_growth',                    to_regclass('public.user_activity_days') is not null),
+  ('20261117000001_launch_hardening',                to_regclass('public.app_error_hits_hash_day_idx') is not null)
 )
 select migracion, case when aplicada then 'OK' else 'FALTA' end as estado
 from checks

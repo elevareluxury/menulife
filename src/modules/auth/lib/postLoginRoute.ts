@@ -23,8 +23,11 @@ export async function postLoginRoute(userId: string): Promise<string> {
   if (!restaurant) {
     // profiles is not yet in database.types.ts — cast to bypass type check
     const { data: profile } = await (supabase as unknown as SupabaseClient)
-      .from('profiles').select('id').eq('user_id', userId).limit(1).maybeSingle()
-    hasProfile = !!profile
+      .from('profiles').select('id, status, onboarding_step').eq('user_id', userId)
+      .order('is_primary', { ascending: false }).limit(1).maybeSingle()
+    // Quien dejó el onboarding a medias (perfil sin publicar, paso < 5) vuelve a Studio para terminarlo
+    const p = profile as { status?: string; onboarding_step?: number | null } | null
+    hasProfile = !!p && (p.status === 'published' || p.onboarding_step == null || p.onboarding_step >= 5)
   }
   return routeFromRole(!!superAdmin, restaurant, hasProfile)
 }

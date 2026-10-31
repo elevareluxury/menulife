@@ -45,15 +45,22 @@ export default async function handler(req: Request): Promise<Response> {
   const anonKey = env.VITE_SUPABASE_ANON_KEY ?? env.SUPABASE_ANON_KEY
 
   let rows: Row[] = []
+  let failed = false
   if (supabaseUrl && anonKey) {
     try {
       const res = await fetch(`${supabaseUrl}/rest/v1/rpc/public_sitemap`, {
         method: 'POST',
         headers: { apikey: anonKey, authorization: `Bearer ${anonKey}`, 'content-type': 'application/json' },
         body: JSON.stringify({ p_offset: 0, p_limit: MAX_URLS - STATIC_PATHS.length - APP_LANGS.length }),
+        signal: AbortSignal.timeout(8000),
       })
       if (res.ok) rows = ((await res.json()) as Row[] | null) ?? []
-    } catch { /* sin base: sólo las páginas fijas */ }
+      else failed = true
+    } catch { failed = true }
+  }
+  // Sin base, 503 y sin caché: un sitemap vacío guardado en la CDN le diría a Google que no hay perfiles por un día
+  if (failed) {
+    return new Response('Service unavailable', { status: 503, headers: { 'cache-control': 'no-store', 'retry-after': '120' } })
   }
 
   return new Response(buildSitemap(origin, rows), {

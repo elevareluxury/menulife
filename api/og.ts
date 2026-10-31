@@ -224,6 +224,10 @@ function page(origin: string, path: string, title: string, description: string, 
   })
 }
 
+
+// Los previsualizadores (WhatsApp, X…) esperan pocos segundos: si la base tarda, mejor la app que nada
+const RPC_TIMEOUT_MS = 3500
+
 /** La app tal cual (index.html) para todo lo que no es un perfil o proyecto publicado: las páginas de la app (soporte,
  * privacidad…) llegan con su contenido a los buscadores, y una dirección sin perfil muestra la app (que la marca noindex). */
 async function spa(origin: string): Promise<Response> {
@@ -267,6 +271,7 @@ export default async function handler(req: Request): Promise<Response> {
       method: 'POST',
       headers: { apikey: anonKey, authorization: `Bearer ${anonKey}`, 'content-type': 'application/json' },
       body: JSON.stringify({ p_username: handle }),
+      signal: AbortSignal.timeout(RPC_TIMEOUT_MS),
     })
     if (!res.ok) return spa(origin)
     const data = (await res.json()) as (PublicProfile & { redirect?: string }) | null
@@ -275,7 +280,8 @@ export default async function handler(req: Request): Promise<Response> {
     if (!data.display_name || data.status === 'unavailable' || data.status !== 'published') return spa(origin)
 
     const title = data.descriptor ? `${data.display_name} · ${data.descriptor}` : data.display_name
-    const description = (data.bio ?? data.descriptor ?? 'Mi identidad en Mycen.').slice(0, 200)
+    // Sin bio ni descriptor: la dirección (igual en todos los idiomas), nunca un texto en español
+    const description = (data.bio ?? data.descriptor ?? `mycen.id/${data.handle ?? data.username}`).slice(0, 200)
     const path = `/${data.handle ?? data.username}`
     const { html, jsonLd } = profileBody(data, `${origin}${path}`)
     return page(origin, path, title, description, ogImage(origin, data, space),
@@ -292,6 +298,7 @@ async function projectPage(origin: string, supabaseUrl: string, anonKey: string,
       method: 'POST',
       headers: { apikey: anonKey, authorization: `Bearer ${anonKey}`, 'content-type': 'application/json' },
       body: JSON.stringify({ p_username: slug, p_slug: projectSlug }),
+      signal: AbortSignal.timeout(RPC_TIMEOUT_MS),
     })
     if (!res.ok) return spa(origin)
     const data = (await res.json()) as (PublicProject & { redirect?: string }) | null
