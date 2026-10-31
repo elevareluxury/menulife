@@ -19,6 +19,7 @@ import { VerificationsTab }  from '@/modules/super-admin/pages/VerificationsTab'
 import { HomeTab }           from '@/modules/super-admin/pages/HomeTab'
 import { PeopleTab }         from '@/modules/super-admin/pages/PeopleTab'
 import { ActivityTab }       from '@/modules/super-admin/pages/ActivityTab'
+import { EstadoTab }         from '@/modules/super-admin/pages/EstadoTab'
 import { ROUTES } from '@/lib/constants'
 
 export function SuperAdminPage() {
@@ -49,6 +50,7 @@ export function SuperAdminPage() {
         <Route index                    element={<HomeTab />} />
         <Route path="personas"          element={<PeopleTab />} />
         <Route path="actividad"         element={<ActivityTab />} />
+        <Route path="estado"            element={<EstadoTab />} />
         <Route path="solicitudes"       element={<AccessRequestsTab />} />
         <Route path="denuncias"         element={<ReportsTab />} />
         <Route path="verificaciones"    element={<VerificationsTab />} />

@@ -1,6 +1,6 @@
 import { useId, useMemo, useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote, MoreHorizontal, X, Flag, Bug, TrendingUp, BadgeCheck, Users, History, ChevronDown } from 'lucide-react'
+import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote, MoreHorizontal, X, Flag, Bug, TrendingUp, BadgeCheck, Users, History, ChevronDown, HeartPulse } from 'lucide-react'
 import { brandMarkSvg } from '@/lib/brandMark'
 import { useSiteFlags } from '@/lib/siteFlags'
 import { usePendingCounts, type PendingCounts } from '../lib/adminRpc'
@@ -22,6 +22,7 @@ type NavItem = { label: (t: AdminDict) => string; icon: typeof Store; to: string
 // Mycen primero; las pantallas de Business van en su propio grupo (abierto si Business está prendido)
 const mycenItems: NavItem[] = [
   { label: t => t.nav.overview,      icon: LayoutDashboard,    to: '/super-admin',                end: true  },
+  { label: t => t.nav.status,        icon: HeartPulse,         to: '/super-admin/estado',         end: false },
   { label: t => t.shell.people,      icon: Users,              to: '/super-admin/personas',       end: false },
   { label: t => t.nav.reports,       icon: Flag,               to: '/super-admin/denuncias',      end: false, badge: 'reports' },
   { label: t => t.nav.verifications, icon: BadgeCheck,         to: '/super-admin/verificaciones', end: false, badge: 'verifications' },
@@ -41,7 +42,7 @@ const businessItems: NavItem[] = [
   { label: t => t.nav.tester,     icon: FlaskConical,  to: '/super-admin/tester',        end: false },
 ]
 // Barra de abajo en el celular: lo de todos los días + "Más" (todo el menú)
-const barItems = mycenItems.filter(i => ['/super-admin', '/super-admin/personas', '/super-admin/denuncias', '/super-admin/errores'].includes(i.to))
+const barItems = mycenItems.filter(i => ['/super-admin', '/super-admin/estado', '/super-admin/denuncias', '/super-admin/errores'].includes(i.to))
 
 
 // Botones de íconos de la barra del celular: 44 px de área táctil (guía del proyecto)
@@ -104,7 +105,7 @@ function NavList({ t, counts, onNavigate }: { t: AdminDict; counts: PendingCount
   const [open, setOpen] = useState<boolean | null>(null)
   const showBusiness = open ?? (business || inBusiness)
   const head = (text: string) => (
-    <p className="px-3 pt-3 pb-1 text-[11px] font-semibold tracking-widest uppercase" style={{ color: TEXT_MUTED, opacity: 0.7 }}>{text}</p>
+    <p className="px-3 pt-3 pb-1 text-[11px] font-semibold tracking-widest uppercase" style={{ color: TEXT_MUTED }}>{text}</p>
   )
   return (
     <nav aria-label={t.layout.nav} className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">

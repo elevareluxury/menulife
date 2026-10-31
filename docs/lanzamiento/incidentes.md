@@ -40,6 +40,10 @@ cada paso con los clics exactos. Proyecto de Supabase: `fcuiolmzfnhxyukkyeht`. C
 
 ## Cómo detectarlo
 
+1. **Estado del sistema** — `/super-admin/estado`: semáforo general (base, versión, perfil público, vista previa al
+   compartir, sitemap, video y portadas, calendario, recordatorios push, errores, registros, tamaño, consultas lentas,
+   archivos y copias de seguridad) y el autochequeo de seguridad de la base. Es lo primero que se abre ante una duda.
+   Se revisa solo cada minuto con la pantalla abierta; no reemplaza al monitor externo (si cae todo, no avisa).
 1. **Panel de errores** — `/super-admin/errores` (y "Para revisar" en `/super-admin`). Mirar errores nuevos y cuántas
    personas afectan. Un error que vuelve después de resuelto se reabre solo. La semana del lanzamiento, revisarlo al
    menos 2 veces por día.

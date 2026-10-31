@@ -111,7 +111,7 @@ export function SistemaTab() {
       ])
 
       const adminMap = Object.fromEntries(
-        (admins ?? []).map(a => [a.user_id, (a.email as string).split('@')[0]])
+        (admins ?? []).map(a => [a.user_id, ((a.email as string | null) ?? '').split('@')[0] || String(a.user_id).slice(0, 8)])
       )
 
       const rests = (allRest ?? []) as {
@@ -160,7 +160,7 @@ export function SistemaTab() {
       setLogs(
         ((logsRaw ?? []) as AdminLog[]).map(l => ({
           ...l,
-          admin_email: adminMap[l.admin_id] ?? l.admin_id.slice(0, 8),
+          admin_email: adminMap[l.admin_id] ?? String(l.admin_id ?? '').slice(0, 8),
         }))
       )
 

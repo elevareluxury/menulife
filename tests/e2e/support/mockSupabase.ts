@@ -22,6 +22,11 @@ export interface MockState {
   trafficSources?: { source: string | null; referrer_host: string | null; visits: number; visitors: number }[]
   /** Interruptores del sitio (get_site_flags / admin_set_site_flag) */
   siteFlags?: { business: boolean }
+  /** Estado del sistema: lo que cambia sobre la respuesta de admin_system_status y los hallazgos del autochequeo */
+  systemStatus?: Row
+  selfcheck?: { rule: string; level: 'red' | 'yellow' | 'info'; object: string }[]
+  /** Ajustes del Estado del sistema (admin_set_status_setting) */
+  statusSettings?: Record<string, string>
   /**
    * Onboarding de Life OS (user_settings.life_onboarding_at): las cuentas de las pruebas ya lo vieron, salvo con
    * 'pending' (la cuenta nunca lo vio y, sin metas, hábitos ni tareas, se muestra al entrar a Life).
@@ -916,6 +921,47 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       return rows.filter(r => !before || String(r.created_at) < before).slice(0, Number(args.p_limit ?? 100))
     }
     case 'get_site_flags': return { business: state.siteFlags?.business === true }
+    case 'admin_system_status': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const now = Date.now()
+      const day = (n: number) => new Date(now - n * 86_400_000).toISOString().slice(0, 10)
+      const probe = state.tables.profiles.find(p => p.status === 'published' && p.is_primary && !p.suspended_at)
+      return {
+        checked_at: new Date(now).toISOString(),
+        settings: { ...(state.statusSettings ?? {}) },
+        probe_username: state.statusSettings?.probe_username ?? probe?.username ?? null,
+        db: { bytes: 120 * 1024 * 1024, connections: 12, max_connections: 60 },
+        tables: [{ name: 'profiles', bytes: 2_000_000, rows: state.tables.profiles.length }],
+        storage: [{ bucket: 'profile-media', files: 4, bytes: 3_000_000 }],
+        cron: [{ name: 'life-reminders', schedule: '* * * * *', active: true, last_start: new Date(now - 40_000).toISOString(), last_status: 'succeeded', failed_24h: 0 }],
+        net: { ok: 60, client: 0, server: 0, failed: 0 },
+        slow_queries: [{ query: 'select * from profiles where username = $1', calls: 120, mean_ms: 4.2, total_ms: 504 }],
+        errors_by_day: Array.from({ length: 14 }, (_, i) => ({ day: day(13 - i), people: 1 })),
+        new_errors: [],
+        signups: { started_1h: 1, completed_1h: 1, started_24h: 6, completed_24h: 5 },
+        push_shown_1h: 3,
+        sitemap_paths: state.tables.profiles.filter(p => p.status === 'published').length,
+        ...(state.systemStatus ?? {}),
+      }
+    }
+    case 'admin_security_selfcheck': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      return { checked_at: new Date().toISOString(), findings: state.selfcheck ?? [] }
+    }
+    case 'admin_set_status_setting': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const key = String(args.p_key)
+      let value = String(args.p_value ?? '').trim()
+      if (!['probe_username', 'backup_checked_at', 'db_limit_mb', 'storage_limit_mb'].includes(key)) throw new Error('INVALID_KEY')
+      if (key === 'backup_checked_at' && value) value = new Date().toISOString()
+      if (key.endsWith('_mb') && value && !/^[0-9]{1,8}$/.test(value)) throw new Error('INVALID_VALUE')
+      if (key === 'probe_username' && value && !/^[a-z0-9][a-z0-9_.-]{1,29}(\/[a-z0-9][a-z0-9-]{0,39})?$/.test(value.toLowerCase())) throw new Error('INVALID_VALUE')
+      const settings = (state.statusSettings ??= {})
+      if (value) settings[key] = key === 'probe_username' ? value.toLowerCase() : value
+      else delete settings[key]
+      audit(state, 'status_setting', 'mycen_admin_settings', key, { value: value || null })
+      return { ...settings }
+    }
     case 'admin_set_site_flag': {
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
       if (args.p_key !== 'business' || typeof args.p_enabled !== 'boolean') throw new Error('INVALID_FLAG')
