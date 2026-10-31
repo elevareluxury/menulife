@@ -84,7 +84,7 @@ const it: LandingDict = {
       { title: 'Condividilo ovunque', text: 'Copia il tuo link per ogni social o mostra il tuo QR. Sai da dove arriva ogni visita.' },
       { title: 'Guarda cosa funziona', text: 'Quali pulsanti vengono toccati di più e da dove arrivano le visite. Dati anonimi: non salviamo chi ti visita.' },
     ],
-    demo: { role: 'Designer · Buenos Aires', available: 'Disponibile', portfolio: 'Il mio portfolio', video: 'Ultimo video', music: 'Ascolta il mio brano', contact: 'Scrivimi', subscribe: 'Iscriviti', support: 'Sostienimi', copied: 'Link copiato', topTaps: 'I più toccati' },
+    demo: { role: 'Designer · Miami', available: 'Disponibile', portfolio: 'Il mio portfolio', video: 'Ultimo video', music: 'Ascolta il mio brano', contact: 'Scrivimi', subscribe: 'Iscriviti', support: 'Sostienimi', copied: 'Link copiato', topTaps: 'I più toccati' },
     cta: 'Crea il tuo Mycen gratis',
     ctaNote: 'Ci vogliono due minuti.',
   },

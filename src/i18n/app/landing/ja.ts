@@ -84,7 +84,7 @@ const ja: LandingDict = {
       { title: 'どこにでもシェア', text: 'SNS ごとにリンクをコピー、または QR を見せるだけ。どこから来た訪問かがわかります。' },
       { title: '効果を確かめる', text: 'よくタップされるボタンと、訪問の流入元。データは匿名で、誰が訪れたかは保存しません。' },
     ],
-    demo: { role: 'デザイナー · ブエノスアイレス', available: '受付中', portfolio: 'ポートフォリオ', video: '最新の動画', music: '私の曲を聴く', contact: 'メッセージ', subscribe: '購読する', support: '応援する', copied: 'リンクをコピーしました', topTaps: 'よくタップされる' },
+    demo: { role: 'デザイナー · マイアミ', available: '受付中', portfolio: 'ポートフォリオ', video: '最新の動画', music: '私の曲を聴く', contact: 'メッセージ', subscribe: '購読する', support: '応援する', copied: 'リンクをコピーしました', topTaps: 'よくタップされる' },
     cta: '無料で Mycen をつくる',
     ctaNote: '2 分で完了します。',
   },

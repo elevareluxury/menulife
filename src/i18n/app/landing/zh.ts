@@ -84,7 +84,7 @@ const zh: LandingDict = {
       { title: '分享到各个地方', text: '为每个平台复制专属链接，或出示你的二维码。清楚每次访问从哪里来。' },
       { title: '看看什么有效', text: '哪些按钮被点得最多、访问来自哪里。数据匿名：我们不记录谁访问了你。' },
     ],
-    demo: { role: '设计师 · 布宜诺斯艾利斯', available: '可接项目', portfolio: '我的作品集', video: '最新视频', music: '听听我的歌', contact: '给我留言', subscribe: '订阅', support: '支持我', copied: '链接已复制', topTaps: '点击最多' },
+    demo: { role: '设计师 · 迈阿密', available: '可接项目', portfolio: '我的作品集', video: '最新视频', music: '听听我的歌', contact: '给我留言', subscribe: '订阅', support: '支持我', copied: '链接已复制', topTaps: '点击最多' },
     cta: '免费创建你的 Mycen',
     ctaNote: '只需两分钟。',
   },

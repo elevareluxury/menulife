@@ -84,7 +84,7 @@ const ko: LandingDict = {
       { title: '어디서나 공유', text: '채널마다 링크를 복사하거나 QR을 보여 주세요. 방문이 어디서 왔는지 알 수 있어요.' },
       { title: '효과 확인하기', text: '가장 많이 누른 버튼과 방문 경로. 익명 데이터라 누가 방문했는지는 저장하지 않아요.' },
     ],
-    demo: { role: '디자이너 · 부에노스아이레스', available: '협업 가능', portfolio: '내 포트폴리오', video: '최신 영상', music: '내 노래 듣기', contact: '메시지 보내기', subscribe: '구독하기', support: '후원하기', copied: '링크 복사됨', topTaps: '가장 많이 누른 것' },
+    demo: { role: '디자이너 · 마이애미', available: '협업 가능', portfolio: '내 포트폴리오', video: '최신 영상', music: '내 노래 듣기', contact: '메시지 보내기', subscribe: '구독하기', support: '후원하기', copied: '링크 복사됨', topTaps: '가장 많이 누른 것' },
     cta: '무료로 Mycen 만들기',
     ctaNote: '2분이면 충분해요.',
   },

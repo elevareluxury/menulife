@@ -84,7 +84,7 @@ const fr: LandingDict = {
       { title: 'Partagez-le partout', text: 'Copiez votre lien pour chaque réseau ou montrez votre QR. Sachez d’où vient chaque visite.' },
       { title: 'Voyez ce qui marche', text: 'Les boutons les plus touchés et d’où viennent vos visites. Données anonymes : on ne garde pas qui vous visite.' },
     ],
-    demo: { role: 'Designer · Buenos Aires', available: 'Disponible', portfolio: 'Mon portfolio', video: 'Dernière vidéo', music: 'Écoutez mon titre', contact: 'Écrivez-moi', subscribe: 'Abonnez-vous', support: 'Soutenez-moi', copied: 'Lien copié', topTaps: 'Les plus touchés' },
+    demo: { role: 'Designer · Miami', available: 'Disponible', portfolio: 'Mon portfolio', video: 'Dernière vidéo', music: 'Écoutez mon titre', contact: 'Écrivez-moi', subscribe: 'Abonnez-vous', support: 'Soutenez-moi', copied: 'Lien copié', topTaps: 'Les plus touchés' },
     cta: 'Créez votre Mycen gratuitement',
     ctaNote: 'Ça prend deux minutes.',
   },

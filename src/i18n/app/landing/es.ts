@@ -93,7 +93,7 @@ const es = {
       { title: 'Compartilo en todos lados', text: 'Copiá tu link para cada red o mostrá tu QR. Sabés de dónde llega cada visita.' },
       { title: 'Mirá qué funciona', text: 'Qué botones tocan más y de dónde vienen tus visitas. Con datos anónimos: no guardamos quién te visita.' },
     ],
-    demo: { role: 'Diseñadora · Buenos Aires', available: 'Disponible', portfolio: 'Mi portfolio', video: 'Último video', music: 'Escuchá mi tema', contact: 'Escribime', subscribe: 'Suscribite', support: 'Apoyame', copied: 'Link copiado', topTaps: 'Lo que más tocan' },
+    demo: { role: 'Diseñadora · Miami', available: 'Disponible', portfolio: 'Mi portfolio', video: 'Último video', music: 'Escuchá mi tema', contact: 'Escribime', subscribe: 'Suscribite', support: 'Apoyame', copied: 'Link copiado', topTaps: 'Lo que más tocan' },
     cta: 'Creá tu Mycen gratis',
     ctaNote: 'Lleva dos minutos.',
   },

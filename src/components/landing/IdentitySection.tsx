@@ -95,17 +95,17 @@ export function IdentitySection() {
                   <div className="idn-url">
                     <Globe size={12} />
                     <span>mycen.id/</span>
-                    <span className="idn-type"><span>ana</span><i className="idn-type-cover" /></span>
+                    <span className="idn-type"><span>olivia</span><i className="idn-type-cover" /></span>
                     <span className="idn-avail"><Check size={11} strokeWidth={3} />{d.available}</span>
                   </div>
 
                   {/* Perfil */}
                   <div className="idn-hero">
-                    <div className="idn-huella"><Huella seed="ana" variant="orbitas" spin /></div>
-                    <div className="idn-avatar">A</div>
+                    <div className="idn-huella"><Huella seed="olivia" variant="orbitas" spin /></div>
+                    <div className="idn-avatar">O</div>
                   </div>
                   <div className="idn-id">
-                    <strong>Ana Pérez</strong>
+                    <strong>Olivia Parker</strong>
                     <span>{d.role}</span>
                   </div>
                   <div className="idn-cta-btn">{d.contact}</div>
@@ -139,8 +139,8 @@ export function IdentitySection() {
 
                   {/* Paso 5: compartir */}
                   <div className="idn-sheet idn-share">
-                    <div className="idn-qr"><FakeQr /><span className="idn-qr-mark"><Huella seed="ana" variant="orbitas" /></span></div>
-                    <div className="idn-share-url">mycen.id/ana</div>
+                    <div className="idn-qr"><FakeQr /><span className="idn-qr-mark"><Huella seed="olivia" variant="orbitas" /></span></div>
+                    <div className="idn-share-url">mycen.id/olivia</div>
                     <div className="idn-chips">{PLATFORMS.map(p => <span key={p}>{p}</span>)}</div>
                     <div className="idn-toast"><Check size={13} strokeWidth={3} />{d.copied}</div>
                   </div>
