@@ -27,7 +27,7 @@ test('las métricas de una app mundial, con sus nombres y el embudo marcado', as
   await expect(page.getByTestId('funnel-first_message')).toHaveAttribute('data-worst', 'true')
   await expect(page.getByText('Acá se pierde más gente')).toHaveCount(1)
   // Nombres reales: idioma, plataforma, región, módulo, estructura y ciudad
-  for (const text of ['English', 'iPhone', 'América', 'Red social', 'Credencial', 'Buenos Aires', 'Hábitos']) {
+  for (const text of ['inglés', 'iPhone', 'América', 'Red social', 'Credencial', 'Buenos Aires', 'Hábitos']) {
     await expect(page.getByText(text, { exact: true }).first()).toBeVisible()
   }
   await expect(page.getByRole('link', { name: '/ana' })).toHaveAttribute('href', '/ana')

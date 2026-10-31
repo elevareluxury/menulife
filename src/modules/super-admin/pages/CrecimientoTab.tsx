@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useAdminT, type AdminDict } from '@/i18n/app/admin'
 import { useStudioT } from '@/i18n/app/studio'
-import { LANG_INFO, isAppLang } from '@/i18n/app/languages'
 import { saveFile } from '@/lib/nativeFiles'
 import { useAdminFormat } from '../lib/adminFormat'
 import { adminRpc, BTN, CARD, MUTED, OK_COLOR, TEXT } from '../lib/adminRpc'
@@ -25,7 +24,7 @@ export function CrecimientoTab() {
   const t = useAdminT()
   const g = t.growth
   const st = useStudioT()
-  const { number, date } = useAdminFormat()
+  const { number, date, locale } = useAdminFormat()
   const [days, setDays] = useState<(typeof PERIODS)[number]>(90)
   const [state, setState] = useState<{ days: number; data: Data | null; failed: boolean } | null>(null)
 
@@ -117,7 +116,7 @@ export function CrecimientoTab() {
                   <KeyBars title={g.sourcesTitle} rows={d.funnel.sources} value={r => r.visits ?? 0}
                     label={r => (r.key === 'direct' ? g.direct : r.key)} n={n} />
                   <KeyBars title={g.channelsTitle} rows={d.funnel.signup_channels} value={r => r.users ?? 0}
-                    label={r => (r.key === 'direct' ? g.direct : r.key)} n={n} />
+                    label={r => (t.product.sourcePlaces as Record<string, string>)[r.key] ?? (r.key === 'direct' ? g.direct : r.key)} n={n} />
                 </div>
               </Section>
 
@@ -132,7 +131,7 @@ export function CrecimientoTab() {
                   <KeyBars title={g.platformsTitle} rows={d.overview.platforms} value={r => r.users ?? 0}
                     label={r => g.platforms[r.key as keyof typeof g.platforms] ?? r.key} n={n} />
                   <KeyBars title={g.languagesTitle} rows={d.overview.languages} value={r => r.users ?? 0}
-                    label={r => (isAppLang(r.key) ? LANG_INFO[r.key].native : r.key)} n={n} />
+                    label={r => languageName(r.key, locale)} n={n} />
                   <KeyBars title={g.regionsTitle} rows={d.overview.regions} value={r => r.users ?? 0}
                     label={r => ((REGIONS as readonly string[]).includes(r.key) ? g.regions[r.key as Region] : r.key)} n={n} />
                   <KeyBars title={g.timezonesTitle} rows={d.overview.timezones} value={r => r.users ?? 0} label={r => cityOf(r.key)} n={n} />
@@ -193,6 +192,11 @@ export function CrecimientoTab() {
 
 type G = AdminDict['growth']
 type Num = (v: number | null | undefined, digits?: number) => string
+
+/** Nombre del idioma en el idioma del panel ("Spanish", "Español"…), con Intl */
+function languageName(code: string, locale: string): string {
+  try { return new Intl.DisplayNames([locale], { type: 'language' }).of(code) ?? code } catch { return code }
+}
 
 function download(name: string, csv: string) {
   void saveFile(new Blob([csv], { type: 'text/csv;charset=utf-8' }), name)
