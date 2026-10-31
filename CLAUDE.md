@@ -657,7 +657,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   super-admin (lo comprueba con `admin_pending_counts`) la vista previa con el agente de WhatsApp, su imagen, el sitemap,
   "Último video", las portadas y el calendario, todo desde el servidor. De la base: `admin_system_status()` (tamaño,
   conexiones, tablas, archivos por bucket, `pg_cron` sin el comando, `pg_net`, `pg_stat_statements` normalizado, errores
-  por día y nuevos, registros, push, direcciones del sitemap) y `admin_security_selfcheck()` (reglas a–j de
+  por día y nuevos, registros, push, direcciones del sitemap; las consultas lentas sólo de los roles de la app,
+  `20261118000001_status_app_queries.sql`) y `admin_security_selfcheck()` (reglas a–j de
   `20261114000001_advisor_hardening` vivas: RLS, search_path, EXECUTE de anon en `admin_*`/`mycen_*` definer y
   triggers, vistas, buckets listables, `auth.uid()` sin select, extensiones en public, lectura "true"). Ajustes
   (perfil de prueba, backup revisado, límites del plan; Pro por defecto) en `mycen_admin_settings` con
