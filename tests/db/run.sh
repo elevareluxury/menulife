@@ -61,7 +61,8 @@ for m in \
   20261110000001_reserved_usernames_expand \
   20261111000001_life_os_metrics \
   20261112000001_life_onboarding \
-  20261113000001_signup_sources; do
+  20261113000001_signup_sources \
+  20261114000001_advisor_hardening; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 
