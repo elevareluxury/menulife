@@ -1,0 +1,146 @@
+/* "Hoy tu vida digital está fragmentada" (FragmentationSection). Desorden: cada herramienta flota a su ritmo, con un
+   aviso que titila, conexiones que se cortan y la huella apagada con interferencia. El orden lo arma el scroll (GSAP).
+   Sólo transform/opacity; con "reducir movimiento" queda la foto del desorden, quieta. Fuera de pantalla, en pausa. */
+
+.frag-viz {
+  position: relative;
+  height: clamp(340px, 52vw, 440px);
+  max-width: 760px;
+  margin: 0 auto;
+}
+.frag-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 30%, transparent 75%);
+  pointer-events: none;
+}
+
+/* Conexiones que se cortan: trazo punteado que aparece y se apaga */
+.frag-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.frag-line line { stroke: rgba(255, 255, 255, 0.14); stroke-width: 1; stroke-dasharray: 3 7; }
+
+/* ─── Núcleo ─── */
+.frag-core {
+  position: absolute; left: 50%; top: 50%;
+  width: clamp(96px, 18vw, 132px); aspect-ratio: 1;
+  margin: calc(clamp(96px, 18vw, 132px) / -2) 0 0 calc(clamp(96px, 18vw, 132px) / -2);
+  pointer-events: none;
+}
+.frag-huella, .frag-layer { position: absolute; inset: 0; }
+.frag-huella svg { width: 100%; height: 100%; }
+.frag-huella--off { opacity: 0.7; }
+.frag-ghost { opacity: 0; mix-blend-mode: screen; }
+.frag-huella--on { opacity: 0; }
+.frag-huella--on svg { filter: drop-shadow(0 0 14px rgba(255, 122, 89, 0.45)); }
+.frag-ring {
+  position: absolute; inset: -14%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 122, 89, 0.35);
+  background: radial-gradient(circle, rgba(255, 122, 89, 0.2) 0%, rgba(255, 122, 89, 0.06) 50%, transparent 72%);
+  box-shadow: 0 0 40px rgba(255, 122, 89, 0.18), inset 0 0 30px rgba(255, 122, 89, 0.12);
+  opacity: 0;
+}
+.frag-off-label {
+  position: absolute; left: 0; right: 0; top: calc(50% + clamp(56px, 10vw, 78px));
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-jakarta); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.32);
+  pointer-events: none;
+}
+
+/* ─── Herramientas ─── */
+.frag-holder { position: absolute; z-index: 1; }
+.frag-box {
+  position: relative;
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--c) 10%, rgba(15, 17, 21, 0.92));
+  border: 1px solid color-mix(in srgb, var(--c) 32%, transparent);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--c) 16%, transparent);
+}
+.frag-name {
+  position: absolute; top: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-jakarta); font-size: 11px; font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+}
+/* Aviso sin leer (sin números: no inventamos cantidades) */
+.frag-dot {
+  position: absolute; top: -4px; right: -4px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #F4705A;
+  border: 2px solid var(--ml-dark);
+}
+.frag-dot::after {
+  content: ''; position: absolute; inset: -2px;
+  border-radius: 50%;
+  border: 2px solid #F4705A;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .frag-holder { animation: frag-drift 7s ease-in-out infinite; }
+  .frag-line { animation: frag-flicker 3.6s steps(1, end) infinite; }
+  .frag-ghost--a { animation: frag-glitch-a 4.2s steps(1, end) infinite; }
+  .frag-ghost--b { animation: frag-glitch-b 4.2s steps(1, end) infinite; }
+  .frag-huella--off { animation: frag-dim 4.2s steps(1, end) infinite; }
+  .frag-dot { animation: frag-pop 3.8s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
+  .frag-dot::after { animation: frag-ping 3.8s ease-out infinite; animation-delay: inherit; }
+}
+
+/* Cada una a su ritmo (duración y retraso propios), un poco torcida */
+@keyframes frag-drift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(6px, -12px) rotate(2deg); }
+  50% { transform: translate(-4px, -4px) rotate(-1.5deg); }
+  75% { transform: translate(-8px, 8px) rotate(1deg); }
+}
+@keyframes frag-flicker {
+  0% { opacity: 1; }
+  38% { opacity: 0.15; }
+  42% { opacity: 1; }
+  44% { opacity: 0; }
+  70% { opacity: 0.6; }
+  86% { opacity: 0; }
+}
+/* Interferencia: las copias roja y celeste se corren un instante, cada tanto */
+@keyframes frag-glitch-a {
+  0%, 100% { transform: translate(0, 0); opacity: 0; }
+  80% { transform: translate(-4px, 1px); opacity: 0.45; }
+  83% { transform: translate(3px, -2px); opacity: 0.35; }
+  86% { transform: translate(-2px, 0); opacity: 0.4; }
+  89% { transform: translate(0, 0); opacity: 0; }
+}
+@keyframes frag-glitch-b {
+  0%, 100% { transform: translate(0, 0); opacity: 0; }
+  80% { transform: translate(4px, -1px); opacity: 0.45; }
+  83% { transform: translate(-3px, 2px); opacity: 0.35; }
+  86% { transform: translate(2px, 1px); opacity: 0.4; }
+  89% { transform: translate(0, 0); opacity: 0; }
+}
+@keyframes frag-dim {
+  0%, 100% { opacity: 0.7; }
+  80% { opacity: 0.3; }
+  86% { opacity: 0.65; }
+  88% { opacity: 0.25; }
+  90% { opacity: 0.7; }
+}
+@keyframes frag-pop {
+  0%, 60%, 100% { transform: scale(1); }
+  64% { transform: scale(1.5); }
+  70% { transform: scale(1); }
+}
+@keyframes frag-ping {
+  0%, 62% { transform: scale(1); opacity: 0; }
+  64% { opacity: 0.8; }
+  85%, 100% { transform: scale(2.6); opacity: 0; }
+}

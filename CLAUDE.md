@@ -140,6 +140,10 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   intercalado (`orbitStart`) para que nada se pise; cada cosa se endereza deshaciendo las transformaciones en orden
   inverso. Sólo transform/opacity; quieto con "reducir movimiento"; con mouse, el sistema se inclina en 3D. Decorativo
   (`aria-hidden`): lo dicen las tarjetas de abajo.
+  "Hoy tu vida digital está fragmentada" (`FragmentationSection` + `fragmentation.css`) es la entrada a esa sección:
+  herramientas que flotan a su ritmo con avisos (puntos, sin números), conexiones que se cortan y la huella apagada con
+  interferencia; al bajar (scrub, termina con el dibujo en el medio de la pantalla) se ordenan en un anillo y la huella
+  se enciende. Lo que anima CSS y lo que maneja el scroll van en elementos distintos (una animación CSS le gana a GSAP).
 - `advancedChunks` sólo agrupa supabase y react (+ el ayudante de precarga de Vite en `vendor`: en el bloque de supabase
   hacía que toda página bajara Supabase): agrupar recharts/framer a mano arrastraba dependencias a todas las páginas.
 - La entrada de la app no lleva Supabase ni i18next (antes de la V1: perfil 239 → 166 KB, landing 264 → 191 KB):
