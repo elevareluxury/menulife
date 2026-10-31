@@ -18,8 +18,8 @@ const it: LandingDict = {
     badgeGoalSub: '6/10 abitudini questo mese',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'Designer · Buenos Aires',
+    name: 'Olivia Parker',
+    descriptor: 'Designer · Miami',
     status: 'Disponibile per progetti',
     links: [
       { label: 'Il mio portfolio', sub: 'Progetti 2026' },

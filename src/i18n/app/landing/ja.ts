@@ -18,8 +18,8 @@ const ja: LandingDict = {
     badgeGoalSub: '今月の習慣 6/10',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'デザイナー · ブエノスアイレス',
+    name: 'Olivia Parker',
+    descriptor: 'デザイナー · マイアミ',
     status: 'プロジェクト受付中',
     links: [
       { label: 'ポートフォリオ', sub: '2026 年のプロジェクト' },

@@ -18,8 +18,8 @@ const ar: LandingDict = {
     badgeGoalSub: '6/10 عادات هذا الشهر',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'مصممة · بوينس آيرس',
+    name: 'Olivia Parker',
+    descriptor: 'مصممة · ميامي',
     status: 'متاحة للمشاريع',
     links: [
       { label: 'أعمالي', sub: 'مشاريع 2026' },

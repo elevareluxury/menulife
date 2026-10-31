@@ -18,8 +18,8 @@ const hi: LandingDict = {
     badgeGoalSub: 'इस महीने 6/10 आदतें',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'डिज़ाइनर · ब्यूनस आयर्स',
+    name: 'Olivia Parker',
+    descriptor: 'डिज़ाइनर · मियामी',
     status: 'प्रोजेक्ट के लिए उपलब्ध',
     links: [
       { label: 'मेरा पोर्टफ़ोलियो', sub: 'प्रोजेक्ट 2026' },

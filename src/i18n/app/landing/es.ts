@@ -27,8 +27,8 @@ const es = {
   },
   /** Ejemplo ilustrativo dentro del teléfono del hero (no es una persona real) */
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'Diseñadora · Buenos Aires',
+    name: 'Olivia Parker',
+    descriptor: 'Diseñadora · Miami',
     status: 'Disponible para proyectos',
     links: [
       { label: 'Mi portfolio', sub: 'Proyectos 2026' },

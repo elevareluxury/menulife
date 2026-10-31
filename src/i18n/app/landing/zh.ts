@@ -18,8 +18,8 @@ const zh: LandingDict = {
     badgeGoalSub: '本月 6/10 个习惯',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: '设计师 · 布宜诺斯艾利斯',
+    name: 'Olivia Parker',
+    descriptor: '设计师 · 迈阿密',
     status: '可接项目',
     links: [
       { label: '我的作品集', sub: '2026 年作品' },

@@ -18,8 +18,8 @@ const ko: LandingDict = {
     badgeGoalSub: '이번 달 습관 6/10',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: '디자이너 · 부에노스아이레스',
+    name: 'Olivia Parker',
+    descriptor: '디자이너 · 마이애미',
     status: '프로젝트 문의 가능',
     links: [
       { label: '포트폴리오', sub: '2026년 프로젝트' },
