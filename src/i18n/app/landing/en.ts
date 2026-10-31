@@ -175,7 +175,7 @@ const en: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Yes. Your profile has a layout designed for businesses, with WhatsApp, location, opening hours, products and a contact form, for free. Management tools (digital menu, orders, bookings) come later with Mycen Business.',
   },
-  footer: { product: 'Product', pricing: 'Pricing', faq: 'FAQ', contact: 'Contact', terms: 'Terms', privacy: 'Privacy', support: 'Help', madeBy: 'Made by Resilio' },
+  footer: { product: 'Product', pricing: 'Pricing', faq: 'FAQ', contact: 'Contact', terms: 'Terms', privacy: 'Privacy', support: 'Help' },
 }
 
 export default en

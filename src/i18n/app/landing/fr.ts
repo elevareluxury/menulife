@@ -175,7 +175,7 @@ const fr: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Oui. Votre profil propose une mise en page pensée pour les entreprises, avec WhatsApp, adresse, horaires, produits et formulaire de contact, gratuitement. Les outils de gestion (menu numérique, commandes, rendez-vous) arriveront plus tard avec Mycen Business.',
   },
-  footer: { product: 'Produit', pricing: 'Tarifs', faq: 'Questions', contact: 'Contact', terms: 'Conditions', privacy: 'Confidentialité', support: 'Aide', madeBy: 'Réalisé par Resilio' },
+  footer: { product: 'Produit', pricing: 'Tarifs', faq: 'Questions', contact: 'Contact', terms: 'Conditions', privacy: 'Confidentialité', support: 'Aide' },
 }
 
 export default fr

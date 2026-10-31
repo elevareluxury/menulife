@@ -175,7 +175,7 @@ const hi: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'हाँ। आपकी प्रोफ़ाइल में बिज़नेस के लिए बना एक लेआउट है, जिसमें WhatsApp, पता, खुलने का समय, प्रोडक्ट और संपर्क फ़ॉर्म मुफ़्त में जोड़ सकते हैं। मैनेजमेंट टूल (डिजिटल मेन्यू, ऑर्डर, बुकिंग) बाद में Mycen Business के साथ आएँगे।',
   },
-  footer: { product: 'प्रोडक्ट', pricing: 'कीमतें', faq: 'सवाल', contact: 'संपर्क', terms: 'शर्तें', privacy: 'गोपनीयता', support: 'मदद', madeBy: 'Resilio द्वारा बनाया गया' },
+  footer: { product: 'प्रोडक्ट', pricing: 'कीमतें', faq: 'सवाल', contact: 'संपर्क', terms: 'शर्तें', privacy: 'गोपनीयता', support: 'मदद' },
 }
 
 export default hi

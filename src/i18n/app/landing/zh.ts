@@ -175,7 +175,7 @@ const zh: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: '可以。你的主页有专为商家设计的版式，可放 WhatsApp、地址、营业时间、产品和联系表单，完全免费。经营工具（电子菜单、订单、预约）稍后会随 Mycen Business 推出。',
   },
-  footer: { product: '产品', pricing: '价格', faq: '常见问题', contact: '联系我们', terms: '条款', privacy: '隐私', support: '帮助', madeBy: '由 Resilio 打造' },
+  footer: { product: '产品', pricing: '价格', faq: '常见问题', contact: '联系我们', terms: '条款', privacy: '隐私', support: '帮助' },
 }
 
 export default zh

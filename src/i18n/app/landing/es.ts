@@ -196,7 +196,6 @@ const es = {
     terms: 'Términos',
     privacy: 'Privacidad',
     support: 'Ayuda',
-    madeBy: 'Hecho por Resilio',
   },
 }
 

@@ -35,12 +35,14 @@
 .frag-huella--off { opacity: 0.7; }
 .frag-ghost { opacity: 0; mix-blend-mode: screen; }
 .frag-huella--on { opacity: 0; }
-.frag-huella--on svg { filter: drop-shadow(0 0 14px rgba(255, 122, 89, 0.45)); }
+.frag-huella--on svg {
+  filter: brightness(1.35) saturate(1.15) drop-shadow(0 0 1.5px rgba(255, 160, 130, 0.95)) drop-shadow(0 0 18px rgba(255, 122, 89, 0.6));
+}
 .frag-ring {
   position: absolute; inset: -14%;
   border-radius: 50%;
   border: 1px solid rgba(255, 122, 89, 0.35);
-  background: radial-gradient(circle, rgba(255, 122, 89, 0.2) 0%, rgba(255, 122, 89, 0.06) 50%, transparent 72%);
+  background: radial-gradient(circle, rgba(255, 122, 89, 0.34) 0%, rgba(255, 122, 89, 0.1) 50%, transparent 72%);
   box-shadow: 0 0 40px rgba(255, 122, 89, 0.18), inset 0 0 30px rgba(255, 122, 89, 0.12);
   opacity: 0;
 }

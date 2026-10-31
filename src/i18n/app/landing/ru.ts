@@ -175,7 +175,7 @@ const ru: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Да. У профиля есть макет для бизнеса: WhatsApp, адрес, часы работы, товары и форма для связи — бесплатно. Инструменты управления (цифровое меню, заказы, запись) появятся позже в Mycen Business.',
   },
-  footer: { product: 'Продукт', pricing: 'Цены', faq: 'Вопросы', contact: 'Контакты', terms: 'Условия', privacy: 'Конфиденциальность', support: 'Помощь', madeBy: 'Сделано Resilio' },
+  footer: { product: 'Продукт', pricing: 'Цены', faq: 'Вопросы', contact: 'Контакты', terms: 'Условия', privacy: 'Конфиденциальность', support: 'Помощь' },
 }
 
 export default ru

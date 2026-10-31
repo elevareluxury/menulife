@@ -31,7 +31,7 @@ export function Footer() {
       padding: '40px 24px calc(32px + env(safe-area-inset-bottom))',
       fontFamily: 'var(--font-jakarta)',
     }}>
-      {/* Todo centrado en columna: la huella, los links y la firma */}
+      {/* Todo centrado en columna: la huella y los links */}
       <div style={{
         maxWidth: '1280px', margin: '0 auto',
         display: 'flex', flexDirection: 'column',
@@ -54,10 +54,6 @@ export function Footer() {
             <Link key={link.to} to={link.to} style={linkStyle} {...hover}>{link.label}</Link>
           ))}
         </nav>
-
-        <span data-rise style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)' }}>
-          {t.madeBy}
-        </span>
       </div>
     </footer>
   )

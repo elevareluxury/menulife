@@ -175,7 +175,7 @@ const pt: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Sim. Seu perfil tem uma estrutura pensada para negócios, com WhatsApp, localização, horários, produtos e formulário de contato, de graça. As ferramentas de gestão (cardápio digital, pedidos, agendamentos) chegam mais adiante com o Mycen Business.',
   },
-  footer: { product: 'Produto', pricing: 'Preços', faq: 'Perguntas', contact: 'Contato', terms: 'Termos', privacy: 'Privacidade', support: 'Ajuda', madeBy: 'Feito por Resilio' },
+  footer: { product: 'Produto', pricing: 'Preços', faq: 'Perguntas', contact: 'Contato', terms: 'Termos', privacy: 'Privacidade', support: 'Ajuda' },
 }
 
 export default pt
