@@ -6,6 +6,8 @@ import { projectKey } from '../lib/clickKeys'
 import type { ProfileLang } from '../lib/profileTypes'
 import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
+import { useProfileModule } from './profileModuleContext'
+import { Huella } from '@/design/components/Huella'
 
 // Módulos que muestran proyectos (Identity Fase 5). Las tarjetas vienen resueltas en `module.projects`
 // (sólo proyectos publicados); el módulo guarda únicamente los ids.
@@ -35,6 +37,16 @@ export function ProjectModule({ module, lang, onAction }: ModuleProps) {
   )
 }
 
+/** Proyecto sin portada: la huella del perfil sobre un fondo del acento (antes, un rectángulo vacío) */
+function CoverArt() {
+  const ctx = useProfileModule()
+  return (
+    <span className="mp-portfolio-img mp-cover-art-fallback" aria-hidden="true">
+      {ctx && <Huella seed={ctx.seed} variant={ctx.variant} />}
+    </span>
+  )
+}
+
 export function PortfolioModule({ module, lang, onAction }: ModuleProps) {
   const cards = (module.projects ?? []).filter(c => cardPath(c))
   if (!cards.length) return null
@@ -49,7 +61,7 @@ export function PortfolioModule({ module, lang, onAction }: ModuleProps) {
           return (
             <a key={card.id} className="mp-portfolio-item" href={cardPath(card)!} onClick={() => onAction(module.id, projectKey(card.id))}>
               <SafeImage className="mp-portfolio-img" src={cover ?? undefined} alt="" loading="lazy"
-                fallback={<span className="mp-portfolio-img" aria-hidden="true" />} />
+                fallback={<CoverArt />} />
               <span className="mp-portfolio-title">{title}</span>
               {summary && <span className="mp-portfolio-summary">{summary}</span>}
             </a>

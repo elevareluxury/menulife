@@ -402,7 +402,7 @@ const pt: StudioDict = {
       network: 'Rede', handle: 'Usuário ou URL', whatsapp: 'WhatsApp', phone: 'Telefone', email: 'E-mail', address: 'Endereço',
       city: 'Cidade', mapsUrl: 'Link do Google Maps (opcional)', text: 'Texto', image: 'Imagem', caption: 'Legenda (opcional)',
       alt: 'Descrição para acessibilidade', buttonText: 'Texto do botão', name: 'Nome', description: 'Descrição',
-      price: 'Preço (opcional)', tag: 'Etiqueta (opcional)', ctaText: 'Texto do botão (opcional)', ctaUrl: 'URL do botão (opcional)',
+      price: 'Preço (opcional)', currency: 'Moeda', tag: 'Etiqueta (opcional)', ctaText: 'Texto do botão (opcional)', ctaUrl: 'URL do botão (opcional)',
       sectionTitle: 'Título da seção (opcional)', layout: 'Como aparecem',
     },
     placeholders: {

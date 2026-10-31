@@ -108,7 +108,9 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   const Layout = LAYOUTS[look.layout]
 
   const hours = profile.modules.find(m => m.type === 'hours')
-  const open = hours && profile.theme.show_open_status !== false
+  // "Abierto/Cerrado ahora" arriba sólo en perfiles de negocio (con local vinculado o el Hub importado lo pidió): en una
+  // persona con horarios de atención contradecía su estado ("Disponible" + "Cerrado ahora")
+  const open = hours && (profile.business || profile.theme.show_open_status === true)
     ? isOpenNow(hours.content.schedule as WeekSchedule, (hours.content.timezone as string) ?? profile.business?.timezone)
     : null
 

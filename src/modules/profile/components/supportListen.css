@@ -52,7 +52,8 @@
 .mp-listen-title { margin: 0; font: 700 var(--my-fs-section) / var(--my-lh-title) var(--my-font-display); overflow-wrap: anywhere; }
 .mp-listen-artist { margin: 0; color: var(--my-muted); font-size: var(--my-fs-body); overflow-wrap: anywhere; }
 
-.mp-listen-links { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+/* Una plataforma por fila: "Apple Music" o "YouTube Music" no se parten en dos renglones y ninguna queda sola */
+.mp-listen-links { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .mp-listen-link {
   display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 12px;
   border-radius: var(--my-r-action); border: 1px solid var(--my-border); background: var(--my-tile); color: var(--my-text);

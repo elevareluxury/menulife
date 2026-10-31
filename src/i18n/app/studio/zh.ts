@@ -402,7 +402,7 @@ const zh: StudioDict = {
       network: '平台', handle: '用户名或 URL', whatsapp: 'WhatsApp', phone: '电话', email: '邮箱', address: '地址',
       city: '城市', mapsUrl: 'Google 地图链接（可选）', text: '文字', image: '图片', caption: '图片说明（可选）',
       alt: '无障碍描述', buttonText: '按钮文字', name: '名称', description: '描述',
-      price: '价格（可选）', tag: '标签（可选）', ctaText: '按钮文字（可选）', ctaUrl: '按钮链接（可选）',
+      price: '价格（可选）', currency: '货币', tag: '标签（可选）', ctaText: '按钮文字（可选）', ctaUrl: '按钮链接（可选）',
       sectionTitle: '分区标题（可选）', layout: '显示方式',
     },
     placeholders: {

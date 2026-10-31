@@ -87,7 +87,10 @@ describe('api/og', () => {
     expect(html).not.toContain('javascript:')
     expect(html).toContain('&lt;/script&gt;&lt;b&gt;hola&lt;/b&gt;')
     const ld = /<script type="application\/ld\+json">(.*?)<\/script>/.exec(html)?.[1] ?? ''
-    expect(JSON.parse(ld)).toMatchObject({ '@type': 'Person', name: 'Ana', sameAs: ['https://instagram.com/ana'] })
+    expect(JSON.parse(ld)).toMatchObject({
+      '@type': 'ProfilePage', url: 'https://mycen.id/ana',
+      mainEntity: { '@type': 'Person', name: 'Ana', alternateName: '@ana', identifier: 'ana', sameAs: ['https://instagram.com/ana'] },
+    })
     expect(html).not.toContain('noindex')
   })
 

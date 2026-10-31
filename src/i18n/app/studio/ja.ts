@@ -402,7 +402,7 @@ const ja: StudioDict = {
       network: 'サービス', handle: 'ユーザー名または URL', whatsapp: 'WhatsApp', phone: '電話番号', email: 'メール', address: '住所',
       city: '市区町村', mapsUrl: 'Google マップのリンク（任意）', text: 'テキスト', image: '画像', caption: 'キャプション（任意）',
       alt: 'アクセシビリティ用の説明', buttonText: 'ボタンのテキスト', name: '名前', description: '説明',
-      price: '価格（任意）', tag: 'ラベル（任意）', ctaText: 'ボタンのテキスト（任意）', ctaUrl: 'ボタンの URL（任意）',
+      price: '価格（任意）', currency: '通貨', tag: 'ラベル（任意）', ctaText: 'ボタンのテキスト（任意）', ctaUrl: 'ボタンの URL（任意）',
       sectionTitle: 'セクションのタイトル（任意）', layout: '表示方法',
     },
     placeholders: {

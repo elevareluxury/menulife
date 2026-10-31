@@ -38,6 +38,10 @@ export function CollabModule({ module, lang, onAction }: ModuleProps) {
   const [message, setMessage] = useState('')
   const [trap, setTrap] = useState('')
   const [status, setStatus] = useState<Status>('idle')
+  // Arranca cerrado: título, invitación y un botón; el formulario (8 campos) se abre en el lugar al tocarlo
+  const [open, setOpen] = useState(false)
+  const firstField = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (open) firstField.current?.querySelector('input')?.focus({ preventScroll: true }) }, [open])
   const text = (key: string) => tr(typeof module.content[key] === 'string' ? module.content[key] as string : '', module.translations, key, lang)
   const title = tr(module.title, module.translations, 'title', lang) || t.title
   const intro = text('intro')
@@ -95,8 +99,13 @@ export function CollabModule({ module, lang, onAction }: ModuleProps) {
       <h2 id={headingId} className="mp-form-title">{title}</h2>
       {intro && <p className="mp-form-intro">{intro}</p>}
       {rates && <p className="mp-collab-rates">{rates}</p>}
+      {!open ? (
+        <button type="button" className="mp-primary" aria-expanded={false} onClick={() => setOpen(true)}>
+          {text('button') || t.propose}
+        </button>
+      ) : (
       <form onSubmit={send} noValidate className="mp-form-fields">
-        <Field label={t.name} value={name} onChange={e => setName(e.target.value)} maxLength={80} autoComplete="name" required />
+        <div ref={firstField} className="mp-form-first"><Field label={t.name} value={name} onChange={e => setName(e.target.value)} maxLength={80} autoComplete="name" required /></div>
         <Field label={t.email} type="email" value={email} onChange={e => setEmail(e.target.value)} maxLength={120} autoComplete="email" required />
         <Field label={t.company} value={company} onChange={e => setCompany(e.target.value)} maxLength={120} autoComplete="organization" required />
         <Field label={t.website} hint={t.websiteHint} type="url" inputMode="url" value={website} onChange={e => setWebsite(e.target.value)}
@@ -121,6 +130,7 @@ export function CollabModule({ module, lang, onAction }: ModuleProps) {
         </button>
         <p className="mp-form-note">{ctx?.preview ? t.preview : t.private}</p>
       </form>
+      )}
     </section>
   )
 }

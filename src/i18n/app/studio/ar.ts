@@ -402,7 +402,7 @@ const ar: StudioDict = {
       network: 'الشبكة', handle: 'اسم المستخدم أو الرابط', whatsapp: 'واتساب', phone: 'الهاتف', email: 'البريد الإلكتروني', address: 'العنوان',
       city: 'المدينة', mapsUrl: 'رابط خرائط Google (اختياري)', text: 'النص', image: 'الصورة', caption: 'تعليق (اختياري)',
       alt: 'وصف لإمكانية الوصول', buttonText: 'نص الزر', name: 'الاسم', description: 'الوصف',
-      price: 'السعر (اختياري)', tag: 'وسم (اختياري)', ctaText: 'نص الزر (اختياري)', ctaUrl: 'رابط الزر (اختياري)',
+      price: 'السعر (اختياري)', currency: 'العملة', tag: 'وسم (اختياري)', ctaText: 'نص الزر (اختياري)', ctaUrl: 'رابط الزر (اختياري)',
       sectionTitle: 'عنوان القسم (اختياري)', layout: 'طريقة العرض',
     },
     placeholders: {

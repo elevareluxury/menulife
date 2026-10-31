@@ -47,12 +47,15 @@ export function MediaModule({ module, lang, onAction }: ModuleProps) {
           />
         </div>
       ) : (
-        <button type="button" className="mp-media-facade" style={video ? { aspectRatio: String(Math.max(embed.ratio, 16 / 9)) } : undefined}
+        // Música: la tarjeta mide lo mismo que el reproductor que la reemplaza, así la página no salta al tocar
+        <button type="button" className="mp-media-facade"
+          style={video ? { aspectRatio: String(Math.max(embed.ratio, 16 / 9)) } : embed.height ? { minHeight: embed.height } : undefined}
           onClick={() => { setPlaying(true); onAction(module.id) }}>
           {/* Portada guardada; si ya no existe, la huella (nunca un ícono de imagen rota) */}
           {cover
             ? <SafeImage className="mp-media-cover" sizing="column" src={cover} alt="" loading="lazy" decoding="async" fallback={art} />
             : art}
+          {cover && <span className="mp-media-scrim" aria-hidden="true" />}
           <span className="mp-media-play" aria-hidden="true"><Play size={22} fill="currentColor" /></span>
           <span className="mp-media-text">
             <span className="mp-media-title">{title}</span>

@@ -402,7 +402,7 @@ const en: StudioDict = {
       network: 'Network', handle: 'Username or URL', whatsapp: 'WhatsApp', phone: 'Phone', email: 'Email', address: 'Address',
       city: 'City', mapsUrl: 'Google Maps link (optional)', text: 'Text', image: 'Image', caption: 'Caption (optional)',
       alt: 'Description for accessibility', buttonText: 'Button text', name: 'Name', description: 'Description',
-      price: 'Price (optional)', tag: 'Tag (optional)', ctaText: 'Button text (optional)', ctaUrl: 'Button URL (optional)',
+      price: 'Price (optional)', currency: 'Currency', tag: 'Tag (optional)', ctaText: 'Button text (optional)', ctaUrl: 'Button URL (optional)',
       sectionTitle: 'Section title (optional)', layout: 'How they are shown',
     },
     placeholders: {

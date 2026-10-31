@@ -18,6 +18,8 @@ export interface CollabStrings {
   deadline: string
   message: string
   send: string
+  /** Botón que abre el formulario (Colaboraciones arranca cerrado: son 8 campos) */
+  propose: string
   sending: string
   sent: string
   sendAnother: string
@@ -47,6 +49,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'Fecha límite (opcional)',
     message: 'Contanos la propuesta',
     send: 'Enviar propuesta',
+    propose: 'Proponer una colaboración',
     sending: 'Enviando…',
     sent: 'Propuesta enviada. Te van a responder pronto.',
     sendAnother: 'Enviar otra propuesta',
@@ -74,6 +77,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'Deadline (optional)',
     message: 'Tell us about the proposal',
     send: 'Send proposal',
+    propose: 'Propose a collaboration',
     sending: 'Sending…',
     sent: 'Proposal sent. You will get a reply soon.',
     sendAnother: 'Send another proposal',
@@ -101,6 +105,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'Prazo (opcional)',
     message: 'Conte a proposta',
     send: 'Enviar proposta',
+    propose: 'Propor uma colaboração',
     sending: 'Enviando…',
     sent: 'Proposta enviada. Você vai receber uma resposta em breve.',
     sendAnother: 'Enviar outra proposta',
@@ -128,6 +133,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'Date limite (facultatif)',
     message: 'Décrivez la proposition',
     send: 'Envoyer la proposition',
+    propose: 'Proposer une collaboration',
     sending: 'Envoi…',
     sent: 'Proposition envoyée. Vous recevrez bientôt une réponse.',
     sendAnother: 'Envoyer une autre proposition',
@@ -155,6 +161,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'Frist (optional)',
     message: 'Beschreibt euren Vorschlag',
     send: 'Vorschlag senden',
+    propose: 'Zusammenarbeit vorschlagen',
     sending: 'Wird gesendet…',
     sent: 'Vorschlag gesendet. Du bekommst bald eine Antwort.',
     sendAnother: 'Weiteren Vorschlag senden',
@@ -182,6 +189,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'Scadenza (facoltativa)',
     message: 'Raccontaci la proposta',
     send: 'Invia proposta',
+    propose: 'Proponi una collaborazione',
     sending: 'Invio…',
     sent: 'Proposta inviata. Riceverai presto una risposta.',
     sendAnother: 'Invia un’altra proposta',
@@ -209,6 +217,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: '截止日期（可选）',
     message: '介绍一下合作提案',
     send: '发送提案',
+    propose: '提出合作',
     sending: '发送中…',
     sent: '提案已发送。你很快会收到回复。',
     sendAnother: '再发一个提案',
@@ -236,6 +245,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: '締め切り（任意）',
     message: 'ご提案の内容',
     send: '提案を送信',
+    propose: 'コラボを提案する',
     sending: '送信中…',
     sent: '提案を送信しました。まもなく返信があります。',
     sendAnother: '別の提案を送る',
@@ -263,6 +273,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: '마감일 (선택)',
     message: '제안 내용을 알려 주세요',
     send: '제안 보내기',
+    propose: '협업 제안하기',
     sending: '보내는 중…',
     sent: '제안을 보냈습니다. 곧 답장을 받을 거예요.',
     sendAnother: '다른 제안 보내기',
@@ -290,6 +301,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'अंतिम तारीख (वैकल्पिक)',
     message: 'अपना प्रस्ताव बताएं',
     send: 'प्रस्ताव भेजें',
+    propose: 'सहयोग का प्रस्ताव दें',
     sending: 'भेजा जा रहा है…',
     sent: 'प्रस्ताव भेज दिया गया। जल्द ही जवाब मिलेगा।',
     sendAnother: 'एक और प्रस्ताव भेजें',
@@ -317,6 +329,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'الموعد النهائي (اختياري)',
     message: 'أخبرنا عن العرض',
     send: 'إرسال العرض',
+    propose: 'اقترح تعاونًا',
     sending: 'جارٍ الإرسال…',
     sent: 'تم إرسال العرض. سيصلك رد قريبًا.',
     sendAnother: 'إرسال عرض آخر',
@@ -344,6 +357,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     deadline: 'Срок (необязательно)',
     message: 'Расскажите о предложении',
     send: 'Отправить предложение',
+    propose: 'Предложить сотрудничество',
     sending: 'Отправка…',
     sent: 'Предложение отправлено. Скоро вам ответят.',
     sendAnother: 'Отправить ещё одно',

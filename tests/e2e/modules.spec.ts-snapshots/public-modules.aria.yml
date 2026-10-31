@@ -18,8 +18,6 @@
   - button "Compartir"
   - heading "Ana Pérez" [level=1]
   - paragraph: Diseñadora
-  - list:
-    - listitem: Cerrado ahora
   - paragraph: Hago marcas.
   - button "Guardar contacto"
   - link /Mi portfolio Trabajos \d+/:
@@ -80,10 +78,12 @@
   - region "Reseñas":
     - heading "Reseñas" [level=2]
     - strong: "4.8"
-    - text: /★★★★★ \d+ reseñas/
+    - img "4.8 / 5"
+    - text: /\d+ reseñas/
     - link "Ver en Google":
       - /url: https://g.page/r/ana
-    - text: Juan ★★★★★
+    - text: Juan
+    - img "5 / 5"
     - paragraph: Excelente trabajo.
   - link /Marca Café Luna Identidad \d+ Ver proyecto/:
     - /url: /ana/projects/cafe-luna

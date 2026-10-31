@@ -48,6 +48,12 @@ test('la dueña agrega Colaboraciones, publica, una marca propone y la dueña la
   await expect(form.getByText('Tarifas desde USD 300')).toBeVisible()
   expect(await axeViolations(vPage)).toEqual([])
 
+  // Arranca cerrado (son 8 campos): se abre con el botón y el foco va al primer campo
+  const opener = form.getByRole('button', { name: 'Proponer una colaboración' })
+  await expect(opener).toHaveAttribute('aria-expanded', 'false')
+  await expect(form.getByRole('textbox', { name: 'Tu nombre' })).toHaveCount(0)
+  await opener.click()
+  await expect(form.getByRole('textbox', { name: 'Tu nombre' })).toBeFocused()
   await form.getByRole('textbox', { name: 'Tu nombre' }).fill('Sofía')
   await form.getByRole('textbox', { name: 'Email de contacto' }).fill('sofi@cafeluna.com')
   await form.getByRole('textbox', { name: 'Empresa o marca' }).fill('Café Luna')
@@ -117,6 +123,7 @@ test('validación, un bot ve "enviada" sin guardar y el formulario de contacto n
   const vPage = await visitor.newPage()
   await vPage.goto('/ana')
   const form = vPage.getByRole('region', { name: 'Colaboraciones' })
+  await form.getByRole('button', { name: 'Proponer una colaboración' }).click()
   await form.getByRole('button', { name: 'Enviar propuesta' }).click()
   await expect(form.getByRole('alert')).toHaveText('Completá tu nombre, un email válido, la empresa, qué buscan y la propuesta.')
 

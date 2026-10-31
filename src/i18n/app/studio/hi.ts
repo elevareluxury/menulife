@@ -402,7 +402,7 @@ const hi: StudioDict = {
       network: 'नेटवर्क', handle: 'यूज़रनेम या URL', whatsapp: 'WhatsApp', phone: 'फ़ोन', email: 'ईमेल', address: 'पता',
       city: 'शहर', mapsUrl: 'Google Maps लिंक (वैकल्पिक)', text: 'टेक्स्ट', image: 'इमेज', caption: 'कैप्शन (वैकल्पिक)',
       alt: 'सुलभता के लिए विवरण', buttonText: 'बटन का टेक्स्ट', name: 'नाम', description: 'विवरण',
-      price: 'कीमत (वैकल्पिक)', tag: 'लेबल (वैकल्पिक)', ctaText: 'बटन का टेक्स्ट (वैकल्पिक)', ctaUrl: 'बटन का URL (वैकल्पिक)',
+      price: 'कीमत (वैकल्पिक)', currency: 'मुद्रा', tag: 'लेबल (वैकल्पिक)', ctaText: 'बटन का टेक्स्ट (वैकल्पिक)', ctaUrl: 'बटन का URL (वैकल्पिक)',
       sectionTitle: 'सेक्शन शीर्षक (वैकल्पिक)', layout: 'कैसे दिखें',
     },
     placeholders: {

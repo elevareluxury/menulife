@@ -6,6 +6,7 @@ import { isExternal, safeHref, telHref, whatsappHref } from '../lib/safeUrl'
 import { todayKey, WEEK_DAYS } from '../lib/schedule'
 import { NETWORK_LABELS } from '../lib/networks'
 import { urlKey } from '../lib/clickKeys'
+import { formatPrice } from '../lib/price'
 import { SocialIcon } from './SocialIcon'
 import { SafeImage } from './SafeImage'
 import { useScrollLock } from '@/lib/scrollLock'
@@ -82,7 +83,7 @@ export function LinkGroupModule({ module, lang, onAction }: ModuleProps) {
   const heading = tr(module.title, module.translations, 'title', lang)
   return (
     <section className="mp-link-group" aria-label={heading || ui(lang).links}>
-      {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
+      {heading && <h2 className="mp-card-title mp-link-group-title">{heading}</h2>}
       {items.map((i, n) => (
         <LinkRow key={i.href + n} href={i.href} title={str(i.title)} subtitle={str(i.subtitle)} onClick={() => onAction(module.id, urlKey(i.url))} />
       ))}
@@ -208,7 +209,7 @@ export function ImageModule({ module, lang }: ModuleProps) {
     <figure className="mp-card mp-image-card" style={{ padding: 0, margin: 0 }}>
       <SafeImage className={`mp-image mp-image-${shape}`} sizing="column" src={src} alt={str(module.content.alt) || caption} loading="lazy"
         onLoad={e => setShape(imageShape(e.currentTarget))} onFail={() => setFailed(true)} />
-      {caption && <figcaption style={{ padding: '12px 16px', fontSize: 14, color: 'var(--p-muted)' }}>{caption}</figcaption>}
+      {caption && <figcaption className="mp-image-caption">{caption}</figcaption>}
     </figure>
   )
 }
@@ -220,8 +221,8 @@ export function FeaturedActionModule({ module, lang, onAction }: ModuleProps) {
   const label = tr(str(module.content.label) || module.title, module.translations, 'label', lang)
   if (!href || !label) return null
   return (
-    <a className="mp-btn-ghost" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>
-      {label} <ArrowUpRight size={16} aria-hidden="true" />
+    <a className="mp-featured" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>
+      {label} <ArrowUpRight size={18} aria-hidden="true" />
     </a>
   )
 }
@@ -246,13 +247,13 @@ export function ProductModule({ module, lang, onAction }: ModuleProps) {
           {description && <p className="mp-product-desc">{description}</p>}
           {price != null && (
             <span className="mp-product-price">
-              $ {new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'es-AR').format(price)}
+              {formatPrice(price, str(module.content.currency), lang)}
             </span>
           )}
         </div>
       </div>
       {ctaHref && ctaText && (
-        <a className="mp-btn-ghost" style={{ marginTop: 14 }} href={ctaHref} {...linkProps(ctaHref)}
+        <a className="mp-featured mp-product-cta" href={ctaHref} {...linkProps(ctaHref)}
           onClick={() => onAction(module.id)}>
           {ctaText}
         </a>
@@ -341,6 +342,16 @@ export function GalleryModule({ module, lang }: ModuleProps) {
 
 interface Review { author_name?: string; rating?: number; text?: string }
 
+/** Siempre 5 estrellas (las que faltan, tenues): la fila no se corre y se entiende "4 de 5" de un vistazo */
+function Stars({ rating }: { rating: number }) {
+  const full = Math.max(0, Math.min(5, Math.round(rating)))
+  return (
+    <span className="mp-stars" role="img" aria-label={`${rating} / 5`}>
+      {[0, 1, 2, 3, 4].map(i => <span key={i} aria-hidden="true" className={i < full ? undefined : 'is-off'}>★</span>)}
+    </span>
+  )
+}
+
 export function TestimonialsModule({ module, lang, onAction }: ModuleProps) {
   const t = ui(lang)
   const items = (Array.isArray(module.content.items) ? module.content.items : []) as Review[]
@@ -352,14 +363,14 @@ export function TestimonialsModule({ module, lang, onAction }: ModuleProps) {
     <section className="mp-card" aria-label={t.reviews}>
       <h2 className="mp-card-title">{trLabel(module.title, lang) || t.reviews}</h2>
       {google?.rating != null && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: items.length ? 14 : 0 }}>
-          <strong style={{ fontSize: 28 }}>{google.rating.toFixed(1)}</strong>
-          <div style={{ fontSize: 13, color: 'var(--p-muted)' }}>
-            <div className="mp-stars" aria-label={`${google.rating} / 5`}>{'★'.repeat(Math.round(google.rating))}</div>
-            {google.count ? `${google.count} ${t.reviewsCount}` : null}
+        <div className={`mp-rating${items.length ? ' has-items' : ''}`}>
+          <strong className="mp-rating-value">{google.rating.toFixed(1)}</strong>
+          <div className="mp-rating-meta">
+            <Stars rating={google.rating} />
+            {google.count ? <span>{google.count} {t.reviewsCount}</span> : null}
           </div>
           {googleHref && (
-            <a className="mp-btn-ghost" style={{ marginLeft: 'auto', minHeight: 40 }} href={googleHref}
+            <a className="mp-btn-ghost mp-rating-link" href={googleHref}
               target="_blank" rel="noopener noreferrer" onClick={() => onAction(module.id)}>
               {t.seeOnGoogle}
             </a>
@@ -370,7 +381,7 @@ export function TestimonialsModule({ module, lang, onAction }: ModuleProps) {
         <div key={i} className="mp-review">
           <div className="mp-review-head">
             <span>{r.author_name}</span>
-            {r.rating ? <span className="mp-stars" aria-label={`${r.rating} / 5`}>{'★'.repeat(Math.min(5, r.rating))}</span> : null}
+            {r.rating ? <Stars rating={r.rating} /> : null}
           </div>
           {r.text && <p>{r.text}</p>}
         </div>

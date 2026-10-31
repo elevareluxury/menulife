@@ -402,7 +402,7 @@ const ko: StudioDict = {
       network: '서비스', handle: '사용자 이름 또는 URL', whatsapp: 'WhatsApp', phone: '전화', email: '이메일', address: '주소',
       city: '도시', mapsUrl: 'Google 지도 링크(선택)', text: '텍스트', image: '이미지', caption: '캡션(선택)',
       alt: '접근성을 위한 설명', buttonText: '버튼 텍스트', name: '이름', description: '설명',
-      price: '가격(선택)', tag: '라벨(선택)', ctaText: '버튼 텍스트(선택)', ctaUrl: '버튼 URL(선택)',
+      price: '가격(선택)', currency: '통화', tag: '라벨(선택)', ctaText: '버튼 텍스트(선택)', ctaUrl: '버튼 URL(선택)',
       sectionTitle: '섹션 제목(선택)', layout: '표시 방식',
     },
     placeholders: {
