@@ -49,6 +49,8 @@ const ja: LandingDict = {
     organizationSub: '整った毎日の暮らし',
     business: 'ビジネス',
     businessSub: 'もっと力強い運営',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'リンク', messages: 'メッセージ', projects: 'プロジェクト', qr: 'QR', tasks: 'タスク', habits: '習慣', money: 'お金', goals: '目標', menu: 'メニュー', orders: '注文', bookings: '予約', sales: '売上' },
   },
   life: {
     label: 'LIFE OS',
@@ -173,7 +175,7 @@ const ja: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'はい。プロフィールにはビジネス向けのレイアウトがあり、WhatsApp、所在地、営業時間、商品、問い合わせフォームを無料で載せられます。運営ツール（デジタルメニュー、注文、予約）は今後 Mycen Business で提供予定です。',
   },
-  footer: { product: '製品', pricing: '料金', faq: 'よくある質問', contact: 'お問い合わせ', terms: '利用規約', privacy: 'プライバシー', support: 'ヘルプ', madeBy: 'Resilio 制作' },
+  footer: { product: '製品', pricing: '料金', faq: 'よくある質問', contact: 'お問い合わせ', terms: '利用規約', privacy: 'プライバシー', support: 'ヘルプ' },
 }
 
 export default ja

@@ -49,6 +49,8 @@ const ru: LandingDict = {
     organizationSub: 'Порядок в личной жизни',
     business: 'Бизнес',
     businessSub: 'Ваше дело на новом уровне',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'Ссылки', messages: 'Сообщения', projects: 'Проекты', qr: 'QR', tasks: 'Задачи', habits: 'Привычки', money: 'Деньги', goals: 'Цели', menu: 'Меню', orders: 'Заказы', bookings: 'Записи', sales: 'Продажи' },
   },
   life: {
     label: 'LIFE OS',
@@ -173,7 +175,7 @@ const ru: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Да. У профиля есть макет для бизнеса: WhatsApp, адрес, часы работы, товары и форма для связи — бесплатно. Инструменты управления (цифровое меню, заказы, запись) появятся позже в Mycen Business.',
   },
-  footer: { product: 'Продукт', pricing: 'Цены', faq: 'Вопросы', contact: 'Контакты', terms: 'Условия', privacy: 'Конфиденциальность', support: 'Помощь', madeBy: 'Сделано Resilio' },
+  footer: { product: 'Продукт', pricing: 'Цены', faq: 'Вопросы', contact: 'Контакты', terms: 'Условия', privacy: 'Конфиденциальность', support: 'Помощь' },
 }
 
 export default ru

@@ -49,6 +49,8 @@ const en: LandingDict = {
     organizationSub: 'Your personal life in order',
     business: 'Business',
     businessSub: 'Your operation, supercharged',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'Links', messages: 'Messages', projects: 'Projects', qr: 'QR', tasks: 'Tasks', habits: 'Habits', money: 'Money', goals: 'Goals', menu: 'Menu', orders: 'Orders', bookings: 'Bookings', sales: 'Sales' },
   },
   life: {
     label: 'LIFE OS',
@@ -173,7 +175,7 @@ const en: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Yes. Your profile has a layout designed for businesses, with WhatsApp, location, opening hours, products and a contact form, for free. Management tools (digital menu, orders, bookings) come later with Mycen Business.',
   },
-  footer: { product: 'Product', pricing: 'Pricing', faq: 'FAQ', contact: 'Contact', terms: 'Terms', privacy: 'Privacy', support: 'Help', madeBy: 'Made by Resilio' },
+  footer: { product: 'Product', pricing: 'Pricing', faq: 'FAQ', contact: 'Contact', terms: 'Terms', privacy: 'Privacy', support: 'Help' },
 }
 
 export default en

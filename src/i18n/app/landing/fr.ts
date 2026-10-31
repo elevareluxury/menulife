@@ -49,6 +49,8 @@ const fr: LandingDict = {
     organizationSub: 'Votre vie personnelle en ordre',
     business: 'Entreprise',
     businessSub: 'Votre activité, décuplée',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'Liens', messages: 'Messages', projects: 'Projets', qr: 'QR', tasks: 'Tâches', habits: 'Habitudes', money: 'Argent', goals: 'Objectifs', menu: 'Menu', orders: 'Commandes', bookings: 'Rendez-vous', sales: 'Ventes' },
   },
   life: {
     label: 'LIFE OS',
@@ -173,7 +175,7 @@ const fr: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Oui. Votre profil propose une mise en page pensée pour les entreprises, avec WhatsApp, adresse, horaires, produits et formulaire de contact, gratuitement. Les outils de gestion (menu numérique, commandes, rendez-vous) arriveront plus tard avec Mycen Business.',
   },
-  footer: { product: 'Produit', pricing: 'Tarifs', faq: 'Questions', contact: 'Contact', terms: 'Conditions', privacy: 'Confidentialité', support: 'Aide', madeBy: 'Réalisé par Resilio' },
+  footer: { product: 'Produit', pricing: 'Tarifs', faq: 'Questions', contact: 'Contact', terms: 'Conditions', privacy: 'Confidentialité', support: 'Aide' },
 }
 
 export default fr

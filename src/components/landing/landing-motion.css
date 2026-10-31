@@ -51,23 +51,12 @@
   .ml-phone-live .ml-phone-link { animation: ml-phone-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .ml-phone-dot { animation: ml-pulse-dot 1.8s ease-in-out infinite; }
   .ml-phone-avatar { animation: ml-avatar-glow 3.2s ease-in-out infinite; }
-
-  /* Órbita de la solución: núcleo que late, satélites que flotan y datos que viajan por las líneas */
-  .ml-core-ring { animation: ml-ring 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-  .ml-core-ring:nth-child(2) { animation-delay: 1.4s; }
-  .ml-sat-float { animation: ml-bob 5s ease-in-out infinite; }
-  .ml-flow { animation: ml-flow 1.6s linear infinite; }
-  .ml-orbit { animation: ml-spin 60s linear infinite; transform-origin: 50px 50px; }
 }
 
 @keyframes ml-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes ml-phone-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes ml-pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 50% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); } }
 @keyframes ml-avatar-glow { 0%, 100% { box-shadow: 0 4px 20px rgba(244, 112, 90, 0.35); } 50% { box-shadow: 0 4px 34px rgba(244, 112, 90, 0.7); } }
-@keyframes ml-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@keyframes ml-ring { from { transform: translate(-50%, -50%) scale(1); opacity: 0.6; } to { transform: translate(-50%, -50%) scale(2.4); opacity: 0; } }
-@keyframes ml-flow { to { stroke-dashoffset: -8; } }
-@keyframes ml-spin { to { transform: rotate(360deg); } }
 
 /* Huella de la barra de arriba: crece un poco al pasar el puntero */
 .nav-huella .huella-mark { transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }

@@ -49,6 +49,8 @@ const de: LandingDict = {
     organizationSub: 'Dein Privatleben in Ordnung',
     business: 'Business',
     businessSub: 'Dein Betrieb, gestärkt',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'Links', messages: 'Nachrichten', projects: 'Projekte', qr: 'QR', tasks: 'Aufgaben', habits: 'Gewohnheiten', money: 'Geld', goals: 'Ziele', menu: 'Speisekarte', orders: 'Bestellungen', bookings: 'Termine', sales: 'Verkäufe' },
   },
   life: {
     label: 'LIFE OS',
@@ -173,7 +175,7 @@ const de: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Ja. Dein Profil hat ein Layout für Unternehmen, mit WhatsApp, Standort, Öffnungszeiten, Produkten und Kontaktformular – kostenlos. Die Verwaltungstools (digitale Speisekarte, Bestellungen, Termine) kommen später mit Mycen Business.',
   },
-  footer: { product: 'Produkt', pricing: 'Preise', faq: 'Fragen', contact: 'Kontakt', terms: 'AGB', privacy: 'Datenschutz', support: 'Hilfe', madeBy: 'Gemacht von Resilio' },
+  footer: { product: 'Produkt', pricing: 'Preise', faq: 'Fragen', contact: 'Kontakt', terms: 'AGB', privacy: 'Datenschutz', support: 'Hilfe' },
 }
 
 export default de

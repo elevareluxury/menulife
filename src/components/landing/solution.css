@@ -1,0 +1,160 @@
+/* "Todo conectado" (SolutionSection): la huella de Mycen en el centro y una órbita por cada parte.
+   Las órbitas son círculos concéntricos en un plano inclinado y aplastado (perspectiva sin 3D). Lo que viaja gira con el
+   plano y se endereza deshaciendo cada transformación en orden inverso (giro, inclinación y aplastado), así el texto
+   queda derecho y nítido. Todo el movimiento es transform/opacity; con "reducir movimiento" queda quieto y repartido
+   en la órbita. Fuera de pantalla se pausa (.ml-paused). */
+
+.sol-viz {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  aspect-ratio: 2 / 1;
+  margin: 0 auto 56px;
+  container-type: inline-size;
+  color: #fff;
+  background: none;
+  user-select: none;
+}
+@media (max-width: 520px) { .sol-viz { aspect-ratio: 16 / 10; margin-bottom: 32px; } }
+/* --k = cuánto se aplasta la órbita (1 = círculo). Con más órbitas, o en el celular, menos: así lo de órbitas vecinas
+   no queda a la misma altura en los costados */
+.sol-stage { position: absolute; inset: 0; --k: 0.36; }
+.sol-viz[data-orbits="3"] .sol-stage { --k: 0.5; }
+
+.sol-halo {
+  position: absolute; left: 50%; top: 50%;
+  width: 80cqw; aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 122, 89, 0.16) 0%, rgba(125, 211, 252, 0.06) 38%, transparent 66%);
+  pointer-events: none;
+}
+
+/* ─── Núcleo ─────────────────────────────────────────────────────────────── */
+.sol-core {
+  position: absolute; inset: 0; margin: auto;
+  width: 21cqw; height: 21cqw;
+}
+.sol-core::before {
+  content: ''; position: absolute; inset: -35%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 122, 89, 0.38) 0%, rgba(255, 122, 89, 0.12) 40%, transparent 70%);
+}
+/* La huella es de puntos finos: el brillo (sobre el mismo svg que gira, así se dibuja una vez y sólo rota) la hace
+   leer como luz y no como un dibujo transparente */
+.sol-core svg {
+  position: relative; width: 100%; height: 100%;
+  filter: brightness(1.35) saturate(1.15) drop-shadow(0 0 1.5px rgba(255, 160, 130, 0.95)) drop-shadow(0 0 18px rgba(255, 122, 89, 0.6));
+}
+.sol-burst, .sol-wave {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 122, 89, 0.55);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── Órbitas ────────────────────────────────────────────────────────────── */
+.sol-orbit { position: absolute; inset: 0; pointer-events: none; }
+.sol-plane {
+  --r: calc(var(--rr) * var(--sol-s, 1) * 1cqw);
+  position: absolute; left: 50%; top: 50%;
+  width: 0; height: 0;
+  transform: rotate(var(--tilt)) scaleY(var(--k));
+}
+.sol-ring, .sol-sweep {
+  position: absolute;
+  left: calc(-1 * var(--r)); top: calc(-1 * var(--r));
+  width: calc(2 * var(--r)); height: calc(2 * var(--r));
+  border-radius: 50%;
+}
+.sol-ring { border: 1px solid color-mix(in srgb, var(--c) 32%, transparent); }
+/* Estela de luz que recorre la órbita */
+.sol-sweep {
+  background: conic-gradient(from 0deg, transparent 0 74%, color-mix(in srgb, var(--c) 90%, #fff) 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2px));
+  opacity: 0.85;
+}
+
+.sol-spin, .sol-arm, .sol-unspin, .sol-upright, .sol-depth { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.sol-arm { transform: rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a))); }
+.sol-upright { transform: scaleY(calc(1 / var(--k))) rotate(calc(-1 * var(--tilt))); }
+/* Caja de tamaño 0 que centra lo de adentro en el punto de la órbita (y escala desde ahí) */
+.sol-depth { display: flex; align-items: center; justify-content: center; }
+
+/* ─── Lo que viaja ───────────────────────────────────────────────────────── */
+.sol-planet, .sol-chip {
+  display: flex; align-items: center; flex: none;
+  white-space: nowrap;
+  font-family: var(--font-jakarta);
+  border-radius: 999px;
+}
+.sol-planet {
+  gap: 8px;
+  padding: 5px 13px 5px 5px;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.01em;
+  color: #fff;
+  background: rgba(12, 14, 20, 0.9);
+  border: 1px solid color-mix(in srgb, var(--c) 50%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 9%, transparent), 0 10px 32px color-mix(in srgb, var(--c) 30%, transparent);
+}
+.sol-chip {
+  gap: 5px;
+  padding: 3px 9px 3px 3px;
+  font-size: 11px; font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(12, 14, 20, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sol-icon {
+  display: grid; place-items: center; flex: none;
+  border-radius: 50%;
+  color: color-mix(in srgb, var(--c) 55%, #fff);
+  background: color-mix(in srgb, var(--c) 24%, transparent);
+}
+.sol-planet .sol-icon { width: 30px; height: 30px; }
+.sol-chip .sol-icon { width: 20px; height: 20px; }
+
+/* Celular: las cosas chicas quedan como íconos y el nombre del planeta va debajo */
+@container (max-width: 480px) {
+  .sol-stage { --sol-s: 0.92; --k: 0.6; }
+  .sol-chip { padding: 2px; }
+  .sol-chip .sol-icon { width: 18px; height: 18px; }
+  .sol-chip svg { width: 11px; height: 11px; }
+  .sol-chip .sol-label { display: none; }
+  .sol-planet {
+    flex-direction: column; gap: 4px;
+    padding: 0;
+    font-size: 10px;
+    background: none; border: 0; box-shadow: none;
+  }
+  .sol-planet .sol-icon {
+    width: 32px; height: 32px;
+    background: rgba(12, 14, 20, 0.92);
+    border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--c) 35%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sol-spin { animation: sol-spin var(--dur) linear infinite; }
+  .sol-unspin { animation: sol-unspin var(--dur) linear infinite; }
+  .sol-depth { animation: sol-depth var(--dur) linear infinite; }
+  .sol-sweep { animation: sol-spin var(--sweep) linear infinite; }
+  .sol-wave { animation: sol-wave 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+  .sol-wave + .sol-wave { animation-delay: 1.8s; }
+}
+
+@keyframes sol-spin { to { transform: rotate(360deg); } }
+@keyframes sol-unspin { to { transform: rotate(-360deg); } }
+/* Adelante (abajo, 90°) más grande y nítido; atrás (arriba, 270°) más chico y tenue */
+@keyframes sol-depth {
+  0%, 100% { transform: scale(0.94); opacity: 0.85; }
+  25% { transform: scale(1.08); opacity: 1; }
+  50% { transform: scale(0.94); opacity: 0.85; }
+  75% { transform: scale(0.8); opacity: 0.5; }
+}
+@keyframes sol-wave {
+  from { transform: scale(0.95); opacity: 0.5; }
+  to { transform: scale(2.3); opacity: 0; }
+}

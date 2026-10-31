@@ -49,6 +49,8 @@ const ar: LandingDict = {
     organizationSub: 'حياتك الشخصية منظّمة',
     business: 'الأعمال',
     businessSub: 'عملك بقوة أكبر',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'روابط', messages: 'رسائل', projects: 'مشاريع', qr: 'QR', tasks: 'مهام', habits: 'عادات', money: 'المال', goals: 'أهداف', menu: 'القائمة', orders: 'الطلبات', bookings: 'المواعيد', sales: 'المبيعات' },
   },
   life: {
     label: 'LIFE OS',
@@ -173,7 +175,7 @@ const ar: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'نعم. لملفك تصميم مخصّص للأنشطة التجارية، فيه واتساب والموقع وساعات العمل والمنتجات ونموذج تواصل، مجانًا. أما أدوات الإدارة (القائمة الرقمية والطلبات والمواعيد) فستأتي لاحقًا مع Mycen Business.',
   },
-  footer: { product: 'المنتج', pricing: 'الأسعار', faq: 'الأسئلة', contact: 'تواصل معنا', terms: 'الشروط', privacy: 'الخصوصية', support: 'المساعدة', madeBy: 'من صنع Resilio' },
+  footer: { product: 'المنتج', pricing: 'الأسعار', faq: 'الأسئلة', contact: 'تواصل معنا', terms: 'الشروط', privacy: 'الخصوصية', support: 'المساعدة' },
 }
 
 export default ar

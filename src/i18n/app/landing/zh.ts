@@ -49,6 +49,8 @@ const zh: LandingDict = {
     organizationSub: '井井有条的个人生活',
     business: '生意',
     businessSub: '更强大的经营',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: '链接', messages: '消息', projects: '项目', qr: '二维码', tasks: '任务', habits: '习惯', money: '财务', goals: '目标', menu: '菜单', orders: '订单', bookings: '预约', sales: '销售' },
   },
   life: {
     label: 'LIFE OS',
@@ -173,7 +175,7 @@ const zh: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: '可以。你的主页有专为商家设计的版式，可放 WhatsApp、地址、营业时间、产品和联系表单，完全免费。经营工具（电子菜单、订单、预约）稍后会随 Mycen Business 推出。',
   },
-  footer: { product: '产品', pricing: '价格', faq: '常见问题', contact: '联系我们', terms: '条款', privacy: '隐私', support: '帮助', madeBy: '由 Resilio 打造' },
+  footer: { product: '产品', pricing: '价格', faq: '常见问题', contact: '联系我们', terms: '条款', privacy: '隐私', support: '帮助' },
 }
 
 export default zh

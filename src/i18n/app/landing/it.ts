@@ -49,6 +49,8 @@ const it: LandingDict = {
     organizationSub: 'La tua vita personale in ordine',
     business: 'Business',
     businessSub: 'La tua attività, potenziata',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'Link', messages: 'Messaggi', projects: 'Progetti', qr: 'QR', tasks: 'Attività', habits: 'Abitudini', money: 'Soldi', goals: 'Obiettivi', menu: 'Menù', orders: 'Ordini', bookings: 'Prenotazioni', sales: 'Vendite' },
   },
   life: {
     label: 'LIFE OS',
@@ -173,7 +175,7 @@ const it: LandingDict = {
     /** Con Business apagado: la misma pregunta con esta respuesta */
     businessSoon: 'Sì. Il tuo profilo ha una struttura pensata per le attività, con WhatsApp, posizione, orari, prodotti e modulo di contatto, gratis. Gli strumenti di gestione (menu digitale, ordini, prenotazioni) arriveranno più avanti con Mycen Business.',
   },
-  footer: { product: 'Prodotto', pricing: 'Prezzi', faq: 'Domande', contact: 'Contatti', terms: 'Termini', privacy: 'Privacy', support: 'Aiuto', madeBy: 'Realizzato da Resilio' },
+  footer: { product: 'Prodotto', pricing: 'Prezzi', faq: 'Domande', contact: 'Contatti', terms: 'Termini', privacy: 'Privacy', support: 'Aiuto' },
 }
 
 export default it
