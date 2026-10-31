@@ -106,7 +106,7 @@ test('sin título del video y con un canal que no responde: en público no se mu
   await expect(region.getByRole('button', { name: /^Último video.*Reproducir en YouTube/ })).toBeVisible()
   await expect(page.getByText('Cómo hago mis tazas')).toHaveCount(0)
   // Bento: tamaño grande
-  await expect(page.locator('.mp-b-L .mp-latest')).toHaveCount(1)
+  await expect(page.locator('.mp-s-featured .mp-latest')).toHaveCount(1)
   // El canal que no responde no deja nada (ni el esqueleto de carga)
   await expect(page.getByRole('region', { name: 'Otro canal' })).toHaveCount(0)
 

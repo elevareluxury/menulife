@@ -10,8 +10,10 @@ import { Button, Drawer, ImageField, SelectField, TextField } from './ui'
 import { urlOnBlur } from '../lib/urlInput'
 import { clearDraft, readDraft, writeDraft } from '@/lib/editDraft'
 import { useStudioT, type StudioDict } from '@/i18n/app/studio'
+import { sizeOptions, type ModuleSize } from '@/modules/profile/lib/moduleSize'
+import { profileLook } from '@/modules/profile/lib/profileLook'
 
-interface ModuleDraft { values: Record<string, string>; en: Record<string, string>; extra?: unknown; showFrom: string; showUntil: string }
+interface ModuleDraft { values: Record<string, string>; en: Record<string, string>; extra?: unknown; showFrom: string; showUntil: string; size?: string }
 
 const str = (v: unknown) => (v == null ? '' : String(v))
 
@@ -71,11 +73,13 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
   // Programación (Fase 7): se guarda en config.show_from / show_until
   const [showFrom, setShowFrom] = useState(() => draft?.showFrom ?? toLocalInput(module?.config?.show_from))
   const [showUntil, setShowUntil] = useState(() => draft?.showUntil ?? toLocalInput(module?.config?.show_until))
+  // Tamaño en la grilla del perfil (config.size, lib/moduleSize); '' = el de siempre de la estructura
+  const [size, setSize] = useState(() => draft?.size ?? (typeof module?.config?.size === 'string' ? module.config.size : ''))
   const touched = useRef(!!draft)
   useEffect(() => {
     if (!touched.current) { touched.current = true; return }
-    writeDraft(draftKey, { values, en, extra, showFrom, showUntil } satisfies ModuleDraft)
-  }, [draftKey, values, en, extra, showFrom, showUntil])
+    writeDraft(draftKey, { values, en, extra, showFrom, showUntil, size } satisfies ModuleDraft)
+  }, [draftKey, values, en, extra, showFrom, showUntil, size])
   const close = () => { clearDraft(draftKey); onClose() }
   const [showSchedule, setShowSchedule] = useState(() => !!(module?.config?.show_from || module?.config?.show_until))
   const [submitted, setSubmitted] = useState(false)
@@ -83,6 +87,8 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
+  const bento = profileLook(profile.theme).layout === 'bento'
+  const sizes = sizeOptions({ type, content: { ...(module?.content ?? {}), url: values.url ?? module?.content?.url } }, bento)
   const set = (k: string, v: string) => { setValues(prev => ({ ...prev, [k]: v })); setError(null); setSaved(false) }
   const translatable = def.fields.filter(f => f.translatable)
 
@@ -135,6 +141,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
     const until = fromLocalInput(showUntil)
     if (from) config.show_from = from; else delete config.show_from
     if (until) config.show_until = until; else delete config.show_until
+    if (size) config.size = size; else delete config.size
     return { title, content, translations, config }
   }
 
@@ -197,6 +204,21 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
         })}
 
         {def.extra && <def.extra.Editor value={extra} onChange={v => { setExtra(v); setError(null) }} userId={userId} fields={values} setField={set} />}
+
+        {sizes.length > 1 && (
+          <div className="st-stack" style={{ gap: 6 }}>
+            <span className="st-label" id={`size-${draftKey}`}>{e.size}</span>
+            <div className="st-segment st-size" role="group" aria-labelledby={`size-${draftKey}`}>
+              {(['', ...sizes] as Array<ModuleSize | ''>).map(s => (
+                <button key={s || 'auto'} type="button" aria-pressed={s ? size === s : !sizes.includes(size as ModuleSize)}
+                  onClick={() => { setSize(s); setSaved(false) }}>
+                  {s ? e.sizes[s] : e.sizes.auto}
+                </button>
+              ))}
+            </div>
+            <p className="st-help" style={{ margin: 0 }}>{e.sizeHelp}</p>
+          </div>
+        )}
 
         {translatable.length > 0 && (
           <div className="st-card" style={{ background: 'var(--st-bg)' }}>

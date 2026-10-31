@@ -26,7 +26,7 @@ Errores que un visitante nota y que restan confianza:
 | A12 | Proyecto sin portada deja un hueco; flyer de Entradas más alto que la pantalla | Detalles | S |
 | A13 | Formularios: título pegado, desplegable distinto, fecha "mm/dd/yyyy" | Detalles | S |
 
-## B. Tamaños por módulo y un Bento de verdad (PR "Tamaños", V1 si llega; si no, primer PR de la V1.1)
+## B. Tamaños por módulo y un Bento de verdad (PR "Tamaños", V1) — hecho el 31/10/2026
 
 El cambio que más se va a notar: hoy todo es una franja de ancho completo y el perfil parece una lista larga.
 

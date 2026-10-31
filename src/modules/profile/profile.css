@@ -119,7 +119,7 @@
 }
 
 /* ── Módulos ────────────────────────────────────────────────────── */
-.mp-modules { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.mp-modules { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 28px; }
 
 .mp-card {
   background: var(--p-card-bg); border: 1px solid var(--p-card-border);
@@ -187,6 +187,11 @@
 .mp-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .mp-gallery button { padding: 0; border: 0; background: var(--p-surface-2); border-radius: calc(12px * var(--p-rs, 1)); overflow: hidden; aspect-ratio: 1; cursor: zoom-in; }
 .mp-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Con 1 o 2 fotos no queda un tercio vacío */
+.mp-gallery:has(> :only-child) { grid-template-columns: 1fr; }
+.mp-gallery:has(> :nth-child(2):last-child) { grid-template-columns: repeat(2, 1fr); }
+/* Títulos de colecciones sin tarjeta (Proyectos, Trabajos, Entradas): alineados con los de las tarjetas */
+.mp-section-title { padding-inline: 4px; }
 
 .mp-lightbox {
   position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.92);
@@ -243,7 +248,8 @@
 }
 
 /* ── Accesibilidad ──────────────────────────────────────────────── */
-.mp-root :focus-visible { outline: 2px solid var(--p-accent); outline-offset: 3px; border-radius: calc(12px * var(--p-rs, 1)); }
+/* El contorno sigue la forma de cada control (antes les cambiaba el radio: un botón redondo quedaba cuadrado al enfocarlo) */
+.mp-root :focus-visible { outline: 2px solid var(--p-accent); outline-offset: 3px; }
 .mp-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -583,6 +589,6 @@
    párrafo toma la dirección de su propio texto, así el punto final de "Hago marcas." no salta al principio. */
 .mp-root[dir='rtl'] :is(.mp-bio, .mp-ed-bio, .mp-text-body, .mp-text-heading, .mp-card-title, .mp-link-title, .mp-link-sub,
   .mp-product-name, .mp-product-desc, .mp-review p, .mp-cards-title, .mp-cards-sub, .mp-project-title, .mp-project-summary,
-  .mp-portfolio-title, .mp-portfolio-summary, .mp-media-title, .mp-image-caption, .mp-form-intro) { unicode-bidi: plaintext; }
+  .mp-portfolio-title, .mp-portfolio-summary, .mp-media-title, .mp-image-caption, .mp-form-intro) { unicode-bidi: plaintext; text-align: right; }
 /* Las flechas "salir hacia" se espejan en árabe */
 .mp-root[dir='rtl'] :is(.lucide-arrow-up-right, .lucide-chevron-right) { transform: scaleX(-1); }

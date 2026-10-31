@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
-import type { BentoSize } from '../components/moduleRegistry'
+import type { ModuleSize } from '../lib/moduleSize'
 import type { ProfileLook } from '../lib/profileLook'
 import type { UiStrings } from '../lib/profileI18n'
 
 /** Un módulo (o grupo de módulos) ya dibujado, listo para que cada estructura lo ubique */
 export interface RenderedBlock {
   key: string
-  size: BentoSize
+  size: ModuleSize
   node: ReactNode
 }
 

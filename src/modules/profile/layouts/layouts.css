@@ -71,7 +71,7 @@
 .mp-cred .mp-chips { justify-content: flex-start; margin-bottom: 8px; }
 .mp-cred .mp-tags { justify-content: flex-start; }
 .mp-cred-handle { position: relative; margin: 6px 0 0; font-size: var(--my-fs-meta); color: var(--my-subtle); letter-spacing: 0.02em; }
-.mp-cred-bio { margin-top: 18px; }
+.mp-cred-bio { margin-top: 18px; margin-inline: 0; }
 
 /* ── Portada: la primera pantalla es la tapa ─────────────────── */
 .mp-layout-portada .mp-container { padding-top: 0; }
@@ -80,6 +80,8 @@
   min-height: calc(100svh - 64px); margin: 0 -20px; padding: 0; overflow: hidden;
 }
 .mp-cover-art { position: absolute; inset: 0; display: grid; place-items: center; background: var(--my-tile); }
+/* Sin foto, la huella va sobre el cielo (en la compu, el fondo liso era un rectángulo de bordes duros) */
+.mp-cover-art:not(:has(img)) { background: none; }
 /* La foto cubre toda la tapa. Posicionada (no por la grilla): en Safari el alto en % de un hijo de grilla no se
    resolvía, la foto quedaba con su alto natural, centrada, y arriba se veía una franja vacía */
 .mp-cover-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
@@ -123,15 +125,76 @@
 .mp-bento .mp-chips, .mp-bento .mp-tags { justify-content: flex-start; position: relative; }
 .mp-bento-bio { position: relative; margin: 8px 0 0; text-align: start; }
 .mp-bento-actions { margin-top: 12px; }
-.mp-bento-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
-/* Sin "dense": el orden es el que eligió el dueño (antes un bloque chico de abajo subía a llenar un hueco) */
-.mp-b-S { grid-column: span 1; }
-.mp-b-M, .mp-b-L { grid-column: 1 / -1; }
-.mp-b-S > *, .mp-b-S .mp-link { height: 100%; }
+.mp-bento-grid { margin-top: 12px; }
 .mp-bento .mp-card, .mp-bento .mp-link { border-radius: var(--my-r-bento); }
 .mp-bento .mp-link-group { border-radius: var(--my-r-bento); }
 .mp-bento .mp-link-group .mp-link { border-radius: 0; }
-.mp-b-S .mp-link { flex-direction: column; align-items: flex-start; justify-content: space-between; min-height: 112px; }
+
+/* Bento en la compu: la identidad queda fija a la izquierda y los módulos van a la derecha en 4 columnas
+   (ModuleStack mide la grilla). Por contenedor, no por pantalla: la vista previa de Studio es angosta. */
+.mp-root.mp-layout-bento { container: mp-page / inline-size; }
+@container mp-page (min-width: 1000px) {
+  .mp-layout-bento .mp-container, .mp-layout-bento .mp-topbar { max-width: 1160px; }
+  .mp-bento { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: 40px; align-items: start; }
+  .mp-bento-side { position: sticky; top: 76px; }
+  .mp-bento-grid { margin-top: 20px; }
+  /* La barra de arriba no se queda fija ni pinta una franja: con la identidad a la vista no hace falta */
+  .mp-layout-bento .mp-topbar { position: static; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
+/* ── Tamaños de los módulos (lib/moduleSize · ModuleStack) ───────── */
+.mp-tile { min-width: 0; display: flex; flex-direction: column; }
+/* El módulo llena su lugar cuando la fila es más alta que él (al lado de un cuadrado) */
+.mp-tile > * { flex: 1 1 auto; }
+.mp-tile.mp-s-square { min-height: var(--mp-sq, 0px); }
+/* Al tocar "Reproducir" en un cuadrado o un vertical, el reproductor pasa a toda la fila */
+.mp-tile:has(.mp-media-frame) { grid-column: 1 / -1 !important; }
+
+.mp-s-square > :is(.mp-card, figure) { display: flex; flex-direction: column; }
+.mp-s-square > .mp-card:not(.mp-media) { padding: 16px; }
+/* Link: ícono arriba, título abajo, flecha en la esquina */
+.mp-s-square .mp-link { position: relative; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 16px; }
+.mp-s-square .mp-link-icon { width: 44px; height: 44px; }
+.mp-s-square .mp-link-arrow { position: absolute; top: 14px; inset-inline-end: 14px; }
+.mp-s-square .mp-link-body { flex: none; width: 100%; }
+.mp-s-square :is(.mp-link-title, .mp-project-title) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.mp-s-square .mp-link-sub { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.mp-s-square :is(.mp-link-card, .mp-project) { display: flex; flex-direction: column; }
+.mp-s-square :is(.mp-link-card-img, .mp-project-cover) { flex: 1 1 0; min-height: 72px; aspect-ratio: auto; height: auto; }
+.mp-s-square :is(.mp-link-card-body, .mp-project-body) { padding: 12px 14px 14px; }
+.mp-s-square .mp-project-summary { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+/* Foto: llena el cuadrado */
+.mp-s-square .mp-image { flex: 1 1 0; min-height: 0; width: 100%; height: 100%; margin: 0; object-fit: cover; aspect-ratio: auto; }
+.mp-s-square .mp-image-caption { padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Producto: foto arriba, nombre y precio; el botón queda abajo */
+.mp-s-square .mp-product { flex-direction: column; align-items: stretch; gap: 10px; }
+.mp-s-square .mp-product img { width: 100%; height: auto; aspect-ratio: 4 / 3; }
+.mp-s-square .mp-product-desc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.mp-s-square .mp-product-cta { margin-top: auto; }
+.mp-s-square .mp-product + .mp-product-cta { margin-top: 14px; }
+
+/* Video y música en cuadrado o vertical: portada a sangre, "Reproducir" y el título abajo */
+.mp-s-square .mp-media, .mp-s-vertical .mp-media { display: flex; flex-direction: column; }
+.mp-s-square .mp-media-facade { flex: 1 1 auto; aspect-ratio: auto !important; min-height: var(--mp-sq, 160px) !important; }
+.mp-s-square .mp-media-facade, .mp-s-vertical .mp-media-facade { flex-direction: column; align-items: flex-start !important; justify-content: flex-end; gap: 10px; padding: 14px; }
+.mp-s-square .mp-media-play, .mp-s-vertical .mp-media-play { width: 44px; height: 44px; }
+.mp-s-square .mp-media-title, .mp-s-vertical .mp-media-title {
+  font-size: var(--my-fs-body); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.mp-s-square .mp-media-music .mp-media-art svg { width: 110% !important; margin: 0; }
+/* Un vertical solo en su fila no ocupa todo el ancho (sería más alto que la pantalla) */
+.mp-s-wide[data-size='vertical'] .mp-media-facade { max-width: 340px; margin-inline: auto; }
+
+/* Barra (Spotify compacto, 80 px como su reproductor): portada chica, título y "Reproducir" al final */
+.mp-media.mp-media-bar .mp-media-facade, .mp-media.mp-media-bar .mp-media-facade:has(.mp-media-cover) {
+  height: 80px; min-height: 80px; align-items: center; gap: 12px; padding: 12px 14px;
+}
+.mp-media-bar .mp-media-cover { position: relative; inset: auto; order: -1; flex: none; width: 56px; height: 56px; border-radius: 10px; }
+.mp-media-bar .mp-media-scrim { display: none; }
+.mp-media-bar .mp-media-art { opacity: 0.45; }
+.mp-media-bar .mp-media-text { order: 1; flex: 1; }
+.mp-media-bar .mp-media-title { font-size: var(--my-fs-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-media-bar .mp-media-play { order: 2; width: 44px; height: 44px; }
 
 /* La foto es un objeto sólido delante de la huella */
 .my-profile .mp-avatar { background: var(--my-tile); border-color: var(--my-bg); box-shadow: 0 0 0 1px var(--my-border); color: var(--my-muted); }

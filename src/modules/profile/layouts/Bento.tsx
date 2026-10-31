@@ -1,13 +1,16 @@
 import { Huella } from '@/design/components/Huella'
 import type { LayoutParts } from './types'
-import { inAt, useReveal } from './motion'
+import { inAt } from './motion'
+import { ModuleStack } from './ModuleStack'
 
-/** Bento: grilla de 2 columnas; cada tipo de módulo tiene su tamaño (S, M o L) en moduleRegistry. */
+/**
+ * Bento: tarjetas de tamaños distintos (lib/moduleSize). En el celular, 2 columnas; con lugar (compu), la identidad
+ * queda fija a la izquierda y los módulos en 4 columnas a la derecha.
+ */
 export default function Bento(p: LayoutParts) {
-  const gridRef = useReveal<HTMLDivElement>(p.blocks.map(b => b.key).join(','), !p.preview)
   return (
     <div className="mp-bento">
-      {p.identity(<>
+      <div className="mp-bento-side">{p.identity(<>
         <section className="mp-header mp-bento-hero my-glass my-glass--hero mp-in mp-in-fade" style={inAt(0)}>
           <Huella seed={p.seed} variant={p.look.huellaVariant} spin draw className="mp-bento-huella" />
           <div className="mp-bento-id">
@@ -25,14 +28,8 @@ export default function Bento(p: LayoutParts) {
           {p.primary}
           {p.secondary}
         </div>
-      </>)}
-      {p.blocks.length > 0 && (
-        <div className="mp-bento-grid" ref={gridRef}>
-          {p.blocks.map((b, i) => (
-            <div key={b.key} className={`mp-b-${b.size} mp-in mp-module-in`} style={inAt(7 + i)}>{b.node}</div>
-          ))}
-        </div>
-      )}
+      </>)}</div>
+      <ModuleStack blocks={p.blocks} className="mp-bento-grid" preview={p.preview} four />
     </div>
   )
 }

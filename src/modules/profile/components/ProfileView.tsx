@@ -13,7 +13,8 @@ import { downloadVCard } from '../lib/vcard'
 import { lookVars, profileLook } from '../lib/profileLook'
 import { profileHandle, signupLink, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
 import { LAYOUTS } from './profileLayouts'
-import { bentoSize, publicModuleDef, type BentoSize, type GroupProps } from './moduleRegistry'
+import { publicModuleDef, type GroupProps } from './moduleRegistry'
+import { moduleSize, type ModuleSize } from '../lib/moduleSize'
 import { ProfileModuleContext } from './profileModuleContext'
 import type { ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
@@ -31,19 +32,20 @@ const ClaimName = lazy(() => import('@/components/claim/ClaimName').then(m => ({
 
 /** Bloques a dibujar: los tipos con `Group` (ej.: redes) se juntan si son consecutivos. */
 type Block =
-  | { kind: 'module'; module: ProfileModule; View: React.ComponentType<ModuleProps>; size: BentoSize }
-  | { kind: 'group'; modules: ProfileModule[]; Group: React.ComponentType<GroupProps>; size: BentoSize }
+  | { kind: 'module'; module: ProfileModule; View: React.ComponentType<ModuleProps>; size: ModuleSize }
+  | { kind: 'group'; modules: ProfileModule[]; Group: React.ComponentType<GroupProps>; size: ModuleSize }
 
-function toBlocks(modules: ProfileModule[]): Block[] {
+/** `bento`: la estructura Bento (tamaños de siempre por tipo y "Destacado"); en las demás, ancho salvo que se elija otro */
+function toBlocks(modules: ProfileModule[], bento: boolean): Block[] {
   const blocks: Block[] = []
   for (const m of modules) {
     const def = publicModuleDef(m.type)
     const last = blocks[blocks.length - 1]
     if (def?.Group) {
       if (last?.kind === 'group' && last.Group === def.Group) last.modules.push(m)
-      else blocks.push({ kind: 'group', modules: [m], Group: def.Group, size: bentoSize(def, m) })
+      else blocks.push({ kind: 'group', modules: [m], Group: def.Group, size: moduleSize(m, bento) })
     } else if (def?.View) {
-      blocks.push({ kind: 'module', module: m, View: def.View, size: bentoSize(def, m) })
+      blocks.push({ kind: 'module', module: m, View: def.View, size: moduleSize(m, bento) })
     }
   }
   return blocks
@@ -102,9 +104,9 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   const name = tr(profile.display_name, profile.translations, 'display_name', lang)
   const descriptor = tr(profile.descriptor, profile.translations, 'descriptor', lang)
   const bio = tr(profile.bio, profile.translations, 'bio', lang)
-  const blocks = useMemo(() => toBlocks(profile.modules), [profile.modules])
   const coverSrc = safeHref(profile.cover_url)
   const look = useMemo(() => profileLook(profile.theme), [profile.theme])
+  const blocks = useMemo(() => toBlocks(profile.modules, look.layout === 'bento'), [profile.modules, look.layout])
   const Layout = LAYOUTS[look.layout]
 
   const hours = profile.modules.find(m => m.type === 'hours')

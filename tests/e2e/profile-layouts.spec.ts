@@ -100,8 +100,8 @@ test('bento: cada tipo de módulo tiene su tamaño', async ({ page, context }) =
   const state = createState({ profiles: [profile({ layout: 'bento' })], profile_modules: rows() })
   await installSupabaseMock(context, state)
   await page.goto('/ana')
-  await expect(page.locator('.mp-bento-grid > .mp-b-S').first()).toBeVisible()
-  await expect(page.locator('.mp-bento-grid > .mp-b-L').first()).toBeVisible()
+  await expect(page.locator('.mp-bento-grid > [data-size="square"]').first()).toBeVisible()
+  await expect(page.locator('.mp-bento-grid > .mp-s-featured').first()).toBeVisible()
 })
 
 test('perfiles de antes: modo claro y un color libre se ven en Clásica, Amanecer y el acento más cercano', async ({ page, context }) => {

@@ -30,8 +30,8 @@ test('el perfil con 3 videos y canciones no carga nada de terceros hasta que se 
   expect(thirdParty).toEqual([])
 
   // Bento: video grande (L), música mediana (M)
-  await expect(page.locator('.mp-b-L .mp-media-video').first()).toBeVisible()
-  await expect(page.locator('.mp-b-M .mp-media-music')).toBeVisible()
+  await expect(page.locator('.mp-s-featured .mp-media-video').first()).toBeVisible()
+  await expect(page.locator('.mp-s-wide .mp-media-music')).toBeVisible()
 
   await play.click()
   const frame = page.locator('iframe[title="Videoclip (YouTube)"]')
