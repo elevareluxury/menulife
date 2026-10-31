@@ -70,8 +70,28 @@ const pt: LandingDict = {
     cta: 'Criar meu espaço grátis →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: 'Sua identidade,',
+    titleAccent: 'ao vivo.',
+    subtitle: 'Veja seu Mycen ganhar forma em minutos. Role e confira.',
+    steps: [
+      { title: 'Escolha seu nome', text: 'Um endereço curto e para sempre: mycen.id/voce. O mesmo na bio, no cartão e no QR.' },
+      { title: 'Sua assinatura, única', text: 'O Mycen desenha uma marca só sua. É a sua identidade visual, mesmo sem logo.' },
+      { title: 'Apareça do seu jeito', text: 'Cinco estruturas, dois temas e doze cores. Mude quando quiser, sem perder nada.' },
+      { title: 'Some o que você faz', text: 'Links, vídeos, música, formulário de contato, inscritos e apoios. Tudo num só lugar.' },
+      { title: 'Compartilhe em todo lugar', text: 'Copie seu link para cada rede ou mostre seu QR. Saiba de onde vem cada visita.' },
+      { title: 'Veja o que funciona', text: 'Quais botões são mais tocados e de onde vêm suas visitas. Dados anônimos: não guardamos quem te visita.' },
+    ],
+    demo: { role: 'Designer · Buenos Aires', available: 'Disponível', portfolio: 'Meu portfólio', video: 'Último vídeo', music: 'Ouça minha música', contact: 'Fale comigo', subscribe: 'Inscreva-se', support: 'Me apoie', copied: 'Link copiado', topTaps: 'Mais tocados' },
+    cta: 'Crie seu Mycen grátis',
+    ctaNote: 'Leva dois minutos.',
+  },
   structures: {
     label: 'SEU PERFIL',
+    prev: 'Anterior',
+    next: 'Próxima',
     title: 'Cinco formas de',
     titleAccent: 'se mostrar.',
     subtitle: 'Escolha a estrutura que combina com o que você faz e o tema que combina com você. Mude quando quiser, sem perder nada.',

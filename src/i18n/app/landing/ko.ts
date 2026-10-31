@@ -70,8 +70,28 @@ const ko: LandingDict = {
     cta: '무료로 내 공간 만들기 →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: '나의 아이덴티티,',
+    titleAccent: '라이브로.',
+    subtitle: '몇 분 만에 Mycen이 완성되는 모습을 스크롤하며 확인하세요.',
+    steps: [
+      { title: '이름 고르기', text: '짧고 평생 쓰는 주소: mycen.id/나. 바이오, 명함, QR 모두 같은 주소로.' },
+      { title: '나만의 시그니처', text: 'Mycen이 나만의 마크를 그려 드려요. 로고가 없어도 그게 바로 내 브랜드예요.' },
+      { title: '원하는 대로 보여주기', text: '레이아웃 5가지, 테마 2가지, 색상 12가지. 언제든 바꿔도 잃는 건 없어요.' },
+      { title: '하는 일을 더하기', text: '링크, 영상, 음악, 문의 양식, 구독자와 후원. 모두 한곳에.' },
+      { title: '어디서나 공유', text: '채널마다 링크를 복사하거나 QR을 보여 주세요. 방문이 어디서 왔는지 알 수 있어요.' },
+      { title: '효과 확인하기', text: '가장 많이 누른 버튼과 방문 경로. 익명 데이터라 누가 방문했는지는 저장하지 않아요.' },
+    ],
+    demo: { role: '디자이너 · 부에노스아이레스', available: '협업 가능', portfolio: '내 포트폴리오', video: '최신 영상', music: '내 노래 듣기', contact: '메시지 보내기', subscribe: '구독하기', support: '후원하기', copied: '링크 복사됨', topTaps: '가장 많이 누른 것' },
+    cta: '무료로 Mycen 만들기',
+    ctaNote: '2분이면 충분해요.',
+  },
   structures: {
     label: '나의 프로필',
+    prev: '이전',
+    next: '다음',
     title: '나를 보여주는',
     titleAccent: '다섯 가지 방법.',
     subtitle: '하는 일에 맞는 구성과 나에게 맞는 테마를 고르세요. 언제든 바꿀 수 있고 아무것도 사라지지 않아요.',

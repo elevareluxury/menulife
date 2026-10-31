@@ -10,6 +10,7 @@ import { CinematicHero }        from '@/components/landing/CinematicHero'
 import { FragmentationSection } from '@/components/landing/FragmentationSection'
 import { SolutionSection }      from '@/components/landing/SolutionSection'
 import { LifeOSSection }        from '@/components/landing/LifeOSSection'
+import { IdentitySection }      from '@/components/landing/IdentitySection'
 import { StructuresSection }    from '@/components/landing/StructuresSection'
 import { BusinessSection }      from '@/components/landing/BusinessSection'
 import { TestimonialsSection }  from '@/components/landing/TestimonialsSection'
@@ -23,7 +24,7 @@ import { useLandingLocale }     from '../lib/useLandingLocale'
 import { useSiteFlags }         from '@/lib/siteFlags'
 
 /** Secciones que se dibujan después del hero (ver `shown`) */
-const REST = 11
+const REST = 12
 
 export function LandingPage() {
   useLandingLocale()
@@ -86,29 +87,32 @@ export function LandingPage() {
         {/* Section 3 — Solución / Todo conectado */}
         {shown > 2 && <div id="soluciones"><SolutionSection /></div>}
 
+        {/* Mycen Identity contado paso a paso (el perfil que se arma mientras se baja) */}
+        {shown > 3 && <IdentitySection />}
+
         {/* Las cinco estructuras del perfil y los dos temas (imágenes de ejemplo) */}
-        {shown > 3 && <StructuresSection />}
+        {shown > 4 && <StructuresSection />}
 
         {/* Section 4 — Mycen Personal / Life OS (con "Mi día") */}
-        {shown > 4 && <LifeOSSection />}
+        {shown > 5 && <LifeOSSection />}
 
         {/* Section 5 — Mycen Business */}
-        {shown > 5 && business && <BusinessSection />}
+        {shown > 6 && business && <BusinessSection />}
 
         {/* Testimonios reales (si no hay, no se muestra) */}
-        {shown > 6 && <TestimonialsSection />}
+        {shown > 7 && <TestimonialsSection />}
 
         {/* Section 6 — Pricing */}
-        {shown > 7 && business && <div id="pricing"><PricingSection /></div>}
+        {shown > 8 && business && <div id="pricing"><PricingSection /></div>}
 
         {/* Section 7 — Visión */}
-        {shown > 8 && <VisionSection />}
+        {shown > 9 && <VisionSection />}
 
         {/* Section 8 — CTA Final */}
-        {shown > 9 && <FinalCTA />}
+        {shown > 10 && <FinalCTA />}
 
         {/* Section 9 — FAQ */}
-        {shown > 10 && <FAQSection />}
+        {shown > 11 && <FAQSection />}
       </main>
 
       {ready && <Footer />}

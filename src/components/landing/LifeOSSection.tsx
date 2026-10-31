@@ -49,12 +49,12 @@ export function LifeOSSection() {
         radial-gradient(ellipse 50% 40% at 80% 20%, rgba(139,92,246,0.05) 0%, transparent 50%),
         var(--ml-dark)
       `,
-      padding: '96px 24px',
+      padding: 'var(--ml-section-y) 24px',
     }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
 
         {/* Header */}
-        <div data-life-title style={{ textAlign: 'center', marginBottom: '72px' }}>
+        <div data-life-title style={{ textAlign: 'center', marginBottom: '48px' }}>
           <p style={{
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',

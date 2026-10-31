@@ -70,8 +70,28 @@ const de: LandingDict = {
     cta: 'Meinen Bereich gratis erstellen →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: 'Deine Identität,',
+    titleAccent: 'live.',
+    subtitle: 'So entsteht dein Mycen in wenigen Minuten. Scroll und schau zu.',
+    steps: [
+      { title: 'Wähl deinen Namen', text: 'Eine kurze Adresse, für immer deine: mycen.id/du. Dieselbe in Bio, Visitenkarte und QR.' },
+      { title: 'Deine Signatur, einzigartig', text: 'Mycen zeichnet ein Zeichen, das nur dir gehört. Deine Marke, auch ohne Logo.' },
+      { title: 'Zeig dich, wie du willst', text: 'Fünf Layouts, zwei Themes und zwölf Farben. Jederzeit änderbar, ohne etwas zu verlieren.' },
+      { title: 'Füg hinzu, was du machst', text: 'Links, Videos, Musik, ein Kontaktformular, Abonnenten und Unterstützung. Alles an einem Ort.' },
+      { title: 'Teil es überall', text: 'Kopier deinen Link für jedes Netzwerk oder zeig deinen QR. Du siehst, woher jeder Besuch kommt.' },
+      { title: 'Sieh, was funktioniert', text: 'Welche Buttons am meisten getippt werden und woher deine Besuche kommen. Anonym: Wir speichern nicht, wer dich besucht.' },
+    ],
+    demo: { role: 'Designerin · Buenos Aires', available: 'Verfügbar', portfolio: 'Mein Portfolio', video: 'Neuestes Video', music: 'Hör meinen Song', contact: 'Schreib mir', subscribe: 'Abonnieren', support: 'Unterstütz mich', copied: 'Link kopiert', topTaps: 'Am meisten getippt' },
+    cta: 'Erstell dein Mycen kostenlos',
+    ctaNote: 'Dauert zwei Minuten.',
+  },
   structures: {
     label: 'DEIN PROFIL',
+    prev: 'Zurück',
+    next: 'Weiter',
     title: 'Fünf Arten, dich',
     titleAccent: 'zu zeigen.',
     subtitle: 'Wähle die Struktur, die zu deiner Arbeit passt, und das Theme, das zu dir passt. Jederzeit änderbar, ohne etwas zu verlieren.',

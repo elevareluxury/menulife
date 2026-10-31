@@ -70,8 +70,28 @@ const ar: LandingDict = {
     cta: 'أنشئ مساحتي مجانًا ←',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: 'هويتك،',
+    titleAccent: 'مباشرةً.',
+    subtitle: 'هكذا يكتمل Mycen الخاص بك في دقائق. مرّر وشاهد.',
+    steps: [
+      { title: 'اختر اسمك', text: 'عنوان قصير ودائم: mycen.id/أنت. نفسه في نبذتك وبطاقتك ورمز QR.' },
+      { title: 'بصمتك الفريدة', text: 'يرسم Mycen علامة خاصة بك وحدك. إنها علامتك التجارية حتى قبل أن يكون لديك شعار.' },
+      { title: 'اظهر كما تريد', text: 'خمسة تصاميم وسمتان واثنا عشر لونًا. غيّر متى شئت دون أن تفقد شيئًا.' },
+      { title: 'أضف ما تفعله', text: 'روابط وفيديوهات وموسيقى ونموذج تواصل ومشتركون ودعم. كل شيء في مكان واحد.' },
+      { title: 'شاركه في كل مكان', text: 'انسخ رابطك لكل شبكة أو اعرض رمز QR. واعرف من أين تأتي كل زيارة.' },
+      { title: 'شاهد ما ينجح', text: 'أي الأزرار يُضغط عليها أكثر ومن أين تأتي زياراتك. بيانات مجهولة: لا نحفظ من يزورك.' },
+    ],
+    demo: { role: 'مصممة · بوينس آيرس', available: 'متاحة', portfolio: 'أعمالي', video: 'أحدث فيديو', music: 'استمع لأغنيتي', contact: 'راسلني', subscribe: 'اشترك', support: 'ادعمني', copied: 'تم نسخ الرابط', topTaps: 'الأكثر ضغطًا' },
+    cta: 'أنشئ Mycen مجانًا',
+    ctaNote: 'يستغرق دقيقتين.',
+  },
   structures: {
     label: 'ملفك الشخصي',
+    prev: 'السابق',
+    next: 'التالي',
     title: 'خمس طرق',
     titleAccent: 'لتظهر.',
     subtitle: 'اختر البنية التي تناسب ما تفعله والسمة التي تناسبك. غيّرها متى شئت دون أن تفقد شيئًا.',

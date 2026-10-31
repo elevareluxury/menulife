@@ -29,7 +29,7 @@ export function VisionSection() {
         radial-gradient(ellipse 60% 50% at 50% 50%, rgba(244,112,90,0.06) 0%, transparent 60%),
         linear-gradient(180deg, #0F1115 0%, #161a22 50%, #0F1115 100%)
       `,
-      padding: '112px 24px',
+      padding: 'var(--ml-section-y) 24px',
       textAlign: 'center',
     }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>

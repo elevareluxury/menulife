@@ -50,10 +50,10 @@ export function TestimonialsSection() {
         radial-gradient(ellipse 50% 40% at 50% 0%, rgba(244,112,90,0.06) 0%, transparent 50%),
         linear-gradient(180deg, #0F1115 0%, #161a22 50%, #0F1115 100%)
       `,
-      padding: '96px 0',
+      padding: 'var(--ml-section-y) 0',
     }}>
       {/* Header */}
-      <div data-test-title style={{ textAlign: 'center', marginBottom: '64px', padding: '0 24px' }}>
+      <div data-test-title style={{ textAlign: 'center', marginBottom: '48px', padding: '0 24px' }}>
         <p style={{
           fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
           textTransform: 'uppercase', color: 'var(--ml-salmon)',

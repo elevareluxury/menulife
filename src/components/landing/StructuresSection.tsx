@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLandingT } from '@/i18n/app/landing'
 import { SplitText } from './SplitText'
 
 // Las cinco estructuras del perfil en los dos temas (V1 · etapa 13). Son imágenes estáticas de perfiles de ejemplo
-// (scripts/landing-shots), no componentes en vivo: pesan poco y no capturan gestos. Grilla que se acomoda sola, sin
-// contenedores con scroll interno.
+// (scripts/landing-shots), no componentes en vivo: pesan poco y no capturan gestos. Van en una sola fila que se desliza
+// de costado (con el dedo, la rueda, el teclado o las flechas) y se encastra en cada tarjeta; si entran todas, centradas.
 
 const LAYOUTS = ['credencial', 'portada', 'editorial', 'bento', 'clasica'] as const
 const THEMES = ['universo', 'amanecer'] as const
@@ -12,9 +13,36 @@ const THEMES = ['universo', 'amanecer'] as const
 export function StructuresSection() {
   const t = useLandingT().structures
   const [theme, setTheme] = useState<(typeof THEMES)[number]>('universo')
+  const rowRef = useRef<HTMLUListElement>(null)
+  const [edges, setEdges] = useState({ start: true, end: false })
+
+  // Hasta dónde se deslizó (en árabe, scrollLeft va de 0 a negativo)
+  const measure = useCallback(() => {
+    const row = rowRef.current
+    if (!row) return
+    const max = row.scrollWidth - row.clientWidth
+    const pos = Math.abs(row.scrollLeft)
+    setEdges({ start: pos <= 2, end: pos >= max - 2 })
+  }, [])
+  useEffect(() => {
+    const row = rowRef.current
+    if (!row) return
+    measure()
+    row.addEventListener('scroll', measure, { passive: true })
+    window.addEventListener('resize', measure)
+    return () => { row.removeEventListener('scroll', measure); window.removeEventListener('resize', measure) }
+  }, [measure])
+
+  const slide = (dir: 1 | -1) => {
+    const row = rowRef.current
+    const card = row?.querySelector('li')
+    if (!row || !card) return
+    const rtl = getComputedStyle(row).direction === 'rtl' ? -1 : 1
+    row.scrollBy({ left: dir * rtl * (card.getBoundingClientRect().width + 16), behavior: 'smooth' })
+  }
 
   return (
-    <section aria-labelledby="ml-structures" style={{ background: 'var(--ml-dark)', padding: '96px 16px' }}>
+    <section aria-labelledby="ml-structures" style={{ background: 'var(--ml-dark)', padding: 'var(--ml-section-y) 16px' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <p style={{
@@ -43,7 +71,8 @@ export function StructuresSection() {
           </div>
         </div>
 
-        <ul className="ml-structures">
+        {/* Fila deslizable: se puede enfocar con el teclado (flechas) y tiene nombre para los lectores de pantalla */}
+        <ul ref={rowRef} className="ml-structures" tabIndex={0} aria-label={`${t.title} ${t.titleAccent}`}>
           {LAYOUTS.map(layout => {
             const info = t.layouts[layout]
             return (
@@ -63,6 +92,16 @@ export function StructuresSection() {
             )
           })}
         </ul>
+        {!(edges.start && edges.end) && (
+          <div className="ml-structures-nav">
+            <button type="button" onClick={() => slide(-1)} disabled={edges.start} aria-label={t.prev}>
+              <ChevronLeft size={20} aria-hidden="true" className="ml-flip-rtl" />
+            </button>
+            <button type="button" onClick={() => slide(1)} disabled={edges.end} aria-label={t.next}>
+              <ChevronRight size={20} aria-hidden="true" className="ml-flip-rtl" />
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )

@@ -70,8 +70,28 @@ const zh: LandingDict = {
     cta: '免费创建我的空间 →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: '你的身份，',
+    titleAccent: '实时呈现。',
+    subtitle: '几分钟就能搭好你的 Mycen。往下滑看看。',
+    steps: [
+      { title: '选好你的名字', text: '一个简短、永久属于你的地址：mycen.id/你。简介、名片和二维码都用它。' },
+      { title: '你独有的指纹', text: 'Mycen 为你画出一枚独一无二的标记。即使还没有 logo，它就是你的品牌。' },
+      { title: '随心展示自己', text: '五种布局、两种主题、十二种颜色。随时更换，什么都不会丢。' },
+      { title: '加上你在做的事', text: '链接、视频、音乐、联系表单、订阅者和支持。全都在一个地方。' },
+      { title: '分享到各个地方', text: '为每个平台复制专属链接，或出示你的二维码。清楚每次访问从哪里来。' },
+      { title: '看看什么有效', text: '哪些按钮被点得最多、访问来自哪里。数据匿名：我们不记录谁访问了你。' },
+    ],
+    demo: { role: '设计师 · 布宜诺斯艾利斯', available: '可接项目', portfolio: '我的作品集', video: '最新视频', music: '听听我的歌', contact: '给我留言', subscribe: '订阅', support: '支持我', copied: '链接已复制', topTaps: '点击最多' },
+    cta: '免费创建你的 Mycen',
+    ctaNote: '只需两分钟。',
+  },
   structures: {
     label: '你的主页',
+    prev: '上一个',
+    next: '下一个',
     title: '五种方式',
     titleAccent: '展示你自己。',
     subtitle: '选择适合你所做之事的结构，以及适合你的主题。随时可以更换，不会丢失任何内容。',

@@ -79,8 +79,28 @@ const es = {
     cta: 'Crear mi espacio gratis →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: 'Tu identidad,',
+    titleAccent: 'en vivo.',
+    subtitle: 'Así se arma tu Mycen en minutos. Bajá y miralo.',
+    steps: [
+      { title: 'Elegí tu nombre', text: 'Una dirección corta y para siempre: mycen.id/vos. La misma en tu bio, tu tarjeta y tu QR.' },
+      { title: 'Tu huella, única', text: 'Mycen dibuja una huella que es sólo tuya. Es tu marca, aunque todavía no tengas logo.' },
+      { title: 'Mostrate como quieras', text: 'Cinco estructuras, dos temas y doce colores. Cambiás cuando quieras, sin perder nada.' },
+      { title: 'Sumá lo que hacés', text: 'Links, videos, música, un formulario de contacto, suscriptores y apoyos. Todo en un solo lugar.' },
+      { title: 'Compartilo en todos lados', text: 'Copiá tu link para cada red o mostrá tu QR. Sabés de dónde llega cada visita.' },
+      { title: 'Mirá qué funciona', text: 'Qué botones tocan más y de dónde vienen tus visitas. Con datos anónimos: no guardamos quién te visita.' },
+    ],
+    demo: { role: 'Diseñadora · Buenos Aires', available: 'Disponible', portfolio: 'Mi portfolio', video: 'Último video', music: 'Escuchá mi tema', contact: 'Escribime', subscribe: 'Suscribite', support: 'Apoyame', copied: 'Link copiado', topTaps: 'Lo que más tocan' },
+    cta: 'Creá tu Mycen gratis',
+    ctaNote: 'Lleva dos minutos.',
+  },
   structures: {
     label: 'TU PERFIL',
+    prev: 'Anterior',
+    next: 'Siguiente',
     title: 'Cinco formas de',
     titleAccent: 'mostrarte.',
     subtitle: 'Elegí la estructura que va con lo que hacés y el tema que va con vos. Lo cambiás cuando quieras, sin perder nada.',
