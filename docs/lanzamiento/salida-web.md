@@ -166,21 +166,30 @@ Si algo falla: apagá el CAPTCHA en Supabase (paso 5) y todo vuelve a andar al i
 1. search.google.com/search-console → **Agregar propiedad** → **Dominio** → `mycen.id` → **Continuar**.
 2. Copiá el registro TXT (`google-site-verification=…`) y cargalo en el DNS (bloque 8). Volvé y tocá **Verificar**
    (si falla, esperá 30 minutos y reintentá).
-3. Menú izquierdo → **Sitemaps** → escribí `sitemap.xml` → **Enviar**. En 1 o 2 días: estado "Correcto".
+3. Antes, abrí `https://mycen.id/sitemap.xml` en el navegador: tiene que verse un texto con muchas direcciones
+   `https://mycen.id/…`. Después, menú izquierdo → **Sitemaps** → escribí la dirección **completa**
+   `https://mycen.id/sitemap.xml` (en una propiedad de tipo Dominio no alcanza con `sitemap.xml`: da "Dirección de
+   sitemap no válida") → **Enviar**. En 1 o 2 días: estado "Correcto".
    (El mapa ya lista la landing en los 12 idiomas, las páginas legales y cada perfil público.)
 4. Arriba, en la barra de búsqueda: `https://mycen.id/` → **Solicitar indexación**. Repetí con
    `https://mycen.id/?lang=en` y `https://mycen.id/?lang=pt`.
 5. bing.com/webmasters → **Importar desde Google Search Console** → elegí `mycen.id`. Con eso también aparece en Bing,
    DuckDuckGo y Yahoo.
+   Después, en Bing → **Sitemaps** → **Submit sitemap** → `https://mycen.id/sitemap.xml` (el aviso de "hasta 48 horas"
+   es normal).
 
 ---
 
 ## Bloque 7 · Monitor de caídas (10 min)
 
 Para enterarte vos antes que tus usuarios si algo se cae. uptimerobot.com (gratis):
-1. **New monitor** → tipo **Keyword** → URL `https://mycen.id/api/health` → keyword `"ok":true` → "alert when keyword
-   **not exists**" → cada 5 minutos → avisos a tu mail (y a la app de UptimeRobot en el celular).
-   `/api/health` responde OK sólo si la web **y** la base andan.
+1. **New monitor** → Monitor type **Keyword monitoring**.
+   - **URL to monitor**: `https://mycen.id/api/health` (una sola vez `https://`; el campo a veces ya lo trae escrito).
+   - **Keyword to look for**: `"ok":true` (con las comillas, tal cual; no la frase de la opción).
+   - Desplegable de al lado: **Start incident when keyword not exists**.
+   - Case-sensitive apagado, avisos por E-mail (y Push si bajás la app de UptimeRobot) → **Create monitor**.
+   Cada 5 minutos abre esa dirección: si la web **y** la base andan, Mycen responde `{"ok":true,…}`; si ese texto no
+   aparece, te avisa.
 2. **New monitor** → tipo **HTTP(s)** → `https://mycen.id/` → cada 5 minutos.
 3. Opcional: **Status page** pública (ej. `estado.mycen.id`) para que la gente vea si hay un problema.
 

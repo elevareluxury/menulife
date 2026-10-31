@@ -49,6 +49,8 @@ const ko: LandingDict = {
     organizationSub: '질서 있는 일상',
     business: '비즈니스',
     businessSub: '더 강력해진 운영',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: '링크', messages: '메시지', projects: '프로젝트', qr: 'QR', tasks: '할 일', habits: '습관', money: '돈', goals: '목표', menu: '메뉴', orders: '주문', bookings: '예약', sales: '매출' },
   },
   life: {
     label: 'LIFE OS',

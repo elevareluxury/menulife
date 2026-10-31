@@ -49,6 +49,8 @@ const ar: LandingDict = {
     organizationSub: 'حياتك الشخصية منظّمة',
     business: 'الأعمال',
     businessSub: 'عملك بقوة أكبر',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'روابط', messages: 'رسائل', projects: 'مشاريع', qr: 'QR', tasks: 'مهام', habits: 'عادات', money: 'المال', goals: 'أهداف', menu: 'القائمة', orders: 'الطلبات', bookings: 'المواعيد', sales: 'المبيعات' },
   },
   life: {
     label: 'LIFE OS',

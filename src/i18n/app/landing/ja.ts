@@ -49,6 +49,8 @@ const ja: LandingDict = {
     organizationSub: '整った毎日の暮らし',
     business: 'ビジネス',
     businessSub: 'もっと力強い運営',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'リンク', messages: 'メッセージ', projects: 'プロジェクト', qr: 'QR', tasks: 'タスク', habits: '習慣', money: 'お金', goals: '目標', menu: 'メニュー', orders: '注文', bookings: '予約', sales: '売上' },
   },
   life: {
     label: 'LIFE OS',

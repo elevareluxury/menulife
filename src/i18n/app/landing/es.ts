@@ -58,6 +58,8 @@ const es = {
     organizationSub: 'Tu vida personal en orden',
     business: 'Negocios',
     businessSub: 'Tu operación potenciada',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'Links', messages: 'Mensajes', projects: 'Proyectos', qr: 'QR', tasks: 'Tareas', habits: 'Hábitos', money: 'Dinero', goals: 'Metas', menu: 'Menú', orders: 'Pedidos', bookings: 'Turnos', sales: 'Ventas' },
   },
   life: {
     label: 'LIFE OS',

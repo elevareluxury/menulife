@@ -49,6 +49,8 @@ const hi: LandingDict = {
     organizationSub: 'आपकी निजी ज़िंदगी व्यवस्थित',
     business: 'बिज़नेस',
     businessSub: 'आपका काम, और मज़बूत',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'लिंक', messages: 'संदेश', projects: 'प्रोजेक्ट', qr: 'QR', tasks: 'काम', habits: 'आदतें', money: 'पैसा', goals: 'लक्ष्य', menu: 'मेनू', orders: 'ऑर्डर', bookings: 'बुकिंग', sales: 'बिक्री' },
   },
   life: {
     label: 'LIFE OS',

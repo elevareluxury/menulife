@@ -49,6 +49,8 @@ const it: LandingDict = {
     organizationSub: 'La tua vita personale in ordine',
     business: 'Business',
     businessSub: 'La tua attività, potenziata',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: 'Link', messages: 'Messaggi', projects: 'Progetti', qr: 'QR', tasks: 'Attività', habits: 'Abitudini', money: 'Soldi', goals: 'Obiettivi', menu: 'Menù', orders: 'Ordini', bookings: 'Prenotazioni', sales: 'Vendite' },
   },
   life: {
     label: 'LIFE OS',

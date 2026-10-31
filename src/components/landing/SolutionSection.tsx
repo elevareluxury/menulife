@@ -1,79 +1,114 @@
 import { useEffect, useRef } from 'react'
-import { Globe, Target, Rocket } from 'lucide-react'
+import gsap from 'gsap'
+import type { CSSProperties } from 'react'
+import {
+  Globe, Target, Rocket, Link2, MessageCircle, FolderOpen, QrCode, CheckSquare, Flame, Wallet, Flag,
+  UtensilsCrossed, ShoppingBag, CalendarClock, BarChart3,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useLandingT } from '@/i18n/app/landing'
 import { useSiteFlags } from '@/lib/siteFlags'
+import { Huella } from '@/design/components/Huella'
 
 import { reducedMotion } from './motion'
 import { SplitText } from './SplitText'
+import './solution.css'
 
-declare const gsap: any
+type ChipKey = 'links' | 'messages' | 'projects' | 'qr' | 'tasks' | 'habits' | 'money' | 'goals' | 'menu' | 'orders' | 'bookings' | 'sales'
 
-const SATELLITES = [
+// Cada parte de Mycen es una órbita alrededor de la huella: el planeta con su nombre y, en la misma órbita, lo que
+// tiene adentro. Las órbitas son círculos concéntricos en un mismo plano inclinado y aplastado (perspectiva sin 3D) y
+// giran juntas: lo de cada órbita va intercalado con lo de las otras, así nada se pisa.
+const ORBITS = [
   {
-    Icon: Globe,   key: 'identity',
-    color: '#3B82F6', angle: 270, // top
+    key: 'identity', Icon: Globe, color: '#3B82F6',
+    chips: [['links', Link2], ['messages', MessageCircle], ['projects', FolderOpen], ['qr', QrCode]],
   },
   {
-    Icon: Target,  key: 'organization',
-    color: '#8B5CF6', angle: 30, // bottom-right
+    key: 'organization', Icon: Target, color: '#8B5CF6',
+    chips: [['tasks', CheckSquare], ['habits', Flame], ['money', Wallet], ['goals', Flag]],
   },
   {
-    Icon: Rocket,  key: 'business',
-    color: '#F4705A', angle: 150, // bottom-left
+    key: 'business', Icon: Rocket, color: '#F4705A',
+    chips: [['menu', UtensilsCrossed], ['orders', ShoppingBag], ['bookings', CalendarClock], ['sales', BarChart3]],
   },
-] as const
+] as const satisfies ReadonlyArray<{
+  key: 'identity' | 'organization' | 'business'; Icon: LucideIcon; color: string
+  chips: ReadonlyArray<readonly [ChipKey, LucideIcon]>
+}>
 
-function polarToPercent(angle: number, rx: number, ry: number) {
-  const rad = (angle - 90) * (Math.PI / 180)
-  return {
-    x: 50 + rx * Math.cos(rad),
-    y: 50 + ry * Math.sin(rad),
-  }
+/** Radios (en % del ancho del dibujo) según cuántas órbitas hay */
+const RADII: Record<number, number[]> = { 2: [22, 38], 3: [18, 29, 40] }
+const TILT = -10      // grados
+const DUR = 80        // segundos por vuelta
+const STEP = 72       // 5 cosas por órbita
+
+/** Dónde arranca cada órbita: corrida STEP/n respecto de la anterior (intercalada) y dos pasos más (144°), para que
+ *  los planetas queden repartidos */
+function orbitStart(i: number, n: number) {
+  return 200 + i * (STEP / n) + i * 2 * STEP
+}
+
+/** Retraso (negativo) para que el "adelante/atrás" de cada cosa arranque donde está en la órbita */
+function depthDelay(angle: number) {
+  return `${-((((angle % 360) + 360) % 360) / 360) * DUR}s`
 }
 
 export function SolutionSection() {
   const t = useLandingT().solution
   const { business } = useSiteFlags()
-  // Sin Business quedan dos: enfrentadas, para que el dibujo no quede torcido
-  const sats = SATELLITES.filter(s => business || s.key !== 'business').map(s => ({
-    ...s, angle: !business && s.key === 'organization' ? 90 : s.angle, label: t[s.key], sub: t[`${s.key}Sub`],
-  }))
+  const orbits = ORBITS.filter(o => business || o.key !== 'business')
   const sectionRef = useRef<HTMLElement>(null)
   const titleRef   = useRef<HTMLDivElement>(null)
   const vizRef     = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (typeof gsap === 'undefined' || reducedMotion()) return
-    const ST = (window as any).ScrollTrigger
-    if (!ST) return
+    const viz = vizRef.current
+    if (reducedMotion() || !viz) return
+    const cleanups: Array<() => void> = []
 
-    gsap.fromTo(titleRef.current,
-      { opacity: 0, y: 48 },
-      { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
-        scrollTrigger: { trigger: titleRef.current, start: 'top 85%' } })
+    const ctx = gsap.context(() => {
+      gsap.fromTo(titleRef.current,
+        { opacity: 0, y: 48 },
+        { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+          scrollTrigger: { trigger: titleRef.current, start: 'top 85%' } })
 
-    gsap.fromTo('[data-sol-core]',
-      { opacity: 0, scale: 0.5 },
-      { opacity: 1, scale: 1, duration: 0.8, ease: 'back.out(1.8)',
-        scrollTrigger: { trigger: vizRef.current, start: 'top 80%' } })
+      // Entrada: la huella aparece, cada órbita se abre desde el centro y lo de adentro se enciende de a uno
+      const tl = gsap.timeline({ scrollTrigger: { trigger: viz, start: 'top 78%' } })
+      tl.fromTo('[data-sol-core]', { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.9, ease: 'back.out(1.7)' })
+        .fromTo('[data-sol-burst]', { opacity: 0.9, scale: 0.6 }, { opacity: 0, scale: 3, duration: 1.1, ease: 'power2.out' }, '<0.2')
+        .fromTo('[data-sol-orbit]', { opacity: 0, scale: 0.35, rotate: -40 },
+          { opacity: 1, scale: 1, rotate: 0, duration: 1.2, ease: 'expo.out', stagger: 0.18 }, '<0.1')
+        .fromTo('[data-sol-item]', { opacity: 0, scale: 0.3 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2)', stagger: 0.05 }, '<0.35')
 
-    gsap.fromTo('[data-sol-sat]',
-      { opacity: 0, scale: 0.6 },
-      { opacity: 1, scale: 1, duration: 0.7, ease: 'back.out(1.4)', stagger: 0.15,
-        scrollTrigger: { trigger: vizRef.current, start: 'top 78%' } })
+      gsap.fromTo('[data-sol-cards]',
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.12,
+          scrollTrigger: { trigger: '[data-sol-cards]', start: 'top 85%' } })
+    }, sectionRef)
 
-    gsap.fromTo('[data-sol-line]',
-      { opacity: 0, strokeDashoffset: 200 },
-      { opacity: 1, strokeDashoffset: 0, duration: 0.9, ease: 'power2.out', stagger: 0.2,
-        scrollTrigger: { trigger: vizRef.current, start: 'top 76%' } })
+    // Con mouse: el sistema se inclina en 3D siguiendo el puntero
+    if (window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) {
+      const stage = viz.querySelector<HTMLElement>('[data-sol-stage]')
+      if (stage) {
+        gsap.set(stage, { transformPerspective: 1100 })
+        const rx = gsap.quickTo(stage, 'rotationX', { duration: 0.9, ease: 'power3.out' })
+        const ry = gsap.quickTo(stage, 'rotationY', { duration: 0.9, ease: 'power3.out' })
+        const move = (e: PointerEvent) => {
+          const b = viz.getBoundingClientRect()
+          rx(((e.clientY - b.top) / b.height - 0.5) * -14)
+          ry(((e.clientX - b.left) / b.width - 0.5) * 18)
+        }
+        const leave = () => { rx(0); ry(0) }
+        viz.addEventListener('pointermove', move)
+        viz.addEventListener('pointerleave', leave)
+        cleanups.push(() => { viz.removeEventListener('pointermove', move); viz.removeEventListener('pointerleave', leave) })
+      }
+    }
 
-    gsap.fromTo('[data-sol-cards]',
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.12,
-        scrollTrigger: { trigger: '[data-sol-cards]', start: 'top 85%' } })
-  }, [])
-
-  const RX = 38, RY = 36
+    return () => { ctx.revert(); cleanups.forEach(f => f()) }
+  }, [business])
 
   return (
     <section ref={sectionRef} style={{
@@ -95,7 +130,7 @@ export function SolutionSection() {
       <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative' }}>
 
         {/* Header */}
-        <div ref={titleRef} style={{ textAlign: 'center', marginBottom: '72px' }}>
+        <div ref={titleRef} style={{ textAlign: 'center', marginBottom: '40px' }}>
           <p style={{
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',
@@ -114,125 +149,58 @@ export function SolutionSection() {
           }}>{t.subtitle}</p>
         </div>
 
-        {/* Orbital visualization */}
-        <div ref={vizRef} style={{
-          position: 'relative',
-          width: '100%', maxWidth: '480px',
-          aspectRatio: '1 / 1',
-          margin: '0 auto 64px',
-        }}>
-          {/* SVG: orbit ring + connection lines */}
-          <svg
-            viewBox="0 0 100 100"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}
-          >
-            {/* Orbit ellipse */}
-            <ellipse
-              className="ml-orbit"
-              cx="50" cy="50"
-              rx={RX} ry={RY}
-              fill="none"
-              stroke="rgba(255,255,255,0.06)"
-              strokeWidth="0.5"
-              strokeDasharray="2 3"
-            />
-            {/* Connection lines */}
-            {sats.map(({ label, color, angle }) => {
-              const pos = polarToPercent(angle, RX, RY)
+        {/* Sistema: la huella de Mycen en el centro y una órbita por cada parte (decorativo: lo dicen las tarjetas) */}
+        <div ref={vizRef} className="sol-viz" data-orbits={orbits.length} data-mycen-theme="universo" aria-hidden="true">
+          <div className="sol-stage" data-sol-stage>
+            <div className="sol-halo" />
+            {/* La huella va debajo: lo que orbita pasa por delante */}
+            <div className="sol-core" data-sol-core>
+              <span className="sol-burst" data-sol-burst />
+              <span className="sol-wave" />
+              <span className="sol-wave" />
+              <Huella seed="mycen" variant="orbitas" spin />
+            </div>
+
+            {orbits.map((o, n) => {
+              const at = orbitStart(n, orbits.length)
+              const items = [
+                { key: o.key, label: t[o.key], Icon: o.Icon, main: true, angle: at },
+                ...o.chips.map(([key, Icon], i) => ({ key, label: t.chips[key], Icon, main: false, angle: at + STEP * (i + 1) })),
+              ]
+              const vars = {
+                '--c': o.color, '--rr': RADII[orbits.length][n], '--tilt': `${TILT}deg`, '--dur': `${DUR}s`,
+                '--sweep': `${DUR / (5 + n * 2)}s`,
+              } as CSSProperties
               return (
-                <line
-                  key={label}
-                  data-sol-line
-                  x1="50" y1="50"
-                  x2={pos.x} y2={pos.y}
-                  stroke={color}
-                  strokeWidth="0.4"
-                  strokeOpacity="0.5"
-                  strokeDasharray="200"
-                  strokeDashoffset="200"
-                />
-              )
-            })}
-            {/* Datos que viajan del núcleo a cada parte */}
-            {sats.map(({ label, color, angle }) => {
-              const pos = polarToPercent(angle, RX, RY)
-              return (
-                <line key={`flow-${label}`} className="ml-flow" x1="50" y1="50" x2={pos.x} y2={pos.y}
-                  stroke={color} strokeWidth="0.9" strokeLinecap="round" strokeDasharray="0.1 7.9" strokeOpacity="0.95" />
-              )
-            })}
-          </svg>
-
-          {/* Ondas que salen del núcleo */}
-          <div aria-hidden="true">
-            {[0, 1].map(i => (
-              <span key={i} className="ml-core-ring" style={{
-                position: 'absolute', top: '50%', left: '50%', width: '80px', height: '80px', borderRadius: '50%',
-                border: '1.5px solid rgba(244,112,90,0.5)', transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 1,
-              }} />
-            ))}
-          </div>
-
-          {/* Core node */}
-          <div data-sol-core style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '80px', height: '80px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(244,112,90,0.25) 0%, rgba(244,112,90,0.05) 70%)',
-            border: '1.5px solid rgba(244,112,90,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 40px rgba(244,112,90,0.25), 0 0 80px rgba(244,112,90,0.1)',
-            zIndex: 2,
-          }}>
-            <span style={{
-              fontFamily: 'var(--font-syne)',
-              fontWeight: 800, fontSize: '14px',
-              color: '#fff', letterSpacing: '0.05em',
-            }}>Mycen</span>
-          </div>
-
-          {/* Satellite nodes */}
-          {sats.map(({ Icon, label, color, angle }) => {
-            const pos = polarToPercent(angle, RX, RY)
-            return (
-              <div
-                key={label}
-                data-sol-sat
-                style={{
-                  position: 'absolute',
-                  left: `${pos.x}%`,
-                  top: `${pos.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                  zIndex: 3,
-                }}
-              >
-                <div className="ml-sat-float" style={{
-                  animationDelay: `${angle / -120}s`,
-                  width: '52px', height: '52px',
-                  borderRadius: '14px',
-                  background: `${color}15`,
-                  border: `1px solid ${color}40`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: `0 6px 24px ${color}20`,
-                  backdropFilter: 'blur(12px)',
-                }}>
-                  <Icon size={20} style={{ color }} strokeWidth={1.8} />
+                <div key={o.key} className="sol-orbit" data-sol-orbit style={vars}>
+                  <div className="sol-plane">
+                    <div className="sol-ring" />
+                    <div className="sol-sweep" />
+                    <div className="sol-spin">
+                      {items.map(it => (
+                        <div key={it.key} className="sol-arm" style={{ '--a': `${it.angle}deg` } as CSSProperties}>
+                          <div className="sol-unspin">
+                            <div className="sol-upright">
+                              <div className="sol-depth" style={{ animationDelay: depthDelay(it.angle) }}>
+                                <div data-sol-item className={it.main ? 'sol-planet' : 'sol-chip'}>
+                                  <span className="sol-icon"><it.Icon size={it.main ? 18 : 12} strokeWidth={2} /></span>
+                                  <span className="sol-label">{it.label}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <span style={{
-                  fontFamily: 'var(--font-jakarta)',
-                  fontSize: '11px', fontWeight: 600,
-                  color: 'rgba(255,255,255,0.6)',
-                  whiteSpace: 'nowrap',
-                }}>{label}</span>
-              </div>
-            )
-          })}
+              )
+            })}
+
+          </div>
         </div>
 
-        {/* 3 feature cards below */}
+        {/* Una tarjeta por parte */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -240,9 +208,9 @@ export function SolutionSection() {
           maxWidth: '900px',
           margin: '0 auto',
         }}>
-          {sats.map(({ Icon, label, sub, color }) => (
+          {orbits.map(({ key, Icon, color }) => (
             <div
-              key={label}
+              key={key}
               data-sol-cards
               className="liquid-glass"
               style={{
@@ -265,11 +233,11 @@ export function SolutionSection() {
               <h3 style={{
                 fontFamily: 'var(--font-syne)', fontWeight: 800,
                 fontSize: '18px', color: '#fff', marginBottom: '8px',
-              }}>{label}</h3>
+              }}>{t[key]}</h3>
               <p style={{
                 fontFamily: 'var(--font-jakarta)', fontSize: '14px',
                 color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, margin: 0,
-              }}>{sub}</p>
+              }}>{t[`${key}Sub`]}</p>
             </div>
           ))}
         </div>

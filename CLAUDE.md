@@ -134,6 +134,12 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   en bucle), las secciones fuera de pantalla quedan en pausa (`.ml-paused`), el canvas del hero se detiene cuando no se ve
   y no usar `scroll-behavior: smooth` en `<html>` (las anclas se mueven por JS). El hero es una sola pantalla (sin tarjeta fijada).
   Acentos de títulos: Geist sin cursiva (no hay cursiva cargada) con degradé fijo (`.ml-shine`, `.ch-line2`).
+  "Todo conectado" (`SolutionSection` + `solution.css`): la huella de la marca al centro y una órbita por parte
+  (Identidad, Organización y, con Business prendido, Negocios) con lo que tiene adentro (`solution.chips`, 12 idiomas).
+  Órbitas concéntricas en un plano inclinado y aplastado (`--tilt`, `--k`) que giran juntas, con lo de cada una
+  intercalado (`orbitStart`) para que nada se pise; cada cosa se endereza deshaciendo las transformaciones en orden
+  inverso. Sólo transform/opacity; quieto con "reducir movimiento"; con mouse, el sistema se inclina en 3D. Decorativo
+  (`aria-hidden`): lo dicen las tarjetas de abajo.
 - `advancedChunks` sólo agrupa supabase y react (+ el ayudante de precarga de Vite en `vendor`: en el bloque de supabase
   hacía que toda página bajara Supabase): agrupar recharts/framer a mano arrastraba dependencias a todas las páginas.
 - La entrada de la app no lleva Supabase ni i18next (antes de la V1: perfil 239 → 166 KB, landing 264 → 191 KB):

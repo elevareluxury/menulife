@@ -49,6 +49,8 @@ const zh: LandingDict = {
     organizationSub: '井井有条的个人生活',
     business: '生意',
     businessSub: '更强大的经营',
+    /** Lo que gira en cada órbita del dibujo "Todo conectado" */
+    chips: { links: '链接', messages: '消息', projects: '项目', qr: '二维码', tasks: '任务', habits: '习惯', money: '财务', goals: '目标', menu: '菜单', orders: '订单', bookings: '预约', sales: '销售' },
   },
   life: {
     label: 'LIFE OS',
