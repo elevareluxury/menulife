@@ -18,8 +18,8 @@ const en: LandingDict = {
     badgeGoalSub: '6/10 habits this month',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'Designer · Buenos Aires',
+    name: 'Olivia Parker',
+    descriptor: 'Designer · Miami',
     status: 'Available for projects',
     links: [
       { label: 'My portfolio', sub: 'Projects 2026' },
@@ -70,8 +70,28 @@ const en: LandingDict = {
     cta: 'Create my free space →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: 'Your identity,',
+    titleAccent: 'live.',
+    subtitle: 'This is how your Mycen comes together in minutes. Scroll and watch.',
+    steps: [
+      { title: 'Pick your name', text: 'A short address that’s yours for good: mycen.id/you. The same in your bio, your card and your QR.' },
+      { title: 'Your own signature', text: 'Mycen draws a mark that’s only yours. It’s your brand, even before you have a logo.' },
+      { title: 'Show up your way', text: 'Five layouts, two themes and twelve colors. Change anytime without losing anything.' },
+      { title: 'Add what you do', text: 'Links, videos, music, a contact form, subscribers and support. All in one place.' },
+      { title: 'Share it everywhere', text: 'Copy your link for each network or show your QR. See where every visit comes from.' },
+      { title: 'See what works', text: 'Which buttons get tapped most and where your visits come from. Anonymous data: we don’t store who visits you.' },
+    ],
+    demo: { role: 'Designer · Miami', available: 'Available', portfolio: 'My portfolio', video: 'Latest video', music: 'Listen to my song', contact: 'Write to me', subscribe: 'Subscribe', support: 'Support me', copied: 'Link copied', topTaps: 'Most tapped' },
+    cta: 'Create your Mycen for free',
+    ctaNote: 'It takes two minutes.',
+  },
   structures: {
     label: 'YOUR PROFILE',
+    prev: 'Previous',
+    next: 'Next',
     title: 'Five ways to',
     titleAccent: 'show up.',
     subtitle: 'Pick the layout that fits what you do and the theme that fits you. Change it anytime without losing anything.',

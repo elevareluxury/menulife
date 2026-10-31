@@ -14,6 +14,12 @@ mkdirSync(OUT, { recursive: true })
 const LAYOUTS = ['credencial', 'portada', 'editorial', 'bento', 'clasica'] as const
 const THEMES = ['universo', 'amanecer'] as const
 const KEEP = ['m-link', 'm-social', 'm-contact', 'm-text', 'm-featured', 'm-hours', 'm-link-group']
+// Persona de ejemplo (inventada) de la landing: la misma en las estructuras, "Mi día" y "Tu identidad, en vivo"
+const PERSON = { display_name: 'Olivia Parker', username: 'olivia' }
+/** Los módulos de prueba son de "ana": los links y contactos pasan a Olivia (Miami) */
+const asOlivia = <T,>(row: T): T => JSON.parse(JSON.stringify(row)
+  .replace(/anaperez/g, 'oliviaparker').replace(/\bana\b/g, 'olivia')
+  .replace(/\+54 9 341 555 0000/g, '+1 305 555 0142'))
 
 test.use({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 2 })
 
@@ -36,19 +42,20 @@ for (const theme of THEMES) {
   for (const layout of LAYOUTS) {
     test(`perfil ${layout} · ${theme}`, async ({ page, context }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
-      const rows = MODULE_FIXTURES.map(f => structuredClone(f.row)).filter(r => KEEP.includes(r.id as string))
+      const rows = MODULE_FIXTURES.map(f => asOlivia(structuredClone(f.row))).filter(r => KEEP.includes(r.id as string))
       const state = createState({
         profiles: [profileRow({
+          ...PERSON,
           theme: { layout, mode: theme, accent: 'plasma' },
-          primary_action: { kind: 'whatsapp', label: 'Escribime por WhatsApp', url: 'https://wa.me/5493415550000' },
+          primary_action: { kind: 'whatsapp', label: 'Escribime por WhatsApp', url: 'https://wa.me/13055550142' },
           status_text: 'Abierta a proyectos', available: true, bio: 'Diseño marcas y sitios para estudios chicos.',
-          descriptor: 'Diseñadora · Buenos Aires',
+          descriptor: 'Diseñadora · Miami',
         })],
         profile_modules: rows,
       })
       await installSupabaseMock(context, state)
-      await page.goto('/ana')
-      await page.getByRole('heading', { level: 1, name: 'Ana Pérez' }).waitFor()
+      await page.goto('/olivia')
+      await page.getByRole('heading', { level: 1, name: 'Olivia Parker' }).waitFor()
       await settle(page)
       await save(page, `perfil-${layout}-${theme}`)
     })
@@ -58,7 +65,7 @@ for (const theme of THEMES) {
     await page.emulateMedia({ colorScheme: theme === 'amanecer' ? 'light' : 'dark', reducedMotion: 'reduce' })
     const today = new Date()
     const key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-    const state = createState()
+    const state = createState({ profiles: [profileRow(PERSON)] })
     const task = (id: string, title: string, done = false) => ({
       id, user_id: OWNER_ID, type: 'task', title, content: null, due_date: key, due_time: null, remind_minutes: null,
       reminded_at: null, completed_at: done ? new Date().toISOString() : null, is_completed: done, is_archived: false,
@@ -86,7 +93,7 @@ for (const theme of THEMES) {
     }]
     state.tables.life_goals = []
     state.tables.life_transactions = []
-    await installSupabaseMock(context, state, { signedIn: true })
+    await installSupabaseMock(context, state, { signedIn: true, userMetadata: { name: 'Olivia Parker' } })
     await page.goto('/life')
     await page.getByRole('heading', { level: 1, name: 'Mi día' }).waitFor()
     await page.getByText('Terminar la propuesta').waitFor()

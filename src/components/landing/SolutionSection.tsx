@@ -116,7 +116,7 @@ export function SolutionSection() {
         radial-gradient(ellipse 60% 50% at 50% 40%, rgba(244,112,90,0.06) 0%, transparent 60%),
         var(--ml-dark-2)
       `,
-      padding: '96px 24px',
+      padding: 'var(--ml-section-y) 24px',
       overflow: 'hidden',
       position: 'relative',
     }}>

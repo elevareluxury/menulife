@@ -18,8 +18,8 @@ const fr: LandingDict = {
     badgeGoalSub: '6/10 habitudes ce mois-ci',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'Designer · Buenos Aires',
+    name: 'Olivia Parker',
+    descriptor: 'Designer · Miami',
     status: 'Disponible pour des projets',
     links: [
       { label: 'Mon portfolio', sub: 'Projets 2026' },
@@ -70,8 +70,28 @@ const fr: LandingDict = {
     cta: 'Créer mon espace gratuit →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: 'Votre identité,',
+    titleAccent: 'en direct.',
+    subtitle: 'Votre Mycen prend forme en quelques minutes. Faites défiler pour voir.',
+    steps: [
+      { title: 'Choisissez votre nom', text: 'Une adresse courte, à vous pour toujours : mycen.id/vous. La même dans votre bio, votre carte et votre QR.' },
+      { title: 'Votre empreinte, unique', text: 'Mycen dessine une empreinte rien qu’à vous. C’est votre marque, même sans logo.' },
+      { title: 'Montrez-vous à votre façon', text: 'Cinq structures, deux thèmes et douze couleurs. Changez quand vous voulez, sans rien perdre.' },
+      { title: 'Ajoutez ce que vous faites', text: 'Liens, vidéos, musique, formulaire de contact, abonnés et soutiens. Tout au même endroit.' },
+      { title: 'Partagez-le partout', text: 'Copiez votre lien pour chaque réseau ou montrez votre QR. Sachez d’où vient chaque visite.' },
+      { title: 'Voyez ce qui marche', text: 'Les boutons les plus touchés et d’où viennent vos visites. Données anonymes : on ne garde pas qui vous visite.' },
+    ],
+    demo: { role: 'Designer · Miami', available: 'Disponible', portfolio: 'Mon portfolio', video: 'Dernière vidéo', music: 'Écoutez mon titre', contact: 'Écrivez-moi', subscribe: 'Abonnez-vous', support: 'Soutenez-moi', copied: 'Lien copié', topTaps: 'Les plus touchés' },
+    cta: 'Créez votre Mycen gratuitement',
+    ctaNote: 'Ça prend deux minutes.',
+  },
   structures: {
     label: 'VOTRE PROFIL',
+    prev: 'Précédente',
+    next: 'Suivante',
     title: 'Cinq façons de',
     titleAccent: 'vous montrer.',
     subtitle: 'Choisissez la structure qui va avec ce que vous faites et le thème qui vous ressemble. Changez quand vous voulez, sans rien perdre.',

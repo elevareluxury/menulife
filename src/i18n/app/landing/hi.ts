@@ -18,8 +18,8 @@ const hi: LandingDict = {
     badgeGoalSub: 'इस महीने 6/10 आदतें',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'डिज़ाइनर · ब्यूनस आयर्स',
+    name: 'Olivia Parker',
+    descriptor: 'डिज़ाइनर · मियामी',
     status: 'प्रोजेक्ट के लिए उपलब्ध',
     links: [
       { label: 'मेरा पोर्टफ़ोलियो', sub: 'प्रोजेक्ट 2026' },
@@ -70,8 +70,28 @@ const hi: LandingDict = {
     cta: 'मुफ़्त में मेरा स्पेस बनाएँ →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: 'आपकी पहचान,',
+    titleAccent: 'लाइव।',
+    subtitle: 'देखिए कुछ ही मिनटों में आपका Mycen कैसे बनता है। स्क्रॉल करें।',
+    steps: [
+      { title: 'अपना नाम चुनें', text: 'छोटा और हमेशा के लिए पता: mycen.id/आप। बायो, कार्ड और QR में एक ही।' },
+      { title: 'आपका अपना सिग्नेचर', text: 'Mycen सिर्फ़ आपके लिए एक निशान बनाता है। लोगो न हो तब भी यही आपकी पहचान है।' },
+      { title: 'जैसे चाहें दिखें', text: 'पाँच लेआउट, दो थीम और बारह रंग। जब चाहें बदलें, कुछ नहीं खोता।' },
+      { title: 'जो करते हैं वो जोड़ें', text: 'लिंक, वीडियो, संगीत, संपर्क फ़ॉर्म, सब्सक्राइबर और सपोर्ट। सब एक जगह।' },
+      { title: 'हर जगह शेयर करें', text: 'हर नेटवर्क के लिए लिंक कॉपी करें या अपना QR दिखाएँ। हर विज़िट कहाँ से आई, पता चलता है।' },
+      { title: 'देखें क्या काम करता है', text: 'कौन से बटन सबसे ज़्यादा दबे और विज़िट कहाँ से आईं। डेटा गुमनाम है: हम नहीं रखते कि कौन आया।' },
+    ],
+    demo: { role: 'डिज़ाइनर · मियामी', available: 'उपलब्ध', portfolio: 'मेरा पोर्टफ़ोलियो', video: 'नया वीडियो', music: 'मेरा गाना सुनें', contact: 'मुझे लिखें', subscribe: 'सब्सक्राइब करें', support: 'सपोर्ट करें', copied: 'लिंक कॉपी हुआ', topTaps: 'सबसे ज़्यादा दबाए गए' },
+    cta: 'मुफ़्त में अपना Mycen बनाएँ',
+    ctaNote: 'बस दो मिनट लगते हैं।',
+  },
   structures: {
     label: 'आपकी प्रोफ़ाइल',
+    prev: 'पिछला',
+    next: 'अगला',
     title: 'खुद को दिखाने के',
     titleAccent: 'पाँच तरीके।',
     subtitle: 'अपने काम के मुताबिक़ ढाँचा और अपने मिज़ाज के मुताबिक़ थीम चुनें। जब चाहें बदलें, कुछ नहीं खोएगा।',

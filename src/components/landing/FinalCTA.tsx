@@ -37,7 +37,7 @@ export function FinalCTA() {
         radial-gradient(ellipse 50% 40% at 50% 0%, rgba(244,112,90,0.06) 0%, transparent 50%),
         linear-gradient(180deg, #0F1115 0%, #161a22 50%, #0F1115 100%)
       `,
-      padding:   '112px 24px',
+      padding:   'var(--ml-section-y) 24px',
       textAlign: 'center',
       position:  'relative',
       overflow:  'hidden',

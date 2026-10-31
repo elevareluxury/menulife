@@ -144,6 +144,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   herramientas que flotan a su ritmo con avisos (puntos, sin números), conexiones que se cortan y la huella apagada con
   interferencia; al bajar (scrub, termina con el dibujo en el medio de la pantalla) se ordenan en un anillo y la huella
   se enciende. Lo que anima CSS y lo que maneja el scroll van en elementos distintos (una animación CSS le gana a GSAP).
+  "Tu identidad, en vivo" (`IdentitySection` + `identity.css`, entre "Todo conectado" y las estructuras): 6 pasos y
+  un celular fijo (sticky; en el celular arriba, con su columna en `display: contents`) que arma un perfil de ejemplo
+  — nombre, huella, las 5 estructuras (las WebP de `public/landing/`), módulos, compartir con QR decorativo y "lo que
+  más tocan" con barras sin números —. El paso activo sale de un IntersectionObserver (franja de lectura) y el
+  celular cambia con clases `idn-at-N` (lo que queda) / `idn-now-N` (lo de ese paso). Textos en `identity` (12
+  idiomas); termina con "Creá tu Mycen" → `/register`.
+  Las 5 estructuras van en una fila que se desliza (`.ml-structures`: scroll-snap, flechas `prev`/`next` si no entran,
+  enfocable con teclado). Aire entre secciones: `--ml-section-y` (56–80 px) en todas.
 - `advancedChunks` sólo agrupa supabase y react (+ el ayudante de precarga de Vite en `vendor`: en el bloque de supabase
   hacía que toda página bajara Supabase): agrupar recharts/framer a mano arrastraba dependencias a todas las páginas.
 - La entrada de la app no lleva Supabase ni i18next (antes de la V1: perfil 239 → 166 KB, landing 264 → 191 KB):

@@ -55,12 +55,12 @@ export function BusinessSection() {
         radial-gradient(ellipse 60% 50% at 70% 30%, rgba(59,130,246,0.04) 0%, transparent 50%),
         var(--ml-dark-2)
       `,
-      padding: '96px 24px',
+      padding: 'var(--ml-section-y) 24px',
     }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
 
         {/* Header */}
-        <div data-biz-title style={{ textAlign: 'center', marginBottom: '72px' }}>
+        <div data-biz-title style={{ textAlign: 'center', marginBottom: '48px' }}>
           <p style={{
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: 'var(--ml-salmon)',

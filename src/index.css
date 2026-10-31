@@ -361,6 +361,8 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
    LANDING v2 — PALETA REBRAND (salmón + dark)
    ===================================================== */
 :root {
+  /* Aire arriba y abajo de cada sección de la landing (entre dos secciones queda el doble) */
+  --ml-section-y:     clamp(56px, 8vw, 80px);
   --ml-dark:          #0F1115;
   --ml-dark-2:        #161a22;
   --ml-dark-3:        #1e2433;
@@ -1252,10 +1254,31 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 .ml-theme-dot-universo { background: #04050D; }
 .ml-theme-dot-amanecer { background: #FBF4EE; }
 .ml-structures {
-  list-style: none; margin: 0; padding: 0;
-  display: grid; gap: 20px; grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none; margin: 0 -16px; padding: 4px 16px 8px;
+  display: flex; gap: 16px;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+  scrollbar-width: none;
+  /* Los bordes se desvanecen: se nota que sigue */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
 }
-@media (min-width: 900px) { .ml-structures { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.ml-structures::-webkit-scrollbar { display: none; }
+.ml-structures:focus-visible { outline: 2px solid var(--ml-salmon); outline-offset: 4px; border-radius: 12px; }
+.ml-structures > li { flex: 0 0 clamp(190px, 56vw, 232px); scroll-snap-align: start; }
+/* Si entran todas, quedan centradas (con margen automático no se cortan las de la punta al deslizar) */
+.ml-structures > li:first-child { margin-inline-start: auto; }
+.ml-structures > li:last-child { margin-inline-end: auto; }
+.ml-structures-nav { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
+.ml-structures-nav button {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+  cursor: pointer; transition: background 0.2s, opacity 0.2s;
+}
+.ml-structures-nav button:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
+.ml-structures-nav button:disabled { opacity: 0.35; cursor: default; }
+[dir="rtl"] .ml-flip-rtl { transform: scaleX(-1); }
 .ml-structures img {
   display: block; width: 100%; height: auto; aspect-ratio: 1 / 2; object-fit: cover; object-position: top;
   border-radius: 22px; border: 1px solid rgba(255,255,255,0.12); background: #04050D;

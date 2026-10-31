@@ -83,7 +83,7 @@ export function FragmentationSection() {
         radial-gradient(ellipse 70% 50% at 50% 50%, rgba(244,112,90,0.04) 0%, transparent 60%),
         var(--ml-dark)
       `,
-      padding: '96px 24px',
+      padding: 'var(--ml-section-y) 24px',
       overflow: 'hidden',
     }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>

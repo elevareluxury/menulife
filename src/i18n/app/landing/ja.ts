@@ -18,8 +18,8 @@ const ja: LandingDict = {
     badgeGoalSub: '今月の習慣 6/10',
   },
   phone: {
-    name: 'Ana Pérez',
-    descriptor: 'デザイナー · ブエノスアイレス',
+    name: 'Olivia Parker',
+    descriptor: 'デザイナー · マイアミ',
     status: 'プロジェクト受付中',
     links: [
       { label: 'ポートフォリオ', sub: '2026 年のプロジェクト' },
@@ -70,8 +70,28 @@ const ja: LandingDict = {
     cta: '無料でスペースをつくる →',
   },
   /** V1 · etapa 13: las cinco estructuras del perfil (imágenes de ejemplo) y "Mi día" */
+  /** "Tu identidad, en vivo": el perfil que se arma mientras se baja (ejemplo ilustrativo, sin números) */
+  identity: {
+    label: 'MYCEN IDENTITY',
+    title: 'あなたのアイデンティティを、',
+    titleAccent: 'ライブで。',
+    subtitle: '数分であなたの Mycen ができあがる様子を、スクロールしてご覧ください。',
+    steps: [
+      { title: '名前を選ぶ', text: 'ずっと使える短いアドレス：mycen.id/あなた。プロフィール、名刺、QR で同じものを。' },
+      { title: 'あなただけのシグネチャー', text: 'Mycen があなただけのマークを描きます。ロゴがなくても、それがあなたのブランドに。' },
+      { title: '好きなように見せる', text: '5 つのレイアウト、2 つのテーマ、12 色。いつでも変えられて、何も失いません。' },
+      { title: 'していることを加える', text: 'リンク、動画、音楽、お問い合わせフォーム、購読者、応援。すべてひとつの場所に。' },
+      { title: 'どこにでもシェア', text: 'SNS ごとにリンクをコピー、または QR を見せるだけ。どこから来た訪問かがわかります。' },
+      { title: '効果を確かめる', text: 'よくタップされるボタンと、訪問の流入元。データは匿名で、誰が訪れたかは保存しません。' },
+    ],
+    demo: { role: 'デザイナー · マイアミ', available: '受付中', portfolio: 'ポートフォリオ', video: '最新の動画', music: '私の曲を聴く', contact: 'メッセージ', subscribe: '購読する', support: '応援する', copied: 'リンクをコピーしました', topTaps: 'よくタップされる' },
+    cta: '無料で Mycen をつくる',
+    ctaNote: '2 分で完了します。',
+  },
   structures: {
     label: 'あなたのプロフィール',
+    prev: '前へ',
+    next: '次へ',
     title: '5つの',
     titleAccent: '見せ方。',
     subtitle: '仕事に合う構成と、自分に合うテーマを選べます。いつでも変更でき、何も失われません。',
