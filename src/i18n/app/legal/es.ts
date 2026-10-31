@@ -6,7 +6,7 @@
 export type LegalBlock = string | { list: string[] }
 export interface LegalSection { id: string; title: string; body: LegalBlock[] }
 
-const UPDATED = '2026-10-19'
+const UPDATED = '2026-10-31'
 
 const es = {
   ui: {
@@ -81,9 +81,9 @@ const es = {
     ] },
   ] as LegalSection[],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'Quién presta el servicio', body: [
-      'Mycen es un servicio operado por **Resilio**, con domicilio en la República Argentina. Podés escribirnos a **team@mycen.id**.',
+      'Mycen es un servicio operado por **Luca Cazzoli** (CUIT 20-42325961-3), bajo el nombre de fantasía **Resilio**, con domicilio en la República Argentina. Podés escribirnos a **team@mycen.id**.',
       'Mycen te permite crear una identidad digital pública (Mycen Identity), administrarla desde Mycen Studio, organizar tu vida personal en Life OS y, si tenés un negocio, gestionarlo con Mycen Business.',
     ] },
     { id: 'edad', title: 'Quién puede usar Mycen', body: [
@@ -148,9 +148,9 @@ const es = {
     ] },
   ] as LegalSection[],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'Quién es responsable de tus datos', body: [
-      'El responsable del tratamiento es **Resilio**, con domicilio en la República Argentina, que opera Mycen. Para cualquier consulta sobre tus datos escribinos a **team@mycen.id**.',
+      'El responsable del tratamiento es **Luca Cazzoli** (CUIT 20-42325961-3), que opera Mycen bajo el nombre de fantasía **Resilio**, con domicilio en la República Argentina. Para cualquier consulta sobre tus datos escribinos a **team@mycen.id**.',
       'Cuando un negocio usa Mycen Business para gestionar datos de sus propios clientes (pedidos, reservas, turnos), ese negocio es el responsable de esos datos y Mycen los trata por su cuenta y siguiendo sus instrucciones.',
     ] },
     { id: 'datos', title: 'Qué datos usamos', body: [

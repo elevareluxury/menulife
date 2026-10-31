@@ -73,9 +73,9 @@ const en: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'Who provides the service', body: [
-      'Mycen is a service operated by **Resilio**, based in the Argentine Republic. You can write to us at **team@mycen.id**.',
+      'Mycen is a service operated by **Luca Cazzoli** (Argentine tax ID CUIT 20-42325961-3), under the trade name **Resilio**, based in the Argentine Republic. You can write to us at **team@mycen.id**.',
       'Mycen lets you create a public digital identity (Mycen Identity), manage it from Mycen Studio, organize your personal life in Life OS and, if you have a business, run it with Mycen Business.',
     ] },
     { id: 'edad', title: 'Who can use Mycen', body: [
@@ -140,9 +140,9 @@ const en: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'Who is responsible for your data', body: [
-      'The data controller is **Resilio**, based in the Argentine Republic, which operates Mycen. For any question about your data, write to **team@mycen.id**.',
+      'The data controller is **Luca Cazzoli** (Argentine tax ID CUIT 20-42325961-3), who operates Mycen under the trade name **Resilio** and is based in the Argentine Republic. For any question about your data, write to **team@mycen.id**.',
       'When a business uses Mycen Business to manage data about its own customers (orders, reservations, appointments), that business is responsible for that data and Mycen processes it on its behalf and following its instructions.',
     ] },
     { id: 'datos', title: 'What data we use', body: [

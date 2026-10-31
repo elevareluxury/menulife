@@ -73,9 +73,9 @@ const it: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'Chi fornisce il servizio', body: [
-      'Mycen è un servizio gestito da **Resilio**, con sede nella Repubblica Argentina. Puoi scriverci a **team@mycen.id**.',
+      'Mycen è un servizio gestito da **Luca Cazzoli** (codice fiscale argentino CUIT 20-42325961-3), con il nome commerciale **Resilio**, residente nella Repubblica Argentina. Puoi scriverci a **team@mycen.id**.',
       'Mycen ti permette di creare un’identità digitale pubblica (Mycen Identity), gestirla da Mycen Studio, organizzare la tua vita personale in Life OS e, se hai un’attività, gestirla con Mycen Business.',
     ] },
     { id: 'edad', title: 'Chi può usare Mycen', body: [
@@ -140,9 +140,9 @@ const it: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'Chi è responsabile dei tuoi dati', body: [
-      'Il titolare del trattamento è **Resilio**, con sede nella Repubblica Argentina, che gestisce Mycen. Per qualsiasi domanda sui tuoi dati scrivi a **team@mycen.id**.',
+      'Il titolare del trattamento è **Luca Cazzoli** (codice fiscale argentino CUIT 20-42325961-3), che gestisce Mycen con il nome commerciale **Resilio** ed è residente nella Repubblica Argentina. Per qualsiasi domanda sui tuoi dati scrivi a **team@mycen.id**.',
       'Quando un’attività usa Mycen Business per gestire i dati dei propri clienti (ordini, prenotazioni, appuntamenti), è quell’attività la titolare di quei dati e Mycen li tratta per suo conto e secondo le sue istruzioni.',
     ] },
     { id: 'datos', title: 'Quali dati usiamo', body: [

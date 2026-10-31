@@ -73,9 +73,9 @@ const ja: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'サービスの提供者', body: [
-      'Mycen は、アルゼンチン共和国に所在する **Resilio** が運営するサービスです。お問い合わせは **team@mycen.id** までご連絡ください。',
+      'Mycen は、アルゼンチン共和国在住の **Luca Cazzoli**（アルゼンチン納税者番号 CUIT 20-42325961-3）が屋号 **Resilio** で運営するサービスです。お問い合わせは **team@mycen.id** までご連絡ください。',
       'Mycen では、公開のデジタルアイデンティティ（Mycen Identity）を作成して Mycen Studio で管理し、Life OS で日々の生活を整え、ビジネスをお持ちの場合は Mycen Business で運営できます。',
     ] },
     { id: 'edad', title: '利用できる方', body: [
@@ -140,9 +140,9 @@ const ja: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'データの管理者', body: [
-      'データの管理者は、Mycen を運営するアルゼンチン共和国所在の **Resilio** です。データに関するお問い合わせは **team@mycen.id** までどうぞ。',
+      'データの管理者は、屋号 **Resilio** で Mycen を運営する、アルゼンチン共和国在住の **Luca Cazzoli**（アルゼンチン納税者番号 CUIT 20-42325961-3）です。データに関するお問い合わせは **team@mycen.id** までどうぞ。',
       'ビジネスが Mycen Business で自社の顧客データ（注文、予約、来店予約など）を管理する場合、そのデータの管理者はそのビジネスであり、Mycen はその委託を受け、指示に従って取り扱います。',
     ] },
     { id: 'datos', title: '利用するデータ', body: [

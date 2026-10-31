@@ -218,7 +218,7 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   (pasos en `supabase/templates/LEEME.md`).
 - Legales (L4): `/terminos` y `/privacidad` salen de `src/i18n/app/legal/<idioma>.ts` (secciones con id; el español es la
   versión de referencia y las traducciones tienen la misma estructura, lo verifica `tests/unit/legal.test.ts`). Responsable:
-  Resilio (Argentina), contacto `team@mycen.id`. Si se suma un proveedor o un dato nuevo, actualizar privacidad en los 12.
+  Luca Cazzoli (monotributo, CUIT 20-42325961-3) con el nombre de fantasía Resilio (Argentina), contacto `team@mycen.id`. Si se suma un proveedor o un dato nuevo, actualizar privacidad en los 12.
   Textos sin revisión de abogado: revisarlos antes de abrir al público.
 - Preferencias de la cuenta en `user_settings` (idioma, moneda principal, monedas extra, zona horaria, inicio de semana):
   `src/lib/prefs.ts` (`usePrefs`, `savePrefs`), se cargan en `PrefsInit`. Ajustes en `/life/settings` y Studio → Ajustes.

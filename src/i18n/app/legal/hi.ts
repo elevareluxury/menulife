@@ -73,9 +73,9 @@ const hi: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'सेवा कौन देता है', body: [
-      'Mycen एक सेवा है जिसे **Resilio** चलाता है, जिसका पता अर्जेंटीना गणराज्य में है। आप हमें **team@mycen.id** पर लिख सकते हैं।',
+      'Mycen एक सेवा है जिसे **Luca Cazzoli** (अर्जेंटीना कर पहचान संख्या CUIT 20-42325961-3) व्यापारिक नाम **Resilio** से चलाते हैं, जिनका पता अर्जेंटीना गणराज्य में है। आप हमें **team@mycen.id** पर लिख सकते हैं।',
       'Mycen से आप एक सार्वजनिक डिजिटल पहचान (Mycen Identity) बना सकते हैं, उसे Mycen Studio से संभाल सकते हैं, Life OS में अपनी निजी ज़िंदगी व्यवस्थित कर सकते हैं और, अगर आपका बिज़नेस है, तो उसे Mycen Business से चला सकते हैं।',
     ] },
     { id: 'edad', title: 'Mycen कौन इस्तेमाल कर सकता है', body: [
@@ -140,9 +140,9 @@ const hi: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'आपके डेटा के लिए कौन ज़िम्मेदार है', body: [
-      'डेटा का नियंत्रक **Resilio** है, जिसका पता अर्जेंटीना गणराज्य में है और जो Mycen चलाता है। अपने डेटा के बारे में किसी भी सवाल के लिए **team@mycen.id** पर लिखें।',
+      'डेटा के नियंत्रक **Luca Cazzoli** (अर्जेंटीना कर पहचान संख्या CUIT 20-42325961-3) हैं, जो व्यापारिक नाम **Resilio** से Mycen चलाते हैं और जिनका पता अर्जेंटीना गणराज्य में है। अपने डेटा के बारे में किसी भी सवाल के लिए **team@mycen.id** पर लिखें।',
       'जब कोई बिज़नेस अपने ग्राहकों का डेटा (ऑर्डर, बुकिंग, अपॉइंटमेंट) संभालने के लिए Mycen Business इस्तेमाल करता है, तो उस डेटा का ज़िम्मेदार वह बिज़नेस होता है और Mycen उसकी ओर से और उसके निर्देशों के अनुसार उसे प्रोसेस करता है।',
     ] },
     { id: 'datos', title: 'हम कौन-सा डेटा इस्तेमाल करते हैं', body: [

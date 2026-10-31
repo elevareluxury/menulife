@@ -73,9 +73,9 @@ const fr: LegalDict = {
     ] },
   ],
   terms: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'quien', title: 'Qui fournit le service', body: [
-      'Mycen est un service exploité par **Resilio**, domicilié en République argentine. Vous pouvez nous écrire à **team@mycen.id**.',
+      'Mycen est un service exploité par **Luca Cazzoli** (identifiant fiscal argentin CUIT 20-42325961-3), sous le nom commercial **Resilio**, domicilié en République argentine. Vous pouvez nous écrire à **team@mycen.id**.',
       'Mycen vous permet de créer une identité numérique publique (Mycen Identity), de la gérer depuis Mycen Studio, d’organiser votre vie personnelle dans Life OS et, si vous avez une entreprise, de la gérer avec Mycen Business.',
     ] },
     { id: 'edad', title: 'Qui peut utiliser Mycen', body: [
@@ -140,9 +140,9 @@ const fr: LegalDict = {
     ] },
   ],
   privacy: [
-    // RESPONSABLE: pendiente de decisión. Hoy dice "Resilio"; no cambiarlo hasta que se decida cómo figura el responsable.
+    // RESPONSABLE: Luca Cazzoli (monotributo, CUIT 20-42325961-3), nombre de fantasía Resilio. Si se arma una sociedad, cambiar acá en los 12.
     { id: 'responsable', title: 'Qui est responsable de vos données', body: [
-      'Le responsable du traitement est **Resilio**, domicilié en République argentine, qui exploite Mycen. Pour toute question sur vos données, écrivez à **team@mycen.id**.',
+      'Le responsable du traitement est **Luca Cazzoli** (identifiant fiscal argentin CUIT 20-42325961-3), qui exploite Mycen sous le nom commercial **Resilio** et est domicilié en République argentine. Pour toute question sur vos données, écrivez à **team@mycen.id**.',
       'Lorsqu’une entreprise utilise Mycen Business pour gérer les données de ses propres clients (commandes, réservations, rendez-vous), cette entreprise est responsable de ces données et Mycen les traite pour son compte et selon ses instructions.',
     ] },
     { id: 'datos', title: 'Quelles données nous utilisons', body: [
