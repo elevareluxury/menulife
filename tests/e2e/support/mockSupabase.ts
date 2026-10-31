@@ -25,6 +25,8 @@ export interface MockState {
   /** Estado del sistema: lo que cambia sobre la respuesta de admin_system_status y los hallazgos del autochequeo */
   systemStatus?: Row
   selfcheck?: { rule: string; level: 'red' | 'yellow' | 'info'; object: string }[]
+  /** Crecimiento: respuestas de admin_growth_* (si no, unas de ejemplo calculadas sobre el estado) */
+  growth?: { overview?: Row; retention?: Row[]; funnel?: Row; adoption?: Row }
   /** Ajustes del Estado del sistema (admin_set_status_setting) */
   statusSettings?: Record<string, string>
   /**
@@ -921,6 +923,70 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       return rows.filter(r => !before || String(r.created_at) < before).slice(0, Number(args.p_limit ?? 100))
     }
     case 'get_site_flags': return { business: state.siteFlags?.business === true }
+    case 'mycen_mark_active': {
+      if (!isOwner) return 'invalid'
+      if (!['life', 'studio'].includes(String(args.p_area))) return 'invalid'
+      ;(state.tables.user_activity_days ??= []).push({ area: args.p_area, platform: args.p_platform, lang: args.p_lang, tz: args.p_tz })
+      return 'ok'
+    }
+    case 'admin_growth_overview': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      if (state.growth?.overview) return state.growth.overview
+      const days = Number(args.p_days ?? 90)
+      const day = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10)
+      const month = (n: number) => { const d = new Date(); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() - n); return d.toISOString().slice(0, 7) }
+      return {
+        today: day(0), days, accounts: 40, dau: 12, wau: 25, mau: 34, stickiness: 35.3,
+        growth: { signups_7d: 9, signups_prev_7d: 6, signups_30d: 30, signups_prev_30d: 20, wau_prev: 20, mau_prev: 25,
+          published_7d: 5, published_prev_7d: 4, published_total: 18 },
+        daily: Array.from({ length: days }, (_, i) => ({ day: day(days - 1 - i), dau: 5 + (i % 7), wau: 20, mau: 30, signups: i % 3, published: i % 4 === 0 ? 1 : 0 })),
+        monthly: Array.from({ length: 12 }, (_, i) => ({ month: month(11 - i), signups: i * 2, active: i * 3, published: i, accounts: i * 4 })),
+        lifecycle: { new: 4, retained: 15, resurrected: 3, churned: 5 },
+        platforms: [{ key: 'web', users: 18 }, { key: 'ios', users: 9 }, { key: 'pwa', users: 5 }, { key: 'android', users: 2 }],
+        languages: [{ key: 'es', users: 20 }, { key: 'en', users: 10 }, { key: 'pt', users: 4 }],
+        regions: [{ key: 'America', users: 25 }, { key: 'Europe', users: 9 }],
+        timezones: [{ key: 'America/Argentina/Buenos_Aires', users: 15 }, { key: 'Europe/Madrid', users: 6 }],
+        areas: { life: 22, studio: 19 },
+        visits: Array.from({ length: days }, (_, i) => ({ day: day(days - 1 - i), views: 30 + i, visitors: 20 + (i % 5) })),
+      }
+    }
+    case 'admin_growth_retention': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      if (state.growth?.retention) return state.growth.retention
+      const monday = (n: number) => { const d = new Date(); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7) - 7 * n); return d.toISOString().slice(0, 10) }
+      return Array.from({ length: 4 }, (_, c) => ({
+        week: monday(c), size: 10 - c,
+        weeks: Array.from({ length: 12 }, (_, k) => (k > c ? null : k === 0 ? 100 : Math.round(60 / k))),
+      }))
+    }
+    case 'admin_growth_funnel': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      if (state.growth?.funnel) return state.growth.funnel
+      return {
+        days: Number(args.p_days ?? 30),
+        steps: [
+          { key: 'signup_started', users: 50 }, { key: 'signed_up', users: 30 }, { key: 'onboarding', users: 26 },
+          { key: 'published', users: 18 }, { key: 'shared', users: 12 }, { key: 'first_visit', users: 10 },
+          { key: 'first_message', users: 3 }, { key: 'came_back', users: 15 },
+        ],
+        referrals: { signups: 6, referrers: 4, publishers_at_start: 12, k: 0.5, share_of_signups: 20 },
+        sources: [{ key: 'qr', visits: 40 }, { key: 'instagram.com', visits: 25 }, { key: 'direct', visits: 18 }],
+        signup_channels: [{ key: 'hero', users: 12 }, { key: 'direct', users: 10 }, { key: 'perfil', users: 8 }],
+      }
+    }
+    case 'admin_growth_adoption': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      if (state.growth?.adoption) return state.growth.adoption
+      return {
+        days: Number(args.p_days ?? 30), published_profiles: 18, active_users: 34,
+        modules: [{ key: 'link', profiles: 16, pct: 88.9 }, { key: 'social', profiles: 12, pct: 66.7 }, { key: 'media', profiles: 5, pct: 27.8 }],
+        layouts: [{ key: 'credencial', profiles: 8, pct: 44.4 }, { key: 'portada', profiles: 6, pct: 33.3 }, { key: 'bento', profiles: 4, pct: 22.2 }],
+        modes: [{ key: 'universo', profiles: 11 }, { key: 'amanecer', profiles: 7 }],
+        life: [{ key: 'tasks', users: 14 }, { key: 'captures', users: 9 }, { key: 'habits', users: 11 }, { key: 'money', users: 7 },
+          { key: 'goals', users: 5 }, { key: 'journal', users: 3 }, { key: 'reviews', users: 6 }],
+        top_profiles: [{ handle: 'ana', views: 120, visitors: 80 }, { handle: 'beto', views: 60, visitors: 41 }],
+      }
+    }
     case 'admin_system_status': {
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
       const now = Date.now()

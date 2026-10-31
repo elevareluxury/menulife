@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MailPlus, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { useMarkActive } from '@/lib/activity'
 import { StudioContext, type StudioContextValue } from './StudioContext'
 import {
   friendlyError, loadBusiness, loadModules, loadMySpaces, loadProfile, loadPublishState, publishSpace,
@@ -84,6 +85,8 @@ export function StudioShell() {
   const dir = langDir(useAppLang(s => s.lang))
   // Título de la pestaña con el de la pantalla ("Analítica · Mycen Studio")
   useH1Title('Mycen Studio')
+  // "Usé Mycen hoy" para el panel → Crecimiento (una vez por día; sin contenido)
+  useMarkActive(userId, 'studio')
 
   useEffect(() => {
     if (!userId) return
