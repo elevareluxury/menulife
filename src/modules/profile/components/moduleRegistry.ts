@@ -53,7 +53,8 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   gallery:         { View: GalleryModule, bento: 'L' },
   product:         { View: ProductModule, bento: 'M' },
   testimonials:    { View: TestimonialsModule, bento: 'M' },
-  hours:           { View: HoursModule, bento: 'S' },
+  // M: a media columna cada horario se partía en dos renglones y estiraba a su vecino
+  hours:           { View: HoursModule, bento: 'M' },
   cards:           { View: CardsModule, bento: 'L' },
   project:         { View: ProjectModule, bento: 'L' },
   portfolio:       { View: PortfolioModule, bento: 'L' },

@@ -676,6 +676,19 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   idiomas (`support` / `deletion` en `src/i18n/app/legal/*`). En Studio → Mensajes, "Reportar" (copia al equipo en
   `profile_message_reports`, panel → Denuncias) y "Bloquear" (`profile_blocked_senders`; un trigger descarta lo que
   llega de ese contacto y al visitante se le responde "ok"), migración `20261106000001_message_block_report.sql`.
+- Pulido de módulos (auditoría visual, `docs/identity/mejoras-clase-mundial.md` bloque A): una sola jerarquía de títulos
+  (`.mp-card-title`/`.mp-form-title`/`.mp-support-title` = tamaño lead, letra de la interfaz; la de marca queda para un
+  texto, "Escuchá en" y proyectos; Editorial usa su serif). Grupo de links = lista agrupada en una tarjeta. Botón
+  destacado y botón de producto = `.mp-featured` (contorno y texto del acento). Producto con `content.currency` (ISO,
+  `CURRENCIES` y `formatPrice` en `profile/lib/price.ts`; sin moneda, "$" como antes). Reseñas: siempre 5 estrellas
+  (`Stars`, `role="img"` "4.8 / 5", color del texto). "Abierto/Cerrado ahora" arriba sólo con negocio vinculado o
+  `theme.show_open_status === true`; Horarios guarda la zona del dispositivo de quien edita (antes, Buenos Aires fija).
+  Colaboraciones arranca cerrado (botón `propose` que abre el formulario y enfoca el primer campo). Música/video: la
+  fachada de música mide lo mismo que el reproductor (sin salto), sin portada un fondo del acento con la huella y con
+  portada un degradé (`.mp-media-scrim`) en vez de la placa. Bento sin `dense` (respeta el orden) y Horarios en M.
+  Portfolio sin portada = huella del perfil; con número impar el último va a todo el ancho. "Escuchá en" en una
+  columna. Flyer ≤ 56svh. Árabe: flechas espejadas y textos del dueño con `unicode-bidi: plaintext`.
+  Buscadores: `api/og.ts` manda `ProfilePage` con la persona o el negocio como `mainEntity` (@usuario, `sameAs`).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

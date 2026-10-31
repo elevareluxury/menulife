@@ -402,7 +402,7 @@ const it: StudioDict = {
       network: 'Social', handle: 'Utente o URL', whatsapp: 'WhatsApp', phone: 'Telefono', email: 'Email', address: 'Indirizzo',
       city: 'Città', mapsUrl: 'Link di Google Maps (facoltativo)', text: 'Testo', image: 'Immagine', caption: 'Didascalia (facoltativa)',
       alt: 'Descrizione per l’accessibilità', buttonText: 'Testo del pulsante', name: 'Nome', description: 'Descrizione',
-      price: 'Prezzo (facoltativo)', tag: 'Etichetta (facoltativa)', ctaText: 'Testo del pulsante (facoltativo)', ctaUrl: 'URL del pulsante (facoltativo)',
+      price: 'Prezzo (facoltativo)', currency: 'Valuta', tag: 'Etichetta (facoltativa)', ctaText: 'Testo del pulsante (facoltativo)', ctaUrl: 'URL del pulsante (facoltativo)',
       sectionTitle: 'Titolo della sezione (facoltativo)', layout: 'Come vengono mostrate',
     },
     placeholders: {

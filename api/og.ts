@@ -115,14 +115,24 @@ function profileBody(p: PublicProfile, url: string): { html: string; jsonLd: str
   }
   if (links.length) parts.push(`<ul>${links.join('')}</ul>`)
   parts.push(`<p><a href="${esc(url)}">${esc(url)}</a></p>`)
+  // ProfilePage (lo que Google pide para páginas de perfil): la persona o el negocio va como entidad principal, con su
+  // @usuario, y la página dice en qué idioma está
+  const handle = p.handle ?? p.username
   const ld = {
     '@context': 'https://schema.org',
-    '@type': PERSON_PURPOSES.has(p.purpose ?? '') ? 'Person' : 'Organization',
-    name: p.display_name,
-    description: p.descriptor ?? p.bio ?? undefined,
+    '@type': 'ProfilePage',
     url,
-    image: p.avatar_url ?? p.cover_url ?? undefined,
-    sameAs: sameAs.length ? sameAs : undefined,
+    inLanguage: p.default_locale ?? undefined,
+    mainEntity: {
+      '@type': PERSON_PURPOSES.has(p.purpose ?? '') ? 'Person' : 'Organization',
+      name: p.display_name,
+      alternateName: `@${handle}`,
+      identifier: handle,
+      description: p.descriptor ?? p.bio ?? undefined,
+      url,
+      image: p.avatar_url ?? p.cover_url ?? undefined,
+      sameAs: sameAs.length ? sameAs : undefined,
+    },
   }
   // JSON dentro de <script>: escapar "<" evita cerrar la etiqueta desde el contenido
   return { html: parts.join('\n'), jsonLd: JSON.stringify(ld).replace(/</g, '\\u003c') }

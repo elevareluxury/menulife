@@ -579,6 +579,7 @@ const es = {
       name: 'Nombre',
       description: 'Descripción',
       price: 'Precio (opcional)',
+      currency: 'Moneda',
       tag: 'Etiqueta (opcional)',
       ctaText: 'Texto del botón (opcional)',
       ctaUrl: 'URL del botón (opcional)',

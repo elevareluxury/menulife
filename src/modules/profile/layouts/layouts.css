@@ -25,6 +25,16 @@
 .mp-chips .mp-status-dot { background: var(--my-subtle); }
 .mp-chips .mp-status.is-open .mp-status-dot { background: var(--my-accent); }
 
+/* Una sola jerarquía de títulos en los módulos: título de sección (tamaño "lead", letra de la interfaz, color del
+   texto) para todos; la letra de marca queda para lo protagonista (un texto, "Escuchá en", un proyecto). Antes
+   convivían una etiqueta chica en mayúsculas grises y títulos grandes de marca, sin regla. Editorial la cambia por
+   su serif (más abajo). */
+.my-profile :is(.mp-card-title, .mp-form-title, .mp-support-title) {
+  font: 600 var(--my-fs-lead) / var(--my-lh-title) var(--my-font-ui);
+  letter-spacing: -0.005em; text-transform: none; color: var(--my-text); margin: 0 0 12px;
+}
+.my-profile .mp-form-intro { margin-top: -6px; }
+
 .mp-actions { display: grid; gap: 10px; margin-top: 8px; }
 .mp-actions .mp-secondary-row { margin-top: 0; }
 
@@ -101,7 +111,7 @@
 .mp-ed-bio { margin: 24px 0; font-size: var(--my-fs-lead); line-height: 1.6; white-space: pre-line; }
 .mp-ed-modules { gap: 20px; }
 .mp-editorial .mp-card, .mp-editorial .mp-link { background: transparent; }
-.mp-editorial .mp-card-title { font-size: var(--my-fs-section); letter-spacing: -0.01em; text-transform: none; font-family: var(--my-font-editorial); font-weight: 400; color: var(--my-text); }
+.mp-editorial :is(.mp-card-title, .mp-form-title, .mp-support-title) { font-size: var(--my-fs-section); letter-spacing: -0.01em; text-transform: none; font-family: var(--my-font-editorial); font-weight: 400; color: var(--my-text); }
 
 /* ── Bento: grilla de 2 columnas ──────────────────────────────── */
 .mp-bento-hero { position: relative; overflow: hidden; margin-top: 20px; padding: 20px; text-align: start; border-radius: var(--my-r-bento); }
@@ -113,11 +123,14 @@
 .mp-bento .mp-chips, .mp-bento .mp-tags { justify-content: flex-start; position: relative; }
 .mp-bento-bio { position: relative; margin: 8px 0 0; text-align: start; }
 .mp-bento-actions { margin-top: 12px; }
-.mp-bento-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row dense; gap: 12px; margin-top: 12px; }
+.mp-bento-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+/* Sin "dense": el orden es el que eligió el dueño (antes un bloque chico de abajo subía a llenar un hueco) */
 .mp-b-S { grid-column: span 1; }
 .mp-b-M, .mp-b-L { grid-column: 1 / -1; }
 .mp-b-S > *, .mp-b-S .mp-link { height: 100%; }
 .mp-bento .mp-card, .mp-bento .mp-link { border-radius: var(--my-r-bento); }
+.mp-bento .mp-link-group { border-radius: var(--my-r-bento); }
+.mp-bento .mp-link-group .mp-link { border-radius: 0; }
 .mp-b-S .mp-link { flex-direction: column; align-items: flex-start; justify-content: space-between; min-height: 112px; }
 
 /* La foto es un objeto sólido delante de la huella */
@@ -128,13 +141,16 @@
 .mp-media-facade {
   position: relative; display: flex; align-items: flex-end; gap: 14px; width: 100%; min-height: 112px;
   padding: 18px; border: 0; border-radius: inherit; overflow: hidden; cursor: pointer; text-align: start;
-  background: var(--my-tile); color: var(--my-text); font: inherit;
+  /* Sin portada: un fondo suave del acento (parece arte de tapa, no una caja vacía), sobre la superficie de las tarjetas
+     del tema (en Amanecer, crema como las demás) */
+  background: radial-gradient(120% 100% at 85% 0%, color-mix(in srgb, var(--my-accent) 26%, transparent), transparent 70%), var(--p-card-bg, var(--my-tile));
+  color: var(--my-text); font: inherit;
 }
 .mp-media-music .mp-media-facade { align-items: center; }
 .mp-media-art {
-  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0.55; pointer-events: none;
+  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0.8; pointer-events: none;
   /* La huella se apaga hacia abajo: el título y el proveedor se leen limpios */
-  -webkit-mask-image: linear-gradient(to top, transparent 15%, black 75%); mask-image: linear-gradient(to top, transparent 15%, black 75%);
+  -webkit-mask-image: linear-gradient(to top, transparent 10%, black 60%); mask-image: linear-gradient(to top, transparent 10%, black 60%);
 }
 .mp-media-art svg { width: 130% !important; height: auto !important; }
 .mp-media-music .mp-media-art svg { width: 60% !important; margin-inline-start: 50%; }
@@ -145,10 +161,12 @@
 .mp-media-text { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .mp-media-title { font-weight: 600; font-size: var(--my-fs-lead); overflow-wrap: anywhere; }
 .mp-media-provider { font-size: var(--my-fs-small); color: var(--my-muted); }
-/* Portada (guardada en Mycen al pegar el link): ocupa la tarjeta; el título va sobre una placa del tema para leerse */
+/* Portada (guardada en Mycen al pegar el link): ocupa la tarjeta; un degradé del fondo del tema sube desde abajo y el
+   título va directo encima (antes, una placa que parecía pegada) */
 .mp-media-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.mp-media-cover ~ .mp-media-text {
-  padding: 8px 12px; border-radius: var(--my-r-field); background: var(--my-glass-strong-solid); box-shadow: var(--my-shadow-float);
+.mp-media-scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, var(--my-bg) 92%, transparent) 0%, color-mix(in srgb, var(--my-bg) 55%, transparent) 38%, transparent 72%);
 }
 .mp-media-music .mp-media-facade:has(.mp-media-cover) { min-height: 180px; align-items: flex-end; }
 .mp-media-frame { width: 100%; overflow: hidden; border-radius: inherit; background: var(--my-tile); }
@@ -162,6 +180,14 @@
 .mp-form-error { margin: 0; font-weight: 600; color: var(--my-text); }
 .mp-form-note { margin: 0; font-size: var(--my-fs-small); color: var(--my-muted); text-align: center; }
 .mp-form-done { margin: 8px 0 14px; font-size: var(--my-fs-lead); }
+/* Desplegables del perfil iguales a los demás campos (el dibujo nativo traía otro margen y otra letra) */
+.mp-root select.my-field-input {
+  -webkit-appearance: none; appearance: none; padding-inline-end: 40px; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%;
+  background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+}
+.mp-root[dir='rtl'] select.my-field-input { background-position: 15px 50%, 20px 50%; }
 /* Colaboraciones (V1.1): "Tarifas desde …" debajo de la invitación */
 .mp-collab-rates { margin: -6px 0 14px; font-weight: 600; color: var(--my-text); }
 

@@ -18,6 +18,11 @@ import { LatestVideoEditor, type LatestVideoValue } from '../components/LatestVi
 import { ListenLinksEditor, SupportMethodsEditor } from '../components/supportListenEditors'
 import { duplicateListenRows, listenErrorText, supportErrorText, type ListenInput, type SupportInput } from './supportListenErrors'
 
+/** Zona horaria del dispositivo de quien edita (los horarios se leen en la del dueño, no en la del visitante) */
+import { CURRENCIES, formatPrice } from '../../profile/lib/price'
+
+const deviceTimeZone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { return 'UTC' } }
+
 export type FieldKind = 'text' | 'textarea' | 'url' | 'email' | 'tel' | 'number' | 'select' | 'image'
 
 export interface FieldDef {
@@ -226,13 +231,14 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         { key: 'name', label: f.name, kind: 'text', required: true, translatable: true, maxLength: 120 },
         { key: 'description', label: f.description, kind: 'textarea', translatable: true, maxLength: 500 },
         { key: 'price', label: f.price, kind: 'number' },
+        { key: 'currency', label: f.currency, kind: 'select', options: CURRENCIES.map(c => ({ value: c, label: c })) },
         { key: 'tag', label: f.tag, kind: 'text', translatable: true, maxLength: 30, placeholder: p.tag },
         { key: 'image_url', label: f.image, kind: 'image' },
         { key: 'cta_text', label: f.ctaText, kind: 'text', translatable: true, maxLength: 40 },
         { key: 'cta_url', label: f.ctaUrl, kind: 'url' },
       ],
       validate: x => (urlOk(x.cta_url) ? null : v.badCta),
-      summary: x => (typeof x.price === 'number' ? `$ ${x.price}` : text(x.description).slice(0, 60)),
+      summary: x => (typeof x.price === 'number' ? formatPrice(x.price, text(x.currency), 'es') : text(x.description).slice(0, 60)),
       fallbackTitle: x => text(x.name) || sm.product,
     },
     hours: {
@@ -243,7 +249,7 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         validate: schedule => (WEEK_DAYS.some(d => schedule[d]) ? null : e.hoursEmpty),
         apply: (schedule, content, ctx) => {
           content.schedule = schedule
-          content.timezone = text(content.timezone) || ctx.businessTimezone || 'America/Argentina/Buenos_Aires'
+          content.timezone = text(content.timezone) || ctx.businessTimezone || deviceTimeZone()
         },
         Editor: HoursEditor,
       }),
