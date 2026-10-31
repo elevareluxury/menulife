@@ -59,7 +59,8 @@ with checks(migracion, aplicada) as (values
   ('20261114000001_advisor_hardening',               exists (select 1 from pg_policies where schemaname = 'storage' and policyname = 'business_media_owner_select')),
   ('20261115000001_admin_system_status',             exists (select 1 from pg_proc where proname = 'admin_system_status')),
   ('20261116000001_admin_growth',                    to_regclass('public.user_activity_days') is not null),
-  ('20261117000001_launch_hardening',                to_regclass('public.app_error_hits_hash_day_idx') is not null)
+  ('20261117000001_launch_hardening',                to_regclass('public.app_error_hits_hash_day_idx') is not null),
+  ('20261118000001_status_app_queries',              exists (select 1 from pg_proc where proname = 'admin_system_status' and prosrc like '%authenticator%'))
 )
 select migracion, case when aplicada then 'OK' else 'FALTA' end as estado
 from checks
