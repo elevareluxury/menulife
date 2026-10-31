@@ -650,6 +650,20 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `admin_audit_log` (nadie lee la tabla; `admin_list_audit`) cada suspensión, verificación, denuncia o pedido resuelto,
   error y interruptor que cambia un super-admin. Migración `20261105000001_admin_console.sql`, tests en
   `admin_console.test.sql` y `admin-console.spec.ts`; textos en `src/i18n/app/admin/` (12 idiomas).
+- Estado del sistema (auditoría del panel, PR 1): `/super-admin/estado` (`EstadoTab`, 2.º del menú de Mycen y en la
+  barra del celular en lugar de Personas). Semáforo general y una fila por chequeo con umbrales puros en
+  `super-admin/lib/systemStatus.ts` (`evaluate`, tests en `systemStatus.test.ts`): base y versión (`/api/health`, que
+  ahora devuelve `release`), perfil público (`get_public_profile` del perfil de prueba), y con `?deep=1` + sesión de
+  super-admin (lo comprueba con `admin_pending_counts`) la vista previa con el agente de WhatsApp, su imagen, el sitemap,
+  "Último video", las portadas y el calendario, todo desde el servidor. De la base: `admin_system_status()` (tamaño,
+  conexiones, tablas, archivos por bucket, `pg_cron` sin el comando, `pg_net`, `pg_stat_statements` normalizado, errores
+  por día y nuevos, registros, push, direcciones del sitemap) y `admin_security_selfcheck()` (reglas a–j de
+  `20261114000001_advisor_hardening` vivas: RLS, search_path, EXECUTE de anon en `admin_*`/`mycen_*` definer y
+  triggers, vistas, buckets listables, `auth.uid()` sin select, extensiones en public, lectura "true"). Ajustes
+  (perfil de prueba, backup revisado, límites del plan; Pro por defecto) en `mycen_admin_settings` con
+  `admin_set_status_setting` (queda en la actividad). Se revisa sola cada minuto con la pestaña visible. Migración
+  `20261115000001_admin_system_status.sql` (también la serie de `admin_overview` en una pasada + índices por fecha),
+  tests en `admin_status.test.sql`, `health.test.ts` y `admin-status.spec.ts`.
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,
