@@ -16,7 +16,7 @@ const ROUTES = ['/studio', '/studio/identity', '/studio/modules', '/studio/proje
   '/life', '/life/money', '/life/goals', '/life/habits', '/life/brain', '/life/brain?vista=tareas', '/life/brain?vista=archivo',
   '/life/replay', '/life/insights', '/life/settings', '/life/journal',
   '/ana', '/ana/projects/cafe-luna', '/login', '/register', '/forgot-password', '/auth/terms', '/terminos',
-  '/super-admin', '/super-admin/personas?q=ana', '/super-admin/denuncias', '/super-admin/errores', '/super-admin/verificaciones', '/super-admin/landing']
+  '/super-admin', '/super-admin/estado', '/super-admin/personas?q=ana', '/super-admin/denuncias', '/super-admin/errores', '/super-admin/verificaciones', '/super-admin/landing']
 
 for (const [lang, scheme] of [['es', 'dark'], ['ru', 'light']] as const) {
   test(`320 px (${lang}): ninguna pantalla se sale, se corta ni se pisa`, async ({ page, context }) => {

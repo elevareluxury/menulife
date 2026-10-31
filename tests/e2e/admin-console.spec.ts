@@ -68,7 +68,7 @@ test('menú: Business agrupado y plegable; en el celular, barra de abajo sin ham
   await page.goto('/super-admin')
   await expect(page.getByRole('button', { name: 'Abrir menú' })).toHaveCount(0)
   const bar = page.locator('nav.fixed')
-  await expect(bar.getByRole('link', { name: 'Personas' })).toBeVisible()
+  await expect(bar.getByRole('link', { name: 'Estado' })).toBeVisible()
   await bar.getByRole('button', { name: 'Más' }).click()
   await expect(page.getByRole('link', { name: 'Actividad del equipo' })).toBeVisible()
 })
