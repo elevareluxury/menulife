@@ -35,8 +35,8 @@ async function serveFlyers(context: BrowserContext) {
 }
 
 test('perfil público: los flyers se deslizan como entradas, con fecha, hora y botón Entradas', async ({ page, context }) => {
-  await serveFlyers(context)
   await installSupabaseMock(context, createState({ profiles: [profileRow()], profile_modules: [FLYERS_MODULE()] }))
+  await serveFlyers(context) // después del mock: si no, el mock responde sus propias imágenes de cdn.example.com
   await page.goto('/ana')
 
   await expect(page.getByRole('region', { name: 'Próximas fechas', exact: true })).toBeVisible()
@@ -52,8 +52,14 @@ test('perfil público: los flyers se deslizan como entradas, con fecha, hora y b
   // Sin link: tarjeta sin botón; sin imagen: el título sobre el color de acento
   await expect(cards.nth(2)).not.toContainText('Entradas')
   await expect(cards.nth(2).locator('.mp-tix-stub')).toHaveCount(0)
-  // Un flyer que no es 9:16 se ve entero (contain) sobre su versión difuminada
+  // La tarjeta toma la forma exacta de cada flyer: ni recorte ni bandas (9:16 y 4:5)
   await expect(cards.nth(1).locator('img.mp-tix-img')).toHaveCSS('object-fit', 'contain')
+  for (const [n, ratio] of [[0, 1080 / 1920], [1, 1080 / 1350]] as const) {
+    await expect.poll(async () => {
+      const box = await cards.nth(n).locator('.mp-tix-flyer').boundingBox()
+      return box ? Math.abs(box.width / box.height - ratio) < 0.02 : false
+    }).toBe(true)
+  }
   await expect(cards.nth(2).locator('.mp-tix-blank')).toHaveText('Fiesta de fin de año')
 
   // Los puntos llevan a cada flyer
