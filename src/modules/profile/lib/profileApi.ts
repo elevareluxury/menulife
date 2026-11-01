@@ -132,3 +132,30 @@ export async function subscribeProfile(handle: string, input: {
   if (error) throw new Error(error.message)
   return data as SubscribeResult
 }
+
+export interface PollResults { counts: Record<string, number>; total: number }
+
+function sanitizePoll(raw: unknown): PollResults | null {
+  if (!raw || typeof raw !== 'object') return null
+  const r = raw as { counts?: unknown; total?: unknown }
+  const counts: Record<string, number> = {}
+  if (r.counts && typeof r.counts === 'object') {
+    for (const [k, v] of Object.entries(r.counts as Record<string, unknown>)) {
+      if (/^[a-z0-9]{1,16}$/.test(k) && typeof v === 'number' && v >= 0) counts[k] = Math.floor(v)
+    }
+  }
+  return { counts, total: typeof r.total === 'number' ? Math.max(0, Math.floor(r.total)) : 0 }
+}
+
+/** Encuesta (entrega 2): resultados de una encuesta publicada (sólo cantidades) */
+export async function fetchPollResults(handle: string, moduleId: string): Promise<PollResults | null> {
+  const { data, error } = await rpc('get_poll_results', { p_handle: handle, p_module_id: moduleId })
+  return error ? null : sanitizePoll(data)
+}
+
+/** Votar (anónimo; el mismo visitante puede cambiar su voto ese día). Devuelve los resultados o null. */
+export async function votePoll(handle: string, moduleId: string, option: string): Promise<PollResults | null> {
+  const { data, error } = await rpc('vote_profile_poll', { p_handle: handle, p_module_id: moduleId, p_option: option })
+  if (error || !data || (data as { status?: string }).status !== 'ok') return null
+  return sanitizePoll((data as { results?: unknown }).results)
+}

@@ -106,8 +106,9 @@ describe('vercel.json: encabezados de seguridad', () => {
     ].sort())
   })
 
-  it('el micrófono queda para Mycen ("Dictar"); cámara y ubicación, apagadas', () => {
-    expect(all['Permissions-Policy']).toBe('camera=(), microphone=(self), geolocation=()')
+  it('micrófono ("Dictar") y ubicación (sucursales) sólo para Mycen; la cámara, apagada', () => {
+    // Ubicación sólo para Mycen: "Ver la más cerca" en las sucursales (se pide al tocar y no sale del dispositivo)
+    expect(all['Permissions-Policy']).toBe('camera=(), microphone=(self), geolocation=(self)')
     expect(all['X-Content-Type-Options']).toBe('nosniff')
     expect(all['X-Frame-Options']).toBe('SAMEORIGIN')
     expect(all['Referrer-Policy']).toBe('strict-origin-when-cross-origin')

@@ -1,0 +1,99 @@
+/* Módulos de la entrega 2 (encuesta, descargables, cupón, galería de videos, podcast). Sólo variables del sistema de
+   diseño (--my-*); el movimiento, dentro de "reducir movimiento: no". */
+
+/* ── Encuesta ── */
+.mp-poll-options { display: grid; gap: 8px; }
+.mp-poll-option {
+  position: relative; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 12px 16px; overflow: hidden;
+  border: 1px solid var(--my-border); border-radius: var(--my-r-field); background: color-mix(in srgb, var(--my-text) 4%, transparent);
+  color: var(--my-text); font: 600 var(--my-fs-body) / 1.3 var(--my-font-ui); text-align: start; cursor: pointer;
+}
+.mp-poll-option:disabled { cursor: progress; }
+.mp-poll-option.is-mine { border-color: var(--my-accent); }
+.mp-poll-bar {
+  position: absolute; inset: 0; width: var(--mp-pct, 0%); transform-origin: left center;
+  background: color-mix(in srgb, var(--my-accent) 22%, transparent); pointer-events: none;
+}
+[dir='rtl'] .mp-poll-bar { transform-origin: right center; }
+.mp-poll-label { position: relative; flex: 1; display: inline-flex; align-items: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.mp-poll-pct { position: relative; font-variant-numeric: tabular-nums; color: var(--my-muted); }
+.mp-poll-option.is-mine .mp-poll-pct { color: var(--my-text); }
+.mp-poll-total { margin: 10px 0 0; font-size: var(--my-fs-small); color: var(--my-muted); }
+
+/* ── Descargables ── */
+.mp-files-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mp-file {
+  display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border-radius: var(--my-r-field);
+  border: 1px solid var(--my-border); color: var(--my-text); text-decoration: none;
+  background: color-mix(in srgb, var(--my-text) 3%, transparent);
+}
+.mp-file-ico {
+  display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: var(--my-r-field);
+  background: color-mix(in srgb, var(--my-accent) 20%, transparent);
+}
+.mp-file-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mp-file-title { font-weight: 600; overflow-wrap: anywhere; }
+.mp-file-meta { font-size: var(--my-fs-meta); color: var(--my-muted); }
+.mp-file-go { color: var(--my-muted); flex: none; }
+
+/* ── Cupón: un ticket con el código punteado ── */
+.my-profile .mp-coupon { position: relative; text-align: center; border-style: dashed; }
+.mp-coupon-ico {
+  display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 8px; border-radius: 50%;
+  background: color-mix(in srgb, var(--my-accent) 20%, transparent); color: var(--my-text);
+}
+.my-profile .mp-coupon-title { margin-bottom: 4px; }
+.mp-coupon-text { margin: 0 0 12px; color: var(--my-muted); }
+.mp-coupon-code {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 6px 6px 16px;
+  border: 1.5px dashed color-mix(in srgb, var(--my-accent) 60%, var(--my-border)); border-radius: var(--my-r-field);
+}
+.mp-coupon-code code { font: 700 var(--my-fs-lead) / 1.2 var(--my-font-ui); letter-spacing: 0.08em; color: var(--my-text); overflow-wrap: anywhere; text-align: start; }
+.mp-coupon-copy {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; flex: none; border: 0;
+  border-radius: var(--my-r-pill); background: var(--my-accent); color: var(--my-on-accent);
+  font: 600 var(--my-fs-small) / 1 var(--my-font-ui); cursor: pointer;
+}
+.mp-coupon-until { margin: 10px 0 0; font-size: var(--my-fs-meta); color: var(--my-muted); }
+.my-profile .mp-coupon-use { margin-top: 12px; }
+
+/* ── Galería de videos: carrusel con scroll-snap ── */
+.mp-vgal-track {
+  display: grid; grid-auto-flow: column; grid-auto-columns: min(84%, 340px); gap: 12px; overflow-x: auto;
+  scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px;
+}
+.mp-vgal-track::-webkit-scrollbar { display: none; }
+.mp-vgal-item { scroll-snap-align: start; }
+.mp-vgal-track:focus-visible { outline: 2px solid var(--my-accent); outline-offset: 4px; border-radius: var(--my-r-card); }
+
+/* ── Podcast ── */
+.mp-podcast-head { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.mp-podcast-art {
+  position: relative; display: grid; place-items: center; width: 64px; height: 64px; flex: none; overflow: hidden;
+  border-radius: var(--my-r-field); background: color-mix(in srgb, var(--my-accent) 26%, var(--my-tile));
+}
+.mp-podcast-art svg { width: 150% !important; height: auto !important; }
+.mp-podcast-name { min-width: 0; }
+.my-profile .mp-podcast-name .mp-card-title { margin: 0 0 2px; overflow-wrap: anywhere; }
+.mp-podcast-kind { font-size: var(--my-fs-meta); color: var(--my-muted); }
+.mp-podcast-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.mp-podcast-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--my-border); }
+.mp-podcast-play {
+  display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; cursor: pointer;
+  background: var(--my-accent); color: var(--my-on-accent);
+}
+.mp-podcast-play svg { margin-inline-start: 2px; }
+.mp-podcast-ep { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mp-podcast-ep-title { font-weight: 600; overflow-wrap: anywhere; }
+.mp-podcast-ep-meta { font-size: var(--my-fs-meta); color: var(--my-muted); }
+.mp-podcast-audio { width: 100%; height: 40px; margin-top: 8px; }
+.mp-podcast-skeleton { height: 120px; border-radius: var(--my-r-field); background: color-mix(in srgb, var(--my-text) 6%, transparent); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .mp-poll-bar { animation: mp-poll-grow 700ms cubic-bezier(0.22, 1, 0.36, 1); }
+  .mp-poll-option, .mp-file, .mp-coupon-copy, .mp-podcast-play { transition: transform 420ms cubic-bezier(0.34, 1.36, 0.64, 1), border-color 200ms; }
+  .mp-poll-option:active, .mp-file:active, .mp-coupon-copy:active, .mp-podcast-play:active { transform: scale(0.97); transition-duration: 120ms; }
+  .mp-podcast-skeleton { animation: mp-skel 1.4s ease-in-out infinite alternate; }
+}
+@keyframes mp-poll-grow { from { transform: scaleX(0); } }
+@keyframes mp-skel { from { opacity: 0.5; } to { opacity: 1; } }

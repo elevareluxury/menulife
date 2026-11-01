@@ -9,7 +9,11 @@ import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import type { ProfileLayout } from '@/modules/profile/lib/profileLook'
 import type { MycenAccent } from '@/design/themes'
 
-export const TEMPLATE_IDS = ['musician', 'creator', 'professional', 'business', 'personal'] as const
+export const TEMPLATE_IDS = [
+  'musician', 'creator', 'professional', 'business', 'personal',
+  // Por rubro
+  'restaurant', 'beauty', 'photographer', 'coach', 'store', 'podcaster',
+] as const
 export type TemplateId = typeof TEMPLATE_IDS[number]
 
 /** Propósito elegido en el onboarding (paso "¿Para qué es tu perfil?") */
@@ -17,6 +21,8 @@ export type OnboardingPurpose = 'personal' | 'creator' | 'professional' | 'busin
 
 export interface IdentityTemplate {
   id: TemplateId
+  /** 'profile' = por tipo de perfil (las del onboarding), 'industry' = por rubro */
+  group: 'profile' | 'industry'
   layout: ProfileLayout
   accent: MycenAccent
   /** Tipos de módulo, en el orden en que se agregan */
@@ -25,24 +31,48 @@ export interface IdentityTemplate {
 
 export const TEMPLATES: Record<TemplateId, IdentityTemplate> = {
   musician: {
-    id: 'musician', layout: 'portada', accent: 'nebulosa',
+    id: 'musician', group: 'profile', layout: 'portada', accent: 'nebulosa',
     modules: ['listen_on', 'latest_video', 'social', 'cards', 'support', 'subscribe', 'contact_form'],
   },
   creator: {
-    id: 'creator', layout: 'portada', accent: 'plasma',
+    id: 'creator', group: 'profile', layout: 'portada', accent: 'plasma',
     modules: ['latest_video', 'social', 'link_group', 'collab', 'support', 'subscribe'],
   },
   professional: {
-    id: 'professional', layout: 'editorial', accent: 'ion',
+    id: 'professional', group: 'profile', layout: 'editorial', accent: 'ion',
     modules: ['text', 'portfolio', 'testimonials', 'link', 'contact', 'contact_form'],
   },
   business: {
-    id: 'business', layout: 'bento', accent: 'sol',
+    id: 'business', group: 'profile', layout: 'bento', accent: 'sol',
     modules: ['featured_action', 'hours', 'location', 'contact', 'gallery', 'testimonials', 'social'],
   },
   personal: {
-    id: 'personal', layout: 'credencial', accent: 'aurora',
+    id: 'personal', group: 'profile', layout: 'credencial', accent: 'aurora',
     modules: ['social', 'link_group', 'text', 'contact_form'],
+  },
+  restaurant: {
+    id: 'restaurant', group: 'industry', layout: 'bento', accent: 'sol',
+    modules: ['featured_action', 'hours', 'location', 'gallery', 'coupon', 'testimonials', 'contact', 'social'],
+  },
+  beauty: {
+    id: 'beauty', group: 'industry', layout: 'credencial', accent: 'rosa',
+    modules: ['featured_action', 'gallery', 'hours', 'location', 'testimonials', 'contact', 'social'],
+  },
+  photographer: {
+    id: 'photographer', group: 'industry', layout: 'editorial', accent: 'mono',
+    modules: ['portfolio', 'gallery', 'testimonials', 'text', 'contact_form', 'social'],
+  },
+  coach: {
+    id: 'coach', group: 'industry', layout: 'editorial', accent: 'lima',
+    modules: ['text', 'featured_action', 'video_gallery', 'testimonials', 'downloads', 'subscribe', 'contact_form'],
+  },
+  store: {
+    id: 'store', group: 'industry', layout: 'bento', accent: 'arena',
+    modules: ['product', 'coupon', 'gallery', 'testimonials', 'contact', 'social'],
+  },
+  podcaster: {
+    id: 'podcaster', group: 'industry', layout: 'portada', accent: 'nebulosa',
+    modules: ['podcast', 'social', 'poll', 'support', 'subscribe', 'collab'],
   },
 }
 
@@ -56,7 +86,7 @@ export const PURPOSE_TEMPLATE: Record<OnboardingPurpose, TemplateId> = {
 /** Tipos que no tiene sentido repetir en un mismo Space: si ya hay uno, la plantilla no agrega otro */
 export const SINGLETON_TYPES: readonly ModuleType[] = [
   'contact_form', 'subscribe', 'collab', 'support', 'hours', 'location', 'contact', 'latest_video', 'portfolio',
-  'testimonials', 'gallery', 'featured_action', 'contact_card',
+  'testimonials', 'gallery', 'featured_action', 'contact_card', 'podcast',
 ]
 
 type ModuleLike = { type: ModuleType; config?: Record<string, unknown> | null; deleted_at?: string | null }

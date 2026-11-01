@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, LayoutTemplate, Link2, Monitor, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, CopyPlus, Eye, EyeOff, LayoutTemplate, Link2, Monitor, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import { useStudio } from '../StudioContext'
@@ -7,7 +7,8 @@ import { moduleDef, moduleSummary } from '../lib/moduleCatalog'
 import { useModuleActions } from '../lib/useModuleActions'
 import { useStudioT } from '@/i18n/app/studio'
 import type { StudioModule } from '../lib/studioTypes'
-import { Button, ConfirmDialog, Menu, PageHeader } from '../components/ui'
+import { Button, ConfirmDialog, Drawer, Menu, PageHeader } from '../components/ui'
+import { spaceHandle } from '../lib/spaces'
 import { DragHandle, SortableList } from '../components/SortableList'
 import { EditTabs } from '../components/shared'
 import { ModuleEditor } from '../components/ModuleEditor'
@@ -18,7 +19,7 @@ import { isTemplatePending } from '../lib/templates'
 import { EDITABLE_MODULES, MODULE_ICONS, useScheduleBadge } from '../lib/moduleUi'
 
 export function ModulesPage() {
-  const { modules, profile } = useStudio()
+  const { modules, profile, spaces, primaryUsername } = useStudio()
   const [library, setLibrary] = useState(false)
   const [templates, setTemplates] = useState(false)
   const [templateNote, setTemplateNote] = useState('')
@@ -37,7 +38,10 @@ export function ModulesPage() {
   }
   const [confirmDelete, setConfirmDelete] = useState<StudioModule | null>(null)
   const [deleting, setDeleting] = useState(false)
-  const { toggleVisibility, moveTo, duplicate, remove, busyId, error, announce, title } = useModuleActions()
+  const { toggleVisibility, moveTo, duplicate, copyToSpace, remove, busyId, error, announce, title } = useModuleActions()
+  // "Copiar a otro Space": los demás Spaces sin archivar de la cuenta
+  const otherSpaces = spaces.filter(sp => sp.id !== profile.id && sp.status !== 'archived')
+  const [copying, setCopying] = useState<StudioModule | null>(null)
   const scheduleBadge = useScheduleBadge()
   const t = useStudioT()
   const mt = t.modules
@@ -115,6 +119,7 @@ export function ModulesPage() {
                     { icon: ArrowUp, label: t.sortable.up, disabled: i === 0, onSelect: () => void moveTo(i, i - 1) },
                     { icon: ArrowDown, label: t.sortable.down, disabled: i === modules.length - 1, onSelect: () => void moveTo(i, i + 1) },
                     ...(canEdit ? [{ icon: Copy, label: t.sortable.duplicate, disabled: busyId === m.id, onSelect: () => void duplicate(i) }] : []),
+                    ...(canEdit && otherSpaces.length ? [{ icon: CopyPlus, label: mt.copyToSpace, disabled: busyId === m.id, onSelect: () => setCopying(m) }] : []),
                     { icon: Trash2, label: t.common.delete, danger: true, onSelect: () => setConfirmDelete(m) },
                   ]} />
                 </div>
@@ -131,6 +136,24 @@ export function ModulesPage() {
         onAdded={n => { setTemplates(false); setTemplateNote(t.templates.added(n)) }} />}
 
       {editing && <ModuleEditor type={editing.type} module={editing.module} onClose={() => setEditing(null)} />}
+
+      {copying && (
+        <Drawer title={mt.copyToSpaceTitle(title(copying))} onClose={() => setCopying(null)}>
+          <p className="st-help" style={{ marginTop: 0 }}>{mt.copyToSpaceHelp}</p>
+          <div className="st-library">
+            {otherSpaces.map(sp => {
+              const name = sp.display_name || spaceHandle(sp, primaryUsername)
+              return (
+                <button key={sp.id} type="button" disabled={busyId === copying.id}
+                  onClick={() => { void copyToSpace(copying, { id: sp.id, name }).then(ok => { if (ok) setCopying(null) }) }}>
+                  <span><strong>{name}</strong><span>/{spaceHandle(sp, primaryUsername)}</span></span>
+                </button>
+              )
+            })}
+          </div>
+          {error && <p className="st-error" role="alert">{error}</p>}
+        </Drawer>
+      )}
 
       {confirmDelete && (
         <ConfirmDialog

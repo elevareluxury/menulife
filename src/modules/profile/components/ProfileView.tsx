@@ -8,6 +8,7 @@ import { fetchContactCard, trackProfileEvent } from '../lib/profileApi'
 import { RESERVE_KEY } from '../lib/clickKeys'
 import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref } from '../lib/safeUrl'
+import { avatarFor } from '../lib/avatarAlt'
 import { isOpenNow } from '../lib/schedule'
 import { downloadVCard, vcardPhoto } from '../lib/vcard'
 import { lookVars, profileLook } from '../lib/profileLook'
@@ -183,7 +184,9 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
     track(profile.id, 'vcard_download')
   }
 
-  const avatarSrc = safeHref(profile.avatar_url)
+  // Segunda foto: la de la mañana o la de la noche, con la hora de quien mira (se decide al abrir)
+  const [openedAt] = useState(() => new Date())
+  const avatarSrc = avatarFor(profile.avatar_url, profile.theme, openedAt)
   const verifiedBadge = profile.verified ? (
     <span className="mp-verified" role="img" aria-label={t.verified} title={t.verified}>
       <BadgeCheck aria-hidden="true" />

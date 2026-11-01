@@ -227,7 +227,7 @@ do $$ declare r record; begin
              and p.proname not in ('get_public_profile', 'get_public_project', 'get_profile_contact_card', 'track_profile_event',
                                    'check_username', 'report_profile', 'public_sitemap', 'report_client_error',
                                    'submit_profile_message', 'submit_profile_collab', 'track_product_event',
-                                   'subscribe_profile', 'life_calendar_feed', 'get_site_flags') loop
+                                   'subscribe_profile', 'life_calendar_feed', 'get_site_flags', 'get_poll_results', 'vote_profile_poll') loop
     assert false, 'anon puede ejecutar: ' || r.proname;
   end loop;
 end $$;

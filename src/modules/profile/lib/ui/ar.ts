@@ -11,7 +11,7 @@ const ui: UiStrings = {
     errorTitle: 'تعذّر تحميل الملف', errorText: 'تحقّق من اتصالك وحاول مرة أخرى.',
     retry: 'إعادة المحاولة', createYours: 'أنشئ Mycen الخاص بك', draftBanner: 'معاينة: هذا الملف ليس عامًا بعد.',
     footer: 'هوية Mycen',
-    verified: 'حساب موثّق', available: 'متاح', moreAboutMe: 'المزيد عني', createIdentity: 'أنشئ هويتك', createFree: 'أنشئ Mycen الخاص بك مجانًا', call: 'اتصال', copyLink: 'نسخ الرابط', qrCode: 'رمز QR', moreOptions: 'خيارات أخرى', backToTop: 'العودة للأعلى', emailLabel: 'البريد', playOn: 'تشغيل على {provider}',
+    verified: 'حساب موثّق', available: 'متاح', moreAboutMe: 'المزيد عني', createIdentity: 'أنشئ هويتك', createFree: 'أنشئ Mycen الخاص بك مجانًا', call: 'اتصال', copyLink: 'نسخ الرابط', qrCode: 'رمز QR', moreOptions: 'خيارات أخرى', backToTop: 'العودة للأعلى', votesCount: "{n} صوت", oneVote: "صوت واحد", noVotes: "لا توجد أصوات بعد: صوتك هو الأول", yourVote: "صوتك", download: "تنزيل", copyCode: "نسخ الرمز", codeCopied: "تم نسخ الرمز", validUntil: "صالح حتى {date}", useCoupon: "استخدم القسيمة", listen: "استمع", nearest: "عرض الأقرب", nearestBusy: "جارٍ تحديد موقعك…", nearestDone: "مرتّبة حسب القرب", nearestFail: "تعذّر تحديد موقعك. تحقّق من إذن الموقع.", nearestPrivate: "موقعك لا يغادر هاتفك.", pause: "إيقاف مؤقت", videos: "فيديوهات", podcast: "بودكاست", episodes: "الحلقات", emailLabel: 'البريد', playOn: 'تشغيل على {provider}',
     days: { monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد' },
     languageLabel: 'اللغة', socials: 'وسائل التواصل', close: 'إغلاق', prevPhoto: 'الصورة السابقة', nextPhoto: 'الصورة التالية', cards: 'بطاقات',
     swipeHint: 'اسحب لرؤية المزيد', tickets: 'التذاكر', tags: 'الفئات',

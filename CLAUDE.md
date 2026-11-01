@@ -27,7 +27,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Usernames reservados: tabla `reserved_usernames` y `src/lib/reservedUsernames.ts` (mantener sincronizados).
 - El visitante anónimo **nunca** lee tablas: usa las RPC `get_public_profile`, `get_public_project`, `get_profile_contact_card`,
   `track_profile_event`, `check_username`, `report_profile`, `public_sitemap`, `report_client_error`, `submit_profile_message`,
-  `track_product_event` (sin sesión, sólo `signup_started`), `subscribe_profile` y `get_site_flags`.
+  `track_product_event` (sin sesión, sólo `signup_started`), `subscribe_profile`, `get_site_flags`, `get_poll_results` y
+  `vote_profile_poll`.
 - Proyectos (Fase 5): `content_objects` (type='project') + `content_blocks`. Son de la identidad y se publican por su cuenta
   (`publish_project` → `published_snapshot`; Studio no puede escribir el snapshot ni pasar a "publicado" directo).
   Los módulos `project`/`portfolio` guardan sólo ids en `content`; `get_public_profile` les agrega `projects` (tarjetas de lo
@@ -766,6 +767,33 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (no dice si está sonando). vCard con foto (256 px JPEG) y los links públicos (`vcardPhoto`, `VCardExtras`). Tapa de
   Portada: la huella sigue apenas al mouse o la inclinación de Android (`useTilt`). Proyectos y portfolio en su chunk.
   Tests en `profileExtras.test.ts`.
+- Entrega 2a (módulos nuevos, `FEATURES.modulesV2`): `poll` (opciones con id `[a-z0-9]{1,16}`; RPC `vote_profile_poll`
+  → `profile_poll_votes`, un voto por visitante con hash diario, cambiarlo lo actualiza, bots "ok" sin guardar, tope
+  5000 por día; `get_poll_results` sólo de un `poll` publicado y vivo; el voto propio queda en `mycen_poll:<id>`),
+  `downloads` (PDF ≤ 10 MB en el bucket `profile-files`, carpeta de la cuenta; `uploadPdf`), `coupon` (código con
+  "Copiar", vence con `expires` y se oculta), `video_gallery` (carrusel de `PlayerFacade`) y `podcast`
+  (`api/podcast-latest.ts` lee el RSS público del dueño, reglas puras en `profile/lib/podcast.ts`, 30 min de caché;
+  el audio carga recién al tocar "Escuchar"). Componentes en `profile/components/V2Modules.tsx` (chunks propios),
+  editores en `studio/components/v2Editors.tsx`. `theme.avatar_alt` (segunda foto para Amanecer/Universo) ya lo valida
+  la base. Migración `20261119000001_identity_modules_v2.sql`, tests en `identity_modules_v2.test.sql` y
+  `modules-v2.spec.ts`. Privacidad (podcast) en 12 idiomas.
+- Entrega 2b (sin migración): Ubicación con sucursales (`content.branches`, hasta 10; `profile/lib/branches.ts`:
+  coordenadas del link largo de Google/Apple Maps, distancia y orden). Con 2+ sucursales con coordenadas, "Ver la más
+  cerca" (`Branches`, chunk propio) pide la ubicación al tocar y ordena en el dispositivo (no sale a ningún lado;
+  `Permissions-Policy: geolocation=(self)`); links cortos sin coordenadas quedan al final. Links de mapas en
+  `lib/mapLinks.ts`. Segunda foto de perfil `theme.avatar_alt` = { url, when: 'amanecer' (5–12 h) | 'noche' (20–5 h) }
+  con la hora de quien mira (`lib/avatarAlt.ts`, Studio → Mi identidad). Plantillas por rubro (`group: 'industry'`:
+  restaurante, belleza, fotografía, coach, tienda, podcast) además de las 5 por tipo de perfil. "Copiar a otro Space"
+  en el menú "⋯" de cada módulo (`copyToSpace` en `useModuleActions`: al final de ese Space, en su versión de trabajo).
+  35 íconos de marca más (Simple Icons, CC0) en `lib/brandIcons.ts`, chunk que `SocialIcon` baja sólo si el perfil usa
+  alguna (`LAZY_BRANDS`, dominios en `networkFromUrl`); también en el selector de "Red social". Tests en
+  `entrega2b.test.ts` y `modules-v2b.spec.ts`. Privacidad (ubicación) en 12 idiomas.
+- Auditoría antes del freeze (Business, `20261120000001_business_quotes_lockdown.sql`, tests en
+  `business_quotes_lockdown.test.sql`): los presupuestos por link (`/q/:token`) ya no se leen ni se cambian con
+  políticas de `anon` (dejaban ver y aceptar todos); `QuotePublicPage` usa `get_public_quote(p_token)` (sólo ese
+  presupuesto, sin datos internos; marca visto/vencido) y `respond_public_quote(p_token, p_accept)`. Al crear un negocio
+  una cuenta común no elige plan, suscripción ni fin de prueba (`restaurants_plan_guard` también en INSERT: toma los
+  valores por defecto). Pendiente para abrir Business: la app de mozo escribe con `anon` (rehacer con un JWT de mozo).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

@@ -16,6 +16,10 @@ import {
 } from '../components/moduleExtraEditors'
 import { LatestVideoEditor, type LatestVideoValue } from '../components/LatestVideoEditor'
 import { ListenLinksEditor, SupportMethodsEditor } from '../components/supportListenEditors'
+import { newOptionId } from './pollOptions'
+import { BRANCHES_MAX, cleanBranches } from '@/modules/profile/lib/branches'
+import { BranchesEditor, FilesEditor, PollOptionsEditor, type BranchInput, VideoListEditor, type FileInput, type PollOptionInput, type VideoInput } from '../components/v2Editors'
+import { inspectFeedUrl } from '@/modules/profile/lib/podcast'
 import { duplicateListenRows, listenErrorText, supportErrorText, type ListenInput, type SupportInput } from './supportListenErrors'
 
 /** Zona horaria del dispositivo de quien edita (los horarios se leen en la del dueño, no en la del visitante) */
@@ -23,7 +27,7 @@ import { CURRENCIES, formatPrice } from '../../profile/lib/price'
 
 const deviceTimeZone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { return 'UTC' } }
 
-export type FieldKind = 'text' | 'textarea' | 'url' | 'email' | 'tel' | 'number' | 'select' | 'image'
+export type FieldKind = 'text' | 'textarea' | 'url' | 'email' | 'tel' | 'number' | 'select' | 'image' | 'date'
 
 export interface FieldDef {
   key: string
@@ -99,6 +103,22 @@ export const SOCIAL_NETWORKS = [
   { value: 'linkedin',  label: 'LinkedIn',  base: 'https://linkedin.com/in/' },
   { value: 'x',         label: 'X',         base: 'https://x.com/' },
   { value: 'whatsapp',  label: 'WhatsApp',  base: 'https://wa.me/' },
+  { value: 'threads',   label: 'Threads',   base: 'https://www.threads.net/@' },
+  { value: 'bluesky',   label: 'Bluesky',   base: 'https://bsky.app/profile/' },
+  { value: 'telegram',  label: 'Telegram',  base: 'https://t.me/' },
+  { value: 'pinterest', label: 'Pinterest', base: 'https://pinterest.com/' },
+  { value: 'snapchat',  label: 'Snapchat',  base: 'https://snapchat.com/add/' },
+  { value: 'twitch',    label: 'Twitch',    base: 'https://twitch.tv/' },
+  { value: 'kick',      label: 'Kick',      base: 'https://kick.com/' },
+  { value: 'spotify',   label: 'Spotify',   base: 'https://open.spotify.com/user/' },
+  { value: 'soundcloud', label: 'SoundCloud', base: 'https://soundcloud.com/' },
+  { value: 'github',    label: 'GitHub',    base: 'https://github.com/' },
+  { value: 'behance',   label: 'Behance',   base: 'https://behance.net/' },
+  { value: 'dribbble',  label: 'Dribbble',  base: 'https://dribbble.com/' },
+  { value: 'reddit',    label: 'Reddit',    base: 'https://reddit.com/user/' },
+  { value: 'discord',   label: 'Discord',   base: 'https://discord.gg/' },
+  { value: 'line',      label: 'LINE',      base: 'https://line.me/ti/p/~' },
+  { value: 'vk',        label: 'VK',        base: 'https://vk.com/' },
 ]
 
 /** "@usuario" o URL completa → URL de la red. */
@@ -200,7 +220,29 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         if (!x.address && !x.maps_url) return v.locationEmpty
         return urlOk(x.maps_url) ? null : v.badMaps
       },
-      summary: x => [text(x.address), text(x.city)].filter(Boolean).join(', ') || text(x.maps_url),
+      // Otras sucursales (opcional): con dos o más, la página ofrece "Ver la más cerca"
+      extra: extra<BranchInput[]>({
+        init: m => cleanBranches(m?.content.branches),
+        validate: list => {
+          const filled = list.filter(b => b.name.trim() || b.address.trim() || b.city.trim() || b.maps_url.trim())
+          if (filled.some(b => !b.address.trim() && !b.maps_url.trim())) return t.v2.branchEmpty
+          return filled.every(b => urlOk(b.maps_url)) ? null : v.badMaps
+        },
+        apply: (list, content) => {
+          const branches = list.filter(b => b.address.trim() || b.maps_url.trim()).slice(0, BRANCHES_MAX).map(b => ({
+            name: b.name.trim().slice(0, 60), address: b.address.trim().slice(0, 120), city: b.city.trim().slice(0, 60),
+            maps_url: b.maps_url.trim() ? safeHref(b.maps_url) ?? '' : '',
+          }))
+          if (branches.length) content.branches = branches
+          else delete content.branches
+        },
+        Editor: BranchesEditor,
+      }),
+      summary: x => {
+        const main = [text(x.address), text(x.city)].filter(Boolean).join(', ') || text(x.maps_url)
+        const n = count(x.branches)
+        return n ? `${main} · ${t.v2.branchesCount(n + 1)}` : main
+      },
     },
     text: {
       addable: true,
@@ -490,6 +532,94 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         const ref = parseChannelUrl(x.url)
         return ref ? `YouTube · ${'handle' in ref ? ref.handle : ref.channel_id}` : ''
       },
+    },
+    // ── Entrega 2 ──
+    poll: {
+      addable: featureOn('modulesV2'),
+      fields: [
+        { key: 'title', label: t.v2.pollQuestion, kind: 'text', isTitle: true, required: true, translatable: true, maxLength: 140 },
+      ],
+      extra: extra<PollOptionInput[]>({
+        init: m => {
+          const saved = (Array.isArray(m?.content.options) ? m!.content.options as PollOptionInput[] : [])
+            .filter(o => o && /^[a-z0-9]{1,16}$/.test(o.id)).map(o => ({ id: o.id, label: text(o.label) }))
+          while (saved.length < 2) saved.push({ id: newOptionId(), label: '' })
+          return saved
+        },
+        validate: opts => (opts.filter(o => o.label.trim()).length < 2 ? t.v2.pollNeedTwo : null),
+        // Los ids no cambian al editar: los votos siguen siendo de su opción
+        apply: (opts, content) => { content.options = opts.filter(o => o.label.trim()).slice(0, 6).map(o => ({ id: o.id, label: o.label.trim().slice(0, 60) })) },
+        Editor: PollOptionsEditor,
+      }),
+      summary: x => (Array.isArray(x.options) ? (x.options as PollOptionInput[]).map(o => o.label).join(' · ') : ''),
+    },
+    downloads: {
+      addable: featureOn('modulesV2'),
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
+      ],
+      extra: extra<FileInput[]>({
+        init: m => (Array.isArray(m?.content.items) && m!.content.items.length ? m!.content.items as FileInput[] : [{ title: '', url: '' }]),
+        validate: items => (items.some(i => i.url && i.title.trim()) ? null : t.v2.fileEmpty),
+        apply: (items, content) => {
+          content.items = items.filter(i => i.url && i.title.trim() && /^https:\/\//.test(i.url))
+            .map(i => ({ title: i.title.trim().slice(0, 80), url: i.url, ...(i.size ? { size: i.size } : {}) }))
+        },
+        Editor: FilesEditor,
+      }),
+      summary: x => (Array.isArray(x.items) ? (x.items as FileInput[]).map(i => i.title).join(' · ') : ''),
+    },
+    coupon: {
+      addable: featureOn('modulesV2'),
+      fields: [
+        { key: 'title', label: f.title, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
+        { key: 'code', label: t.v2.couponCode, kind: 'text', required: true, maxLength: 40, placeholder: 'OLIVIA10' },
+        { key: 'text', label: t.v2.couponText, kind: 'textarea', translatable: true, maxLength: 140 },
+        { key: 'expires', label: t.v2.couponExpires, kind: 'date' },
+        { key: 'url', label: t.v2.couponUrl, kind: 'url' },
+      ],
+      validate: x => {
+        if (!/^[A-Za-z0-9_-]{2,40}$/.test((x.code ?? '').trim())) return t.v2.couponBad
+        return urlOk(x.url) ? null : v.badUrl
+      },
+      finalize: content => { if (typeof content.code === 'string') content.code = content.code.trim() },
+      summary: x => text(x.code),
+    },
+    video_gallery: {
+      addable: featureOn('modulesV2'),
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
+      ],
+      extra: extra<VideoInput[]>({
+        init: m => (Array.isArray(m?.content.items) && m!.content.items.length
+          ? (m!.content.items as VideoInput[]).map(i => ({ url: text(i.url), title: text(i.title) }))
+          : [{ url: '', title: '' }, { url: '', title: '' }]),
+        validate: items => {
+          const filled = items.filter(i => i.url.trim())
+          if (!filled.length) return t.v2.videoEmpty
+          return filled.every(i => parseMediaUrl(withWebScheme(i.url.trim()))?.kind === 'video') ? null : t.v2.videoBad
+        },
+        apply: (items, content) => {
+          content.items = items.filter(i => i.url.trim()).slice(0, 12)
+            .map(i => ({ url: withWebScheme(i.url.trim()), ...(i.title.trim() ? { title: i.title.trim().slice(0, 100) } : {}) }))
+        },
+        Editor: VideoListEditor,
+      }),
+      summary: x => sm.links(count(x.items)),
+    },
+    podcast: {
+      addable: featureOn('modulesV2'),
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
+        { key: 'feed', label: t.v2.podFeed, kind: 'url', required: true, placeholder: 'https://anchor.fm/s/…/podcast/rss' },
+        { key: 'count', label: t.v2.podCount, kind: 'select', required: true, options: [
+          { value: '1', label: '1' }, { value: '3', label: '3' }, { value: '5', label: '5' },
+        ] },
+      ],
+      validate: x => ('error' in inspectFeedUrl(x.feed) ? t.v2.podBad : null),
+      prefill: x => { if (!x.count) x.count = '3' },
+      finalize: content => { content.count = Number(content.count) || 3 },
+      summary: x => text(x.feed).replace(/^https:\/\//, ''),
     },
     // V1.1 · Apoyame: links de pago y alias/Pix para copiar (Mycen no cobra ni procesa pagos)
     support: {

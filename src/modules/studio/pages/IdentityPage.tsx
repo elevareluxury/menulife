@@ -46,6 +46,18 @@ export function IdentityPage({ embedded = false }: { embedded?: boolean }) {
         <ImageField label={id.avatar} shape="round" value={profile.avatar_url}
           onUpload={f => upload('avatar_url', f)} onClear={() => patchProfile({ avatar_url: null })}
           help={id.avatarHelp} />
+        <ImageField label={id.avatarAlt} shape="round" value={profile.theme?.avatar_alt?.url ?? null}
+          onUpload={async f => {
+            const url = await uploadMedia(userId, f, 'avatar')
+            patchProfile({ theme: { ...profile.theme, avatar_alt: { url, when: profile.theme?.avatar_alt?.when ?? 'noche' } } })
+          }}
+          onClear={() => patchProfile({ theme: { ...profile.theme, avatar_alt: null } })}
+          help={id.avatarAltHelp} />
+        {profile.theme?.avatar_alt?.url && (
+          <SelectField label={id.avatarAltWhen} value={profile.theme.avatar_alt.when}
+            options={[{ value: 'amanecer', label: id.avatarAltMorning }, { value: 'noche', label: id.avatarAltNight }]}
+            onChange={v => patchProfile({ theme: { ...profile.theme, avatar_alt: { url: profile.theme.avatar_alt!.url, when: v === 'amanecer' ? 'amanecer' : 'noche' } } })} />
+        )}
         <ImageField label={id.cover} shape="wide" size="1500 × 500" value={profile.cover_url}
           onUpload={f => upload('cover_url', f)} onClear={() => patchProfile({ cover_url: null })}
           help={id.coverHelp} />

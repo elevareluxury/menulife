@@ -4,7 +4,7 @@ import { CheckCircle2, XCircle, Clock, AlertCircle, ChevronDown, ChevronUp } fro
 import { supabase } from '@/lib/supabase'
 import type { Quote, QuoteItem } from '@/modules/services/quotes/quoteTypes'
 import { QUOTE_STATUS_CONFIG } from '@/modules/services/quotes/quoteTypes'
-import { formatCurrency, isQuoteExpired } from '@/modules/services/quotes/quoteUtils'
+import { formatCurrency } from '@/modules/services/quotes/quoteUtils'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any
@@ -35,115 +35,41 @@ export function QuotePublicPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
+  // Todo pasa por funciones de la base que sólo ven el presupuesto de este token (get_public_quote marca "visto" y
+  // "vencido"; respond_public_quote acepta o rechaza): sin sesión no se lee ni se cambia ninguna tabla.
   async function loadQuote() {
     try {
-      const { data, error } = await db
-        .from('service_quotes')
-        .select('*, items:service_quote_items(* ORDER BY sort_order), template:service_quote_templates(color, icon)')
-        .eq('token', token)
-        .single()
-
+      const { data, error } = await db.rpc('get_public_quote', { p_token: token })
       if (error || !data) { setScreen('not_found'); return }
 
-      const q = data as PublicQuote
-
-      // States that are not viewable publicly
-      if (['draft', 'cancelled'].includes(q.status)) {
-        setScreen('unavailable')
-        return
-      }
-
-      // Already decided
-      if (q.status === 'accepted') { setQuote(q); setScreen('accepted'); return }
-      if (q.status === 'rejected') { setQuote(q); setScreen('rejected'); return }
-      if (q.status === 'converted') { setQuote(q); setScreen('accepted'); return }
-
-      // Expired by date
-      if (q.status !== 'expired' && isQuoteExpired(q.expires_at)) {
-        await db.from('service_quotes').update({ status: 'expired' }).eq('token', token)
-        q.status = 'expired'
-      }
-
+      const { restaurant: r, ...rest } = data as PublicQuote & { restaurant: Restaurant | null }
+      const q = rest as PublicQuote
+      if (r) setRestaurant(r)
       setQuote(q)
 
-      // Auto-mark viewed
-      if (q.status === 'sent') {
-        await db
-          .from('service_quotes')
-          .update({ status: 'viewed', viewed_at: new Date().toISOString() })
-          .eq('token', token)
-
-        await db.from('service_quote_events').insert({
-          quote_id:    q.id,
-          event_type:  'quote_viewed',
-          description: 'Vista desde enlace público',
-        })
-        setQuote(prev => prev ? { ...prev, status: 'viewed' } : prev)
-      }
-
+      if (q.status === 'accepted' || q.status === 'converted') { setScreen('accepted'); return }
+      if (q.status === 'rejected') { setScreen('rejected'); return }
       setScreen('view')
-
-      // Load restaurant branding
-      if (q.restaurant_id) {
-        const { data: r } = await db
-          .from('restaurants')
-          .select('name, logo_url')
-          .eq('id', q.restaurant_id)
-          .single()
-        if (r) setRestaurant(r)
-      }
     } catch {
       setScreen('not_found')
     }
   }
 
-  async function accept() {
+  async function respond(accept: boolean) {
     if (!quote || saving) return
     setSaving(true)
     try {
-      const now = new Date().toISOString()
-      await db
-        .from('service_quotes')
-        .update({
-          status:             'accepted',
-          accepted_at:        now,
-          accepted_user_agent: navigator.userAgent,
-        })
-        .eq('token', token)
-
-      await db.from('service_quote_events').insert({
-        quote_id:    quote.id,
-        event_type:  'quote_accepted',
-        description: 'Aceptado desde enlace público',
-        metadata:    { user_agent: navigator.userAgent },
-      })
-
-      setScreen('accepted')
+      const { data } = await db.rpc('respond_public_quote', { p_token: token, p_accept: accept })
+      if (data === 'accepted') setScreen('accepted')
+      else if (data === 'rejected') setScreen('rejected')
+      else if (data === 'expired') { setQuote(prev => prev ? { ...prev, status: 'expired' } : prev); setScreen('view') }
+      else await loadQuote()
     } finally {
       setSaving(false)
     }
   }
-
-  async function reject() {
-    if (!quote || saving) return
-    setSaving(true)
-    try {
-      await db
-        .from('service_quotes')
-        .update({ status: 'rejected', rejected_at: new Date().toISOString() })
-        .eq('token', token)
-
-      await db.from('service_quote_events').insert({
-        quote_id:   quote.id,
-        event_type: 'quote_rejected',
-        description:'Rechazado desde enlace público',
-      })
-
-      setScreen('rejected')
-    } finally {
-      setSaving(false)
-    }
-  }
+  const accept = () => respond(true)
+  const reject = () => respond(false)
 
   const color = quote?.template?.color ?? '#F4705A'
   const cfg   = quote ? QUOTE_STATUS_CONFIG[quote.status] : null

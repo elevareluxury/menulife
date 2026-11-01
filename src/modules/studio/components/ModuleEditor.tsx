@@ -197,7 +197,7 @@ export function ModuleEditor({ type, module, onClose, inline = false, onSaved }:
             <TextField key={f.key} label={f.label} required={f.required} value={values[f.key] ?? ''}
               onChange={v => set(f.key, v)} placeholder={f.placeholder} maxLength={f.maxLength}
               multiline={f.kind === 'textarea'}
-              type={f.kind === 'email' ? 'email' : f.kind === 'tel' ? 'tel' : f.kind === 'url' ? 'url' : 'text'}
+              type={f.kind === 'email' ? 'email' : f.kind === 'tel' ? 'tel' : f.kind === 'url' ? 'url' : f.kind === 'date' ? 'date' : 'text'}
               inputMode={f.kind === 'number' ? 'decimal' : undefined}
               error={fieldError(f)} />
           )

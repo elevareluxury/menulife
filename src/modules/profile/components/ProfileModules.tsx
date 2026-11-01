@@ -11,6 +11,9 @@ import { SafeImage } from './SafeImage'
 // El visor baja recién cuando alguien abre una foto
 const Lightbox = lazy(() => import('./Lightbox').then(m => ({ default: m.Lightbox })))
 import { richText } from '../lib/richText'
+import { cleanBranches, type Branch } from '../lib/branches'
+import { mapLinks } from '../lib/mapLinks'
+const Branches = lazy(() => import('./Branches').then(m => ({ default: m.Branches })))
 import { NETWORK_LABELS, networkFromUrl } from '../lib/networks'
 
 export interface ModuleProps {
@@ -196,31 +199,36 @@ export function ContactModule({ module, lang, onAction }: ModuleProps) {
 
 // ── Location ────────────────────────────────────────────────────────────────
 
-/** Apps de mapas para "Cómo llegar": la del celular primero (Apple Maps en iPhone/iPad) */
-function mapLinks(full: string, ownMaps: string | null): { key: string; label: string; href: string }[] {
-  const q = encodeURIComponent(full)
-  const google = ownMaps ?? `https://www.google.com/maps/search/?api=1&query=${q}`
-  const links = [{ key: 'google', label: 'Google Maps', href: google }]
-  if (full) {
-    links.push({ key: 'apple', label: 'Apple Maps', href: `https://maps.apple.com/?q=${q}` })
-    links.push({ key: 'waze', label: 'Waze', href: `https://waze.com/ul?q=${q}&navigate=yes` })
-  }
-  const apple = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)
-  return apple ? [...links.filter(l => l.key === 'apple'), ...links.filter(l => l.key !== 'apple')] : links
-}
-
 export function LocationModule({ module, lang, onAction }: ModuleProps) {
   const t = ui(lang)
   const address = str(module.content.address)
   const city = str(module.content.city)
   const full = [address, city].filter(Boolean).join(', ')
   const own = safeHref(module.content.maps_url)
-  if (!full && !own) return null
-  const apps = mapLinks(full, own)
+  const branches = cleanBranches(module.content.branches)
+  if (!full && !own && !branches.length) return null
+  const title = trLabel(module.title, lang) || t.location
 
+  // Varias sucursales: lista con "Ver la más cerca" (chunk propio)
+  if (branches.length) {
+    const places: Branch[] = [
+      ...(full || own ? [{ name: str(module.content.name), address, city, maps_url: own ?? '' }] : []),
+      ...branches,
+    ]
+    return (
+      <section className="mp-card" aria-label={title}>
+        <h2 className="mp-card-title">{title}</h2>
+        <Suspense fallback={<div className="mp-branches-wait" style={{ minHeight: places.length * 76 }} />}>
+          <Branches places={places} lang={lang} onOpen={() => onAction(module.id)} />
+        </Suspense>
+      </section>
+    )
+  }
+
+  const apps = mapLinks(full, own)
   return (
     <section className="mp-card" aria-label={t.location}>
-      <h2 className="mp-card-title">{trLabel(module.title, lang) || t.location}</h2>
+      <h2 className="mp-card-title">{title}</h2>
       <div className="mp-row-list">
         {full && <div className="mp-row"><MapPin size={18} /><span>{full}</span></div>}
         <div className="mp-row mp-maps">

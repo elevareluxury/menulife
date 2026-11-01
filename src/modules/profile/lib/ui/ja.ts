@@ -11,7 +11,7 @@ const ui: UiStrings = {
     errorTitle: 'プロフィールを読み込めませんでした', errorText: '接続を確認して、もう一度お試しください。',
     retry: '再試行', createYours: 'Mycen をつくる', draftBanner: 'プレビュー：このプロフィールはまだ公開されていません。',
     footer: 'Mycen のプロフィール',
-    verified: '認証済みアカウント', available: '対応可能', moreAboutMe: 'もっと見る', createIdentity: 'あなたのアイデンティティをつくる', createFree: '無料で Mycen をつくる', call: '電話', copyLink: 'リンクをコピー', qrCode: 'QRコード', moreOptions: 'その他', backToTop: 'トップへ戻る', emailLabel: 'メール', playOn: '{provider} で再生',
+    verified: '認証済みアカウント', available: '対応可能', moreAboutMe: 'もっと見る', createIdentity: 'あなたのアイデンティティをつくる', createFree: '無料で Mycen をつくる', call: '電話', copyLink: 'リンクをコピー', qrCode: 'QRコード', moreOptions: 'その他', backToTop: 'トップへ戻る', votesCount: "{n}票", oneVote: "1票", noVotes: "まだ投票はありません。あなたが最初です", yourVote: "あなたの投票", download: "ダウンロード", copyCode: "コードをコピー", codeCopied: "コードをコピーしました", validUntil: "{date}まで有効", useCoupon: "クーポンを使う", listen: "聴く", nearest: "いちばん近い店舗を見る", nearestBusy: "現在地を確認中…", nearestDone: "近い順に並べました", nearestFail: "現在地を取得できませんでした。位置情報の許可を確認してください。", nearestPrivate: "位置情報はスマートフォンの外に送信されません。", pause: "一時停止", videos: "動画", podcast: "ポッドキャスト", episodes: "エピソード", emailLabel: 'メール', playOn: '{provider} で再生',
     days: { monday: '月', tuesday: '火', wednesday: '水', thursday: '木', friday: '金', saturday: '土', sunday: '日' },
     languageLabel: '言語', socials: 'SNS', close: '閉じる', prevPhoto: '前の写真', nextPhoto: '次の写真', cards: 'カード',
     swipeHint: 'スワイプしてもっと見る', tickets: 'チケット', tags: 'カテゴリー',
