@@ -29,12 +29,12 @@ export function useReveal<T extends HTMLElement>(key: string, enabled: boolean) 
       for (const e of entries) {
         if (!e.isIntersecting) continue
         const el = e.target as HTMLElement
-        // Si entran varios juntos (scroll rápido), se escalonan un poco
+        // Aparecen un poco antes de llegar (al bajar rápido no se ven tarjetas vacías). Si entran varios juntos (scroll rápido), se escalonan un poco
         el.style.setProperty('--mp-r', String(batch++))
         el.classList.add('mp-revealed')
         io.unobserve(el)
       }
-    }, { rootMargin: '0px 0px -6% 0px', threshold: 0.01 })
+    }, { rootMargin: '0px 0px 20% 0px', threshold: 0.01 })
     for (const el of below) { el.classList.add('mp-reveal'); io.observe(el) }
     return () => {
       io.disconnect()

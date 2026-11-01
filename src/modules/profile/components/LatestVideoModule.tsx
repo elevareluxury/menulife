@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Play } from 'lucide-react'
-import { Huella } from '@/design/components/Huella'
 import { channelQuery, type LatestVideo } from '../lib/latestVideo'
 import { loadLatestVideos } from '../lib/latestVideoClient'
 import { latestVideoT } from '../lib/latestVideoI18n'
@@ -8,6 +6,7 @@ import { parseMediaUrl } from '../lib/media'
 import { tr, ui } from '../lib/profileI18n'
 import type { ModuleProps } from './ProfileModules'
 import { useProfileModule } from './profileModuleContext'
+import { PlayerFacade } from './PlayerFacade'
 import './LatestVideoModule.css'
 
 /** Lo que respondió el servidor para una consulta (null = sin videos o error) */
@@ -79,7 +78,6 @@ function LatestItem({ video, title, playing, onPlay, lang, small }: {
   lang: ModuleProps['lang']
   small?: boolean
 }) {
-  const huella = useProfileModule()
   // El iframe se arma con el id validado (YouTube sin cookies), igual que Video y música
   const embed = parseMediaUrl(`https://youtu.be/${video.id}`)
   if (!embed) return null
@@ -92,17 +90,7 @@ function LatestItem({ video, title, playing, onPlay, lang, small }: {
     )
   }
   return (
-    <button type="button" className={`mp-media-facade mp-latest-facade${small ? ' is-small' : ''}`} onClick={onPlay}>
-      {huella && (
-        <span className="mp-media-art" aria-hidden="true">
-          <Huella seed={huella.seed} variant={huella.variant} />
-        </span>
-      )}
-      <span className="mp-media-play" aria-hidden="true"><Play size={small ? 16 : 22} fill="currentColor" /></span>
-      <span className="mp-media-text">
-        <span className="mp-media-title">{title}</span>
-        <span className="mp-media-provider">{ui(lang).playOn.replace('{provider}', 'YouTube')}</span>
-      </span>
-    </button>
+    <PlayerFacade kind="video" title={title} provider="YouTube" playLabel={ui(lang).playOn.replace('{provider}', 'YouTube')}
+      small={small} onPlay={onPlay} />
   )
 }

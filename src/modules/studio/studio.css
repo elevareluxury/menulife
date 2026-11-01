@@ -181,6 +181,9 @@
 .st-image-size { flex-basis: 100%; font-size: 12px; color: var(--st-faint); font-variant-numeric: tabular-nums; }
 
 .st-segment { display: inline-flex; padding: 3px; gap: 2px; border-radius: 12px; background: var(--st-surface); border: 1px solid var(--st-border); }
+/* Tamaño del módulo: hasta 6 opciones; en 320 px bajan a otra línea y cada una mide 44 px de alto */
+.st-segment.st-size { flex-wrap: wrap; align-self: flex-start; }
+.st-segment.st-size button { min-height: 44px; }
 .st-segment button, .st-segment a {
   border: 0; background: transparent; color: var(--st-muted); padding: 8px 14px; border-radius: 9px;
   font-weight: 500; font-size: 13.5px; font-family: inherit; cursor: pointer; text-decoration: none;

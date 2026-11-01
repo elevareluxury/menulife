@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test'
 import { createState, installSupabaseMock, profileRow } from './support/mockSupabase'
 
-// "Creá tu identidad" (V1 · etapa 08): el pie de cada perfil lleva al registro con ?ref y ?tipo; la cuenta nueva
+// "Creá tu Mycen gratis" (V1 · etapa 08): el pie de cada perfil lleva al registro con ?ref y ?tipo; la cuenta nueva
 // queda atribuida al crear su perfil y el onboarding arranca con el mismo tipo elegido.
 
 test('el pie del perfil abre "Elegí tu nombre" y el registro guarda el nombre, el perfil y su tipo', async ({ page, context }) => {
   await installSupabaseMock(context, createState({ profiles: [profileRow()] }))
   await page.goto('/ana')
-  const toggle = page.getByRole('button', { name: 'Creá tu identidad' })
+  const toggle = page.getByRole('button', { name: 'Creá tu Mycen gratis' })
   await toggle.click()
   await expect(toggle).toHaveAttribute('aria-expanded', 'true')
   await page.getByRole('textbox', { name: 'Elegí tu nombre en Mycen' }).fill('Lucía')

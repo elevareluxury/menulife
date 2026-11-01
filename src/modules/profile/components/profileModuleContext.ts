@@ -6,6 +6,8 @@ export interface ProfileModuleCtx {
   /** Huella del perfil (fondo de la fachada de video y música) */
   seed: string
   variant: HuellaVariant
+  /** Acento del perfil (la pantalla de los videos usa el tema Universo con este acento) */
+  accent?: string
   /** Dirección pública del Space ("ana" o "ana/estudio"): el formulario de contacto envía a este perfil */
   handle: string
   /** Vista previa en Studio u onboarding: no se envía ni se registra nada */

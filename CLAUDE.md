@@ -374,13 +374,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   todo (`mycen_valid_profile_look`) y todavía acepta los valores viejos (dark/light/auto y #RRGGBB) hasta la etapa 06.
   `profileLook()` (`profile/lib/profileLook.ts`) interpreta lo viejo igual que `mycen_upgrade_theme` / `mycen_nearest_accent`
   (acento por tono). `ProfileView` arma las piezas y carga la estructura de `profile/layouts/` (un chunk por estructura);
-  los módulos toman el tema por `lookVars` (--p-* → --my-*). Tamaño Bento por tipo en `moduleRegistry` (`bento`).
+  los módulos toman el tema por `lookVars` (--p-* → --my-*). Tamaños en `profile/lib/moduleSize.ts` (ver "Tamaños de módulos").
   Los objetos que se tocan no flotan (sólo la credencial); E2E en `profile-layouts.spec.ts`.
 - Video y música (etapa 04): módulo `media` (`content.url` + `provider`/`kind` de referencia). `profile/lib/media.ts`
   (`inspectMediaUrl`/`parseMediaUrl`): lista cerrada (YouTube sin cookies, Vimeo, Spotify, SoundCloud, TikTok), links cortos
   rechazados, el iframe se arma con el id validado. Fachada `MediaModule` (chunk propio, huella del perfil por
-  `ProfileHuellaContext`): nada de terceros hasta tocar "Reproducir" (lo verifica `media.spec.ts`). Bento: video L, música M
-  (`bento` puede ser función). Los proveedores están en privacidad (12 idiomas).
+  `ProfileHuellaContext`): nada de terceros hasta tocar "Reproducir" (lo verifica `media.spec.ts`). Bento: video destacado, música ancho. Los proveedores están en privacidad (12 idiomas).
 - Último video (bio, `FEATURES.bioModules`): módulo `latest_video` (`content`: `url`, `channel_id` UC… o `handle` @…,
   `show_title`, `count` 1|3). Reglas puras en `profile/lib/latestVideo.ts` (link del canal, feed y respuesta; imports
   relativos porque también las usa la función Edge). `api/youtube-latest.ts` (`?channel=` o `?handle=`): con un @ lee la
@@ -729,6 +728,27 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   Portfolio sin portada = huella del perfil; con número impar el último va a todo el ancho. "Escuchá en" en una
   columna. Flyer ≤ 56svh. Árabe: flechas espejadas y textos del dueño con `unicode-bidi: plaintext`.
   Buscadores: `api/og.ts` manda `ProfilePage` con la persona o el negocio como `mainEntity` (@usuario, `sameAs`).
+- Tamaños de módulos (mejoras-clase-mundial §B): `config.size` (sin migración) = `square` (dos por fila), `wide`,
+  `featured` (sólo Bento: toda la fila en la compu), `bar` (Spotify, 80 px, toda la fila) y `vertical` (video 9:16).
+  `profile/lib/moduleSize.ts` (puro): `sizeOptions` (cuadrado sólo link, foto, producto, proyecto, ubicación y
+  video/música), `moduleSize` (lo elegido si el tipo lo admite; si no, ancho fuera de Bento y el de siempre del tipo en
+  Bento, redes y botón destacado a toda la fila) y `packSpans` (orden del dueño; si lo que sigue no entra, el último de
+  la fila se estira; la última fila no). `ModuleStack` dibuja todas las estructuras en una grilla que mide su ancho
+  (no la pantalla: la vista previa es angosta): 2 columnas, o 4 en Bento con ≥ 680 px; `--mp-sq` = alto mínimo del
+  cuadrado; `.mp-tile.mp-s-<forma>` + `data-size`. Bento en la compu (container query `mp-page` ≥ 1000 px): identidad
+  fija a la izquierda y módulos a la derecha. Al tocar "Reproducir" en un cuadrado o vertical, pasa a toda la fila
+  (`:has(.mp-media-frame)`). Studio: selector "Tamaño" en `ModuleEditor` (12 idiomas, `editor.sizes`). Tests en
+  `moduleSize.test.ts` y `module-sizes.spec.ts`.
+- Reproductores (`PlayerFacade`, la usan Video y música y "Último video"): botón propio dibujado como reproductor;
+  el del proveedor carga recién al tocar. Video = pantalla oscura (`data-mycen-theme="universo"` + el acento del
+  perfil, `ProfileModuleContext.accent`), título, "Reproducir" grande y barra de controles; música = portada (o la
+  huella), título, plataforma, línea de progreso en cero y "Reproducir" (disco/lista y cuadrado: portada a sangre).
+  Nombre accesible = título + "Reproducir en …".
+- Encabezado y pie del perfil (auditoría de diseño): arriba sólo la huella de Mycen (`BrandMark` en `ProfileView`,
+  `brandMarkSvg` con los colores de la marca del tema), la persona primero; en la compu la barra no es fija ni pinta
+  una franja (container query `mp-page` en `.mp-root`). Pie: botón `.mp-footer-cta` con la huella y "Creá tu Mycen
+  gratis" (`createFree`, 12 idiomas; abre "Elegí tu nombre"). Sólo "Disponible" lleva el punto que late; el estado
+  va discreto y las etiquetas como texto con "·". El foco no cambia el radio de los controles.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

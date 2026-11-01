@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { ACCENT_COLORS, MYCEN_ACCENTS, MYCEN_THEMES } from '@/design/themes'
 import { nearestAccent, profileLook } from '@/modules/profile/lib/profileLook'
 import { PUBLIC_MODULES } from '@/modules/profile/components/moduleRegistry'
+import { MODULE_SIZES, moduleSize } from '@/modules/profile/lib/moduleSize'
+import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 
 // V1 · etapa 03: aspecto del perfil. Mismos casos que tests/db/profile_look.test.sql (la regla vive en los dos lados).
 
@@ -56,6 +58,8 @@ describe('profileLook', () => {
   })
 
   it('cada tipo de módulo tiene su tamaño en Bento', () => {
-    for (const def of Object.values(PUBLIC_MODULES)) expect(typeof def.bento === 'function' || ['S', 'M', 'L'].includes(def.bento)).toBe(true)
+    for (const type of Object.keys(PUBLIC_MODULES)) {
+      expect(MODULE_SIZES).toContain(moduleSize({ type: type as ModuleType, content: {}, config: {} }, true))
+    }
   })
 })

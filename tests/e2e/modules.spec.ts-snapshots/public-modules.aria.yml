@@ -1,7 +1,6 @@
 - main:
   - link "Mycen":
     - /url: /
-    - text: mycen
   - combobox "Idioma":
     - option "Español" [selected]
     - option "English"
@@ -103,11 +102,8 @@
     - button "Cómo hago mis tazas Reproducir en YouTube"
     - list:
       - listitem:
-        - button "Visita al taller"
+        - button "Visita al taller Reproducir en YouTube"
       - listitem:
-        - button "Esmaltes nuevos"
-  - link "mycen":
-    - /url: /
-  - text: ·
-  - button "Creá tu identidad"
+        - button "Esmaltes nuevos Reproducir en YouTube"
+  - button "Creá tu Mycen gratis"
   - button "Denunciar"

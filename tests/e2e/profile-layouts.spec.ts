@@ -46,9 +46,9 @@ for (const layout of LAYOUTS) {
     // La huella es decorativa
     await expect(page.locator('svg[aria-hidden="true"] linearGradient').first()).toBeAttached()
 
-    // Pie "mycen · Creá tu identidad" (abre "Elegí tu nombre")
+    // Pie "Creá tu Mycen gratis" con la huella (abre "Elegí tu nombre")
     const footer = page.locator('footer.mp-footer')
-    await expect(footer.getByRole('button', { name: 'Creá tu identidad' })).toHaveAttribute('aria-expanded', 'false')
+    await expect(footer.getByRole('button', { name: 'Creá tu Mycen gratis' })).toHaveAttribute('aria-expanded', 'false')
 
     // Sin contenedores con scroll interno (atrapan el gesto en iOS)
     const traps = await page.evaluate(() => [...document.querySelectorAll('main *')].filter(el => {
@@ -100,8 +100,8 @@ test('bento: cada tipo de módulo tiene su tamaño', async ({ page, context }) =
   const state = createState({ profiles: [profile({ layout: 'bento' })], profile_modules: rows() })
   await installSupabaseMock(context, state)
   await page.goto('/ana')
-  await expect(page.locator('.mp-bento-grid > .mp-b-S').first()).toBeVisible()
-  await expect(page.locator('.mp-bento-grid > .mp-b-L').first()).toBeVisible()
+  await expect(page.locator('.mp-bento-grid > [data-size="square"]').first()).toBeVisible()
+  await expect(page.locator('.mp-bento-grid > .mp-s-featured').first()).toBeVisible()
 })
 
 test('perfiles de antes: modo claro y un color libre se ven en Clásica, Amanecer y el acento más cercano', async ({ page, context }) => {

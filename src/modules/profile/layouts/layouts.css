@@ -40,12 +40,30 @@
 
 .my-profile .mp-footer { text-align: center; color: var(--my-muted); font-size: var(--my-fs-small); padding: 36px 0 12px; }
 .my-profile .mp-footer a { color: var(--my-text); }
-/* "Creá tu identidad": se ve como el link de siempre y abre el campo "Elegí tu nombre" debajo */
-.my-profile .mp-footer-claim {
-  border: 0; background: none; padding: 0 4px; min-height: 44px; display: inline-flex; align-items: center; vertical-align: middle;
-  color: var(--my-text); font: inherit; font-weight: 600; cursor: pointer;
+/* "Creá tu Mycen gratis": píldora con la huella de Mycen (cada perfil compartido invita a crear el propio); abre el
+   campo "Elegí tu nombre" debajo */
+.my-profile .mp-footer-cta {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 20px 6px 8px;
+  border: 1px solid var(--my-border); border-radius: var(--my-r-pill); background: var(--my-glass);
+  color: var(--my-text); font: 600 var(--my-fs-body) / 1.2 var(--my-font-ui); text-decoration: none; cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
 }
-.my-profile .mp-footer-claim:focus-visible { outline: 2px solid var(--my-text); outline-offset: 3px; border-radius: 4px; }
+.my-profile .mp-footer-cta:hover { border-color: color-mix(in srgb, var(--my-text) 30%, transparent); }
+.my-profile .mp-footer-cta:active { transform: scale(0.98); }
+.my-profile .mp-footer-cta[aria-expanded='true'] { border-color: var(--my-accent); }
+.mp-footer-mark { display: block; flex: none; width: 34px; height: 34px; }
+.mp-footer-mark svg, .mp-brand-mark svg { display: block; width: 100%; height: 100%; }
+/* "Denunciar": presente pero sin competir con el botón */
+.my-profile .mp-footer .mp-report-link { margin-top: 10px; color: var(--my-muted); text-decoration: none; font-size: var(--my-fs-small); }
+/* Barra de arriba: sólo la huella de Mycen (la persona primero) */
+.mp-brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-inline-start: -8px; }
+.mp-brand-mark span { display: block; width: 30px; height: 30px; }
+/* Estado (texto del dueño): discreto, sin punto; el punto que late es sólo de "Disponible" */
+.my-profile .mp-chips .mp-chip-status { background: none; border-color: transparent; color: var(--my-muted); padding-inline: 4px; }
+/* Etiquetas como texto separado por "·" (no otra fila de píldoras) */
+.my-profile .mp-tags { gap: 0 8px; }
+.my-profile .mp-tags li { border: 0; padding: 0; border-radius: 0; font-size: var(--my-fs-small); color: var(--my-muted); }
+.my-profile .mp-tags li + li::before { content: '·'; margin-inline-end: 8px; color: var(--my-subtle); }
 .my-profile .mp-footer-claim-box { max-width: 420px; margin: 20px auto 8px; }
 
 /* ── Clásica: foto con la huella orbitando ───────────────────── */
@@ -71,7 +89,7 @@
 .mp-cred .mp-chips { justify-content: flex-start; margin-bottom: 8px; }
 .mp-cred .mp-tags { justify-content: flex-start; }
 .mp-cred-handle { position: relative; margin: 6px 0 0; font-size: var(--my-fs-meta); color: var(--my-subtle); letter-spacing: 0.02em; }
-.mp-cred-bio { margin-top: 18px; }
+.mp-cred-bio { margin-top: 18px; margin-inline: 0; }
 
 /* ── Portada: la primera pantalla es la tapa ─────────────────── */
 .mp-layout-portada .mp-container { padding-top: 0; }
@@ -80,6 +98,8 @@
   min-height: calc(100svh - 64px); margin: 0 -20px; padding: 0; overflow: hidden;
 }
 .mp-cover-art { position: absolute; inset: 0; display: grid; place-items: center; background: var(--my-tile); }
+/* Sin foto, la huella va sobre el cielo (en la compu, el fondo liso era un rectángulo de bordes duros) */
+.mp-cover-art:not(:has(img)) { background: none; }
 /* La foto cubre toda la tapa. Posicionada (no por la grilla): en Safari el alto en % de un hijo de grilla no se
    resolvía, la foto quedaba con su alto natural, centrada, y arriba se veía una franja vacía */
 .mp-cover-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
@@ -87,6 +107,16 @@
 .mp-cover-art:has(img) + .mp-cover-fade { background: linear-gradient(to top, var(--my-bg) 30%, transparent 80%); }
 .mp-cover-huella { width: min(118vw, 640px) !important; height: min(118vw, 640px) !important; margin-top: -18svh; }
 .mp-cover-fade { position: absolute; inset: 0; background: linear-gradient(to top, var(--my-bg) 22%, transparent 72%); pointer-events: none; }
+/* En la compu la tapa es más angosta que la pantalla: el degradé se funde a los costados (antes, un rectángulo
+   oscuro de bordes duros sobre el cielo) */
+@container mp-page (min-width: 700px) {
+  /* La barra de arriba no pinta una franja más angosta que la pantalla ni queda fija (en la compu sobra lugar) */
+  .mp-topbar { position: static; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .mp-cover-fade, .mp-cover-art:has(img) {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 16%, black 84%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 16%, black 84%, transparent);
+  }
+}
 .mp-cover-body { position: relative; padding: 0 20px 22px; }
 .mp-cover-name { font-size: var(--my-fs-cover) !important; margin-bottom: 8px; }
 .mp-cover-avatar { width: 72px !important; height: 72px !important; margin-bottom: 14px !important; font-size: 26px; }
@@ -123,54 +153,151 @@
 .mp-bento .mp-chips, .mp-bento .mp-tags { justify-content: flex-start; position: relative; }
 .mp-bento-bio { position: relative; margin: 8px 0 0; text-align: start; }
 .mp-bento-actions { margin-top: 12px; }
-.mp-bento-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
-/* Sin "dense": el orden es el que eligió el dueño (antes un bloque chico de abajo subía a llenar un hueco) */
-.mp-b-S { grid-column: span 1; }
-.mp-b-M, .mp-b-L { grid-column: 1 / -1; }
-.mp-b-S > *, .mp-b-S .mp-link { height: 100%; }
+.mp-bento-grid { margin-top: 12px; }
 .mp-bento .mp-card, .mp-bento .mp-link { border-radius: var(--my-r-bento); }
 .mp-bento .mp-link-group { border-radius: var(--my-r-bento); }
 .mp-bento .mp-link-group .mp-link { border-radius: 0; }
-.mp-b-S .mp-link { flex-direction: column; align-items: flex-start; justify-content: space-between; min-height: 112px; }
+
+/* Bento en la compu: la identidad queda fija a la izquierda y los módulos van a la derecha en 4 columnas
+   (ModuleStack mide la grilla). Por contenedor, no por pantalla: la vista previa de Studio es angosta. */
+.mp-root.my-profile { container: mp-page / inline-size; }
+@container mp-page (min-width: 1000px) {
+  .mp-layout-bento .mp-container, .mp-layout-bento .mp-topbar { max-width: 1160px; }
+  .mp-bento { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: 40px; align-items: start; }
+  .mp-bento-side { position: sticky; top: 76px; }
+  .mp-bento-grid { margin-top: 20px; }
+}
+
+/* ── Tamaños de los módulos (lib/moduleSize · ModuleStack) ───────── */
+.mp-tile { min-width: 0; display: flex; flex-direction: column; }
+/* El módulo llena su lugar cuando la fila es más alta que él (al lado de un cuadrado) */
+.mp-tile > * { flex: 1 1 auto; }
+.mp-tile.mp-s-square { min-height: var(--mp-sq, 0px); }
+/* Al tocar "Reproducir" en un cuadrado o un vertical, el reproductor pasa a toda la fila */
+.mp-tile:has(.mp-media-frame) { grid-column: 1 / -1 !important; }
+
+.mp-s-square > :is(.mp-card, figure) { display: flex; flex-direction: column; }
+.mp-s-square > .mp-card:not(.mp-media) { padding: 16px; }
+/* Link: ícono arriba, título abajo, flecha en la esquina */
+.mp-s-square .mp-link { position: relative; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 16px; }
+.mp-s-square .mp-link-icon { width: 44px; height: 44px; }
+.mp-s-square .mp-link-arrow { position: absolute; top: 14px; inset-inline-end: 14px; }
+.mp-s-square .mp-link-body { flex: none; width: 100%; }
+.mp-s-square :is(.mp-link-title, .mp-project-title) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.mp-s-square .mp-link-sub { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.mp-s-square :is(.mp-link-card, .mp-project) { display: flex; flex-direction: column; }
+.mp-s-square :is(.mp-link-card-img, .mp-project-cover) { flex: 1 1 0; min-height: 72px; aspect-ratio: auto; height: auto; }
+.mp-s-square :is(.mp-link-card-body, .mp-project-body) { padding: 12px 14px 14px; }
+.mp-s-square .mp-project-summary { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+/* Foto: llena el cuadrado */
+.mp-s-square .mp-image { flex: 1 1 0; min-height: 0; width: 100%; height: 100%; margin: 0; object-fit: cover; aspect-ratio: auto; }
+.mp-s-square .mp-image-caption { padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Producto: foto arriba, nombre y precio; el botón queda abajo */
+.mp-s-square .mp-product { flex-direction: column; align-items: stretch; gap: 10px; }
+.mp-s-square .mp-product img { width: 100%; height: auto; aspect-ratio: 4 / 3; }
+.mp-s-square .mp-product-desc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.mp-s-square .mp-product-cta { margin-top: auto; }
+.mp-s-square .mp-product + .mp-product-cta { margin-top: 14px; }
+
+/* Reproductores en cuadrado, vertical o barra */
+.mp-s-square .mp-media, .mp-s-vertical .mp-media { display: flex; flex-direction: column; }
+.mp-s-square .mp-media-facade { flex: 1 1 auto; aspect-ratio: auto !important; min-height: var(--mp-sq, 160px) !important; }
+.mp-s-square .mp-player-big, .mp-s-vertical .mp-player-big { width: 52px !important; height: 52px !important; }
+.mp-s-square .mp-player-controls .lucide-maximize { display: none; }
+.mp-s-square .mp-player-head .mp-media-title, .mp-s-vertical .mp-player-head .mp-media-title { font-size: var(--my-fs-body); }
+/* Música en cuadrado (la portada a sangre, más arriba): botón y título más chicos */
+.mp-s-square .mp-player-music .mp-media-play { width: 44px; height: 44px; }
+.mp-s-square .mp-player-info .mp-media-title { font-size: var(--my-fs-body); }
+.mp-s-square .mp-player-info .mp-player-track { margin-top: 8px; }
+/* Un vertical solo en su fila no ocupa todo el ancho (sería más alto que la pantalla) */
+.mp-s-wide[data-size='vertical'] .mp-media-facade { max-width: 340px; margin-inline: auto; }
+/* Barra (Spotify compacto, 80 px como su reproductor) */
+.mp-media-bar .mp-player-music { height: 80px; min-height: 80px; padding: 10px 12px; gap: 12px; }
+.mp-media-bar .mp-player-art { width: 58px; border-radius: 8px; }
+.mp-media-bar .mp-player-info .mp-media-title { font-size: var(--my-fs-body); }
+.mp-media-bar .mp-player-info .mp-player-track { margin-top: 7px; height: 3px; }
+.mp-media-bar .mp-media-play { width: 44px; height: 44px; }
 
 /* La foto es un objeto sólido delante de la huella */
 .my-profile .mp-avatar { background: var(--my-tile); border-color: var(--my-bg); box-shadow: 0 0 0 1px var(--my-border); color: var(--my-muted); }
 
-/* ── Video y música (etapa 04): fachada liviana hasta que se toca "Reproducir" ── */
+/* ── Reproductores (Video y música, "Último video") ─────────────────────────────────────────────────────────
+   Fachada liviana hasta tocar "Reproducir" (nada de terceros antes), dibujada como un reproductor de verdad:
+   el video, una pantalla oscura (data-mycen-theme="universo" en la fachada) con título, botón grande y barra de
+   controles; la música, portada, título, plataforma, línea de progreso y "Reproducir". */
 .mp-media { padding: 0; }
 .mp-media-facade {
-  position: relative; display: flex; align-items: flex-end; gap: 14px; width: 100%; min-height: 112px;
-  padding: 18px; border: 0; border-radius: inherit; overflow: hidden; cursor: pointer; text-align: start;
-  /* Sin portada: un fondo suave del acento (parece arte de tapa, no una caja vacía), sobre la superficie de las tarjetas
-     del tema (en Amanecer, crema como las demás) */
-  background: radial-gradient(120% 100% at 85% 0%, color-mix(in srgb, var(--my-accent) 26%, transparent), transparent 70%), var(--p-card-bg, var(--my-tile));
-  color: var(--my-text); font: inherit;
+  position: relative; display: flex; width: 100%; padding: 0; border: 0; border-radius: inherit; overflow: hidden;
+  cursor: pointer; text-align: start; color: var(--my-text); font: inherit;
 }
-.mp-media-music .mp-media-facade { align-items: center; }
-.mp-media-art {
-  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0.8; pointer-events: none;
-  /* La huella se apaga hacia abajo: el título y el proveedor se leen limpios */
-  -webkit-mask-image: linear-gradient(to top, transparent 10%, black 60%); mask-image: linear-gradient(to top, transparent 10%, black 60%);
-}
-.mp-media-art svg { width: 130% !important; height: auto !important; }
-.mp-media-music .mp-media-art svg { width: 60% !important; margin-inline-start: 50%; }
 .mp-media-play {
   position: relative; flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
   background: var(--my-accent); color: var(--my-on-accent); box-shadow: 0 12px 28px -12px var(--my-glow);
+  transition: transform 0.15s;
 }
-.mp-media-text { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.mp-media-title { font-weight: 600; font-size: var(--my-fs-lead); overflow-wrap: anywhere; }
+.mp-media-play svg { margin-inline-start: 3px; }
+.mp-media-facade:hover .mp-media-play { transform: scale(1.06); }
+.mp-media-facade:active .mp-media-play { transform: scale(0.96); }
+.mp-media-title { font-weight: 600; font-size: var(--my-fs-lead); line-height: var(--my-lh-title); overflow-wrap: anywhere; }
 .mp-media-provider { font-size: var(--my-fs-small); color: var(--my-muted); }
-/* Portada (guardada en Mycen al pegar el link): ocupa la tarjeta; un degradé del fondo del tema sube desde abajo y el
-   título va directo encima (antes, una placa que parecía pegada) */
 .mp-media-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.mp-media-scrim {
-  position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(to top, color-mix(in srgb, var(--my-bg) 92%, transparent) 0%, color-mix(in srgb, var(--my-bg) 55%, transparent) 38%, transparent 72%);
+.mp-media-art { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0.8; pointer-events: none; }
+.mp-media-art svg { width: 130% !important; height: auto !important; }
+/* Línea de progreso (en cero: todavía no empezó) */
+.mp-player-track { position: relative; display: block; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--my-text) 20%, transparent); }
+.mp-player-track::before {
+  content: ''; position: absolute; inset-inline-start: 0; top: 50%; width: 10px; height: 10px; margin-top: -5px;
+  border-radius: 50%; background: var(--my-text);
 }
-.mp-media-music .mp-media-facade:has(.mp-media-cover) { min-height: 180px; align-items: flex-end; }
 .mp-media-frame { width: 100%; overflow: hidden; border-radius: inherit; background: var(--my-tile); }
 .mp-media-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+/* Video: pantalla oscura, título arriba, "Reproducir" grande al centro y barra de controles abajo */
+.mp-player-video { flex-direction: column; justify-content: space-between; min-height: 150px; background: var(--my-bg); }
+.mp-player-video .mp-media-art { opacity: 0.6; }
+.mp-player-shade {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--my-bg) 82%, transparent), transparent 34%,
+    transparent 60%, color-mix(in srgb, var(--my-bg) 90%, transparent));
+}
+.mp-player-head { position: relative; padding: 14px 16px 0; }
+.mp-player-head .mp-media-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.mp-player-video .mp-player-big { position: absolute; top: 50%; left: 50%; width: 64px; height: 64px; transform: translate(-50%, -50%); }
+.mp-player-video:hover .mp-player-big { transform: translate(-50%, -50%) scale(1.06); }
+.mp-player-video:active .mp-player-big { transform: translate(-50%, -50%) scale(0.96); }
+.mp-player-controls {
+  position: relative; display: flex; align-items: center; gap: 10px; padding: 0 16px 14px;
+  font-size: var(--my-fs-meta); color: var(--my-text);
+}
+.mp-player-controls .mp-player-track { flex: 1; }
+.mp-player-brand { font-weight: 600; }
+
+/* Música: portada, título, plataforma, progreso y "Reproducir" (como un reproductor compacto) */
+.mp-player-music {
+  align-items: center; gap: 14px; padding: 14px; min-height: 112px;
+  background: radial-gradient(120% 100% at 85% 0%, color-mix(in srgb, var(--my-accent) 22%, transparent), transparent 70%), var(--p-card-bg, var(--my-tile));
+}
+.mp-player-art {
+  position: relative; flex: none; width: 92px; aspect-ratio: 1; border-radius: 12px; overflow: hidden;
+  background: color-mix(in srgb, var(--my-accent) 30%, var(--my-tile));
+}
+.mp-player-art .mp-media-art { opacity: 0.9; }
+.mp-player-art .mp-media-art svg { width: 150% !important; }
+.mp-player-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mp-player-info .mp-media-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-player-info .mp-player-track { margin-top: 12px; }
+/* Disco o lista (el reproductor mide 352 px) y cuadrado: la portada a sangre, "Reproducir" y el título abajo */
+:is(.mp-player-music.is-tall, .mp-s-square .mp-player-music) { flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 10px; }
+:is(.mp-player-music.is-tall, .mp-s-square .mp-player-music) .mp-player-art { position: absolute; inset: 0; width: auto; border-radius: 0; }
+:is(.mp-player-music.is-tall, .mp-s-square .mp-player-music) .mp-player-art::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, color-mix(in srgb, var(--my-bg) 92%, transparent), transparent 70%);
+}
+:is(.mp-player-music.is-tall, .mp-s-square .mp-player-music) .mp-media-play { order: 1; }
+:is(.mp-player-music.is-tall, .mp-s-square .mp-player-music) .mp-player-info { position: relative; order: 2; flex: none; width: 100%; }
+:is(.mp-player-music.is-tall, .mp-s-square .mp-player-music) .mp-player-info .mp-media-title {
+  white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+}
 
 /* ── Formulario de contacto (etapa 05) ── */
 .mp-form-title { margin: 0 0 6px; font: 700 var(--my-fs-section) / var(--my-lh-title) var(--my-font-display); }

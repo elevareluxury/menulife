@@ -496,7 +496,7 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
 
   return (
     <section ref={section} className={`mp-tix${shown ? ' is-in' : ''}`} aria-label={heading || t.cards}>
-      {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
+      {heading && <h2 className="mp-card-title mp-section-title">{heading}</h2>}
       <div ref={track} className="mp-tix-track" tabIndex={0} role="region" aria-label={`${heading || t.cards} — ${t.swipeHint}`}>
         {items.map((item, i) => {
           const href = safeHref(item.url)
@@ -572,7 +572,7 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
 
   return (
     <section aria-label={heading || ui(lang).cards}>
-      {heading && <h2 className="mp-card-title" style={{ padding: '0 4px' }}>{heading}</h2>}
+      {heading && <h2 className="mp-card-title mp-section-title">{heading}</h2>}
       <div className={layout === 'carousel' ? 'mp-cards-carousel' : 'mp-cards-stack'}
         tabIndex={layout === 'carousel' ? 0 : undefined}
         role={layout === 'carousel' ? 'region' : undefined}

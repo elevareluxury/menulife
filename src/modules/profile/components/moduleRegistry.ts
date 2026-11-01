@@ -16,7 +16,6 @@ const LatestVideoModule = preloadable<ModuleProps>(() => import('./LatestVideoMo
 // Módulos de bio (V1.1): cada uno con su chunk, sus textos y su CSS
 const SupportModule = preloadable<ModuleProps>(() => import('./SupportModule').then(m => ({ default: m.SupportModule })))
 const ListenOnModule = preloadable<ModuleProps>(() => import('./ListenOnModule').then(m => ({ default: m.ListenOnModule })))
-import { parseMediaUrl } from '../lib/media'
 
 export interface GroupProps {
   modules: ProfileModule[]
@@ -34,43 +33,33 @@ export interface PublicModuleDef {
   /** Los módulos consecutivos de este tipo se dibujan juntos (ej.: redes en una fila de íconos) */
   Group?: ComponentType<GroupProps>
   // Sin View ni Group: no es un bloque (contact_card se muestra como botón "Guardar contacto")
-  /** Tamaño en la estructura Bento (V1): S = media columna, M = ancho completo, L = ancho completo destacado.
-   *  Una función si depende del contenido (ej. video L, música M). */
-  bento: BentoSize | ((module: ProfileModule) => BentoSize)
+  // El tamaño de cada módulo en la grilla (y el de siempre de cada tipo en Bento) está en lib/moduleSize.ts
 }
-
-export type BentoSize = 'S' | 'M' | 'L'
 
 export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
-  link:            { View: LinkModule, bento: 'S' },
-  social:          { Group: SocialRow, bento: 'M' },
-  contact:         { View: ContactModule, bento: 'M' },
-  location:        { View: LocationModule, bento: 'M' },
-  image:           { View: ImageModule, bento: 'L' },
-  text:            { View: TextModule, bento: 'M' },
-  featured_action: { View: FeaturedActionModule, bento: 'M' },
-  contact_card:    { bento: 'S' },
-  gallery:         { View: GalleryModule, bento: 'L' },
-  product:         { View: ProductModule, bento: 'M' },
-  testimonials:    { View: TestimonialsModule, bento: 'M' },
-  // M: a media columna cada horario se partía en dos renglones y estiraba a su vecino
-  hours:           { View: HoursModule, bento: 'M' },
-  cards:           { View: CardsModule, bento: 'L' },
-  project:         { View: ProjectModule, bento: 'L' },
-  portfolio:       { View: PortfolioModule, bento: 'L' },
-  link_group:      { View: LinkGroupModule, bento: 'M' },
-  contact_form:    { View: ContactFormModule, bento: 'M' },
-  collab:          { View: CollabModule, bento: 'M' },
-  subscribe:       { View: SubscribeModule, bento: 'M' },
-  media:           { View: MediaModule, bento: m => (parseMediaUrl(m.content.url)?.kind === 'music' ? 'M' : 'L') },
-  latest_video:    { View: LatestVideoModule, bento: 'L' },
-  support:         { View: SupportModule, bento: 'M' },
-  listen_on:       { View: ListenOnModule, bento: 'M' },
-}
-
-/** Tamaño Bento de un módulo */
-export function bentoSize(def: PublicModuleDef, module: ProfileModule): BentoSize {
-  return typeof def.bento === 'function' ? def.bento(module) : def.bento
+  link:            { View: LinkModule },
+  social:          { Group: SocialRow },
+  contact:         { View: ContactModule },
+  location:        { View: LocationModule },
+  image:           { View: ImageModule },
+  text:            { View: TextModule },
+  featured_action: { View: FeaturedActionModule },
+  contact_card:    {},
+  gallery:         { View: GalleryModule },
+  product:         { View: ProductModule },
+  testimonials:    { View: TestimonialsModule },
+  hours:           { View: HoursModule },
+  cards:           { View: CardsModule },
+  project:         { View: ProjectModule },
+  portfolio:       { View: PortfolioModule },
+  link_group:      { View: LinkGroupModule },
+  contact_form:    { View: ContactFormModule },
+  collab:          { View: CollabModule },
+  subscribe:       { View: SubscribeModule },
+  media:           { View: MediaModule },
+  latest_video:    { View: LatestVideoModule },
+  support:         { View: SupportModule },
+  listen_on:       { View: ListenOnModule },
 }
 
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */

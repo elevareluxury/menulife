@@ -183,8 +183,8 @@ for (const mode of ['universo', 'amanecer'] as const) {
       // Sin scroll de costado
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
       if (layout === 'bento') {
-        await expect(page.locator('.mp-b-M .mp-support')).toBeVisible()
-        await expect(page.locator('.mp-b-M .mp-listen')).toBeVisible()
+        await expect(page.locator('.mp-s-wide .mp-support')).toBeVisible()
+        await expect(page.locator('.mp-s-wide .mp-listen')).toBeVisible()
       }
       await axe(page)
     })
