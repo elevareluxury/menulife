@@ -76,7 +76,10 @@ revoke all on function public.mycen_purge_expired() from public, anon, authentic
 -- Todos los días a las 04:17 UTC (si pg_cron está prendido en el proyecto)
 do $$
 begin
-  if to_regnamespace('cron') is not null and to_regproc('cron.schedule') is not null then
+  -- cron.schedule tiene varias firmas: to_regproc() da null con nombres sobrecargados, por eso se busca en pg_proc
+  if to_regnamespace('cron') is not null and exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'cron' and p.proname = 'schedule'
+  ) then
     begin
       perform cron.unschedule('mycen-purge-expired');
     exception when others then null;
