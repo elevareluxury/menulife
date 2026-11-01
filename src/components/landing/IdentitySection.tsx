@@ -7,6 +7,7 @@ import { Huella } from '@/design/components/Huella'
 
 import { SplitText } from './SplitText'
 import './identity.css'
+import { shot } from './shots'
 
 // "Tu identidad, en vivo": mientras se bajan los pasos, el celular de al lado (fijo) arma un perfil de ejemplo:
 // nombre, huella, estructuras, módulos, compartir y "lo que más tocan". Es una ilustración: sin números ni datos de
@@ -132,7 +133,7 @@ export function IdentitySection() {
                   {/* Paso 3: las cinco estructuras reales, una tras otra */}
                   <div className="idn-layouts">
                     {LAYOUTS.map((l, i) => (
-                      <img key={l} src={`/landing/perfil-${l}-universo.webp`} alt="" loading="lazy" decoding="async"
+                      <img key={l} src={shot(`perfil-${l}-universo`)} alt="" loading="lazy" decoding="async"
                         width={300} height={600} style={{ '--i': i } as CSSProperties} />
                     ))}
                   </div>

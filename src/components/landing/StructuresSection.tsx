@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLandingT } from '@/i18n/app/landing'
 import { SplitText } from './SplitText'
+import { shot } from './shots'
 
 // Las cinco estructuras del perfil en los dos temas (V1 · etapa 13). Son imágenes estáticas de perfiles de ejemplo
 // (scripts/landing-shots), no componentes en vivo: pesan poco y no capturan gestos. Van en una sola fila que se desliza
@@ -79,7 +80,7 @@ export function StructuresSection() {
               <li key={layout} data-rise>
                 <figure style={{ margin: 0 }}>
                   <img
-                    src={`/landing/perfil-${layout}-${theme}.webp`}
+                    src={shot(`perfil-${layout}-${theme}`)}
                     alt={t.alt(info.name, t[theme])}
                     width={300} height={600} loading="lazy" decoding="async"
                   />

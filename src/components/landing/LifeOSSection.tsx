@@ -6,6 +6,7 @@ import { useLandingT } from '@/i18n/app/landing'
 
 import { reducedMotion } from './motion'
 import { SplitText } from './SplitText'
+import { shot } from './shots'
 
 declare const gsap: any
 
@@ -77,8 +78,8 @@ export function LifeOSSection() {
         {/* "Mi día" (V1 · etapa 13): capturas de ejemplo en los dos temas */}
         <div className="ml-myday">
           <div className="ml-myday-shots">
-            <img src="/landing/mi-dia-universo.webp" alt={md.alt} width={260} height={520} loading="lazy" decoding="async" />
-            <img src="/landing/mi-dia-amanecer.webp" alt="" width={260} height={520} loading="lazy" decoding="async" />
+            <img src={shot('mi-dia-universo')} alt={md.alt} width={260} height={520} loading="lazy" decoding="async" />
+            <img src={shot('mi-dia-amanecer')} alt="" width={260} height={520} loading="lazy" decoding="async" />
           </div>
           <div>
             <h3>{md.title}</h3>
