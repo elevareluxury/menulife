@@ -5,9 +5,10 @@ import { uploadPdf } from '../lib/studioApi'
 import { useStudioT } from '@/i18n/app/studio'
 import type { ExtraEditorProps } from './moduleExtraEditors'
 import { newOptionId } from '../lib/pollOptions'
+import { BRANCHES_MAX, coordsFromMapsUrl } from '@/modules/profile/lib/branches'
+import { cleanLinkInput, withWebScheme } from '@/modules/profile/lib/safeUrl'
 
-// Editores de los módulos de la entrega 2 (encuesta, descargables, galería de videos).
-
+// Editores de los módulos de la entrega 2 (encuesta, descargables, galería de videos, sucursales).
 
 function move<T>(list: T[], i: number, d: -1 | 1): T[] {
   const t = i + d
@@ -147,6 +148,46 @@ export function VideoListEditor({ value, onChange }: ExtraEditorProps<VideoInput
       ))}
       {value.length < 12 && (
         <Button size="sm" onClick={() => onChange([...value, { url: '', title: '' }])}><Plus size={15} aria-hidden="true" /> {v.videoAdd}</Button>
+      )}
+    </div>
+  )
+}
+
+// ── Sucursales (Ubicación) ──────────────────────────────────────────────────
+
+export interface BranchInput { name: string; address: string; city: string; maps_url: string }
+
+export function BranchesEditor({ value, onChange }: ExtraEditorProps<BranchInput[]>) {
+  const t = useStudioT()
+  const v = t.v2
+  const e = t.editor
+  const f = t.catalog.fields
+  const update = (i: number, patch: Partial<BranchInput>) => onChange(value.map((x, j) => (j === i ? { ...x, ...patch } : x)))
+  return (
+    <div className="st-stack" style={{ gap: 10 }}>
+      <span className="st-label">{v.branches}</span>
+      <p className="st-help" style={{ margin: 0 }}>{v.branchHelp}</p>
+      {value.map((x, i) => {
+        const url = cleanLinkInput(x.maps_url)
+        return (
+          <div key={i} className="st-card" style={{ background: 'var(--st-bg)', margin: 0 }}>
+            <RowTools i={i} n={value.length} label={x.name.trim() || v.branchN(i + 1)}
+              onMove={d => onChange(move(value, i, d))} onRemove={() => onChange(value.filter((_, j) => j !== i))}
+              labels={{ up: e.upLink(i + 1), down: e.downLink(i + 1), remove: v.branchRemove(i + 1) }} />
+            <div className="st-stack" style={{ gap: 10, marginTop: 10 }}>
+              <TextField label={v.branchName} value={x.name} maxLength={60} onChange={name => update(i, { name })} />
+              <TextField label={f.address} value={x.address} maxLength={120} onChange={address => update(i, { address })} />
+              <TextField label={f.city} value={x.city} maxLength={60} onChange={city => update(i, { city })} />
+              <TextField label={f.mapsUrl} type="url" value={x.maps_url} onChange={maps_url => update(i, { maps_url })}
+                help={url ? (coordsFromMapsUrl(withWebScheme(url)) ? v.branchHasCoords : v.branchNoCoords) : undefined} />
+            </div>
+          </div>
+        )
+      })}
+      {value.length < BRANCHES_MAX && (
+        <Button size="sm" onClick={() => onChange([...value, { name: '', address: '', city: '', maps_url: '' }])}>
+          <Plus size={15} aria-hidden="true" /> {v.branchAdd}
+        </Button>
       )}
     </div>
   )

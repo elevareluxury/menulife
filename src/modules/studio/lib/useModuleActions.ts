@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStudio } from '../StudioContext'
-import { createModule, deleteModule, friendlyError, saveOrder, updateModule } from './studioApi'
+import { createModule, deleteModule, friendlyError, lastModulePosition, saveOrder, updateModule } from './studioApi'
 import { moduleDisplayTitle } from './moduleCatalog'
 import type { StudioModule } from './studioTypes'
 import { isTemplatePending } from './templates'
@@ -74,6 +74,24 @@ export function useModuleActions() {
     } finally { setBusyId(null) }
   }
 
+  /** Copia el módulo al final de otro Space de la misma cuenta (queda en su versión de trabajo hasta publicar). */
+  async function copyToSpace(m: StudioModule, target: { id: string; name: string }): Promise<boolean> {
+    setBusyId(m.id); setError(null)
+    try {
+      const config = Object.fromEntries(Object.entries(m.config ?? {}).filter(([k]) => !k.startsWith('legacy_')))
+      await createModule({
+        profile_id: target.id, type: m.type, position: (await lastModulePosition(target.id)) + 10,
+        title: m.title, content: structuredClone(m.content), translations: structuredClone(m.translations ?? {}),
+        config, visibility: m.visibility,
+      })
+      setAnnounce(mt.copiedTo(title(m), target.name))
+      return true
+    } catch (e) {
+      setError(friendlyError(e))
+      return false
+    } finally { setBusyId(null) }
+  }
+
   /** Borrado lógico. Devuelve si se pudo. */
   async function remove(m: StudioModule): Promise<boolean> {
     setError(null)
@@ -88,5 +106,5 @@ export function useModuleActions() {
     }
   }
 
-  return { toggleVisibility, moveTo, duplicate, remove, busyId, error, announce, title }
+  return { toggleVisibility, moveTo, duplicate, copyToSpace, remove, busyId, error, announce, title }
 }

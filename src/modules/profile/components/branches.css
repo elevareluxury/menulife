@@ -1,0 +1,31 @@
+/* Sucursales (Ubicación con varias direcciones). Sólo variables del sistema de diseño. */
+.mp-branches { display: grid; gap: 12px; }
+.mp-branches-near { display: grid; gap: 6px; justify-items: start; }
+.mp-branches-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 0; cursor: pointer;
+  border-radius: var(--my-r-pill); background: var(--my-accent); color: var(--my-on-accent);
+  font: 600 var(--my-fs-small) / 1 var(--my-font-ui);
+}
+.mp-branches-btn:disabled { cursor: progress; opacity: 0.8; }
+.mp-branches-note { margin: 0; font-size: var(--my-fs-meta); color: var(--my-muted); }
+.mp-branches-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.mp-branch { display: grid; gap: 10px; padding: 12px 0; border-top: 1px solid var(--my-border); }
+.mp-branch:first-child { border-top: 0; padding-top: 0; }
+.mp-branch-head { display: flex; align-items: flex-start; gap: 10px; }
+.mp-branch-head > svg { flex: none; margin-top: 2px; color: var(--my-muted); }
+.mp-branch.is-nearest .mp-branch-head > svg { color: var(--my-accent); }
+.mp-branch-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mp-branch-name { overflow-wrap: anywhere; }
+.mp-branch-sub { font-size: var(--my-fs-small); color: var(--my-muted); overflow-wrap: anywhere; }
+.mp-branch-km {
+  flex: none; padding: 4px 10px; border-radius: var(--my-r-pill); font: 600 var(--my-fs-meta) / 1.2 var(--my-font-ui);
+  background: color-mix(in srgb, var(--my-accent) 18%, transparent); color: var(--my-text); font-variant-numeric: tabular-nums;
+}
+.mp-branch-apps { gap: 6px; }
+.my-profile .mp-branch .mp-maps-app { padding: 0 12px; }
+@media (prefers-reduced-motion: no-preference) {
+  .mp-branch { animation: mp-branch-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .mp-branches-btn { transition: transform 420ms cubic-bezier(0.34, 1.36, 0.64, 1); }
+  .mp-branches-btn:active { transform: scale(0.97); transition-duration: 120ms; }
+}
+@keyframes mp-branch-in { from { opacity: 0.01; transform: translateY(6px); } }

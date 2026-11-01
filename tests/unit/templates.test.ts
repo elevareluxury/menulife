@@ -11,9 +11,9 @@ import {
 // Plantillas de Identity: definiciones válidas y reglas para agregarlas sin pisar nada ni publicar vacíos.
 
 describe('definiciones', () => {
-  it('hay entre 5 y 6 plantillas, cada una con su texto', () => {
-    expect(TEMPLATE_LIST.length).toBeGreaterThanOrEqual(5)
-    expect(TEMPLATE_LIST.length).toBeLessThanOrEqual(6)
+  it('5 plantillas por tipo de perfil y 6 por rubro, cada una con su texto', () => {
+    expect(TEMPLATE_LIST.filter(t => t.group === 'profile')).toHaveLength(5)
+    expect(TEMPLATE_LIST.filter(t => t.group === 'industry')).toHaveLength(6)
     for (const id of TEMPLATE_IDS) {
       expect(TEMPLATES[id].id).toBe(id)
       expect(es.templates.items[id].name.length).toBeGreaterThan(0)

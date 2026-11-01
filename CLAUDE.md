@@ -777,6 +777,17 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   editores en `studio/components/v2Editors.tsx`. `theme.avatar_alt` (segunda foto para Amanecer/Universo) ya lo valida
   la base. Migración `20261119000001_identity_modules_v2.sql`, tests en `identity_modules_v2.test.sql` y
   `modules-v2.spec.ts`. Privacidad (podcast) en 12 idiomas.
+- Entrega 2b (sin migración): Ubicación con sucursales (`content.branches`, hasta 10; `profile/lib/branches.ts`:
+  coordenadas del link largo de Google/Apple Maps, distancia y orden). Con 2+ sucursales con coordenadas, "Ver la más
+  cerca" (`Branches`, chunk propio) pide la ubicación al tocar y ordena en el dispositivo (no sale a ningún lado;
+  `Permissions-Policy: geolocation=(self)`); links cortos sin coordenadas quedan al final. Links de mapas en
+  `lib/mapLinks.ts`. Segunda foto de perfil `theme.avatar_alt` = { url, when: 'amanecer' (5–12 h) | 'noche' (20–5 h) }
+  con la hora de quien mira (`lib/avatarAlt.ts`, Studio → Mi identidad). Plantillas por rubro (`group: 'industry'`:
+  restaurante, belleza, fotografía, coach, tienda, podcast) además de las 5 por tipo de perfil. "Copiar a otro Space"
+  en el menú "⋯" de cada módulo (`copyToSpace` en `useModuleActions`: al final de ese Space, en su versión de trabajo).
+  35 íconos de marca más (Simple Icons, CC0) en `lib/brandIcons.ts`, chunk que `SocialIcon` baja sólo si el perfil usa
+  alguna (`LAZY_BRANDS`, dominios en `networkFromUrl`); también en el selector de "Red social". Tests en
+  `entrega2b.test.ts` y `modules-v2b.spec.ts`. Privacidad (ubicación) en 12 idiomas.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

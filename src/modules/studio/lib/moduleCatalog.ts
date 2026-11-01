@@ -17,7 +17,8 @@ import {
 import { LatestVideoEditor, type LatestVideoValue } from '../components/LatestVideoEditor'
 import { ListenLinksEditor, SupportMethodsEditor } from '../components/supportListenEditors'
 import { newOptionId } from './pollOptions'
-import { FilesEditor, PollOptionsEditor, VideoListEditor, type FileInput, type PollOptionInput, type VideoInput } from '../components/v2Editors'
+import { BRANCHES_MAX, cleanBranches } from '@/modules/profile/lib/branches'
+import { BranchesEditor, FilesEditor, PollOptionsEditor, type BranchInput, VideoListEditor, type FileInput, type PollOptionInput, type VideoInput } from '../components/v2Editors'
 import { inspectFeedUrl } from '@/modules/profile/lib/podcast'
 import { duplicateListenRows, listenErrorText, supportErrorText, type ListenInput, type SupportInput } from './supportListenErrors'
 
@@ -102,6 +103,22 @@ export const SOCIAL_NETWORKS = [
   { value: 'linkedin',  label: 'LinkedIn',  base: 'https://linkedin.com/in/' },
   { value: 'x',         label: 'X',         base: 'https://x.com/' },
   { value: 'whatsapp',  label: 'WhatsApp',  base: 'https://wa.me/' },
+  { value: 'threads',   label: 'Threads',   base: 'https://www.threads.net/@' },
+  { value: 'bluesky',   label: 'Bluesky',   base: 'https://bsky.app/profile/' },
+  { value: 'telegram',  label: 'Telegram',  base: 'https://t.me/' },
+  { value: 'pinterest', label: 'Pinterest', base: 'https://pinterest.com/' },
+  { value: 'snapchat',  label: 'Snapchat',  base: 'https://snapchat.com/add/' },
+  { value: 'twitch',    label: 'Twitch',    base: 'https://twitch.tv/' },
+  { value: 'kick',      label: 'Kick',      base: 'https://kick.com/' },
+  { value: 'spotify',   label: 'Spotify',   base: 'https://open.spotify.com/user/' },
+  { value: 'soundcloud', label: 'SoundCloud', base: 'https://soundcloud.com/' },
+  { value: 'github',    label: 'GitHub',    base: 'https://github.com/' },
+  { value: 'behance',   label: 'Behance',   base: 'https://behance.net/' },
+  { value: 'dribbble',  label: 'Dribbble',  base: 'https://dribbble.com/' },
+  { value: 'reddit',    label: 'Reddit',    base: 'https://reddit.com/user/' },
+  { value: 'discord',   label: 'Discord',   base: 'https://discord.gg/' },
+  { value: 'line',      label: 'LINE',      base: 'https://line.me/ti/p/~' },
+  { value: 'vk',        label: 'VK',        base: 'https://vk.com/' },
 ]
 
 /** "@usuario" o URL completa → URL de la red. */
@@ -203,7 +220,29 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         if (!x.address && !x.maps_url) return v.locationEmpty
         return urlOk(x.maps_url) ? null : v.badMaps
       },
-      summary: x => [text(x.address), text(x.city)].filter(Boolean).join(', ') || text(x.maps_url),
+      // Otras sucursales (opcional): con dos o más, la página ofrece "Ver la más cerca"
+      extra: extra<BranchInput[]>({
+        init: m => cleanBranches(m?.content.branches),
+        validate: list => {
+          const filled = list.filter(b => b.name.trim() || b.address.trim() || b.city.trim() || b.maps_url.trim())
+          if (filled.some(b => !b.address.trim() && !b.maps_url.trim())) return t.v2.branchEmpty
+          return filled.every(b => urlOk(b.maps_url)) ? null : v.badMaps
+        },
+        apply: (list, content) => {
+          const branches = list.filter(b => b.address.trim() || b.maps_url.trim()).slice(0, BRANCHES_MAX).map(b => ({
+            name: b.name.trim().slice(0, 60), address: b.address.trim().slice(0, 120), city: b.city.trim().slice(0, 60),
+            maps_url: b.maps_url.trim() ? safeHref(b.maps_url) ?? '' : '',
+          }))
+          if (branches.length) content.branches = branches
+          else delete content.branches
+        },
+        Editor: BranchesEditor,
+      }),
+      summary: x => {
+        const main = [text(x.address), text(x.city)].filter(Boolean).join(', ') || text(x.maps_url)
+        const n = count(x.branches)
+        return n ? `${main} · ${t.v2.branchesCount(n + 1)}` : main
+      },
     },
     text: {
       addable: true,

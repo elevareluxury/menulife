@@ -11,7 +11,7 @@ const ui: UiStrings = {
     errorTitle: '无法加载主页', errorText: '请检查网络连接后重试。',
     retry: '重试', createYours: '创建你的 Mycen', draftBanner: '预览：此主页尚未公开。',
     footer: 'Mycen 身份主页',
-    verified: '已认证账号', available: '可接洽', moreAboutMe: '了解更多', createIdentity: '创建你的身份', createFree: '免费创建你的 Mycen', call: '打电话', copyLink: '复制链接', qrCode: '二维码', moreOptions: '更多选项', backToTop: '回到顶部', votesCount: "{n} 票", oneVote: "1 票", noVotes: "还没有投票：你是第一个", yourVote: "你的投票", download: "下载", copyCode: "复制代码", codeCopied: "代码已复制", validUntil: "有效期至 {date}", useCoupon: "使用优惠券", listen: "收听", pause: "暂停", videos: "视频", podcast: "播客", episodes: "节目", emailLabel: '邮件', playOn: '在 {provider} 播放',
+    verified: '已认证账号', available: '可接洽', moreAboutMe: '了解更多', createIdentity: '创建你的身份', createFree: '免费创建你的 Mycen', call: '打电话', copyLink: '复制链接', qrCode: '二维码', moreOptions: '更多选项', backToTop: '回到顶部', votesCount: "{n} 票", oneVote: "1 票", noVotes: "还没有投票：你是第一个", yourVote: "你的投票", download: "下载", copyCode: "复制代码", codeCopied: "代码已复制", validUntil: "有效期至 {date}", useCoupon: "使用优惠券", listen: "收听", nearest: "查看最近的", nearestBusy: "正在获取你的位置…", nearestDone: "已按距离排序", nearestFail: "无法获取你的位置。请检查定位权限。", nearestPrivate: "你的位置不会离开你的手机。", pause: "暂停", videos: "视频", podcast: "播客", episodes: "节目", emailLabel: '邮件', playOn: '在 {provider} 播放',
     days: { monday: '周一', tuesday: '周二', wednesday: '周三', thursday: '周四', friday: '周五', saturday: '周六', sunday: '周日' },
     languageLabel: '语言', socials: '社交媒体', close: '关闭', prevPhoto: '上一张', nextPhoto: '下一张', cards: '卡片',
     swipeHint: '滑动查看更多', tickets: '购票', tags: '分类',

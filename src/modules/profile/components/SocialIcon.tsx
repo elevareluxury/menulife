@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
+import { useEffect, useSyncExternalStore, type ReactNode } from 'react'
 import { Globe, Link as LinkIcon, Mail, MapPin, Phone } from 'lucide-react'
+import { LAZY_BRANDS } from '../lib/networks'
 
 // Íconos de marcas (lucide-react 1.x ya no los incluye)
 const BRAND_PATHS: Record<string, string> = {
@@ -14,10 +15,22 @@ const BRAND_PATHS: Record<string, string> = {
 
 const ALIASES: Record<string, string> = { twitter: 'x', ig: 'instagram', fb: 'facebook', yt: 'youtube', wa: 'whatsapp' }
 
+// Las otras 35 marcas (brandIcons.ts, ~15 KB) se bajan recién cuando un perfil usa alguna; mientras, el ícono genérico
+let lazyPaths: Record<string, string> | null = null
+let loading: Promise<void> | null = null
+const listeners = new Set<() => void>()
+function loadBrands() {
+  loading ??= import('../lib/brandIcons').then(m => { lazyPaths = m.BRAND_ICON_PATHS; listeners.forEach(l => l()) }).catch(() => { loading = null })
+}
+const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l) } }
+const snapshot = () => lazyPaths
+
 /** Ícono para una red o tipo de link. Si no se conoce, un ícono genérico. */
 export function SocialIcon({ network, size = 20 }: { network: string | null | undefined; size?: number }): ReactNode {
   const key = ALIASES[network ?? ''] ?? network ?? ''
-  const path = BRAND_PATHS[key]
+  const lazy = useSyncExternalStore(subscribe, snapshot, snapshot)
+  useEffect(() => { if (LAZY_BRANDS.has(key) && !lazyPaths) loadBrands() }, [key])
+  const path = BRAND_PATHS[key] ?? lazy?.[key]
   if (path) {
     return (
       <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true">

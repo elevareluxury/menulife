@@ -60,18 +60,23 @@ export function TemplatePicker({ onClose, onAdded }: { onClose: () => void; onAd
     return (
       <Drawer title={x.title} onClose={onClose}>
         <p className="st-help" style={{ marginTop: 0 }}>{x.intro}</p>
-        <div className="st-library st-template-list">
-          {TEMPLATE_LIST.map(tpl => (
-            <button key={tpl.id} type="button" onClick={() => { setChosen(tpl); setApplyLook(false) }}
-              aria-label={x.choose(x.items[tpl.id].name)}>
-              <span>
-                <strong>{x.items[tpl.id].name}</strong>
-                <span>{x.items[tpl.id].description}</span>
-                <ModuleChips inline types={tpl.modules.filter(allowed)} />
-              </span>
-            </button>
-          ))}
-        </div>
+        {(['profile', 'industry'] as const).map(group => (
+          <section key={group} aria-label={x.groups[group]}>
+            <h3 className="st-card-title">{x.groups[group]}</h3>
+            <div className="st-library st-template-list">
+              {TEMPLATE_LIST.filter(tpl => tpl.group === group).map(tpl => (
+                <button key={tpl.id} type="button" onClick={() => { setChosen(tpl); setApplyLook(false) }}
+                  aria-label={x.choose(x.items[tpl.id].name)}>
+                  <span>
+                    <strong>{x.items[tpl.id].name}</strong>
+                    <span>{x.items[tpl.id].description}</span>
+                    <ModuleChips inline types={tpl.modules.filter(allowed)} />
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
       </Drawer>
     )
   }

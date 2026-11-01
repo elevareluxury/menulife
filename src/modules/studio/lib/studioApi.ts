@@ -195,6 +195,14 @@ export async function createModule(input: {
   return data as StudioModule
 }
 
+/** Última posición de los módulos de un Space (para sumar uno al final de otro Space) */
+export async function lastModulePosition(profileId: string): Promise<number> {
+  const { data, error } = await db.from('profile_modules').select('position').eq('profile_id', profileId)
+    .is('deleted_at', null).order('position', { ascending: false }).limit(1)
+  if (error) throw error
+  return (data?.[0] as { position?: number } | undefined)?.position ?? 0
+}
+
 /** Varios módulos de una vez (plantillas): un solo pedido, devueltos en orden de posición */
 export async function createModules(rows: Parameters<typeof createModule>[0][]): Promise<StudioModule[]> {
   if (!rows.length) return []
