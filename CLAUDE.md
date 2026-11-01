@@ -191,6 +191,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   conexión de un tercero nuevo se suma en `frame-src`/`connect-src`. `vite preview` manda la misma CSP y
   `npm run test:e2e:prod` falla con cualquier violación. El service worker no intercepta otros orígenes (salvo Supabase).
 - Límite de pedidos en `/api`: reglas del Vercel Firewall (panel), pasos en `docs/lanzamiento/firewall-api.md`.
+- SGSI (hardening ISO 27001 / ISO 27701 / SOC 2): `docs/seguridad/sgsi/` (alcance y política, riesgos, controles con
+  evidencia, activos/proveedores/tratamientos, retención, operación y calendario) + `SECURITY.md`. Un cambio que toque
+  permisos, datos personales, proveedores o plazos actualiza ese documento en el mismo PR. Retención automática
+  `mycen_purge_expired()` (pg_cron diario: uso de la app 25 meses, personas con errores 90 días, bitácora 3 años) y
+  `admin_audit_log` inalterable (trigger `admin_audit_log_guard`), migración `20261121000001_retention_hardening.sql`,
+  tests en `retention_hardening.test.sql`. CI: `npm audit --omit=dev --audit-level=high` (riesgos aceptados en
+  `02-riesgos.md`; `overrides.sharp`). Cabeceras: HSTS 2 años con preload, COOP `same-origin-allow-popups`,
+  `X-Permitted-Cross-Domain-Policies: none` (`securityWeb.test.ts`).
 
 ## Idioma y región
 - 12 idiomas: es, en, pt, fr, de, it, zh, ja, ko, hi, ar (RTL), ru — lista en `src/i18n/app/languages.ts`

@@ -202,7 +202,7 @@ const en: LegalDict = {
         'Contact form messages, until the profile owner deletes them or deletes their account.',
         'Subscription emails, until the profile owner deletes them, deletes their account or you ask us to delete them.',
         'Error records are kept for as long as they help us fix problems (a resolved one stays in case it happens again); the count of affected people, 90 days.',
-        'Usage events, while you have your account; if you delete it, they are no longer linked to you in any way.',
+        'App usage events and the record of the days you used Mycen, 25 months (after that they are deleted automatically); if you delete your account before then, they are no longer linked to you in any way.',
         'Whatever the law requires us to keep (for example, billing data), for the period it sets.',
       ] },
     ] },

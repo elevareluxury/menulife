@@ -202,7 +202,7 @@ const fr: LegalDict = {
         'Les messages du formulaire de contact, jusqu’à ce que la personne propriétaire du profil les supprime ou supprime son compte.',
         'Les e-mails d’abonnement, jusqu’à ce que la personne propriétaire du profil les supprime, supprime son compte ou que vous nous demandiez de les supprimer.',
         'Les journaux d’erreurs sont conservés tant qu’ils servent à corriger les problèmes (une erreur résolue reste enregistrée au cas où elle se reproduirait) ; le décompte des personnes concernées, 90 jours.',
-        'Les événements d’utilisation, tant que vous avez votre compte ; si vous le supprimez, ils ne sont plus liés à vous d’aucune façon.',
+        'Les événements d’utilisation de l’app et le relevé des jours où vous avez utilisé Mycen, 25 mois (ensuite ils sont supprimés automatiquement) ; si vous supprimez votre compte avant, ils ne sont plus liés à vous d’aucune façon.',
         'Ce que la loi oblige à conserver (par exemple, les données de facturation), pendant la durée qu’elle fixe.',
       ] },
     ] },

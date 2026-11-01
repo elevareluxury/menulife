@@ -202,7 +202,7 @@ const it: LegalDict = {
         'I messaggi del modulo di contatto, finché la persona proprietaria del profilo non li elimina o elimina il proprio account.',
         'Le email di iscrizione, finché la persona proprietaria del profilo non le cancella, elimina il suo account o ci chiedi di cancellarle.',
         'I registri degli errori sono conservati finché servono a correggerli (uno risolto resta salvato nel caso si ripresenti); il conteggio delle persone coinvolte, 90 giorni.',
-        'Gli eventi d’uso, finché hai l’account; se lo elimini, non sono più collegati a te in alcun modo.',
+        'Gli eventi di utilizzo dell’app e il registro dei giorni in cui hai usato Mycen, 25 mesi (poi vengono cancellati automaticamente); se elimini l’account prima, non restano collegati a te in alcun modo.',
         'Ciò che la legge obbliga a conservare (per esempio i dati di fatturazione), per il periodo che stabilisce.',
       ] },
     ] },
