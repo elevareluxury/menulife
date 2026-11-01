@@ -33,14 +33,22 @@
       - text: ""
   - region "Ubicación":
     - heading "Estudio" [level=2]
-    - text: /Córdoba \d+, Rosario/
-    - link "Cómo llegar":
+    - text: /Córdoba \d+, Rosario Cómo llegar/
+    - 'link "Cómo llegar: Google Maps"':
       - /url: https://maps.app.goo.gl/ana
+      - text: ""
+    - 'link "Cómo llegar: Apple Maps"':
+      - /url: https://maps.apple.com/?q=C%C3%B3rdoba%201234%2C%20Rosario
+      - text: ""
+    - 'link "Cómo llegar: Waze"':
+      - /url: https://waze.com/ul?q=C%C3%B3rdoba%201234%2C%20Rosario&navigate=yes
+      - text: ""
   - article:
     - heading "Sobre mí" [level=2]
     - paragraph: /Diseño marcas desde \d+\./
   - figure "Mi taller":
-    - img "Taller de Ana"
+    - button "Taller de Ana":
+      - img "Taller de Ana"
     - text: ""
   - link "Reservá una llamada":
     - /url: https://cal.com/ana
