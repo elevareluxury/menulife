@@ -326,3 +326,48 @@
 /* Tilde de cuenta verificada junto al nombre (después de la etapa 15): acento del perfil, mismo alto que el texto */
 .my-profile .mp-verified { display: inline-flex; vertical-align: -0.08em; margin-inline-start: 0.22em; color: var(--my-accent); }
 .my-profile .mp-verified svg { width: 0.72em; height: 0.72em; }
+
+/* ── Pulido del perfil (antes del freeze) ──────────────────────────────────────────────────────────────────────
+   Un módulo que no tiene nada que mostrar (proyecto sin publicar, foto que no carga) no deja un hueco */
+.mp-tile:empty { display: none; }
+/* Radios desde el sistema de diseño (con :where, Bento y las tarjetas propias siguen pudiendo cambiarlos) */
+.my-profile :where(.mp-card, .mp-link-card, .mp-project, .mp-link-group) { border-radius: var(--my-r-card); }
+.my-profile :where(.mp-link) { border-radius: var(--my-r-action); }
+/* Títulos de colecciones sin tarjeta (Proyectos, Trabajos, Entradas) a la altura del texto de las tarjetas */
+.my-profile .mp-section-title { padding-inline: 18px; }
+/* Link sin red reconocida: la inicial del título sobre el acento */
+.my-profile .mp-link-icon.is-initial {
+  background: color-mix(in srgb, var(--my-accent) 20%, var(--my-tile)); color: var(--my-text);
+  font: 700 var(--my-fs-lead) / 1 var(--my-font-display);
+}
+.my-profile .mp-link.is-highlight .mp-link-icon.is-initial { background: color-mix(in srgb, var(--my-on-accent) 16%, transparent); color: var(--my-on-accent); }
+/* Contacto: botones grandes con ícono */
+.mp-contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px; }
+.mp-contact-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 88px;
+  padding: 12px 6px; border-radius: var(--my-r-field); border: 1px solid var(--my-border);
+  background: color-mix(in srgb, var(--my-text) 4%, transparent); color: var(--my-text); text-decoration: none;
+  font: 600 var(--my-fs-small) / 1.2 var(--my-font-ui); text-align: center;
+}
+.mp-contact-ico {
+  display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%;
+  background: color-mix(in srgb, var(--my-accent) 20%, transparent); color: var(--my-text);
+}
+/* Acción principal con su ícono */
+.mp-primary-icon { flex: none; }
+/* Galería: fotos más grandes, sin el marco ancho de la tarjeta */
+.my-profile .mp-card:has(> .mp-gallery) { padding: 14px 8px 8px; }
+.my-profile .mp-card:has(> .mp-gallery) > .mp-card-title { padding-inline: 10px; }
+.my-profile .mp-gallery button { border-radius: var(--my-r-field); }
+/* Producto: la etiqueta sobre la foto y el precio con peso */
+.mp-product-media { position: relative; flex: none; display: block; }
+.my-profile .mp-product-tag.is-over {
+  position: absolute; top: 6px; inset-inline-start: 6px; margin: 0;
+  background: var(--my-bg); color: var(--my-text); box-shadow: 0 0 0 1px var(--my-border);
+}
+.my-profile .mp-product-price { font: 700 var(--my-fs-lead) / 1.2 var(--my-font-ui); color: var(--my-text); }
+.mp-s-square .mp-product-media { width: 100%; }
+/* Aviso de "Link copiado" con la huella de Mycen */
+.my-profile .mp-toast { display: inline-flex; align-items: center; gap: 8px; }
+.mp-toast-mark { display: block; width: 20px; height: 20px; flex: none; }
+.mp-toast-mark svg { display: block; width: 100%; height: 100%; }

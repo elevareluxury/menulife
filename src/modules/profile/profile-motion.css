@@ -45,7 +45,8 @@
   /* Credencial: el envoltorio sube (sólo transform) y la tarjeta se funde y después flota. Separados porque dos
      animaciones de transform no conviven en el mismo elemento, y un fundido en el envoltorio apagaría el vidrio. */
   .mp-root .mp-in-card { animation: mp-lift 1000ms var(--mp-ease) backwards; animation-delay: 60ms; }
-  .mp-root .mp-cred.my-float { animation: mp-fade 900ms var(--mp-ease) 60ms backwards, my-float 7s ease-in-out -1.1s infinite; }
+  /* Flota dos veces al entrar y se queda quieta (algo que se mueve todo el tiempo cuesta leerlo) */
+  .mp-root .mp-cred.my-float { animation: mp-fade 900ms var(--mp-ease) 60ms backwards, mp-float-twice 5s ease-in-out 900ms 2; }
 
   /* ── 2. Huella y tapa ──────────────────────────────────────────── */
   .mp-root[data-motion='full'] .my-draw { animation-duration: 1500ms; animation-delay: 80ms; }
@@ -101,6 +102,49 @@
     .mp-root :is(.mp-icon-btn, .mp-social):hover:active { transform: scale(0.9); }
   }
 
+  /* Respuesta al tocar también en contacto, botón destacado, filas con link, galería, reproductores y el pie */
+  .mp-root :is(.mp-contact-btn, .mp-featured, .mp-row[href], .mp-gallery button, .mp-media-facade, .mp-footer-cta) {
+    transition: transform 420ms var(--mp-spring), border-color 200ms var(--mp-ease), background-color 200ms var(--mp-ease);
+  }
+  .mp-root :is(.mp-contact-btn, .mp-featured, .mp-row[href], .mp-gallery button, .mp-media-facade, .mp-footer-cta):active {
+    transform: scale(0.97); transition-duration: 120ms;
+  }
+  @media (hover: hover) {
+    .mp-root :is(.mp-contact-btn, .mp-featured, .mp-gallery button, .mp-footer-cta):hover { transform: translateY(-2px); }
+    .mp-root :is(.mp-contact-btn, .mp-featured, .mp-gallery button, .mp-footer-cta):hover:active { transform: scale(0.97); }
+  }
+
+  /* Acción principal: el brillo la cruza una vez al abrir el perfil, para que el ojo vaya ahí */
+  .mp-root[data-motion='full'] .mp-primary::before { animation: mp-shine 1200ms var(--mp-ease) 1500ms 1; }
+
+  /* Visor de la galería: el fondo se funde y la foto crece */
+  .mp-root .mp-lightbox { animation: mp-fade 220ms var(--mp-ease); }
+  .mp-root .mp-lightbox :is(img, video) { animation: mp-zoom 360ms var(--mp-spring); }
+  /* "Reproducir": el reproductor se funde sobre la fachada */
+  .mp-root .mp-media-frame { animation: mp-fade 420ms var(--mp-ease); }
+  /* Aviso de "Link copiado": sube */
+  .mp-root .mp-toast { animation: mp-toast 380ms var(--mp-spring); }
+
+  /* Reseñas: las estrellas se llenan una tras otra cuando el módulo está a la vista */
+  .mp-root :is(.mp-tile:not(.mp-reveal), .mp-revealed) .mp-stars > span { animation: mp-pop 460ms var(--mp-spring) backwards; }
+  .mp-root .mp-stars > span:nth-child(1) { animation-delay: 300ms; }
+  .mp-root .mp-stars > span:nth-child(2) { animation-delay: 370ms; }
+  .mp-root .mp-stars > span:nth-child(3) { animation-delay: 440ms; }
+  .mp-root .mp-stars > span:nth-child(4) { animation-delay: 510ms; }
+  .mp-root .mp-stars > span:nth-child(5) { animation-delay: 580ms; }
+
+  /* Profundidad en la compu: la huella del encabezado baja más lento que la página (sólo con el scroll del
+     navegador, sin JS; anima `translate`, así convive con el giro) */
+  @supports (animation-timeline: scroll()) {
+    @container mp-page (min-width: 700px) {
+      .mp-root[data-motion='full'] :is(.mp-cover-huella, .mp-cl-huella, .mp-ed-huella, .mp-bento-huella, .mp-cred-huella).my-spin {
+        animation: mp-fade 1200ms var(--mp-ease) backwards, my-spin 120s linear infinite, mp-drift linear both;
+        animation-timeline: auto, auto, scroll(root);
+        animation-range: normal, normal, 0 700px;
+      }
+    }
+  }
+
   /* ── Vista previa (Studio, onboarding): fundido corto ───────────── */
   .mp-root[data-motion='calm'] .mp-in {
     animation-name: mp-fade; animation-duration: 360ms; animation-timing-function: var(--mp-ease);
@@ -110,7 +154,7 @@
   .mp-root[data-motion='calm'] .mp-cover-art,
   .mp-root[data-motion='calm'] .mp-more svg,
   .mp-root[data-motion='calm'] .mp-in-name .mp-verified { animation: none; }
-  .mp-root[data-motion='calm'] .mp-cred.my-float { animation: my-float 7s ease-in-out -1.1s infinite; }
+  .mp-root[data-motion='calm'] .mp-cred.my-float { animation: none; }
 }
 
 /* Desde 0,01 y no 0: con opacidad 0 Chrome no toma el texto como visible (LCP) hasta que termina la animación */
@@ -121,4 +165,9 @@
 @keyframes mp-lift { from { transform: translate3d(0, 26px, 0) scale(0.97); } }
 @keyframes mp-settle { from { opacity: 0.01; transform: scale(1.06); } }
 @keyframes mp-reveal { from { opacity: 0.01; transform: translate3d(0, 28px, 0) scale(0.985); } }
+@keyframes mp-float-twice { 0%, 100% { transform: none; } 25% { transform: translateY(-5px); } 75% { transform: translateY(5px); } }
+@keyframes mp-shine { from { transform: translateX(-110%); } to { transform: translateX(110%); } }
+@keyframes mp-zoom { from { opacity: 0.01; transform: scale(0.9); } }
+@keyframes mp-toast { from { opacity: 0.01; transform: translate(-50%, 16px); } }
+@keyframes mp-drift { to { translate: 0 90px; } }
 @keyframes mp-nudge { 0%, 100% { transform: none; } 50% { transform: translateY(5px); } }
