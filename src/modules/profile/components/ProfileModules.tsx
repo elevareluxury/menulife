@@ -53,14 +53,24 @@ export function LinkModule({ module, lang, onAction }: ModuleProps) {
   )
 }
 
+/** Link sin red reconocida (web suelta): la inicial del título sobre el acento, no la misma cadenita en todos */
+const isGenericLink = (type?: string) => !type || type === 'website' || type === 'link'
+function LinkGlyph({ type, title }: { type?: string; title: string }) {
+  if (!isGenericLink(type)) return <SocialIcon network={type ?? ''} />
+  const initial = Array.from(title.replace(/^https?:\/\/(www\.)?/i, '').trim())[0]?.toLocaleUpperCase() ?? ''
+  return initial ? <span aria-hidden="true">{initial}</span> : <SocialIcon network={type ?? ''} />
+}
+
 /** Fila de link: ícono o miniatura, título, detalle y flecha. `highlight` = link destacado (color de acento). */
 function LinkRow({ href, title, subtitle, image, linkType, highlight, onClick }: {
   href: string; title: string; subtitle?: string; image?: string | null; linkType?: string; highlight?: boolean; onClick: () => void
 }) {
   return (
     <a className={`mp-link${highlight ? ' is-highlight' : ''}`} href={href} {...linkProps(href)} onClick={onClick}>
-      <span className="mp-link-icon">
-        {image ? <SafeImage sizing="thumb" src={image} alt="" loading="lazy" fallback={<SocialIcon network={linkType ?? ''} />} /> : <SocialIcon network={linkType ?? ''} />}
+      <span className={`mp-link-icon${!image && isGenericLink(linkType) ? ' is-initial' : ''}`}>
+        {image
+          ? <SafeImage sizing="thumb" src={image} alt="" loading="lazy" fallback={<LinkGlyph type={linkType} title={title} />} />
+          : <LinkGlyph type={linkType} title={title} />}
       </span>
       <span className="mp-link-body">
         <span className="mp-link-title">{title}</span>
@@ -118,20 +128,23 @@ export function ContactModule({ module, lang, onAction }: ModuleProps) {
   const email = str(module.content.email)
   const phone = str(module.content.phone)
   const whatsapp = str(module.content.whatsapp)
+  // Botones grandes con ícono (como la ficha de un contacto en el celular); el número o el email completo queda en
+  // el nombre accesible y en el globito del mouse
   const rows = [
-    whatsapp && whatsappHref(whatsapp) && { key: 'whatsapp', icon: <MessageCircle size={18} />, label: 'WhatsApp', href: whatsappHref(whatsapp)! },
-    phone && telHref(phone) && { key: 'phone', icon: <Phone size={18} />, label: phone, href: telHref(phone)! },
-    email && { key: 'email', icon: <Mail size={18} />, label: email, href: `mailto:${email}` },
-  ].filter(Boolean) as { key: string; icon: React.ReactNode; label: string; href: string }[]
+    whatsapp && whatsappHref(whatsapp) && { key: 'whatsapp', icon: <MessageCircle size={22} />, label: 'WhatsApp', detail: 'WhatsApp', href: whatsappHref(whatsapp)! },
+    phone && telHref(phone) && { key: 'phone', icon: <Phone size={22} />, label: t.call, detail: `${t.call}: ${phone}`, href: telHref(phone)! },
+    email && { key: 'email', icon: <Mail size={22} />, label: t.emailLabel, detail: `${t.emailLabel}: ${email}`, href: `mailto:${email}` },
+  ].filter(Boolean) as { key: string; icon: React.ReactNode; label: string; detail: string; href: string }[]
   if (!rows.length) return null
 
   return (
     <section className="mp-card" aria-label={t.contact}>
       <h2 className="mp-card-title">{trLabel(module.title, lang) || t.contact}</h2>
-      <div className="mp-row-list">
+      <div className="mp-contact-grid" data-count={rows.length}>
         {rows.map(r => (
-          <a key={r.href} className="mp-row" href={r.href} {...linkProps(r.href)} onClick={() => onAction(module.id, r.key)}>
-            {r.icon}<span>{r.label}</span>
+          <a key={r.href} className="mp-contact-btn" href={r.href} {...linkProps(r.href)} aria-label={r.detail} title={r.detail}
+            onClick={() => onAction(module.id, r.key)}>
+            <span className="mp-contact-ico" aria-hidden="true">{r.icon}</span><span>{r.label}</span>
           </a>
         ))}
       </div>
@@ -240,9 +253,14 @@ export function ProductModule({ module, lang, onAction }: ModuleProps) {
   return (
     <article className="mp-card">
       <div className="mp-product">
-        {image && <SafeImage sizing="thumb" src={image} alt="" loading="lazy" />}
+        {image && (
+          <span className="mp-product-media">
+            <SafeImage sizing="thumb" src={image} alt="" loading="lazy" />
+            {tag && <span className="mp-product-tag is-over">{tag}</span>}
+          </span>
+        )}
         <div style={{ minWidth: 0 }}>
-          {tag && <span className="mp-product-tag">{tag}</span>}
+          {tag && !image && <span className="mp-product-tag">{tag}</span>}
           <h2 className="mp-product-name">{name}</h2>
           {description && <p className="mp-product-desc">{description}</p>}
           {price != null && (
@@ -342,6 +360,33 @@ export function GalleryModule({ module, lang }: ModuleProps) {
 
 interface Review { author_name?: string; rating?: number; text?: string }
 
+/** Número que cuenta hasta su valor la primera vez que se ve (decorativo: el valor lo dicen las estrellas) */
+function CountUp({ value, className }: { value: number; className?: string }) {
+  const ref = useRef<HTMLElement>(null)
+  const animate = typeof IntersectionObserver !== 'undefined' && typeof window !== 'undefined'
+    && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const [shown, setShown] = useState(animate ? 0 : value)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || !animate) return
+    let raf = 0
+    const io = new IntersectionObserver(([e]) => {
+      if (!e?.isIntersecting) return
+      io.disconnect()
+      const start = performance.now()
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - start) / 900)
+        setShown(value * (1 - Math.pow(1 - k, 3)))
+        if (k < 1) raf = requestAnimationFrame(tick)
+      }
+      raf = requestAnimationFrame(tick)
+    }, { threshold: 0.4 })
+    io.observe(el)
+    return () => { io.disconnect(); cancelAnimationFrame(raf) }
+  }, [animate, value])
+  return <strong ref={ref} className={className} aria-hidden="true">{shown.toFixed(1)}</strong>
+}
+
 /** Siempre 5 estrellas (las que faltan, tenues): la fila no se corre y se entiende "4 de 5" de un vistazo */
 function Stars({ rating }: { rating: number }) {
   const full = Math.max(0, Math.min(5, Math.round(rating)))
@@ -364,7 +409,7 @@ export function TestimonialsModule({ module, lang, onAction }: ModuleProps) {
       <h2 className="mp-card-title">{trLabel(module.title, lang) || t.reviews}</h2>
       {google?.rating != null && (
         <div className={`mp-rating${items.length ? ' has-items' : ''}`}>
-          <strong className="mp-rating-value">{google.rating.toFixed(1)}</strong>
+          <CountUp className="mp-rating-value" value={google.rating} />
           <div className="mp-rating-meta">
             <Stars rating={google.rating} />
             {google.count ? <span>{google.count} {t.reviewsCount}</span> : null}
@@ -392,6 +437,19 @@ export function TestimonialsModule({ module, lang, onAction }: ModuleProps) {
 
 // ── Hours ───────────────────────────────────────────────────────────────────
 
+/** Agrupa días seguidos con el mismo horario (en el orden de la semana) */
+function hourGroups(schedule: WeekSchedule, closed: string) {
+  const groups: { days: (typeof WEEK_DAYS)[number][]; value: string }[] = []
+  for (const day of WEEK_DAYS) {
+    const slot = schedule[day]
+    const value = !slot || slot.closed || !slot.open || !slot.close ? closed : `${slot.open} – ${slot.close}`
+    const last = groups[groups.length - 1]
+    if (last && last.value === value) last.days.push(day)
+    else groups.push({ days: [day], value })
+  }
+  return groups
+}
+
 export function HoursModule({ module, lang }: ModuleProps) {
   const t = ui(lang)
   const schedule = (module.content.schedule ?? null) as WeekSchedule | null
@@ -404,14 +462,16 @@ export function HoursModule({ module, lang }: ModuleProps) {
       <h2 className="mp-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <Clock size={14} aria-hidden="true" /> {trLabel(module.title, lang) || t.hours}
       </h2>
+      {/* Días seguidos con el mismo horario van juntos ("Mar – Dom · Cerrado"); el grupo de hoy, resaltado */}
       <dl className="mp-hours" style={{ margin: 0 }}>
-        {WEEK_DAYS.map(day => {
-          const slot = schedule[day]
-          const cls = day === today ? 'is-today' : undefined
-          const value = !slot || slot.closed || !slot.open || !slot.close ? t.closed : `${slot.open} – ${slot.close}`
+        {hourGroups(schedule, t.closed).map(g => {
+          const cls = g.days.includes(today as typeof g.days[number]) ? 'is-today' : undefined
+          const first = g.days[0]
+          const last = g.days[g.days.length - 1]
+          const label = g.days.length === 1 ? t.days[first] : `${t.days[first]} – ${t.days[last]}`
           return [
-            <dt key={day + '-d'} className={cls}>{t.days[day]}</dt>,
-            <dd key={day + '-h'} className={cls}>{value}</dd>,
+            <dt key={first + '-d'} className={cls}>{label}</dt>,
+            <dd key={first + '-h'} className={cls}>{g.value}</dd>,
           ]
         })}
       </dl>

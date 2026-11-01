@@ -1,7 +1,7 @@
 import { shareLink } from '@/lib/nativeFiles'
 import { lazy, Suspense, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BadgeCheck, Calendar, Globe, Share2, UserPlus } from 'lucide-react'
+import { BadgeCheck, Calendar, Globe, Mail, MessageCircle, Phone, Share2, UserPlus } from 'lucide-react'
 import { huellaSeed } from '@/lib/huella'
 import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
 import { fetchContactCard, trackProfileEvent } from '../lib/profileApi'
@@ -28,6 +28,17 @@ import '../profile-motion.css'
 import { webOrigin } from '@/lib/platform'
 import { brandMarkSvg } from '@/lib/brandMark'
 import { ACCENT_COLORS, SECONDARY_COLORS } from '@/design/themes'
+
+/** Ícono de la acción principal según lo que abre (se reconoce antes de leer y da confianza) */
+function primaryIcon(kind: string, href: string) {
+  const h = href.toLowerCase()
+  const Icon = /^https:\/\/(wa\.me|api\.whatsapp\.com|chat\.whatsapp\.com)\//.test(h) || kind === 'whatsapp' ? MessageCircle
+    : h.startsWith('mailto:') ? Mail
+    : h.startsWith('tel:') ? Phone
+    : kind === 'booking' || /calendly\.com|cal\.com/.test(h) ? Calendar
+    : Globe
+  return <Icon size={19} aria-hidden="true" className="mp-primary-icon" />
+}
 
 /** La huella de Mycen (la del ícono de la app) en los colores de la marca para el tema del perfil. Decorativa. */
 function BrandMark({ mode, id, className }: { mode: 'universo' | 'amanecer'; id: string; className?: string }) {
@@ -142,6 +153,8 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
       await navigator.clipboard.writeText(profileUrl)
       track(profile.id, 'copy_link')
       onToast(t.linkCopied)
+      // Una vibración corta confirma en el celular (si el navegador la tiene)
+      navigator.vibrate?.(15)
     } catch { /* clipboard no disponible */ }
   }
 
@@ -176,6 +189,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
     <a className="mp-primary" href={primaryHref}
       {...(isExternal(primaryHref) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       onClick={() => track(profile.id, 'primary_action_click')}>
+      {primaryIcon(primary.kind, primaryHref)}
       {tr(null, profile.translations, 'primary_action_label', lang) || trLabel(primary.label, lang)}
     </a>
   ) : null
@@ -283,7 +297,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
         </footer>
       </div>
 
-      {toast && <div className="mp-toast" role="status">{toast}</div>}
+      {toast && <div className="mp-toast" role="status"><BrandMark mode={look.mode} id="toast" className="mp-toast-mark" />{toast}</div>}
     </main>
   )
 }
