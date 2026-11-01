@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
-import { brandMarkSvg } from '../src/lib/brandMark'
-import { ACCENT_COLORS, SECONDARY_COLORS, THEME_BG } from '../src/design/themes'
+import { brandMarkSvg } from '../src/lib/brandMark.ts'
+import { ACCENT_COLORS, SECONDARY_COLORS, THEME_BG } from '../src/design/themes.ts'
 
 // Pantalla de carga: la huella de Mycen (semilla "mycen", la del ícono) centrada y girando, sobre el fondo del tema del
 // celular (Universo / Amanecer). Va en index.html, así se ve apenas llega el HTML, antes de que cargue la app; la app

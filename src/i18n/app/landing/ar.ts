@@ -1,4 +1,4 @@
-import type { LandingDict } from './es'
+import type { LandingDict } from './es.ts'
 
 const ar: LandingDict = {
   meta: {

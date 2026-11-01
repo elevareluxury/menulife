@@ -105,7 +105,7 @@ export function LifeShell() {
         setRestaurantSlug(data?.slug ?? null)
         setRestaurantPlan(data?.plan ?? null)
       })
-  }, [user, setHasRestaurant])
+  }, [user, setHasRestaurant, setRestaurantName, setRestaurantSlug, setRestaurantPlan])
 
   if ((!initialized || loading || (user && !prefsReady)) && !timedOut) {
     return (
