@@ -4,11 +4,12 @@ import { test, type Page } from '@playwright/test'
 import sharp from 'sharp'
 import { createState, installSupabaseMock, OWNER_ID, profileRow } from '../../tests/e2e/support/mockSupabase'
 import { MODULE_FIXTURES } from '../../tests/e2e/support/moduleFixtures'
+import { LANDING_SHOTS_VERSION } from '../../src/components/landing/shots'
 
 // Imágenes de ejemplo para la landing: perfiles de ejemplo (no personas reales) y "Mi día" con datos inventados
 // a propósito para la muestra. Se guardan en WebP, 2× para pantallas densas.
 
-const OUT = join(process.cwd(), 'public/landing')
+const OUT = join(process.cwd(), 'public/landing', LANDING_SHOTS_VERSION)
 mkdirSync(OUT, { recursive: true })
 
 const LAYOUTS = ['credencial', 'portada', 'editorial', 'bento', 'clasica'] as const

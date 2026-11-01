@@ -4,7 +4,7 @@ import base from '../../playwright.config'
 
 // Genera las imágenes estáticas de la landing (V1 · etapa 13): estructuras del perfil y "Mi día" en los dos temas.
 //   npx playwright test --config scripts/landing-shots/playwright.config.ts
-// Escribe public/landing/*.webp. No corre en CI: se vuelve a generar cuando cambia el diseño del perfil o de Mi día.
+// Escribe public/landing/<versión>/*.webp (LANDING_SHOTS_VERSION en src/components/landing/shots.ts; subirla al regenerar). No corre en CI: se vuelve a generar cuando cambia el diseño del perfil o de Mi día.
 const PORT = 5181
 // El config base tiene varios servidores (app y CAPTCHA): se usa el de la app
 const web = (Array.isArray(base.webServer) ? base.webServer[0] : base.webServer) as { env: Record<string, string> }

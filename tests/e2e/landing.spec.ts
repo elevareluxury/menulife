@@ -114,10 +114,10 @@ test.describe('marca (V1 · etapa 13)', () => {
     await section.scrollIntoViewIfNeeded()
     const imgs = section.getByRole('img')
     await expect(imgs).toHaveCount(5)
-    await expect(imgs.first()).toHaveAttribute('src', '/landing/perfil-credencial-universo.webp')
+    await expect(imgs.first()).toHaveAttribute('src', '/landing/v2/perfil-credencial-universo.webp')
     await section.getByRole('radio', { name: 'Amanecer' }).click()
     await expect(section.getByRole('radio', { name: 'Amanecer' })).toHaveAttribute('aria-checked', 'true')
-    await expect(imgs.first()).toHaveAttribute('src', '/landing/perfil-credencial-amanecer.webp')
+    await expect(imgs.first()).toHaveAttribute('src', '/landing/v2/perfil-credencial-amanecer.webp')
     // Las imágenes existen y cargan
     for (const src of await imgs.evaluateAll(els => els.map(e => (e as HTMLImageElement).src))) {
       expect((await page.request.get(src)).ok(), src).toBe(true)
