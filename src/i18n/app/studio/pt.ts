@@ -373,6 +373,17 @@ const pt: StudioDict = {
   },
   catalog: {
     styleHighlight: 'Destaque (cor de destaque)',
+    collapseLabel: 'Como aparece',
+    collapseOpen: 'Sempre aberto',
+    collapseFolded: 'Recolhido (abre ao tocar)',
+    showHandleLabel: 'Usuário abaixo do ícone',
+    optNo: 'Não',
+    optYes: 'Sim',
+    captionLabel: 'Legenda',
+    captionBelow: 'Abaixo da foto',
+    captionOver: 'Sobre a foto',
+    buttonSubtitle: 'Subtítulo (opcional)',
+    textFormatHint: "Você pode usar **negrito**, listas com \"- \" e links.",
     styleButton: 'Botão (ícone ou miniatura ao lado)', styleCard: 'Cartão com foto grande',
     layoutCarousel: 'Deslizáveis (carrossel)', layoutStack: 'Um abaixo do outro', layoutTickets: 'Flyers de eventos (formato story)',
     types: {

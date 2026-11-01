@@ -373,6 +373,17 @@ const it: StudioDict = {
   },
   catalog: {
     styleHighlight: 'In evidenza (colore d’accento)',
+    collapseLabel: 'Aspetto',
+    collapseOpen: 'Sempre aperto',
+    collapseFolded: 'Chiuso (si apre al tocco)',
+    showHandleLabel: 'Nome utente sotto l’icona',
+    optNo: 'No',
+    optYes: 'Sì',
+    captionLabel: 'Didascalia',
+    captionBelow: 'Sotto la foto',
+    captionOver: 'Sopra la foto',
+    buttonSubtitle: 'Sottotitolo (facoltativo)',
+    textFormatHint: "Puoi usare **grassetto**, elenchi con \"- \" e link.",
     styleButton: 'Pulsante (icona o miniatura di lato)', styleCard: 'Scheda con foto grande',
     layoutCarousel: 'Scorrevoli (carosello)', layoutStack: 'Una sotto l’altra', layoutTickets: 'Flyer di eventi (formato storia)',
     types: {

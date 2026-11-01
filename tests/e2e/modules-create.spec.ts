@@ -114,8 +114,13 @@ const CASES: Case[] = [
     saved: { content: { address: 'San Martín 123', city: 'Rosario' } },
     check: async main => {
       await expect(main.getByText('San Martín 123, Rosario')).toBeVisible()
-      await expect(main.getByRole('link', { name: 'Cómo llegar' }))
+      // "Cómo llegar" ofrece cada app de mapas con la dirección
+      await expect(main.getByRole('link', { name: 'Cómo llegar: Google Maps' }))
         .toHaveAttribute('href', 'https://www.google.com/maps/search/?api=1&query=San%20Mart%C3%ADn%20123%2C%20Rosario')
+      await expect(main.getByRole('link', { name: 'Cómo llegar: Apple Maps' }))
+        .toHaveAttribute('href', 'https://maps.apple.com/?q=San%20Mart%C3%ADn%20123%2C%20Rosario')
+      await expect(main.getByRole('link', { name: 'Cómo llegar: Waze' }))
+        .toHaveAttribute('href', 'https://waze.com/ul?q=San%20Mart%C3%ADn%20123%2C%20Rosario&navigate=yes')
     },
   },
   {
@@ -125,7 +130,9 @@ const CASES: Case[] = [
     },
     saved: { content: { maps_url: 'https://maps.app.goo.gl/AbC123' } },
     check: async main => {
-      await expect(main.getByRole('link', { name: 'Cómo llegar' })).toHaveAttribute('href', 'https://maps.app.goo.gl/AbC123')
+      // Sin dirección escrita, sólo el link de Google Maps que pegó el dueño
+      await expect(main.getByRole('link', { name: 'Cómo llegar: Google Maps' })).toHaveAttribute('href', 'https://maps.app.goo.gl/AbC123')
+      await expect(main.getByRole('link', { name: /Apple Maps|Waze/ })).toHaveCount(0)
     },
   },
   {

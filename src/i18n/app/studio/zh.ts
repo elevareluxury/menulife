@@ -373,6 +373,17 @@ const zh: StudioDict = {
   },
   catalog: {
     styleHighlight: '突出显示（强调色）',
+    collapseLabel: '显示方式',
+    collapseOpen: '始终展开',
+    collapseFolded: '折叠（点按展开）',
+    showHandleLabel: '在图标下显示用户名',
+    optNo: '否',
+    optYes: '是',
+    captionLabel: '图片说明',
+    captionBelow: '照片下方',
+    captionOver: '照片上方',
+    buttonSubtitle: '副标题（可选）',
+    textFormatHint: "可以使用 **粗体**、以 \"- \" 开头的列表和链接。",
     styleButton: '按钮（侧边带图标或缩略图）', styleCard: '大图卡片',
     layoutCarousel: '可滑动（轮播）', layoutStack: '上下排列', layoutTickets: '活动海报（快拍格式）',
     types: {

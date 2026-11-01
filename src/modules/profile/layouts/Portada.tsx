@@ -3,7 +3,7 @@ import { Huella } from '@/design/components/Huella'
 import { SafeImage } from '../components/SafeImage'
 import type { LayoutParts } from './types'
 import { ModuleStack } from './ModuleStack'
-import { inAt } from './motion'
+import { inAt, useTilt } from './motion'
 
 /**
  * Portada: la primera pantalla completa es la tapa (huella o imagen). Abajo, sobre un degradé, el nombre, la acción
@@ -12,10 +12,11 @@ import { inAt } from './motion'
  */
 export default function Portada(p: LayoutParts) {
   const image = p.look.cover.type === 'imagen' ? p.look.cover.url : undefined
+  const tilt = useTilt<HTMLElement>(!image && !p.preview)
   return (
     <div>
       {p.identity(
-        <section className="mp-header mp-cover-hero">
+        <section ref={tilt} className="mp-header mp-cover-hero">
           <div className="mp-cover-art" aria-hidden="true">
             {image
               ? <SafeImage sizing="cover" src={image} alt="" />

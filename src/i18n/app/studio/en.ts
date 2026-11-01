@@ -373,6 +373,17 @@ const en: StudioDict = {
   },
   catalog: {
     styleHighlight: 'Highlighted (accent color)',
+    collapseLabel: 'Display',
+    collapseOpen: 'Always open',
+    collapseFolded: 'Collapsed (opens on tap)',
+    showHandleLabel: 'Username under the icon',
+    optNo: 'No',
+    optYes: 'Yes',
+    captionLabel: 'Caption',
+    captionBelow: 'Below the photo',
+    captionOver: 'Over the photo',
+    buttonSubtitle: 'Subtitle (optional)',
+    textFormatHint: "You can use **bold**, lists with \"- \" and links.",
     styleButton: 'Button (icon or thumbnail on the side)', styleCard: 'Card with a large photo',
     layoutCarousel: 'Swipeable (carousel)', layoutStack: 'One below the other', layoutTickets: 'Event flyers (story format)',
     types: {

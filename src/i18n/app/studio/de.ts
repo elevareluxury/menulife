@@ -373,6 +373,17 @@ const de: StudioDict = {
   },
   catalog: {
     styleHighlight: 'Hervorgehoben (Akzentfarbe)',
+    collapseLabel: 'Darstellung',
+    collapseOpen: 'Immer offen',
+    collapseFolded: 'Eingeklappt (öffnet beim Tippen)',
+    showHandleLabel: 'Benutzername unter dem Symbol',
+    optNo: 'Nein',
+    optYes: 'Ja',
+    captionLabel: 'Bildunterschrift',
+    captionBelow: 'Unter dem Foto',
+    captionOver: 'Auf dem Foto',
+    buttonSubtitle: 'Untertitel (optional)',
+    textFormatHint: "Du kannst **fett**, Listen mit „- “ und Links verwenden.",
     styleButton: 'Button (Symbol oder Vorschaubild seitlich)', styleCard: 'Karte mit großem Foto',
     layoutCarousel: 'Wischbar (Karussell)', layoutStack: 'Untereinander', layoutTickets: 'Event-Flyer (Story-Format)',
     types: {

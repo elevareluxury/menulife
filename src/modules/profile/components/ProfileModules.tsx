@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { ArrowUpRight, ChevronLeft, ChevronRight, Clock, Mail, MapPin, MessageCircle, Navigation, Phone, X } from 'lucide-react'
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { ArrowUpRight, ChevronDown, Clock, Mail, MapPin, MessageCircle, Navigation, Phone } from 'lucide-react'
 import type { ProfileLang, ProfileModule, WeekSchedule } from '../lib/profileTypes'
 import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref, telHref, whatsappHref } from '../lib/safeUrl'
 import { todayKey, WEEK_DAYS } from '../lib/schedule'
-import { NETWORK_LABELS } from '../lib/networks'
 import { urlKey } from '../lib/clickKeys'
 import { formatPrice } from '../lib/price'
 import { SocialIcon } from './SocialIcon'
 import { SafeImage } from './SafeImage'
-import { useScrollLock } from '@/lib/scrollLock'
+// El visor baja recién cuando alguien abre una foto
+const Lightbox = lazy(() => import('./Lightbox').then(m => ({ default: m.Lightbox })))
+import { richText } from '../lib/richText'
+import { NETWORK_LABELS, networkFromUrl } from '../lib/networks'
 
 export interface ModuleProps {
   module: ProfileModule
@@ -32,7 +34,9 @@ export function LinkModule({ module, lang, onAction }: ModuleProps) {
   const title = tr(module.title, module.translations, 'title', lang) || href
   const subtitle = tr(str(module.content.subtitle), module.translations, 'subtitle', lang)
   const image = safeHref(module.content.image_url)
-  const linkType = str(module.content.link_type)
+  // Sin red elegida (link común): se reconoce por el dominio (Instagram, YouTube, WhatsApp…); si no, la inicial
+  const savedType = str(module.content.link_type)
+  const linkType = !savedType || savedType === 'custom' || savedType === 'website' ? networkFromUrl(href) || savedType : savedType
 
   // Estilo "tarjeta": foto grande arriba, título abajo
   if (module.content.style === 'card' && image) {
@@ -54,7 +58,7 @@ export function LinkModule({ module, lang, onAction }: ModuleProps) {
 }
 
 /** Link sin red reconocida (web suelta): la inicial del título sobre el acento, no la misma cadenita en todos */
-const isGenericLink = (type?: string) => !type || type === 'website' || type === 'link'
+const isGenericLink = (type?: string) => !type || type === 'website' || type === 'link' || type === 'custom'
 function LinkGlyph({ type, title }: { type?: string; title: string }) {
   if (!isGenericLink(type)) return <SocialIcon network={type ?? ''} />
   const initial = Array.from(title.replace(/^https?:\/\/(www\.)?/i, '').trim())[0]?.toLocaleUpperCase() ?? ''
@@ -91,32 +95,70 @@ export function LinkGroupModule({ module, lang, onAction }: ModuleProps) {
     .filter((i): i is LinkItem & { href: string } => !!i.href && !!str(i.title))
   if (!items.length) return null
   const heading = tr(module.title, module.translations, 'title', lang)
+  // Títulos cortos y sin detalle: de a dos por fila (una lista larga de "Etsy", "Behance"… se lee peor)
+  const grid = items.length >= 4 && items.every(i => Array.from(str(i.title)).length <= 14 && !str(i.subtitle))
+  const rows = (
+    <div className={`mp-link-group-rows${grid ? ' is-grid' : ''}`}>
+      {items.map((i, n) => (
+        <LinkRow key={i.href + n} href={i.href} title={str(i.title)} subtitle={str(i.subtitle)} linkType={networkFromUrl(i.href)}
+          onClick={() => onAction(module.id, urlKey(i.url))} />
+      ))}
+    </div>
+  )
+  // Plegable (lo elige el dueño): el título abre y cierra la lista; sin título, "Links"
+  if (module.content.collapse === 'folded') {
+    return (
+      <details className="mp-link-group is-folding">
+        <summary className="mp-card-title mp-link-group-title">
+          <span>{heading || ui(lang).links}</span>
+          <span className="mp-link-group-count">{items.length}</span>
+          <ChevronDown size={18} aria-hidden="true" className="mp-link-group-chevron" />
+        </summary>
+        {rows}
+      </details>
+    )
+  }
   return (
     <section className="mp-link-group" aria-label={heading || ui(lang).links}>
       {heading && <h2 className="mp-card-title mp-link-group-title">{heading}</h2>}
-      {items.map((i, n) => (
-        <LinkRow key={i.href + n} href={i.href} title={str(i.title)} subtitle={str(i.subtitle)} onClick={() => onAction(module.id, urlKey(i.url))} />
-      ))}
+      {rows}
     </section>
   )
 }
 
 // ── Social (se agrupan las redes consecutivas en una fila) ───────────────────
 
+/** "@usuario" para mostrar debajo del ícono (WhatsApp y links largos muestran el nombre de la red) */
+function socialHandleLabel(network: string, handle: string): string {
+  const h = handle.trim()
+  if (!h || network === 'whatsapp' || /[/\s]/.test(h) || /^https?:/i.test(h)) return NETWORK_LABELS[network] ?? network
+  return h.startsWith('@') ? h : `@${h}`
+}
+
 export function SocialRow({ modules, lang, onAction }: { modules: ProfileModule[]; lang: ProfileLang; onAction: (id: string) => void }) {
   const items = modules
     .map(m => ({ m, href: safeHref(m.content.url), network: str(m.content.network) }))
     .filter((x): x is { m: ProfileModule; href: string; network: string } => !!x.href)
   if (!items.length) return null
+  // Con más de 6 redes, filas parejas (4 y 4, no 6 y 2); sin scroll de costado en la página pública
+  const rowsNeeded = Math.ceil(items.length / 6)
+  const cols = Math.ceil(items.length / rowsNeeded)
+  const withHandle = items.some(x => x.m.content.show_handle === 'yes')
   return (
-    <nav className="mp-socials" aria-label={ui(lang).socials}>
-      {items.map(({ m, href, network }) => (
-        <a key={m.id} className="mp-social" href={href} {...linkProps(href)}
-          aria-label={NETWORK_LABELS[network] ?? m.title ?? network}
-          onClick={() => onAction(m.id)}>
-          <SocialIcon network={network} />
-        </a>
-      ))}
+    <nav className={`mp-socials${withHandle ? ' has-handles' : ''}`} aria-label={ui(lang).socials}
+      style={items.length > 6 ? { gridTemplateColumns: `repeat(${cols}, auto)` } : undefined} data-many={items.length > 6 || undefined}>
+      {items.map(({ m, href, network }) => {
+        const name = NETWORK_LABELS[network] ?? m.title ?? network
+        const handle = withHandle ? socialHandleLabel(network, str(m.content.handle)) : ''
+        return (
+          <a key={m.id} className="mp-social" href={href} {...linkProps(href)}
+            aria-label={handle && handle !== name ? `${name} ${handle}` : name}
+            onClick={() => onAction(m.id)}>
+            <span className="mp-social-ico"><SocialIcon network={network} /></span>
+            {handle && <span className="mp-social-handle" aria-hidden="true">{handle}</span>}
+          </a>
+        )
+      })}
     </nav>
   )
 }
@@ -154,25 +196,43 @@ export function ContactModule({ module, lang, onAction }: ModuleProps) {
 
 // ── Location ────────────────────────────────────────────────────────────────
 
+/** Apps de mapas para "Cómo llegar": la del celular primero (Apple Maps en iPhone/iPad) */
+function mapLinks(full: string, ownMaps: string | null): { key: string; label: string; href: string }[] {
+  const q = encodeURIComponent(full)
+  const google = ownMaps ?? `https://www.google.com/maps/search/?api=1&query=${q}`
+  const links = [{ key: 'google', label: 'Google Maps', href: google }]
+  if (full) {
+    links.push({ key: 'apple', label: 'Apple Maps', href: `https://maps.apple.com/?q=${q}` })
+    links.push({ key: 'waze', label: 'Waze', href: `https://waze.com/ul?q=${q}&navigate=yes` })
+  }
+  const apple = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)
+  return apple ? [...links.filter(l => l.key === 'apple'), ...links.filter(l => l.key !== 'apple')] : links
+}
+
 export function LocationModule({ module, lang, onAction }: ModuleProps) {
   const t = ui(lang)
   const address = str(module.content.address)
   const city = str(module.content.city)
   const full = [address, city].filter(Boolean).join(', ')
-  const maps = safeHref(module.content.maps_url)
-    ?? (full ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(full)}` : null)
-  if (!full && !maps) return null
+  const own = safeHref(module.content.maps_url)
+  if (!full && !own) return null
+  const apps = mapLinks(full, own)
 
   return (
     <section className="mp-card" aria-label={t.location}>
       <h2 className="mp-card-title">{trLabel(module.title, lang) || t.location}</h2>
       <div className="mp-row-list">
         {full && <div className="mp-row"><MapPin size={18} /><span>{full}</span></div>}
-        {maps && (
-          <a className="mp-row" href={maps} target="_blank" rel="noopener noreferrer" onClick={() => onAction(module.id)}>
-            <Navigation size={18} /><span>{t.howToGet}</span>
-          </a>
-        )}
+        <div className="mp-row mp-maps">
+          <Navigation size={18} aria-hidden="true" />
+          <span className="mp-maps-label">{t.howToGet}</span>
+          <span className="mp-maps-apps">
+            {apps.map(a => (
+              <a key={a.key} className="mp-maps-app" href={a.href} target="_blank" rel="noopener noreferrer"
+                aria-label={`${t.howToGet}: ${a.label}`} onClick={() => onAction(module.id)}>{a.label}</a>
+            ))}
+          </span>
+        </div>
       </div>
     </section>
   )
@@ -191,7 +251,7 @@ export function TextModule({ module, lang }: ModuleProps) {
   const text = (title || body) && (
     <>
       {title && <h2 className="mp-text-heading">{title}</h2>}
-      {body && <p className="mp-text-body">{body}</p>}
+      {body && richText(body)}
     </>
   )
   // Con foto: la foto ocupa todo el ancho de la tarjeta (en cualquier estructura) y el texto va debajo con su margen
@@ -215,14 +275,25 @@ export function ImageModule({ module, lang }: ModuleProps) {
   const src = safeHref(module.content.url)
   const [failed, setFailed] = useState(false)
   const [shape, setShape] = useState<ImageShape>('normal')
+  const [viewing, setViewing] = useState(false)
   // Una foto que ya no existe no deja un ícono roto: el bloque no se muestra
   if (!src || failed) return null
   const caption = tr(str(module.content.caption), module.translations, 'caption', lang)
+  const alt = str(module.content.alt) || caption
+  const over = !!caption && module.content.caption_style === 'over'
+  const t = ui(lang)
   return (
-    <figure className="mp-card mp-image-card" style={{ padding: 0, margin: 0 }}>
-      <SafeImage className={`mp-image mp-image-${shape}`} sizing="column" src={src} alt={str(module.content.alt) || caption} loading="lazy"
-        onLoad={e => setShape(imageShape(e.currentTarget))} onFail={() => setFailed(true)} />
+    <figure className={`mp-card mp-image-card${over ? ' is-caption-over' : ''}`} style={{ padding: 0, margin: 0 }}>
+      {/* Tocar la foto la abre a pantalla completa (el mismo visor que la galería) */}
+      <button type="button" className="mp-image-open" aria-label={alt || t.gallery} onClick={() => setViewing(true)}>
+        <SafeImage className={`mp-image mp-image-${shape}`} sizing="column" src={src} alt={alt} loading="lazy"
+          onLoad={e => setShape(imageShape(e.currentTarget))} onFail={() => setFailed(true)} />
+      </button>
       {caption && <figcaption className="mp-image-caption">{caption}</figcaption>}
+      {viewing && (
+        <Suspense fallback={null}><Lightbox items={[{ url: src, caption }]} index={0} onIndex={() => undefined} onClose={() => setViewing(false)}
+          labels={{ close: t.close, prev: t.prevPhoto, next: t.nextPhoto }} /></Suspense>
+      )}
     </figure>
   )
 }
@@ -232,10 +303,15 @@ export function ImageModule({ module, lang }: ModuleProps) {
 export function FeaturedActionModule({ module, lang, onAction }: ModuleProps) {
   const href = safeHref(module.content.url)
   const label = tr(str(module.content.label) || module.title, module.translations, 'label', lang)
+  const subtitle = tr(str(module.content.subtitle), module.translations, 'subtitle', lang)
   if (!href || !label) return null
   return (
-    <a className="mp-featured" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>
-      {label} <ArrowUpRight size={18} aria-hidden="true" />
+    <a className={`mp-featured${subtitle ? ' has-sub' : ''}`} href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>
+      <span className="mp-featured-text">
+        <span>{label}</span>
+        {subtitle && <small className="mp-featured-sub">{subtitle}</small>}
+      </span>
+      <ArrowUpRight size={18} aria-hidden="true" />
     </a>
   )
 }
@@ -252,7 +328,7 @@ export function ProductModule({ module, lang, onAction }: ModuleProps) {
 
   return (
     <article className="mp-card">
-      <div className="mp-product">
+      <div className={`mp-product${image ? ' has-image' : ''}`}>
         {image && (
           <span className="mp-product-media">
             <SafeImage sizing="thumb" src={image} alt="" loading="lazy" />
@@ -295,27 +371,14 @@ export function GalleryModule({ module, lang }: ModuleProps) {
     .filter((i): i is GalleryItem => !!i && typeof (i as GalleryItem).url === 'string' && !!safeHref((i as GalleryItem).url))
     .filter(i => !broken.has(i.url))
 
-  useEffect(() => {
-    if (open == null) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(null)
-      if (e.key === 'ArrowRight') setOpen(i => (i == null ? i : (i + 1) % items.length))
-      if (e.key === 'ArrowLeft') setOpen(i => (i == null ? i : (i - 1 + items.length) % items.length))
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, items.length])
-
-  // Con el visor abierto, la página de atrás queda quieta
-  useScrollLock(open != null)
-
   if (!items.length) return null
-  const current = open != null ? items[Math.min(open, items.length - 1)] : null
 
   return (
     <section className="mp-card" aria-label={t.gallery}>
       <h2 className="mp-card-title">{trLabel(module.title, lang) || t.gallery}</h2>
-      <div className="mp-gallery">
+      {/* Estilo revista: la primera grande. Según cuántas fotos haya, la primera ocupa 2×2 o toda la fila (y con
+          resto 2, la última va de a dos), así la grilla siempre cierra sin huecos */}
+      <div className={`mp-gallery${items.length >= 3 ? ` is-mag-${items.length % 3}` : ''}`}>
         {items.map((item, i) => {
           const thumb = safeHref(item.thumbnail_url) ?? (isVideo(item) ? null : item.url)
           return (
@@ -328,29 +391,9 @@ export function GalleryModule({ module, lang }: ModuleProps) {
           )
         })}
       </div>
-      {current && (
-        <div className="mp-lightbox" role="dialog" aria-modal="true" aria-label={`${open! + 1} / ${items.length}`} onClick={() => setOpen(null)}>
-          <button type="button" className="mp-icon-btn mp-lightbox-close" aria-label={ui(lang).close} onClick={() => setOpen(null)}>
-            <X size={20} />
-          </button>
-          {items.length > 1 && (
-            <>
-              {/* En el celular no hay flechas del teclado: botones para pasar de foto */}
-              <button type="button" className="mp-icon-btn mp-lightbox-nav is-prev" aria-label={t.prevPhoto}
-                onClick={e => { e.stopPropagation(); setOpen(i => (i == null ? i : (i - 1 + items.length) % items.length)) }}>
-                <ChevronLeft size={22} aria-hidden="true" />
-              </button>
-              <button type="button" className="mp-icon-btn mp-lightbox-nav is-next" aria-label={t.nextPhoto}
-                onClick={e => { e.stopPropagation(); setOpen(i => (i == null ? i : (i + 1) % items.length)) }}>
-                <ChevronRight size={22} aria-hidden="true" />
-              </button>
-              <span className="mp-lightbox-count" aria-hidden="true">{open! + 1} / {items.length}</span>
-            </>
-          )}
-          {isVideo(current)
-            ? <video src={current.url} controls autoPlay playsInline onClick={e => e.stopPropagation()} />
-            : <img src={current.url} alt={current.caption ?? ''} onClick={e => e.stopPropagation()} />}
-        </div>
+      {open != null && (
+        <Suspense fallback={null}><Lightbox items={items.map(i => ({ url: i.url, caption: i.caption, video: isVideo(i) }))} index={open} onIndex={setOpen}
+          onClose={() => setOpen(null)} labels={{ close: ui(lang).close, prev: t.prevPhoto, next: t.nextPhoto }} /></Suspense>
       )}
     </section>
   )

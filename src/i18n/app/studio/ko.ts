@@ -373,6 +373,17 @@ const ko: StudioDict = {
   },
   catalog: {
     styleHighlight: '강조(포인트 색상)',
+    collapseLabel: '표시 방식',
+    collapseOpen: '항상 펼침',
+    collapseFolded: '접기(탭하면 열림)',
+    showHandleLabel: '아이콘 아래 사용자 이름',
+    optNo: '아니요',
+    optYes: '예',
+    captionLabel: '캡션',
+    captionBelow: '사진 아래',
+    captionOver: '사진 위',
+    buttonSubtitle: '부제(선택)',
+    textFormatHint: "**굵게**, \"- \"로 시작하는 목록, 링크를 쓸 수 있어요.",
     styleButton: '버튼(옆에 아이콘 또는 썸네일)', styleCard: '큰 사진 카드',
     layoutCarousel: '스와이프(캐러셀)', layoutStack: '세로로 나열', layoutTickets: '이벤트 플라이어(스토리 형식)',
     types: {

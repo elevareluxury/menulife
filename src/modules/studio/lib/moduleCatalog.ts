@@ -157,6 +157,11 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       fields: [
         { key: 'network', label: f.network, kind: 'select', required: true, options: SOCIAL_NETWORKS.map(n => ({ value: n.value, label: n.label })) },
         { key: 'handle', label: f.handle, kind: 'text', required: true, placeholder: p.handle },
+        // La fila de redes muestra "@usuario" debajo de cada ícono si alguna lo pide
+        { key: 'show_handle', label: c.showHandleLabel, kind: 'select', options: [
+          { value: '', label: c.optNo },
+          { value: 'yes', label: c.optYes },
+        ] },
       ],
       validate: x => (socialUrl(x.network, x.handle ?? '') ? null
         : x.network === 'whatsapp' && whatsappNeedsCountry(x.handle) ? v.badWhatsapp : v.badHandle),
@@ -201,7 +206,7 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       addable: true,
       fields: [
         { key: 'title', label: f.title, kind: 'text', isTitle: true, translatable: true, maxLength: 120 },
-        { key: 'body', label: f.text, kind: 'textarea', required: true, translatable: true, maxLength: 2000 },
+        { key: 'body', label: f.text, kind: 'textarea', required: true, translatable: true, maxLength: 2000, placeholder: c.textFormatHint },
         { key: 'image_url', label: f.imageOptional, kind: 'image' },
       ],
       summary: x => text(x.body).slice(0, 80),
@@ -211,6 +216,10 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       fields: [
         { key: 'url', label: f.image, kind: 'image', required: true },
         { key: 'caption', label: f.caption, kind: 'text', translatable: true, maxLength: 200 },
+        { key: 'caption_style', label: c.captionLabel, kind: 'select', options: [
+          { value: '', label: c.captionBelow },
+          { value: 'over', label: c.captionOver },
+        ] },
         { key: 'alt', label: f.alt, kind: 'text', maxLength: 200 },
       ],
       summary: x => text(x.caption) || sm.image,
@@ -219,6 +228,7 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       addable: true,
       fields: [
         { key: 'label', label: f.buttonText, kind: 'text', required: true, translatable: true, maxLength: 60, placeholder: p.featuredLabel },
+        { key: 'subtitle', label: c.buttonSubtitle, kind: 'text', translatable: true, maxLength: 60 },
         { key: 'url', label: f.url, kind: 'url', required: true },
       ],
       validate: x => (urlOk(x.url) ? null : v.badUrl),
@@ -367,6 +377,10 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       addable: true,
       fields: [
         { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 },
+        { key: 'collapse', label: c.collapseLabel, kind: 'select', options: [
+          { value: '', label: c.collapseOpen },
+          { value: 'folded', label: c.collapseFolded },
+        ] },
       ],
       extra: extra<LinkItemInput[]>({
         init: m => (Array.isArray(m?.content.items) ? m.content.items as LinkItemInput[] : [{}]),

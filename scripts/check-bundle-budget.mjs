@@ -40,7 +40,7 @@ for (const b of BUDGETS) {
   if (!ok) failed = true
   console.log(`${ok ? '✓' : '✗'} ${b.name}: ${kb.toFixed(0)} KB gzip (límite ${b.maxKb} KB)`)
   if (!ok) {
-    for (const f of [...files].sort((a, z) => gz(z) - gz(a)).slice(0, 6)) console.log(`    ${(gz(f) / 1024).toFixed(0)} KB  ${f}`)
+    for (const f of [...files].sort((a, z) => gz(z) - gz(a)).slice(0, Number(process.env.BUDGET_TOP ?? 6))) console.log(`    ${(gz(f) / 1024).toFixed(0)} KB  ${f}`)
   }
 }
 process.exit(failed ? 1 : 0)

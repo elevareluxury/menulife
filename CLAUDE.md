@@ -203,7 +203,10 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Panel interno (super-admin): marca Mycen y diccionario `src/i18n/app/admin/<idioma>.ts` (`useAdminT`; fechas y números
   con `super-admin/lib/adminFormat.ts`) para la estructura y las pantallas de Mycen (Resumen, Denuncias, Verificaciones,
   Errores, Producto); las de Business siguen en español. `i18n-coverage.spec.ts` las recorre en inglés.
-- Textos de la página pública (botones del sistema) en `src/modules/profile/lib/profileI18n.ts`.
+- Textos de la página pública (botones del sistema) en `src/modules/profile/lib/profileI18n.ts`: el español viaja con la
+  página y los otros 11 idiomas están en `profile/lib/ui/<idioma>.ts` (se bajan al usarlos). `ui(lang)` suspende hasta
+  tenerlos (se ve el esqueleto de la ruta, nunca el español de golpe) y `setLang` los espera (`registerNamespace`);
+  sólo se llama al dibujar. Una clave nueva va en `UiStrings`, en `ES` y en los 11 archivos.
 - Landing (Lanzamiento L3a): diccionario `src/i18n/app/landing/<idioma>.ts` (`useLandingT`), selector de los 12 idiomas en
   el Navbar, `?lang=xx` fija el idioma y `useLandingLocale` pone título, descripción, `dir` (RTL en árabe), `hreflang` (12 +
   `x-default`) y canónica. Sin prueba social inventada: testimonios sólo de la tabla `testimonials` (si no hay, no se muestra).
@@ -749,6 +752,20 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   una franja (container query `mp-page` en `.mp-root`). Pie: botón `.mp-footer-cta` con la huella y "Creá tu Mycen
   gratis" (`createFree`, 12 idiomas; abre "Elegí tu nombre"). Sólo "Disponible" lleva el punto que late; el estado
   va discreto y las etiquetas como texto con "·". El foco no cambia el radio de los controles.
+- Entrega 1 (módulos existentes, antes del freeze): "Compartir" abre una hoja propia (`ShareSheet`, chunk aparte:
+  copiar, WhatsApp con `?src=whatsapp`, QR con `?src=qr` y "Guardar contacto"; "Más opciones" = menú del sistema).
+  Visor de fotos `Lightbox` (chunk aparte; galería y foto suelta: flechas/Escape, deslizar para pasar o cerrar, dos
+  toques acercan). "Volver arriba" con la huella del perfil (`BackToTop`). Links: la red sale del dominio
+  (`networkFromUrl` en `lib/networks.ts`; si no, la inicial), miniatura de 56 px, "tarjeta" con el título sobre un
+  degradé, destacado con un aro que respira. Grupo de links: ícono por fila, de a dos si los títulos son cortos y
+  plegable (`content.collapse = 'folded'`, `<details>`). Redes: "@usuario" debajo (`show_handle`) y filas parejas con
+  más de 6 (sin scroll). "Cómo llegar" con Google Maps, Apple Maps (primero en iPhone) y Waze. Texto con formato
+  seguro (`lib/richText.tsx`: **negrita**, [link](url), listas con "- "; nunca HTML). Foto con epígrafe sobre la foto
+  (`caption_style = 'over'`). Botón destacado con subtítulo. Producto con foto 4:5. Tarjetas con sombra en abanico,
+  galería estilo revista (`is-mag-N`), portfolio en mosaico. Música abierta: ecualizador decorativo y la plataforma
+  (no dice si está sonando). vCard con foto (256 px JPEG) y los links públicos (`vcardPhoto`, `VCardExtras`). Tapa de
+  Portada: la huella sigue apenas al mouse o la inclinación de Android (`useTilt`). Proyectos y portfolio en su chunk.
+  Tests en `profileExtras.test.ts`.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

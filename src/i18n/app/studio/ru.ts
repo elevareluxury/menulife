@@ -379,6 +379,17 @@ const ru: StudioDict = {
   },
   catalog: {
     styleHighlight: 'Выделенная (акцентный цвет)',
+    collapseLabel: 'Вид',
+    collapseOpen: 'Всегда открыт',
+    collapseFolded: 'Свёрнут (открывается касанием)',
+    showHandleLabel: 'Имя пользователя под значком',
+    optNo: 'Нет',
+    optYes: 'Да',
+    captionLabel: 'Подпись',
+    captionBelow: 'Под фото',
+    captionOver: 'Поверх фото',
+    buttonSubtitle: 'Подзаголовок (необязательно)',
+    textFormatHint: "Можно использовать **жирный**, списки с «- » и ссылки.",
     styleButton: 'Кнопка (значок или миниатюра сбоку)', styleCard: 'Карточка с большим фото',
     layoutCarousel: 'Листаемые (карусель)', layoutStack: 'Одна под другой', layoutTickets: 'Афиши событий (формат сторис)',
     types: {

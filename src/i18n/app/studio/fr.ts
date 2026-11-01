@@ -373,6 +373,17 @@ const fr: StudioDict = {
   },
   catalog: {
     styleHighlight: 'Mis en avant (couleur d’accent)',
+    collapseLabel: 'Affichage',
+    collapseOpen: 'Toujours ouvert',
+    collapseFolded: 'Replié (s’ouvre au toucher)',
+    showHandleLabel: 'Nom d’utilisateur sous l’icône',
+    optNo: 'Non',
+    optYes: 'Oui',
+    captionLabel: 'Légende',
+    captionBelow: 'Sous la photo',
+    captionOver: 'Sur la photo',
+    buttonSubtitle: 'Sous-titre (facultatif)',
+    textFormatHint: "Vous pouvez utiliser **gras**, des listes avec « - » et des liens.",
     styleButton: 'Bouton (icône ou miniature sur le côté)', styleCard: 'Carte avec grande photo',
     layoutCarousel: 'À faire défiler (carrousel)', layoutStack: 'Les unes sous les autres', layoutTickets: 'Flyers d’événements (format story)',
     types: {
