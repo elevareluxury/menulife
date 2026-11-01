@@ -788,6 +788,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   35 íconos de marca más (Simple Icons, CC0) en `lib/brandIcons.ts`, chunk que `SocialIcon` baja sólo si el perfil usa
   alguna (`LAZY_BRANDS`, dominios en `networkFromUrl`); también en el selector de "Red social". Tests en
   `entrega2b.test.ts` y `modules-v2b.spec.ts`. Privacidad (ubicación) en 12 idiomas.
+- Auditoría antes del freeze (Business, `20261120000001_business_quotes_lockdown.sql`, tests en
+  `business_quotes_lockdown.test.sql`): los presupuestos por link (`/q/:token`) ya no se leen ni se cambian con
+  políticas de `anon` (dejaban ver y aceptar todos); `QuotePublicPage` usa `get_public_quote(p_token)` (sólo ese
+  presupuesto, sin datos internos; marca visto/vencido) y `respond_public_quote(p_token, p_accept)`. Al crear un negocio
+  una cuenta común no elige plan, suscripción ni fin de prueba (`restaurants_plan_guard` también en INSERT: toma los
+  valores por defecto). Pendiente para abrir Business: la app de mozo escribe con `anon` (rehacer con un JWT de mozo).
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea
