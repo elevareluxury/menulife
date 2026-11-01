@@ -42,7 +42,8 @@ for (const theme of THEMES) {
   for (const layout of LAYOUTS) {
     test(`perfil ${layout} · ${theme}`, async ({ page, context }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
-      const rows = MODULE_FIXTURES.map(f => asOlivia(structuredClone(f.row))).filter(r => KEEP.includes(r.id as string))
+      // El perfil sigue siendo la fila de prueba (p-ana): sólo cambian los textos y links de los módulos
+      const rows = MODULE_FIXTURES.map(f => ({ ...asOlivia(structuredClone(f.row)), profile_id: 'p-ana' })).filter(r => KEEP.includes(r.id as string))
       const state = createState({
         profiles: [profileRow({
           ...PERSON,
