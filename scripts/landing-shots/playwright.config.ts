@@ -6,7 +6,8 @@ import base from '../../playwright.config'
 //   npx playwright test --config scripts/landing-shots/playwright.config.ts
 // Escribe public/landing/*.webp. No corre en CI: se vuelve a generar cuando cambia el diseño del perfil o de Mi día.
 const PORT = 5181
-const web = base.webServer as { env: Record<string, string> }
+// El config base tiene varios servidores (app y CAPTCHA): se usa el de la app
+const web = (Array.isArray(base.webServer) ? base.webServer[0] : base.webServer) as { env: Record<string, string> }
 export default defineConfig({
   ...base, testDir: '.', retries: 0, fullyParallel: false, workers: 1,
   // La app se sirve como "mycen.id": la credencial y su QR muestran la dirección pública real, no la de pruebas
