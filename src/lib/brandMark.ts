@@ -1,4 +1,4 @@
-import { generateHuella, huellaToSvg } from './huella/index.ts'
+import { generateHuella, huellaToSvg } from './huella/huella.ts'
 
 /**
  * La huella de la marca (semilla "mycen", la del ícono de la app) como SVG, con trazos más firmes para que se lea en
