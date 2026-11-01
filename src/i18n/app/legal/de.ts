@@ -202,7 +202,7 @@ const de: LegalDict = {
         'Nachrichten aus dem Kontaktformular, bis die Person, der das Profil gehört, sie löscht oder ihr Konto löscht.',
         'Abonnement-E-Mails, bis die Person, der das Profil gehört, sie löscht, ihr Konto löscht oder du uns bittest, sie zu löschen.',
         'Fehlerprotokolle werden gespeichert, solange sie bei der Behebung helfen (ein behobener Fehler bleibt gespeichert, falls er wieder auftritt); die Zählung betroffener Personen 90 Tage.',
-        'Nutzungsereignisse, solange du dein Konto hast; wenn du es löschst, sind sie in keiner Weise mehr mit dir verbunden.',
+        'Nutzungsereignisse der App und die Aufzeichnung der Tage, an denen du Mycen genutzt hast, 25 Monate (danach werden sie automatisch gelöscht); löschst du dein Konto vorher, haben sie keinerlei Verbindung mehr zu dir.',
         'Was das Gesetz aufzubewahren verlangt (zum Beispiel Rechnungsdaten), für die dort festgelegte Frist.',
       ] },
     ] },

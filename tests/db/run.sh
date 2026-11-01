@@ -68,7 +68,8 @@ for m in \
   20261117000001_launch_hardening \
   20261118000001_status_app_queries \
   20261119000001_identity_modules_v2 \
-  20261120000001_business_quotes_lockdown; do
+  20261120000001_business_quotes_lockdown \
+  20261121000001_retention_hardening; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

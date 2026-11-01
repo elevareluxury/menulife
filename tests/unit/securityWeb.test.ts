@@ -113,6 +113,14 @@ describe('vercel.json: encabezados de seguridad', () => {
     expect(all['X-Frame-Options']).toBe('SAMEORIGIN')
     expect(all['Referrer-Policy']).toBe('strict-origin-when-cross-origin')
   })
+
+  // Hardening (SOC 2 CC6.7 / ISO 27001 A.8.20–A.8.23): HTTPS siempre (2 años, subdominios, lista de precarga),
+  // ventana aislada de otros orígenes (los popups siguen andando) y sin políticas de Flash/PDF de otros dominios
+  it('HTTPS estricto, ventana aislada y sin políticas cruzadas', () => {
+    expect(all['Strict-Transport-Security']).toBe('max-age=63072000; includeSubDomains; preload')
+    expect(all['Cross-Origin-Opener-Policy']).toBe('same-origin-allow-popups')
+    expect(all['X-Permitted-Cross-Domain-Policies']).toBe('none')
+  })
 })
 
 describe('vercel.json: rutas', () => {

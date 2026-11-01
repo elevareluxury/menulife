@@ -29,6 +29,11 @@ jobs:
         run: npm test
 
       # Incluye el chequeo de la CSP (scripts/check-csp.mjs)
+      # Hardening (SOC 2 CC7.1 / ISO 27001 A.8.8): ninguna dependencia de producción con una falla alta o crítica conocida.
+      # Las moderadas aceptadas están en docs/seguridad/sgsi/02-riesgos.md.
+      - name: Dependencias sin fallas altas
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Build
         run: npm run build
         env:

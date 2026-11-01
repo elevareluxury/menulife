@@ -210,7 +210,7 @@ const es = {
         'Los mensajes del formulario de contacto, hasta que la persona dueña del perfil los borra o elimina su cuenta.',
         'Los emails de suscripción, hasta que la persona dueña del perfil los borra, elimina su cuenta o nos pedís que los borremos.',
         'Los registros de errores se guardan mientras sirvan para arreglarlos (uno resuelto queda guardado por si vuelve a pasar); el conteo de personas afectadas, 90 días.',
-        'Los eventos de uso, mientras tengas la cuenta; si la eliminás, quedan sin ningún vínculo con vos.',
+        'Los eventos de uso de la app y el registro de los días que usaste Mycen, 25 meses (después se borran solos); si antes eliminás tu cuenta, quedan sin ningún vínculo con vos.',
         'Lo que la ley obligue a conservar (por ejemplo, datos de facturación), por el plazo que fije.',
       ] },
     ] },

@@ -202,7 +202,7 @@ const pt: LegalDict = {
         'As mensagens do formulário de contato, até que a pessoa dona do perfil as apague ou exclua a conta.',
         'Os e-mails de inscrição, até que a pessoa dona do perfil os apague, exclua a conta ou você nos peça para apagá-los.',
         'Os registros de erros são guardados enquanto servirem para corrigi-los (um resolvido continua guardado caso volte a acontecer); a contagem de pessoas afetadas, 90 dias.',
-        'Os eventos de uso, enquanto você tiver a conta; se você a excluir, deixam de ter qualquer vínculo com você.',
+        'Os eventos de uso do app e o registro dos dias em que você usou o Mycen, 25 meses (depois são apagados automaticamente); se você excluir sua conta antes, eles deixam de ter qualquer vínculo com você.',
         'O que a lei obrigar a conservar (por exemplo, dados de faturamento), pelo prazo que ela fixar.',
       ] },
     ] },
