@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type SyntheticEvent } from 'react'
 import { ArrowUpRight, ChevronDown, Clock, Mail, MapPin, MessageCircle, Navigation, Phone } from 'lucide-react'
 import type { ProfileLang, ProfileModule, WeekSchedule } from '../lib/profileTypes'
 import { tr, trLabel, ui } from '../lib/profileI18n'
@@ -556,9 +556,10 @@ function ticketDate(date: string | undefined, lang: ProfileLang) {
 }
 
 /**
- * Diseño Flyers (tickets): entradas que se deslizan de a uno, centradas. Arriba fecha, hora, título y lugar; en el
- * medio el flyer entero (9:16, sin recortes); abajo un talón troquelado con el botón "Entradas" (si hay link).
- * Coverflow (la del centro al frente, las de los costados giradas), entrada escalonada y brillo al quedar al frente.
+ * Diseño Flyers (ticketera): entradas que se deslizan de a una, centradas. La tarjeta toma la forma exacta del flyer
+ * (se mide al cargar: ni recorte ni bandas; un formato muy alto achica el ancho para que entre en la pantalla) con la
+ * fecha encima; debajo día, hora, título y lugar, y un talón con código de barras decorativo y "Entradas" (si hay
+ * link). Forma futurista: esquinas en chanfle, cortes en V en la línea de troquel y borde de luz del acento.
  * Puntos abajo para saber cuántas hay y saltar a una.
  */
 function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: CardItem[] }) {
@@ -566,6 +567,18 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
   const t = ui(lang)
   const track = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(0)
+  // Proporción real de cada flyer (ancho / alto), medida al cargar; entre 9:16 y 1.91:1
+  const [ratios, setRatios] = useState<Record<number, number>>({})
+  const arOf = (first: number, last: number) => ({
+    '--tix-ar-first': safeHref(items[first]?.image_url) ? ratios[first] ?? 0.8 : 0.8,
+    '--tix-ar-last': safeHref(items[last]?.image_url) ? ratios[last] ?? 0.8 : 0.8,
+  }) as CSSProperties
+  const measure = (i: number) => (e: SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = e.currentTarget
+    if (!w || !h) return
+    const ar = Math.min(1.91, Math.max(0.5625, w / h))
+    setRatios(r => (r[i] === ar ? r : { ...r, [i]: ar }))
+  }
 
   useEffect(() => {
     const el = track.current
@@ -608,7 +621,7 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
   return (
     <section ref={section} className={`mp-tix${shown ? ' is-in' : ''}`} aria-label={heading || t.cards}>
       {heading && <h2 className="mp-card-title mp-section-title">{heading}</h2>}
-      <div ref={track} className="mp-tix-track" tabIndex={0} role="region" aria-label={`${heading || t.cards} — ${t.swipeHint}`}>
+      <div ref={track} className="mp-tix-track" tabIndex={0} style={arOf(0, items.length - 1)} role="region" aria-label={`${heading || t.cards} — ${t.swipeHint}`}>
         {items.map((item, i) => {
           const href = safeHref(item.url)
           const img = safeHref(item.image_url)
@@ -617,17 +630,21 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
           const when = ticketDate(item.date, lang)
           const body = (
             <>
-              {/* Arriba el flyer entero a todo el ancho (nunca recortado: si no es 4:5, se ve completo sobre su propia
-                  versión difuminada); debajo fecha, título y lugar */}
               <div className="mp-tix-top">
                 <div className="mp-tix-flyer">
                   {img
                     ? <>
                         <SafeImage className="mp-tix-backdrop" sizing="column" src={img} alt="" aria-hidden="true" loading={i < 2 ? 'eager' : 'lazy'} />
-                        <SafeImage className="mp-tix-img" sizing="column" src={img} alt={title} loading={i < 2 ? 'eager' : 'lazy'} />
+                        <SafeImage className="mp-tix-img" sizing="column" src={img} alt={title} loading={i < 2 ? 'eager' : 'lazy'} onLoad={measure(i)} />
                       </>
                     : <span className="mp-tix-blank" aria-hidden="true">{title}</span>}
                   <span className="mp-tix-sheen" aria-hidden="true" />
+                  {when && (
+                    <span className="mp-tix-badge" aria-hidden="true">
+                      <span className="mp-tix-badge-day">{when.day}</span>
+                      <span className="mp-tix-badge-month">{when.month}</span>
+                    </span>
+                  )}
                 </div>
                 <div className="mp-tix-head">
                   {(when || item.time) && (
@@ -639,9 +656,13 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
                   {subtitle && <span className="mp-tix-sub"><MapPin size={13} aria-hidden="true" />{subtitle}</span>}
                 </div>
               </div>
-              {/* Abajo: el talón troquelado con el botón de entradas */}
+              {/* Talón: troquel con cortes en V, código de barras decorativo y el botón de entradas */}
               {href && (
                 <div className="mp-tix-stub">
+                  <span className="mp-tix-code" aria-hidden="true">
+                    <span className="mp-tix-bars" />
+                    <span className="mp-tix-serial">{String(i + 1).padStart(3, '0')}</span>
+                  </span>
                   <span className="mp-tix-cta">{t.tickets} <ArrowUpRight size={17} aria-hidden="true" /></span>
                 </div>
               )}
@@ -649,8 +670,8 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
           )
           const pos = i === active ? ' is-active' : i < active ? ' is-before' : ' is-after'
           const cls = `mp-tix-card${pos}${href ? ' has-stub' : ''}`
-          // --i: orden para la entrada escalonada
-          const style = { '--i': i } as CSSProperties
+          // --i: orden para la entrada escalonada; --tix-ar: proporción del flyer (4:5 hasta que se mide)
+          const style = { '--i': i, '--tix-ar': img ? ratios[i] ?? 0.8 : 0.8 } as CSSProperties
           return href
             ? <a key={i} className={cls} style={style} href={href} {...linkProps(href)} onClick={() => onAction(module.id, urlKey(item.url))}>{body}</a>
             : <article key={i} className={cls} style={style}>{body}</article>
