@@ -28,8 +28,9 @@
     - heading "Escribime" [level=2]
     - link "WhatsApp":
       - /url: https://wa.me/5493415550000
-    - link "hola@ana.com":
+    - 'link "Email: hola@ana.com"':
       - /url: mailto:hola@ana.com
+      - text: ""
   - region "Ubicación":
     - heading "Estudio" [level=2]
     - text: /Córdoba \d+, Rosario/
@@ -54,17 +55,7 @@
     - heading "Horarios" [level=2]
     - term: Lun
     - definition: /\d+:\d+ – \d+:\d+/
-    - term: Mar
-    - definition: Cerrado
-    - term: Mié
-    - definition: Cerrado
-    - term: Jue
-    - definition: Cerrado
-    - term: Vie
-    - definition: Cerrado
-    - term: Sáb
-    - definition: Cerrado
-    - term: Dom
+    - term: Mar – Dom
     - definition: Cerrado
   - region "Galería":
     - heading "Galería" [level=2]
@@ -76,7 +67,6 @@
       - /url: https://ana.design/cafe
   - region "Reseñas":
     - heading "Reseñas" [level=2]
-    - strong: "4.8"
     - img "4.8 / 5"
     - text: /\d+ reseñas/
     - link "Ver en Google":
