@@ -627,6 +627,28 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       })
       return 'ok'
     }
+    // = get_poll_results / vote_profile_poll (entrega 2): sólo encuestas publicadas; el visitante de las pruebas es
+    //   siempre el mismo ("mock-visitor") y puede cambiar su voto
+    case 'get_poll_results':
+    case 'vote_profile_poll': {
+      const { p } = findSpace(state, String(args.p_handle ?? ''))
+      const snap = p && p.status === 'published' && p.visibility !== 'private' && !spaceSuspended(state, p) ? publishedSnapshot(state, p) : null
+      const mod = ((snap?.modules as Row[] | undefined) ?? []).find(m => m.type === 'poll' && m.id === args.p_module_id)
+      if (!mod || !isModuleLive(mod.config as Row)) return fn === 'get_poll_results' ? null : { status: 'not_found' }
+      const ids = (((mod.content as Row).options as Row[] | undefined) ?? []).map(o => String(o.id))
+      const votes = (state.tables.profile_poll_votes ??= [])
+      const results = () => {
+        const counts: Record<string, number> = {}
+        for (const v of votes) if (v.module_id === mod.id && ids.includes(String(v.option_id))) counts[String(v.option_id)] = (counts[String(v.option_id)] ?? 0) + 1
+        return { counts, total: Object.values(counts).reduce((a, b) => a + b, 0) }
+      }
+      if (fn === 'get_poll_results') return results()
+      if (!ids.includes(String(args.p_option))) return { status: 'invalid' }
+      const mine = votes.find(v => v.module_id === mod.id && v.voter_hash === 'mock-visitor')
+      if (mine) mine.option_id = args.p_option
+      else votes.push({ module_id: mod.id, voter_hash: 'mock-visitor', option_id: args.p_option })
+      return { status: 'ok', results: results() }
+    }
     case 'report_profile': {
       const reasons = ['spam', 'scam', 'impersonation', 'hate', 'violence', 'sexual', 'illegal', 'other']
       if (!reasons.includes(String(args.p_reason))) return 'invalid'

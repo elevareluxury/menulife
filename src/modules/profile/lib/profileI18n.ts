@@ -60,6 +60,21 @@ export interface UiStrings {
   qrCode: string
   moreOptions: string
   backToTop: string
+  /** Módulos de la entrega 2 (encuesta, descargables, cupón, podcast, galería de videos) */
+  votesCount: string
+  oneVote: string
+  noVotes: string
+  yourVote: string
+  download: string
+  copyCode: string
+  codeCopied: string
+  validUntil: string
+  useCoupon: string
+  listen: string
+  pause: string
+  videos: string
+  podcast: string
+  episodes: string
   /** Video y música: el reproductor del proveedor se carga al tocar ({provider} = YouTube, Spotify…) */
   playOn: string
   days: Days
@@ -113,7 +128,7 @@ const ES: UiStrings = {
     errorTitle: 'No pudimos cargar el perfil', errorText: 'Revisá tu conexión e intentá de nuevo.',
     retry: 'Reintentar', createYours: 'Creá tu Mycen', draftBanner: 'Vista previa: este perfil todavía no es público.',
     footer: 'Una identidad Mycen',
-    verified: 'Cuenta verificada', available: 'Disponible', moreAboutMe: 'Más sobre mí', createIdentity: 'Creá tu identidad', createFree: 'Creá tu Mycen gratis', call: 'Llamar', copyLink: 'Copiar link', qrCode: 'Código QR', moreOptions: 'Más opciones', backToTop: 'Volver arriba', emailLabel: 'Email', playOn: 'Reproducir en {provider}',
+    verified: 'Cuenta verificada', available: 'Disponible', moreAboutMe: 'Más sobre mí', createIdentity: 'Creá tu identidad', createFree: 'Creá tu Mycen gratis', call: 'Llamar', copyLink: 'Copiar link', qrCode: 'Código QR', moreOptions: 'Más opciones', backToTop: 'Volver arriba', votesCount: "{n} votos", oneVote: "1 voto", noVotes: "Todavía no hay votos: el tuyo es el primero", yourVote: "Tu voto", download: "Descargar", copyCode: "Copiar código", codeCopied: "Código copiado", validUntil: "Válido hasta el {date}", useCoupon: "Usar el cupón", listen: "Escuchar", pause: "Pausar", videos: "Videos", podcast: "Podcast", episodes: "Episodios", emailLabel: 'Email', playOn: 'Reproducir en {provider}',
     days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mié', thursday: 'Jue', friday: 'Vie', saturday: 'Sáb', sunday: 'Dom' },
     languageLabel: 'Idioma', socials: 'Redes sociales', close: 'Cerrar', prevPhoto: 'Foto anterior', nextPhoto: 'Foto siguiente', cards: 'Tarjetas',
     swipeHint: 'deslizá para ver más', tickets: 'Entradas', tags: 'Categorías',

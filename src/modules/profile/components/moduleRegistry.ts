@@ -8,6 +8,12 @@ import {
 // Proyectos y portfolio en su chunk (traen la huella para las portadas que faltan): sólo los baja un perfil que los usa
 const ProjectModule = preloadable<ModuleProps>(() => import('./ProjectModules').then(m => ({ default: m.ProjectModule })))
 const PortfolioModule = preloadable<ModuleProps>(() => import('./ProjectModules').then(m => ({ default: m.PortfolioModule })))
+// Entrega 2 (encuesta, descargables, cupón, galería de videos, podcast): un chunk para los cinco
+const PollModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.PollModule })))
+const DownloadsModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.DownloadsModule })))
+const CouponModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.CouponModule })))
+const VideoGalleryModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.VideoGalleryModule })))
+const PodcastModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.PodcastModule })))
 // Video y música en su propio chunk: sólo lo baja un perfil que lo usa (la huella de la fachada pesa)
 const ContactFormModule = preloadable<ModuleProps>(() => import('./ContactFormModule').then(m => ({ default: m.ContactFormModule })))
 const CollabModule = preloadable<ModuleProps>(() => import('./CollabModule').then(m => ({ default: m.CollabModule })))
@@ -62,6 +68,11 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   latest_video:    { View: LatestVideoModule },
   support:         { View: SupportModule },
   listen_on:       { View: ListenOnModule },
+  poll:            { View: PollModule },
+  downloads:       { View: DownloadsModule },
+  coupon:          { View: CouponModule },
+  video_gallery:   { View: VideoGalleryModule },
+  podcast:         { View: PodcastModule },
 }
 
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */

@@ -11,7 +11,7 @@ const ui: UiStrings = {
     errorTitle: '프로필을 불러오지 못했습니다', errorText: '연결 상태를 확인하고 다시 시도해 주세요.',
     retry: '다시 시도', createYours: '나의 Mycen 만들기', draftBanner: '미리보기: 이 프로필은 아직 공개되지 않았습니다.',
     footer: 'Mycen 아이덴티티',
-    verified: '인증된 계정', available: '연락 가능', moreAboutMe: '더 알아보기', createIdentity: '나의 아이덴티티 만들기', createFree: '무료로 나의 Mycen 만들기', call: '전화', copyLink: '링크 복사', qrCode: 'QR 코드', moreOptions: '더 보기', backToTop: '맨 위로', emailLabel: '이메일', playOn: '{provider}에서 재생',
+    verified: '인증된 계정', available: '연락 가능', moreAboutMe: '더 알아보기', createIdentity: '나의 아이덴티티 만들기', createFree: '무료로 나의 Mycen 만들기', call: '전화', copyLink: '링크 복사', qrCode: 'QR 코드', moreOptions: '더 보기', backToTop: '맨 위로', votesCount: "{n}표", oneVote: "1표", noVotes: "아직 투표가 없어요. 첫 투표를 해 보세요", yourVote: "내 투표", download: "다운로드", copyCode: "코드 복사", codeCopied: "코드를 복사했어요", validUntil: "{date}까지 유효", useCoupon: "쿠폰 사용하기", listen: "듣기", pause: "일시정지", videos: "동영상", podcast: "팟캐스트", episodes: "에피소드", emailLabel: '이메일', playOn: '{provider}에서 재생',
     days: { monday: '월', tuesday: '화', wednesday: '수', thursday: '목', friday: '금', saturday: '토', sunday: '일' },
     languageLabel: '언어', socials: '소셜 미디어', close: '닫기', prevPhoto: '이전 사진', nextPhoto: '다음 사진', cards: '카드',
     swipeHint: '밀어서 더 보기', tickets: '티켓', tags: '카테고리',

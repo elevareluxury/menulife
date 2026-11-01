@@ -11,7 +11,7 @@ const ui: UiStrings = {
     errorTitle: 'Não conseguimos carregar o perfil', errorText: 'Verifique sua conexão e tente novamente.',
     retry: 'Tentar novamente', createYours: 'Crie seu Mycen', draftBanner: 'Prévia: este perfil ainda não é público.',
     footer: 'Uma identidade Mycen',
-    verified: 'Conta verificada', available: 'Disponível', moreAboutMe: 'Mais sobre mim', createIdentity: 'Crie sua identidade', createFree: 'Crie seu Mycen grátis', call: 'Ligar', copyLink: 'Copiar link', qrCode: 'Código QR', moreOptions: 'Mais opções', backToTop: 'Voltar ao topo', emailLabel: 'E-mail', playOn: 'Reproduzir no {provider}',
+    verified: 'Conta verificada', available: 'Disponível', moreAboutMe: 'Mais sobre mim', createIdentity: 'Crie sua identidade', createFree: 'Crie seu Mycen grátis', call: 'Ligar', copyLink: 'Copiar link', qrCode: 'Código QR', moreOptions: 'Mais opções', backToTop: 'Voltar ao topo', votesCount: "{n} votos", oneVote: "1 voto", noVotes: "Ainda não há votos: o seu é o primeiro", yourVote: "Seu voto", download: "Baixar", copyCode: "Copiar código", codeCopied: "Código copiado", validUntil: "Válido até {date}", useCoupon: "Usar o cupom", listen: "Ouvir", pause: "Pausar", videos: "Vídeos", podcast: "Podcast", episodes: "Episódios", emailLabel: 'E-mail', playOn: 'Reproduzir no {provider}',
     days: { monday: 'Seg', tuesday: 'Ter', wednesday: 'Qua', thursday: 'Qui', friday: 'Sex', saturday: 'Sáb', sunday: 'Dom' },
     languageLabel: 'Idioma', socials: 'Redes sociais', close: 'Fechar', prevPhoto: 'Foto anterior', nextPhoto: 'Próxima foto', cards: 'Cartões',
     swipeHint: 'deslize para ver mais', tickets: 'Ingressos', tags: 'Categorias',

@@ -16,6 +16,7 @@ export const MODULE_TYPES = [
   'featured_action', 'contact_card', 'gallery', 'product', 'testimonials', 'hours', 'cards',
   'project', 'portfolio', 'link_group', 'media', 'contact_form',
   'collab', 'subscribe', 'latest_video', 'support', 'listen_on',
+  'poll', 'downloads', 'coupon', 'video_gallery', 'podcast',
 ] as const
 
 export type ModuleType = typeof MODULE_TYPES[number]

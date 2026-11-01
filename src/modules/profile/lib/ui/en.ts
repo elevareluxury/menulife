@@ -11,7 +11,7 @@ const ui: UiStrings = {
     errorTitle: 'We could not load this profile', errorText: 'Check your connection and try again.',
     retry: 'Try again', createYours: 'Create your Mycen', draftBanner: 'Preview: this profile is not public yet.',
     footer: 'A Mycen identity',
-    verified: 'Verified account', available: 'Available', moreAboutMe: 'More about me', createIdentity: 'Create your identity', createFree: 'Create your Mycen for free', call: 'Call', copyLink: 'Copy link', qrCode: 'QR code', moreOptions: 'More options', backToTop: 'Back to top', emailLabel: 'Email', playOn: 'Play on {provider}',
+    verified: 'Verified account', available: 'Available', moreAboutMe: 'More about me', createIdentity: 'Create your identity', createFree: 'Create your Mycen for free', call: 'Call', copyLink: 'Copy link', qrCode: 'QR code', moreOptions: 'More options', backToTop: 'Back to top', votesCount: "{n} votes", oneVote: "1 vote", noVotes: "No votes yet: yours is the first", yourVote: "Your vote", download: "Download", copyCode: "Copy code", codeCopied: "Code copied", validUntil: "Valid until {date}", useCoupon: "Use the coupon", listen: "Listen", pause: "Pause", videos: "Videos", podcast: "Podcast", episodes: "Episodes", emailLabel: 'Email', playOn: 'Play on {provider}',
     days: { monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu', friday: 'Fri', saturday: 'Sat', sunday: 'Sun' },
     languageLabel: 'Language', socials: 'Social networks', close: 'Close', prevPhoto: 'Previous photo', nextPhoto: 'Next photo', cards: 'Cards',
     swipeHint: 'swipe to see more', tickets: 'Tickets', tags: 'Categories',

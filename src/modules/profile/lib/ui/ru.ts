@@ -11,7 +11,7 @@ const ui: UiStrings = {
     errorTitle: 'Не удалось загрузить профиль', errorText: 'Проверьте подключение и попробуйте снова.',
     retry: 'Повторить', createYours: 'Создайте свой Mycen', draftBanner: 'Предпросмотр: профиль ещё не опубликован.',
     footer: 'Профиль Mycen',
-    verified: 'Подтверждённый аккаунт', available: 'На связи', moreAboutMe: 'Подробнее обо мне', createIdentity: 'Создайте свою идентичность', createFree: 'Создайте свой Mycen бесплатно', call: 'Позвонить', copyLink: 'Скопировать ссылку', qrCode: 'QR-код', moreOptions: 'Другие варианты', backToTop: 'Наверх', emailLabel: 'Почта', playOn: 'Воспроизвести в {provider}',
+    verified: 'Подтверждённый аккаунт', available: 'На связи', moreAboutMe: 'Подробнее обо мне', createIdentity: 'Создайте свою идентичность', createFree: 'Создайте свой Mycen бесплатно', call: 'Позвонить', copyLink: 'Скопировать ссылку', qrCode: 'QR-код', moreOptions: 'Другие варианты', backToTop: 'Наверх', votesCount: "{n} голосов", oneVote: "1 голос", noVotes: "Голосов пока нет: ваш будет первым", yourVote: "Ваш голос", download: "Скачать", copyCode: "Скопировать код", codeCopied: "Код скопирован", validUntil: "Действует до {date}", useCoupon: "Использовать купон", listen: "Слушать", pause: "Пауза", videos: "Видео", podcast: "Подкаст", episodes: "Выпуски", emailLabel: 'Почта', playOn: 'Воспроизвести в {provider}',
     days: { monday: 'Пн', tuesday: 'Вт', wednesday: 'Ср', thursday: 'Чт', friday: 'Пт', saturday: 'Сб', sunday: 'Вс' },
     languageLabel: 'Язык', socials: 'Соцсети', close: 'Закрыть', prevPhoto: 'Предыдущее фото', nextPhoto: 'Следующее фото', cards: 'Карточки',
     swipeHint: 'листайте, чтобы увидеть больше', tickets: 'Билеты', tags: 'Категории',

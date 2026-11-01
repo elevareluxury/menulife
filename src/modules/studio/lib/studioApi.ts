@@ -245,6 +245,20 @@ export async function uploadMedia(userId: string, original: File, kind: 'avatar'
   return db.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl
 }
 
+/** Descargables (entrega 2): sube un PDF (hasta 10 MB) a la carpeta de la cuenta en profile-files y devuelve su link */
+export const FILE_MAX_BYTES = 10 * 1024 * 1024
+export async function uploadPdf(userId: string, file: File): Promise<{ url: string; size: number }> {
+  const v2 = studioT().v2
+  if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) throw new Error(v2.fileNotPdf)
+  if (file.size > FILE_MAX_BYTES) throw new Error(v2.fileTooBig)
+  const path = `${userId}/${crypto.randomUUID()}.pdf`
+  const { error } = await db.storage.from('profile-files').upload(path, file, {
+    cacheControl: '31536000', contentType: 'application/pdf', upsert: false,
+  })
+  if (error) throw error
+  return { url: db.storage.from('profile-files').getPublicUrl(path).data.publicUrl, size: file.size }
+}
+
 export async function loadStats(profileId: string, days: number): Promise<DailyStat[]> {
   const since = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10)
   const { data, error } = await db.from('profile_stats_daily')

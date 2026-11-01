@@ -11,7 +11,7 @@ const ui: UiStrings = {
     errorTitle: 'प्रोफ़ाइल लोड नहीं हो सकी', errorText: 'अपना कनेक्शन जाँचें और फिर से कोशिश करें।',
     retry: 'फिर से कोशिश करें', createYours: 'अपना Mycen बनाएँ', draftBanner: 'पूर्वावलोकन: यह प्रोफ़ाइल अभी सार्वजनिक नहीं है।',
     footer: 'एक Mycen पहचान',
-    verified: 'सत्यापित खाता', available: 'उपलब्ध', moreAboutMe: 'मेरे बारे में और', createIdentity: 'अपनी पहचान बनाएं', createFree: 'अपना Mycen मुफ़्त बनाएं', call: 'कॉल करें', copyLink: 'लिंक कॉपी करें', qrCode: 'QR कोड', moreOptions: 'और विकल्प', backToTop: 'ऊपर जाएँ', emailLabel: 'ईमेल', playOn: '{provider} पर चलाएं',
+    verified: 'सत्यापित खाता', available: 'उपलब्ध', moreAboutMe: 'मेरे बारे में और', createIdentity: 'अपनी पहचान बनाएं', createFree: 'अपना Mycen मुफ़्त बनाएं', call: 'कॉल करें', copyLink: 'लिंक कॉपी करें', qrCode: 'QR कोड', moreOptions: 'और विकल्प', backToTop: 'ऊपर जाएँ', votesCount: "{n} वोट", oneVote: "1 वोट", noVotes: "अभी कोई वोट नहीं: पहला वोट आपका", yourVote: "आपका वोट", download: "डाउनलोड करें", copyCode: "कोड कॉपी करें", codeCopied: "कोड कॉपी हो गया", validUntil: "{date} तक मान्य", useCoupon: "कूपन इस्तेमाल करें", listen: "सुनें", pause: "रोकें", videos: "वीडियो", podcast: "पॉडकास्ट", episodes: "एपिसोड", emailLabel: 'ईमेल', playOn: '{provider} पर चलाएं',
     days: { monday: 'सोम', tuesday: 'मंगल', wednesday: 'बुध', thursday: 'गुरु', friday: 'शुक्र', saturday: 'शनि', sunday: 'रवि' },
     languageLabel: 'भाषा', socials: 'सोशल मीडिया', close: 'बंद करें', prevPhoto: 'पिछली फ़ोटो', nextPhoto: 'अगली फ़ोटो', cards: 'कार्ड',
     swipeHint: 'और देखने के लिए स्वाइप करें', tickets: 'टिकट', tags: 'श्रेणियाँ',

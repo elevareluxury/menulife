@@ -20,6 +20,9 @@ export const FEATURES = {
   // Módulos de bio (V1.1, pedido directo; prendidos): Apoyame, Suscribirse, Último video, Escuchá en y Colaboraciones.
   // Apagado, Studio no los ofrece al agregar un módulo (los ya creados se siguen viendo).
   bioModules:     true,
+  // Módulos de la entrega 2 (pedido directo; prendidos): Encuesta, Descargables, Cupón, Galería de videos y Podcast.
+  // Apagado, Studio no los ofrece al agregar un módulo (los ya creados se siguen viendo).
+  modulesV2:      true,
 } as const
 
 export type FeatureName = keyof typeof FEATURES
