@@ -31,6 +31,10 @@ export function MediaModule({ module, lang, onAction }: ModuleProps) {
 
   return (
     <section className={`mp-card mp-media mp-media-${embed.kind}${bar ? ' mp-media-bar' : ''}`} aria-label={title}>
+      {/* Música abierta: el ecualizador y la plataforma arriba del reproductor (decorativo, no dice si está sonando) */}
+      {playing && !video && (
+        <div className="mp-now" aria-hidden="true"><span className="mp-eq"><i /><i /><i /><i /></span>{provider}</div>
+      )}
       {playing ? (
         <div className="mp-media-frame" style={box}>
           <iframe

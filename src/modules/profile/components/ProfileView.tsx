@@ -1,15 +1,15 @@
 import { shareLink } from '@/lib/nativeFiles'
-import { lazy, Suspense, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BadgeCheck, Calendar, Globe, Mail, MessageCircle, Phone, Share2, UserPlus } from 'lucide-react'
-import { huellaSeed } from '@/lib/huella'
+import { ArrowUp, BadgeCheck, Calendar, Globe, Mail, MessageCircle, Phone, Share2, UserPlus } from 'lucide-react'
+import { generateHuella, huellaSeed, huellaToSvg } from '@/lib/huella'
 import { APP_LANGS, LANG_INFO, langDir } from '@/i18n/app/languages'
 import { fetchContactCard, trackProfileEvent } from '../lib/profileApi'
 import { RESERVE_KEY } from '../lib/clickKeys'
 import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref } from '../lib/safeUrl'
 import { isOpenNow } from '../lib/schedule'
-import { downloadVCard } from '../lib/vcard'
+import { downloadVCard, vcardPhoto } from '../lib/vcard'
 import { lookVars, profileLook } from '../lib/profileLook'
 import { profileHandle, signupLink, type ProfileLang, type ProfileModule, type PublicProfile, type WeekSchedule } from '../lib/profileTypes'
 import { LAYOUTS } from './profileLayouts'
@@ -29,6 +29,18 @@ import { webOrigin } from '@/lib/platform'
 import { brandMarkSvg } from '@/lib/brandMark'
 import { ACCENT_COLORS, SECONDARY_COLORS } from '@/design/themes'
 
+/** Links públicos del perfil (links, grupos y redes) para la tarjeta de contacto */
+function publicLinks(modules: ProfileModule[]): string[] {
+  const out: string[] = []
+  for (const m of modules) {
+    if (m.type === 'link' || m.type === 'social') { const u = safeHref(m.content.url); if (u && /^https:/.test(u)) out.push(u) }
+    if (m.type === 'link_group' && Array.isArray(m.content.items)) {
+      for (const i of m.content.items as { url?: string }[]) { const u = safeHref(i?.url); if (u && /^https:/.test(u)) out.push(u) }
+    }
+  }
+  return out
+}
+
 /** Ícono de la acción principal según lo que abre (se reconoce antes de leer y da confianza) */
 function primaryIcon(kind: string, href: string) {
   const h = href.toLowerCase()
@@ -45,6 +57,9 @@ function BrandMark({ mode, id, className }: { mode: 'universo' | 'amanecer'; id:
   const svg = useMemo(() => brandMarkSvg(ACCENT_COLORS.plasma[mode].accent, SECONDARY_COLORS[mode], `-${id}`, 64), [mode, id])
   return <span aria-hidden="true" className={className} dangerouslySetInnerHTML={{ __html: svg }} />
 }
+
+// Hoja "Compartir": baja recién al tocar el botón
+const ShareSheet = lazy(() => import('./ShareSheet'))
 
 // "Elegí tu nombre" del pie: se baja sólo si alguien toca "Creá tu Mycen gratis"
 const ClaimName = lazy(() => import('@/components/claim/ClaimName').then(m => ({ default: m.ClaimName })))
@@ -143,25 +158,28 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
 
   const onModuleAction = (moduleId: string, item?: string) => track(profile.id, 'module_click', moduleId, item)
 
-  async function share() {
-    // Menú del sistema (en la app de iOS/Android, el nativo); si no hay, se copia el link
-    if (await shareLink(name, profileUrl, descriptor || name)) {
-      track(profile.id, 'share')
-      return
-    }
+  const [sharing, setSharing] = useState(false)
+  const share = () => setSharing(true)
+  async function copyLink() {
     try {
       await navigator.clipboard.writeText(profileUrl)
       track(profile.id, 'copy_link')
+      setSharing(false)
       onToast(t.linkCopied)
       // Una vibración corta confirma en el celular (si el navegador la tiene)
       navigator.vibrate?.(15)
     } catch { /* clipboard no disponible */ }
   }
+  async function nativeShare() {
+    if (await shareLink(name, profileUrl, descriptor || name)) track(profile.id, 'share')
+    setSharing(false)
+  }
+  const hasNativeShare = typeof navigator !== 'undefined' && (!!navigator.share || /Capacitor/.test(navigator.userAgent))
 
   async function saveContact() {
-    const card = await fetchContactCard(profile.id)
+    const [card, photo] = await Promise.all([fetchContactCard(profile.id), vcardPhoto(avatarSrc)])
     if (!card) return
-    downloadVCard(card, profileUrl)
+    downloadVCard(card, profileUrl, { photo, urls: publicLinks(profile.modules) })
     track(profile.id, 'vcard_download')
   }
 
@@ -297,8 +315,45 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
         </footer>
       </div>
 
+      {sharing && (
+        <Suspense fallback={null}>
+          <ShareSheet open={sharing} onClose={() => setSharing(false)} url={profileUrl} name={name} t={t}
+            canSaveContact={!!profile.has_contact_card} onCopy={copyLink}
+            onWhatsapp={() => { track(profile.id, 'share'); setSharing(false) }}
+            onSaveContact={() => { setSharing(false); void saveContact() }}
+            onNative={nativeShare} hasNative={hasNativeShare} />
+        </Suspense>
+      )}
+      {!preview && <BackToTop label={t.backToTop} seed={seed} variant={look.huellaVariant} />}
       {toast && <div className="mp-toast" role="status"><BrandMark mode={look.mode} id="toast" className="mp-toast-mark" />{toast}</div>}
     </main>
+  )
+}
+
+/** "Volver arriba" con la huella del perfil: aparece después de bajar una pantalla y media */
+function BackToTop({ label, seed, variant }: { label: string; seed: string; variant: ReturnType<typeof profileLook>['huellaVariant'] }) {
+  const [shown, setShown] = useState(false)
+  // SVG generado de la huella (sin el componente animado: pesa menos en la carga del perfil)
+  const svg = useMemo(() => huellaToSvg(generateHuella(seed, variant), { colorA: 'currentColor', colorB: 'currentColor', size: 44 }), [seed, variant])
+  useEffect(() => {
+    let frame = 0
+    const onScroll = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => setShown(window.scrollY > window.innerHeight * 1.5))
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(frame) }
+  }, [])
+  const top = () => {
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+  }
+  return (
+    <button type="button" className={`mp-back-top${shown ? ' is-shown' : ''}`} aria-label={label} title={label} onClick={top}
+      tabIndex={shown ? 0 : -1} aria-hidden={!shown}>
+      <span className="mp-back-top-huella" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svg }} />
+      <ArrowUp size={18} aria-hidden="true" className="mp-back-top-arrow" />
+    </button>
   )
 }
 

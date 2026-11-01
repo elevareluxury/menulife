@@ -1,0 +1,8 @@
+/* Visor: deslizar para cerrar o pasar, dos toques acercan (sin bloquear el zoom con dos dedos) */
+.mp-lightbox { touch-action: pinch-zoom; }
+.mp-lightbox-img { transition: transform 280ms var(--my-ease, ease); cursor: zoom-in; user-select: none; }
+.mp-lightbox-img.is-zoomed { cursor: zoom-out; }
+.mp-lightbox-caption {
+  position: absolute; inset: auto 16px calc(46px + env(safe-area-inset-bottom, 0px)); margin: 0; text-align: center;
+  color: rgba(255, 255, 255, 0.88); font-size: var(--my-fs-small);
+}

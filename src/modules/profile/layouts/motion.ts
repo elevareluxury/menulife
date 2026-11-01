@@ -43,3 +43,40 @@ export function useReveal<T extends HTMLElement>(key: string, enabled: boolean) 
   }, [key, enabled])
   return ref
 }
+
+/**
+ * La huella de la tapa sigue apenas al mouse (compu) o a la inclinación del celular (Android: el iPhone pide permiso
+ * para eso y no se lo pedimos a nadie). Escribe --mp-tx / --mp-ty (-1…1) en el elemento; el CSS las usa con
+ * `translate`. Quieto con "reducir movimiento" y en la vista previa.
+ */
+export function useTilt<T extends HTMLElement>(enabled: boolean) {
+  const ref = useRef<T>(null)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el || !enabled || window.matchMedia?.(REDUCE).matches) return
+    let frame = 0
+    const set = (x: number, y: number) => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        el.style.setProperty('--mp-tx', Math.max(-1, Math.min(1, x)).toFixed(3))
+        el.style.setProperty('--mp-ty', Math.max(-1, Math.min(1, y)).toFixed(3))
+      })
+    }
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return
+      set((e.clientX / window.innerWidth) * 2 - 1, (e.clientY / window.innerHeight) * 2 - 1)
+    }
+    const onTilt = (e: DeviceOrientationEvent) => {
+      if (e.gamma == null || e.beta == null) return
+      set(e.gamma / 30, (e.beta - 45) / 30)
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('deviceorientation', onTilt, { passive: true })
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('deviceorientation', onTilt)
+      cancelAnimationFrame(frame)
+    }
+  }, [enabled])
+  return ref
+}

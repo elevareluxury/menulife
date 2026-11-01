@@ -373,6 +373,17 @@ const ja: StudioDict = {
   },
   catalog: {
     styleHighlight: '強調（アクセントカラー）',
+    collapseLabel: '表示',
+    collapseOpen: '常に開く',
+    collapseFolded: '折りたたむ（タップで開く）',
+    showHandleLabel: 'アイコンの下にユーザー名',
+    optNo: 'いいえ',
+    optYes: 'はい',
+    captionLabel: 'キャプション',
+    captionBelow: '写真の下',
+    captionOver: '写真の上',
+    buttonSubtitle: 'サブタイトル（任意）',
+    textFormatHint: "**太字**、「- 」で始まるリスト、リンクが使えます。",
     styleButton: 'ボタン（横にアイコンかサムネイル）', styleCard: '大きな写真のカード',
     layoutCarousel: 'スワイプ（カルーセル）', layoutStack: '縦に並べる', layoutTickets: 'イベントフライヤー（ストーリー形式）',
     types: {

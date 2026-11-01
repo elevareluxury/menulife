@@ -373,6 +373,17 @@ const ar: StudioDict = {
   },
   catalog: {
     styleHighlight: 'مميّز (لون التمييز)',
+    collapseLabel: 'طريقة العرض',
+    collapseOpen: 'مفتوح دائمًا',
+    collapseFolded: 'مطوي (يُفتح باللمس)',
+    showHandleLabel: 'اسم المستخدم أسفل الأيقونة',
+    optNo: 'لا',
+    optYes: 'نعم',
+    captionLabel: 'التعليق',
+    captionBelow: 'أسفل الصورة',
+    captionOver: 'فوق الصورة',
+    buttonSubtitle: 'عنوان فرعي (اختياري)',
+    textFormatHint: "يمكنك استخدام **الخط العريض** والقوائم بـ \"- \" والروابط.",
     styleButton: 'زر (أيقونة أو صورة مصغّرة بجانبه)', styleCard: 'بطاقة بصورة كبيرة',
     layoutCarousel: 'قابلة للتمرير (عرض دوّار)', layoutStack: 'واحدة تحت الأخرى', layoutTickets: 'ملصقات الفعاليات (بتنسيق القصة)',
     types: {

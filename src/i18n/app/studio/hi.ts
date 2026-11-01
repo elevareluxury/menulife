@@ -373,6 +373,17 @@ const hi: StudioDict = {
   },
   catalog: {
     styleHighlight: 'हाइलाइट (एक्सेंट रंग)',
+    collapseLabel: 'दिखावट',
+    collapseOpen: 'हमेशा खुला',
+    collapseFolded: 'बंद (टैप करने पर खुले)',
+    showHandleLabel: 'आइकन के नीचे यूज़रनेम',
+    optNo: 'नहीं',
+    optYes: 'हाँ',
+    captionLabel: 'कैप्शन',
+    captionBelow: 'फ़ोटो के नीचे',
+    captionOver: 'फ़ोटो के ऊपर',
+    buttonSubtitle: 'उपशीर्षक (वैकल्पिक)',
+    textFormatHint: "आप **बोल्ड**, \"- \" वाली सूचियाँ और लिंक इस्तेमाल कर सकते हैं।",
     styleButton: 'बटन (बगल में आइकन या थंबनेल)', styleCard: 'बड़ी फ़ोटो वाला कार्ड',
     layoutCarousel: 'स्वाइप करने योग्य (कैरोसेल)', layoutStack: 'एक के नीचे एक', layoutTickets: 'इवेंट फ़्लायर (स्टोरी फ़ॉर्मेट)',
     types: {

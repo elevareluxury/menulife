@@ -5,7 +5,9 @@ import {
   CardsModule, ContactModule, LinkGroupModule, FeaturedActionModule, GalleryModule, HoursModule, ImageModule, LinkModule,
   LocationModule, ProductModule, SocialRow, TestimonialsModule, TextModule, type ModuleProps,
 } from './ProfileModules'
-import { PortfolioModule, ProjectModule } from './ProjectModules'
+// Proyectos y portfolio en su chunk (traen la huella para las portadas que faltan): sólo los baja un perfil que los usa
+const ProjectModule = preloadable<ModuleProps>(() => import('./ProjectModules').then(m => ({ default: m.ProjectModule })))
+const PortfolioModule = preloadable<ModuleProps>(() => import('./ProjectModules').then(m => ({ default: m.PortfolioModule })))
 // Video y música en su propio chunk: sólo lo baja un perfil que lo usa (la huella de la fachada pesa)
 const ContactFormModule = preloadable<ModuleProps>(() => import('./ContactFormModule').then(m => ({ default: m.ContactFormModule })))
 const CollabModule = preloadable<ModuleProps>(() => import('./CollabModule').then(m => ({ default: m.CollabModule })))
