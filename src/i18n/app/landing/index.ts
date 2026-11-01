@@ -1,5 +1,5 @@
 import { createNamespace } from '../namespace'
-import es, { type LandingDict } from './es'
+import es, { type LandingDict } from './es.ts'
 
 const landing = createNamespace<LandingDict>(es, {
   en: () => import('./en'), pt: () => import('./pt'), fr: () => import('./fr'), de: () => import('./de'),

@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 import type { Plugin, Rollup } from 'vite'
-import { SYSTEM_USERNAMES } from '../src/lib/reservedUsernames'
-import { IMAGE_QUALITY, IMAGE_SIZES, IMAGE_WIDTHS, MEDIA_PATH, imageCdnOn, imageSrcset } from '../src/modules/profile/lib/imageCdn'
+import { SYSTEM_USERNAMES } from '../src/lib/reservedUsernames.ts'
+import { IMAGE_QUALITY, IMAGE_SIZES, IMAGE_WIDTHS, MEDIA_PATH, imageCdnOn, imageSrcset } from '../src/modules/profile/lib/imageCdn.ts'
 
 // Perfil público más rápido (LCP). Lo más compartido de Mycen es `/{username}`; antes, en un celular con 4G lento, los
 // datos salían recién cuando habían bajado React, la página y ProfileView (~6 s), y cada pieza (la página, la

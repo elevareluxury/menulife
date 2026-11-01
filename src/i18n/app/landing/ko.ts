@@ -1,4 +1,4 @@
-import type { LandingDict } from './es'
+import type { LandingDict } from './es.ts'
 
 const ko: LandingDict = {
   meta: {

@@ -1,18 +1,33 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
-import { heroShellPlugin } from './scripts/heroShell'
-import { bootSplashPlugin } from './scripts/bootSplash'
-import { profilePrefetchPlugin } from './scripts/profilePrefetch'
-import { businessI18nPlugin } from './scripts/businessI18n'
+import { heroShellPlugin } from './scripts/heroShell.ts'
+import { bootSplashPlugin } from './scripts/bootSplash.ts'
+import { profilePrefetchPlugin } from './scripts/profilePrefetch.ts'
+import { businessI18nPlugin } from './scripts/businessI18n.ts'
 import { readFileSync } from 'fs'
 
 // La CSP de producción (vercel.json) también en `vite preview`: el humo del build (npm run test:e2e:prod) corre con
 // ella y falla si algo la viola. scripts/check-csp.mjs verifica al compilar que cubre los scripts en línea del HTML.
+/** `inlineDynamicImports: true` (vite-plugin-pwa, también en su última versión) → `codeSplitting: false` */
+function swSingleFile(): Plugin {
+  return {
+    name: 'mycen-sw-single-file',
+    config(config) {
+      const output = config.build?.rollupOptions?.output
+      if (output && !Array.isArray(output) && 'inlineDynamicImports' in output) {
+        const out = output as Record<string, unknown>
+        delete out.inlineDynamicImports
+        out.codeSplitting = false
+      }
+    },
+  }
+}
+
 type VercelConfig = { headers?: { source: string; headers: { key: string; value: string }[] }[] }
-const vercelCsp = (JSON.parse(readFileSync(path.resolve(__dirname, 'vercel.json'), 'utf8')) as VercelConfig).headers
+const vercelCsp = (JSON.parse(readFileSync(path.resolve(import.meta.dirname, 'vercel.json'), 'utf8')) as VercelConfig).headers
   ?.find(r => r.source === '/(.*)')?.headers.find(h => h.key === 'Content-Security-Policy')?.value
 
 export default defineConfig({
@@ -38,6 +53,9 @@ export default defineConfig({
       // Raise the precache size limit above the 2 MiB default (bundle is ~2.1 MiB)
       injectManifest: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        // El service worker es un solo archivo: el plugin lo pide con `inlineDynamicImports` (nombre viejo, avisa en
+        // cada build); se pasa al nombre actual de Vite 8, que hace lo mismo
+        buildPlugins: { vite: [swSingleFile()] },
       },
 
       manifest: {
@@ -79,7 +97,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
   },
   preview: {
@@ -94,7 +112,7 @@ export default defineConfig({
       output: {
         // Sólo se agrupan librerías que usa casi toda página. recharts y framer-motion NO: agruparlas a mano
         // arrastraba dependencias compartidas y hacía que cada perfil público descargara gráficos y animaciones.
-        advancedChunks: {
+        codeSplitting: {
           groups: [
             // El ayudante que precarga pantallas lo usa la entrada: si queda en el bloque de Supabase, cada página baja
             // Supabase entero sólo por él
