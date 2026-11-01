@@ -34,6 +34,8 @@ async function rects(page: Page) {
 test('celular: cuadrados de a dos en el orden del dueño, sin huecos, barra de 80 px y vertical', async ({ page, context }) => {
   await installTestImages(context)
   await installSupabaseMock(context, createState({ profiles: [profileRow({ theme: { layout: 'clasica', mode: 'universo' } })], profile_modules: modules() }))
+  // Sin animaciones de entrada: se miden las posiciones finales
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/ana')
   await expect(tiles(page)).toHaveCount(7)
@@ -68,6 +70,7 @@ test('un cuadrado solo en su fila se estira (nunca queda un hueco) y sin elegir 
     moduleRow({ id: 'm-3', title: 'Tres', position: 30 }),
   ]
   await installSupabaseMock(context, createState({ profiles: [profileRow({ theme: { layout: 'credencial' } })], profile_modules: rows }))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/ana')
   await expect(tiles(page)).toHaveCount(3)
@@ -80,6 +83,7 @@ test('un cuadrado solo en su fila se estira (nunca queda un hueco) y sin elegir 
 test('Bento en la compu: identidad al costado y módulos en 4 columnas; en el celular, 2', async ({ page, context }) => {
   await installTestImages(context)
   await installSupabaseMock(context, createState({ profiles: [profileRow({ theme: { layout: 'bento', mode: 'amanecer' } })], profile_modules: modules() }))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto('/ana')
   await expect(tiles(page)).toHaveCount(7)

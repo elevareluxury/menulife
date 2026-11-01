@@ -739,6 +739,16 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   fija a la izquierda y módulos a la derecha. Al tocar "Reproducir" en un cuadrado o vertical, pasa a toda la fila
   (`:has(.mp-media-frame)`). Studio: selector "Tamaño" en `ModuleEditor` (12 idiomas, `editor.sizes`). Tests en
   `moduleSize.test.ts` y `module-sizes.spec.ts`.
+- Reproductores (`PlayerFacade`, la usan Video y música y "Último video"): botón propio dibujado como reproductor;
+  el del proveedor carga recién al tocar. Video = pantalla oscura (`data-mycen-theme="universo"` + el acento del
+  perfil, `ProfileModuleContext.accent`), título, "Reproducir" grande y barra de controles; música = portada (o la
+  huella), título, plataforma, línea de progreso en cero y "Reproducir" (disco/lista y cuadrado: portada a sangre).
+  Nombre accesible = título + "Reproducir en …".
+- Encabezado y pie del perfil (auditoría de diseño): arriba sólo la huella de Mycen (`BrandMark` en `ProfileView`,
+  `brandMarkSvg` con los colores de la marca del tema), la persona primero; en la compu la barra no es fija ni pinta
+  una franja (container query `mp-page` en `.mp-root`). Pie: botón `.mp-footer-cta` con la huella y "Creá tu Mycen
+  gratis" (`createFree`, 12 idiomas; abre "Elegí tu nombre"). Sólo "Disponible" lleva el punto que late; el estado
+  va discreto y las etiquetas como texto con "·". El foco no cambia el radio de los controles.
 - Muestra sólo en desarrollo: `/dev/design`. Contraste medido sobre `tokens.css` en `tests/unit/designTokens.test.ts`.
 
 ### Antes de cada tarea

@@ -1,26 +1,17 @@
 import { useState } from 'react'
-import { Play } from 'lucide-react'
-import { Huella } from '@/design/components/Huella'
 import { MEDIA_PROVIDER_NAME, parseMediaUrl } from '../lib/media'
 import { safeHref } from '../lib/safeUrl'
 import { tr, ui } from '../lib/profileI18n'
 import type { ModuleProps } from './ProfileModules'
-import { useProfileModule } from './profileModuleContext'
-import { SafeImage } from './SafeImage'
+import { PlayerFacade } from './PlayerFacade'
 
 /**
- * Video y música (V1 · etapa 04) con fachada: al abrir el perfil sólo se dibuja una tarjeta liviana con la huella del
- * perfil, el título y "Reproducir". El reproductor del proveedor (y cualquier pedido a YouTube, Spotify, etc.) se
+ * Video y música (V1 · etapa 04) con fachada: al abrir el perfil sólo se dibuja un reproductor propio (PlayerFacade)
+ * con la portada o la huella del perfil, el título y "Reproducir". El reproductor del proveedor (y cualquier pedido a YouTube, Spotify, etc.) se
  * carga recién cuando el visitante lo toca.
  */
 export function MediaModule({ module, lang, onAction }: ModuleProps) {
   const t = ui(lang)
-  const huella = useProfileModule()
-  const art = huella && (
-    <span className="mp-media-art" aria-hidden="true">
-      <Huella seed={huella.seed} variant={huella.variant} />
-    </span>
-  )
   const [playing, setPlaying] = useState(false)
   const embed = parseMediaUrl(module.content.url)
   if (!embed) return null
@@ -53,20 +44,10 @@ export function MediaModule({ module, lang, onAction }: ModuleProps) {
         </div>
       ) : (
         // Música: la tarjeta mide lo mismo que el reproductor que la reemplaza, así la página no salta al tocar
-        <button type="button" className="mp-media-facade"
+        <PlayerFacade kind={embed.kind} title={title} provider={provider} playLabel={t.playOn.replace('{provider}', provider)}
+          cover={cover} tall={!bar && (height ?? 0) >= 300}
           style={video ? { aspectRatio: String(vertical ? ratio : Math.max(ratio, 16 / 9)) } : height ? { minHeight: height } : undefined}
-          onClick={() => { setPlaying(true); onAction(module.id) }}>
-          {/* Portada guardada; si ya no existe, la huella (nunca un ícono de imagen rota) */}
-          {cover
-            ? <SafeImage className="mp-media-cover" sizing="column" src={cover} alt="" loading="lazy" decoding="async" fallback={art} />
-            : art}
-          {cover && <span className="mp-media-scrim" aria-hidden="true" />}
-          <span className="mp-media-play" aria-hidden="true"><Play size={22} fill="currentColor" /></span>
-          <span className="mp-media-text">
-            <span className="mp-media-title">{title}</span>
-            <span className="mp-media-provider">{t.playOn.replace('{provider}', provider)}</span>
-          </span>
-        </button>
+          onPlay={() => { setPlaying(true); onAction(module.id) }} />
       )}
     </section>
   )

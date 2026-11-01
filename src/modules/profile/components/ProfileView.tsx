@@ -26,8 +26,16 @@ import '../profile.css'
 import '../layouts/layouts.css'
 import '../profile-motion.css'
 import { webOrigin } from '@/lib/platform'
+import { brandMarkSvg } from '@/lib/brandMark'
+import { ACCENT_COLORS, SECONDARY_COLORS } from '@/design/themes'
 
-// "Elegí tu nombre" del pie: se baja sólo si alguien toca "Creá tu identidad"
+/** La huella de Mycen (la del ícono de la app) en los colores de la marca para el tema del perfil. Decorativa. */
+function BrandMark({ mode, id, className }: { mode: 'universo' | 'amanecer'; id: string; className?: string }) {
+  const svg = useMemo(() => brandMarkSvg(ACCENT_COLORS.plasma[mode].accent, SECONDARY_COLORS[mode], `-${id}`, 64), [mode, id])
+  return <span aria-hidden="true" className={className} dangerouslySetInnerHTML={{ __html: svg }} />
+}
+
+// "Elegí tu nombre" del pie: se baja sólo si alguien toca "Creá tu Mycen gratis"
 const ClaimName = lazy(() => import('@/components/claim/ClaimName').then(m => ({ default: m.ClaimName })))
 
 /** Bloques a dibujar: los tipos con `Group` (ej.: redes) se juntan si son consecutivos. */
@@ -153,7 +161,8 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   const statusText = profile.status_text?.trim()
   const chips = (statusText || profile.available || open != null) ? (
     <ul className="mp-chips mp-in">
-      {statusText && <li className="my-chip"><span className="my-status-dot my-pulse" aria-hidden="true" />{statusText}</li>}
+      {/* Sólo "Disponible" lleva el punto que late; el estado va discreto (antes, dos puntos iguales competían) */}
+      {statusText && <li className="my-chip mp-chip-status">{statusText}</li>}
       {profile.available && <li className="my-chip mp-chip-available"><span className="my-status-dot my-pulse" aria-hidden="true" />{t.available}</li>}
       {open != null && (
         <li className={`my-chip mp-status${open ? ' is-open' : ''}`}>
@@ -207,7 +216,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
 
   const seed = huellaSeed(profile)
   const handle = profileHandle(profile)
-  const moduleCtx = useMemo(() => ({ seed, variant: look.huellaVariant, handle, preview, displayName: name }), [seed, look.huellaVariant, handle, preview, name])
+  const moduleCtx = useMemo(() => ({ seed, variant: look.huellaVariant, accent: look.accent, handle, preview, displayName: name }), [seed, look.huellaVariant, look.accent, handle, preview, name])
   const parts: LayoutParts = {
     look,
     seed,
@@ -240,7 +249,8 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
       {profile.status !== 'published' && <div className="mp-banner" role="status">{t.draftBanner}</div>}
 
       <header className="mp-topbar">
-        <Link to="/" className="mp-brand" aria-label="Mycen">mycen</Link>
+        {/* La persona primero: la marca es sólo la huella de Mycen, que lleva al inicio */}
+        <Link to="/" className="mp-brand-mark" aria-label="Mycen"><BrandMark mode={look.mode} id="top" /></Link>
         <div className="mp-topbar-actions">
           <label className="mp-lang-select" title={t.languageLabel}>
             <Globe size={15} aria-hidden="true" />
@@ -263,9 +273,10 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
         </ProfileModuleContext.Provider>
 
         <footer className="mp-footer">
-          <Link to="/" className="mp-footer-brand">mycen</Link> · {preview
-            ? <Link to={signupLink(handle, profile.purpose)}>{t.createIdentity}</Link>
-            : <FooterClaim label={t.createIdentity} handle={handle} purpose={profile.purpose} look={look} lang={lang} />}
+          {/* Cada perfil compartido invita a crear el propio: un botón con la huella de Mycen, no un texto chico */}
+          {preview
+            ? <Link className="mp-footer-cta" to={signupLink(handle, profile.purpose)}><BrandMark mode={look.mode} id="foot" className="mp-footer-mark" />{t.createFree}</Link>
+            : <FooterClaim label={t.createFree} handle={handle} purpose={profile.purpose} look={look} lang={lang} />}
           {!preview && !profile.is_owner && profile.status === 'published' && (
             <div><ReportButton username={profileHandle(profile)} lang={lang} /></div>
           )}
@@ -277,7 +288,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
   )
 }
 
-/** Pie del perfil: "Creá tu identidad" abre el campo para elegir el nombre; el registro sigue atribuido a este perfil. */
+/** Pie del perfil: "Creá tu Mycen gratis" abre el campo para elegir el nombre; el registro sigue atribuido a este perfil. */
 function FooterClaim({ label, handle, purpose, look, lang }: {
   label: string
   handle: string
@@ -288,7 +299,9 @@ function FooterClaim({ label, handle, purpose, look, lang }: {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <button type="button" className="mp-footer-claim" aria-expanded={open} onClick={() => setOpen(o => !o)}>{label}</button>
+      <button type="button" className="mp-footer-cta" aria-expanded={open} onClick={() => setOpen(o => !o)}>
+        <BrandMark mode={look.mode} id="foot" className="mp-footer-mark" />{label}
+      </button>
       {open && (
         <div className="mp-footer-claim-box">
           <Suspense fallback={null}>
