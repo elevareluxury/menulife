@@ -857,7 +857,7 @@ const en: StudioDict = {
       professional: { name: 'Professional / freelance', description: 'Who you are, your work, reviews and how to hire you.' },
       business: { name: 'Local business', description: 'Main action, hours, address, contact and photos of the place.' },
       personal: { name: 'Personal', description: 'Your socials, your links and a bit about you.' },
-      restaurant: { name: "Restaurant / café", description: "Bookings or orders, hours, address, photos, a coupon and reviews." },
+      restaurant: { name: "Restaurant / coffee shop", description: "Bookings or orders, hours, address, photos, a coupon and reviews." },
       beauty: { name: "Beauty and wellness", description: "Appointments, photos of your work, hours, address and reviews." },
       photographer: { name: "Photography", description: "Your portfolio, a gallery, reviews and a form for quotes." },
       coach: { name: "Coach / classes", description: "Who you are, your main action, videos, reviews, downloadable material and subscribers." },
