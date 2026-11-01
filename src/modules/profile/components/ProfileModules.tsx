@@ -617,17 +617,9 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
           const when = ticketDate(item.date, lang)
           const body = (
             <>
-              {/* Arriba: fecha, título y lugar · el flyer entero (sin recortes: si no es 9:16, el fondo es el mismo flyer difuminado) */}
+              {/* Arriba el flyer entero a todo el ancho (nunca recortado: si no es 4:5, se ve completo sobre su propia
+                  versión difuminada); debajo fecha, título y lugar */}
               <div className="mp-tix-top">
-                <div className="mp-tix-head">
-                  {(when || item.time) && (
-                    <span className="mp-tix-when">
-                      {[when && `${when.weekday} ${when.day} ${when.month}`, item.time].filter(Boolean).join(' · ')}
-                    </span>
-                  )}
-                  {title && <span className="mp-tix-title">{title}</span>}
-                  {subtitle && <span className="mp-tix-sub"><MapPin size={13} aria-hidden="true" />{subtitle}</span>}
-                </div>
                 <div className="mp-tix-flyer">
                   {img
                     ? <>
@@ -636,6 +628,15 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
                       </>
                     : <span className="mp-tix-blank" aria-hidden="true">{title}</span>}
                   <span className="mp-tix-sheen" aria-hidden="true" />
+                </div>
+                <div className="mp-tix-head">
+                  {(when || item.time) && (
+                    <span className="mp-tix-when">
+                      {[when && `${when.weekday} ${when.day} ${when.month}`, item.time].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
+                  {title && <span className="mp-tix-title">{title}</span>}
+                  {subtitle && <span className="mp-tix-sub"><MapPin size={13} aria-hidden="true" />{subtitle}</span>}
                 </div>
               </div>
               {/* Abajo: el talón troquelado con el botón de entradas */}

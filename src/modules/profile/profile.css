@@ -295,13 +295,13 @@
 .mp-cards-title { font-weight: 700; font-size: 15.5px; line-height: 1.3; }
 .mp-cards-sub { font-size: 13px; color: var(--p-muted); line-height: 1.45; }
 
-/* Diseño Flyers (ticketera): arriba fecha, título y lugar + el flyer entero; abajo el talón troquelado con el botón
-   Entradas. Las muescas son máscaras (huecos de verdad) y la sombra es un drop-shadow que sigue su forma.
-   Coverflow: la del centro al frente, las de los costados giradas hacia adentro. */
-.mp-tix { --tix-w: min(74vw, 288px); --tix-notch: 12px; --tix-r: calc(24px * var(--p-rs, 1)); }
+/* Diseño Flyers (ticketera): arriba el flyer entero a todo el ancho; debajo fecha, título y lugar; abajo el talón
+   troquelado con el botón Entradas. Las muescas son máscaras (huecos de verdad) y la sombra es un drop-shadow que sigue
+   su forma. Carrusel: la del centro al frente; las de los costados apenas más chicas y tenues (sin giros). */
+.mp-tix { --tix-w: min(80vw, 320px); --tix-notch: 12px; --tix-r: calc(24px * var(--p-rs, 1)); }
 .mp-tix-track {
   display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  margin: 0 -20px; padding: 8px calc(50% - var(--tix-w) / 2 + 20px) 18px; outline-offset: -2px; perspective: 1100px;
+  margin: 0 -20px; padding: 8px calc(50% - var(--tix-w) / 2 + 20px) 18px; outline-offset: -2px;
 }
 .mp-tix-track::-webkit-scrollbar { display: none; }
 
@@ -309,11 +309,10 @@
   position: relative; flex: 0 0 var(--tix-w); scroll-snap-align: center; scroll-snap-stop: always;
   display: flex; flex-direction: column; text-decoration: none; color: var(--p-text);
   filter: drop-shadow(0 22px 28px rgb(0 0 0 / 0.42)) drop-shadow(0 2px 4px rgb(0 0 0 / 0.25));
-  transform-origin: 50% 60%;
+  transform-origin: 50% 50%;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s;
 }
-.mp-tix-card.is-before { transform: translateZ(-60px) rotateY(14deg) scale(0.9); opacity: 0.5; }
-.mp-tix-card.is-after  { transform: translateZ(-60px) rotateY(-14deg) scale(0.9); opacity: 0.5; }
+.mp-tix-card.is-before, .mp-tix-card.is-after { transform: scale(0.94); opacity: 0.55; }
 .mp-tix-card.is-active { transform: none; opacity: 1; }
 .mp-tix-card:active .mp-tix-top, .mp-tix-card:active .mp-tix-stub { transform: scale(0.985); }
 
@@ -327,7 +326,7 @@
   box-shadow: inset 0 0 0 1px var(--p-card-border), inset 0 1px 0 rgb(255 255 255 / 0.06);
   transition: transform 0.2s;
 }
-.mp-tix-top { border-radius: var(--tix-r); padding: 16px 12px 12px; }
+.mp-tix-top { border-radius: var(--tix-r); padding: 0; overflow: hidden; }
 .mp-tix-card.has-stub .mp-tix-top {
   border-radius: var(--tix-r) var(--tix-r) 8px 8px;
   -webkit-mask:
@@ -338,7 +337,7 @@
     radial-gradient(circle var(--tix-notch) at 100% 100%, transparent 98%, #000) right / 51% 100% no-repeat;
 }
 
-.mp-tix-head { display: flex; flex-direction: column; gap: 4px; padding: 0 6px 14px; }
+.mp-tix-head { display: flex; flex-direction: column; gap: 4px; padding: 14px 18px 16px; }
 .mp-tix-when {
   font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--p-accent-text);
   font-variant-numeric: tabular-nums;
@@ -353,10 +352,11 @@
 }
 .mp-tix-sub svg { flex-shrink: 0; opacity: 0.8; }
 
-/* El flyer entero: 9:16 llena el marco; otro formato se ve completo sobre su propia versión difuminada */
+/* El flyer entero, a todo el ancho de la tarjeta y con el mismo alto en todas (4:5, el formato de Instagram): otro
+   formato (historia 9:16, cuadrado) se ve completo sobre su propia versión difuminada. Nunca se recorta. */
 .mp-tix-flyer {
-  position: relative; aspect-ratio: 9 / 16; overflow: hidden; isolation: isolate;
-  border-radius: calc(16px * var(--p-rs, 1)); background: var(--p-surface-2);
+  position: relative; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; isolation: isolate;
+  border-radius: var(--tix-r) var(--tix-r) 0 0; background: var(--p-surface-2);
 }
 .mp-tix-backdrop {
   position: absolute; inset: -12%; width: 124%; height: 124%; max-width: none; object-fit: cover;
@@ -364,9 +364,7 @@
 }
 .mp-tix-img {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block;
-  transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.mp-tix-card.is-active .mp-tix-img { transform: scale(1.03); }
 .mp-tix-blank {
   position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 22px; font-weight: 700; font-size: 28px; line-height: 1.05;
   letter-spacing: -0.03em; color: var(--p-on-accent);
@@ -530,8 +528,6 @@
 .mp-row[href]:hover { color: var(--p-text); background: color-mix(in srgb, var(--p-text) 4%, transparent); }
 :is(.mp-project, .mp-portfolio-item, .mp-cards-item):hover { border-color: color-mix(in srgb, var(--p-text) 28%, transparent); }
 
-/* Flyer de entradas: nunca más alto que la pantalla del celular */
-.mp-tix-flyer { max-height: 56svh; }
 
 /* ── Denunciar (Fase 8) ─────────────────────────────────────────── */
 .mp-report-link {

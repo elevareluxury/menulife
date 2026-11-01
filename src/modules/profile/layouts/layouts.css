@@ -471,6 +471,9 @@
 .my-profile .mp-portfolio-img { aspect-ratio: auto; max-height: 360px; }
 .my-profile .mp-portfolio-item:last-child:nth-child(odd) .mp-portfolio-img { aspect-ratio: auto; }
 .my-profile .mp-portfolio-img.mp-cover-art-fallback { aspect-ratio: 4 / 3; }
+/* Un solo trabajo: a todo el ancho (con dos columnas quedaba a la mitad y la otra vacía) */
+.my-profile .mp-portfolio:has(> .mp-portfolio-item:only-child) { columns: 1; }
+.my-profile .mp-portfolio-item:only-child .mp-portfolio-img.mp-cover-art-fallback { aspect-ratio: 16 / 9; }
 /* Música abierta: ecualizador y plataforma */
 .mp-now {
   display: flex; align-items: center; gap: 8px; padding: 10px 14px 0; font: 600 var(--my-fs-meta) / 1 var(--my-font-ui); color: var(--my-muted);
