@@ -6,13 +6,19 @@ import { loadSupabase } from '@/lib/supabaseLazy'
 import type { Referral } from '@/lib/referral'
 import { claimMetadata, type Claim } from '@/lib/claim'
 import { validUsername } from '@/lib/username'
-import { featureOn } from '@/lib/features'
+import { betaOn, featureOn } from '@/lib/features'
+import { cachedAuthProviders, type AuthProviders } from '@/lib/authProviders'
 
-/** Qué botones de acceso con otra cuenta se muestran. App Store (regla 4.8): en la app de iPhone, Google sólo va
- *  junto a "Entrar con Apple"; mientras Apple no esté configurado, ahí se entra con email. */
-export function oauthProviders(): { google: boolean; apple: boolean } {
-  const apple = featureOn('appleSignIn')
-  return { google: featureOn('googleSignIn') && (nativePlatform() !== 'ios' || apple), apple }
+/** Qué botones de acceso con otra cuenta se muestran.
+ *  - Apple: con `appleSignIn` prendido, sólo si Supabase dice que Apple está configurado (`server`, por defecto lo
+ *    último que respondió en este dispositivo); con `?beta=1`, siempre (para probarlo antes).
+ *  - Google: salvo que Supabase diga que está apagado.
+ *  - App Store (regla 4.8): en la app de iPhone, Google sólo va junto a "Entrar con Apple"; sin Apple, ahí se entra
+ *    con email. */
+export function oauthProviders(server: AuthProviders | null = cachedAuthProviders()): { google: boolean; apple: boolean } {
+  const apple = featureOn('appleSignIn') && (server?.apple === true || betaOn())
+  const google = featureOn('googleSignIn') && server?.google !== false
+  return { google: google && (nativePlatform() !== 'ios' || apple), apple }
 }
 
 const KEY = 'mycen_oauth_pending'

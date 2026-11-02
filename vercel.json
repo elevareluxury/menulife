@@ -19,6 +19,14 @@
   },
   "rewrites": [
     {
+      "source": "/.well-known/apple-app-site-association",
+      "destination": "/api/well-known?f=aasa"
+    },
+    {
+      "source": "/.well-known/assetlinks.json",
+      "destination": "/api/well-known?f=assetlinks"
+    },
+    {
       "source": "/cal/:file",
       "destination": "/api/calendar?f=:file"
     },

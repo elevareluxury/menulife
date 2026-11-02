@@ -10,9 +10,10 @@ export const FEATURES = {
   voiceCapture:   true,
   // Entrar con Google: prendido para todos (se apaga acá si hiciera falta)
   googleSignIn:   true,
-  // Entrar con Apple: la App Store lo exige si la app ofrece Google. Prender cuando esté configurado en Apple y en
-  // Supabase → Providers → Apple (pasos en docs/app/README.md). Mientras tanto se prueba con ?beta=1 (BETA)
-  appleSignIn:    false,
+  // Entrar con Apple: la App Store lo exige si la app ofrece Google. Prendido: el botón aparece solo cuando Apple está
+  // configurado en Supabase → Authentication → Providers (lo pregunta `authProviders.ts`; pasos en docs/app/README.md).
+  // Con ?beta=1 aparece aunque Supabase no lo tenga (para probar).
+  appleSignIn:    true,
   // Diario privado con bloqueo en el dispositivo (Life OS → Brain → Diario)
   journal:        true,
   // Ánimo del día y revisión semanal guiada en Life OS (V1.1, pedido directo; prendido para todos)

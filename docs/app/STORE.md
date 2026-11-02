@@ -50,9 +50,9 @@ Palabras clave (es): `link en bio,perfil,hábitos,tareas,metas,diario,presupuest
 ## Revisión de Apple
 - Contenido de otras personas (guía 1.2): denunciar un perfil ("Denunciar" en cada perfil público) y, en Studio →
   Mensajes, reportar un mensaje al equipo o bloquear a quien lo escribió. El equipo lo revisa en el panel (Denuncias).
-- "Entrar con Apple" va junto a "Continuar con Google" (guía 4.8). Mientras `appleSignIn` esté apagado, la app de
-  iPhone no muestra Google (`oauthProviders()` en `googleSignIn.ts`): se entra con email. Si prendés Apple, cambiá el
-  párrafo "SIGN-IN" de las notas de abajo.
+- "Entrar con Apple" va junto a "Continuar con Google" (guía 4.8). Aparece solo cuando Apple está configurado en
+  Supabase; mientras no lo esté, la app de iPhone no muestra Google (`oauthProviders()` en `googleSignIn.ts`) y se entra
+  con email. Las notas de abajo traen los dos párrafos "SIGN-IN": dejá el que corresponda.
 - Permisos de iOS (`Info.plist` y los 12 `InfoPlist.strings`): sólo cámara y fotos (foto de perfil, portada e imágenes
   de proyectos) y guardar en Fotos (QR y tarjeta). Sin micrófono ni reconocimiento de voz: "Dictar" no se ofrece en la
   app (`speechSupported()` en `useSpeech.ts`). Si vuelve el dictado nativo, declarar los dos permisos de nuevo.
@@ -92,7 +92,8 @@ SIGN-IN
 Use this demo account (email and password):
 Email: <EMAIL_DE_PRUEBA>
 Password: <CONTRASEÑA>
-In this version the iPhone app only offers email sign-in. It shows no third-party login (Google or other) on iOS, so guideline 4.8 does not apply. Sign in with Apple will be added next to Google in a later version.
+The app also offers "Continue with Apple" next to "Continue with Google" (guideline 4.8).
+[If Apple is not configured in Supabase yet, use this sentence instead: "In this version the iPhone app only offers email sign-in. It shows no third-party login on iOS, so guideline 4.8 does not apply."]
 
 ACCOUNT DELETION (5.1.1(v))
 Inside the app, from either part:

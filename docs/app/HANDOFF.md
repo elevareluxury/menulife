@@ -20,7 +20,7 @@ Android") y `docs/app/README.md`.
 1. `/api/media-cover` y `/api/youtube-latest`: CORS `*` (la app pide desde `capacitor://localhost`; antes fallaba).
 2. Link `webcal://` del calendario y links de Business (QR, mozos, repartidores, solicitudes) con `webOrigin()`.
 3. Descargas de Business (QR de mesas, CSV de estadísticas) con `saveFile` (en la app no hay descargas).
-4. App Store 4.8: `oauthProviders()` en `googleSignIn.ts` — en iPhone, Google sólo si `appleSignIn` está prendido.
+4. App Store 4.8: `oauthProviders()` en `googleSignIn.ts` — en iPhone, Google sólo si Apple aparece (prendido en Supabase).
 5. App Store 5.1.1(v): "Eliminar mi cuenta" también en Life OS → Ajustes → Cuenta (con palabra de confirmación;
    `LifeConfirmDialog` suma `confirmDisabled`; textos en los 12 idiomas en `src/i18n/app/life/*`).
 6. Dictado apagado en la app (iOS y Android); huella del diario apagada en la app (sólo PIN).
@@ -34,6 +34,6 @@ Android") y `docs/app/README.md`.
 - Esperar el CI verde del PR #81 → el usuario dice "listo" → mergear (merge commit) → reset de la rama a `origin/main`.
 - Después: freeze v1.0.0 según `docs/v1/prompts/17-freeze.md` (pedir confirmación de migraciones aplicadas, CHANGELOG,
   `docs/v1/RELEASE.md`, rama `release/v1` y tag `v1.0.0`).
-- Del usuario: Team ID de Apple y SHA256 de Android (reemplazan `APPLE_TEAM_ID` / `ANDROID_SHA256_FINGERPRINT` en
-  `public/.well-known/`), configurar "Entrar con Apple" y prender `appleSignIn`, cuentas de desarrollador, armar en una
+- Del usuario: Team ID de Apple y SHA256 de Android (variables `APPLE_TEAM_ID` / `ANDROID_CERT_SHA256` en Vercel,
+  sin tocar código), configurar "Entrar con Apple" en Apple y Supabase (aparece solo), cuentas de desarrollador, armar en una
   Mac (Xcode) y en Android Studio.

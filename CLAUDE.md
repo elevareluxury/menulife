@@ -714,10 +714,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `authCallbackUrl()`); nada de `window.location.origin` para links públicos. En la app: `/` → `/login` (sin landing ni
   precios), sin "Agregar a inicio" ni service worker, descargas y compartir con `saveFile`/`shareLink`
   (`src/lib/nativeFiles.ts`), acceso con PKCE y navegador del sistema (`googleSignIn.ts`, `startOAuthSignIn`), links de
-  mycen.id que abren la app (`NativeBridge`, `lib/appLinks.ts`, `public/.well-known/`), recordatorios programados en el
+  mycen.id que abren la app (`NativeBridge`, `lib/appLinks.ts`; `/.well-known/apple-app-site-association` y
+  `assetlinks.json` los arma `api/well-known.ts` con `APPLE_TEAM_ID` / `ANDROID_CERT_SHA256` de Vercel), recordatorios programados en el
   teléfono (`life/lib/nativeReminders.ts`, desde `useTaskReminders`/`useHabitReminders`). Los plugins se importan sólo
-  en la app (dinámicos). Entrar con Apple: `FEATURES.appleSignIn` (en BETA hasta configurarlo; textos y privacidad en
-  12 idiomas; mientras esté apagado, la app de iPhone no muestra Google — regla 4.8, `oauthProviders()`). Íconos:
+  en la app (dinámicos). Entrar con Apple: `FEATURES.appleSignIn` prendido, pero el botón sale sólo si Supabase
+  tiene Apple configurado (`src/lib/authProviders.ts` lee `/auth/v1/settings`; `?beta=1` lo fuerza para probar); textos y
+  privacidad en 12 idiomas; sin Apple, la app de iPhone no muestra Google — regla 4.8, `oauthProviders()`. Íconos:
   `node scripts/build-app-assets.mjs`. E2E `native-app.spec.ts` (simula el puente de iOS). Para las tiendas: `/api`
   público con CORS `*` (la app pide desde `capacitor://localhost`), "Eliminar mi cuenta" también en Life OS → Ajustes
   (E2E en `delete-account.spec.ts`; `oauthProviders()` en `googleSignIn.test.ts`),

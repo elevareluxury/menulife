@@ -97,18 +97,33 @@ test('sin aceptar, una cuenta de Google no puede usar la app', async ({ page, co
   await expect(page).toHaveURL(/\/login$/)
 })
 
-test('Entrar con Apple: apagado no aparece; en beta manda a Apple por el mismo camino', async ({ page, context }) => {
+test('Entrar con Apple: aparece sólo si está configurado en Supabase (o con ?beta=1) y manda a Apple', async ({ page, context }) => {
   await installSupabaseMock(context, createState({}))
   let authorize: URL | null = null
   await page.route('**/auth/v1/authorize**', route => {
     authorize = new URL(route.request().url())
     return route.fulfill({ status: 200, contentType: 'text/html', body: '<p>Apple</p>' })
   })
+  let apple = false
+  await page.route('**/auth/v1/settings', route => route.fulfill({
+    status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+    body: JSON.stringify({ external: { apple, google: true, email: true } }),
+  }))
+
+  // Sin Apple en Supabase: sólo Google
   await page.goto('/login')
   await expect(page.getByRole('button', { name: 'Continuar con Google' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Continuar con Apple' })).toHaveCount(0)
 
+  // Con ?beta=1 aparece igual (para probar antes de prenderlo)
   await page.goto('/login?beta=1')
+  await expect(page.getByRole('button', { name: 'Continuar con Apple' })).toBeVisible()
+  await page.goto('/login?beta=0')
+  await expect(page.getByRole('button', { name: 'Continuar con Apple' })).toHaveCount(0)
+
+  // Prendido en Supabase: aparece para todos, sin tocar código
+  apple = true
+  await page.goto('/login')
   await page.getByRole('button', { name: 'Continuar con Apple' }).click()
   await expect.poll(() => authorize?.searchParams.get('provider')).toBe('apple')
   expect(authorize!.searchParams.get('redirect_to')).toMatch(/\/auth\/callback$/)
