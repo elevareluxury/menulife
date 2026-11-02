@@ -21,7 +21,7 @@ const BENTO_DEFAULT: Record<ModuleType, ModuleSize> = {
   featured_action: 'featured', contact_card: 'square', gallery: 'featured', product: 'wide', testimonials: 'wide',
   hours: 'wide', cards: 'featured', project: 'featured', portfolio: 'featured', link_group: 'wide',
   contact_form: 'wide', collab: 'wide', subscribe: 'wide', media: 'wide', latest_video: 'featured', support: 'wide',
-  listen_on: 'wide', poll: 'wide', downloads: 'wide', coupon: 'square', video_gallery: 'featured', podcast: 'wide',
+  listen_on: 'wide', poll: 'wide', downloads: 'wide', coupon: 'square', video_gallery: 'featured', podcast: 'wide', events: 'featured',
 }
 
 /** Los tipos que se ven bien en un cuadrado (el resto parte sus textos o sus botones) */

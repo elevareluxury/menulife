@@ -20,6 +20,9 @@ import { newOptionId } from './pollOptions'
 import { BRANCHES_MAX, cleanBranches } from '@/modules/profile/lib/branches'
 import { BranchesEditor, FilesEditor, PollOptionsEditor, type BranchInput, VideoListEditor, type FileInput, type PollOptionInput, type VideoInput } from '../components/v2Editors'
 import { inspectFeedUrl } from '@/modules/profile/lib/podcast'
+import { readEvents, validEventId, type EventItem } from '@/modules/profile/lib/events'
+import { EventsEditor } from '../components/EventsEditor'
+import { newEvent } from './newEvent'
 import { duplicateListenRows, listenErrorText, supportErrorText, type ListenInput, type SupportInput } from './supportListenErrors'
 
 /** Zona horaria del dispositivo de quien edita (los horarios se leen en la del dueño, no en la del visitante) */
@@ -620,6 +623,31 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
       prefill: x => { if (!x.count) x.count = '3' },
       finalize: content => { content.count = Number(content.count) || 3 },
       summary: x => text(x.feed).replace(/^https:\/\//, ''),
+    },
+    // Eventos (ticketera para productoras): flyer, datos, descripción (ficha del evento) y link de entradas
+    events: {
+      addable: featureOn('eventsModule'),
+      fields: [
+        { key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80, placeholder: t.events.titlePlaceholder },
+      ],
+      extra: extra<EventItem[]>({
+        init: m => (Array.isArray(m?.content.items) && m!.content.items.length
+          ? (m!.content.items as EventItem[]).map(i => ({ ...i, id: validEventId(i?.id) ? i.id : newEvent().id }))
+          : [newEvent()]),
+        validate: items => {
+          const filled = items.filter(i => i.title?.trim() || i.image_url)
+          if (!filled.length) return t.events.empty
+          if (filled.some(i => i.url?.trim() && !safeHref(i.url))) return t.events.badLink
+          return null
+        },
+        apply: (items, content) => {
+          content.items = readEvents(items
+            .filter(i => i.title?.trim() || i.image_url)
+            .map(i => ({ ...i, url: i.url?.trim() ? safeHref(i.url) ?? undefined : undefined })))
+        },
+        Editor: EventsEditor,
+      }),
+      summary: x => t.events.summary(count(x.items)),
     },
     // V1.1 · Apoyame: links de pago y alias/Pix para copiar (Mycen no cobra ni procesa pagos)
     support: {

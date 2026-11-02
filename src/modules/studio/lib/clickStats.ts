@@ -54,7 +54,8 @@ export function clickItemLabel(m: ClickModule, key: string, labels: ClickLabels,
   const c = m.content ?? {}
   switch (m.type) {
     case 'link_group':
-    case 'cards': {
+    case 'cards':
+    case 'events': {
       const hit = items(c.items).find(i => urlKey(i.url) === key)
       return hit ? str(hit.title) || str(hit.url) : null
     }

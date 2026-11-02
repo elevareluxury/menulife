@@ -798,6 +798,15 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   35 íconos de marca más (Simple Icons, CC0) en `lib/brandIcons.ts`, chunk que `SocialIcon` baja sólo si el perfil usa
   alguna (`LAZY_BRANDS`, dominios en `networkFromUrl`); también en el selector de "Red social". Tests en
   `entrega2b.test.ts` y `modules-v2b.spec.ts`. Privacidad (ubicación) en 12 idiomas.
+- Eventos (ticketera para productoras, `FEATURES.eventsModule`): módulo `events` (`content.items`, hasta 20: `id`
+  `[a-z0-9]{4,16}`, portada, título, fecha, hora, lugar, etiqueta, descripción ≤ 1500, link de entradas, `en`). Reglas
+  puras en `profile/lib/events.ts` (`readEvents` vuelve a validar, `upcomingEvents` oculta lo que ya pasó con la fecha
+  de quien mira, `posterRatio` 9:16…1:1). `EventsModule` (chunk propio, `events.css`, textos en `eventsI18n.ts`):
+  fecha grande del evento al frente, tarjetas casi del alto de la pantalla con la forma del flyer, "Entradas" directo al
+  link; tocar la portada abre la ficha (portal a pantalla completa con foco atrapado, Escape y botón atrás) con su link
+  `?evento=<id>` (pushState; se puede compartir). Studio: `EventsEditor`, plantilla por rubro "Productora de eventos".
+  Migración `20261122000001_identity_events_module.sql` (sólo el tipo), tests en `events_module.test.sql`,
+  `events.test.ts` y `events.spec.ts`. El diseño "Flyers" de Tarjetas sigue para quien ya lo usa.
 - Auditoría antes del freeze (Business, `20261120000001_business_quotes_lockdown.sql`, tests en
   `business_quotes_lockdown.test.sql`): los presupuestos por link (`/q/:token`) ya no se leen ni se cambian con
   políticas de `anon` (dejaban ver y aceptar todos); `QuotePublicPage` usa `get_public_quote(p_token)` (sólo ese
