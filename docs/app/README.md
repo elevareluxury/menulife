@@ -12,7 +12,7 @@ La app es la misma web de Mycen adentro de una app nativa (Capacitor 8). Todo el
 | Guardar o compartir archivos (vCard, CSV, QR, tarjeta, .ics, exportar) | `src/lib/nativeFiles.ts` |
 | Recordatorios con la app cerrada (notificaciones locales) | `src/modules/life/lib/nativeReminders.ts` |
 | Íconos y pantalla de carga (desde el ícono maestro de la marca) | `node scripts/build-app-assets.mjs` |
-| Links verificados (Universal Links / App Links) | `public/.well-known/apple-app-site-association`, `public/.well-known/assetlinks.json` |
+| Links verificados (Universal Links / App Links) | `api/well-known.ts` (`/.well-known/apple-app-site-association` y `/.well-known/assetlinks.json`, con variables de Vercel) |
 
 Qué cambia en la app respecto de la web:
 - Abre en el acceso (sin landing ni precios: Apple no deja cobrar por fuera de su sistema) y no ofrece "Agregar a inicio".
@@ -32,11 +32,14 @@ Qué cambia en la app respecto de la web:
 - **Google Play Console** (USD 25, una sola vez): https://play.google.com/console
 
 ### 2. Links que abren la app
-- En `public/.well-known/apple-app-site-association`, reemplazá `APPLE_TEAM_ID` por tu Team ID (dos veces).
-- En `public/.well-known/assetlinks.json`, reemplazá `ANDROID_SHA256_FINGERPRINT` por la huella SHA-256 del
-  certificado con el que Google Play firma la app (Play Console → tu app → Configuración → Integridad de la app →
-  "Certificado de firma de apps"). Para probar antes, agregá también la de tu llave de subida.
-- Publicá (merge a `main`) y comprobá que `https://mycen.id/.well-known/apple-app-site-association` responde.
+Sin tocar código: se cargan dos variables en **Vercel → Settings → Environment Variables** (entorno Production) y se
+vuelve a publicar (Deployments → ⋯ → Redeploy).
+- `APPLE_TEAM_ID` = tu Team ID (10 letras y números).
+- `ANDROID_CERT_SHA256` = la huella SHA-256 del certificado con el que Google Play firma la app (Play Console → tu app
+  → Configuración → Integridad de la app → "Certificado de firma de apps"), con los dos puntos (`AB:CD:…`). Para probar
+  antes con tu llave de subida, agregá también esa huella separada por una coma.
+- Comprobá que `https://mycen.id/.well-known/apple-app-site-association` muestra tu Team ID y
+  `https://mycen.id/.well-known/assetlinks.json` tu huella.
 - **Supabase → Authentication → URL Configuration → Redirect URLs:** que esté `https://mycen.id/auth/callback`
   (ya se usa en la web).
 
@@ -48,8 +51,9 @@ Qué cambia en la app respecto de la web:
 3. Creá una **Key** con Sign in with Apple y bajá el archivo `.p8`.
 4. Supabase → Authentication → Providers → **Apple**: prendelo y cargá el Services ID, el Team ID, el Key ID y el
    contenido del `.p8` (Supabase genera el secreto). Ojo: el secreto vence cada 6 meses; anotalo en el calendario.
-5. Probá en producción con `https://mycen.id/login?beta=1` (aparece "Continuar con Apple" sólo en ese dispositivo).
-6. Si funciona, en `src/lib/features.ts` poné `appleSignIn: true` (PR aparte) y aparece para todos.
+5. Listo: "Continuar con Apple" aparece solo en cuanto Apple queda prendido en Supabase (la app pregunta a Supabase
+   qué accesos están configurados; mientras no lo esté, no se muestra y en el iPhone tampoco Google). Para probarlo
+   antes en un solo dispositivo: `https://mycen.id/login?beta=1` (`?beta=0` lo saca).
 
 ### 4. Armar la app
 Necesitás una Mac con **Xcode 16+** para iPhone y **Android Studio** para Android (o un servicio de compilación en la

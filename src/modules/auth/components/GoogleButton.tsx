@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
 import { authErrorMessage } from '@/lib/authErrors'
 import type { Referral } from '@/lib/referral'
 import type { Claim } from '@/lib/claim'
 import { oauthProviders, startOAuthSignIn } from '@/modules/auth/lib/googleSignIn'
+import { fetchAuthProviders } from '@/lib/authProviders'
 
 // Logo de Google con sus colores oficiales (lo piden sus pautas de marca para el botón de acceso)
 function GoogleLogo() {
@@ -40,7 +41,13 @@ export function GoogleButton({ referral = null, claim = null, accepted }: { refe
   const a = t.apple
   const [loading, setLoading] = useState<'google' | 'apple' | null>(null)
   const [error, setError] = useState('')
-  const [shown] = useState(oauthProviders)
+  // Primero lo último que respondió Supabase en este dispositivo; después, lo que está configurado hoy
+  const [shown, setShown] = useState(() => oauthProviders())
+  useEffect(() => {
+    let alive = true
+    void fetchAuthProviders().then(p => { if (alive && p) setShown(oauthProviders(p)) })
+    return () => { alive = false }
+  }, [])
 
   async function handleClick(provider: 'google' | 'apple') {
     setError('')

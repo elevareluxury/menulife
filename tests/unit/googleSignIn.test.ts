@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { needsTerms, oauthProviders, pendingUpdates } from '@/modules/auth/lib/googleSignIn'
+import { parseAuthSettings } from '@/lib/authProviders'
 import { nativePlatform } from '@/lib/platform'
 import { featureOn, type FeatureName } from '@/lib/features'
 
@@ -58,27 +59,56 @@ describe('oauthProviders (App Store 4.8)', () => {
 
   beforeEach(() => vi.mocked(featureOn).mockReset())
 
+  const ON = { apple: true, google: true }
+  const NO_APPLE = { apple: false, google: true }
+
   it('en iPhone sin Apple no muestra Google (se entra con email)', () => {
     platform('ios'); on({ googleSignIn: true, appleSignIn: false })
-    expect(oauthProviders()).toEqual({ google: false, apple: false })
+    expect(oauthProviders(ON)).toEqual({ google: false, apple: false })
   })
 
-  it('en iPhone con Apple prendido muestra los dos', () => {
+  it('en iPhone con Apple prendido y configurado en Supabase muestra los dos', () => {
     platform('ios'); on({ googleSignIn: true, appleSignIn: true })
-    expect(oauthProviders()).toEqual({ google: true, apple: true })
+    expect(oauthProviders(ON)).toEqual({ google: true, apple: true })
+  })
+
+  it('Apple prendido pero sin configurar en Supabase (o sin respuesta todavía): no aparece y en iPhone tampoco Google', () => {
+    platform('ios'); on({ googleSignIn: true, appleSignIn: true })
+    expect(oauthProviders(NO_APPLE)).toEqual({ google: false, apple: false })
+    expect(oauthProviders(null)).toEqual({ google: false, apple: false })
+    platform('web')
+    expect(oauthProviders(NO_APPLE)).toEqual({ google: true, apple: false })
+  })
+
+  it('Google apagado en Supabase no se muestra; sin respuesta, se muestra', () => {
+    platform('web'); on({ googleSignIn: true, appleSignIn: true })
+    expect(oauthProviders({ apple: true, google: false })).toEqual({ google: false, apple: true })
+    expect(oauthProviders(null)).toEqual({ google: true, apple: false })
   })
 
   it('en la web y en Android, Google no depende de Apple', () => {
     for (const p of ['web', 'android'] as const) {
       platform(p); on({ googleSignIn: true, appleSignIn: false })
-      expect(oauthProviders()).toEqual({ google: true, apple: false })
+      expect(oauthProviders(ON)).toEqual({ google: true, apple: false })
     }
   })
 
   it('con Google apagado no lo muestra en ningún lado', () => {
     for (const p of ['web', 'android', 'ios'] as const) {
       platform(p); on({ googleSignIn: false, appleSignIn: true })
-      expect(oauthProviders()).toEqual({ google: false, apple: true })
+      expect(oauthProviders(ON)).toEqual({ google: false, apple: true })
     }
+  })
+})
+
+describe('parseAuthSettings (/auth/v1/settings de Supabase)', () => {
+  it('lee qué proveedores están prendidos', () => {
+    expect(parseAuthSettings({ external: { apple: true, google: true, email: true } })).toEqual({ apple: true, google: true })
+    expect(parseAuthSettings({ external: { google: true } })).toEqual({ apple: false, google: true })
+  })
+  it('una respuesta sin esa forma no cuenta', () => {
+    expect(parseAuthSettings({})).toBeNull()
+    expect(parseAuthSettings(null)).toBeNull()
+    expect(parseAuthSettings({ external: 'x' })).toBeNull()
   })
 })
