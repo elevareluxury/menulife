@@ -1,0 +1,204 @@
+/* Módulo "Eventos" (ticketera para productoras). Dentro del perfil usa las variables --p-* del tema; la ficha (portal en
+   <body>) copia tema y acento y usa las --my-* del sistema de diseño. Sólo se anima transform y opacity. */
+
+.mp-ev { container-type: inline-size; }
+.mp-ev .mp-section-title { margin-bottom: 6px; }
+
+/* Fecha grande del evento al frente */
+.mp-ev-head { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 14px; min-height: 1em; }
+.mp-ev-bigdate {
+  font-family: var(--p-title-font); font-weight: 800; font-size: clamp(38px, 13cqw, 60px); line-height: 0.92;
+  letter-spacing: -0.045em; text-transform: uppercase; color: var(--p-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mp-ev-headmeta {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--p-accent-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Carrusel: la tarjeta toma la forma del flyer (--ev-ar); uno alto achica el ancho para no pasar --ev-maxh */
+.mp-ev-track {
+  --ev-w: min(86cqw, 380px); --ev-maxh: 56svh;
+  display: flex; align-items: center; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch; margin: 0 -20px; outline-offset: -2px;
+  padding: 6px calc(50% - min(var(--ev-w), var(--ev-maxh) * var(--ev-ar-last, 0.8)) / 2 + 20px) 18px
+    calc(50% - min(var(--ev-w), var(--ev-maxh) * var(--ev-ar-first, 0.8)) / 2 + 20px);
+}
+.mp-ev-track::-webkit-scrollbar { display: none; }
+
+.mp-ev-card {
+  position: relative; flex: 0 0 min(var(--ev-w), var(--ev-maxh) * var(--ev-ar, 0.8)); min-width: min(240px, 72cqw);
+  display: flex; flex-direction: column; scroll-snap-align: center; scroll-snap-stop: always;
+  padding: 8px; border-radius: calc(30px * var(--p-rs, 1)); background: var(--p-card-bg);
+  box-shadow: inset 0 0 0 1px var(--p-card-border), 0 24px 40px -18px rgb(0 0 0 / 0.5);
+  transform-origin: 50% 50%;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s;
+}
+.mp-ev-card.is-side { transform: scale(0.92); opacity: 0.5; }
+
+.mp-ev-poster {
+  position: relative; display: block; width: 100%; aspect-ratio: var(--ev-ar, 0.8); padding: 0; border: 0; cursor: pointer;
+  overflow: hidden; isolation: isolate; border-radius: calc(23px * var(--p-rs, 1)); background: var(--p-surface-2);
+  color: inherit; font: inherit; text-align: start;
+}
+.mp-ev-poster:focus-visible { outline: 2px solid var(--p-accent); outline-offset: 3px; }
+.mp-ev-card:active .mp-ev-poster { transform: scale(0.985); }
+.mp-ev-poster { transition: transform 0.2s; }
+.mp-ev-backdrop {
+  position: absolute; inset: -12%; width: 124%; height: 124%; max-width: none; object-fit: cover;
+  filter: blur(26px) saturate(1.3) brightness(0.7);
+}
+.mp-ev-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.mp-ev-blank {
+  position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 22px; font-family: var(--p-title-font);
+  font-weight: 700; font-size: 28px; line-height: 1.05; letter-spacing: -0.03em; color: var(--p-on-accent);
+  background:
+    radial-gradient(90% 60% at 85% 10%, color-mix(in srgb, #fff 22%, transparent), transparent 60%),
+    radial-gradient(120% 80% at 10% 0%, color-mix(in srgb, var(--p-accent) 85%, #fff 15%), var(--p-accent) 45%, color-mix(in srgb, var(--p-accent) 35%, #000));
+}
+/* Hora y etiqueta sobre el flyer, en vidrio oscuro (se leen sobre cualquier imagen) */
+.mp-ev-chips { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.mp-ev-chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.02em; color: #fff; font-variant-numeric: tabular-nums;
+  background: rgb(8 8 18 / 0.58); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+}
+[dir="rtl"] .mp-ev-chips { left: 10px; right: 10px; }
+.mp-ev-sheen {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; mix-blend-mode: screen;
+  background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.2) 47%, color-mix(in srgb, var(--p-accent) 28%, transparent) 52%, transparent 62%) 120% 0 / 250% 100% no-repeat;
+}
+
+.mp-ev-info { display: flex; flex-direction: column; gap: 3px; padding: 12px 10px 4px; min-width: 0; }
+.mp-ev-when {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--p-accent-text);
+  font-variant-numeric: tabular-nums;
+}
+.mp-ev-title {
+  font-weight: 700; font-size: 19px; line-height: 1.18; letter-spacing: -0.02em; color: var(--p-text);
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; unicode-bidi: plaintext;
+}
+.mp-ev-venue {
+  display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--p-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mp-ev-venue svg { flex-shrink: 0; }
+
+/* Abajo de la tarjeta: directo al link de entradas */
+.mp-ev-buy {
+  position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; margin-top: 10px; border-radius: calc(22px * var(--p-rs, 1));
+  font-size: 15.5px; font-weight: 700; letter-spacing: 0.01em; text-decoration: none;
+  background: var(--p-accent); color: var(--p-on-accent);
+  box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--p-accent) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.22);
+}
+.mp-ev-buy svg:last-child { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.mp-ev-buy:hover svg:last-child { transform: translate(2px, -2px); }
+[dir="rtl"] .mp-ev-buy svg:last-child { transform: scaleX(-1); }
+.mp-ev-buy::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%; transform: skewX(-20deg); opacity: 0;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.32), transparent);
+}
+
+.mp-ev-dots { display: flex; justify-content: center; flex-wrap: wrap; }
+.mp-ev-dots button {
+  /* Punto de 6 px dentro de un área táctil propia de 24 × 24 (data-touch-exempt) */
+  box-sizing: content-box; width: 6px; height: 6px; padding: 9px; border: 0; border-radius: 999px; cursor: pointer;
+  background: color-mix(in srgb, var(--p-text) 24%, transparent) content-box;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+}
+.mp-ev-dots button.is-active { width: 22px; background: var(--p-accent) content-box; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .mp-ev-bigdate { animation: mp-ev-date 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+  @keyframes mp-ev-date { from { opacity: 0.01; transform: translateY(10px); } }
+  .mp-ev-card.is-active .mp-ev-sheen { animation: mp-ev-sheen 1.5s 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+  @keyframes mp-ev-sheen { 0% { opacity: 1; background-position: 120% 0; } 100% { opacity: 1; background-position: -40% 0; } }
+  .mp-ev-card.is-active .mp-ev-buy::after { animation: mp-ev-shine 3.6s 1.2s ease-in-out infinite; }
+  @keyframes mp-ev-shine { 0% { left: -60%; opacity: 1; } 28% { left: 120%; opacity: 1; } 100% { left: 120%; opacity: 0; } }
+  .mp-evd { animation: mp-evd-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+  @keyframes mp-evd-in { from { opacity: 0.01; transform: translateY(18px); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mp-ev-card { transition: none; }
+}
+
+/* ── Ficha del evento (pantalla completa) ───────────────────────────── */
+.mp-evd {
+  position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  background: var(--my-bg); color: var(--my-text); font-family: var(--my-font-ui);
+}
+.mp-evd-glowbox { position: absolute; top: 0; left: 0; right: 0; height: 70svh; overflow: hidden; pointer-events: none; z-index: 0; }
+.mp-evd-glow {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  filter: blur(48px) saturate(1.4); opacity: 0.4; transform: scale(1.15);
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent); mask-image: linear-gradient(to bottom, #000 30%, transparent);
+}
+.mp-evd-top {
+  position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: calc(env(safe-area-inset-top) + 12px) 16px 10px;
+}
+.mp-evd-back, .mp-evd-share, .mp-evd-chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 44px;
+  border-radius: var(--my-r-pill); border: 1px solid var(--my-border); color: var(--my-text);
+  background: var(--my-glass-strong); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  font: 600 15px/1 var(--my-font-ui);
+}
+.mp-evd-back { padding: 0 16px 0 10px; cursor: pointer; }
+[dir="rtl"] .mp-evd-back svg { transform: scaleX(-1); }
+.mp-evd-share { width: 44px; padding: 0; cursor: pointer; }
+.mp-evd-chip { min-height: 36px; padding: 0 14px; font-size: 13px; font-weight: 700; }
+.mp-evd-topchips { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mp-evd-back:focus-visible, .mp-evd-share:focus-visible, .mp-evd-more:focus-visible, .mp-evd-buy:focus-visible {
+  outline: 2px solid var(--my-text); outline-offset: 3px;
+}
+
+.mp-evd-body { position: relative; z-index: 1; flex: 1 0 auto; width: 100%; max-width: 560px; margin: 0 auto; padding: 6px 16px 20px; box-sizing: border-box; }
+.mp-evd-body { display: flex; flex-direction: column; }
+/* El flyer con su forma: el marco mide lo mismo que la imagen (sin bandas a los costados) */
+.mp-evd-poster {
+  align-self: center; width: fit-content; max-width: 100%; border-radius: var(--my-r-hero); overflow: hidden;
+  background: var(--my-tile); box-shadow: var(--my-shadow-float);
+}
+.mp-evd-poster img { display: block; width: auto; max-width: 100%; height: auto; max-height: 70svh; }
+.mp-evd-info { min-width: 0; }
+.mp-evd-title {
+  font-family: var(--my-font-display); font-weight: 700; font-size: clamp(26px, 7.4vw, 38px); line-height: 1.06;
+  letter-spacing: -0.02em; margin: 22px 0 14px; overflow-wrap: anywhere; unicode-bidi: plaintext;
+}
+.mp-evd-meta { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+.mp-evd-meta li { display: flex; align-items: center; gap: 10px; font-size: 15.5px; line-height: 1.35; }
+.mp-evd-meta li span::first-letter { text-transform: uppercase; }
+.mp-evd-meta svg { flex-shrink: 0; color: var(--my-muted); }
+.mp-evd-desc {
+  margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--my-muted); white-space: pre-line; overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+.mp-evd-desc.is-clamped { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
+.mp-evd-more {
+  min-height: 44px; padding: 0; border: 0; background: none; color: var(--my-text); cursor: pointer;
+  font: 700 15px/1 var(--my-font-ui); text-decoration: underline; text-underline-offset: 3px;
+}
+.mp-evd-status { margin: 8px 0 0; min-height: 1em; font-size: 13px; color: var(--my-muted); }
+
+.mp-evd-cta {
+  position: sticky; bottom: 0; z-index: 2; padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--my-bg) 62%, transparent);
+}
+.mp-evd-buy {
+  display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 528px; min-height: 56px; margin: 0 auto;
+  border-radius: var(--my-r-action); background: var(--my-accent); color: var(--my-on-accent); text-decoration: none;
+  font: 700 16.5px/1 var(--my-font-ui); box-shadow: 0 14px 30px -14px var(--my-accent);
+}
+[dir="rtl"] .mp-evd-buy svg:last-child { transform: scaleX(-1); }
+
+@media (min-width: 900px) {
+  .mp-evd-body { max-width: 1040px; flex-direction: row; align-items: flex-start; gap: 48px; padding-top: 24px; }
+  .mp-evd-poster { flex: 0 0 auto; max-width: 48%; position: sticky; top: 84px; }
+  .mp-evd-poster img { max-height: calc(100svh - 200px); }
+  .mp-evd-info { flex: 1 1 0; }
+  .mp-evd-title { margin-top: 4px; }
+  .mp-evd-cta { padding-inline: 24px; }
+}

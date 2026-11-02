@@ -12,7 +12,7 @@ import type { MycenAccent } from '@/design/themes'
 export const TEMPLATE_IDS = [
   'musician', 'creator', 'professional', 'business', 'personal',
   // Por rubro
-  'restaurant', 'beauty', 'photographer', 'coach', 'store', 'podcaster',
+  'restaurant', 'beauty', 'photographer', 'coach', 'store', 'podcaster', 'producer',
 ] as const
 export type TemplateId = typeof TEMPLATE_IDS[number]
 
@@ -73,6 +73,10 @@ export const TEMPLATES: Record<TemplateId, IdentityTemplate> = {
   podcaster: {
     id: 'podcaster', group: 'industry', layout: 'portada', accent: 'nebulosa',
     modules: ['podcast', 'social', 'poll', 'support', 'subscribe', 'collab'],
+  },
+  producer: {
+    id: 'producer', group: 'industry', layout: 'portada', accent: 'plasma',
+    modules: ['events', 'video_gallery', 'gallery', 'social', 'subscribe', 'contact_form'],
   },
 }
 

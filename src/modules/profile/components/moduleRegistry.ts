@@ -14,6 +14,8 @@ const DownloadsModule = preloadable<ModuleProps>(() => import('./V2Modules').the
 const CouponModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.CouponModule })))
 const VideoGalleryModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.VideoGalleryModule })))
 const PodcastModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.PodcastModule })))
+// Eventos (ticketera para productoras): chunk propio con su CSS, sus textos y la ficha del evento
+const EventsModule = preloadable<ModuleProps>(() => import('./EventsModule').then(m => ({ default: m.EventsModule })))
 // Video y música en su propio chunk: sólo lo baja un perfil que lo usa (la huella de la fachada pesa)
 const ContactFormModule = preloadable<ModuleProps>(() => import('./ContactFormModule').then(m => ({ default: m.ContactFormModule })))
 const CollabModule = preloadable<ModuleProps>(() => import('./CollabModule').then(m => ({ default: m.CollabModule })))
@@ -73,6 +75,7 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   coupon:          { View: CouponModule },
   video_gallery:   { View: VideoGalleryModule },
   podcast:         { View: PodcastModule },
+  events:          { View: EventsModule },
 }
 
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */

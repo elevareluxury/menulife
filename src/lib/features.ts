@@ -24,6 +24,8 @@ export const FEATURES = {
   // Módulos de la entrega 2 (pedido directo; prendidos): Encuesta, Descargables, Cupón, Galería de videos y Podcast.
   // Apagado, Studio no los ofrece al agregar un módulo (los ya creados se siguen viendo).
   modulesV2:      true,
+  // Eventos (ticketera para productoras, pedido directo; prendido). Apagado, Studio no lo ofrece al agregar un módulo.
+  eventsModule:   true,
 } as const
 
 export type FeatureName = keyof typeof FEATURES
