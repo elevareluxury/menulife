@@ -78,6 +78,8 @@ export function PollModule({ module, lang, onAction }: ModuleProps) {
               aria-pressed={chosen} disabled={busy} onClick={() => vote(o.id)}
               style={showResults ? { '--mp-pct': `${pct}%` } as React.CSSProperties : undefined}>
               {showResults && <span className="mp-poll-bar" aria-hidden="true" />}
+              {/* Antes de votar, un círculo de opción: se ve que se toca para elegir (no un texto suelto) */}
+              {!showResults && <span className="mp-poll-radio" aria-hidden="true" />}
               <span className="mp-poll-label">{chosen && <Check size={16} aria-hidden="true" />}{o.label}</span>
               {showResults && <span className="mp-poll-pct">{pct}%</span>}
             </button>

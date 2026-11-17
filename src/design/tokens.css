@@ -57,6 +57,8 @@
   --my-glass: rgba(255, 255, 255, 0.06);
   --my-glass-strong: rgba(255, 255, 255, 0.09);
   --my-border: rgba(255, 255, 255, 0.14);
+  /* Borde de los campos: 3:1 contra el fondo (WCAG 1.4.11); el de vidrio no alcanza para saber dónde escribir */
+  --my-field-border: rgba(255, 255, 255, 0.38);
   --my-field: rgba(4, 5, 13, 0.6);
   --my-tile: #0C0D12;
   --my-track: rgba(255, 255, 255, 0.12);
@@ -91,6 +93,7 @@
   --my-glass: rgba(255, 255, 255, 0.55);
   --my-glass-strong: rgba(255, 255, 255, 0.70);
   --my-border: rgba(255, 255, 255, 0.85);
+  --my-field-border: rgba(26, 21, 48, 0.5);
   --my-field: rgba(255, 255, 255, 0.75);
   --my-tile: #F3E8F0;
   --my-track: rgba(26, 21, 48, 0.12);

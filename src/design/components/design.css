@@ -75,7 +75,7 @@
 .my-field-label { font: 500 var(--my-fs-small) / 1.3 var(--my-font-ui); color: var(--my-text); }
 .my-field-input {
   width: 100%; min-height: 46px; padding: 11px 14px; box-sizing: border-box;
-  border: 1px solid var(--my-border); border-radius: var(--my-r-field);
+  border: 1px solid var(--my-field-border, var(--my-border)); border-radius: var(--my-r-field);
   background: var(--my-field); color: var(--my-text);
   font: 400 16px / 1.4 var(--my-font-ui); /* 16 px: iOS no hace zoom al tocar */
 }
