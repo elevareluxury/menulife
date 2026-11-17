@@ -9,6 +9,8 @@
   color: var(--my-text); font: 600 var(--my-fs-body) / 1.3 var(--my-font-ui); text-align: start; cursor: pointer;
 }
 .mp-poll-option:disabled { cursor: progress; }
+.mp-poll-radio { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--my-field-border, var(--my-border)); box-sizing: border-box; }
+.mp-poll-option:hover .mp-poll-radio, .mp-poll-option:focus-visible .mp-poll-radio { border-color: var(--my-accent); }
 .mp-poll-option.is-mine { border-color: var(--my-accent); }
 .mp-poll-bar {
   position: absolute; inset: 0; width: var(--mp-pct, 0%); transform-origin: left center;

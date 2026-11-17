@@ -290,7 +290,9 @@
 .mp-cards-item:active { transform: scale(0.99); }
 .mp-cards-img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--p-surface-2); }
 .mp-cards-stack .mp-cards-img { aspect-ratio: 16 / 9; }
-.mp-cards-body { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px 14px; }
+.mp-cards-body { position: relative; display: flex; flex-direction: column; gap: 3px; padding: 12px 14px 14px; }
+.mp-cards-body:has(.mp-cards-go) { padding-inline-end: 42px; }
+.mp-cards-go { position: absolute; top: 14px; inset-inline-end: 14px; }
 .mp-cards-date { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--p-accent-text); }
 .mp-cards-title { font-weight: 700; font-size: 15.5px; line-height: 1.3; }
 .mp-cards-sub { font-size: 13px; color: var(--p-muted); line-height: 1.45; }

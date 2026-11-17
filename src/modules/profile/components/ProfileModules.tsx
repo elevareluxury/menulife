@@ -721,6 +721,8 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
                 {item.date && <span className="mp-cards-date">{formatCardDate(item.date, lang)}</span>}
                 {title && <span className="mp-cards-title">{title}</span>}
                 {subtitle && <span className="mp-cards-sub">{subtitle}</span>}
+                {/* Con link, la misma flecha que los links: se ve que se toca */}
+                {href && <ArrowUpRight size={18} className="mp-link-arrow mp-cards-go" aria-hidden="true" />}
               </div>
             </>
           )
