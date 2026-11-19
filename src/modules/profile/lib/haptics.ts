@@ -1,4 +1,2 @@
-/** Vibración corta al confirmar algo (copiar, votar, enviar). Sólo donde el navegador la tiene (Android); si no, nada. */
-export function haptic(ms = 12): void {
-  try { navigator.vibrate?.(ms) } catch { /* sin vibración */ }
-}
+// La vibración del perfil es la de toda la app (nativa en iOS/Android, `navigator.vibrate` en la web)
+export { haptic } from '@/lib/haptics'

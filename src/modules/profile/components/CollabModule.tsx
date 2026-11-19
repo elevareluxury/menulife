@@ -66,7 +66,7 @@ export function CollabModule({ module, lang, onAction }: ModuleProps) {
         budget: budget.trim(), deadline, message: message.trim(), trap, elapsedMs: Date.now() - startedAt.current,
       })
       if (r === 'ok') {
-        haptic(); setStatus('sent')
+        haptic('success'); setStatus('sent')
         onAction(module.id)
       } else {
         setStatus(r === 'not_found' ? 'error' : r)

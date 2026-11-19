@@ -725,6 +725,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (E2E en `delete-account.spec.ts`; `oauthProviders()` en `googleSignIn.test.ts`),
   sin dictado en Android ni huella del diario en la app (sólo PIN), permisos de micrófono/voz en `Info.plist` (12
   idiomas en `*.lproj/InfoPlist.strings`) y `PrivacyInfo.xcprivacy` (igual a `docs/app/STORE.md`).
+  Sensación nativa (antes de la salida): sólo iPhone (`TARGETED_DEVICE_FAMILY = 1`, sin capturas de iPad); el texto
+  sigue el tamaño de letra del celular con tope (`@capacitor/text-zoom` en `NativeBridge`, `textZoomFor` en
+  `src/lib/textZoom.ts`, 135 %; `text-zoom.spec.ts` recorre las pantallas con la letra agrandada); deslizar desde el
+  borde para volver en iPhone (`MycenBridgeViewController` en `SceneDelegate.swift`); vibración nativa con `haptic()`
+  (`src/lib/haptics.ts`, `@capacitor/haptics` sólo en la app; `celebrate()` de Life OS, el perfil y "Publicar" lo usan);
+  `<html data-native>` apaga la selección y el menú de copiar en botones e imágenes (`index.css`).
   Páginas públicas para las tiendas: `/soporte` y `/eliminar-cuenta` (el link de Google Play), con `LegalPage` en 12
   idiomas (`support` / `deletion` en `src/i18n/app/legal/*`). En Studio → Mensajes, "Reportar" (copia al equipo en
   `profile_message_reports`, panel → Denuncias) y "Bloquear" (`profile_blocked_senders`; un trigger descarta lo que

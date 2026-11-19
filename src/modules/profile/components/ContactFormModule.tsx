@@ -40,7 +40,7 @@ export function ContactFormModule({ module, lang, onAction }: ModuleProps) {
         name: name.trim(), contact: contact.trim(), message: message.trim(), trap, elapsedMs: Date.now() - startedAt.current,
       })
       if (r === 'ok') {
-        haptic(); setStatus('sent')
+        haptic('success'); setStatus('sent')
         onAction(module.id)
       } else {
         setStatus(r === 'not_found' ? 'error' : r)

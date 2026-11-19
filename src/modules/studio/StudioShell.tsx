@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { haptic } from '@/lib/haptics'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { BarChart3, FolderOpen, Home, Inbox, Layers, LayoutGrid, LogOut, MailPlus, MoreHorizontal, Palette, PanelsLeftRight, PenLine, Settings, Share2, UserRound } from 'lucide-react'
@@ -377,6 +378,7 @@ function StudioReady({ userId, initial, switchSpace }: {
       await flush()
       if (Object.keys(pending.current).length) throw new Error(saveError ?? 'SAVE_FAILED')
       await publishSpace(initial.profile.id)
+      haptic('success')
       if (initial.profile.status !== 'published') trackEvent('profile_published', { seconds: secondsSinceSignup() })
       const fresh = await loadProfile(initial.profile.id)
       revision.current = fresh.revision

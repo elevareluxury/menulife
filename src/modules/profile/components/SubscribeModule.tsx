@@ -47,7 +47,7 @@ export function SubscribeModule({ module, lang, onAction }: ModuleProps) {
         elapsedMs: Date.now() - startedAt.current, locale: lang,
       })
       if (r === 'ok') {
-        haptic(); setStatus('sent')
+        haptic('success'); setStatus('sent')
         onAction(module.id)
       } else {
         setStatus(r === 'not_found' ? 'error' : r)

@@ -1,4 +1,5 @@
 import { shareLink } from '@/lib/nativeFiles'
+import { haptic } from '../lib/haptics'
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUp, BadgeCheck, Calendar, Globe, Mail, MessageCircle, Phone, Share2, UserPlus } from 'lucide-react'
@@ -167,8 +168,8 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
       track(profile.id, 'copy_link')
       setSharing(false)
       onToast(t.linkCopied)
-      // Una vibración corta confirma en el celular (si el navegador la tiene)
-      navigator.vibrate?.(15)
+      // Una vibración corta confirma en el celular
+      haptic()
     } catch { /* clipboard no disponible */ }
   }
   async function nativeShare() {

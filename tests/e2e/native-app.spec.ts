@@ -39,3 +39,22 @@ test('en la web sigue todo igual: landing y "Agregar a inicio"', async ({ page, 
   await page.goto('/')
   await expect(page).toHaveURL(/\/$/)
 })
+
+test('en la app los botones no seleccionan texto al mantenerlos apretados; los campos y la web, sí', async ({ page, context }) => {
+  await asNativeApp(context)
+  await installSupabaseMock(context, rich(), { signedIn: true })
+  await page.goto('/life')
+  await expect(page.locator('html')).toHaveAttribute('data-native', 'ios')
+  const button = page.getByRole('button').first()
+  await expect(button).toBeVisible()
+  expect(await button.evaluate(el => getComputedStyle(el).userSelect)).toBe('none')
+  await page.goto('/login')
+  const field = page.getByRole('textbox').first()
+  expect(await field.evaluate(el => getComputedStyle(el).userSelect)).not.toBe('none')
+})
+
+test('en la web no se marca como app', async ({ page, context }) => {
+  await installSupabaseMock(context, createState({}))
+  await page.goto('/login')
+  await expect(page.locator('html')).not.toHaveAttribute('data-native', /.*/)
+})
