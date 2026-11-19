@@ -1,5 +1,5 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type SyntheticEvent } from 'react'
-import { createPortal } from 'react-dom'
+import { createPortal, flushSync } from 'react-dom'
 import { ArrowUpRight, CalendarDays, ChevronLeft, Clock, MapPin, Share2, Ticket } from 'lucide-react'
 import { useScrollLock } from '@/lib/scrollLock'
 import { webOrigin } from '@/lib/platform'
@@ -7,6 +7,7 @@ import { langLocale } from '@/i18n/app/languages'
 import { tr } from '../lib/profileI18n'
 import { isExternal, safeHref } from '../lib/safeUrl'
 import { urlKey } from '../lib/clickKeys'
+import { haptic } from '../lib/haptics'
 import { eventHref, localToday, posterRatio, readEvents, upcomingEvents, type EventItem } from '../lib/events'
 import { eventsStrings, type EventsStrings } from '../lib/eventsI18n'
 import type { ProfileLang } from '../lib/profileTypes'
@@ -41,6 +42,41 @@ function dateParts(date: string | undefined, lang: ProfileLang) {
 const titleOf = (e: EventItem, lang: ProfileLang) => (lang === 'en' && e.en?.title) || e.title || ''
 const descriptionOf = (e: EventItem, lang: ProfileLang) => (lang === 'en' && e.en?.description) || e.description || ''
 
+/** El flyer de la tarjeta de ese evento en el carrusel (null si no tiene foto) */
+function posterIn(track: HTMLElement | null, items: EventItem[], id: string): HTMLElement | null {
+  const i = items.findIndex(e => e.id === id)
+  return i < 0 || !items[i].image_url ? null : track?.children[i]?.querySelector<HTMLElement>('.mp-ev-img') ?? null
+}
+
+/**
+ * Abre o cierra la ficha con una transición de vista: el flyer de la tarjeta crece hasta el de la ficha (y vuelve al
+ * cerrar). Sólo con View Transitions, flyer a la vista y sin "reducir movimiento"; si no, cambia como siempre.
+ * El nombre va en la tarjeta en la foto de "antes" y en la ficha (CSS) en la de "después": nunca en los dos a la vez.
+ */
+function withPosterTransition(poster: HTMLElement | null, update: () => void) {
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } }
+  const visible = poster && poster.getBoundingClientRect().bottom > 0 && poster.getBoundingClientRect().top < window.innerHeight
+  if (!doc.startViewTransition || !visible || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { update(); return }
+  const opening = !document.querySelector('.mp-evd')
+  if (opening) poster.style.setProperty('view-transition-name', 'mp-ev-flyer')
+  document.documentElement.classList.add('mp-ev-vt')
+  try {
+    const vt = doc.startViewTransition(() => {
+      if (opening) poster.style.removeProperty('view-transition-name')
+      else poster.style.setProperty('view-transition-name', 'mp-ev-flyer')
+      flushSync(update)
+    })
+    void vt.finished.finally(() => {
+      poster.style.removeProperty('view-transition-name')
+      document.documentElement.classList.remove('mp-ev-vt')
+    })
+  } catch {
+    poster.style.removeProperty('view-transition-name')
+    document.documentElement.classList.remove('mp-ev-vt')
+    update()
+  }
+}
+
 export function EventsModule({ module, lang, onAction }: ModuleProps) {
   const ctx = useProfileModule()
   const preview = !!ctx?.preview
@@ -72,22 +108,32 @@ export function EventsModule({ module, lang, onAction }: ModuleProps) {
   }, [initialId, items])
   useEffect(() => {
     if (preview) return
-    const onPop = () => { pushed.current = false; setOpenId(fromUrl(items)) }
+    const onPop = () => {
+      pushed.current = false
+      const next = fromUrl(items)
+      // Al cerrar, el flyer vuelve a su tarjeta (la del evento que estaba abierto)
+      const closing = openRef.current && !next ? openRef.current : null
+      withPosterTransition(closing ? posterIn(track.current, items, closing) : null, () => setOpenId(next))
+    }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [items, preview])
+
+  const openRef = useRef(openId)
+  useEffect(() => { openRef.current = openId }, [openId])
+  const posterOf = (id: string) => posterIn(track.current, items, id)
 
   const openEvent = (e: EventItem) => {
     if (!preview) {
       window.history.pushState(window.history.state, '', eventHref(window.location.href, e.id))
       pushed.current = true
     }
-    setOpenId(e.id)
+    withPosterTransition(preview ? null : posterOf(e.id), () => setOpenId(e.id))
   }
   const closeEvent = () => {
     if (!preview && pushed.current) { window.history.back(); return }
     if (!preview) window.history.replaceState(window.history.state, '', eventHref(window.location.href, null))
-    setOpenId(null)
+    withPosterTransition(openId && !preview ? posterOf(openId) : null, () => setOpenId(null))
   }
 
   useEffect(() => {
@@ -249,7 +295,7 @@ function EventDetail({ event, lang, s, handle, preview, onClose, onBuy }: {
     try {
       if (navigator.share) { await navigator.share({ title, url }); return }
     } catch { return }
-    try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2400) } catch { /* sin portapapeles */ }
+    try { await navigator.clipboard.writeText(url); haptic(); setCopied(true); setTimeout(() => setCopied(false), 2400) } catch { /* sin portapapeles */ }
   }
 
   return (

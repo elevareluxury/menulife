@@ -813,6 +813,16 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   foto con la huella (`mp-product-art`), campos con `--my-field-border` (3:1). Letras por idioma en `tokens.css`:
   Unbounded con cirílico (`fonts.css`), pila del sistema propia para zh/ja/ko/ar/hi (`[data-mycen-theme]:lang(..)`),
   alto de línea mayor y sin `letter-spacing` en esos alfabetos (en árabe y devanagari separaba letras unidas).
+- Fase 3 de diseño (movimiento de intensidad media, `profile-motion.css`): las filas de las listas de un módulo
+  (links de un grupo, redes, encuesta, descargables, Apoyame, "Escuchá en", galería, contacto…) llegan una tras otra
+  después de su módulo (`--mp-k` por posición, la demora parte de `--mp-i`/`--mp-r`); tarjetas con foto que se inclinan
+  hacia el mouse (`useCardTilt` en `layouts/motion.ts`, sólo `pointerType` mouse); carruseles de Tarjetas y de videos
+  con la del frente entera y las de costado más chicas (`animation-timeline: view(inline)`, `scale`/`opacity`); copiar
+  sella el cupón y muestra el tilde en Apoyame; formularios enviados dibujan un tilde (`DoneMark`); la encuesta cuenta
+  los % (`CountUp`, componente propio); vibración corta al confirmar (`lib/haptics.ts`, sólo Android); punto del acento
+  en el día de hoy del horario; la ficha de un evento se abre y cierra con View Transitions (el flyer crece,
+  `withPosterTransition`; la clase `mp-ev-vt` en `<html>` sólo mientras dura). Los brillos de "Entradas" animan
+  `transform` (antes `left`). Todo quieto con "reducir movimiento" y en la vista previa. E2E en `motion.spec.ts`.
 - Auditoría antes del freeze (Business, `20261120000001_business_quotes_lockdown.sql`, tests en
   `business_quotes_lockdown.test.sql`): los presupuestos por link (`/q/:token`) ya no se leen ni se cambian con
   políticas de `anon` (dejaban ver y aceptar todos); `QuotePublicPage` usa `get_public_quote(p_token)` (sólo ese

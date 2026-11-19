@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, type RefObject } from 'react'
 import type { CSSProperties } from 'react'
 
 /**
@@ -79,4 +79,55 @@ export function useTilt<T extends HTMLElement>(enabled: boolean) {
     }
   }, [enabled])
   return ref
+}
+
+/** Lo que se inclina al pasar el mouse (tarjetas con foto). Con el dedo, nada: el toque ya responde con su escala. */
+const TILT_TARGETS = '.mp-project, .mp-portfolio-item, .mp-cards-item, .mp-link-card'
+const TILT_MAX = 4
+
+/**
+ * En la compu, las tarjetas con foto se inclinan apenas hacia el mouse (hasta 4°) y vuelven al salir. Un solo par
+ * de eventos en la grilla de módulos (no uno por tarjeta). Escribe --mp-rx / --mp-ry y la clase `mp-tilting`; el CSS
+ * (profile-motion.css) arma el giro con `perspective`. Sólo con mouse (`pointerType`): con el dedo o el lápiz, nada.
+ * Quieto con "reducir movimiento" y en la vista previa.
+ */
+export function useCardTilt(ref: RefObject<HTMLElement | null>, enabled: boolean) {
+  useLayoutEffect(() => {
+    const root = ref.current
+    if (!root || !enabled || window.matchMedia?.(REDUCE).matches) return
+    let current: HTMLElement | null = null
+    let frame = 0
+    const reset = () => {
+      if (!current) return
+      current.classList.remove('mp-tilting')
+      current.style.removeProperty('--mp-rx')
+      current.style.removeProperty('--mp-ry')
+      current = null
+    }
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return
+      const card = (e.target as Element | null)?.closest?.<HTMLElement>(TILT_TARGETS) ?? null
+      if (card !== current) { reset(); current = card }
+      if (!card) return
+      const x = e.clientX, y = e.clientY
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const r = card.getBoundingClientRect()
+        if (!r.width || !r.height) return
+        const px = Math.max(-1, Math.min(1, ((x - r.left) / r.width) * 2 - 1))
+        const py = Math.max(-1, Math.min(1, ((y - r.top) / r.height) * 2 - 1))
+        card.style.setProperty('--mp-rx', `${(-py * TILT_MAX).toFixed(2)}deg`)
+        card.style.setProperty('--mp-ry', `${(px * TILT_MAX).toFixed(2)}deg`)
+        card.classList.add('mp-tilting')
+      })
+    }
+    const onLeave = () => { cancelAnimationFrame(frame); reset() }
+    root.addEventListener('pointermove', onMove, { passive: true })
+    root.addEventListener('pointerleave', onLeave)
+    return () => {
+      root.removeEventListener('pointermove', onMove)
+      root.removeEventListener('pointerleave', onLeave)
+      onLeave()
+    }
+  }, [ref, enabled])
 }

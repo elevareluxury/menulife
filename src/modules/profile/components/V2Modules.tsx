@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { CountUp } from './CountUp'
+import { haptic } from '../lib/haptics'
 import { Check, Copy, Download, FileText, Pause, Play, Ticket } from 'lucide-react'
 import { Huella } from '@/design/components/Huella'
 import { tr, ui } from '../lib/profileI18n'
@@ -54,6 +56,7 @@ export function PollModule({ module, lang, onAction }: ModuleProps) {
   async function vote(id: string) {
     if (busy) return
     setMine(id)
+    haptic()
     onAction(module.id, `v:${id}`)
     if (ctx?.preview || !ctx?.handle) return
     saveVote(module.id, id)
@@ -81,7 +84,7 @@ export function PollModule({ module, lang, onAction }: ModuleProps) {
               {/* Antes de votar, un círculo de opción: se ve que se toca para elegir (no un texto suelto) */}
               {!showResults && <span className="mp-poll-radio" aria-hidden="true" />}
               <span className="mp-poll-label">{chosen && <Check size={16} aria-hidden="true" />}{o.label}</span>
-              {showResults && <span className="mp-poll-pct">{pct}%</span>}
+              {showResults && <span className="mp-poll-pct"><CountUp value={pct} decimals={0} suffix="%" /><span className="mp-sr-only">{pct}%</span></span>}
             </button>
           )
         })}
@@ -162,7 +165,7 @@ export function CouponModule({ module, lang, onAction }: ModuleProps) {
     try {
       await navigator.clipboard.writeText(code)
       setCopied(true)
-      navigator.vibrate?.(15)
+      haptic()
       onAction(module.id, 'copy')
       window.clearTimeout(timer.current)
       timer.current = window.setTimeout(() => setCopied(false), 2200)
@@ -170,7 +173,7 @@ export function CouponModule({ module, lang, onAction }: ModuleProps) {
   }
 
   return (
-    <section className="mp-card mp-coupon" aria-label={title || t.copyCode}>
+    <section className={`mp-card mp-coupon${copied ? ' is-copied' : ''}`} aria-label={title || t.copyCode}>
       <span className="mp-coupon-ico" aria-hidden="true"><Ticket size={20} /></span>
       {title && <h2 className="mp-card-title mp-coupon-title">{title}</h2>}
       {text && <p className="mp-coupon-text">{text}</p>}

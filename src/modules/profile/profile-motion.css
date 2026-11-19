@@ -159,6 +159,64 @@
   .mp-share-btn { transition: transform 420ms var(--mp-spring), border-color 200ms var(--mp-ease); }
   .mp-share-btn:active { transform: scale(0.96); transition-duration: 120ms; }
 
+  /* ── Fase 3: dentro de cada módulo ─────────────────────────────── */
+  /* Las filas de una lista llegan una tras otra, justo después de su módulo. La demora parte de la del módulo
+     (--mp-i al abrir, --mp-r al bajar: se heredan) y suma 50 ms por fila, hasta la 8.ª (las demás, juntas). */
+  .mp-root[data-motion='full'] .mp-tile:not(.mp-reveal) :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list,
+    .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > * {
+    animation: mp-rise 620ms var(--mp-ease) backwards;
+    animation-delay: calc(var(--mp-start) + min(var(--mp-i, 0), 9) * var(--mp-step) + 180ms + var(--mp-k, 0) * 50ms);
+  }
+  .mp-root[data-motion='full'] .mp-revealed :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list,
+    .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > * {
+    animation: mp-rise 620ms var(--mp-ease) backwards;
+    animation-delay: calc(min(var(--mp-r, 0), 4) * 90ms + 180ms + var(--mp-k, 0) * 50ms);
+  }
+  .mp-root :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list, .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > :nth-child(2) { --mp-k: 1; }
+  .mp-root :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list, .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > :nth-child(3) { --mp-k: 2; }
+  .mp-root :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list, .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > :nth-child(4) { --mp-k: 3; }
+  .mp-root :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list, .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > :nth-child(5) { --mp-k: 4; }
+  .mp-root :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list, .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > :nth-child(6) { --mp-k: 5; }
+  .mp-root :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list, .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > :nth-child(7) { --mp-k: 6; }
+  .mp-root :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list, .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > :nth-child(8) { --mp-k: 7; }
+  .mp-root :is(.mp-link-group-rows, .mp-socials, .mp-row-list, .mp-poll-options, .mp-files-list, .mp-support-list, .mp-listen-links, .mp-podcast-list, .mp-contact-grid, .mp-gallery, .mp-cards-stack) > :nth-child(n+9) { --mp-k: 8; }
+
+  /* Horario: el punto de hoy aparece después de la lista */
+  .mp-root[data-motion='full'] :is(.mp-tile:not(.mp-reveal), .mp-revealed) .mp-hours dt.is-today::before {
+    animation: mp-pop 520ms var(--mp-spring) backwards;
+    animation-delay: calc(var(--mp-start) + min(var(--mp-i, 0), 9) * var(--mp-step) + 520ms);
+  }
+  .mp-root[data-motion='full'] .mp-revealed .mp-hours dt.is-today::before { animation-delay: 520ms; }
+
+  /* Tarjetas con foto: se inclinan apenas hacia el mouse (useCardTilt pone la clase sólo con mouse) */
+  .mp-root :is(.mp-project, .mp-portfolio-item, .mp-cards-item, .mp-link-card).mp-tilting {
+    transform: perspective(900px) rotateX(var(--mp-rx, 0deg)) rotateY(var(--mp-ry, 0deg)) translateY(-3px);
+    transition: transform 180ms var(--mp-ease);
+  }
+  .mp-root :is(.mp-project, .mp-portfolio-item, .mp-cards-item, .mp-link-card).mp-tilting:active {
+    transform: perspective(900px) rotateX(var(--mp-rx, 0deg)) rotateY(var(--mp-ry, 0deg)) scale(0.98);
+  }
+
+  /* Carruseles: la tarjeta que está al frente se ve entera y las de los costados, un poco más chicas
+     (con el scroll del carrusel, sin JS; `scale` y `opacity` no pisan el transform del toque) */
+  @supports (animation-timeline: view(inline)) {
+    .mp-root[data-motion='full'] :is(.mp-cards-carousel > .mp-cards-item, .mp-vgal-track > .mp-vgal-item) {
+      animation: mp-carousel linear both;
+      animation-timeline: view(inline);
+    }
+  }
+
+  /* Copiar: el cupón se "sella" (el código late y el borde toma el acento) y el botón de Apoyame muestra el tilde */
+  .mp-root .mp-coupon.is-copied .mp-coupon-code { animation: mp-stamp 520ms var(--mp-spring); }
+  .mp-root .mp-coupon-copy svg, .mp-root .mp-support-copy-btn svg { transition: transform 420ms var(--mp-spring); }
+  .mp-root .mp-coupon.is-copied .mp-coupon-copy svg, .mp-root .mp-support-copy-btn[data-copied] svg { animation: mp-pop 460ms var(--mp-spring); }
+
+  /* Formularios enviados: el círculo y el tilde se dibujan, y el texto sube detrás */
+  .mp-root .mp-done-ring { animation: mp-draw-line 620ms var(--mp-ease) backwards; }
+  .mp-root .mp-done-tick { animation: mp-draw-line 420ms var(--mp-ease) 380ms backwards; }
+  .mp-root .mp-done-mark { animation: mp-pop 620ms var(--mp-spring) backwards; }
+  .mp-root .mp-done-mark ~ .mp-form-done { animation: mp-rise 520ms var(--mp-ease) 260ms backwards; }
+
   /* ── Vista previa (Studio, onboarding): fundido corto ───────────── */
   .mp-root[data-motion='calm'] .mp-in {
     animation-name: mp-fade; animation-duration: 360ms; animation-timing-function: var(--mp-ease);
@@ -186,4 +244,11 @@
 @keyframes mp-drift { to { translate: 0 90px; } }
 @keyframes mp-breathe { from { opacity: 0.25; } to { opacity: 0.9; } }
 @keyframes mp-eq { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
+@keyframes mp-carousel {
+  entry 0% { scale: 0.9; opacity: 0.55; }
+  entry 100%, exit 0% { scale: 1; opacity: 1; }
+  exit 100% { scale: 0.9; opacity: 0.55; }
+}
+@keyframes mp-stamp { 0% { transform: scale(1); } 35% { transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes mp-draw-line { from { stroke-dashoffset: 1; } }
 @keyframes mp-nudge { 0%, 100% { transform: none; } 50% { transform: translateY(5px); } }

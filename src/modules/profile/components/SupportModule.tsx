@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, Coffee, Copy, HeartHandshake, Landmark, Link2, Wallet } from 'lucide-react'
+import { ArrowUpRight, Check, Coffee, Copy, HeartHandshake, Landmark, Link2, Wallet } from 'lucide-react'
 import { tr } from '../lib/profileI18n'
 import { isCopyKind, readSupportMethods, SUPPORT_BRAND, supportHref, type SupportKind, type SupportMethod } from '../lib/support'
 import { supportListenStrings } from '../lib/supportListenI18n'
 import { supportKey } from '../lib/clickKeys'
+import { haptic } from '../lib/haptics'
 import type { ModuleProps } from './ProfileModules'
 import './supportListen.css'
 
@@ -21,6 +22,7 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
   const t = supportListenStrings(lang)
   const methods = readSupportMethods(module.content.methods)
   const [status, setStatus] = useState('')
+  const [copiedAt, setCopiedAt] = useState(-1)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => () => clearTimeout(timer.current), [])
   if (!methods.length) return null
@@ -37,7 +39,7 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
     return SUPPORT_BRAND[m.kind] ?? new URL(m.value).hostname.replace(/^www\./, '')
   }
 
-  async function copy(m: SupportMethod) {
+  async function copy(m: SupportMethod, i: number) {
     const value = m.value
     let ok = false
     try {
@@ -49,9 +51,9 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
     clearTimeout(timer.current)
     timer.current = setTimeout(() => {
       setStatus(ok ? t.copied : t.copyFailed)
-      timer.current = setTimeout(() => setStatus(''), 4000)
+      timer.current = setTimeout(() => { setStatus(''); setCopiedAt(-1) }, 4000)
     }, 30)
-    if (ok) onAction(module.id, supportKey(m))
+    if (ok) { haptic(); setCopiedAt(i); onAction(module.id, supportKey(m)) }
   }
 
   // El primer link va con el color de acento
@@ -77,8 +79,8 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
                   <span className="mp-support-value" translate="no">{m.value}</span>
                 </span>
                 <button type="button" className="mp-support-copy-btn" aria-label={t.copyAria.replace('{label}', name)}
-                  onClick={() => copy(m)}>
-                  <Copy size={16} aria-hidden="true" /> {t.copy}
+                  onClick={() => copy(m, i)} data-copied={copiedAt === i || undefined}>
+                  {copiedAt === i ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />} {t.copy}
                 </button>
               </div>
             )
