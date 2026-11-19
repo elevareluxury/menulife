@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { DoneMark } from './DoneMark'
+import { haptic } from '../lib/haptics'
 import { Field } from '@/design/components/Field'
 import { subscribeProfile, type SubscribeResult } from '../lib/profileApi'
 import { tr } from '../lib/profileI18n'
@@ -45,7 +47,7 @@ export function SubscribeModule({ module, lang, onAction }: ModuleProps) {
         elapsedMs: Date.now() - startedAt.current, locale: lang,
       })
       if (r === 'ok') {
-        setStatus('sent')
+        haptic(); setStatus('sent')
         onAction(module.id)
       } else {
         setStatus(r === 'not_found' ? 'error' : r)
@@ -59,6 +61,7 @@ export function SubscribeModule({ module, lang, onAction }: ModuleProps) {
     return (
       <section className="mp-card mp-form" aria-labelledby={headingId}>
         <h2 id={headingId} className="mp-form-title">{title}</h2>
+        <DoneMark />
         <p className="mp-form-done" role="status">{t.done}</p>
         <p className="mp-form-note">{t.note(owner)}</p>
       </section>

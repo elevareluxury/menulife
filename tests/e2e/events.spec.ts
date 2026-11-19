@@ -79,6 +79,8 @@ test('página pública: carrusel de entradas, ficha del evento con su link y bot
   await page.getByRole('dialog', { name: 'Sunset Sessions' }).getByRole('button', { name: 'Volver' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await section.getByRole('button', { name: /^Ver evento: Noche Universo/ }).click()
+  // La ficha llega un cuadro después (transición de vista): Escape cuando ya está
+  await expect(page.getByRole('dialog')).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page).toHaveURL(/\/ana\?src=qr$/)
@@ -155,4 +157,26 @@ test('Studio: crear un módulo de eventos con su ficha y publicarlo', async ({ p
 
   await page.getByRole('button', { name: 'Publicar cambios' }).click()
   await expect(page.getByText(/Publicado · versión 2/)).toBeVisible()
+})
+
+test('abrir y cerrar la ficha: el flyer crece con una transición de vista y no queda nada colgado', async ({ page, context }) => {
+  await installSupabaseMock(context, createState({ profiles: [profileRow()], profile_modules: [EVENTS()] }))
+  await serveFlyers(context)
+  await page.goto('/ana')
+  const poster = page.locator('.mp-ev-card.is-active .mp-ev-poster')
+  await expect(poster.locator('.mp-ev-img')).toBeVisible()
+  await poster.scrollIntoViewIfNeeded()
+  const supported = await page.evaluate(() => 'startViewTransition' in document)
+  await poster.click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  if (supported) await expect(page.locator('html')).toHaveClass(/mp-ev-vt/)
+  await expect(page.locator('html')).not.toHaveClass(/mp-ev-vt/)
+  // Ningún flyer del carrusel se queda con el nombre de la transición
+  expect(await page.locator('.mp-ev-img').evaluateAll(els => els.filter(el => (el as HTMLElement).style.viewTransitionName).length)).toBe(0)
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await expect(page).toHaveURL(/\/ana$/)
+  await expect(page.locator('html')).not.toHaveClass(/mp-ev-vt/)
+  expect(await page.locator('.mp-ev-img').evaluateAll(els => els.filter(el => (el as HTMLElement).style.viewTransitionName).length)).toBe(0)
 })

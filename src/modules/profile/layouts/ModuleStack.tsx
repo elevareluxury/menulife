@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState, type CSSProperties } from 'react'
 import { packSpans } from '../lib/moduleSize'
 import type { RenderedBlock } from './types'
-import { inAt, useReveal } from './motion'
+import { inAt, useCardTilt, useReveal } from './motion'
 
 /** Ancho mínimo de la grilla para pasar a 4 columnas (Bento en la compu): cuadrados de ≥ 160 px; sólo con la identidad al costado */
 const FOUR_COLS_FROM = 680
@@ -18,6 +18,7 @@ export function ModuleStack({ blocks, id, className, preview = false, four = fal
   blocks: RenderedBlock[]; id?: string; className?: string; preview?: boolean; four?: boolean
 }) {
   const ref = useReveal<HTMLDivElement>(blocks.map(b => b.key).join(','), !preview)
+  useCardTilt(ref, !preview)
   // Se mide la grilla (no la pantalla): la vista previa de Studio es angosta aunque la compu sea ancha
   const [width, setWidth] = useState(0)
   useLayoutEffect(() => {

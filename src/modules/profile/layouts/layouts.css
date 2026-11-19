@@ -529,3 +529,15 @@
   background: linear-gradient(to bottom, color-mix(in srgb, var(--my-tile) 70%, transparent), transparent 34%,
     transparent 60%, color-mix(in srgb, var(--my-tile) 85%, transparent));
 }
+
+/* ── Fase 3 (lo quieto; el movimiento está en profile-motion.css) ───────── */
+/* Tilde de "enviado" de los formularios */
+.my-profile .mp-done-mark { display: inline-flex; color: var(--p-accent); margin-top: 4px; }
+.mp-done-mark svg { display: block; }
+.mp-done-ring, .mp-done-tick { stroke: currentColor; stroke-dasharray: 1; }
+.mp-done-ring { opacity: 0.35; stroke-dasharray: 1.02 1; }
+/* Horario: un punto del acento marca hoy */
+.my-profile .mp-hours dt.is-today::before {
+  content: ''; display: inline-block; width: 6px; height: 6px; margin-inline-end: 8px; vertical-align: 0.15em;
+  border-radius: 999px; background: var(--p-accent);
+}

@@ -8,6 +8,7 @@ import { urlKey } from '../lib/clickKeys'
 import { formatPrice } from '../lib/price'
 import { SocialIcon } from './SocialIcon'
 import { SafeImage } from './SafeImage'
+import { CountUp } from './CountUp'
 // El visor baja recién cuando alguien abre una foto
 const Lightbox = lazy(() => import('./Lightbox').then(m => ({ default: m.Lightbox })))
 import { richText } from '../lib/richText'
@@ -428,33 +429,6 @@ export function GalleryModule({ module, lang }: ModuleProps) {
 // ── Testimonials ────────────────────────────────────────────────────────────
 
 interface Review { author_name?: string; rating?: number; text?: string }
-
-/** Número que cuenta hasta su valor la primera vez que se ve (decorativo: el valor lo dicen las estrellas) */
-function CountUp({ value, className }: { value: number; className?: string }) {
-  const ref = useRef<HTMLElement>(null)
-  const animate = typeof IntersectionObserver !== 'undefined' && typeof window !== 'undefined'
-    && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  const [shown, setShown] = useState(animate ? 0 : value)
-  useEffect(() => {
-    const el = ref.current
-    if (!el || !animate) return
-    let raf = 0
-    const io = new IntersectionObserver(([e]) => {
-      if (!e?.isIntersecting) return
-      io.disconnect()
-      const start = performance.now()
-      const tick = (now: number) => {
-        const k = Math.min(1, (now - start) / 900)
-        setShown(value * (1 - Math.pow(1 - k, 3)))
-        if (k < 1) raf = requestAnimationFrame(tick)
-      }
-      raf = requestAnimationFrame(tick)
-    }, { threshold: 0.4 })
-    io.observe(el)
-    return () => { io.disconnect(); cancelAnimationFrame(raf) }
-  }, [animate, value])
-  return <strong ref={ref} className={className} aria-hidden="true">{shown.toFixed(1)}</strong>
-}
 
 /** Siempre 5 estrellas (las que faltan, tenues): la fila no se corre y se entiende "4 de 5" de un vistazo */
 function Stars({ rating }: { rating: number }) {

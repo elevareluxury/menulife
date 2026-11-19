@@ -433,7 +433,8 @@
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
 }
 .mp-tix-card.is-active .mp-tix-cta::after { animation: mp-tix-shine 3.6s 1.2s ease-in-out infinite; }
-@keyframes mp-tix-shine { 0% { left: -60%; opacity: 1; } 28% { left: 120%; opacity: 1; } 100% { left: 120%; opacity: 0; } }
+/* Sólo transform (antes `left`, que repinta en cada cuadro): 400 % del ancho propio = de -60 % a 120 % de la tarjeta */
+@keyframes mp-tix-shine { 0% { transform: translateX(0) skewX(-20deg); opacity: 1; } 28%, 100% { transform: translateX(400%) skewX(-20deg); } 28% { opacity: 1; } 100% { opacity: 0; } }
 [dir="rtl"] .mp-tix-badge { right: auto; left: 12px; }
 
 .mp-tix-dots { display: flex; justify-content: center; }

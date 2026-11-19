@@ -118,13 +118,21 @@
   .mp-ev-card.is-active .mp-ev-sheen { animation: mp-ev-sheen 1.5s 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
   @keyframes mp-ev-sheen { 0% { opacity: 1; background-position: 120% 0; } 100% { opacity: 1; background-position: -40% 0; } }
   .mp-ev-card.is-active .mp-ev-buy::after { animation: mp-ev-shine 3.6s 1.2s ease-in-out infinite; }
-  @keyframes mp-ev-shine { 0% { left: -60%; opacity: 1; } 28% { left: 120%; opacity: 1; } 100% { left: 120%; opacity: 0; } }
+  @keyframes mp-ev-shine { 0% { transform: translateX(0) skewX(-20deg); opacity: 1; } 28%, 100% { transform: translateX(400%) skewX(-20deg); } 28% { opacity: 1; } 100% { opacity: 0; } }
   .mp-evd { animation: mp-evd-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
   @keyframes mp-evd-in { from { opacity: 0.01; transform: translateY(18px); } }
 }
 @media (prefers-reduced-motion: reduce) {
   .mp-ev-card { transition: none; }
 }
+
+/* Abrir y cerrar la ficha: el flyer de la tarjeta crece hasta el de la ficha (View Transitions; withPosterTransition
+   pone la clase en <html> sólo mientras dura). La entrada propia de la ficha no corre encima. */
+.mp-ev-vt .mp-evd-poster img { view-transition-name: mp-ev-flyer; }
+.mp-ev-vt .mp-evd { animation: none; }
+.mp-ev-vt::view-transition-group(mp-ev-flyer) { animation-duration: 460ms; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+.mp-ev-vt::view-transition-old(mp-ev-flyer), .mp-ev-vt::view-transition-new(mp-ev-flyer) { height: 100%; object-fit: cover; }
+.mp-ev-vt::view-transition-old(root), .mp-ev-vt::view-transition-new(root) { animation-duration: 300ms; }
 
 /* ── Ficha del evento (pantalla completa) ───────────────────────────── */
 .mp-evd {
