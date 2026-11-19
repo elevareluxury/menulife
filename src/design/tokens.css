@@ -3,8 +3,8 @@
    Ningún componente usa colores sueltos: todo sale de acá. tests/unit/designTokens.test.ts mide el contraste. */
 
 [data-mycen-theme] {
-  /* Tipografía (§4). Unbounded y Geist no cubren árabe, devanagari, CJK ni (Unbounded) cirílico:
-     la pila sigue con la fuente del sistema de cada alfabeto, así ningún nombre queda con letras faltantes. */
+  /* Tipografía (§4). Unbounded y Geist cubren latín y cirílico; árabe, devanagari y CJK siguen con la fuente del
+     sistema de cada alfabeto (más abajo, una pila por idioma), así ningún nombre queda con letras faltantes. */
   --my-font-script: 'Noto Sans Arabic', 'Geeza Pro', 'Noto Sans Devanagari', 'Kohinoor Devanagari',
     'Hiragino Sans', 'Yu Gothic', 'Apple SD Gothic Neo', 'Malgun Gothic', 'PingFang SC', 'Microsoft YaHei',
     'Noto Sans CJK SC', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -48,6 +48,37 @@
 }
 
 /* ── Universo (oscuro) ─────────────────────────────────────────────── */
+/* Letras por idioma. Como hace iOS: chino, japonés y coreano con la fuente del sistema de ese idioma, cada una
+   primero en su pila (los caracteres chinos se dibujan distinto en japonés y en coreano: con una sola pila, un texto
+   chino salía con formas japonesas). Árabe y devanagari con sus fuentes del sistema. Alto de línea mayor (los
+   signos de arriba y abajo de esos alfabetos no se cortan) y sin espaciado entre letras: en árabe y devanagari
+   separa las letras que van unidas, y en CJK se ve desparejo. */
+[data-mycen-theme]:lang(zh) {
+  --my-font-script: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', system-ui, sans-serif;
+}
+[data-mycen-theme]:lang(ja) {
+  --my-font-script: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', 'Noto Sans CJK JP', 'Noto Sans JP', system-ui, sans-serif;
+}
+[data-mycen-theme]:lang(ko) {
+  --my-font-script: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', 'Noto Sans KR', system-ui, sans-serif;
+}
+[data-mycen-theme]:lang(ar) {
+  --my-font-script: 'Geeza Pro', 'SF Arabic', 'Segoe UI', 'Noto Sans Arabic', 'Noto Naskh Arabic', Tahoma, system-ui, sans-serif;
+}
+[data-mycen-theme]:lang(hi) {
+  --my-font-script: 'Kohinoor Devanagari', 'Nirmala UI', 'Noto Sans Devanagari', 'Mangal', system-ui, sans-serif;
+}
+[data-mycen-theme]:is(:lang(zh), :lang(ja), :lang(ko), :lang(ar), :lang(hi)) {
+  --my-font-display: 'Unbounded', var(--my-font-script);
+  --my-font-ui: 'Geist', var(--my-font-script);
+  --my-font-editorial: 'Instrument Serif', Georgia, var(--my-font-script);
+  --my-lh-title: 1.3;
+  --my-lh-body: 1.65;
+}
+:is(:lang(zh), :lang(ja), :lang(ko), :lang(ar), :lang(hi)) :where([data-mycen-theme], [data-mycen-theme] *) {
+  letter-spacing: 0 !important;
+}
+
 [data-mycen-theme='universo'] {
   color-scheme: dark;
   --my-bg: #04050D;

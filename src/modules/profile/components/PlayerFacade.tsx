@@ -35,8 +35,7 @@ export function PlayerFacade({ kind, title, provider, playLabel, cover, style, t
 
   if (kind === 'video') {
     return (
-      <button type="button" className={`mp-media-facade mp-player-video${small ? ' is-small' : ''}`} style={style} onClick={onPlay}
-        data-mycen-theme="universo" data-mycen-accent={ctx?.accent}>
+      <button type="button" className={`mp-media-facade mp-player-video${small ? ' is-small' : ''}`} style={style} onClick={onPlay}>
         {picture}
         <span className="mp-player-shade" aria-hidden="true" />
         <span className="mp-player-head"><span className="mp-media-title">{title}</span></span>

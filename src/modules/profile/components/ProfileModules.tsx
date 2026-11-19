@@ -15,6 +15,20 @@ import { cleanBranches, type Branch } from '../lib/branches'
 import { mapLinks } from '../lib/mapLinks'
 const Branches = lazy(() => import('./Branches').then(m => ({ default: m.Branches })))
 import { NETWORK_LABELS, networkFromUrl } from '../lib/networks'
+import { generateHuella, huellaToSvg } from '@/lib/huella'
+import { useProfileModule } from './profileModuleContext'
+
+/** Título de una colección sin tarjeta (carruseles y listas de tarjetas): el mismo estilo que el de las tarjetas, a la
+ *  altura de su texto, y la cantidad al lado cuando hay más de una. */
+export function SectionTitle({ heading, count }: { heading: string; count?: number }) {
+  if (!heading) return null
+  return (
+    <h2 className="mp-card-title mp-section-title">
+      {heading}
+      {count != null && count > 1 && <span className="mp-section-count" aria-hidden="true">{count}</span>}
+    </h2>
+  )
+}
 
 export interface ModuleProps {
   module: ProfileModule
@@ -332,11 +346,15 @@ export function ProductModule({ module, lang, onAction }: ModuleProps) {
   const price = typeof module.content.price === 'number' ? module.content.price : null
   const ctaHref = safeHref(module.content.cta_url)
   const ctaText = tr(str(module.content.cta_text), module.translations, 'cta_text', lang)
+  // Sin foto, la huella del perfil sobre su acento (no un hueco): la misma regla que proyectos y portfolio
+  const ctx = useProfileModule()
+  const art = !image && ctx ? huellaToSvg(generateHuella(ctx.seed, ctx.variant), { colorA: 'currentColor', colorB: 'currentColor', size: 64 }) : null
   if (!name) return null
 
   return (
     <article className="mp-card">
-      <div className={`mp-product${image ? ' has-image' : ''}`}>
+      <div className={`mp-product${image ? ' has-image' : ''}${art ? ' has-art' : ''}`}>
+        {art && <span className="mp-product-art" aria-hidden="true" dangerouslySetInnerHTML={{ __html: art }} />}
         {image && (
           <span className="mp-product-media">
             <SafeImage sizing="thumb" src={image} alt="" loading="lazy" />
@@ -355,7 +373,7 @@ export function ProductModule({ module, lang, onAction }: ModuleProps) {
         </div>
       </div>
       {ctaHref && ctaText && (
-        <a className="mp-featured mp-product-cta" href={ctaHref} {...linkProps(ctaHref)}
+        <a className="mp-primary mp-product-cta" href={ctaHref} {...linkProps(ctaHref)}
           onClick={() => onAction(module.id)}>
           {ctaText}
         </a>
@@ -620,7 +638,7 @@ function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: C
 
   return (
     <section ref={section} className={`mp-tix${shown ? ' is-in' : ''}`} aria-label={heading || t.cards}>
-      {heading && <h2 className="mp-card-title mp-section-title">{heading}</h2>}
+      <SectionTitle heading={heading} count={items.length} />
       <div ref={track} className="mp-tix-track" tabIndex={0} style={arOf(0, items.length - 1)} role="region" aria-label={`${heading || t.cards} — ${t.swipeHint}`}>
         {items.map((item, i) => {
           const href = safeHref(item.url)
@@ -705,7 +723,7 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
 
   return (
     <section aria-label={heading || ui(lang).cards}>
-      {heading && <h2 className="mp-card-title mp-section-title">{heading}</h2>}
+      <SectionTitle heading={heading} count={visible.length} />
       <div className={layout === 'carousel' ? 'mp-cards-carousel' : 'mp-cards-stack'}
         tabIndex={layout === 'carousel' ? 0 : undefined}
         role={layout === 'carousel' ? 'region' : undefined}
