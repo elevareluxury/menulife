@@ -2,7 +2,7 @@ import type { UiStrings } from '../profileI18n'
 
 // Textos de la página pública en ja (se bajan sólo cuando alguien usa este idioma; ver ui() en profileI18n.ts)
 const ui: UiStrings = {
-    openNow: '営業中', closedNow: '営業時間外', share: '共有', linkCopied: 'リンクをコピーしました',
+    openNow: '営業中', closedNow: '営業時間外', closesAt: '{t} に閉店', opensAt: '{t} に開店', opensTomorrow: '明日 {t} に開店', opensOn: '{d} {t} に開店', share: '共有', linkCopied: 'リンクをコピーしました',
     saveContact: '連絡先を保存', contact: '連絡先', location: '所在地', howToGet: '経路',
     hours: '営業時間', closed: '定休日', gallery: 'ギャラリー', reviews: 'レビュー', seeOnGoogle: 'Google で見る',
     reviewsCount: '件のレビュー',

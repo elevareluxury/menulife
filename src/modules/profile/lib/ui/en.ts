@@ -2,7 +2,7 @@ import type { UiStrings } from '../profileI18n'
 
 // Textos de la página pública en en (se bajan sólo cuando alguien usa este idioma; ver ui() en profileI18n.ts)
 const ui: UiStrings = {
-    openNow: 'Open now', closedNow: 'Closed now', share: 'Share', linkCopied: 'Link copied',
+    openNow: 'Open now', closedNow: 'Closed now', closesAt: 'Closes at {t}', opensAt: 'Opens at {t}', opensTomorrow: 'Opens tomorrow at {t}', opensOn: 'Opens {d} at {t}', share: 'Share', linkCopied: 'Link copied',
     saveContact: 'Save contact', contact: 'Contact', location: 'Location', howToGet: 'Get directions',
     hours: 'Hours', closed: 'Closed', gallery: 'Gallery', reviews: 'Reviews', seeOnGoogle: 'See on Google',
     reviewsCount: 'reviews',

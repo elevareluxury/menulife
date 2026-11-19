@@ -61,6 +61,9 @@
       - /url: https://wa.me/5493415550000
   - region "Horarios":
     - heading "Horarios" [level=2]
+    - paragraph:
+      - strong: /(Abierto|Cerrado) ahora/
+      - text: /(Cierra|Abre) .*\d+:\d+/
     - term: Lun
     - definition: /\d+:\d+ – \d+:\d+/
     - term: Mar – Dom
@@ -79,9 +82,11 @@
     - text: /\d+ reseñas/
     - link "Ver en Google":
       - /url: https://g.page/r/ana
-    - text: Juan
-    - img "5 / 5"
-    - paragraph: Excelente trabajo.
+    - figure "Juan 5 / 5":
+      - blockquote:
+        - paragraph: Excelente trabajo.
+      - text: ""
+      - img "5 / 5"
   - link /Marca Café Luna Identidad \d+ Ver proyecto/:
     - /url: /ana/projects/cafe-luna
   - region "Trabajos":

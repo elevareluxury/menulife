@@ -2,7 +2,7 @@ import type { UiStrings } from '../profileI18n'
 
 // Textos de la página pública en zh (se bajan sólo cuando alguien usa este idioma; ver ui() en profileI18n.ts)
 const ui: UiStrings = {
-    openNow: '营业中', closedNow: '已打烊', share: '分享', linkCopied: '链接已复制',
+    openNow: '营业中', closedNow: '已打烊', closesAt: '{t} 打烊', opensAt: '{t} 开始营业', opensTomorrow: '明天 {t} 开始营业', opensOn: '{d} {t} 开始营业', share: '分享', linkCopied: '链接已复制',
     saveContact: '保存联系人', contact: '联系方式', location: '位置', howToGet: '导航',
     hours: '营业时间', closed: '休息', gallery: '相册', reviews: '评价', seeOnGoogle: '在 Google 上查看',
     reviewsCount: '条评价',

@@ -823,6 +823,14 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   en el día de hoy del horario; la ficha de un evento se abre y cierra con View Transitions (el flyer crece,
   `withPosterTransition`; la clase `mp-ev-vt` en `<html>` sólo mientras dura). Los brillos de "Entradas" animan
   `transform` (antes `left`). Todo quieto con "reducir movimiento" y en la vista previa. E2E en `motion.spec.ts`.
+- Fase 2 de diseño (recortada, sin migración): Producto con precio y botón en una barra de compra
+  (`.mp-product-foot`; en el cuadrado, uno debajo del otro); Horarios con el estado de ahora arriba (`hoursStatus` en
+  `profile/lib/schedule.ts`: abierto y a qué hora cierra, o cerrado y cuándo abre — hoy, mañana o el día con su nombre
+  completo por `Intl`; null sin datos o si nunca abre; textos `closesAt`/`opensAt`/`opensTomorrow`/`opensOn` en los 12
+  idiomas; tests en `schedule.test.ts`); Reseñas como citas (`figure` con el texto primero, inicial del autor y estrellas;
+  el promedio grande); formularios más cortos (nombre y contacto lado a lado con `container: mp-form` ≥ 460 px); Cupón
+  con forma de entrada (línea de corte `.mp-coupon-cut` y muescas recortadas con `mask` a la altura que mide
+  `CouponModule` en `--mp-cut`; sin medir, quedan afuera).
 - Auditoría antes del freeze (Business, `20261120000001_business_quotes_lockdown.sql`, tests en
   `business_quotes_lockdown.test.sql`): los presupuestos por link (`/q/:token`) ya no se leen ni se cambian con
   políticas de `anon` (dejaban ver y aceptar todos); `QuotePublicPage` usa `get_public_quote(p_token)` (sólo ese

@@ -2,7 +2,7 @@ import type { UiStrings } from '../profileI18n'
 
 // Textos de la página pública en ar (se bajan sólo cuando alguien usa este idioma; ver ui() en profileI18n.ts)
 const ui: UiStrings = {
-    openNow: 'مفتوح الآن', closedNow: 'مغلق الآن', share: 'مشاركة', linkCopied: 'تم نسخ الرابط',
+    openNow: 'مفتوح الآن', closedNow: 'مغلق الآن', closesAt: 'يغلق الساعة {t}', opensAt: 'يفتح الساعة {t}', opensTomorrow: 'يفتح غدًا الساعة {t}', opensOn: 'يفتح يوم {d} الساعة {t}', share: 'مشاركة', linkCopied: 'تم نسخ الرابط',
     saveContact: 'حفظ جهة الاتصال', contact: 'التواصل', location: 'الموقع', howToGet: 'الاتجاهات',
     hours: 'ساعات العمل', closed: 'مغلق', gallery: 'المعرض', reviews: 'التقييمات', seeOnGoogle: 'عرض على Google',
     reviewsCount: 'تقييمات',

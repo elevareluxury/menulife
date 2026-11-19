@@ -20,6 +20,11 @@ type Days = { monday: string; tuesday: string; wednesday: string; thursday: stri
 export interface UiStrings {
   openNow: string
   closedNow: string
+  /** Horario: estado del módulo ({t} = hora, {d} = día de la semana completo) */
+  closesAt: string
+  opensAt: string
+  opensTomorrow: string
+  opensOn: string
   share: string
   linkCopied: string
   saveContact: string
@@ -124,7 +129,7 @@ export interface UiStrings {
 
 /** Español: viaja con la página. Los otros 11 idiomas, en lib/ui/<idioma>.ts (se bajan al usarlos). */
 const ES: UiStrings = {
-    openNow: 'Abierto ahora', closedNow: 'Cerrado ahora', share: 'Compartir', linkCopied: 'Link copiado',
+    openNow: 'Abierto ahora', closedNow: 'Cerrado ahora', closesAt: 'Cierra a las {t}', opensAt: 'Abre a las {t}', opensTomorrow: 'Abre mañana a las {t}', opensOn: 'Abre el {d} a las {t}', share: 'Compartir', linkCopied: 'Link copiado',
     saveContact: 'Guardar contacto', contact: 'Contacto', location: 'Ubicación', howToGet: 'Cómo llegar',
     hours: 'Horarios', closed: 'Cerrado', gallery: 'Galería', reviews: 'Reseñas', seeOnGoogle: 'Ver en Google',
     reviewsCount: 'reseñas',

@@ -80,11 +80,14 @@ export function SubscribeModule({ module, lang, onAction }: ModuleProps) {
       <h2 id={headingId} className="mp-form-title">{title}</h2>
       {text && <p className="mp-form-intro">{text}</p>}
       <form onSubmit={send} noValidate className="mp-form-fields">
-        <Field label={t.email} type="email" inputMode="email" autoComplete="email" value={email}
-          onChange={e => setEmail(e.target.value)} maxLength={254} required />
-        {askName && (
-          <Field label={t.name} value={name} onChange={e => setName(e.target.value)} maxLength={80} autoComplete="name" />
-        )}
+        {/* Email (y nombre si el dueño lo pide) lado a lado cuando hay lugar */}
+        <div className={askName ? 'mp-form-pair' : undefined}>
+          <Field label={t.email} type="email" inputMode="email" autoComplete="email" value={email}
+            onChange={e => setEmail(e.target.value)} maxLength={254} required />
+          {askName && (
+            <Field label={t.name} value={name} onChange={e => setName(e.target.value)} maxLength={80} autoComplete="name" />
+          )}
+        </div>
         <label className="mp-sub-consent" htmlFor={consentId}>
           <input id={consentId} type="checkbox" checked={consent} required
             onChange={e => { setConsent(e.target.checked); if (status === 'consent_required') setStatus('idle') }} />

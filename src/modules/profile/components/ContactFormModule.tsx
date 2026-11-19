@@ -74,8 +74,11 @@ export function ContactFormModule({ module, lang, onAction }: ModuleProps) {
       <h2 id={headingId} className="mp-form-title">{title}</h2>
       {intro && <p className="mp-form-intro">{intro}</p>}
       <form onSubmit={send} noValidate className="mp-form-fields">
-        <Field label={t.formName} value={name} onChange={e => setName(e.target.value)} maxLength={80} autoComplete="name" required />
-        <Field label={t.formContact} value={contact} onChange={e => setContact(e.target.value)} maxLength={120} autoComplete="email" required />
+        {/* Nombre y contacto lado a lado cuando hay lugar: el formulario se ve más corto */}
+        <div className="mp-form-pair">
+          <Field label={t.formName} value={name} onChange={e => setName(e.target.value)} maxLength={80} autoComplete="name" required />
+          <Field label={t.formContact} value={contact} onChange={e => setContact(e.target.value)} maxLength={120} autoComplete="email" required />
+        </div>
         <Field label={t.formMessage} multiline value={message} onChange={e => setMessage(e.target.value)} maxLength={2000} required />
         {/* Trampa para bots: una persona no la ve ni la completa */}
         <div className="mp-form-trap" aria-hidden="true">
