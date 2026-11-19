@@ -569,7 +569,7 @@
 .my-profile figure.mp-review + figure.mp-review { margin-top: 10px; }
 .mp-review-text { margin: 0 0 12px; }
 .mp-review-text::before {
-  content: '\201C'; display: block; height: 20px; margin-bottom: 4px;
+  content: '\201C'; content: '\201C' / ''; display: block; height: 20px; margin-bottom: 4px;
   font: 700 44px / 0.9 var(--my-font-display); color: var(--p-accent);
 }
 .my-profile .mp-review-text p { margin: 0; font-size: var(--my-fs-body); line-height: var(--my-lh-body, 1.55); color: var(--my-text); }
