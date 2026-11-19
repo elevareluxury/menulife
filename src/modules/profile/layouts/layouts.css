@@ -541,3 +541,68 @@
   content: ''; display: inline-block; width: 6px; height: 6px; margin-inline-end: 8px; vertical-align: 0.15em;
   border-radius: 999px; background: var(--p-accent);
 }
+
+/* ── Fase 2 de diseño: producto, horario, reseñas, formularios y cupón ──────── */
+/* Producto: precio y botón en una barra de compra; en el cuadrado, uno debajo del otro y abajo de todo */
+.my-profile .mp-product-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 16px; margin-top: 16px; }
+.my-profile .mp-product-foot .mp-product-price { flex: none; font: 700 var(--my-fs-section) / 1.1 var(--my-font-ui); letter-spacing: -0.01em; }
+.my-profile .mp-product-foot .mp-product-cta { flex: 1 1 160px; margin-top: 0; }
+.my-profile .mp-s-square .mp-product-foot { flex-direction: column; align-items: stretch; gap: 10px; margin-top: auto; padding-top: 14px; }
+.my-profile .mp-s-square .mp-product-foot .mp-product-cta { flex: none; }
+
+/* Horario: arriba, abierto o cerrado ahora y el próximo cambio (con la hora del negocio) */
+.my-profile .mp-hours-now {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin: 0 0 14px; padding: 10px 14px;
+  border-radius: var(--my-r-field); background: color-mix(in srgb, var(--my-text) 6%, transparent);
+  font-size: var(--my-fs-small); color: var(--my-text);
+}
+.mp-hours-dot { flex: none; width: 8px; height: 8px; border-radius: 999px; background: var(--my-muted); }
+.mp-hours-now.is-open .mp-hours-dot { background: var(--my-ok); box-shadow: 0 0 0 4px color-mix(in srgb, var(--my-ok) 22%, transparent); }
+.mp-hours-next { color: var(--my-muted); }
+
+/* Reseñas: el promedio grande y cada reseña como una cita (texto primero, autor con su inicial abajo) */
+.my-profile .mp-rating-value { font: 700 40px / 1 var(--my-font-display); letter-spacing: -0.02em; color: var(--my-text); }
+.my-profile figure.mp-review {
+  margin: 0; padding: 16px; border: 1px solid var(--p-border); border-radius: var(--my-r-field);
+  background: color-mix(in srgb, var(--my-text) 3%, transparent);
+}
+.my-profile figure.mp-review + figure.mp-review { margin-top: 10px; }
+.mp-review-text { margin: 0 0 12px; }
+.mp-review-text::before {
+  content: '\201C'; display: block; height: 20px; margin-bottom: 4px;
+  font: 700 44px / 0.9 var(--my-font-display); color: var(--p-accent);
+}
+.my-profile .mp-review-text p { margin: 0; font-size: var(--my-fs-body); line-height: var(--my-lh-body, 1.55); color: var(--my-text); }
+.my-profile .mp-review-head { display: flex; align-items: center; gap: 10px; margin: 0; font-size: var(--my-fs-small); }
+.mp-review-avatar {
+  flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px;
+  background: color-mix(in srgb, var(--my-accent) 22%, transparent); color: var(--my-text);
+  font: 700 var(--my-fs-small) / 1 var(--my-font-ui);
+}
+.mp-review-author { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.my-profile .mp-review-head .mp-stars { margin-inline-start: auto; }
+.mp-s-square figure.mp-review { padding: 12px; }
+
+/* Formularios cortos: nombre y contacto (o email y nombre) lado a lado cuando el módulo es ancho */
+.my-profile .mp-form { container: mp-form / inline-size; }
+.mp-form-pair { display: grid; gap: 14px; }
+@container mp-form (min-width: 460px) { .mp-form-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+/* Cupón con forma de entrada: muescas a los costados a la altura de la línea de corte (--mp-cut lo mide
+   CouponModule; sin medir, las muescas quedan afuera y no se ven) */
+.my-profile .mp-card.mp-coupon {
+  --mp-cut: -40px;
+  border-style: solid;
+  -webkit-mask-image: radial-gradient(circle 13px at 0 var(--mp-cut), transparent 12px, #000 12.5px),
+    radial-gradient(circle 13px at 100% var(--mp-cut), transparent 12px, #000 12.5px);
+  -webkit-mask-composite: source-in;
+  mask-image: radial-gradient(circle 13px at 0 var(--mp-cut), transparent 12px, #000 12.5px),
+    radial-gradient(circle 13px at 100% var(--mp-cut), transparent 12px, #000 12.5px);
+  mask-composite: intersect;
+}
+.mp-coupon-cut { display: block; height: 0; margin: 10px 0 22px; }
+.mp-coupon-cut::before {
+  content: ''; position: absolute; left: 20px; right: 20px;
+  border-top: 2px dashed color-mix(in srgb, var(--my-text) 24%, transparent);
+}
+.my-profile .mp-coupon-text { margin-bottom: 14px; }

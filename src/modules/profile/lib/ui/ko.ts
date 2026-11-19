@@ -2,7 +2,7 @@ import type { UiStrings } from '../profileI18n'
 
 // Textos de la página pública en ko (se bajan sólo cuando alguien usa este idioma; ver ui() en profileI18n.ts)
 const ui: UiStrings = {
-    openNow: '영업 중', closedNow: '영업 종료', share: '공유', linkCopied: '링크가 복사되었습니다',
+    openNow: '영업 중', closedNow: '영업 종료', closesAt: '{t}에 영업 종료', opensAt: '{t}에 영업 시작', opensTomorrow: '내일 {t}에 영업 시작', opensOn: '{d} {t}에 영업 시작', share: '공유', linkCopied: '링크가 복사되었습니다',
     saveContact: '연락처 저장', contact: '연락처', location: '위치', howToGet: '길찾기',
     hours: '영업시간', closed: '휴무', gallery: '갤러리', reviews: '리뷰', seeOnGoogle: 'Google에서 보기',
     reviewsCount: '개의 리뷰',

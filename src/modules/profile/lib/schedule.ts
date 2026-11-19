@@ -54,3 +54,40 @@ export function isOpenNow(schedule: WeekSchedule | null | undefined, timezone?: 
 export function todayKey(timezone?: string | null, date = new Date()): Day {
   return nowInTimezone(timezone, date).day
 }
+
+export interface HoursStatus {
+  open: boolean
+  /** Hora del próximo cambio (cierra o abre), HH:MM como está guardada */
+  at: string
+  /** Si está cerrado: en cuántos días abre (0 = hoy, 1 = mañana…) y qué día */
+  inDays: number
+  day: Day
+}
+
+const validSlot = (s: DaySchedule | undefined): s is DaySchedule & { open: string; close: string } =>
+  !!s && !s.closed && toMinutes(s.open) != null && toMinutes(s.close) != null
+
+/**
+ * Estado del horario para mostrar arriba del módulo: abierto (y a qué hora cierra) o cerrado (y cuándo abre).
+ * null si no hay datos o nunca abre: no se inventa nada.
+ */
+export function hoursStatus(schedule: WeekSchedule | null | undefined, timezone?: string | null, date = new Date()): HoursStatus | null {
+  const open = isOpenNow(schedule, timezone, date)
+  if (open == null || !schedule) return null
+  const { day, minutes } = nowInTimezone(timezone, date)
+  const idx = WEEK_DAYS.indexOf(day)
+  if (open) {
+    const today = schedule[day]
+    // Abierto por el horario de hoy, o por el de ayer que pasó la medianoche
+    const slot = isWithin(today, minutes, 'same_day') ? today : schedule[WEEK_DAYS[(idx + 6) % 7]]
+    return validSlot(slot) ? { open: true, at: slot.close.slice(0, 5), inDays: 0, day } : null
+  }
+  for (let i = 0; i < 8; i++) {
+    const d = WEEK_DAYS[(idx + i) % 7]
+    const slot = schedule[d]
+    if (!validSlot(slot)) continue
+    if (i === 0 && toMinutes(slot.open)! <= minutes) continue
+    return { open: false, at: slot.open.slice(0, 5), inDays: i, day: d }
+  }
+  return null
+}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CountUp } from './CountUp'
 import { haptic } from '../lib/haptics'
 import { Check, Copy, Download, FileText, Pause, Play, Ticket } from 'lucide-react'
@@ -152,6 +152,19 @@ export function CouponModule({ module, lang, onAction }: ModuleProps) {
   const [copied, setCopied] = useState(false)
   const timer = useRef<number>(0)
   useEffect(() => () => window.clearTimeout(timer.current), [])
+  // La altura de la línea de corte, para recortar las muescas justo ahí (cambia con el ancho y los textos)
+  const cut = useRef<HTMLSpanElement>(null)
+  useLayoutEffect(() => {
+    const el = cut.current
+    const card = el?.parentElement
+    if (!el || !card) return
+    const place = () => card.style.setProperty('--mp-cut', `${el.offsetTop}px`)
+    place()
+    if (typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(place)
+    ro.observe(card)
+    return () => ro.disconnect()
+  }, [])
   // Vencido: no se muestra (nadie quiere un código que no anda)
   if (!/^[A-Za-z0-9_-]{2,40}$/.test(code) || (/^\d{4}-\d{2}-\d{2}$/.test(expires) && expires < today())) return null
   const title = tr(module.title, module.translations, 'title', lang)
@@ -177,6 +190,8 @@ export function CouponModule({ module, lang, onAction }: ModuleProps) {
       <span className="mp-coupon-ico" aria-hidden="true"><Ticket size={20} /></span>
       {title && <h2 className="mp-card-title mp-coupon-title">{title}</h2>}
       {text && <p className="mp-coupon-text">{text}</p>}
+      {/* Línea de corte de la entrada: las muescas de los costados se recortan a su altura (--mp-cut) */}
+      <span ref={cut} className="mp-coupon-cut" aria-hidden="true" />
       <div className="mp-coupon-code">
         <code>{code}</code>
         <button type="button" className="mp-coupon-copy" onClick={copy}>

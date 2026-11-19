@@ -2,7 +2,7 @@ import type { UiStrings } from '../profileI18n'
 
 // Textos de la página pública en hi (se bajan sólo cuando alguien usa este idioma; ver ui() en profileI18n.ts)
 const ui: UiStrings = {
-    openNow: 'अभी खुला है', closedNow: 'अभी बंद है', share: 'शेयर करें', linkCopied: 'लिंक कॉपी हो गया',
+    openNow: 'अभी खुला है', closedNow: 'अभी बंद है', closesAt: '{t} बजे बंद होगा', opensAt: '{t} बजे खुलेगा', opensTomorrow: 'कल {t} बजे खुलेगा', opensOn: '{d} को {t} बजे खुलेगा', share: 'शेयर करें', linkCopied: 'लिंक कॉपी हो गया',
     saveContact: 'संपर्क सहेजें', contact: 'संपर्क', location: 'पता', howToGet: 'रास्ता देखें',
     hours: 'समय', closed: 'बंद', gallery: 'गैलरी', reviews: 'समीक्षाएँ', seeOnGoogle: 'Google पर देखें',
     reviewsCount: 'समीक्षाएँ',

@@ -2,7 +2,7 @@ import type { UiStrings } from '../profileI18n'
 
 // Textos de la página pública en ru (se bajan sólo cuando alguien usa este idioma; ver ui() en profileI18n.ts)
 const ui: UiStrings = {
-    openNow: 'Открыто', closedNow: 'Закрыто', share: 'Поделиться', linkCopied: 'Ссылка скопирована',
+    openNow: 'Открыто', closedNow: 'Закрыто', closesAt: 'Закрывается в {t}', opensAt: 'Открывается в {t}', opensTomorrow: 'Откроется завтра в {t}', opensOn: 'Откроется: {d}, {t}', share: 'Поделиться', linkCopied: 'Ссылка скопирована',
     saveContact: 'Сохранить контакт', contact: 'Контакты', location: 'Адрес', howToGet: 'Как добраться',
     hours: 'Часы работы', closed: 'Выходной', gallery: 'Галерея', reviews: 'Отзывы', seeOnGoogle: 'Смотреть в Google',
     reviewsCount: 'отзывов',

@@ -3,7 +3,7 @@ import { ArrowUpRight, ChevronDown, Clock, Mail, MapPin, MessageCircle, Navigati
 import type { ProfileLang, ProfileModule, WeekSchedule } from '../lib/profileTypes'
 import { tr, trLabel, ui } from '../lib/profileI18n'
 import { isExternal, safeHref, telHref, whatsappHref } from '../lib/safeUrl'
-import { todayKey, WEEK_DAYS } from '../lib/schedule'
+import { hoursStatus, todayKey, WEEK_DAYS } from '../lib/schedule'
 import { urlKey } from '../lib/clickKeys'
 import { formatPrice } from '../lib/price'
 import { SocialIcon } from './SocialIcon'
@@ -366,18 +366,23 @@ export function ProductModule({ module, lang, onAction }: ModuleProps) {
           {tag && !image && <span className="mp-product-tag">{tag}</span>}
           <h2 className="mp-product-name">{name}</h2>
           {description && <p className="mp-product-desc">{description}</p>}
+        </div>
+      </div>
+      {/* Precio y botón en una sola barra de compra (el precio a la vista al decidir) */}
+      {(price != null || (ctaHref && ctaText)) && (
+        <div className="mp-product-foot">
           {price != null && (
             <span className="mp-product-price">
               {formatPrice(price, str(module.content.currency), lang)}
             </span>
           )}
+          {ctaHref && ctaText && (
+            <a className="mp-primary mp-product-cta" href={ctaHref} {...linkProps(ctaHref)}
+              onClick={() => onAction(module.id)}>
+              {ctaText}
+            </a>
+          )}
         </div>
-      </div>
-      {ctaHref && ctaText && (
-        <a className="mp-primary mp-product-cta" href={ctaHref} {...linkProps(ctaHref)}
-          onClick={() => onAction(module.id)}>
-          {ctaText}
-        </a>
       )}
     </article>
   )
@@ -465,15 +470,20 @@ export function TestimonialsModule({ module, lang, onAction }: ModuleProps) {
           )}
         </div>
       )}
-      {items.map((r, i) => (
-        <div key={i} className="mp-review">
-          <div className="mp-review-head">
-            <span>{r.author_name}</span>
-            {r.rating ? <Stars rating={r.rating} /> : null}
-          </div>
-          {r.text && <p>{r.text}</p>}
-        </div>
-      ))}
+      {/* Cada reseña como una cita: el texto primero y, abajo, quién la escribió (inicial) y sus estrellas */}
+      {items.map((r, i) => {
+        const author = (r.author_name ?? '').trim()
+        return (
+          <figure key={i} className="mp-review">
+            {r.text && <blockquote className="mp-review-text"><p>{r.text}</p></blockquote>}
+            <figcaption className="mp-review-head">
+              {author && <span className="mp-review-avatar" aria-hidden="true">{[...author][0]?.toUpperCase()}</span>}
+              <span className="mp-review-author">{author}</span>
+              {r.rating ? <Stars rating={r.rating} /> : null}
+            </figcaption>
+          </figure>
+        )
+      })}
     </section>
   )
 }
@@ -493,18 +503,39 @@ function hourGroups(schedule: WeekSchedule, closed: string) {
   return groups
 }
 
+/** Nombre completo del día en el idioma de la página (lunes, Montag…) */
+function weekdayName(day: (typeof WEEK_DAYS)[number], lang: ProfileLang): string {
+  try {
+    return new Intl.DateTimeFormat(lang, { weekday: 'long' }).format(new Date(2024, 0, 1 + WEEK_DAYS.indexOf(day)))
+  } catch { return day }
+}
+
 export function HoursModule({ module, lang }: ModuleProps) {
   const t = ui(lang)
   const schedule = (module.content.schedule ?? null) as WeekSchedule | null
   const timezone = str(module.content.timezone) || null
   if (!schedule) return null
   const today = todayKey(timezone)
+  const now = hoursStatus(schedule, timezone)
+  const nowText = !now ? null
+    : now.open ? t.closesAt.replace('{t}', now.at)
+    : now.inDays === 0 ? t.opensAt.replace('{t}', now.at)
+    : now.inDays === 1 ? t.opensTomorrow.replace('{t}', now.at)
+    : t.opensOn.replace('{t}', now.at).replace('{d}', weekdayName(now.day, lang))
 
   return (
     <section className="mp-card" aria-label={t.hours}>
       <h2 className="mp-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <Clock size={14} aria-hidden="true" /> {trLabel(module.title, lang) || t.hours}
       </h2>
+      {/* Ahora: abierto (y a qué hora cierra) o cerrado (y cuándo abre), con la hora del negocio */}
+      {now && (
+        <p className={`mp-hours-now${now.open ? ' is-open' : ''}`}>
+          <span className="mp-hours-dot" aria-hidden="true" />
+          <strong>{now.open ? t.openNow : t.closedNow}</strong>
+          <span className="mp-hours-next">{nowText}</span>
+        </p>
+      )}
       {/* Días seguidos con el mismo horario van juntos ("Mar – Dom · Cerrado"); el grupo de hoy, resaltado */}
       <dl className="mp-hours" style={{ margin: 0 }}>
         {hourGroups(schedule, t.closed).map(g => {
