@@ -754,8 +754,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (`:has(.mp-media-frame)`). Studio: selector "Tamaño" en `ModuleEditor` (12 idiomas, `editor.sizes`). Tests en
   `moduleSize.test.ts` y `module-sizes.spec.ts`.
 - Reproductores (`PlayerFacade`, la usan Video y música y "Último video"): botón propio dibujado como reproductor;
-  el del proveedor carga recién al tocar. Video = pantalla oscura (`data-mycen-theme="universo"` + el acento del
-  perfil, `ProfileModuleContext.accent`), título, "Reproducir" grande y barra de controles; música = portada (o la
+  el del proveedor carga recién al tocar. Video = pantalla del tema del perfil (Universo oscura; Amanecer con
+  `--my-tile`, antes un bloque negro), título, "Reproducir" grande y barra de controles; música = portada (o la
   huella), título, plataforma, línea de progreso en cero y "Reproducir" (disco/lista y cuadrado: portada a sangre).
   Nombre accesible = título + "Reproducir en …".
 - Encabezado y pie del perfil (auditoría de diseño): arriba sólo la huella de Mycen (`BrandMark` en `ProfileView`,
@@ -807,6 +807,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `?evento=<id>` (pushState; se puede compartir). Studio: `EventsEditor`, plantilla por rubro "Productora de eventos".
   Migración `20261122000001_identity_events_module.sql` (sólo el tipo), tests en `events_module.test.sql`,
   `events.test.ts` y `events.spec.ts`. El diseño "Flyers" de Tarjetas sigue para quien ya lo usa.
+- Fase 1 de diseño (lenguaje único de módulos): títulos con la letra de la interfaz (también "Sobre mí"; la de marca
+  queda para el nombre, nombres de proyectos/canciones y momentos grandes), colecciones sin tarjeta con
+  `SectionTitle` (mismo estilo + cantidad), acción principal rellena (`mp-primary` en Producto y Cupón), producto sin
+  foto con la huella (`mp-product-art`), campos con `--my-field-border` (3:1). Letras por idioma en `tokens.css`:
+  Unbounded con cirílico (`fonts.css`), pila del sistema propia para zh/ja/ko/ar/hi (`[data-mycen-theme]:lang(..)`),
+  alto de línea mayor y sin `letter-spacing` en esos alfabetos (en árabe y devanagari separaba letras unidas).
 - Auditoría antes del freeze (Business, `20261120000001_business_quotes_lockdown.sql`, tests en
   `business_quotes_lockdown.test.sql`): los presupuestos por link (`/q/:token`) ya no se leen ni se cambian con
   políticas de `anon` (dejaban ver y aceptar todos); `QuotePublicPage` usa `get_public_quote(p_token)` (sólo ese

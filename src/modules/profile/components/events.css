@@ -6,6 +6,8 @@
 
 /* Fecha grande del evento al frente */
 .mp-ev-head { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 14px; min-height: 1em; }
+/* A la altura del título de la sección (y del texto de las tarjetas) */
+.my-profile .mp-ev-head { padding-inline: 18px; }
 .mp-ev-bigdate {
   font-family: var(--p-title-font); font-weight: 800; font-size: clamp(38px, 13cqw, 60px); line-height: 0.92;
   letter-spacing: -0.045em; text-transform: uppercase; color: var(--p-text);

@@ -8,7 +8,7 @@ import { fetchPollResults, votePoll, type PollResults } from '../lib/profileApi'
 import { loadPodcast } from '../lib/podcastClient'
 import { inspectFeedUrl, type PodcastResponse } from '../lib/podcast'
 import { MEDIA_PROVIDER_NAME, parseMediaUrl } from '../lib/media'
-import type { ModuleProps } from './ProfileModules'
+import { SectionTitle, type ModuleProps } from './ProfileModules'
 import { useProfileModule } from './profileModuleContext'
 import { PlayerFacade } from './PlayerFacade'
 import './v2modules.css'
@@ -184,7 +184,7 @@ export function CouponModule({ module, lang, onAction }: ModuleProps) {
       <span className="mp-sr-only" role="status">{copied ? t.codeCopied : ''}</span>
       {until && <p className="mp-coupon-until">{until}</p>}
       {href && (
-        <a className="mp-featured mp-coupon-use" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>{t.useCoupon}</a>
+        <a className="mp-primary mp-coupon-use" href={href} {...linkProps(href)} onClick={() => onAction(module.id)}>{t.useCoupon}</a>
       )}
     </section>
   )
@@ -205,7 +205,7 @@ export function VideoGalleryModule({ module, lang, onAction }: ModuleProps) {
   const heading = tr(module.title, module.translations, 'title', lang) || t.videos
   return (
     <section className="mp-vgal" aria-label={heading}>
-      <h2 className="mp-card-title mp-section-title">{heading}</h2>
+      <SectionTitle heading={heading} count={videos.length} />
       <div className="mp-vgal-track" tabIndex={0} role="region" aria-label={`${heading} — ${t.swipeHint}`}>
         {videos.map(({ item, embed }, i) => {
           const provider = MEDIA_PROVIDER_NAME[embed.provider]

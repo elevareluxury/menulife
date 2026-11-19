@@ -494,3 +494,38 @@
 [data-mycen-lowfx] .mp-back-top { background: var(--my-glass-solid); }
 /* Tapa de Portada: la huella sigue apenas al mouse o a la inclinación (variables de useTilt) */
 .mp-cover-art:not(:has(img)) { translate: calc(var(--mp-tx, 0) * 16px) calc(var(--mp-ty, 0) * 12px); transition: translate 700ms var(--my-ease, ease); }
+
+/* ── Fase 1 de diseño: un solo lenguaje en los módulos ─────────────────────────────────────────────────────────
+   Títulos: el del bloque de texto ("Sobre mí") con la misma letra y tamaño que el resto (la de marca queda para el
+   nombre, los nombres de proyectos/canciones y los momentos grandes, como la fecha de Eventos). */
+.my-profile .mp-text-heading {
+  font: 600 var(--my-fs-lead) / var(--my-lh-title) var(--my-font-ui); letter-spacing: -0.005em; color: var(--my-text);
+  margin: 0 0 8px;
+}
+.mp-editorial .mp-text-heading { font-family: var(--my-font-editorial); font-weight: 400; font-size: var(--my-fs-section); }
+/* Colecciones sin tarjeta (carruseles, proyectos, entradas): la cantidad al lado del título */
+.my-profile .mp-section-title { display: flex; align-items: center; gap: 8px; }
+.mp-section-count {
+  display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 7px; box-sizing: border-box;
+  border-radius: var(--my-r-pill); font: 600 12px / 1 var(--my-font-ui); font-variant-numeric: tabular-nums;
+  color: var(--my-text); background: color-mix(in srgb, var(--my-text) 10%, transparent);
+}
+/* La acción principal de cada módulo va rellena (Pedir, Usar el cupón): de contorno quedan sólo las secundarias */
+.my-profile :is(.mp-product-cta, .mp-coupon-use) { min-height: 50px; font-size: 15px; box-shadow: none; }
+/* Producto sin foto: la huella del perfil sobre su acento, a la izquierda (no queda un texto suelto) */
+.mp-product-art {
+  flex: none; display: grid; place-items: center; width: 72px; height: 72px; overflow: hidden;
+  border-radius: calc(var(--my-r-card) * 0.6); color: var(--my-text);
+  background: radial-gradient(120% 90% at 30% 20%, color-mix(in srgb, var(--my-accent) 30%, var(--my-tile)), var(--my-tile));
+}
+.mp-product-art svg { width: 86%; height: 86%; opacity: 0.8; }
+.mp-s-square .mp-product.has-art { flex-direction: column; align-items: stretch; }
+.mp-s-square .mp-product-art { width: 100%; height: auto; aspect-ratio: 4 / 3; }
+/* Video: la pantalla sigue el tema del perfil. En Amanecer, un tono del tema (antes, un bloque negro sobre crema) */
+.my-profile[data-mycen-theme='amanecer'] .mp-player-video,
+[data-mycen-theme='amanecer'] .my-profile .mp-player-video { background: var(--my-tile); }
+.my-profile[data-mycen-theme='amanecer'] .mp-player-shade,
+[data-mycen-theme='amanecer'] .my-profile .mp-player-shade {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--my-tile) 70%, transparent), transparent 34%,
+    transparent 60%, color-mix(in srgb, var(--my-tile) 85%, transparent));
+}

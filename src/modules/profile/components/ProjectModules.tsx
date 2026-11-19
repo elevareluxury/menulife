@@ -4,7 +4,7 @@ import { tr, ui } from '../lib/profileI18n'
 import { safeHref } from '../lib/safeUrl'
 import { projectKey } from '../lib/clickKeys'
 import type { ProfileLang } from '../lib/profileTypes'
-import type { ModuleProps } from './ProfileModules'
+import { SectionTitle, type ModuleProps } from './ProfileModules'
 import { SafeImage } from './SafeImage'
 import { useProfileModule } from './profileModuleContext'
 import { Huella } from '@/design/components/Huella'
@@ -53,7 +53,7 @@ export function PortfolioModule({ module, lang, onAction }: ModuleProps) {
   const heading = tr(module.title, module.translations, 'title', lang) || ui(lang).projects
   return (
     <section aria-label={heading}>
-      <h2 className="mp-card-title mp-section-title">{heading}</h2>
+      <SectionTitle heading={heading} count={cards.length} />
       <div className="mp-portfolio">
         {cards.map(card => {
           const { title, summary } = cardText(card, lang)

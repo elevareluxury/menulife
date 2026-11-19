@@ -10,7 +10,7 @@ import { urlKey } from '../lib/clickKeys'
 import { eventHref, localToday, posterRatio, readEvents, upcomingEvents, type EventItem } from '../lib/events'
 import { eventsStrings, type EventsStrings } from '../lib/eventsI18n'
 import type { ProfileLang } from '../lib/profileTypes'
-import type { ModuleProps } from './ProfileModules'
+import { SectionTitle, type ModuleProps } from './ProfileModules'
 import { useProfileModule } from './profileModuleContext'
 import { SafeImage } from './SafeImage'
 import './events.css'
@@ -126,7 +126,7 @@ export function EventsModule({ module, lang, onAction }: ModuleProps) {
 
   return (
     <section className="mp-ev" aria-label={heading || s.section}>
-      {heading && <h2 className="mp-card-title mp-section-title">{heading}</h2>}
+      <SectionTitle heading={heading} count={items.length} />
       {/* La fecha del evento que está al frente, grande (decorativa: cada tarjeta dice la suya) */}
       <div className="mp-ev-head" aria-hidden="true">
         {head
