@@ -5,10 +5,12 @@ La app es la misma web de Mycen adentro de una app nativa (Capacitor 8). Todo el
 | Qué | Dónde |
 |---|---|
 | Configuración (id `id.mycen.app`, nombre, pantalla de carga) | `capacitor.config.ts` |
-| Proyecto de iPhone/iPad (Xcode) | `ios/` |
+| Proyecto de iPhone (Xcode; sólo iPhone, `TARGETED_DEVICE_FAMILY = 1`: en iPad se instala y se ve en tamaño iPhone) | `ios/` |
 | Proyecto de Android (Android Studio) | `android/` |
 | ¿Web o app? (`isNativeApp`, `webOrigin`, `apiUrl`, `authCallbackUrl`) | `src/lib/platform.ts` |
-| Links que abren la app, botón atrás, barra de estado, tocar un recordatorio | `src/app/native/NativeBridge.tsx`, `src/lib/appLinks.ts` |
+| Links que abren la app, botón atrás, barra de estado, tocar un recordatorio, tamaño de letra del celular | `src/app/native/NativeBridge.tsx`, `src/lib/appLinks.ts`, `src/lib/textZoom.ts` |
+| Deslizar desde el borde para volver (iPhone) | `ios/App/App/SceneDelegate.swift` (`MycenBridgeViewController`) |
+| Vibraciones nativas (tildar, copiar, enviar, publicar) | `src/lib/haptics.ts` (`@capacitor/haptics`) |
 | Guardar o compartir archivos (vCard, CSV, QR, tarjeta, .ics, exportar) | `src/lib/nativeFiles.ts` |
 | Recordatorios con la app cerrada (notificaciones locales) | `src/modules/life/lib/nativeReminders.ts` |
 | Íconos y pantalla de carga (desde el ícono maestro de la marca) | `node scripts/build-app-assets.mjs` |
@@ -21,6 +23,12 @@ Qué cambia en la app respecto de la web:
 - Las descargas abren el menú nativo de compartir (Guardar en Archivos, AirDrop, WhatsApp…).
 - Los recordatorios de tareas y hábitos se programan en el teléfono: llegan aunque la app esté cerrada.
 - Sin service worker (la app ya está instalada).
+- El texto sigue el tamaño de letra elegido en el celular (`@capacitor/text-zoom`), hasta 135 % (el más grande "normal"
+  de iPhone; lo prueba `text-zoom.spec.ts`), y se vuelve a leer al volver a la app.
+- En iPhone se vuelve atrás deslizando desde el borde izquierdo; en Android, con el botón atrás.
+- Vibración nativa al confirmar (en iPhone, el "toquecito" del sistema; la web sólo vibra en Android).
+- Mantener apretado un botón o una imagen no selecciona texto ni abre el menú de copiar (`html[data-native]` en
+  `index.css`); los campos y los textos se siguen pudiendo copiar.
 - "Dictar" no se ofrece en la app, ni en iPhone ni en Android (`speechSupported()` en `useSpeech.ts`): no pide micrófono ni voz. El Diario se
   desbloquea con el PIN (la huella o cara del navegador no existe en la app). Quedan para una versión nativa (V1.1).
 

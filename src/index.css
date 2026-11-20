@@ -1329,3 +1329,14 @@ h3 { font-weight: 700; letter-spacing: -0.02em;  line-height: 1.2; }
 
 /* Huella de la marca en las pantallas de acceso (components/ui/AuthBrand.tsx) */
 .auth-brand-mark svg { display: block; width: 100%; height: 100%; }
+
+/* App de iOS/Android (<html data-native>, lo pone NativeBridge): mantener apretado un botón, una pestaña o una
+   imagen no selecciona texto ni abre el menú de "copiar"/"guardar imagen" (es lo que más delata una web). Los campos
+   de texto, los textos largos y los links dentro de un párrafo se siguen pudiendo seleccionar y copiar. */
+html[data-native] :is(button, [role='button'], [role='tab'], [role='menuitem'], [role='switch'], summary, nav a, label:has(> input[type='checkbox'], > input[type='radio'])) {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+html[data-native] img { -webkit-touch-callout: none; -webkit-user-drag: none; }
+html[data-native] { -webkit-tap-highlight-color: transparent; }

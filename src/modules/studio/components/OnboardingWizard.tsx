@@ -1,4 +1,5 @@
 import { shareLink } from '@/lib/nativeFiles'
+import { haptic } from '@/lib/haptics'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEverywhereT } from '@/i18n/app/share/everywhere'
@@ -193,6 +194,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
     try {
       await updateProfile(profile.id, { onboarding_step: 5 })
       await publishSpace(profile.id)
+      haptic('success')
       trackEvent('profile_published', { seconds: secondsSinceSignup() })
       setProfile(await loadProfile(profile.id))
       setPublished(true)
