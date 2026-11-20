@@ -150,7 +150,7 @@ const it: LegalDict = {
     ] },
     { id: 'datos', title: 'Quali dati usiamo', body: [
       { list: [
-        '**Il tuo account:** nome, email, password (conservata cifrata, non la vediamo mai), lingua, valuta, fuso orario e data in cui hai accettato queste condizioni.',
+        '**Il tuo account:** nome, email, password (conservata cifrata, non la vediamo mai), lingua, valuta, fuso orario e data in cui hai accettato queste condizioni. Se attivi la verifica in due passaggi, anche la chiave della tua app di autenticazione (conservata cifrata da Supabase).',
         '**Il tuo profilo pubblico:** ciò che inserisci in Studio (nome, foto, testi, link, progetti, biglietto da visita). Viene pubblicato solo ciò che decidi di mostrare. Ogni foto viene rigenerata sul tuo dispositivo prima del caricamento, quindi i dati nascosti che contiene (come la posizione GPS o il modello della fotocamera) vengono eliminati.',
         '**Life OS:** i tuoi obiettivi, abitudini, attività, finanze e note, compresi i nomi che scrivi (per esempio, con chi hai diviso una spesa). Sono privati: solo tu puoi vederli. Anche il tuo diario: il blocco con PIN, impronta o volto funziona solo sul tuo dispositivo (non viene inviato a Mycen) e le voci non sono cifrate end-to-end.',
         '**Come ti sei sentito:** se chiudendo la giornata tocchi una delle faccine, salviamo quel valore (da 1 a 5) e la data. Può dire qualcosa sulla tua salute: per questo è facoltativo, lo vedi solo tu e lo usiamo solo per mostrarti le tue tendenze (per esempio in Insights e in «Il tuo mese»). Toccare la faccina è il tuo consenso, che revochi toccandola di nuovo (viene cancellata) o eliminando Life OS.',

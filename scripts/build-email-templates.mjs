@@ -24,11 +24,13 @@ const COMMON = {
 }
 
 /**
- * Tipos de mail. `kind: 'link'` lleva botón con {{ .ConfirmationURL }}; `kind: 'code'` muestra {{ .Token }}.
+ * Tipos de mail. `kind: 'link'` lleva botón con el link a /auth/callback con `token_hash` (flujo PKCE: sirve en
+ * cualquier dispositivo, también si el mail se abre en otro celular o navegador; AuthCallback lo canjea con
+ * verifyOtp) y `type` (el de verifyOtp); `kind: 'code'` muestra {{ .Token }}.
  * Campos por idioma: subject, title, body, cta (sólo link).
  */
 const EMAILS = {
-  confirmar_cuenta: { kind: 'link', supabase: 'Confirm signup', text: {
+  confirmar_cuenta: { kind: 'link', type: 'email', supabase: 'Confirm signup', text: {
     es: ['Confirmá tu cuenta de Mycen', 'Te damos la bienvenida a Mycen', 'Confirmá tu email para activar tu cuenta y empezar a armar tu identidad.', 'Confirmar mi cuenta'],
     en: ['Confirm your Mycen account', 'Welcome to Mycen', 'Confirm your email to activate your account and start building your identity.', 'Confirm my account'],
     pt: ['Confirme sua conta Mycen', 'Boas-vindas ao Mycen', 'Confirme seu e-mail para ativar sua conta e começar a montar sua identidade.', 'Confirmar minha conta'],
@@ -42,7 +44,7 @@ const EMAILS = {
     ar: ['أكّد حسابك في Mycen', 'مرحبًا بك في Mycen', 'أكّد بريدك الإلكتروني لتفعيل حسابك والبدء في بناء هويتك.', 'تأكيد حسابي'],
     ru: ['Подтвердите аккаунт Mycen', 'Добро пожаловать в Mycen', 'Подтвердите почту, чтобы активировать аккаунт и начать создавать свою идентичность.', 'Подтвердить аккаунт'],
   } },
-  recuperar_contrasena: { kind: 'link', supabase: 'Reset Password', text: {
+  recuperar_contrasena: { kind: 'link', type: 'recovery', supabase: 'Reset Password', text: {
     es: ['Creá una contraseña nueva para Mycen', 'Recuperá tu contraseña', 'Recibimos un pedido para cambiar la contraseña de tu cuenta. El link vence en 1 hora.', 'Crear contraseña nueva'],
     en: ['Create a new password for Mycen', 'Reset your password', 'We received a request to change your account password. The link expires in 1 hour.', 'Create new password'],
     pt: ['Crie uma nova senha para o Mycen', 'Recupere sua senha', 'Recebemos um pedido para trocar a senha da sua conta. O link expira em 1 hora.', 'Criar nova senha'],
@@ -56,7 +58,7 @@ const EMAILS = {
     ar: ['أنشئ كلمة مرور جديدة لـ Mycen', 'استعادة كلمة المرور', 'تلقّينا طلبًا لتغيير كلمة مرور حسابك. تنتهي صلاحية الرابط خلال ساعة واحدة.', 'إنشاء كلمة مرور جديدة'],
     ru: ['Создайте новый пароль для Mycen', 'Восстановление пароля', 'Мы получили запрос на смену пароля вашего аккаунта. Ссылка действует 1 час.', 'Создать новый пароль'],
   } },
-  enlace_magico: { kind: 'link', supabase: 'Magic Link', text: {
+  enlace_magico: { kind: 'link', type: 'email', supabase: 'Magic Link', text: {
     es: ['Tu link para entrar a Mycen', 'Entrá a Mycen', 'Tocá el botón para iniciar sesión. El link sirve una sola vez.', 'Iniciar sesión'],
     en: ['Your link to log in to Mycen', 'Log in to Mycen', 'Tap the button to log in. The link works only once.', 'Log in'],
     pt: ['Seu link para entrar no Mycen', 'Entre no Mycen', 'Toque no botão para entrar. O link funciona uma única vez.', 'Entrar'],
@@ -70,7 +72,7 @@ const EMAILS = {
     ar: ['رابط تسجيل الدخول إلى Mycen', 'سجّل الدخول إلى Mycen', 'اضغط الزر لتسجيل الدخول. يعمل الرابط مرة واحدة فقط.', 'تسجيل الدخول'],
     ru: ['Ваша ссылка для входа в Mycen', 'Вход в Mycen', 'Нажмите кнопку, чтобы войти. Ссылка работает только один раз.', 'Войти'],
   } },
-  cambio_de_email: { kind: 'link', supabase: 'Change Email Address', text: {
+  cambio_de_email: { kind: 'link', type: 'email_change', supabase: 'Change Email Address', text: {
     es: ['Confirmá tu nuevo email en Mycen', 'Confirmá el cambio de email', 'Pediste cambiar el email de tu cuenta de {{ .Email }} a {{ .NewEmail }}. Confirmalo con el botón.', 'Confirmar nuevo email'],
     en: ['Confirm your new email on Mycen', 'Confirm your email change', 'You asked to change your account email from {{ .Email }} to {{ .NewEmail }}. Confirm it with the button.', 'Confirm new email'],
     pt: ['Confirme seu novo e-mail no Mycen', 'Confirme a troca de e-mail', 'Você pediu para trocar o e-mail da sua conta de {{ .Email }} para {{ .NewEmail }}. Confirme pelo botão.', 'Confirmar novo e-mail'],
@@ -119,13 +121,17 @@ function byLang(render) {
     + `{{ else }}${render('es')}{{ end }}`
 }
 
+/** Link del mail: la Site URL de Supabase (https://mycen.id) + /auth/callback con el token y el tipo */
+export const actionLink = type => `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=${type}`
+
 function body(email, l) {
   const [, title, text, cta] = email.text[l]
   const c = COMMON[l]
+  const link = email.kind === 'link' ? actionLink(email.type) : ''
   const action = email.kind === 'link'
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:${C.accent}"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:${C.accent};color:${C.onAccent};text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">${html(cta)}</a></td></tr></table>
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:${C.accent}"><a href="${link}" style="display:inline-block;background:${C.accent};color:${C.onAccent};text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">${html(cta)}</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:${C.muted}">${html(c.fallback)}</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:${C.accent}">{{ .ConfirmationURL }}</a></p>`
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="${link}" style="color:${C.accent}">${link}</a></p>`
     : `<p style="margin:28px 0;font-size:32px;font-weight:700;letter-spacing:6px;color:${C.text}" dir="ltr">{{ .Token }}</p>`
   return `
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:${C.text}">${html(title)}</h1>

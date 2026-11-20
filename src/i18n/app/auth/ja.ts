@@ -24,6 +24,8 @@ const ja: AuthDict = {
     failed: "ログインできませんでした。もう一度お試しください。",
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "新規登録を数分間停止しています。少し時間をおいてもう一度お試しください。",
     subtitle: "あなたのデジタルアイデンティティを、ひとつの場所に",
     name: "お名前",
     namePlaceholder: "Ana Pérez",
@@ -112,6 +114,32 @@ const ja: AuthDict = {
     failed: "人間であることを確認できませんでした。もう一度お試しください。",
     unavailable: "ボット対策の確認を読み込めませんでした。接続を確認するか、コンテンツブロッカーをオフにしてもう一度お試しください。",
     retry: "確認をやり直す",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "2段階認証",
+    intro: "パスワードに加えて、認証アプリ（Google Authenticator、Microsoft Authenticator、1Password など）の6桁のコードを求めます。誰かにパスワードを知られても、ログインできません。",
+    on: "オン",
+    off: "オフ",
+    enable: "オンにする",
+    disable: "オフにする",
+    scan: "このコードを認証アプリでスキャンしてください。",
+    manual: "スキャンできない場合は、このキーをアプリに入力してください：",
+    code: "6桁のコード",
+    verify: "確認",
+    verifying: "確認しています…",
+    wrong: "コードが正しくないか、期限切れです。アプリに今表示されているコードを入力してください。",
+    failed: "この手順を完了できませんでした。もう一度お試しください。",
+    challengeTitle: "確認コード",
+    challengeIntro: "認証アプリを開き、Mycen の6桁のコードを入力してください。",
+    signOut: "ログアウト",
+    lost: "スマートフォンをなくしましたか？アカウントのメールアドレスから team@mycen.id にご連絡ください。",
+    adminTitle: "チームのパネルには2段階認証が必要です",
+    adminIntro: "チームのパネルに入るには、2段階認証をオンにしてください。設定は一度だけで、すべての人のデータを守ります。",
+    enabledDone: "完了：2段階認証がオンになりました。",
+    disabledDone: "2段階認証はオフです。",
+    cancel: "キャンセル",
+    needsRecent: "オフにするには、ログアウトしてコードでもう一度ログインしてください。",
   },
 }
 

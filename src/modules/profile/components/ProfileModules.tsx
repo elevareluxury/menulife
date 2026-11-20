@@ -281,7 +281,7 @@ export function TextModule({ module, lang }: ModuleProps) {
   if (showImage) {
     return (
       <article className="mp-card mp-card-media">
-        <SafeImage className="mp-text-image" sizing="column" src={image!} alt="" loading="lazy" onFail={() => setImageFailed(true)} />
+        <SafeImage className="mp-text-image" sizing="column" src={image!} alt={str(module.content.image_alt)} loading="lazy" onFail={() => setImageFailed(true)} />
         {text && <div className="mp-card-media-body">{text}</div>}
       </article>
     )
@@ -314,7 +314,7 @@ export function ImageModule({ module, lang }: ModuleProps) {
       </button>
       {caption && <figcaption className="mp-image-caption">{caption}</figcaption>}
       {viewing && (
-        <Suspense fallback={null}><Lightbox items={[{ url: src, caption }]} index={0} onIndex={() => undefined} onClose={() => setViewing(false)}
+        <Suspense fallback={null}><Lightbox items={[{ url: src, caption, alt: alt || undefined }]} index={0} onIndex={() => undefined} onClose={() => setViewing(false)}
           labels={{ close: t.close, prev: t.prevPhoto, next: t.nextPhoto }} /></Suspense>
       )}
     </figure>
@@ -390,7 +390,7 @@ export function ProductModule({ module, lang, onAction }: ModuleProps) {
 
 // ── Gallery ─────────────────────────────────────────────────────────────────
 
-interface GalleryItem { url: string; type?: string; caption?: string; thumbnail_url?: string }
+interface GalleryItem { url: string; type?: string; caption?: string; alt?: string; thumbnail_url?: string }
 
 const isVideo = (item: GalleryItem) => item.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(item.url)
 
@@ -415,7 +415,7 @@ export function GalleryModule({ module, lang }: ModuleProps) {
           const thumb = safeHref(item.thumbnail_url) ?? (isVideo(item) ? null : item.url)
           return (
             <button key={item.url + i} type="button" onClick={() => setOpen(i)}
-              aria-label={item.caption || `${t.gallery} ${i + 1}`}>
+              aria-label={str(item.alt) || item.caption || `${t.gallery} ${i + 1}`}>
               {thumb
                 ? <SafeImage sizing="third" src={thumb} alt="" loading="lazy" onFail={() => setBroken(b => new Set(b).add(item.url))} />
                 : <video src={item.url} muted playsInline preload="metadata" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
@@ -424,7 +424,7 @@ export function GalleryModule({ module, lang }: ModuleProps) {
         })}
       </div>
       {open != null && (
-        <Suspense fallback={null}><Lightbox items={items.map(i => ({ url: i.url, caption: i.caption, video: isVideo(i) }))} index={open} onIndex={setOpen}
+        <Suspense fallback={null}><Lightbox items={items.map(i => ({ url: i.url, caption: i.caption, alt: str(i.alt) || undefined, video: isVideo(i) }))} index={open} onIndex={setOpen}
           onClose={() => setOpen(null)} labels={{ close: ui(lang).close, prev: t.prevPhoto, next: t.nextPhoto }} /></Suspense>
       )}
     </section>

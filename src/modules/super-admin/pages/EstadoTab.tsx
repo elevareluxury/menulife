@@ -5,6 +5,7 @@ import { apiUrl } from '@/lib/platform'
 import { useAdminT, type AdminDict } from '@/i18n/app/admin'
 import { useAdminFormat } from '../lib/adminFormat'
 import { adminRpc, BTN, CARD, INPUT, MUTED, OK_COLOR, TEXT } from '../lib/adminRpc'
+import { EmergencySwitches } from '../components/EmergencySwitches'
 import {
   evaluate, overall, selfcheckLevel,
   type Finding, type HealthResult, type Level, type ProfileProbe, type Row, type SystemStatus,
@@ -129,6 +130,8 @@ export function EstadoTab() {
         <Dot level={general} size={18} />
         <p style={{ margin: 0, fontSize: 19, fontWeight: 800, color: TEXT }}>{snap ? s.overall[general] : t.common.loading}</p>
       </section>
+
+      <EmergencySwitches />
 
       {snap && !snap.status && <p role="alert" style={{ color: BAD, fontSize: 14 }}>{s.loadFailed}</p>}
       {snap?.health && !snap.health.checks && <p role="status" style={{ color: WARN, fontSize: 13.5 }}>{s.deepUnavailable}</p>}

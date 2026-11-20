@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { MfaSettingsCard } from '@/modules/auth/components/Mfa'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ChevronRight, Download, FileSpreadsheet, LogOut, Plus, Settings2, Trash2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -207,6 +208,10 @@ export function LifeSettingsPage() {
             </button>
           </div>
           <p style={help}>{t.data.help}</p>
+        </LifeCard>
+
+        <LifeCard>
+          <MfaSettingsCard />
         </LifeCard>
 
         <LifeCard>

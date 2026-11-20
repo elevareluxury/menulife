@@ -66,6 +66,7 @@ export function ContactFormModule({ module, lang, onAction }: ModuleProps) {
   const errorText = status === 'invalid' ? t.formInvalid
     : status === 'too_many_links' ? t.formLinks
     : status === 'rate_limited' ? t.formLimit
+    : status === 'paused' ? t.formPaused
     : status === 'error' ? t.formError
     : null
 

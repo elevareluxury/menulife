@@ -42,6 +42,8 @@ export function PollModule({ module, lang, onAction }: ModuleProps) {
   const [mine, setMine] = useState<string | null>(() => readVote(module.id))
   const [results, setResults] = useState<PollResults | null>(null)
   const [busy, setBusy] = useState(false)
+  // El equipo pausó las votaciones (interruptor de emergencia): no se guarda el voto y se explica
+  const [paused, setPaused] = useState(false)
 
   // Quien ya votó ve los resultados al volver
   useEffect(() => {
@@ -55,14 +57,21 @@ export function PollModule({ module, lang, onAction }: ModuleProps) {
 
   async function vote(id: string) {
     if (busy) return
+    const before = mine
     setMine(id)
+    setPaused(false)
     haptic()
     onAction(module.id, `v:${id}`)
     if (ctx?.preview || !ctx?.handle) return
-    saveVote(module.id, id)
     setBusy(true)
     const r = await votePoll(ctx.handle, module.id, id)
-    if (r) setResults(r)
+    if (r === 'paused') {
+      setMine(before)
+      setPaused(true)
+    } else {
+      saveVote(module.id, id)
+      if (r) setResults(r)
+    }
     setBusy(false)
   }
 
@@ -89,6 +98,7 @@ export function PollModule({ module, lang, onAction }: ModuleProps) {
           )
         })}
       </div>
+      {paused && <p className="mp-form-error" role="status">{t.pollPaused}</p>}
       {mine && results && (
         <p className="mp-poll-total" role="status">
           {total === 1 ? t.oneVote : total ? t.votesCount.replace('{n}', String(total)) : t.noVotes}

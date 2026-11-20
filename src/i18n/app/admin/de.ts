@@ -33,6 +33,13 @@ const de: AdminDict = {
     seeErrors: 'Fehler ansehen →',
   },
   reports: {
+    /** Abuso sexual infantil: suspender, retener la evidencia y denunciar (docs/seguridad/csam.md) */
+    csamButton: "Sexueller Kindesmissbrauch",
+    csamConfirm: "Das sperrt das ganze Konto, schließt seine Meldungen und sichert die Beweise (niemand kann sie löschen). Nur bei sexuellen Inhalten mit Minderjährigen verwenden. Fortfahren?",
+    csamDone: "Erledigt: Das Konto ist gesperrt und die Beweise sind gesichert. Folge jetzt diesen Schritten.",
+    csamFailed: "Konnte nicht abgeschlossen werden. Hast du die Migration zur Beweissicherung angewendet?",
+    csamStepsTitle: "Was jetzt zu tun ist",
+    csamSteps: ["Lade das Material nicht herunter, kopiere oder leite es nicht weiter und zeig es niemandem.", "Melde es den Behörden: NCMEC CyberTipline (report.cybertip.org) und in Argentinien der UFECI der Staatsanwaltschaft.", "Gib in der Meldung den Profil-Link, das Datum und die Uhrzeit an. Das Material wird nicht angehängt: Die Behörden fordern es bei Bedarf an.", "Benachrichtige die Person nicht: Der Grund, den sie sieht, ist allgemein.", "Das vollständige Verfahren steht in docs/seguridad/csam.md."],
     title: 'Meldungen',
     intro: 'Von Besuchern gemeldete Profile und Projekte. Eine Sperre blendet das Profil vollständig aus (Seite, Projekte, vCard) und schließt alle offenen Meldungen. Der Inhaber sieht den Grund in Studio.',
     open: 'Offen', resolved: 'Erledigt',
@@ -155,6 +162,10 @@ const de: AdminDict = {
     businessOff: 'Business ist auf der Startseite ausgeschaltet. Die Seiten bleiben im Menü unter „Business“.',
   },
   people: {
+    /** Retención legal de una cuenta (abuso infantil o pedido de una autoridad) */
+    legalHold: "Rechtliche Sicherung: Das Konto und seine Dateien können nicht gelöscht werden.",
+    releaseHold: "Sicherung aufheben",
+    releaseConfirm: "Sicherung aufheben? Mach das nur, wenn die Behörden die Beweise nicht mehr brauchen.",
     title: 'Personen',
     intro: 'Suche ein Konto per E-Mail, Benutzername oder Name.',
     search: 'Suchen',
@@ -201,6 +212,8 @@ const de: AdminDict = {
     purgeDone: (n) => `${n} Dateien gelöscht`,
   },
   activity: {
+    csam_hold: "Wegen Kindesmissbrauch gesperrt und Beweise gesichert",
+    legal_hold_released: "Eine rechtliche Sicherung aufgehoben",
     title: 'Team-Aktivität',
     intro: 'Jede Aktion des Teams wird automatisch protokolliert: wer, was und wann.',
     empty: 'Noch keine Aktionen.',
@@ -225,6 +238,21 @@ const de: AdminDict = {
     status_setting: 'Hat eine Einstellung im Systemstatus geändert',
   },
   status: {
+    /** Interruptores de emergencia (Estado): registros, mensajes, suscripciones y votaciones */
+    emergency: {
+      title: "Notschalter",
+      intro: "Bei Spam oder einem Angriff pausierst du einen Teil mit einem Klick. Die Datenbank stoppt ihn sofort, ohne neue Version; wer es versucht, sieht „pausiert, versuch es gleich noch einmal“. Es wird in der Team-Aktivität festgehalten.",
+      signups: "Neue Registrierungen",
+      messages: "Nachrichten und Kooperationen",
+      subscriptions: "Abonnements",
+      polls: "Abstimmungen in Umfragen",
+      on: "Läuft",
+      off: "Pausiert",
+      turnOff: "Pausieren",
+      turnOn: "Fortsetzen",
+      confirm: (name) => `„${name}“ pausieren? Niemand kann es nutzen, bis du es fortsetzt.`,
+      failed: "Konnte nicht geändert werden. Hast du die Migration der Schalter angewendet?",
+    },
     title: 'Systemstatus',
     intro: 'Wie es Mycen gerade geht. Solange diese Seite offen ist, prüft sie sich jede Minute selbst.',
     refresh: 'Jetzt prüfen',

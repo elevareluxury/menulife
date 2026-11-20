@@ -24,6 +24,8 @@ const en: AuthDict = {
     failed: "We couldn’t log you in. Please try again.",
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "New sign-ups are paused for a few minutes. Please try again shortly.",
     subtitle: "Your digital identity, all in one place",
     name: "Your name",
     namePlaceholder: "Ana Pérez",
@@ -112,6 +114,32 @@ const en: AuthDict = {
     failed: "We couldn’t verify that you’re a person. Try again.",
     unavailable: "We couldn’t load the anti-bot check. Check your connection or turn off your content blocker and try again.",
     retry: "Retry check",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "Two-step verification",
+    intro: "Besides your password, we ask for a 6-digit code from an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password…). Even if someone gets your password, they can’t get in.",
+    on: "On",
+    off: "Off",
+    enable: "Turn on",
+    disable: "Turn off",
+    scan: "Scan this code with your authenticator app.",
+    manual: "If you can’t scan it, type this key into the app:",
+    code: "6-digit code",
+    verify: "Confirm",
+    verifying: "Confirming…",
+    wrong: "The code is wrong or expired. Try the one your app shows now.",
+    failed: "We couldn’t complete this step. Please try again.",
+    challengeTitle: "Your verification code",
+    challengeIntro: "Open your authenticator app and enter Mycen’s 6-digit code.",
+    signOut: "Sign out",
+    lost: "Lost your phone? Write to team@mycen.id from your account’s email.",
+    adminTitle: "The team panel requires two-step verification",
+    adminIntro: "To enter the team panel, turn on two-step verification. You only do it once, and it protects everyone’s data.",
+    enabledDone: "Done: two-step verification is on.",
+    disabledDone: "Two-step verification is off.",
+    cancel: "Cancel",
+    needsRecent: "To turn it off, sign out and sign back in with your code.",
   },
 }
 

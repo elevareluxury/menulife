@@ -19,6 +19,7 @@ import { AuthBrand } from '@/components/ui/AuthBrand'
 import { CaptchaField } from '@/modules/auth/components/Captcha'
 import { useCaptcha } from '@/modules/auth/lib/useCaptcha'
 import { withCaptcha } from '@/lib/turnstile'
+import { signupsPausedNow, useSiteFlags } from '@/lib/siteFlags'
 
 const CORAL = '#F4705A'
 
@@ -86,10 +87,13 @@ export function RegisterPage() {
   const [error,    setError]    = useState('')
   const [accepted, setAccepted] = useState(false)
   const captcha = useCaptcha()
+  // Interruptor de emergencia (Super-admin → Estado): con los registros en pausa no se intenta (la base igual lo frena)
+  const { signups } = useSiteFlags()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    if (!signups) { setError(r.signupsPaused); return }
     if (!name.trim()) { setError(r.needName); return }
     if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
       setError(r.weakPassword)
@@ -127,6 +131,11 @@ export function RegisterPage() {
       // Onboarding guiado: Studio lo muestra a quien todavía no tiene identidad
       navigate('/studio')
     } catch (err: unknown) {
+      // Registros recién pausados: la base rechaza la cuenta con un error del servidor ("Database error saving new user")
+      if (/saving new user/i.test(err instanceof Error ? err.message : String(err)) && await signupsPausedNow()) {
+        setError(r.signupsPaused)
+        return
+      }
       // Error del servidor: la cuenta suele crearse y el mail sale igual (si no, volver a registrarse lo reenvía)
       if (signupMaybeCreated(err)) {
         toast.success(r.checkEmailSlow, { duration: 10000 })
@@ -183,6 +192,13 @@ export function RegisterPage() {
           )}
         </div>
 
+        {!signups && !error && (
+          <p role="status" style={{
+            padding: '10px 14px', borderRadius: '10px', margin: '0 0 16px',
+            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)',
+            fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: '#fff', lineHeight: 1.5,
+          }}>{r.signupsPaused}</p>
+        )}
         {error && (
           <div role="alert" style={{
             padding: '10px 14px', borderRadius: '10px',
@@ -261,7 +277,7 @@ export function RegisterPage() {
           </button>
         </form>
 
-        {featureOn('googleSignIn') && <GoogleButton referral={referral} claim={claim} accepted={accepted} />}
+        {featureOn('googleSignIn') && signups && <GoogleButton referral={referral} claim={claim} accepted={accepted} />}
 
         <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.65)' }}>
           {r.haveAccount}{' '}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { setSiteFlagsLocal, useSiteFlags } from '@/lib/siteFlags'
+import { readSiteFlags, setSiteFlagsLocal, useSiteFlags } from '@/lib/siteFlags'
 
 const CARD = {
   background: '#0A0D12',
@@ -159,7 +159,7 @@ function BusinessSwitch() {
     const { data, error: err } = await (supabase as any).rpc('admin_set_site_flag', { p_key: 'business', p_enabled: !business })
     setBusy(false)
     if (err || !data) setError('No se pudo cambiar. ¿Aplicaste el SQL de interruptores?')
-    else setSiteFlagsLocal({ business: (data as { business?: boolean }).business === true })
+    else setSiteFlagsLocal(readSiteFlags(data as Record<string, unknown>))
   }
 
   return (

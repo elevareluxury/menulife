@@ -20,7 +20,7 @@ aplica (con motivo). La evidencia apunta a archivos del repo o a pantallas de lo
 | 5.10 Uso aceptable | ✅ | `/terminos#reglas` (12 idiomas) |
 | 5.12–5.13 Clasificación y etiquetado | ✅ | [04 · Clasificación](04-activos-proveedores.md#clasificación) |
 | 5.14 Transferencia de información | ✅ | Sólo HTTPS; exportes descargados por la propia persona |
-| 5.15–5.18 Control de accesos, identidad, autenticación, derechos | 🟡 | RLS + RPC; super-admins en tabla propia; [06 · Accesos](06-operacion.md#control-de-accesos). Pendiente: 2FA dentro del panel (R-02) |
+| 5.15–5.18 Control de accesos, identidad, autenticación, derechos | 🟡 | RLS + RPC; super-admins en tabla propia; [06 · Accesos](06-operacion.md#control-de-accesos). 2FA (TOTP) obligatoria en el panel: la base exige aal2 en `mycen_is_admin()` (R-02); opcional para las cuentas (Ajustes) |
 | 5.19–5.22 Proveedores | ✅ | [04 · Proveedores](04-activos-proveedores.md#proveedores-y-subencargados) con certificaciones y DPA |
 | 5.23 Servicios en la nube | ✅ | Supabase, Vercel, Resend: configuración en `docs/lanzamiento/salida-web.md` |
 | 5.24–5.28 Incidentes y evidencia | ✅ | [Plan ante incidentes](../../lanzamiento/incidentes.md) con registro y plazos de aviso |
@@ -47,10 +47,10 @@ dispositivos del equipo: bloqueo de pantalla, disco cifrado y sistema actualizad
 | Control | Estado | Evidencia / acción |
 |---|---|---|
 | 8.1 Dispositivos de usuario | 🟡 | [06 · Dispositivos](06-operacion.md#dispositivos-del-equipo) |
-| 8.2 Accesos privilegiados | 🟡 | `super_admins`, `admin_*` sólo `authenticated` + `mycen_is_admin`; service role sólo en el servidor. Pendiente 2FA en el panel |
+| 8.2 Accesos privilegiados | 🟡 | `super_admins`, `admin_*` sólo `authenticated` + `mycen_is_admin`; service role sólo en el servidor. 2FA obligatoria en el panel (aal2) |
 | 8.3 Restricción de acceso | ✅ | RLS en todas las tablas; anónimos sólo RPC (`CLAUDE.md` · Modelo de datos); `restaurants` con columnas públicas |
 | 8.4 Acceso al código | ✅ | GitHub privado; ramas protegidas (configurar en GitHub: ver [06](06-operacion.md#gestión-de-cambios-y-desarrollo-seguro)) |
-| 8.5 Autenticación segura | 🟡 | Supabase Auth, contraseñas filtradas bloqueadas (activar en el panel), Turnstile, Google/Apple. Pendiente 2FA del panel |
+| 8.5 Autenticación segura | 🟡 | Supabase Auth, contraseñas filtradas bloqueadas (activar en el panel), Turnstile, Google/Apple, PKCE en web y app, 2FA (TOTP) obligatoria en el panel y opcional para todas las cuentas |
 | 8.6 Capacidad | ✅ | `/super-admin/estado` (tamaño, conexiones, límites del plan) |
 | 8.7 Malware | ✅ | Archivos subidos: imágenes convertidas a WebP en el dispositivo, PDFs con tipo y tamaño cerrados (10 MB) |
 | 8.8 Vulnerabilidades técnicas | ✅ | Dependabot; `npm audit --audit-level=high` en CI; `admin_security_selfcheck`; auditorías por etapa |
@@ -81,7 +81,7 @@ dispositivos del equipo: bloqueo de pantalla, disco cifrado y sistema actualizad
 | CC3 Evaluación de riesgos | ✅ | [02](02-riesgos.md) |
 | CC4 Monitoreo de controles | ✅ | Calendario en [06](06-operacion.md#calendario-de-controles); estado del sistema en vivo |
 | CC5 Actividades de control | ✅ | Controles automáticos en CI y en la base (RLS, triggers, límites) |
-| CC6 Accesos lógicos y físicos | 🟡 | Ver A.5.15–18 y A.8.2–8.5; pendiente 2FA del panel |
+| CC6 Accesos lógicos y físicos | 🟡 | Ver A.5.15–18 y A.8.2–8.5; 2FA del panel hecha |
 | CC7 Operación (detección, respuesta) | ✅ | Errores, estado, monitor, plan de incidentes, bitácora inalterable |
 | CC8 Gestión de cambios | ✅ | PR + CI + migraciones probadas |
 | CC9 Mitigación de riesgos / proveedores | ✅ | [04 · Proveedores](04-activos-proveedores.md#proveedores-y-subencargados) |

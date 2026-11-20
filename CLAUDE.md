@@ -720,6 +720,22 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   Cloudflare R2 (`.github/workflows/storage-backup.yml`, pasos en `docs/lanzamiento/copia-archivos.md`) y prueba de carga
   con k6 (`scripts/load/profile-load.js`, `docs/lanzamiento/prueba-de-carga.md`). Android sin copia de seguridad
   (`allowBackup="false"`).
+- Interruptores de emergencia, 2FA y CSAM (PR C, `20261124000001_emergency_switches_mfa_csam.sql`, tests en
+  `emergency_mfa_csam.test.sql` y `emergency-mfa.spec.ts`): `mycen_site_flags` suma `signups`, `messages` (contacto y
+  colaboraciones), `subscriptions` y `polls`, prendidos salvo que el equipo los pause en Super-admin → Estado
+  (`EmergencySwitches`). La base los frena: `mycen_pre_request` responde 503 `FEATURE_PAUSED` (`mycen_rpc_flag`) y un
+  trigger en `auth.users` frena las cuentas nuevas; la app lo explica (`blockedWrite` en `profileApi`, `signupsPaused`,
+  `/login?error=paused`). `mycen_is_admin()` exige una sesión **aal2** (verificación en dos pasos TOTP;
+  `mycen_session_aal`, escape `mycen_security_settings.admin_mfa = 'off'` sólo por SQL): el panel pasa por
+  `AdminMfaGate` (activar o escribir el código, `modules/auth/components/Mfa.tsx`); para el resto es opcional
+  (`MfaSettingsCard` en Studio → Ajustes y Life OS → Ajustes; `MfaGateLoader` pide el código en las pantallas privadas,
+  nunca en las públicas). `tests/db/run.sh` corre con `request.jwt.claims` aal2. Web con PKCE (`flowType: 'pkce'`,
+  `detectSessionInUrl: false`): `AuthCallback` canjea `code` (con `redirectType` de recuperar), `token_hash` de los
+  mails (`verifyOtp`; las plantillas usan `{{ .SiteURL }}/auth/callback?token_hash=…&type=…`) y los tokens en el # de
+  mails viejos. Abuso sexual infantil: Denuncias → "Abuso sexual infantil" (`admin_csam_action`: suspende, cierra
+  denuncias y pone `mycen_legal_holds`; con retención nadie borra la cuenta ni sus fotos y PDF, política restrictiva en
+  `storage.objects`), Personas muestra la retención y "Levantar la retención"; procedimiento en `docs/seguridad/csam.md`.
+  Texto alternativo: galería (`items[].alt`, nombre del botón y del visor) y foto de un texto (`content.image_alt`).
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,

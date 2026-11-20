@@ -21,11 +21,16 @@ export function AuthCallback() {
       errorDesc: search.get('error_description') || hash.get('error_description'),
       type:      search.get('type')              || hash.get('type'),
       code:      search.get('code'),
+      // Links de los mails (supabase/templates): token_hash + type, se canjean con verifyOtp en cualquier dispositivo
+      tokenHash: search.get('token_hash'),
+      // Links de mails viejos (antes de PKCE): los tokens vienen en el # y el cliente ya no los lee solo
+      accessToken:  hash.get('access_token'),
+      refreshToken: hash.get('refresh_token'),
     }
   }, [])
 
   useEffect(() => {
-    const { error, errorDesc, type, code } = params
+    const { error, errorDesc, type, code, tokenHash, accessToken, refreshToken } = params
 
     async function redirectByRole(userId?: string) {
       // Volviendo de "Continuar con Google": idioma, términos y referido, como en el registro con email
@@ -43,9 +48,35 @@ export function AuthCallback() {
         // CASE 1: Explicit error in URL
         if (error) {
           // Se pasa un código (no el texto en inglés de Supabase): la pantalla lo muestra en el idioma de la persona
-          const code = /expired/i.test(errorDesc ?? '') ? 'expired' : 'invalid'
+          // "Database error saving new user" = la base frenó la cuenta nueva (registros en pausa)
+          const code = /expired/i.test(errorDesc ?? '') ? 'expired' : /saving new user/i.test(errorDesc ?? '') ? 'paused' : 'invalid'
           const dest = type === 'recovery' ? '/forgot-password' : '/login'
           navigate(`${dest}?error=${code}`, { replace: true })
+          return
+        }
+
+        // CASE 1b: link de un mail (token_hash). Recuperar la contraseña va a /reset-password; lo demás, a la app.
+        if (tokenHash) {
+          const otpType = (['email', 'signup', 'recovery', 'email_change', 'magiclink', 'invite'] as const)
+            .find(t => t === type) ?? 'email'
+          const { error: ex } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: otpType })
+          if (ex) {
+            const bad = /expired/i.test(ex.message) ? 'expired' : 'invalid'
+            navigate(otpType === 'recovery' ? `/forgot-password?error=${bad}` : `/login?error=${bad}`, { replace: true })
+            return
+          }
+          if (otpType === 'recovery') { navigate('/reset-password', { replace: true }); return }
+          await redirectByRole()
+          return
+        }
+
+        // CASE 1c: link viejo con los tokens en el # (mails enviados antes de pasar a PKCE)
+        if (accessToken && refreshToken) {
+          if (window.location.hash) window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search)
+          const { error: ex } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+          if (ex) { navigate(type === 'recovery' ? '/forgot-password?error=invalid' : '/login?error=invalid', { replace: true }); return }
+          if (type === 'recovery') { navigate('/reset-password', { replace: true }); return }
+          await redirectByRole()
           return
         }
 
@@ -79,13 +110,16 @@ export function AuthCallback() {
           return
         }
 
-        // CASE 3: PKCE code, non-recovery (magic link, signup confirmation)
+        // CASE 3: PKCE code (Google, Apple o un link viejo de mail). Si el canje dice que era recuperar la contraseña
+        // (el pedido se hizo en este navegador), a /reset-password.
         if (code) {
-          const { error: ex } = await supabase.auth.exchangeCodeForSession(code)
-          if (ex) {
+          const { data: ex, error: exError } = await supabase.auth.exchangeCodeForSession(code)
+          if (exError) {
             navigate('/login?error=invalid', { replace: true })
             return
           }
+          // auth-js devuelve redirectType aunque el tipo no lo declare
+          if ((ex as { redirectType?: string | null }).redirectType === 'recovery') { navigate('/reset-password', { replace: true }); return }
           await redirectByRole()
           return
         }

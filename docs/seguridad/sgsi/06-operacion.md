@@ -128,3 +128,11 @@ La evidencia de cada revisión se guarda como un issue de GitHub con su etiqueta
 | Año | Revisión del SGSI por la dirección: política, alcance, proveedores (certificaciones y DPA), retención | Firma en [01](01-alcance-politica.md) + commit |
 | Año | Renovar `public/.well-known/security.txt` (vence 2027-10-31) | Commit |
 | Año / versión mayor | Auditoría técnica + simulacro del plan ante incidentes | `docs/seguridad/auditoria-*.md` |
+
+## Abuso sexual infantil (CSAM) e interruptores de emergencia
+- Procedimiento completo: [`../csam.md`](../csam.md) (bloquear con "Abuso sexual infantil" en Denuncias, denunciar a
+  NCMEC/UFECI el mismo día, retención legal de la evidencia en `mycen_legal_holds`, levantarla sólo con el OK de la
+  autoridad). Se revisa una vez por año.
+- Ante spam o un ataque: Super-admin → Estado → **Interruptores de emergencia** (registros, mensajes y colaboraciones,
+  suscripciones, votaciones). La base los frena (503 `FEATURE_PAUSED` en el gancho previo; trigger en `auth.users`) y
+  cada cambio queda en la actividad del equipo.

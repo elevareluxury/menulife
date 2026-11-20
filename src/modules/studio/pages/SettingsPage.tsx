@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { BadgeCheck, Download, History, Trash2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudio } from '../StudioContext'
+import { MfaSettingsCard } from '@/modules/auth/components/Mfa'
 import { deleteMyAccount, exportMyData, friendlyError, loadVersions, updateProfile } from '../lib/studioApi'
 import type { SpaceVersion } from '../lib/studioTypes'
 import { publicBaseUrl } from '../lib/preview'
@@ -354,6 +355,9 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
   }
 
   return (
+    <>
+    {/* Verificación en dos pasos (opcional; el panel del equipo la exige) */}
+    <section className="st-card"><MfaSettingsCard /></section>
     <section className="st-card st-stack">
       <h2 className="st-card-title" style={{ margin: 0 }}>{st.privacy}</h2>
       <div className="st-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
@@ -390,5 +394,6 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
         </div>
       )}
     </section>
+    </>
   )
 }

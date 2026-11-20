@@ -14,6 +14,8 @@ export function LoginPage() {
   const [params] = useSearchParams()
   const code = params.get('message')
   const message = code && code in MESSAGES ? t.login[MESSAGES[code as keyof typeof MESSAGES]]
+    // Una cuenta nueva de Google o Apple con los registros en pausa (interruptor de emergencia)
+    : params.get('error') === 'paused' ? t.register.signupsPaused
     : params.get('error') ? t.login.linkInvalid : null
 
   return (

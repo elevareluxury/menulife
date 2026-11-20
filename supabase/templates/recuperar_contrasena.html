@@ -12,86 +12,86 @@
 <tr><td>{{ if eq $l "en" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">Reset your password</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">We received a request to change your account password. The link expires in 1 hour.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Create new password</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Create new password</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">If the button doesn’t work, copy this link into your browser:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">If this wasn’t you, you can ignore this email.</p>
 {{ else if eq $l "pt" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">Recupere sua senha</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">Recebemos um pedido para trocar a senha da sua conta. O link expira em 1 hora.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Criar nova senha</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Criar nova senha</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">Se o botão não funcionar, copie este link no seu navegador:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">Se não foi você, pode ignorar este e-mail.</p>
 {{ else if eq $l "fr" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">Réinitialisez votre mot de passe</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">Nous avons reçu une demande de changement du mot de passe de votre compte. Le lien expire dans 1 heure.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Créer un nouveau mot de passe</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Créer un nouveau mot de passe</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">Si ce n’était pas vous, vous pouvez ignorer cet e-mail.</p>
 {{ else if eq $l "de" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">Passwort zurücksetzen</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">Wir haben eine Anfrage erhalten, das Passwort deines Kontos zu ändern. Der Link ist 1 Stunde gültig.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Neues Passwort erstellen</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Neues Passwort erstellen</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">Wenn du das nicht warst, kannst du diese E-Mail ignorieren.</p>
 {{ else if eq $l "it" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">Recupera la tua password</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">Abbiamo ricevuto una richiesta per cambiare la password del tuo account. Il link scade tra 1 ora.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Crea nuova password</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Crea nuova password</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">Se il pulsante non funziona, copia questo link nel browser:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">Se non sei stato tu, puoi ignorare questa email.</p>
 {{ else if eq $l "zh" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">找回你的密码</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">我们收到了修改你账户密码的请求。链接 1 小时内有效。</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">设置新密码</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">设置新密码</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">如果按钮无法使用，请将此链接复制到浏览器中：</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">如果这不是你本人的操作，请忽略这封邮件。</p>
 {{ else if eq $l "ja" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">パスワードの再設定</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">アカウントのパスワード変更のリクエストを受け付けました。リンクの有効期限は 1 時間です。</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">新しいパスワードを設定する</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">新しいパスワードを設定する</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">ボタンが使えない場合は、このリンクをブラウザに貼り付けてください：</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">お心当たりがない場合は、このメールを無視してください。</p>
 {{ else if eq $l "ko" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">비밀번호 재설정</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">계정 비밀번호 변경 요청을 받았습니다. 링크는 1시간 후 만료됩니다.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">새 비밀번호 만들기</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">새 비밀번호 만들기</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">버튼이 작동하지 않으면 이 링크를 브라우저에 붙여 넣으세요:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">본인이 요청하지 않았다면 이 메일을 무시하셔도 됩니다.</p>
 {{ else if eq $l "hi" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">अपना पासवर्ड रीसेट करें</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">हमें आपके अकाउंट का पासवर्ड बदलने का अनुरोध मिला है। लिंक 1 घंटे में समाप्त हो जाएगा।</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">नया पासवर्ड बनाएँ</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">नया पासवर्ड बनाएँ</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">अगर बटन काम न करे, तो यह लिंक अपने ब्राउज़र में कॉपी करें:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">अगर यह आपने नहीं किया, तो इस ईमेल को अनदेखा कर दें।</p>
 {{ else if eq $l "ar" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">استعادة كلمة المرور</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">تلقّينا طلبًا لتغيير كلمة مرور حسابك. تنتهي صلاحية الرابط خلال ساعة واحدة.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">إنشاء كلمة مرور جديدة</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">إنشاء كلمة مرور جديدة</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">إذا لم يعمل الزر، انسخ هذا الرابط في متصفحك:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">إذا لم تكن أنت، يمكنك تجاهل هذه الرسالة.</p>
 {{ else if eq $l "ru" }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">Восстановление пароля</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">Мы получили запрос на смену пароля вашего аккаунта. Ссылка действует 1 час.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Создать новый пароль</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Создать новый пароль</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">Если кнопка не работает, скопируйте эту ссылку в браузер:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">Если это были не вы, просто проигнорируйте это письмо.</p>
 {{ else }}
 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#1A1530">Recuperá tu contraseña</h1>
 <p style="margin:0;font-size:15px;line-height:1.6;color:#4E4866">Recibimos un pedido para cambiar la contraseña de tu cuenta. El link vence en 1 hora.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Crear contraseña nueva</a></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0"><tr><td style="border-radius:999px;background:#C8431F"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#C8431F;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px">Crear contraseña nueva</a></td></tr></table>
 <p style="margin:0 0 6px;font-size:13px;color:#4E4866">Si el botón no funciona, copiá este link en tu navegador:</p>
-<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .ConfirmationURL }}" style="color:#C8431F">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-size:13px;word-break:break-all"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#C8431F">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a></p>
 <p style="margin:28px 0 0;font-size:12px;color:#6B6580">Si no fuiste vos, podés ignorar este mail.</p>
 {{ end }}</td></tr>
 </table>

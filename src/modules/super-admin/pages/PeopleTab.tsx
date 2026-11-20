@@ -126,7 +126,7 @@ function AccountView({ userId, onBack }: { userId: string; onBack: () => void })
   const { dateTime, number } = useAdminFormat()
   const [reload, setReload] = useState(0)
   const key = `${userId}#${reload}`
-  const [state, setState] = useState<{ key: string; data: AccountDetail | null; failed: boolean } | null>(null)
+  const [state, setState] = useState<{ key: string; data: AccountDetail | null; failed: boolean; held: boolean } | null>(null)
   const [reasons, setReasons] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -147,8 +147,12 @@ function AccountView({ userId, onBack }: { userId: string; onBack: () => void })
 
   useEffect(() => {
     let cancelled = false
-    void Promise.resolve(adminRpc('admin_account_detail', { p_user_id: userId })).then(({ data, error: e }) => {
-      if (!cancelled) setState({ key, data: e ? null : data as AccountDetail | null, failed: !!e })
+    // Retención legal (abuso infantil): sus archivos no se borran; sin la migración, se toma como sin retención
+    void Promise.all([
+      Promise.resolve(adminRpc('admin_account_detail', { p_user_id: userId })),
+      Promise.resolve(adminRpc('admin_get_legal_hold', { p_user_id: userId })),
+    ]).then(([{ data, error: e }, hold]) => {
+      if (!cancelled) setState({ key, data: e ? null : data as AccountDetail | null, failed: !!e, held: !hold.error && !!hold.data })
     })
     return () => { cancelled = true }
   }, [userId, key])
@@ -232,7 +236,15 @@ function AccountView({ userId, onBack }: { userId: string; onBack: () => void })
                 </section>
               ))}
 
-              {d.spaces.some(s => s.suspended_at) && (
+              {state.held ? (
+                <section style={{ ...CARD, borderColor: `${WARN_COLOR}66` }} aria-labelledby="acc-hold" data-testid="legal-hold">
+                  <h2 id="acc-hold" style={{ margin: '0 0 10px', fontSize: 16, color: TEXT }}>{p.legalHold}</h2>
+                  <button type="button" style={BTN} disabled={busy}
+                    onClick={() => { if (window.confirm(p.releaseConfirm)) void act('admin_release_legal_hold', { p_user_id: d.user_id }) }}>
+                    {p.releaseHold}
+                  </button>
+                </section>
+              ) : d.spaces.some(s => s.suspended_at) && (
                 <section style={CARD} aria-labelledby="acc-purge">
                   <h2 id="acc-purge" style={{ margin: '0 0 4px', fontSize: 16, color: TEXT }}>{p.purgeFiles}</h2>
                   <p style={{ margin: '0 0 12px', fontSize: 12.5, color: MUTED }}>{p.purgeHelp}</p>

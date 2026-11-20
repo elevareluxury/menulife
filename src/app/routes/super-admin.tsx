@@ -22,6 +22,7 @@ import { ActivityTab }       from '@/modules/super-admin/pages/ActivityTab'
 import { EstadoTab }         from '@/modules/super-admin/pages/EstadoTab'
 import { CrecimientoTab }    from '@/modules/super-admin/pages/CrecimientoTab'
 import { ROUTES } from '@/lib/constants'
+import { AdminMfaGate } from '@/modules/auth/components/Mfa'
 
 export function SuperAdminPage() {
   const { loading, initialized, isAuthenticated, isSuperAdmin, role } = useAuth()
@@ -45,7 +46,9 @@ export function SuperAdminPage() {
   if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />
   if (!isSuperAdmin)    return <Navigate to={ROUTES.DASHBOARD} replace />
 
+  // El panel pide la verificación en dos pasos (la base también: mycen_is_admin() exige una sesión aal2)
   return (
+    <AdminMfaGate>
     <SuperAdminLayout>
       <Routes>
         <Route index                    element={<HomeTab />} />
@@ -71,5 +74,6 @@ export function SuperAdminPage() {
         <Route path="restaurants"       element={<Navigate to="/super-admin/negocios"    replace />} />
       </Routes>
     </SuperAdminLayout>
+    </AdminMfaGate>
   )
 }

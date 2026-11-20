@@ -3,7 +3,9 @@
 # Usa las variables estándar de Postgres (PGHOST, PGPORT, PGUSER, PGPASSWORD). Ej.:
 #   PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres npm run test:db
 set -euo pipefail
-export PGOPTIONS="${PGOPTIONS:-} -c client_min_messages=warning"
+# Las sesiones de prueba llevan el segundo paso hecho (aal2), como el equipo en el panel: mycen_is_admin() lo exige
+# desde 20261124000001. emergency_mfa_csam.test.sql prueba también sin él.
+export PGOPTIONS="${PGOPTIONS:-} -c client_min_messages=warning -c request.jwt.claims={\"aal\":\"aal2\"}"
 cd "$(dirname "$0")/../.."
 DB="mycen_test_$$"
 psql -d postgres -qAtX -c "create database $DB" >/dev/null
@@ -71,7 +73,8 @@ for m in \
   20261120000001_business_quotes_lockdown \
   20261121000001_retention_hardening \
   20261122000001_identity_events_module \
-  20261123000001_web_launch_hardening; do
+  20261123000001_web_launch_hardening \
+  20261124000001_emergency_switches_mfa_csam; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

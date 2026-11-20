@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useScrollLock } from '@/lib/scrollLock'
 import './Lightbox.css'
 
-export interface LightboxItem { url: string; caption?: string; video?: boolean }
+/** alt: qué se ve en la foto (lo escribe el dueño); si no, el epígrafe */
+export interface LightboxItem { url: string; caption?: string; alt?: string; video?: boolean }
 
 /**
  * Visor de fotos (galería y foto suelta): flechas y Escape con el teclado; en el celular, deslizar de costado pasa
@@ -87,7 +88,7 @@ export function Lightbox({ items, index, onIndex, onClose, labels }: {
       )}
       {current.video
         ? <video key={current.url} src={current.url} controls autoPlay playsInline onClick={e => e.stopPropagation()} />
-        : <img key={current.url} src={current.url} alt={current.caption ?? ''} className={`mp-lightbox-img${zoom ? ' is-zoomed' : ''}`} style={style} onClick={tap} draggable={false} />}
+        : <img key={current.url} src={current.url} alt={current.alt ?? current.caption ?? ''} className={`mp-lightbox-img${zoom ? ' is-zoomed' : ''}`} style={style} onClick={tap} draggable={false} />}
       {current.caption && <p className="mp-lightbox-caption" onClick={e => e.stopPropagation()}>{current.caption}</p>}
     </div>
   )

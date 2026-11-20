@@ -33,6 +33,13 @@ const it: AdminDict = {
     seeErrors: 'Vedi errori →',
   },
   reports: {
+    /** Abuso sexual infantil: suspender, retener la evidencia y denunciar (docs/seguridad/csam.md) */
+    csamButton: "Abuso sessuale su minori",
+    csamConfirm: "Questo sospende l’intero account, chiude le sue segnalazioni e conserva le prove (nessuno può cancellarle). Usalo solo per contenuti sessuali con minori. Continuare?",
+    csamDone: "Fatto: l’account è sospeso e le prove sono conservate. Ora segui questi passaggi.",
+    csamFailed: "Non è stato possibile completare. Hai applicato la migrazione della conservazione delle prove?",
+    csamStepsTitle: "Cosa fare adesso",
+    csamSteps: ["Non scaricare, copiare né inoltrare il materiale, e non mostrarlo a nessuno.", "Denuncialo alle autorità: NCMEC CyberTipline (report.cybertip.org) e, in Argentina, l’UFECI del Pubblico Ministero.", "Nella denuncia indica il link del profilo, la data e l’ora. Il materiale non si allega: se serve, lo chiedono le autorità.", "Non avvisare la persona: il motivo che vede è generico.", "La procedura completa è in docs/seguridad/csam.md."],
     title: 'Segnalazioni',
     intro: 'Profili e progetti segnalati dai visitatori. Sospendere un profilo lo nasconde del tutto (pagina, progetti, vCard) e chiude tutte le sue segnalazioni aperte. Il titolare vede il motivo in Studio.',
     open: 'Aperte', resolved: 'Risolte',
@@ -155,6 +162,10 @@ const it: AdminDict = {
     businessOff: 'Business è spento nella landing. Le sue schermate restano nel menu, sotto «Business».',
   },
   people: {
+    /** Retención legal de una cuenta (abuso infantil o pedido de una autoridad) */
+    legalHold: "Conservazione legale: l’account e i suoi file non si possono cancellare.",
+    releaseHold: "Revoca la conservazione",
+    releaseConfirm: "Revocare la conservazione? Fallo solo quando le autorità non hanno più bisogno delle prove.",
     title: 'Persone',
     intro: 'Cerca un account per email, username o nome.',
     search: 'Cerca',
@@ -201,6 +212,8 @@ const it: AdminDict = {
     purgeDone: (n) => `${n} file eliminati`,
   },
   activity: {
+    csam_hold: "Ha sospeso per abuso su minori e conservato le prove",
+    legal_hold_released: "Ha revocato una conservazione legale",
     title: 'Attività del team',
     intro: 'Ogni azione del team viene registrata da sola: chi, cosa e quando.',
     empty: 'Ancora nessuna azione.',
@@ -225,6 +238,21 @@ const it: AdminDict = {
     status_setting: 'Ha modificato un’impostazione dello Stato del sistema',
   },
   status: {
+    /** Interruptores de emergencia (Estado): registros, mensajes, suscripciones y votaciones */
+    emergency: {
+      title: "Interruttori di emergenza",
+      intro: "In caso di spam o di un attacco, metti in pausa una parte con un clic. Il database la blocca subito, senza pubblicare una nuova versione; chi ci prova vede \"in pausa, riprova tra poco\". Resta nell’attività del team.",
+      signups: "Nuove registrazioni",
+      messages: "Messaggi e collaborazioni",
+      subscriptions: "Iscrizioni",
+      polls: "Votazioni dei sondaggi",
+      on: "Attivo",
+      off: "In pausa",
+      turnOff: "Metti in pausa",
+      turnOn: "Riprendi",
+      confirm: (name) => `Mettere in pausa "${name}"? Nessuno potrà usarlo finché non lo riprendi.`,
+      failed: "Non è stato possibile cambiarlo. Hai applicato la migrazione degli interruttori?",
+    },
     title: 'Stato del sistema',
     intro: 'Come sta Mycen adesso. Finché questa schermata è aperta, si ricontrolla da sola ogni minuto.',
     refresh: 'Controlla ora',

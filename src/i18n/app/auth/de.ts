@@ -24,6 +24,8 @@ const de: AuthDict = {
     failed: "Die Anmeldung hat nicht geklappt. Versuch es noch einmal.",
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "Neue Registrierungen sind für ein paar Minuten pausiert. Versuch es gleich noch einmal.",
     subtitle: "Deine digitale Identität, alles an einem Ort",
     name: "Dein Name",
     namePlaceholder: "Ana Pérez",
@@ -112,6 +114,32 @@ const de: AuthDict = {
     failed: "Wir konnten nicht bestätigen, dass du ein Mensch bist. Versuche es erneut.",
     unavailable: "Die Anti-Bot-Prüfung konnte nicht geladen werden. Prüfe deine Verbindung oder deaktiviere den Inhaltsblocker und versuche es erneut.",
     retry: "Prüfung wiederholen",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "Bestätigung in zwei Schritten",
+    intro: "Zusätzlich zu deinem Passwort fragen wir nach einem 6-stelligen Code aus einer Authenticator-App (Google Authenticator, Microsoft Authenticator, 1Password …). Selbst wenn jemand dein Passwort hat, kommt er nicht hinein.",
+    on: "Aktiviert",
+    off: "Deaktiviert",
+    enable: "Aktivieren",
+    disable: "Deaktivieren",
+    scan: "Scanne diesen Code mit deiner Authenticator-App.",
+    manual: "Wenn du ihn nicht scannen kannst, gib diesen Schlüssel in der App ein:",
+    code: "6-stelliger Code",
+    verify: "Bestätigen",
+    verifying: "Wird bestätigt …",
+    wrong: "Der Code ist falsch oder abgelaufen. Nimm den, den die App gerade anzeigt.",
+    failed: "Dieser Schritt hat nicht geklappt. Versuch es noch einmal.",
+    challengeTitle: "Dein Bestätigungscode",
+    challengeIntro: "Öffne deine Authenticator-App und gib den 6-stelligen Code von Mycen ein.",
+    signOut: "Abmelden",
+    lost: "Handy verloren? Schreib an team@mycen.id von der E-Mail-Adresse deines Kontos.",
+    adminTitle: "Das Team-Panel verlangt die Bestätigung in zwei Schritten",
+    adminIntro: "Um ins Team-Panel zu kommen, aktiviere die Bestätigung in zwei Schritten. Das machst du nur einmal, und es schützt die Daten aller Menschen.",
+    enabledDone: "Fertig: Die Bestätigung in zwei Schritten ist aktiviert.",
+    disabledDone: "Die Bestätigung in zwei Schritten ist deaktiviert.",
+    cancel: "Abbrechen",
+    needsRecent: "Um sie zu deaktivieren, melde dich ab und mit deinem Code wieder an.",
   },
 }
 

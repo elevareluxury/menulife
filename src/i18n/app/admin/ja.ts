@@ -30,6 +30,13 @@ const ja: AdminDict = {
     seeErrors: 'エラーを見る →',
   },
   reports: {
+    /** Abuso sexual infantil: suspender, retener la evidencia y denunciar (docs/seguridad/csam.md) */
+    csamButton: "児童の性的虐待",
+    csamConfirm: "アカウント全体を停止し、通報を閉じて、証拠を保全します（誰も削除できません）。未成年者が関わる性的コンテンツの場合にのみ使ってください。続けますか？",
+    csamDone: "完了：アカウントを停止し、証拠を保全しました。次の手順に従ってください。",
+    csamFailed: "完了できませんでした。証拠保全のマイグレーションを適用しましたか？",
+    csamStepsTitle: "次にすること",
+    csamSteps: ["その素材をダウンロード、コピー、転送しないでください。誰にも見せないでください。", "当局に通報してください：NCMEC CyberTipline（report.cybertip.org）、アルゼンチンでは検察庁の UFECI。", "通報にはプロフィールのリンク、日付、時刻を書いてください。素材は添付しません。必要な場合は当局から求められます。", "本人には知らせないでください。本人に表示される理由は一般的なものです。", "手順の全文は docs/seguridad/csam.md にあります。"],
     title: '通報',
     intro: '訪問者から通報されたプロフィールとプロジェクト。プロフィールを停止すると完全に非表示になり（ページ、プロジェクト、vCard）、未対応の通報はすべて閉じられます。持ち主は Studio で理由を確認できます。',
     open: '未対応', resolved: '対応済み',
@@ -152,6 +159,10 @@ const ja: AdminDict = {
     businessOff: 'Business はランディングでオフです。画面はメニューの「Business」に残っています。',
   },
   people: {
+    /** Retención legal de una cuenta (abuso infantil o pedido de una autoridad) */
+    legalHold: "法的保全：このアカウントとファイルは削除できません。",
+    releaseHold: "保全を解除",
+    releaseConfirm: "保全を解除しますか？当局が証拠を必要としなくなったときだけ行ってください。",
     title: 'ユーザー',
     intro: 'メール、ユーザー名、名前でアカウントを検索します。',
     search: '検索',
@@ -198,6 +209,8 @@ const ja: AdminDict = {
     purgeDone: (n) => `${n} 件のファイルを削除しました`,
   },
   activity: {
+    csam_hold: "児童虐待で停止し、証拠を保全しました",
+    legal_hold_released: "法的保全を解除しました",
     title: 'チームの操作履歴',
     intro: 'チームの操作はすべて自動で記録されます：誰が、何を、いつ。',
     empty: 'まだ操作はありません。',
@@ -222,6 +235,21 @@ const ja: AdminDict = {
     status_setting: 'システムステータスの設定を変更しました',
   },
   status: {
+    /** Interruptores de emergencia (Estado): registros, mensajes, suscripciones y votaciones */
+    emergency: {
+      title: "緊急スイッチ",
+      intro: "スパムや攻撃があったら、ワンクリックで機能を一時停止できます。新しいバージョンを公開しなくても、データベースがすぐに止めます。使おうとした人には「一時停止中です。少し後でお試しください」と表示されます。チームのアクティビティに記録されます。",
+      signups: "新規登録",
+      messages: "メッセージとコラボレーション",
+      subscriptions: "購読",
+      polls: "アンケートの投票",
+      on: "稼働中",
+      off: "一時停止中",
+      turnOff: "一時停止",
+      turnOn: "再開",
+      confirm: (name) => `「${name}」を一時停止しますか？再開するまで誰も使えません。`,
+      failed: "変更できませんでした。スイッチのマイグレーションを適用しましたか？",
+    },
     title: 'システムステータス',
     intro: '現在の Mycen の状態です。この画面を開いている間は、1分ごとに自動でチェックします。',
     refresh: '今すぐチェック',
