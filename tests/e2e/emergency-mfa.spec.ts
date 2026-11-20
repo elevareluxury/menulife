@@ -62,7 +62,7 @@ test('el equipo pausa y reanuda una parte desde Estado (queda en la actividad)',
   expect(state.siteFlags?.messages).toBe(true)
 })
 
-test('el panel pide activar la verificación en dos pasos a quien entra sólo con contraseña', async ({ page, context }) => {
+test('el panel pide activar el segundo paso (huella o cara, o app de códigos) a quien entra sólo con contraseña', async ({ page, context }) => {
   const state = createState({ super_admins: [{ id: 'sa-1', user_id: OWNER_ID }] })
   await installSupabaseMock(context, state, { signedIn: true, aal: 'aal1' })
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>'
@@ -84,6 +84,9 @@ test('el panel pide activar la verificación en dos pasos a quien entra sólo co
 
   await page.goto('/super-admin')
   await expect(page.getByRole('heading', { name: 'El panel del equipo pide la verificación en dos pasos' })).toBeVisible()
+  // Primero la huella o la cara (passkey); la app de códigos queda como alternativa
+  await expect(page.getByRole('button', { name: 'Usar huella o cara' })).toBeVisible()
+  await page.getByRole('button', { name: 'Prefiero una app de códigos' }).click()
   await expect(page.getByText('JBSWY3DPEHPK3PXP')).toBeVisible()
   await page.getByRole('textbox', { name: 'Código de 6 números' }).fill('123 456')
   await page.getByRole('button', { name: 'Confirmar' }).click()
@@ -122,4 +125,22 @@ test('las fotos de la galería se nombran con su texto alternativo', async ({ pa
   await expect(page.getByRole('button', { name: 'Ana pintando un mural en Rosario' })).toBeVisible()
   await page.getByRole('button', { name: 'Ana pintando un mural en Rosario' }).click()
   await expect(page.getByRole('img', { name: 'Ana pintando un mural en Rosario' })).toBeVisible()
+})
+
+test('nombres reservados: el equipo reserva el de un talento y queda bloqueado para los demás', async ({ page }) => {
+  const state = createState({})
+  await asAdmin(page, state)
+  await page.goto('/super-admin/reservas')
+  await page.getByLabel('Nombre de usuario').fill('@lunaoficial')
+  await page.getByLabel('Nombre del talento').fill('Luna')
+  await page.getByLabel('Email del talento (opcional)').fill('luna@agencia.com')
+  await page.getByRole('button', { name: 'Reservar', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Reservado.' })).toBeVisible()
+  await expect(page.getByTestId('reservation-lunaoficial')).toContainText('Esperando a la persona')
+
+  await page.getByRole('textbox', { name: /Uno por línea/ }).fill('sol, Sol\nmal formato!!, X')
+  await page.getByRole('button', { name: 'Reservar todos' }).click()
+  await expect(page.getByRole('status').filter({ hasText: '1 reservados · 1 con problemas' })).toBeVisible()
+  await expect(page.getByTestId('reservation-sol')).toContainText('Sin email: nadie lo puede tomar')
+  expect(state.rpcCalls.filter(c => c.fn === 'admin_save_talent_reservation')).toHaveLength(3)
 })

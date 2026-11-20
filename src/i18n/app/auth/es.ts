@@ -121,7 +121,7 @@ const es = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "Verificación en dos pasos",
-    intro: "Además de tu contraseña, te pedimos un código de 6 números de una app de autenticación (Google Authenticator, Microsoft Authenticator, 1Password…). Aunque alguien consiga tu contraseña, no puede entrar.",
+    intro: "Además de tu contraseña, Mycen te pide la huella o la cara de tu celular o compu (o un código de una app). Aunque alguien consiga tu contraseña, no puede entrar.",
     on: "Activada",
     off: "Desactivada",
     enable: "Activar",
@@ -134,7 +134,7 @@ const es = {
     wrong: "El código no es correcto o venció. Probá con el que muestra la app ahora.",
     failed: "No pudimos completar el paso. Probá de nuevo.",
     challengeTitle: "Tu código de verificación",
-    challengeIntro: "Abrí tu app de autenticación y escribí el código de 6 números de Mycen.",
+    challengeIntro: "Confirmá que sos vos con la huella o la cara (o con el código de tu app).",
     signOut: "Salir",
     lost: "¿Perdiste el celular? Escribinos a team@mycen.id desde el email de tu cuenta.",
     adminTitle: "El panel del equipo pide la verificación en dos pasos",
@@ -143,6 +143,13 @@ const es = {
     disabledDone: "La verificación en dos pasos está desactivada.",
     cancel: "Cancelar",
     needsRecent: "Para desactivarla, salí y volvé a entrar con tu código.",
+    passkeyEnable: "Usar huella o cara",
+    passkeyIntro: "Tu celular o tu compu te va a pedir la huella, la cara o su PIN. No hace falta instalar nada.",
+    passkeyUse: "Entrar con huella o cara",
+    passkeyFailed: "No se pudo usar la huella o la cara. Probá de nuevo o usá una app de códigos.",
+    useCodeApp: "Prefiero una app de códigos",
+    usePasskey: "Usar huella o cara",
+    waiting: "Esperando la huella o la cara…",
   },
 }
 

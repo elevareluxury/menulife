@@ -745,6 +745,15 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   no comercial) → `cron_flag_link` crea una denuncia `scam` (una vez por perfil y link, `mycen_link_flags`; nada se
   suspende solo). Reglas puras en `scripts/cron/rules.mjs`. Visitas (`profile_events`) 13 meses e índice parcial de
   vistas por fecha. Propuesta de portfolio (modelos, influencers, cantantes): `docs/identity/portfolio-propuesta.md`.
+- Nombres reservados y huella o cara (PR E, `20261126000001_talent_reservations.sql`, tests en
+  `talent_reservations.test.sql` y `emergency-mfa.spec.ts`): Super-admin → Nombres reservados (`ReservationsTab`,
+  `/super-admin/reservas`; de a uno o varios "usuario, nombre, email" por línea) → `talent_reservations` (nadie la lee;
+  `admin_list/save/delete_talent_reservation`, en la bitácora). `check_username` y `mycen_validate_username` dan
+  'reserved' salvo a quien tiene el email confirmado de la reserva (`mycen_talent_reserved_for_other`; la toma queda en
+  `claimed_by`/`claimed_at`); sin email, nadie la toma. Segundo paso: `PasskeyEnroll`/`PasskeyChallenge`
+  (`supabase.auth.mfa.webauthn._register/_authenticate`, experimental; hay que prender WebAuthn en Supabase → Auth →
+  MFA) primero y la app de códigos como alternativa (`EnrollChoice`/`ChallengeChoice` en `Mfa.tsx`); en la app nativa,
+  sólo códigos. Privacidad (12 idiomas).
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,

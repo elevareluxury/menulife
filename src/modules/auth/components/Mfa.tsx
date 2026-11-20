@@ -5,8 +5,10 @@ import { useAuthT } from '@/i18n/app/auth'
 import { useAuthStore } from '@/store/authStore'
 import { Field, PrimaryAction } from '@/design'
 import { isPrivatePath } from './MfaGateLoader'
+import { isNativeApp } from '@/lib/platform'
 
-// Verificación en dos pasos (TOTP, Supabase Auth MFA).
+// Verificación en dos pasos (Supabase Auth MFA): primero la huella o la cara del equipo (passkey, WebAuthn) y, como
+// alternativa, una app de códigos (TOTP). Las dos dejan la sesión en aal2.
 //   · El panel del equipo la exige (AdminMfaGate): la base también, mycen_is_admin() pide una sesión aal2.
 //   · Para el resto es opcional (MfaSettingsCard en Studio → Ajustes y Life OS → Ajustes); quien la activó pasa por
 //     el código al entrar a las pantallas privadas (MfaGate), no a las públicas.
@@ -28,8 +30,120 @@ export async function readAssurance(): Promise<Assurance> {
 }
 
 async function verifiedTotp(): Promise<string | null> {
+  return (await verifiedFactors()).totp
+}
+
+/** Factores activos de la cuenta: la passkey (huella o cara) y la app de códigos */
+async function verifiedFactors(): Promise<{ passkey: string | null; totp: string | null }> {
   const { data } = await supabase.auth.mfa.listFactors()
-  return data?.totp?.[0]?.id ?? null
+  const all = (data?.all ?? []).filter(f => f.status === 'verified')
+  return {
+    passkey: all.find(f => f.factor_type === 'webauthn')?.id ?? null,
+    totp: all.find(f => f.factor_type === 'totp')?.id ?? null,
+  }
+}
+
+/** Huella o cara: el navegador sabe hacerlo (en la app de iOS/Android, por ahora, sólo la app de códigos) */
+export const passkeySupported = () =>
+  typeof window !== 'undefined' && typeof window.PublicKeyCredential === 'function' && !isNativeApp()
+
+const linkButton: React.CSSProperties = {
+  background: 'none', border: 0, color: 'inherit', textDecoration: 'underline', justifySelf: 'start', minHeight: 44, cursor: 'pointer', padding: 0,
+}
+
+/** Activar la huella o la cara: el dispositivo crea la passkey y la sesión queda en aal2 */
+export function PasskeyEnroll({ onDone }: { onDone: () => void }) {
+  const t = useAuthT().mfa
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function enroll() {
+    setBusy(true); setError(null)
+    try {
+      // Un intento anterior sin terminar deja un factor sin verificar
+      const { data: list } = await supabase.auth.mfa.listFactors()
+      for (const f of list?.all ?? []) {
+        if (f.factor_type === 'webauthn' && f.status !== 'verified') await supabase.auth.mfa.unenroll({ factorId: f.id })
+      }
+      const { error: e } = await supabase.auth.mfa.webauthn._register({ friendlyName: `Mycen ${new Date().toISOString().slice(0, 10)}` })
+      if (e) { setError(t.passkeyFailed); return }
+      onDone()
+    } catch {
+      setError(t.passkeyFailed)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div style={{ display: 'grid', gap: 10 }} data-testid="passkey-enroll">
+      <p style={{ margin: 0, fontSize: 14 }}>{t.passkeyIntro}</p>
+      <PrimaryAction onClick={() => void enroll()} disabled={busy}>{busy ? t.waiting : t.passkeyEnable}</PrimaryAction>
+      {error && <p role="alert" style={{ margin: 0 }}>{error}</p>}
+    </div>
+  )
+}
+
+/** Entrar con la huella o la cara */
+export function PasskeyChallenge({ factorId, onDone }: { factorId: string; onDone: () => void }) {
+  const t = useAuthT().mfa
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function go() {
+    setBusy(true); setError(null)
+    try {
+      const { error: e } = await supabase.auth.mfa.webauthn._authenticate({ factorId })
+      if (e) { setError(t.passkeyFailed); return }
+      onDone()
+    } catch {
+      setError(t.passkeyFailed)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div style={{ display: 'grid', gap: 10 }} data-testid="passkey-challenge">
+      <PrimaryAction onClick={() => void go()} disabled={busy}>{busy ? t.waiting : t.passkeyUse}</PrimaryAction>
+      {error && <p role="alert" style={{ margin: 0 }}>{error}</p>}
+    </div>
+  )
+}
+
+/** Activar el segundo paso: huella o cara primero; la app de códigos, si se prefiere o el navegador no puede */
+function EnrollChoice({ onDone, onCancel }: { onDone: () => void; onCancel?: () => void }) {
+  const t = useAuthT().mfa
+  const [codes, setCodes] = useState(!passkeySupported())
+  return (
+    <div style={{ display: 'grid', gap: 12 }}>
+      {codes ? <MfaEnroll onDone={onDone} /> : <PasskeyEnroll onDone={onDone} />}
+      {passkeySupported() && (
+        <button type="button" style={linkButton} onClick={() => setCodes(c => !c)}>{codes ? t.usePasskey : t.useCodeApp}</button>
+      )}
+      {onCancel && <button type="button" style={linkButton} onClick={onCancel}>{t.cancel}</button>}
+    </div>
+  )
+}
+
+/** Entrar con el segundo paso: la huella o la cara si está activada (y el navegador puede); si no, el código */
+function ChallengeChoice({ onDone }: { onDone: () => void }) {
+  const t = useAuthT().mfa
+  const [factors, setFactors] = useState<{ passkey: string | null; totp: string | null } | null>(null)
+  const [codes, setCodes] = useState(false)
+  useEffect(() => {
+    void verifiedFactors().then(setFactors).catch(() => setFactors({ passkey: null, totp: null }))
+  }, [])
+  if (!factors) return <p role="status" style={{ margin: 0 }}>{t.verifying}</p>
+  const canPasskey = !!factors.passkey && passkeySupported()
+  return (
+    <div style={{ display: 'grid', gap: 12 }}>
+      {canPasskey && !codes ? <PasskeyChallenge factorId={factors.passkey!} onDone={onDone} /> : <MfaChallenge onDone={onDone} />}
+      {canPasskey && factors.totp && (
+        <button type="button" style={linkButton} onClick={() => setCodes(c => !c)}>{codes ? t.usePasskey : t.useCodeApp}</button>
+      )}
+    </div>
+  )
 }
 
 function CodeForm({ busy, error, onSubmit, submit }: {
@@ -158,7 +272,8 @@ export function AdminMfaGate({ children }: { children: ReactNode }) {
   const check = useCallback(async () => {
     const a = await readAssurance()
     if (a.current === 'aal2') { setState('ok'); return }
-    setState(a.next === 'aal2' || await verifiedTotp().catch(() => null) ? 'challenge' : 'enroll')
+    const f = await verifiedFactors().catch(() => ({ passkey: null, totp: null }))
+    setState(a.next === 'aal2' || f.passkey || f.totp ? 'challenge' : 'enroll')
   }, [])
 
   useEffect(() => { void check() }, [check])
@@ -167,7 +282,7 @@ export function AdminMfaGate({ children }: { children: ReactNode }) {
   if (state === 'loading') return <main data-mycen-theme="universo" className="my-sky" style={{ minHeight: '100vh' }} aria-busy="true" />
   return (
     <FullScreen title={state === 'enroll' ? t.adminTitle : t.challengeTitle} intro={state === 'enroll' ? t.adminIntro : t.challengeIntro}>
-      {state === 'enroll' ? <MfaEnroll onDone={() => void check()} /> : <MfaChallenge onDone={() => void check()} />}
+      {state === 'enroll' ? <EnrollChoice onDone={() => void check()} /> : <ChallengeChoice onDone={() => void check()} />}
     </FullScreen>
   )
 }
@@ -191,7 +306,7 @@ export function MfaGate() {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, overflow: 'auto' }}>
       <FullScreen title={t.challengeTitle} intro={t.challengeIntro}>
-        <MfaChallenge onDone={() => setNeeds(false)} />
+        <ChallengeChoice onDone={() => setNeeds(false)} />
       </FullScreen>
     </div>
   )
@@ -200,37 +315,45 @@ export function MfaGate() {
 /** Ajustes (Studio y Life OS): activar o desactivar la verificación en dos pasos */
 export function MfaSettingsCard() {
   const t = useAuthT().mfa
-  const [factorId, setFactorId] = useState<string | null | undefined>(undefined)
+  const [factors, setFactors] = useState<{ passkey: string | null; totp: string | null } | undefined>(undefined)
   const [enrolling, setEnrolling] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
-    try { setFactorId(await verifiedTotp()) } catch { setFactorId(null) }
+    try { setFactors(await verifiedFactors()) } catch { setFactors({ passkey: null, totp: null }) }
   }, [])
   useEffect(() => { void load() }, [load])
 
+  const active = !!factors && !!(factors.passkey || factors.totp)
+
+  // Desactivar = sacar la huella o cara y la app de códigos
   async function disable() {
-    if (!factorId) return
+    if (!factors) return
     setBusy(true); setMessage(null)
-    const { error } = await supabase.auth.mfa.unenroll({ factorId })
+    let failed = false
+    for (const factorId of [factors.passkey, factors.totp]) {
+      if (!factorId) continue
+      const { error } = await supabase.auth.mfa.unenroll({ factorId })
+      if (error) failed = true
+    }
     setBusy(false)
-    if (error) { setMessage(t.needsRecent); return }
+    if (failed) { setMessage(t.needsRecent); void load(); return }
     setMessage(t.disabledDone)
     void load()
   }
 
-  if (factorId === undefined) return null
+  if (factors === undefined) return null
   return (
     <section aria-labelledby="mfa-settings-title" data-testid="mfa-settings" style={{ display: 'grid', gap: 10 }}>
       <h2 id="mfa-settings-title" style={{ margin: 0, fontSize: 16 }}>
-        {t.title} · <span style={{ fontWeight: 600 }}>{factorId ? t.on : t.off}</span>
+        {t.title} · <span style={{ fontWeight: 600 }}>{active ? t.on : t.off}</span>
       </h2>
       <p style={{ margin: 0, fontSize: 14, color: 'var(--my-muted)' }}>{t.intro}</p>
       {enrolling ? (
-        <MfaEnroll onCancel={() => setEnrolling(false)}
+        <EnrollChoice onCancel={() => setEnrolling(false)}
           onDone={() => { setEnrolling(false); setMessage(t.enabledDone); void load() }} />
-      ) : factorId ? (
+      ) : active ? (
         <PrimaryAction onClick={() => void disable()} disabled={busy}>{t.disable}</PrimaryAction>
       ) : (
         <PrimaryAction onClick={() => { setMessage(null); setEnrolling(true) }}>{t.enable}</PrimaryAction>

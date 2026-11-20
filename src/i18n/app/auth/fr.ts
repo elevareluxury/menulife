@@ -118,7 +118,7 @@ const fr: AuthDict = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "Validation en deux étapes",
-    intro: "En plus de votre mot de passe, nous demandons un code à 6 chiffres d’une application d’authentification (Google Authenticator, Microsoft Authenticator, 1Password…). Même si quelqu’un obtient votre mot de passe, il ne peut pas entrer.",
+    intro: "En plus de votre mot de passe, Mycen demande l’empreinte ou le visage de votre téléphone ou ordinateur (ou un code d’une application). Même si quelqu’un obtient votre mot de passe, il ne peut pas entrer.",
     on: "Activée",
     off: "Désactivée",
     enable: "Activer",
@@ -131,7 +131,7 @@ const fr: AuthDict = {
     wrong: "Le code est incorrect ou a expiré. Essayez celui que l’application affiche maintenant.",
     failed: "Nous n’avons pas pu terminer cette étape. Réessayez.",
     challengeTitle: "Votre code de vérification",
-    challengeIntro: "Ouvrez votre application d’authentification et saisissez le code à 6 chiffres de Mycen.",
+    challengeIntro: "Confirmez que c’est vous avec votre empreinte ou votre visage (ou le code de votre application).",
     signOut: "Se déconnecter",
     lost: "Vous avez perdu votre téléphone ? Écrivez à team@mycen.id depuis l’e-mail de votre compte.",
     adminTitle: "Le panneau de l’équipe exige la validation en deux étapes",
@@ -140,6 +140,13 @@ const fr: AuthDict = {
     disabledDone: "La validation en deux étapes est désactivée.",
     cancel: "Annuler",
     needsRecent: "Pour la désactiver, déconnectez-vous puis reconnectez-vous avec votre code.",
+    passkeyEnable: "Utiliser l’empreinte ou le visage",
+    passkeyIntro: "Votre téléphone ou ordinateur vous demandera votre empreinte, votre visage ou le code de l’appareil. Rien à installer.",
+    passkeyUse: "Se connecter avec l’empreinte ou le visage",
+    passkeyFailed: "Impossible d’utiliser l’empreinte ou le visage. Réessayez ou utilisez une application de codes.",
+    useCodeApp: "Je préfère une application de codes",
+    usePasskey: "Utiliser l’empreinte ou le visage",
+    waiting: "En attente de l’empreinte ou du visage…",
   },
 }
 

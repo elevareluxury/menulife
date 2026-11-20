@@ -118,7 +118,7 @@ const de: AuthDict = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "Bestätigung in zwei Schritten",
-    intro: "Zusätzlich zu deinem Passwort fragen wir nach einem 6-stelligen Code aus einer Authenticator-App (Google Authenticator, Microsoft Authenticator, 1Password …). Selbst wenn jemand dein Passwort hat, kommt er nicht hinein.",
+    intro: "Zusätzlich zu deinem Passwort fragt Mycen nach dem Fingerabdruck oder Gesicht deines Handys oder Computers (oder einem Code aus einer App). Selbst wenn jemand dein Passwort hat, kommt er nicht hinein.",
     on: "Aktiviert",
     off: "Deaktiviert",
     enable: "Aktivieren",
@@ -131,7 +131,7 @@ const de: AuthDict = {
     wrong: "Der Code ist falsch oder abgelaufen. Nimm den, den die App gerade anzeigt.",
     failed: "Dieser Schritt hat nicht geklappt. Versuch es noch einmal.",
     challengeTitle: "Dein Bestätigungscode",
-    challengeIntro: "Öffne deine Authenticator-App und gib den 6-stelligen Code von Mycen ein.",
+    challengeIntro: "Bestätige mit Fingerabdruck oder Gesicht (oder dem Code deiner App), dass du es bist.",
     signOut: "Abmelden",
     lost: "Handy verloren? Schreib an team@mycen.id von der E-Mail-Adresse deines Kontos.",
     adminTitle: "Das Team-Panel verlangt die Bestätigung in zwei Schritten",
@@ -140,6 +140,13 @@ const de: AuthDict = {
     disabledDone: "Die Bestätigung in zwei Schritten ist deaktiviert.",
     cancel: "Abbrechen",
     needsRecent: "Um sie zu deaktivieren, melde dich ab und mit deinem Code wieder an.",
+    passkeyEnable: "Fingerabdruck oder Gesicht nutzen",
+    passkeyIntro: "Dein Handy oder Computer fragt nach Fingerabdruck, Gesicht oder Geräte-PIN. Nichts zu installieren.",
+    passkeyUse: "Mit Fingerabdruck oder Gesicht anmelden",
+    passkeyFailed: "Fingerabdruck oder Gesicht hat nicht geklappt. Versuch es noch einmal oder nutze eine Code-App.",
+    useCodeApp: "Ich nutze lieber eine Code-App",
+    usePasskey: "Fingerabdruck oder Gesicht nutzen",
+    waiting: "Warte auf Fingerabdruck oder Gesicht …",
   },
 }
 
