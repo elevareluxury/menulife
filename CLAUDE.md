@@ -754,6 +754,17 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (`supabase.auth.mfa.webauthn._register/_authenticate`, experimental; hay que prender WebAuthn en Supabase → Auth →
   MFA) primero y la app de códigos como alternativa (`EnrollChoice`/`ChallengeChoice` en `Mfa.tsx`); en la app nativa,
   sólo códigos. Privacidad (12 idiomas).
+- Portfolio profesional (PR F, `FEATURES.portfolioModules`, `20261127000001_identity_portfolio_modules.sql`, tests en
+  `portfolio_modules.test.sql`, `portfolio.test.ts` y `portfolio.spec.ts`): 6 tipos de módulo — `measurements` (cm 20–260
+  y talles; la página suma pulgadas), `audience` (por red: seguidores/vistas/interacción, con `as_of`: > 90 días avisa,
+  > 1 año o sin fecha no se muestra; los carga la persona, Mycen no calcula nada), `brands`, `press`, `credits` y
+  `representation` (agencia, booking, management…: email/teléfono/web con `onAction` `email|phone|u:`). Reglas puras en
+  `profile/lib/portfolio.ts` (la página vuelve a validar), un solo chunk `PortfolioModules.tsx` + `portfolio.css` con
+  textos en `portfolioI18n.ts`; editores en `studio/components/portfolioEditors.tsx`. Galería "book"
+  (`content.layout = 'book'`: columnas, fotos enteras sin recortar). Ajustes → "Quién lo puede ver" (`profiles.visibility`:
+  público / sólo con el link = noindex y fuera del sitemap / privado; se aplica sin publicar). Plantillas de talento
+  (`group: 'talent'`: modelo, actor, influencer, cantante, creativo; `presets` = sólo formato, ej. galería en book) y 5
+  tipos de talento en el onboarding (`profiles.purpose`: model, actor, influencer, musician, creative). Privacidad (12 idiomas).
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,

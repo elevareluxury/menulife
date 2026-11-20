@@ -47,6 +47,15 @@ export function SettingsPage() {
             ? st.publishedHelp
             : st.draftHelp}
         </p>
+        {/* Público / sólo con el link (noindex, fuera del sitemap) / privado: la página lo lee de la fila, sin publicar */}
+        <SelectField label={st.visibility} required value={profile.visibility}
+          options={[
+            { value: 'public', label: st.visibilityPublic },
+            { value: 'unlisted', label: st.visibilityUnlisted },
+            { value: 'private', label: st.visibilityPrivate },
+          ]}
+          onChange={v => patchProfile({ visibility: v as typeof profile.visibility })} />
+        <p className="st-help" style={{ margin: 0 }}>{st.visibilityHelp}</p>
       </section>
 
       <VersionsSection />

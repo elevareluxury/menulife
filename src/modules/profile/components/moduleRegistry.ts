@@ -16,6 +16,15 @@ const VideoGalleryModule = preloadable<ModuleProps>(() => import('./V2Modules').
 const PodcastModule = preloadable<ModuleProps>(() => import('./V2Modules').then(m => ({ default: m.PodcastModule })))
 // Eventos (ticketera para productoras): chunk propio con su CSS, sus textos y la ficha del evento
 const EventsModule = preloadable<ModuleProps>(() => import('./EventsModule').then(m => ({ default: m.EventsModule })))
+// Portfolio profesional (medidas, audiencia, marcas, prensa, créditos, representación): un chunk para los seis
+const pf = <K extends 'MeasurementsModule' | 'AudienceModule' | 'BrandsModule' | 'PressModule' | 'CreditsModule' | 'RepresentationModule'>(k: K) =>
+  preloadable<ModuleProps>(() => import('./PortfolioModules').then(m => ({ default: m[k] })))
+const MeasurementsModule = pf('MeasurementsModule')
+const AudienceModule = pf('AudienceModule')
+const BrandsModule = pf('BrandsModule')
+const PressModule = pf('PressModule')
+const CreditsModule = pf('CreditsModule')
+const RepresentationModule = pf('RepresentationModule')
 // Video y música en su propio chunk: sólo lo baja un perfil que lo usa (la huella de la fachada pesa)
 const ContactFormModule = preloadable<ModuleProps>(() => import('./ContactFormModule').then(m => ({ default: m.ContactFormModule })))
 const CollabModule = preloadable<ModuleProps>(() => import('./CollabModule').then(m => ({ default: m.CollabModule })))
@@ -76,6 +85,12 @@ export const PUBLIC_MODULES: Record<ModuleType, PublicModuleDef> = {
   video_gallery:   { View: VideoGalleryModule },
   podcast:         { View: PodcastModule },
   events:          { View: EventsModule },
+  measurements:    { View: MeasurementsModule },
+  audience:        { View: AudienceModule },
+  brands:          { View: BrandsModule },
+  press:           { View: PressModule },
+  credits:         { View: CreditsModule },
+  representation:  { View: RepresentationModule },
 }
 
 /** Definición pública de un tipo; undefined si la base trae un tipo que esta versión de la app no conoce. */

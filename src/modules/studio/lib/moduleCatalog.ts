@@ -22,6 +22,10 @@ import { BranchesEditor, FilesEditor, PollOptionsEditor, type BranchInput, Video
 import { inspectFeedUrl } from '@/modules/profile/lib/podcast'
 import { readEvents, validEventId, type EventItem } from '@/modules/profile/lib/events'
 import { EventsEditor } from '../components/EventsEditor'
+import { AudienceEditor, BrandsEditor, CreditsEditor, MeasurementsEditor, PressEditor, RepresentationEditor, type AudienceValue, type Row } from '../components/portfolioEditors'
+import {
+  audienceFreshness, MEASURE_CM, MEASURE_TEXT, readAudience, readBrands, readCredits, readMeasurements, readPress, readRepresentation,
+} from '@/modules/profile/lib/portfolio'
 import { newEvent } from './newEvent'
 import { duplicateListenRows, listenErrorText, supportErrorText, type ListenInput, type SupportInput } from './supportListenErrors'
 
@@ -97,6 +101,16 @@ type ModuleSpec = Omit<ModuleDef, 'type' | 'label' | 'description'>
 const extra = <S,>(def: ModuleExtra<S>) => def
 const text = (v: unknown) => (typeof v === 'string' ? v : '')
 const count = (v: unknown) => (Array.isArray(v) ? v.length : 0)
+/** Ítems guardados → filas de texto para los editores del portfolio */
+const rowsOf = (v: unknown, blank: Row = {}): Row[] => {
+  const rows = (Array.isArray(v) ? v : []).filter((x): x is Record<string, unknown> => !!x && typeof x === 'object')
+    .map(x => Object.fromEntries(Object.entries(x).map(([k, val]) => [k, val == null ? '' : String(val)])))
+  return rows.length ? rows : [{ ...blank }]
+}
+const filledRows = (rows: Row[]) => rows.filter(r => Object.entries(r).some(([k, v]) => k !== 'role' && k !== 'platform' && v.trim()))
+/** Algún link escrito que no abre */
+const badLinks = (rows: Row[], keys: string[]) => rows.some(r => keys.some(k => r[k]?.trim() && !safeHref(r[k])))
+const localDay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
 
 export const SOCIAL_NETWORKS = [
   { value: 'instagram', label: 'Instagram', base: 'https://instagram.com/' },
@@ -314,7 +328,14 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
     },
     gallery: {
       addable: true,
-      fields: [],
+      fields: [
+        // Revista (la primera grande, recortadas parejas) o book (enteras, sin recortar: modelos y fotógrafos)
+        { key: 'layout', label: f.layout, kind: 'select', required: true, options: [
+          { value: 'grid', label: c.layoutMagazine },
+          { value: 'book', label: c.layoutBook },
+        ] },
+      ],
+      prefill: x => { if (!x.layout) x.layout = 'grid' },
       extra: extra<GalleryItem[]>({
         init: m => (Array.isArray(m?.content.items) ? m.content.items as GalleryItem[] : []),
         validate: items => (items.length ? null : e.galleryEmpty),
@@ -650,6 +671,101 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         Editor: EventsEditor,
       }),
       summary: x => t.events.summary(count(x.items)),
+    },
+    // Portfolio profesional: lo que no se carga no se muestra; la página vuelve a validar todo (profile/lib/portfolio.ts)
+    measurements: {
+      addable: featureOn('portfolioModules'),
+      fields: [{ key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 }],
+      extra: extra<Row>({
+        init: m => Object.fromEntries([...MEASURE_CM, ...MEASURE_TEXT].map(k => [k, m?.content[k] == null ? '' : String(m.content[k])])),
+        validate: x => {
+          const shown = readMeasurements(x)
+          if (MEASURE_CM.some(k => x[k]?.trim() && !shown.some(s => s.key === k))) return t.portfolio.measureBad
+          return shown.length ? null : t.portfolio.measuresEmpty
+        },
+        apply: (x, content) => {
+          for (const k of [...MEASURE_CM, ...MEASURE_TEXT]) delete content[k]
+          for (const m of readMeasurements(x)) content[m.key] = m.cm ?? m.text
+        },
+        Editor: MeasurementsEditor,
+      }),
+      summary: x => t.portfolio.summary(readMeasurements(x).length),
+    },
+    audience: {
+      addable: featureOn('portfolioModules'),
+      fields: [{ key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 }],
+      extra: extra<AudienceValue>({
+        init: m => ({ as_of: text(m?.content.as_of) || localDay(), items: rowsOf(m?.content.items, { platform: 'instagram' }) }),
+        validate: x => {
+          if (!readAudience({ items: x.items }).length) return t.portfolio.audienceEmpty
+          if (audienceFreshness(x.as_of) === 'missing') return t.portfolio.asOfMissing
+          return badLinks(x.items, ['url']) ? t.portfolio.badLink : null
+        },
+        apply: (x, content) => { content.as_of = x.as_of; content.items = readAudience({ items: x.items }) },
+        Editor: AudienceEditor,
+      }),
+      summary: x => [text(x.as_of), t.portfolio.summary(count(x.items))].filter(Boolean).join(' · '),
+    },
+    brands: {
+      addable: featureOn('portfolioModules'),
+      fields: [{ key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 }],
+      extra: extra<Row[]>({
+        init: m => rowsOf(m?.content.items),
+        validate: rows => (!readBrands({ items: filledRows(rows) }).length ? t.portfolio.brandsEmpty : badLinks(rows, ['url']) ? t.portfolio.badLink : null),
+        apply: (rows, content) => { content.items = readBrands({ items: filledRows(rows) }) },
+        Editor: BrandsEditor,
+      }),
+      summary: x => t.portfolio.summary(count(x.items)),
+    },
+    press: {
+      addable: featureOn('portfolioModules'),
+      fields: [{ key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 }],
+      extra: extra<Row[]>({
+        init: m => rowsOf(m?.content.items),
+        validate: rows => {
+          const filled = filledRows(rows)
+          if (!filled.length || readPress({ items: filled }).length < filled.length) return t.portfolio.pressEmpty
+          return badLinks(rows, ['url']) ? t.portfolio.badLink : null
+        },
+        apply: (rows, content) => { content.items = readPress({ items: filledRows(rows) }) },
+        Editor: PressEditor,
+      }),
+      summary: x => t.portfolio.summary(count(x.items)),
+    },
+    credits: {
+      addable: featureOn('portfolioModules'),
+      fields: [{ key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 }],
+      extra: extra<Row[]>({
+        init: m => rowsOf(m?.content.items),
+        validate: rows => {
+          const filled = filledRows(rows)
+          if (!filled.length || readCredits({ items: filled }).length < filled.length) return t.portfolio.creditsEmpty
+          return badLinks(rows, ['url']) ? t.portfolio.badLink : null
+        },
+        apply: (rows, content) => { content.items = readCredits({ items: filledRows(rows) }) },
+        Editor: CreditsEditor,
+      }),
+      summary: x => t.portfolio.summary(count(x.items)),
+    },
+    representation: {
+      addable: featureOn('portfolioModules'),
+      fields: [{ key: 'title', label: f.sectionTitle, kind: 'text', isTitle: true, translatable: true, maxLength: 80 }],
+      extra: extra<Row[]>({
+        init: m => rowsOf(m?.content.items, { role: 'agency' }),
+        validate: rows => {
+          const filled = filledRows(rows)
+          if (!filled.length || readRepresentation({ items: filled }).length < filled.length) return t.portfolio.repEmpty
+          for (const r of filled) {
+            const ok = readRepresentation({ items: [r] })[0]
+            if (r.email?.trim() && !ok?.email) return t.portfolio.badEmail
+            if (r.phone?.trim() && !ok?.phone) return t.portfolio.badPhone
+          }
+          return badLinks(rows, ['url']) ? t.portfolio.badLink : null
+        },
+        apply: (rows, content) => { content.items = readRepresentation({ items: filledRows(rows) }) },
+        Editor: RepresentationEditor,
+      }),
+      summary: x => t.portfolio.summary(count(x.items)),
     },
     // V1.1 · Apoyame: links de pago y alias/Pix para copiar (Mycen no cobra ni procesa pagos)
     support: {

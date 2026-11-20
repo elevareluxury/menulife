@@ -60,7 +60,7 @@ export function TemplatePicker({ onClose, onAdded }: { onClose: () => void; onAd
     return (
       <Drawer title={x.title} onClose={onClose}>
         <p className="st-help" style={{ marginTop: 0 }}>{x.intro}</p>
-        {(['profile', 'industry'] as const).map(group => (
+        {(['profile', 'talent', 'industry'] as const).map(group => (
           <section key={group} aria-label={x.groups[group]}>
             <h3 className="st-card-title">{x.groups[group]}</h3>
             <div className="st-library st-template-list">

@@ -76,7 +76,8 @@ for m in \
   20261123000001_web_launch_hardening \
   20261124000001_emergency_switches_mfa_csam \
   20261125000001_alerts_links_events_scale \
-  20261126000001_talent_reservations; do
+  20261126000001_talent_reservations \
+  20261127000001_identity_portfolio_modules; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

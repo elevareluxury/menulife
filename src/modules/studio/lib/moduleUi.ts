@@ -1,7 +1,7 @@
 import {
   AlignLeft, Clock, FolderOpen, GalleryHorizontal, Image, Images, LayoutGrid, Link2, List, MapPin, MessageSquareQuote,
   Handshake, HeartHandshake, Mail, MailPlus, Music2, Phone, PlayCircle, ShoppingBag, Sparkles, SquarePlay, UserPlus, Users,
-  BarChart3, FileDown, Ticket, Clapperboard, Podcast, CalendarDays,
+  BarChart3, FileDown, Ticket, Clapperboard, Podcast, CalendarDays, Ruler, TrendingUp, BadgeCheck, Newspaper, Film, Briefcase,
 } from 'lucide-react'
 import type { ModuleType } from '@/modules/profile/lib/profileTypes'
 import { moduleSchedule, scheduleState } from '@/modules/profile/lib/moduleSchedule'
@@ -20,11 +20,13 @@ export const MODULE_ICONS: Record<ModuleType, typeof Link2> = {
   collab: Handshake, subscribe: MailPlus, latest_video: SquarePlay, support: HeartHandshake, listen_on: Music2,
   poll: BarChart3, downloads: FileDown, coupon: Ticket, video_gallery: Clapperboard, podcast: Podcast,
   events: CalendarDays,
+  measurements: Ruler, audience: TrendingUp, brands: BadgeCheck, press: Newspaper, credits: Film, representation: Briefcase,
 }
 
 /** Tipos que se editan en Studio (contact_card se maneja desde Compartir) */
 export const EDITABLE_MODULES: ModuleType[] = ['link', 'social', 'contact', 'location', 'image', 'text', 'featured_action', 'product', 'hours', 'gallery', 'cards', 'testimonials', 'project', 'portfolio', 'link_group', 'media', 'contact_form',
-  'collab', 'subscribe', 'latest_video', 'support', 'listen_on', 'poll', 'downloads', 'coupon', 'video_gallery', 'podcast', 'events']
+  'collab', 'subscribe', 'latest_video', 'support', 'listen_on', 'poll', 'downloads', 'coupon', 'video_gallery', 'podcast', 'events',
+  'measurements', 'audience', 'brands', 'press', 'credits', 'representation']
 
 /** "Desde 12 oct 18:00" · "Hasta 20 oct 10:00" · "Terminó" — o null si no está programado */
 export function useScheduleBadge() {

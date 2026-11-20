@@ -26,6 +26,8 @@ export const FEATURES = {
   modulesV2:      true,
   // Eventos (ticketera para productoras, pedido directo; prendido). Apagado, Studio no lo ofrece al agregar un módulo.
   eventsModule:   true,
+  // Portfolio profesional (medidas, audiencia, marcas, prensa, créditos, representación). Apagado, Studio no los ofrece.
+  portfolioModules: true,
 } as const
 
 export type FeatureName = keyof typeof FEATURES
