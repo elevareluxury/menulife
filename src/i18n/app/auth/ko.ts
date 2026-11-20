@@ -24,6 +24,8 @@ const ko: AuthDict = {
     failed: "로그인하지 못했습니다. 다시 시도해 주세요.",
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "신규 가입이 몇 분 동안 일시 중지되었습니다. 잠시 후 다시 시도해 주세요.",
     subtitle: "나의 디지털 아이덴티티, 모두 한곳에",
     name: "이름",
     namePlaceholder: "Ana Pérez",
@@ -112,6 +114,32 @@ const ko: AuthDict = {
     failed: "사람인지 확인하지 못했습니다. 다시 시도해 주세요.",
     unavailable: "봇 방지 확인을 불러오지 못했습니다. 연결을 확인하거나 콘텐츠 차단기를 끄고 다시 시도해 주세요.",
     retry: "다시 확인하기",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "2단계 인증",
+    intro: "비밀번호와 함께 인증 앱(Google Authenticator, Microsoft Authenticator, 1Password 등)의 6자리 코드를 입력하도록 합니다. 누군가 비밀번호를 알아내더라도 로그인할 수 없습니다.",
+    on: "켜짐",
+    off: "꺼짐",
+    enable: "켜기",
+    disable: "끄기",
+    scan: "인증 앱으로 이 코드를 스캔하세요.",
+    manual: "스캔할 수 없으면 앱에 이 키를 입력하세요:",
+    code: "6자리 코드",
+    verify: "확인",
+    verifying: "확인 중…",
+    wrong: "코드가 맞지 않거나 만료되었습니다. 지금 앱에 표시된 코드를 입력하세요.",
+    failed: "이 단계를 완료하지 못했습니다. 다시 시도해 주세요.",
+    challengeTitle: "인증 코드",
+    challengeIntro: "인증 앱을 열고 Mycen의 6자리 코드를 입력하세요.",
+    signOut: "로그아웃",
+    lost: "휴대폰을 잃어버렸나요? 계정 이메일로 team@mycen.id에 연락해 주세요.",
+    adminTitle: "팀 패널에는 2단계 인증이 필요합니다",
+    adminIntro: "팀 패널에 들어가려면 2단계 인증을 켜세요. 한 번만 설정하면 되고, 모든 사람의 데이터를 지켜 줍니다.",
+    enabledDone: "완료: 2단계 인증이 켜졌습니다.",
+    disabledDone: "2단계 인증이 꺼져 있습니다.",
+    cancel: "취소",
+    needsRecent: "끄려면 로그아웃한 뒤 코드로 다시 로그인하세요.",
   },
 }
 

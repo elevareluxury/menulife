@@ -30,6 +30,13 @@ const ko: AdminDict = {
     seeErrors: '오류 보기 →',
   },
   reports: {
+    /** Abuso sexual infantil: suspender, retener la evidencia y denunciar (docs/seguridad/csam.md) */
+    csamButton: "아동 성 학대",
+    csamConfirm: "계정 전체를 정지하고, 신고를 닫고, 증거를 보존합니다(아무도 삭제할 수 없음). 미성년자가 관련된 성적 콘텐츠에만 사용하세요. 계속할까요?",
+    csamDone: "완료: 계정이 정지되고 증거가 보존되었습니다. 이제 다음 단계를 따르세요.",
+    csamFailed: "완료하지 못했습니다. 증거 보존 마이그레이션을 적용했나요?",
+    csamStepsTitle: "이제 할 일",
+    csamSteps: ["자료를 내려받거나 복사하거나 전달하지 말고, 누구에게도 보여 주지 마세요.", "당국에 신고하세요: NCMEC CyberTipline(report.cybertip.org), 아르헨티나에서는 검찰청의 UFECI.", "신고서에는 프로필 링크, 날짜, 시간을 적으세요. 자료는 첨부하지 않습니다. 필요하면 당국이 요청합니다.", "당사자에게 알리지 마세요. 당사자가 보는 사유는 일반적인 문구입니다.", "전체 절차는 docs/seguridad/csam.md에 있습니다."],
     title: '신고',
     intro: '방문자가 신고한 프로필과 프로젝트입니다. 프로필을 정지하면 페이지, 프로젝트, vCard가 모두 숨겨지고 열린 신고가 모두 닫힙니다. 주인은 Studio에서 사유를 볼 수 있어요.',
     open: '열림', resolved: '처리됨',
@@ -152,6 +159,10 @@ const ko: AdminDict = {
     businessOff: 'Business는 랜딩에서 꺼져 있어요. 화면은 메뉴의 "Business" 아래에 있어요.',
   },
   people: {
+    /** Retención legal de una cuenta (abuso infantil o pedido de una autoridad) */
+    legalHold: "법적 보존: 이 계정과 파일은 삭제할 수 없습니다.",
+    releaseHold: "보존 해제",
+    releaseConfirm: "보존을 해제할까요? 당국이 더 이상 증거를 필요로 하지 않을 때만 하세요.",
     title: '사용자',
     intro: '이메일, 사용자 이름 또는 이름으로 계정을 찾으세요.',
     search: '검색',
@@ -198,6 +209,8 @@ const ko: AdminDict = {
     purgeDone: (n) => `파일 ${n}개를 삭제했어요`,
   },
   activity: {
+    csam_hold: "아동 학대로 정지하고 증거를 보존함",
+    legal_hold_released: "법적 보존을 해제함",
     title: '팀 활동 기록',
     intro: '팀의 모든 작업이 자동으로 기록돼요: 누가, 무엇을, 언제.',
     empty: '아직 작업이 없어요.',
@@ -222,6 +235,21 @@ const ko: AdminDict = {
     status_setting: '시스템 상태 설정을 변경했어요',
   },
   status: {
+    /** Interruptores de emergencia (Estado): registros, mensajes, suscripciones y votaciones */
+    emergency: {
+      title: "비상 스위치",
+      intro: "스팸이나 공격이 있으면 클릭 한 번으로 기능을 일시 중지하세요. 새 버전을 배포하지 않아도 데이터베이스가 바로 막습니다. 사용하려는 사람에게는 \"일시 중지됨, 잠시 후 다시 시도해 주세요\"가 표시됩니다. 팀 활동에 기록됩니다.",
+      signups: "신규 가입",
+      messages: "메시지와 협업 제안",
+      subscriptions: "구독",
+      polls: "투표",
+      on: "작동 중",
+      off: "일시 중지됨",
+      turnOff: "일시 중지",
+      turnOn: "다시 시작",
+      confirm: (name) => `"${name}"을(를) 일시 중지할까요? 다시 시작할 때까지 아무도 사용할 수 없습니다.`,
+      failed: "변경하지 못했습니다. 스위치 마이그레이션을 적용했나요?",
+    },
     title: '시스템 상태',
     intro: '지금 Mycen의 상태예요. 이 화면이 열려 있는 동안 1분마다 자동으로 확인해요.',
     refresh: '지금 확인',

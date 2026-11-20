@@ -15,6 +15,8 @@ export interface ContactFormStrings {
   formInvalid: string
   formLinks: string
   formLimit: string
+  /** Interruptor de emergencia apagado (Super-admin → Estado) */
+  formPaused: string
   formPreview: string
   formPrivate: string
   /** Link a la política de privacidad, debajo del aviso */
@@ -35,6 +37,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'Completá tu nombre, cómo contactarte y el mensaje.',
     formLinks: 'El mensaje tiene demasiados links: dejá como mucho 3.',
     formLimit: 'Ya enviaste varios mensajes hoy. Probá de nuevo mañana.',
+    formPaused: "Por ahora no se pueden enviar mensajes. Probá de nuevo en un rato.",
     formPreview: 'En la vista previa los mensajes no se envían.',
     formPrivate: 'Sólo lo ve la persona dueña de este perfil.',
     formPrivacy: 'Cómo cuida Mycen tus datos',
@@ -52,6 +55,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'Fill in your name, how to reach you and your message.',
     formLinks: 'Your message has too many links: keep it to 3 or fewer.',
     formLimit: 'You\'ve sent several messages today. Try again tomorrow.',
+    formPaused: "Messages can’t be sent right now. Please try again shortly.",
     formPreview: 'Messages are not sent from the preview.',
     formPrivate: 'Only the owner of this profile sees it.',
     formPrivacy: 'How Mycen protects your data',
@@ -69,6 +73,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'Preencha seu nome, como falar com você e a mensagem.',
     formLinks: 'A mensagem tem links demais: deixe no máximo 3.',
     formLimit: 'Você já enviou várias mensagens hoje. Tente de novo amanhã.',
+    formPaused: "Por enquanto não é possível enviar mensagens. Tente de novo daqui a pouco.",
     formPreview: 'Na prévia as mensagens não são enviadas.',
     formPrivate: 'Só a pessoa dona deste perfil vê.',
     formPrivacy: 'Como a Mycen cuida dos seus dados',
@@ -86,6 +91,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'Indiquez votre nom, comment vous joindre et votre message.',
     formLinks: 'Votre message contient trop de liens : 3 maximum.',
     formLimit: 'Vous avez déjà envoyé plusieurs messages aujourd’hui. Réessayez demain.',
+    formPaused: "Impossible d’envoyer des messages pour le moment. Réessayez dans un instant.",
     formPreview: 'Les messages ne sont pas envoyés depuis l’aperçu.',
     formPrivate: 'Seule la personne propriétaire de ce profil le voit.',
     formPrivacy: 'Comment Mycen protège vos données',
@@ -103,6 +109,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'Gib deinen Namen, deine Kontaktmöglichkeit und deine Nachricht ein.',
     formLinks: 'Deine Nachricht enthält zu viele Links: höchstens 3.',
     formLimit: 'Du hast heute schon mehrere Nachrichten gesendet. Versuche es morgen wieder.',
+    formPaused: "Nachrichten können gerade nicht gesendet werden. Versuch es gleich noch einmal.",
     formPreview: 'In der Vorschau werden keine Nachrichten gesendet.',
     formPrivate: 'Nur die Person, der dieses Profil gehört, sieht sie.',
     formPrivacy: 'Wie Mycen deine Daten schützt',
@@ -120,6 +127,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'Inserisci il tuo nome, come contattarti e il messaggio.',
     formLinks: 'Il messaggio ha troppi link: al massimo 3.',
     formLimit: 'Hai già inviato diversi messaggi oggi. Riprova domani.',
+    formPaused: "Per ora non si possono inviare messaggi. Riprova tra poco.",
     formPreview: 'Nell’anteprima i messaggi non vengono inviati.',
     formPrivate: 'Lo vede solo la persona proprietaria di questo profilo.',
     formPrivacy: 'Come Mycen protegge i tuoi dati',
@@ -137,6 +145,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: '请填写你的名字、联系方式和留言内容。',
     formLinks: '留言中的链接太多了：最多 3 个。',
     formLimit: '你今天已经发送了多条留言，请明天再试。',
+    formPaused: "暂时无法发送留言。请稍后再试。",
     formPreview: '预览中不会发送留言。',
     formPrivate: '只有这个主页的主人能看到。',
     formPrivacy: 'Mycen 如何保护你的数据',
@@ -154,6 +163,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'お名前、連絡先、メッセージを入力してください。',
     formLinks: 'メッセージのリンクが多すぎます。3 つまでにしてください。',
     formLimit: '本日はすでに複数のメッセージを送信しています。明日もう一度お試しください。',
+    formPaused: "現在メッセージを送信できません。少し時間をおいてお試しください。",
     formPreview: 'プレビューではメッセージは送信されません。',
     formPrivate: 'このプロフィールの持ち主だけが見られます。',
     formPrivacy: 'Mycen のデータの取り扱い',
@@ -171,6 +181,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: '이름, 연락 방법, 메시지를 입력하세요.',
     formLinks: '메시지에 링크가 너무 많습니다. 최대 3개까지 넣어 주세요.',
     formLimit: '오늘 이미 여러 메시지를 보냈습니다. 내일 다시 시도하세요.',
+    formPaused: "지금은 메시지를 보낼 수 없습니다. 잠시 후 다시 시도해 주세요.",
     formPreview: '미리보기에서는 메시지가 전송되지 않습니다.',
     formPrivate: '이 프로필 주인만 볼 수 있습니다.',
     formPrivacy: 'Mycen의 개인정보 보호 방법',
@@ -188,6 +199,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'अपना नाम, संपर्क का तरीका और संदेश भरें।',
     formLinks: 'संदेश में बहुत ज़्यादा लिंक हैं: अधिकतम 3 रखें।',
     formLimit: 'आप आज कई संदेश भेज चुके हैं। कल फिर कोशिश करें।',
+    formPaused: "अभी संदेश नहीं भेजे जा सकते। थोड़ी देर में फिर कोशिश करें।",
     formPreview: 'प्रीव्यू में संदेश नहीं भेजे जाते।',
     formPrivate: 'इसे सिर्फ़ इस प्रोफ़ाइल का मालिक देखता है।',
     formPrivacy: 'Mycen आपके डेटा की सुरक्षा कैसे करता है',
@@ -205,6 +217,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'اكتب اسمك وطريقة التواصل معك والرسالة.',
     formLinks: 'في الرسالة روابط كثيرة: 3 روابط كحد أقصى.',
     formLimit: 'أرسلت عدة رسائل اليوم. حاول مرة أخرى غدًا.',
+    formPaused: "لا يمكن إرسال الرسائل حاليًا. حاول مرة أخرى بعد قليل.",
     formPreview: 'لا تُرسل الرسائل من المعاينة.',
     formPrivate: 'لا يراها إلا صاحب هذا الملف.',
     formPrivacy: 'كيف تحمي Mycen بياناتك',
@@ -222,6 +235,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formInvalid: 'Укажите имя, способ связи и сообщение.',
     formLinks: 'В сообщении слишком много ссылок: не больше 3.',
     formLimit: 'Сегодня вы уже отправили несколько сообщений. Попробуйте завтра.',
+    formPaused: "Сейчас нельзя отправлять сообщения. Попробуйте чуть позже.",
     formPreview: 'В предпросмотре сообщения не отправляются.',
     formPrivate: 'Его видит только владелец этого профиля.',
     formPrivacy: 'Как Mycen защищает ваши данные',

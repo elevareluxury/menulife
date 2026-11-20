@@ -24,6 +24,8 @@ const it: AuthDict = {
     failed: "Non siamo riusciti a farti accedere. Riprova.",
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "Le nuove registrazioni sono in pausa per qualche minuto. Riprova tra poco.",
     subtitle: "La tua identità digitale, tutto in un unico posto",
     name: "Il tuo nome",
     namePlaceholder: "Ana Pérez",
@@ -112,6 +114,32 @@ const it: AuthDict = {
     failed: "Non siamo riusciti a verificare che sei una persona. Riprova.",
     unavailable: "Non siamo riusciti a caricare la verifica anti-bot. Controlla la connessione o disattiva il blocco contenuti e riprova.",
     retry: "Riprova la verifica",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "Verifica in due passaggi",
+    intro: "Oltre alla password, ti chiediamo un codice di 6 cifre da un’app di autenticazione (Google Authenticator, Microsoft Authenticator, 1Password…). Anche se qualcuno ottiene la tua password, non può entrare.",
+    on: "Attiva",
+    off: "Disattivata",
+    enable: "Attiva",
+    disable: "Disattiva",
+    scan: "Scansiona questo codice con la tua app di autenticazione.",
+    manual: "Se non riesci a scansionarlo, inserisci questa chiave nell’app:",
+    code: "Codice di 6 cifre",
+    verify: "Conferma",
+    verifying: "Conferma in corso…",
+    wrong: "Il codice è sbagliato o scaduto. Prova con quello che mostra l’app adesso.",
+    failed: "Non siamo riusciti a completare il passaggio. Riprova.",
+    challengeTitle: "Il tuo codice di verifica",
+    challengeIntro: "Apri la tua app di autenticazione e scrivi il codice di 6 cifre di Mycen.",
+    signOut: "Esci",
+    lost: "Hai perso il telefono? Scrivi a team@mycen.id dall’email del tuo account.",
+    adminTitle: "Il pannello del team richiede la verifica in due passaggi",
+    adminIntro: "Per entrare nel pannello del team, attiva la verifica in due passaggi. Si fa una volta sola e protegge i dati di tutte le persone.",
+    enabledDone: "Fatto: la verifica in due passaggi è attiva.",
+    disabledDone: "La verifica in due passaggi è disattivata.",
+    cancel: "Annulla",
+    needsRecent: "Per disattivarla, esci e rientra con il tuo codice.",
   },
 }
 

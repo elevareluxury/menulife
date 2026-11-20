@@ -24,6 +24,8 @@ const es = {
     failed: 'No pudimos iniciar sesión. Intentá de nuevo.',
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "Los registros nuevos están en pausa por unos minutos. Probá de nuevo en un rato.",
     subtitle: 'Tu identidad digital, todo en un solo lugar',
     name: 'Tu nombre',
     namePlaceholder: 'Ana Pérez',
@@ -115,6 +117,32 @@ const es = {
     failed: "No pudimos verificar que sos una persona. Probá de nuevo.",
     unavailable: "No pudimos cargar la verificación anti-bots. Revisá tu conexión o desactivá el bloqueador de contenido y probá de nuevo.",
     retry: "Reintentar verificación",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "Verificación en dos pasos",
+    intro: "Además de tu contraseña, te pedimos un código de 6 números de una app de autenticación (Google Authenticator, Microsoft Authenticator, 1Password…). Aunque alguien consiga tu contraseña, no puede entrar.",
+    on: "Activada",
+    off: "Desactivada",
+    enable: "Activar",
+    disable: "Desactivar",
+    scan: "Escaneá este código con tu app de autenticación.",
+    manual: "Si no podés escanearlo, escribí esta clave en la app:",
+    code: "Código de 6 números",
+    verify: "Confirmar",
+    verifying: "Confirmando…",
+    wrong: "El código no es correcto o venció. Probá con el que muestra la app ahora.",
+    failed: "No pudimos completar el paso. Probá de nuevo.",
+    challengeTitle: "Tu código de verificación",
+    challengeIntro: "Abrí tu app de autenticación y escribí el código de 6 números de Mycen.",
+    signOut: "Salir",
+    lost: "¿Perdiste el celular? Escribinos a team@mycen.id desde el email de tu cuenta.",
+    adminTitle: "El panel del equipo pide la verificación en dos pasos",
+    adminIntro: "Para entrar al panel del equipo, activá la verificación en dos pasos. Se hace una sola vez y protege los datos de todas las personas.",
+    enabledDone: "Listo: la verificación en dos pasos está activada.",
+    disabledDone: "La verificación en dos pasos está desactivada.",
+    cancel: "Cancelar",
+    needsRecent: "Para desactivarla, salí y volvé a entrar con tu código.",
   },
 }
 

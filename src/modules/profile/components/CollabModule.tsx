@@ -94,6 +94,7 @@ export function CollabModule({ module, lang, onAction }: ModuleProps) {
     : status === 'bad_deadline' ? t.badDeadline
     : status === 'too_many_links' ? t.links
     : status === 'rate_limited' ? t.limit
+    : status === 'paused' ? t.paused
     : status === 'error' ? t.error
     : null
 

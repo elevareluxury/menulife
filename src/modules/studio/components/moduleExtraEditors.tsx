@@ -67,19 +67,26 @@ export function HoursEditor({ value: schedule, onChange }: ExtraEditorProps<Week
 
 // ── Galería ─────────────────────────────────────────────────────────────────
 
-export interface GalleryItem { url: string; type?: string; caption?: string }
+export interface GalleryItem { url: string; type?: string; caption?: string; alt?: string }
 
 export function GalleryEditor({ value: items, onChange, userId }: ExtraEditorProps<GalleryItem[]>) {
   const [adding, setAdding] = useState(false)
-  const e = useStudioT().editor
+  const st = useStudioT()
+  const e = st.editor
+  // Qué se ve en cada foto (lector de pantalla); vacío = se nombra "Galería 1, 2…"
+  const setAlt = (i: number, alt: string) => onChange(items.map((it, j) => (j === i ? { ...it, alt: alt || undefined } : it)))
   return (
     <div className="st-stack" style={{ gap: 8 }}>
       <span className="st-label">{e.photos(items.length)}</span>
       {items.map((item, i) => (
-        <div key={item.url + i} className="st-row">
-          <GalleryThumb url={item.url} label={e.photoN(i + 1)} />
-          <button type="button" className="st-icon-btn" aria-label={e.removePhoto(i + 1)}
-            onClick={() => onChange(items.filter((_, j) => j !== i))}><Trash2 size={16} /></button>
+        <div key={item.url + i} className="st-stack" style={{ gap: 6 }}>
+          <div className="st-row">
+            <GalleryThumb url={item.url} label={e.photoN(i + 1)} />
+            <button type="button" className="st-icon-btn" aria-label={e.removePhoto(i + 1)}
+              onClick={() => onChange(items.filter((_, j) => j !== i))}><Trash2 size={16} /></button>
+          </div>
+          <TextField label={`${st.catalog.fields.alt} · ${e.photoN(i + 1)}`} value={item.alt ?? ''} maxLength={200}
+            onChange={v => setAlt(i, v)} />
         </div>
       ))}
       {adding

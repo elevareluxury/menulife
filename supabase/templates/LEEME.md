@@ -19,6 +19,11 @@ registro y se actualiza al cambiar el idioma en Ajustes. Sin `locale` (cuentas v
 - Guardar.
 
 ## 3. Supabase → Authentication → Emails → Templates
+Desde el PR de interruptores y 2FA (flujo PKCE en la web), los links de los mails llevan `token_hash`
+(`{{ .SiteURL }}/auth/callback?token_hash=…&type=…`): funcionan aunque el mail se abra en otro celular o navegador.
+Antes de pegar, revisá **Authentication → URL Configuration → Site URL = `https://mycen.id`** (los links salen de ahí).
+Pegalas **después** de mergear ese PR (la app vieja no entiende `token_hash`).
+
 Para cada plantilla, pegá el **Subject** de `asuntos.md` y el **Body** del archivo:
 
 | Plantilla en Supabase | Archivo |

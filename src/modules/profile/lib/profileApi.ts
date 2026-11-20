@@ -107,8 +107,18 @@ export async function reportProfile(username: string, reason: string, details: s
   return data as ReportResult
 }
 
-/** Respuesta de submit_profile_message (V1 · etapa 05) */
-export type MessageResult = 'ok' | 'invalid' | 'too_many_links' | 'rate_limited' | 'not_found'
+/**
+ * Lo que la base frena antes de llegar a la función (gancho previo de PostgREST): un interruptor de emergencia
+ * apagado (503 FEATURE_PAUSED) o el tope diario por IP (429 RATE_LIMITED). Lo demás sigue siendo un error.
+ */
+export function blockedWrite(error: { message: string; code?: string }): 'paused' | 'rate_limited' | null {
+  if (error.code === 'PT503' || /FEATURE_PAUSED/.test(error.message)) return 'paused'
+  if (error.code === 'PT429' || /RATE_LIMITED/.test(error.message)) return 'rate_limited'
+  return null
+}
+
+/** Respuesta de submit_profile_message (V1 · etapa 05); 'paused' = interruptor de emergencia apagado */
+export type MessageResult = 'ok' | 'invalid' | 'too_many_links' | 'rate_limited' | 'not_found' | 'paused'
 
 /** Formulario de contacto: el mensaje queda en la bandeja de Studio del dueño (no se manda ningún email). */
 export async function submitProfileMessage(handle: string, input: {
@@ -118,7 +128,7 @@ export async function submitProfileMessage(handle: string, input: {
     p_handle: handle, p_name: input.name, p_contact: input.contact, p_message: input.message,
     p_trap: input.trap || null, p_elapsed_ms: Math.round(input.elapsedMs),
   })
-  if (error) throw new Error(error.message)
+  if (error) return blockedWrite(error) ?? Promise.reject(new Error(error.message))
   return data as MessageResult
 }
 
@@ -133,11 +143,11 @@ export async function submitProfileCollab(handle: string, input: {
     p_deadline: input.deadline || null, p_message: input.message,
     p_trap: input.trap || null, p_elapsed_ms: Math.round(input.elapsedMs),
   })
-  if (error) throw new Error(error.message)
+  if (error) return blockedWrite(error) ?? Promise.reject(new Error(error.message))
   return data as MessageResult
 }
 
-export type SubscribeResult = 'ok' | 'invalid' | 'consent_required' | 'rate_limited' | 'full' | 'not_found'
+export type SubscribeResult = 'ok' | 'invalid' | 'consent_required' | 'rate_limited' | 'full' | 'not_found' | 'paused'
 
 /** Módulo "Suscribirse": el email queda en Studio → Suscriptores del dueño (Mycen no le manda nada a la lista). */
 export async function subscribeProfile(handle: string, input: {
@@ -147,7 +157,7 @@ export async function subscribeProfile(handle: string, input: {
     p_handle: handle, p_module_id: input.moduleId, p_email: input.email, p_name: input.name || null,
     p_consent: input.consent, p_hp: input.trap || null, p_elapsed_ms: Math.round(input.elapsedMs), p_locale: input.locale,
   })
-  if (error) throw new Error(error.message)
+  if (error) return blockedWrite(error) ?? Promise.reject(new Error(error.message))
   return data as SubscribeResult
 }
 
@@ -171,9 +181,13 @@ export async function fetchPollResults(handle: string, moduleId: string): Promis
   return error ? null : sanitizePoll(data)
 }
 
-/** Votar (anónimo; el mismo visitante puede cambiar su voto ese día). Devuelve los resultados o null. */
-export async function votePoll(handle: string, moduleId: string, option: string): Promise<PollResults | null> {
+/**
+ * Votar (anónimo; el mismo visitante puede cambiar su voto ese día). Devuelve los resultados, 'paused' si el equipo
+ * apagó las votaciones o null si no se pudo.
+ */
+export async function votePoll(handle: string, moduleId: string, option: string): Promise<PollResults | 'paused' | null> {
   const { data, error } = await rpc('vote_profile_poll', { p_handle: handle, p_module_id: moduleId, p_option: option })
+  if (error && blockedWrite(error) === 'paused') return 'paused'
   if (error || !data || (data as { status?: string }).status !== 'ok') return null
   return sanitizePoll((data as { results?: unknown }).results)
 }

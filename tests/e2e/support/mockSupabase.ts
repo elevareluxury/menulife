@@ -21,7 +21,7 @@ export interface MockState {
   /** Respuesta de profile_traffic_sources (Fase 7) */
   trafficSources?: { source: string | null; referrer_host: string | null; visits: number; visitors: number }[]
   /** Interruptores del sitio (get_site_flags / admin_set_site_flag) */
-  siteFlags?: { business: boolean }
+  siteFlags?: { business: boolean; signups?: boolean; messages?: boolean; subscriptions?: boolean; polls?: boolean }
   /** Estado del sistema: lo que cambia sobre la respuesta de admin_system_status y los hallazgos del autochequeo */
   systemStatus?: Row
   selfcheck?: { rule: string; level: 'red' | 'yellow' | 'info'; object: string }[]
@@ -388,7 +388,14 @@ function senderBlocked(state: MockState, profileId: string, contact: string): bo
   return (state.tables.profile_blocked_senders ?? []).some(b => b.profile_id === profileId && b.contact_key === contactKey(contact))
 }
 
+const RPC_FLAG: Record<string, 'messages' | 'subscriptions' | 'polls'> = {
+  submit_profile_message: 'messages', submit_profile_collab: 'messages', subscribe_profile: 'subscriptions', vote_profile_poll: 'polls',
+}
+
 function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown {
+  // Interruptores de emergencia: como el gancho previo de la base (mycen_pre_request → 503 FEATURE_PAUSED)
+  const flag = RPC_FLAG[fn]
+  if (flag && state.siteFlags?.[flag] === false) throw new Error('FEATURE_PAUSED')
   state.rpcCalls.push({ fn, args })
   switch (fn) {
     case 'get_public_profile': return publicProfile(state, String(args.p_username ?? ''), isOwner)
@@ -708,6 +715,35 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       }
       return null
     }
+    // Abuso sexual infantil (20261124000001): suspende la cuenta, cierra sus denuncias y retiene la evidencia
+    case 'admin_csam_action': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const p = state.tables.profiles.find(x => x.id === args.p_profile_id)
+      if (!p) throw new Error('NOT_FOUND')
+      const now = new Date().toISOString()
+      for (const sp of state.tables.profiles.filter(x => x.user_id === p.user_id && (x.is_primary || x.id === p.id))) {
+        sp.suspended_at = sp.suspended_at ?? now
+        sp.suspension_reason = 'Incumplimiento grave de las reglas de contenido'
+      }
+      const spaces = new Set(state.tables.profiles.filter(x => x.user_id === p.user_id).map(x => x.id))
+      state.tables.profile_reports.filter(x => spaces.has(String(x.profile_id)) && x.status === 'open')
+        .forEach(x => Object.assign(x, { status: 'actioned', resolution_note: 'csam', resolved_at: now }))
+      const holds = (state.tables.mycen_legal_holds ??= [])
+      if (!holds.some(h => h.user_id === p.user_id)) holds.push({ user_id: p.user_id, reason: 'csam', report_id: args.p_report_id ?? null, created_at: now })
+      audit(state, 'csam_hold', 'profiles', String(p.id), { user_id: p.user_id })
+      return { user_id: p.user_id, held: true }
+    }
+    case 'admin_get_legal_hold': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const h = (state.tables.mycen_legal_holds ?? []).find(x => x.user_id === args.p_user_id)
+      return h ? { reason: h.reason, created_at: h.created_at, report_id: h.report_id } : null
+    }
+    case 'admin_release_legal_hold': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      state.tables.mycen_legal_holds = (state.tables.mycen_legal_holds ?? []).filter(x => x.user_id !== args.p_user_id)
+      audit(state, 'legal_hold_released', 'auth.users', String(args.p_user_id), {})
+      return null
+    }
     // ── Errores (Lanzamiento L5): agrupa por zona + mensaje (la huella real también usa el stack) ──
     case 'report_client_error': {
       const errors = (state.tables.app_errors ??= [])
@@ -944,7 +980,11 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       const before = args.p_before ? String(args.p_before) : null
       return rows.filter(r => !before || String(r.created_at) < before).slice(0, Number(args.p_limit ?? 100))
     }
-    case 'get_site_flags': return { business: state.siteFlags?.business === true }
+    case 'get_site_flags': return {
+      business: state.siteFlags?.business === true, signups: state.siteFlags?.signups !== false,
+      messages: state.siteFlags?.messages !== false, subscriptions: state.siteFlags?.subscriptions !== false,
+      polls: state.siteFlags?.polls !== false,
+    }
     case 'mycen_mark_active': {
       if (!isOwner) return 'invalid'
       if (!['life', 'studio'].includes(String(args.p_area))) return 'invalid'
@@ -1052,10 +1092,13 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
     }
     case 'admin_set_site_flag': {
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
-      if (args.p_key !== 'business' || typeof args.p_enabled !== 'boolean') throw new Error('INVALID_FLAG')
-      state.siteFlags = { business: args.p_enabled }
-      audit(state, args.p_enabled ? 'flag_on' : 'flag_off', 'mycen_site_flags', 'business', {})
-      return { business: args.p_enabled }
+      const key = String(args.p_key)
+      if (!['business', 'signups', 'messages', 'subscriptions', 'polls'].includes(key) || typeof args.p_enabled !== 'boolean') {
+        throw new Error('INVALID_FLAG')
+      }
+      state.siteFlags = { ...(state.siteFlags ?? { business: false }), [key]: args.p_enabled }
+      audit(state, args.p_enabled ? 'flag_on' : 'flag_off', 'mycen_site_flags', key, {})
+      return rpc(state, 'get_site_flags', {}, isOwner)
     }
     case 'check_username': {
       const u = String(args.p_username ?? '')
@@ -1069,11 +1112,24 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
 
 // ── Instalación en el contexto del navegador ────────────────────────────────
 
+/**
+ * Token de acceso con forma de JWT (sin firma real): supabase-js lee de acá el nivel de la sesión (`aal`). Por defecto
+ * aal2, como el equipo con la verificación en dos pasos hecha (el panel la exige); `aal: 'aal1'` = sólo contraseña.
+ */
+export function mockAccessToken(aal: 'aal1' | 'aal2' = 'aal2', amr: string[] = aal === 'aal2' ? ['password', 'totp'] : ['password']) {
+  const b64 = (o: unknown) => Buffer.from(JSON.stringify(o)).toString('base64url')
+  const now = Math.floor(Date.now() / 1000)
+  return [b64({ alg: 'HS256', typ: 'JWT' }), b64({
+    sub: OWNER_ID, role: 'authenticated', aud: 'authenticated', aal, iat: now, exp: now + 86_400,
+    amr: amr.map(method => ({ method, timestamp: now })),
+  }), 'mock-signature'].join('.')
+}
+
 export async function installSupabaseMock(context: BrowserContext, state: MockState,
-  opts: { signedIn?: boolean; userMetadata?: Record<string, unknown>; appMetadata?: Record<string, unknown> } = {}) {
+  opts: { signedIn?: boolean; userMetadata?: Record<string, unknown>; appMetadata?: Record<string, unknown>; aal?: 'aal1' | 'aal2' } = {}) {
   if (opts.signedIn) {
     const session = {
-      access_token: 'mock-access-token', refresh_token: 'mock-refresh', token_type: 'bearer', expires_in: 3600,
+      access_token: mockAccessToken(opts.aal ?? 'aal2'), refresh_token: 'mock-refresh', token_type: 'bearer', expires_in: 3600,
       expires_at: Math.floor(Date.now() / 1000) + 86_400,
       user: { id: OWNER_ID, email: 'ana@example.com', aud: 'authenticated', role: 'authenticated', user_metadata: { name: 'Ana Pérez', ...opts.userMetadata },
         ...(opts.appMetadata ? { app_metadata: opts.appMetadata } : {}) },

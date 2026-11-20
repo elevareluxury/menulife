@@ -72,6 +72,7 @@ export function SubscribeModule({ module, lang, onAction }: ModuleProps) {
     : status === 'consent_required' ? t.consentRequired
     : status === 'rate_limited' ? t.limit
     : status === 'full' ? t.full
+    : status === 'paused' ? t.paused
     : status === 'error' ? t.error
     : null
 

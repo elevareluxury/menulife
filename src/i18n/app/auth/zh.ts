@@ -24,6 +24,8 @@ const zh: AuthDict = {
     failed: "无法登录，请重试。",
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "新用户注册已暂停几分钟。请稍后再试。",
     subtitle: "你的数字身份，尽在一处",
     name: "你的名字",
     namePlaceholder: "Ana Pérez",
@@ -112,6 +114,32 @@ const zh: AuthDict = {
     failed: "我们无法确认你是真人。请重试。",
     unavailable: "无法加载防机器人验证。请检查网络或关闭内容拦截器后重试。",
     retry: "重新验证",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "两步验证",
+    intro: "除了密码，我们还会要求输入身份验证器应用（Google Authenticator、Microsoft Authenticator、1Password…）中的 6 位数字验证码。即使有人拿到你的密码，也无法登录。",
+    on: "已开启",
+    off: "已关闭",
+    enable: "开启",
+    disable: "关闭",
+    scan: "用你的身份验证器应用扫描这个码。",
+    manual: "如果无法扫描，请在应用中输入这个密钥：",
+    code: "6 位数字验证码",
+    verify: "确认",
+    verifying: "正在确认…",
+    wrong: "验证码不正确或已过期。请输入应用当前显示的验证码。",
+    failed: "无法完成这一步。请重试。",
+    challengeTitle: "你的验证码",
+    challengeIntro: "打开身份验证器应用，输入 Mycen 的 6 位数字验证码。",
+    signOut: "退出",
+    lost: "手机丢了？请用你账户的邮箱写信到 team@mycen.id。",
+    adminTitle: "团队面板需要两步验证",
+    adminIntro: "要进入团队面板，请开启两步验证。只需设置一次，它能保护所有人的数据。",
+    enabledDone: "完成：两步验证已开启。",
+    disabledDone: "两步验证已关闭。",
+    cancel: "取消",
+    needsRecent: "要关闭它，请退出后用验证码重新登录。",
   },
 }
 

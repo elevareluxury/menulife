@@ -10,8 +10,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-// En la app de iOS/Android el acceso vuelve por un link de mycen.id que abre la app (no carga la página): flujo PKCE y
-// el código se canjea en /auth/callback (AuthCallback), sin leer la dirección al iniciar. La sesión se respalda en las
-// preferencias nativas (`nativeAuthStorage`).
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey,
-  isNativeApp() ? { auth: { flowType: 'pkce', detectSessionInUrl: false, storage: nativeAuthStorage } } : undefined)
+// Flujo PKCE en la web y en la app (sin tokens en la dirección): Google/Apple vuelven a /auth/callback con un `code`
+// que AuthCallback canjea (sabe si era recuperar la contraseña), y los mails traen `token_hash` (verifyOtp, sirve en
+// cualquier dispositivo). Por eso el cliente no lee la dirección al iniciar. En la app de iOS/Android el link de mycen.id
+// abre la app y la sesión se respalda en las preferencias nativas (`nativeAuthStorage`).
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: { flowType: 'pkce', detectSessionInUrl: false, ...(isNativeApp() ? { storage: nativeAuthStorage } : {}) },
+})

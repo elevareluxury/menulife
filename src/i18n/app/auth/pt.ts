@@ -24,6 +24,8 @@ const pt: AuthDict = {
     failed: "Não conseguimos entrar. Tente de novo.",
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "Os novos cadastros estão pausados por alguns minutos. Tente de novo daqui a pouco.",
     subtitle: "Sua identidade digital, tudo em um só lugar",
     name: "Seu nome",
     namePlaceholder: "Ana Pérez",
@@ -112,6 +114,32 @@ const pt: AuthDict = {
     failed: "Não conseguimos verificar que você é uma pessoa. Tente de novo.",
     unavailable: "Não conseguimos carregar a verificação anti-bots. Confira sua conexão ou desative o bloqueador de conteúdo e tente de novo.",
     retry: "Tentar verificação de novo",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "Verificação em duas etapas",
+    intro: "Além da sua senha, pedimos um código de 6 números de um app autenticador (Google Authenticator, Microsoft Authenticator, 1Password…). Mesmo que alguém consiga sua senha, não consegue entrar.",
+    on: "Ativada",
+    off: "Desativada",
+    enable: "Ativar",
+    disable: "Desativar",
+    scan: "Escaneie este código com seu app autenticador.",
+    manual: "Se não conseguir escanear, digite esta chave no app:",
+    code: "Código de 6 números",
+    verify: "Confirmar",
+    verifying: "Confirmando…",
+    wrong: "O código está errado ou expirou. Use o que o app mostra agora.",
+    failed: "Não conseguimos concluir esta etapa. Tente de novo.",
+    challengeTitle: "Seu código de verificação",
+    challengeIntro: "Abra seu app autenticador e digite o código de 6 números da Mycen.",
+    signOut: "Sair",
+    lost: "Perdeu o celular? Escreva para team@mycen.id do e-mail da sua conta.",
+    adminTitle: "O painel da equipe exige verificação em duas etapas",
+    adminIntro: "Para entrar no painel da equipe, ative a verificação em duas etapas. Você faz isso uma vez só e protege os dados de todas as pessoas.",
+    enabledDone: "Pronto: a verificação em duas etapas está ativada.",
+    disabledDone: "A verificação em duas etapas está desativada.",
+    cancel: "Cancelar",
+    needsRecent: "Para desativar, saia e entre de novo com seu código.",
   },
 }
 

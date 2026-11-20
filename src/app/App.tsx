@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } fr
 import { Toaster } from 'react-hot-toast'
 import { AuthInit } from '@/app/AuthInit'
 import { TermsGate } from '@/modules/auth/components/TermsGate'
+import { MfaGateLoader } from '@/modules/auth/components/MfaGateLoader'
 import { PrefsInit } from '@/app/PrefsInit'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
@@ -141,6 +142,7 @@ function App() {
       <AuthInit />
       {isNativeApp() && <Suspense fallback={null}><NativeBridge /></Suspense>}
       <TermsGate />
+      <MfaGateLoader />
       <PrefsInit />
       <OfflineBanner />
       {/* Abierta desde el inicio, la app ocupa también la zona de la hora y la cámara: los avisos bajan lo justo para no

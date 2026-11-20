@@ -30,6 +30,13 @@ const zh: AdminDict = {
     seeErrors: '查看错误 →',
   },
   reports: {
+    /** Abuso sexual infantil: suspender, retener la evidencia y denunciar (docs/seguridad/csam.md) */
+    csamButton: "儿童性虐待",
+    csamConfirm: "这会封禁整个账户、关闭其举报并保留证据（任何人都无法删除）。仅在涉及未成年人的性内容时使用。继续吗？",
+    csamDone: "完成：账户已封禁，证据已保留。现在请按以下步骤操作。",
+    csamFailed: "无法完成。你应用证据保留的迁移了吗？",
+    csamStepsTitle: "接下来要做什么",
+    csamSteps: ["不要下载、复制或转发该内容，也不要给任何人看。", "向主管机关举报：NCMEC CyberTipline（report.cybertip.org），在阿根廷则向检察院的 UFECI 举报。", "举报时写上主页链接、日期和时间。不要附上该内容：如有需要，主管机关会索取。", "不要通知当事人：对方看到的原因是通用说明。", "完整流程见 docs/seguridad/csam.md。"],
     title: '举报',
     intro: '访客举报的个人主页和项目。停用一个主页会将其完全隐藏（页面、项目、vCard），并关闭其所有未处理的举报。主页所有者会在 Studio 中看到原因。',
     open: '未处理', resolved: '已处理',
@@ -152,6 +159,10 @@ const zh: AdminDict = {
     businessOff: 'Business 已在落地页关闭。相关页面仍在菜单的“Business”下。',
   },
   people: {
+    /** Retención legal de una cuenta (abuso infantil o pedido de una autoridad) */
+    legalHold: "法律保留：该账户及其文件不能删除。",
+    releaseHold: "解除保留",
+    releaseConfirm: "解除保留？只有在主管机关不再需要证据时才这样做。",
     title: '用户',
     intro: '按邮箱、用户名或名字查找账户。',
     search: '搜索',
@@ -198,6 +209,8 @@ const zh: AdminDict = {
     purgeDone: (n) => `已删除 ${n} 个文件`,
   },
   activity: {
+    csam_hold: "因儿童性虐待封禁并保留了证据",
+    legal_hold_released: "解除了一项法律保留",
     title: '团队操作记录',
     intro: '团队的每个操作都会自动记录：谁、做了什么、何时。',
     empty: '还没有操作。',
@@ -222,6 +235,21 @@ const zh: AdminDict = {
     status_setting: '修改了系统状态的一项设置',
   },
   status: {
+    /** Interruptores de emergencia (Estado): registros, mensajes, suscripciones y votaciones */
+    emergency: {
+      title: "紧急开关",
+      intro: "如果出现垃圾信息或攻击，一键暂停某项功能。数据库会立即拦截，无需发布新版本；尝试使用的人会看到“已暂停，请稍后再试”。操作会记录在团队活动中。",
+      signups: "新用户注册",
+      messages: "留言与合作",
+      subscriptions: "订阅",
+      polls: "投票",
+      on: "正常运行",
+      off: "已暂停",
+      turnOff: "暂停",
+      turnOn: "恢复",
+      confirm: (name) => `暂停“${name}”？在你恢复之前，任何人都无法使用。`,
+      failed: "无法更改。你应用开关的迁移了吗？",
+    },
     title: '系统状态',
     intro: 'Mycen 当前的运行情况。此页面打开期间，每分钟自动检查一次。',
     refresh: '立即检查',

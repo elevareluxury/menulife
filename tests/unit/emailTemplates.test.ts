@@ -25,10 +25,22 @@ describe('plantillas de mail', () => {
     expect(src).toContain('{{ else }}')                          // español: sin locale o con uno desconocido
     expect(src).toContain('{{ with .Data }}{{ with .locale }}')  // una cuenta sin metadata no rompe la plantilla
     expect(src).toContain('dir="{{ if eq $l "ar" }}rtl')
-    expect(src.includes('{{ .ConfirmationURL }}') || src.includes('{{ .Token }}')).toBe(true)
+    // Links con token_hash (PKCE): sirven abiertos en cualquier dispositivo. Nunca el ConfirmationURL (con PKCE exige
+    // el mismo navegador donde se pidió)
+    expect(src).not.toContain('{{ .ConfirmationURL }}')
+    expect(/\{\{ \.SiteURL \}\}\/auth\/callback\?token_hash=\{\{ \.TokenHash \}\}&type=(email|recovery|email_change)"/.test(src)
+      || src.includes('{{ .Token }}')).toBe(true)
     const opens = (src.match(/\{\{ (if|with) /g) ?? []).length
     const ends = (src.match(/\{\{ end \}\}/g) ?? []).length
     expect(ends).toBe(opens)
+  })
+
+  it('cada link lleva el tipo que canjea AuthCallback', () => {
+    const type = (f: string) => readFileSync(join(DIR, f), 'utf8').match(/token_hash=\{\{ \.TokenHash \}\}&type=(\w+)/)?.[1]
+    expect(type('confirmar_cuenta.html')).toBe('email')
+    expect(type('recuperar_contrasena.html')).toBe('recovery')
+    expect(type('enlace_magico.html')).toBe('email')
+    expect(type('cambio_de_email.html')).toBe('email_change')
   })
 
   it('los asuntos entran en el límite de Supabase (255) y caen en inglés para los idiomas que no entran', () => {

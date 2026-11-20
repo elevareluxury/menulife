@@ -150,7 +150,7 @@ const en: LegalDict = {
     ] },
     { id: 'datos', title: 'What data we use', body: [
       { list: [
-        '**Your account:** name, email, password (stored encrypted, we never see it), language, currency, time zone and the date you accepted these terms.',
+        '**Your account:** name, email, password (stored encrypted, we never see it), language, currency, time zone and the date you accepted these terms. If you turn on two-step verification, also your authenticator app’s key (stored encrypted by Supabase).',
         '**Your public profile:** what you add in Studio (name, photo, texts, links, projects, contact card). Only what you choose to show is published. Every photo is redrawn on your device before it’s uploaded, so the hidden data it carries (such as GPS location or the camera model) is removed.',
         '**Life OS:** your goals, habits, tasks, finances and notes, including the names you type (for example, who you split an expense with). They are private: only you can see them. So is your journal: the PIN, fingerprint or face lock works only on your device (it is not sent to Mycen) and entries are not end-to-end encrypted.',
         '**How you felt:** if you tap one of the faces when you close your day, we save that value (1 to 5) and the date. It may say something about your health, so it’s optional, only you can see it, and we use it only to show you your own patterns (for example, in Insights and “Your month”). Tapping a face is your consent, and you withdraw it by tapping it again (it’s deleted) or by deleting Life OS.',

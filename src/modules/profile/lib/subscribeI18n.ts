@@ -16,6 +16,8 @@ export interface SubscribeStrings {
   consentRequired: string
   limit: string
   full: string
+  /** Interruptor de emergencia apagado (Super-admin → Estado) */
+  paused: string
   error: string
   preview: string
   note: (owner: string) => string
@@ -35,6 +37,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'Para suscribirte, marcá la casilla.',
     limit: 'Ya hiciste varios intentos hoy. Probá de nuevo mañana.',
     full: 'Esta lista no recibe más suscripciones por ahora.',
+    paused: "Por ahora no se pueden sumar suscripciones. Probá de nuevo en un rato.",
     error: 'No pudimos suscribirte. Revisá tu conexión y probá de nuevo.',
     preview: 'En la vista previa no se suscribe a nadie.',
     note: o => `Podés pedirle a ${o} que te saque de la lista cuando quieras.`,
@@ -52,6 +55,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'To subscribe, tick the box.',
     limit: 'You have tried several times today. Try again tomorrow.',
     full: 'This list is not taking new subscribers right now.',
+    paused: "New subscriptions can’t be added right now. Please try again shortly.",
     error: 'We couldn\'t subscribe you. Check your connection and try again.',
     preview: 'Nobody is subscribed from the preview.',
     note: o => `You can ask ${o} to remove you from the list at any time.`,
@@ -69,6 +73,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'Para se inscrever, marque a caixa.',
     limit: 'Você já tentou várias vezes hoje. Tente de novo amanhã.',
     full: 'Esta lista não está recebendo novas inscrições no momento.',
+    paused: "Por enquanto não é possível adicionar inscrições. Tente de novo daqui a pouco.",
     error: 'Não conseguimos inscrever você. Verifique sua conexão e tente de novo.',
     preview: 'Na pré-visualização ninguém é inscrito.',
     note: o => `Você pode pedir a ${o} que tire você da lista quando quiser.`,
@@ -86,6 +91,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'Pour vous abonner, cochez la case.',
     limit: 'Vous avez déjà essayé plusieurs fois aujourd’hui. Réessayez demain.',
     full: 'Cette liste n’accepte plus de nouveaux abonnés pour le moment.',
+    paused: "Impossible d’ajouter des abonnements pour le moment. Réessayez dans un instant.",
     error: 'Impossible de vous abonner. Vérifiez votre connexion et réessayez.',
     preview: 'Personne n’est abonné depuis l’aperçu.',
     note: o => `Vous pouvez demander à ${o} de vous retirer de la liste à tout moment.`,
@@ -103,6 +109,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'Um zu abonnieren, setze das Häkchen.',
     limit: 'Du hast es heute schon mehrmals versucht. Versuch es morgen wieder.',
     full: 'Diese Liste nimmt gerade keine neuen Abonnenten an.',
+    paused: "Neue Abonnements sind gerade nicht möglich. Versuch es gleich noch einmal.",
     error: 'Wir konnten dich nicht eintragen. Prüfe deine Verbindung und versuch es noch einmal.',
     preview: 'In der Vorschau wird niemand eingetragen.',
     note: o => `Du kannst ${o} jederzeit bitten, dich von der Liste zu nehmen.`,
@@ -120,6 +127,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'Per iscriverti, spunta la casella.',
     limit: 'Hai già provato più volte oggi. Riprova domani.',
     full: 'Questa lista al momento non accetta nuove iscrizioni.',
+    paused: "Per ora non si possono aggiungere iscrizioni. Riprova tra poco.",
     error: 'Non siamo riusciti a iscriverti. Controlla la connessione e riprova.',
     preview: 'Dall’anteprima non si iscrive nessuno.',
     note: o => `Puoi chiedere a ${o} di toglierti dalla lista quando vuoi.`,
@@ -137,6 +145,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: '要订阅，请勾选此框。',
     limit: '你今天已尝试多次。请明天再试。',
     full: '此名单目前不接受新的订阅。',
+    paused: "暂时无法新增订阅。请稍后再试。",
     error: '无法为你订阅。请检查网络后重试。',
     preview: '在预览中不会为任何人订阅。',
     note: o => `你可以随时请 ${o} 将你从名单中移除。`,
@@ -154,6 +163,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: '購読するにはチェックボックスにチェックしてください。',
     limit: '今日はすでに何度か試しています。明日もう一度お試しください。',
     full: 'このリストは現在、新しい購読を受け付けていません。',
+    paused: "現在、購読を追加できません。少し時間をおいてお試しください。",
     error: '登録できませんでした。接続を確認してもう一度お試しください。',
     preview: 'プレビューでは登録されません。',
     note: o => `いつでも ${o} にリストからの削除を依頼できます。`,
@@ -171,6 +181,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: '구독하려면 확인란을 선택하세요.',
     limit: '오늘 이미 여러 번 시도했어요. 내일 다시 시도하세요.',
     full: '이 목록은 지금 새 구독을 받지 않아요.',
+    paused: "지금은 구독을 추가할 수 없습니다. 잠시 후 다시 시도해 주세요.",
     error: '구독하지 못했어요. 연결을 확인하고 다시 시도하세요.',
     preview: '미리보기에서는 구독되지 않아요.',
     note: o => `언제든지 ${o}님에게 목록에서 삭제해 달라고 요청할 수 있어요.`,
@@ -188,6 +199,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'सब्सक्राइब करने के लिए बॉक्स पर निशान लगाएँ।',
     limit: 'आप आज कई बार कोशिश कर चुके हैं। कल फिर कोशिश करें।',
     full: 'यह सूची अभी नए सब्सक्राइबर नहीं ले रही है।',
+    paused: "अभी नए सब्सक्रिप्शन नहीं जोड़े जा सकते। थोड़ी देर में फिर कोशिश करें।",
     error: 'हम आपको सब्सक्राइब नहीं कर सके। अपना कनेक्शन जाँचें और फिर कोशिश करें।',
     preview: 'प्रीव्यू से किसी को सब्सक्राइब नहीं किया जाता।',
     note: o => `आप कभी भी ${o} से खुद को सूची से हटाने के लिए कह सकते हैं।`,
@@ -205,6 +217,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'للاشتراك، ضع علامة في المربع.',
     limit: 'حاولت عدة مرات اليوم. حاول مرة أخرى غدًا.',
     full: 'هذه القائمة لا تقبل مشتركين جددًا حاليًا.',
+    paused: "لا يمكن إضافة اشتراكات حاليًا. حاول مرة أخرى بعد قليل.",
     error: 'تعذّر اشتراكك. تحقّق من اتصالك وحاول مرة أخرى.',
     preview: 'لا يُشترك أحد من المعاينة.',
     note: o => `يمكنك أن تطلب من ${o} إزالتك من القائمة في أي وقت.`,
@@ -222,6 +235,7 @@ const STRINGS: Record<ProfileLang, SubscribeStrings> = {
     consentRequired: 'Чтобы подписаться, отметьте флажок.',
     limit: 'Сегодня вы уже несколько раз пытались. Попробуйте завтра.',
     full: 'Сейчас этот список не принимает новых подписчиков.',
+    paused: "Сейчас нельзя оформить подписку. Попробуйте чуть позже.",
     error: 'Не удалось вас подписать. Проверьте соединение и попробуйте ещё раз.',
     preview: 'Из предпросмотра никто не подписывается.',
     note: o => `Вы можете в любой момент попросить ${o} удалить вас из списка.`,

@@ -72,6 +72,13 @@ const es = {
     seeErrors: 'Ver errores →',
   },
   reports: {
+    /** Abuso sexual infantil: suspender, retener la evidencia y denunciar (docs/seguridad/csam.md) */
+    csamButton: "Abuso sexual infantil",
+    csamConfirm: "Esto suspende la cuenta entera, cierra sus denuncias y guarda la evidencia (nadie la puede borrar). Usalo sólo ante contenido sexual con menores. ¿Seguir?",
+    csamDone: "Listo: la cuenta quedó suspendida y la evidencia, guardada. Ahora seguí estos pasos.",
+    csamFailed: "No se pudo completar. ¿Aplicaste la migración de retención de evidencia?",
+    csamStepsTitle: "Qué hacer ahora",
+    csamSteps: ["No descargues, copies ni reenvíes el material, y no se lo muestres a nadie.", "Denuncialo a la autoridad: NCMEC CyberTipline (report.cybertip.org) y, en la Argentina, la UFECI del Ministerio Público Fiscal.", "En la denuncia poné el link del perfil, la fecha y la hora. El material no se adjunta: si lo necesita, lo pide la autoridad.", "No le avises a la persona: el motivo que ve es genérico.", "El procedimiento completo está en docs/seguridad/csam.md."],
     title: 'Denuncias',
     intro: 'Perfiles y proyectos denunciados por visitantes. Suspender un perfil lo oculta por completo (página, proyectos, vCard) y cierra todas sus denuncias abiertas. El dueño ve el motivo en Studio.',
     open: 'Abiertas',
@@ -243,6 +250,10 @@ const es = {
     businessOff: 'Business está apagado en la landing. Sus pantallas siguen en el menú, bajo "Business".',
   },
   people: {
+    /** Retención legal de una cuenta (abuso infantil o pedido de una autoridad) */
+    legalHold: "Retención legal: la cuenta y sus archivos no se pueden borrar.",
+    releaseHold: "Levantar la retención",
+    releaseConfirm: "¿Levantar la retención? Hacelo sólo cuando la autoridad ya no necesite la evidencia.",
     title: 'Personas',
     intro: 'Buscá una cuenta por email, usuario o nombre.',
     search: 'Buscar',
@@ -289,6 +300,8 @@ const es = {
     purgeDone: (n: number) => `Se borraron ${n} archivos`,
   },
   activity: {
+    csam_hold: "Suspendió por abuso infantil y guardó la evidencia",
+    legal_hold_released: "Levantó una retención legal",
     title: 'Actividad del equipo',
     intro: 'Cada acción del equipo queda anotada sola: quién, qué y cuándo.',
     empty: 'Todavía no hay acciones.',
@@ -313,6 +326,21 @@ const es = {
     status_setting: 'Cambió un ajuste del Estado del sistema',
   },
   status: {
+    /** Interruptores de emergencia (Estado): registros, mensajes, suscripciones y votaciones */
+    emergency: {
+      title: "Interruptores de emergencia",
+      intro: "Si hay spam o un ataque, pausá una parte en un clic. La base la frena en el momento, sin publicar una versión nueva; quien lo intenta ve \"en pausa, probá en un rato\". Queda en la actividad del equipo.",
+      signups: "Registros nuevos",
+      messages: "Mensajes y colaboraciones",
+      subscriptions: "Suscripciones",
+      polls: "Votaciones de encuestas",
+      on: "Funcionando",
+      off: "En pausa",
+      turnOff: "Pausar",
+      turnOn: "Reanudar",
+      confirm: (name: string) => `¿Pausar "${name}"? Nadie va a poder usarlo hasta que lo reanudes.`,
+      failed: "No se pudo cambiar. ¿Aplicaste la migración de los interruptores?",
+    },
     title: 'Estado del sistema',
     intro: 'Cómo está Mycen ahora. Mientras esta pantalla está abierta, se revisa sola cada minuto.',
     refresh: 'Revisar ahora',

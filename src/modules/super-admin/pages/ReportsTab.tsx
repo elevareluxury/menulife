@@ -56,6 +56,8 @@ export function ReportsTab() {
   const [actionError, setActionError] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
+  // Después de "Abuso sexual infantil": los pasos que siguen (denunciar a la autoridad, no tocar el material)
+  const [csamDone, setCsamDone] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -80,6 +82,17 @@ export function ReportsTab() {
     setReload(n => n + 1)
   }, [t])
 
+  // Abuso sexual infantil: suspende la cuenta entera, cierra sus denuncias y retiene la evidencia (admin_csam_action)
+  const csam = useCallback(async (r: Report) => {
+    if (!window.confirm(tr.csamConfirm)) return
+    setBusy(r.id); setActionError(null)
+    const { error: e } = await rpc('admin_csam_action', { p_profile_id: r.profile.id, p_report_id: r.id })
+    setBusy(null)
+    if (e) { setActionError(tr.csamFailed); return }
+    setCsamDone(true)
+    setReload(n => n + 1)
+  }, [tr])
+
   return (
     <div style={{ color: TEXT, maxWidth: 860 }}>
       <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 6px' }}>{tr.title}</h1>
@@ -96,6 +109,15 @@ export function ReportsTab() {
         ))}
       </div>
 
+      {csamDone && (
+        <section role="status" data-testid="csam-steps" style={{ ...CARD, borderColor: `${ACCENT}66` }}>
+          <p style={{ margin: '0 0 8px', fontWeight: 700 }}>{tr.csamDone}</p>
+          <h2 style={{ fontSize: 15, margin: '0 0 6px' }}>{tr.csamStepsTitle}</h2>
+          <ol style={{ margin: 0, paddingInlineStart: 20, color: '#D0D5DD', fontSize: 14, display: 'grid', gap: 4 }}>
+            {tr.csamSteps.map(step => <li key={step}>{step}</li>)}
+          </ol>
+        </section>
+      )}
       {error && <p role="alert" style={{ color: ACCENT }}>{error}</p>}
       {reports === null && <p role="status" style={{ color: MUTED }}>{t.common.loading}</p>}
       {reports?.length === 0 && !error && (
@@ -140,6 +162,10 @@ export function ReportsTab() {
                   <button type="button" style={DANGER} disabled={busy !== null}
                     onClick={() => act(r.id, 'admin_resolve_report', { p_report_id: r.id, p_action: 'suspend', p_note: notes[r.id] || reasonOf(r.reason) })}>
                     {tr.suspend}
+                  </button>
+                  <button type="button" style={{ ...BTN, borderColor: `${ACCENT}88`, color: ACCENT }} disabled={busy !== null}
+                    onClick={() => { void csam(r) }}>
+                    {tr.csamButton}
                   </button>
                 </div>
               </div>

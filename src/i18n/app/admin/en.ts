@@ -33,6 +33,13 @@ const en: AdminDict = {
     seeErrors: 'View errors →',
   },
   reports: {
+    /** Abuso sexual infantil: suspender, retener la evidencia y denunciar (docs/seguridad/csam.md) */
+    csamButton: "Child sexual abuse",
+    csamConfirm: "This suspends the whole account, closes its reports and keeps the evidence (nobody can delete it). Use it only for sexual content involving minors. Continue?",
+    csamDone: "Done: the account is suspended and the evidence is kept. Now follow these steps.",
+    csamFailed: "Couldn’t complete it. Did you apply the evidence retention migration?",
+    csamStepsTitle: "What to do now",
+    csamSteps: ["Don’t download, copy or forward the material, and don’t show it to anyone.", "Report it to the authorities: NCMEC CyberTipline (report.cybertip.org) and, in Argentina, the UFECI of the Public Prosecutor’s Office.", "In the report, include the profile link, the date and the time. Don’t attach the material: the authorities request it if needed.", "Don’t tell the person: the reason they see is generic.", "The full procedure is in docs/seguridad/csam.md."],
     title: 'Reports',
     intro: 'Profiles and projects reported by visitors. Suspending a profile hides it completely (page, projects, vCard) and closes all its open reports. The owner sees the reason in Studio.',
     open: 'Open', resolved: 'Resolved',
@@ -155,6 +162,10 @@ const en: AdminDict = {
     businessOff: 'Business is turned off on the landing page. Its screens stay in the menu, under "Business".',
   },
   people: {
+    /** Retención legal de una cuenta (abuso infantil o pedido de una autoridad) */
+    legalHold: "Legal hold: the account and its files can’t be deleted.",
+    releaseHold: "Release the hold",
+    releaseConfirm: "Release the hold? Do it only when the authorities no longer need the evidence.",
     title: 'People',
     intro: 'Find an account by email, username or name.',
     search: 'Search',
@@ -201,6 +212,8 @@ const en: AdminDict = {
     purgeDone: (n) => `${n} files deleted`,
   },
   activity: {
+    csam_hold: "Suspended for child abuse and kept the evidence",
+    legal_hold_released: "Released a legal hold",
     title: 'Team activity',
     intro: 'Every team action is logged automatically: who, what and when.',
     empty: 'No actions yet.',
@@ -225,6 +238,21 @@ const en: AdminDict = {
     status_setting: 'Changed a System status setting',
   },
   status: {
+    /** Interruptores de emergencia (Estado): registros, mensajes, suscripciones y votaciones */
+    emergency: {
+      title: "Emergency switches",
+      intro: "If there’s spam or an attack, pause a part with one click. The database stops it right away, without publishing a new version; anyone who tries sees \"paused, try again shortly\". It’s recorded in the team activity.",
+      signups: "New sign-ups",
+      messages: "Messages and collaborations",
+      subscriptions: "Subscriptions",
+      polls: "Poll voting",
+      on: "Working",
+      off: "Paused",
+      turnOff: "Pause",
+      turnOn: "Resume",
+      confirm: (name) => `Pause "${name}"? Nobody can use it until you resume it.`,
+      failed: "Couldn’t change it. Did you apply the switches migration?",
+    },
     title: 'System status',
     intro: 'How Mycen is doing right now. While this screen is open, it rechecks itself every minute.',
     refresh: 'Check now',

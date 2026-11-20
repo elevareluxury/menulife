@@ -29,6 +29,8 @@ export interface CollabStrings {
   badDeadline: string
   links: string
   limit: string
+  /** Interruptor de emergencia apagado (Super-admin → Estado) */
+  paused: string
   preview: string
   private: string
   /** Link a la política de privacidad, debajo del aviso */
@@ -61,6 +63,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'La fecha límite no puede haber pasado.',
     links: 'La propuesta tiene demasiados links: dejá como mucho 3.',
     limit: 'Ya enviaste varios mensajes hoy. Probá de nuevo mañana.',
+    paused: "Por ahora no se pueden enviar mensajes. Probá de nuevo en un rato.",
     preview: 'En la vista previa las propuestas no se envían.',
     private: 'Sólo lo ve la persona dueña de este perfil.',
     privacy: 'Cómo cuida Mycen tus datos',
@@ -90,6 +93,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'The deadline can\'t be in the past.',
     links: 'Your proposal has too many links: keep it to 3 or fewer.',
     limit: 'You\'ve sent several messages today. Try again tomorrow.',
+    paused: "Messages can’t be sent right now. Please try again shortly.",
     preview: 'Proposals are not sent from the preview.',
     private: 'Only the owner of this profile sees it.',
     privacy: 'How Mycen protects your data',
@@ -119,6 +123,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'O prazo não pode estar no passado.',
     links: 'A proposta tem links demais: deixe no máximo 3.',
     limit: 'Você já enviou várias mensagens hoje. Tente de novo amanhã.',
+    paused: "Por enquanto não é possível enviar mensagens. Tente de novo daqui a pouco.",
     preview: 'Na prévia as propostas não são enviadas.',
     private: 'Só a pessoa dona deste perfil vê.',
     privacy: 'Como a Mycen cuida dos seus dados',
@@ -148,6 +153,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'La date limite ne peut pas être passée.',
     links: 'Votre proposition contient trop de liens : 3 maximum.',
     limit: 'Vous avez déjà envoyé plusieurs messages aujourd’hui. Réessayez demain.',
+    paused: "Impossible d’envoyer des messages pour le moment. Réessayez dans un instant.",
     preview: 'Les propositions ne sont pas envoyées depuis l’aperçu.',
     private: 'Seule la personne propriétaire de ce profil le voit.',
     privacy: 'Comment Mycen protège vos données',
@@ -177,6 +183,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'Die Frist darf nicht in der Vergangenheit liegen.',
     links: 'Dein Vorschlag enthält zu viele Links: höchstens 3.',
     limit: 'Du hast heute schon mehrere Nachrichten gesendet. Versuche es morgen wieder.',
+    paused: "Nachrichten können gerade nicht gesendet werden. Versuch es gleich noch einmal.",
     preview: 'In der Vorschau werden keine Vorschläge gesendet.',
     private: 'Nur die Person, der dieses Profil gehört, sieht ihn.',
     privacy: 'Wie Mycen deine Daten schützt',
@@ -206,6 +213,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'La scadenza non può essere già passata.',
     links: 'La proposta ha troppi link: al massimo 3.',
     limit: 'Hai già inviato diversi messaggi oggi. Riprova domani.',
+    paused: "Per ora non si possono inviare messaggi. Riprova tra poco.",
     preview: 'Nell’anteprima le proposte non vengono inviate.',
     private: 'Lo vede solo la persona proprietaria di questo profilo.',
     privacy: 'Come Mycen protegge i tuoi dati',
@@ -235,6 +243,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: '截止日期不能早于今天。',
     links: '提案中的链接太多了：最多 3 个。',
     limit: '你今天已经发送了多条消息，请明天再试。',
+    paused: "暂时无法发送留言。请稍后再试。",
     preview: '预览中不会发送提案。',
     private: '只有这个主页的主人能看到。',
     privacy: 'Mycen 如何保护你的数据',
@@ -264,6 +273,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: '締め切りに過去の日付は指定できません。',
     links: '提案のリンクが多すぎます。3 つまでにしてください。',
     limit: '本日はすでに複数のメッセージを送信しています。明日もう一度お試しください。',
+    paused: "現在メッセージを送信できません。少し時間をおいてお試しください。",
     preview: 'プレビューでは提案は送信されません。',
     private: 'このプロフィールの持ち主だけが見られます。',
     privacy: 'Mycen のデータの取り扱い',
@@ -293,6 +303,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: '마감일은 지난 날짜일 수 없습니다.',
     links: '제안에 링크가 너무 많습니다. 최대 3개까지 넣어 주세요.',
     limit: '오늘 이미 여러 메시지를 보냈습니다. 내일 다시 시도하세요.',
+    paused: "지금은 메시지를 보낼 수 없습니다. 잠시 후 다시 시도해 주세요.",
     preview: '미리보기에서는 제안이 전송되지 않습니다.',
     private: '이 프로필 주인만 볼 수 있습니다.',
     privacy: 'Mycen의 개인정보 보호 방법',
@@ -322,6 +333,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'अंतिम तारीख बीती हुई नहीं हो सकती।',
     links: 'प्रस्ताव में बहुत ज़्यादा लिंक हैं: अधिकतम 3 रखें।',
     limit: 'आप आज कई संदेश भेज चुके हैं। कल फिर कोशिश करें।',
+    paused: "अभी संदेश नहीं भेजे जा सकते। थोड़ी देर में फिर कोशिश करें।",
     preview: 'प्रीव्यू में प्रस्ताव नहीं भेजे जाते।',
     private: 'इसे सिर्फ़ इस प्रोफ़ाइल का मालिक देखता है।',
     privacy: 'Mycen आपके डेटा की सुरक्षा कैसे करता है',
@@ -351,6 +363,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'لا يمكن أن يكون الموعد النهائي في الماضي.',
     links: 'في العرض روابط كثيرة: 3 روابط كحد أقصى.',
     limit: 'أرسلت عدة رسائل اليوم. حاول مرة أخرى غدًا.',
+    paused: "لا يمكن إرسال الرسائل حاليًا. حاول مرة أخرى بعد قليل.",
     preview: 'لا تُرسل العروض من المعاينة.',
     private: 'لا يراه إلا صاحب هذا الملف.',
     privacy: 'كيف تحمي Mycen بياناتك',
@@ -380,6 +393,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     badDeadline: 'Срок не может быть в прошлом.',
     links: 'В предложении слишком много ссылок: не больше 3.',
     limit: 'Сегодня вы уже отправили несколько сообщений. Попробуйте завтра.',
+    paused: "Сейчас нельзя отправлять сообщения. Попробуйте чуть позже.",
     preview: 'В предпросмотре предложения не отправляются.',
     private: 'Его видит только владелец этого профиля.',
     privacy: 'Как Mycen защищает ваши данные',

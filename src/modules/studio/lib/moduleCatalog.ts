@@ -253,6 +253,8 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         { key: 'title', label: f.title, kind: 'text', isTitle: true, translatable: true, maxLength: 120 },
         { key: 'body', label: f.text, kind: 'textarea', required: true, translatable: true, maxLength: 2000, placeholder: c.textFormatHint },
         { key: 'image_url', label: f.imageOptional, kind: 'image' },
+        // Qué se ve en la foto, para quien usa un lector de pantalla (sin texto, la foto es decorativa)
+        { key: 'image_alt', label: f.alt, kind: 'text', maxLength: 200 },
       ],
       summary: x => text(x.body).slice(0, 80),
     },

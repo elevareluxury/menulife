@@ -24,6 +24,8 @@ const ar: AuthDict = {
     failed: "تعذّر تسجيل الدخول. حاول مرة أخرى.",
   },
   register: {
+    /** Interruptor de emergencia: registros en pausa (Super-admin → Estado) */
+    signupsPaused: "التسجيلات الجديدة متوقفة لبضع دقائق. حاول مرة أخرى بعد قليل.",
     subtitle: "هويتك الرقمية، كل شيء في مكان واحد",
     name: "اسمك",
     namePlaceholder: "Ana Pérez",
@@ -112,6 +114,32 @@ const ar: AuthDict = {
     failed: "لم نتمكن من التأكد من أنك شخص حقيقي. حاول مرة أخرى.",
     unavailable: "تعذّر تحميل التحقق. تحقّق من اتصالك أو أوقف مانع المحتوى ثم حاول مرة أخرى.",
     retry: "إعادة التحقق",
+  },
+  /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
+  mfa: {
+    title: "التحقق بخطوتين",
+    intro: "إلى جانب كلمة المرور، نطلب رمزًا من 6 أرقام من تطبيق مصادقة (Google Authenticator أو Microsoft Authenticator أو 1Password…). حتى لو حصل أحد على كلمة مرورك، لن يتمكن من الدخول.",
+    on: "مفعّل",
+    off: "غير مفعّل",
+    enable: "تفعيل",
+    disable: "إيقاف",
+    scan: "امسح هذا الرمز بتطبيق المصادقة.",
+    manual: "إذا لم تتمكن من مسحه، اكتب هذا المفتاح في التطبيق:",
+    code: "رمز من 6 أرقام",
+    verify: "تأكيد",
+    verifying: "جارٍ التأكيد…",
+    wrong: "الرمز غير صحيح أو انتهت صلاحيته. جرّب الرمز الظاهر في التطبيق الآن.",
+    failed: "لم نتمكن من إكمال هذه الخطوة. حاول مرة أخرى.",
+    challengeTitle: "رمز التحقق",
+    challengeIntro: "افتح تطبيق المصادقة واكتب رمز Mycen المكوّن من 6 أرقام.",
+    signOut: "تسجيل الخروج",
+    lost: "فقدت هاتفك؟ اكتب إلى team@mycen.id من بريد حسابك.",
+    adminTitle: "لوحة الفريق تتطلب التحقق بخطوتين",
+    adminIntro: "لدخول لوحة الفريق، فعّل التحقق بخطوتين. يتم ذلك مرة واحدة فقط ويحمي بيانات الجميع.",
+    enabledDone: "تم: التحقق بخطوتين مفعّل.",
+    disabledDone: "التحقق بخطوتين غير مفعّل.",
+    cancel: "إلغاء",
+    needsRecent: "لإيقافه، سجّل الخروج ثم ادخل مجددًا باستخدام رمزك.",
   },
 }
 
