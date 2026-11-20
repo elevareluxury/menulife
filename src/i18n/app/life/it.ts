@@ -366,7 +366,7 @@ const it: LifeDict = {
   },
   mood: {
     question: 'Come ti sei sentito oggi?',
-    hint: 'Un tocco, se vuoi. È solo per te.',
+    hint: 'Facoltativo e solo per te: se tocchi una faccina, la salviamo per mostrarti le tue tendenze. Toccala di nuovo per cancellarla.',
     levels: ['Molto male', 'Male', 'Così così', 'Bene', 'Molto bene'],
     habitsTitle: 'Le tue abitudini e il tuo umore',
     habitsText: (w, wo, days) => `Nei giorni in cui fai un’abitudine, il tuo umore tende a essere più alto (${w} contro ${wo}, su 5). Succede in ${days} giorni annotati; non vuol dire che una cosa causi l’altra.`,

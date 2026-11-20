@@ -457,7 +457,7 @@ const es = {
   },
   mood: {
     question: '¿Cómo te sentiste hoy?',
-    hint: 'Un toque, si querés. Es sólo para vos.',
+    hint: 'Opcional y sólo para vos: si tocás una carita, la guardamos para mostrarte tus propios patrones. Tocala de nuevo para borrarla.',
     levels: ['Muy mal', 'Mal', 'Más o menos', 'Bien', 'Muy bien'],
     habitsTitle: 'Tus hábitos y tu ánimo',
     habitsText: (withAvg: string, withoutAvg: string, days: number) => `Los días que hacés algún hábito, tu ánimo suele ser más alto (${withAvg} contra ${withoutAvg}, de 5). Coincide en ${days} días que anotaste; no quiere decir que una cosa cause la otra.`,

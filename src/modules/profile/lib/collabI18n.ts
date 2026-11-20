@@ -31,6 +31,8 @@ export interface CollabStrings {
   limit: string
   preview: string
   private: string
+  /** Link a la política de privacidad, debajo del aviso */
+  privacy: string
 }
 
 const STRINGS: Record<ProfileLang, CollabStrings> = {
@@ -61,6 +63,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'Ya enviaste varios mensajes hoy. Probá de nuevo mañana.',
     preview: 'En la vista previa las propuestas no se envían.',
     private: 'Sólo lo ve la persona dueña de este perfil.',
+    privacy: 'Cómo cuida Mycen tus datos',
   },
   en: {
     title: 'Collaborations',
@@ -89,6 +92,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'You\'ve sent several messages today. Try again tomorrow.',
     preview: 'Proposals are not sent from the preview.',
     private: 'Only the owner of this profile sees it.',
+    privacy: 'How Mycen protects your data',
   },
   pt: {
     title: 'Colaborações',
@@ -117,6 +121,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'Você já enviou várias mensagens hoje. Tente de novo amanhã.',
     preview: 'Na prévia as propostas não são enviadas.',
     private: 'Só a pessoa dona deste perfil vê.',
+    privacy: 'Como a Mycen cuida dos seus dados',
   },
   fr: {
     title: 'Collaborations',
@@ -145,6 +150,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'Vous avez déjà envoyé plusieurs messages aujourd’hui. Réessayez demain.',
     preview: 'Les propositions ne sont pas envoyées depuis l’aperçu.',
     private: 'Seule la personne propriétaire de ce profil le voit.',
+    privacy: 'Comment Mycen protège vos données',
   },
   de: {
     title: 'Kooperationen',
@@ -173,6 +179,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'Du hast heute schon mehrere Nachrichten gesendet. Versuche es morgen wieder.',
     preview: 'In der Vorschau werden keine Vorschläge gesendet.',
     private: 'Nur die Person, der dieses Profil gehört, sieht ihn.',
+    privacy: 'Wie Mycen deine Daten schützt',
   },
   it: {
     title: 'Collaborazioni',
@@ -201,6 +208,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'Hai già inviato diversi messaggi oggi. Riprova domani.',
     preview: 'Nell’anteprima le proposte non vengono inviate.',
     private: 'Lo vede solo la persona proprietaria di questo profilo.',
+    privacy: 'Come Mycen protegge i tuoi dati',
   },
   zh: {
     title: '合作',
@@ -229,6 +237,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: '你今天已经发送了多条消息，请明天再试。',
     preview: '预览中不会发送提案。',
     private: '只有这个主页的主人能看到。',
+    privacy: 'Mycen 如何保护你的数据',
   },
   ja: {
     title: 'コラボレーション',
@@ -257,6 +266,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: '本日はすでに複数のメッセージを送信しています。明日もう一度お試しください。',
     preview: 'プレビューでは提案は送信されません。',
     private: 'このプロフィールの持ち主だけが見られます。',
+    privacy: 'Mycen のデータの取り扱い',
   },
   ko: {
     title: '협업 제안',
@@ -285,6 +295,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: '오늘 이미 여러 메시지를 보냈습니다. 내일 다시 시도하세요.',
     preview: '미리보기에서는 제안이 전송되지 않습니다.',
     private: '이 프로필 주인만 볼 수 있습니다.',
+    privacy: 'Mycen의 개인정보 보호 방법',
   },
   hi: {
     title: 'सहयोग',
@@ -313,6 +324,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'आप आज कई संदेश भेज चुके हैं। कल फिर कोशिश करें।',
     preview: 'प्रीव्यू में प्रस्ताव नहीं भेजे जाते।',
     private: 'इसे सिर्फ़ इस प्रोफ़ाइल का मालिक देखता है।',
+    privacy: 'Mycen आपके डेटा की सुरक्षा कैसे करता है',
   },
   ar: {
     title: 'التعاونات',
@@ -341,6 +353,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'أرسلت عدة رسائل اليوم. حاول مرة أخرى غدًا.',
     preview: 'لا تُرسل العروض من المعاينة.',
     private: 'لا يراه إلا صاحب هذا الملف.',
+    privacy: 'كيف تحمي Mycen بياناتك',
   },
   ru: {
     title: 'Сотрудничество',
@@ -369,6 +382,7 @@ const STRINGS: Record<ProfileLang, CollabStrings> = {
     limit: 'Сегодня вы уже отправили несколько сообщений. Попробуйте завтра.',
     preview: 'В предпросмотре предложения не отправляются.',
     private: 'Его видит только владелец этого профиля.',
+    privacy: 'Как Mycen защищает ваши данные',
   },
 }
 

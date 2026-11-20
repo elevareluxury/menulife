@@ -366,7 +366,7 @@ const de: LifeDict = {
   },
   mood: {
     question: 'Wie hast du dich heute gefühlt?',
-    hint: 'Ein Tipp, wenn du magst. Nur für dich.',
+    hint: 'Freiwillig und nur für dich: Wenn du ein Gesicht antippst, speichern wir es, um dir deine eigenen Muster zu zeigen. Tipp es noch einmal an, um es zu löschen.',
     levels: ['Sehr schlecht', 'Schlecht', 'Geht so', 'Gut', 'Sehr gut'],
     habitsTitle: 'Deine Gewohnheiten und deine Stimmung',
     habitsText: (w, wo, days) => `An Tagen, an denen du eine Gewohnheit machst, ist deine Stimmung meist besser (${w} gegenüber ${wo}, von 5). Das zeigt sich an ${days} eingetragenen Tagen; es heißt nicht, dass das eine das andere verursacht.`,

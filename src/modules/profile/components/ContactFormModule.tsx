@@ -88,7 +88,9 @@ export function ContactFormModule({ module, lang, onAction }: ModuleProps) {
         <button type="submit" className="mp-primary" disabled={status === 'sending' || !!ctx?.preview}>
           {status === 'sending' ? t.formSending : t.formSend}
         </button>
-        <p className="mp-form-note">{ctx?.preview ? t.formPreview : t.formPrivate}</p>
+        <p className="mp-form-note">
+          {ctx?.preview ? t.formPreview : <>{t.formPrivate}{' '}<a className="mp-sub-privacy" href="/privacidad#datos" target="_blank" rel="noopener noreferrer">{t.formPrivacy}</a></>}
+        </p>
       </form>
     </section>
   )

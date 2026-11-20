@@ -26,6 +26,23 @@ describe('textos legales', () => {
 
   it('nombra a todos los proveedores que usa Mycen', () => {
     const providers = JSON.stringify(es.privacy.find(s => s.id === 'proveedores'))
-    for (const p of ['Supabase', 'Vercel', 'Resend', 'Anthropic', 'Mercado Pago', 'YouTube', 'Vimeo', 'TikTok', 'Spotify', 'SoundCloud']) expect(providers).toContain(p)
+    for (const p of ['Supabase', 'Vercel', 'Resend', 'Anthropic', 'Mercado Pago', 'YouTube', 'Vimeo', 'TikTok', 'Spotify', 'SoundCloud',
+      'Cloudflare R2', 'Firebase Cloud Messaging']) expect(providers).toContain(p)
+  })
+
+  it('cuenta lo que guarda la salida web: ánimo con consentimiento, avisos, encuestas, IP como hash y bitácora', () => {
+    const data = JSON.stringify(es.privacy.find(s => s.id === 'datos'))
+    for (const k of ['Cómo te sentiste', 'Encuestas', 'Avisos con la app cerrada', 'Protección contra abusos', 'equipo de Mycen', 'GPS']) {
+      expect(data).toContain(k)
+    }
+    expect(JSON.stringify(es.privacy.find(s => s.id === 'para-que'))).toContain('consentimiento explícito')
+    // Un identificador que cambia cada día es un seudónimo, no un dato anónimo
+    expect(JSON.stringify(es.privacy)).not.toMatch(/anónim/)
+  })
+
+  it.each(APP_LANGS)('%s nombra a Cloudflare R2 y a los servicios de avisos del navegador', async lang => {
+    const dict = (await import(`../../src/i18n/app/legal/${lang}.ts`)).default as typeof es
+    const providers = JSON.stringify(dict.privacy.find(s => s.id === 'proveedores'))
+    for (const p of ['Cloudflare R2', 'Firebase Cloud Messaging', 'Mozilla']) expect(providers).toContain(p)
   })
 })
