@@ -18,6 +18,10 @@ mismo: si se cambia un plazo, se cambian los dos en el mismo PR.
 | Copia de fotos y PDF (Cloudflare R2) | Espejo diario; lo borrado o cambiado, **30 días** | `storage-backup.yml` borra `old/` de más de 30 días |
 | Contadores de pedidos por IP (`mycen_rate_hits`, hash de la IP) | **2 días** | pg_cron `mycen-rate-hits-purge` cada hora |
 | Archivos de una cuenta borrada | Se borran al borrar la cuenta (fotos y PDF) | `removeAccountFiles` antes de `delete_my_account`; el equipo puede borrarlos desde Personas |
+| Denuncias (`profile_reports`, `profile_message_reports`) | Mientras exista el perfil denunciado | Cascada al borrar el perfil |
+| Pedidos de verificación e invitaciones (`verification_requests`, `referrals`) | Mientras exista la cuenta | Cascada al borrar la cuenta |
+| Nombres reservados (`talent_reservations`) | Mientras dure la reserva | El equipo la borra en `/super-admin/reservas` |
+| Retención legal (`mycen_legal_holds`, abuso sexual infantil) | Lo que pida la autoridad | El equipo levanta la retención desde Personas; mientras tanto nadie borra la cuenta ni sus archivos |
 | Datos que la ley obligue a guardar (facturación) | El plazo de la ley | Fuera de la app |
 
 **Comprobar que corre:** `/super-admin/estado` muestra las tareas de pg_cron (`mycen-purge-expired`) con su última
