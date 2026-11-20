@@ -1,9 +1,9 @@
 import { shareLink } from '@/lib/nativeFiles'
 import { haptic } from '@/lib/haptics'
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEverywhereT } from '@/i18n/app/share/everywhere'
-import { ArrowLeft, Briefcase, Check, Copy, Palette, Share2, Store, UserRound } from 'lucide-react'
+import { ArrowLeft, Briefcase, Camera, Check, Clapperboard, Copy, Mic2, Palette, PenTool, Share2, Store, TrendingUp, UserRound } from 'lucide-react'
 import { ProfileView } from '@/modules/profile/components/ProfileView'
 import { Huella } from '@/design/components/Huella'
 import { huellaSeed } from '@/lib/huella'
@@ -35,18 +35,25 @@ import '../onboarding.css'
 const TOTAL = 7
 const DRAFT_KEY = 'mycen_onboarding_draft'
 
-type Purpose = 'personal' | 'creator' | 'professional' | 'business'
+type Purpose = 'personal' | 'creator' | 'professional' | 'business' | 'model' | 'actor' | 'influencer' | 'musician' | 'creative'
 
-const PURPOSES: { value: Purpose; icon: typeof UserRound; layout: ProfileLayout }[] = [
+const PURPOSES: { value: Purpose; icon: typeof UserRound; layout: ProfileLayout; talent?: true }[] = [
   { value: 'personal', icon: UserRound, layout: 'credencial' },
   { value: 'creator', icon: Palette, layout: 'portada' },
   { value: 'professional', icon: Briefcase, layout: 'editorial' },
   { value: 'business', icon: Store, layout: 'bento' },
+  // Talentos: el portfolio profesional (book, medidas, audiencia, marcas, prensa, créditos y representación)
+  { value: 'model', icon: Camera, layout: 'portada', talent: true },
+  { value: 'actor', icon: Clapperboard, layout: 'editorial', talent: true },
+  { value: 'influencer', icon: TrendingUp, layout: 'portada', talent: true },
+  { value: 'musician', icon: Mic2, layout: 'portada', talent: true },
+  { value: 'creative', icon: PenTool, layout: 'bento', talent: true },
 ]
 
 /** Propósito del perfil que trajo a la persona (pie "Creá tu identidad") → la opción del onboarding */
 const REFERRAL_PURPOSE: Record<string, Purpose> = {
   personal: 'personal', creator: 'creator', artist: 'creator', professional: 'professional', business: 'business', brand: 'business',
+  model: 'model', actor: 'actor', influencer: 'influencer', musician: 'musician', creative: 'creative',
 }
 
 interface Draft { name?: string; username?: string; purpose?: Purpose }
@@ -258,8 +265,10 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
 
         {step === 3 && (
           <div className="st-stack" role="radiogroup" aria-label={w.purposeTitle} style={{ gap: 8 }}>
-            {PURPOSES.map(p => (
-              <button key={p.value} type="button" role="radio" aria-checked={purpose === p.value}
+            {PURPOSES.map((p, i) => (
+              <Fragment key={p.value}>
+              {p.talent && !PURPOSES[i - 1]?.talent && <p className="st-label" style={{ margin: '8px 0 0' }}>{w.talentGroup}</p>}
+              <button type="button" role="radio" aria-checked={purpose === p.value}
                 onClick={() => { setPurpose(p.value); setError(null) }} className="st-module ob-option">
                 <span className="st-module-icon" style={{ display: 'flex' }} aria-hidden="true"><p.icon size={17} /></span>
                 <span style={{ flex: 1 }}>
@@ -268,6 +277,7 @@ export function OnboardingWizard({ userId, initialProfile, initialModules = [], 
                 </span>
                 {purpose === p.value && <Check size={18} aria-hidden="true" />}
               </button>
+              </Fragment>
             ))}
           </div>
         )}

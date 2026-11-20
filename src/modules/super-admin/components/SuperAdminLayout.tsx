@@ -1,6 +1,6 @@
 import { useId, useMemo, useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote, MoreHorizontal, X, Flag, Bug, TrendingUp, BadgeCheck, Users, History, ChevronDown, HeartPulse, Rocket } from 'lucide-react'
+import { LayoutDashboard, Store, ClipboardList, BarChart3, LogOut, DollarSign, Activity, ToggleLeft, Globe, FlaskConical, MessageSquareQuote, MoreHorizontal, X, Flag, Bug, TrendingUp, BadgeCheck, Users, History, ChevronDown, HeartPulse, Rocket, AtSign } from 'lucide-react'
 import { brandMarkSvg } from '@/lib/brandMark'
 import { useSiteFlags } from '@/lib/siteFlags'
 import { usePendingCounts, type PendingCounts } from '../lib/adminRpc'
@@ -27,6 +27,7 @@ const mycenItems: NavItem[] = [
   { label: t => t.shell.people,      icon: Users,              to: '/super-admin/personas',       end: false },
   { label: t => t.nav.reports,       icon: Flag,               to: '/super-admin/denuncias',      end: false, badge: 'reports' },
   { label: t => t.nav.verifications, icon: BadgeCheck,         to: '/super-admin/verificaciones', end: false, badge: 'verifications' },
+  { label: t => t.nav.reservations,  icon: AtSign,             to: '/super-admin/reservas',       end: false },
   { label: t => t.nav.errors,        icon: Bug,                to: '/super-admin/errores',        end: false, badge: 'errors' },
   { label: t => t.nav.product,       icon: TrendingUp,         to: '/super-admin/producto',       end: false },
   { label: t => t.shell.activity,    icon: History,            to: '/super-admin/actividad',      end: false },

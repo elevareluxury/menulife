@@ -118,7 +118,7 @@ const ja: AuthDict = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "2段階認証",
-    intro: "パスワードに加えて、認証アプリ（Google Authenticator、Microsoft Authenticator、1Password など）の6桁のコードを求めます。誰かにパスワードを知られても、ログインできません。",
+    intro: "パスワードに加えて、Mycen はスマートフォンやパソコンの指紋や顔（またはアプリのコード）を求めます。誰かにパスワードを知られても、ログインできません。",
     on: "オン",
     off: "オフ",
     enable: "オンにする",
@@ -131,7 +131,7 @@ const ja: AuthDict = {
     wrong: "コードが正しくないか、期限切れです。アプリに今表示されているコードを入力してください。",
     failed: "この手順を完了できませんでした。もう一度お試しください。",
     challengeTitle: "確認コード",
-    challengeIntro: "認証アプリを開き、Mycen の6桁のコードを入力してください。",
+    challengeIntro: "指紋または顔（またはアプリのコード）で本人であることを確認してください。",
     signOut: "ログアウト",
     lost: "スマートフォンをなくしましたか？アカウントのメールアドレスから team@mycen.id にご連絡ください。",
     adminTitle: "チームのパネルには2段階認証が必要です",
@@ -140,6 +140,13 @@ const ja: AuthDict = {
     disabledDone: "2段階認証はオフです。",
     cancel: "キャンセル",
     needsRecent: "オフにするには、ログアウトしてコードでもう一度ログインしてください。",
+    passkeyEnable: "指紋または顔を使う",
+    passkeyIntro: "スマートフォンやパソコンが指紋、顔、または端末の PIN を求めます。インストールは不要です。",
+    passkeyUse: "指紋または顔でログイン",
+    passkeyFailed: "指紋または顔を使えませんでした。もう一度試すか、コードアプリを使ってください。",
+    useCodeApp: "コードアプリを使いたい",
+    usePasskey: "指紋または顔を使う",
+    waiting: "指紋または顔を待っています…",
   },
 }
 

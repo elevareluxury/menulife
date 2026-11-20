@@ -18,6 +18,7 @@ export const MODULE_TYPES = [
   'collab', 'subscribe', 'latest_video', 'support', 'listen_on',
   'poll', 'downloads', 'coupon', 'video_gallery', 'podcast',
   'events',
+  'measurements', 'audience', 'brands', 'press', 'credits', 'representation',
 ] as const
 
 export type ModuleType = typeof MODULE_TYPES[number]

@@ -1100,10 +1100,39 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
       audit(state, args.p_enabled ? 'flag_on' : 'flag_off', 'mycen_site_flags', key, {})
       return rpc(state, 'get_site_flags', {}, isOwner)
     }
+    // Nombres reservados para talentos (20261126000001)
+    case 'admin_list_talent_reservations': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const q = String(args.p_q ?? '').toLowerCase()
+      return (state.tables.talent_reservations ?? [])
+        .filter(r => !q || [r.username, r.talent_name, r.email].some(v => String(v ?? '').toLowerCase().includes(q)))
+        .map(r => ({ claimed_at: null, claimed_username: null, note: null, ...r }))
+    }
+    case 'admin_save_talent_reservation': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      const u = String(args.p_username ?? '').trim().toLowerCase()
+      const name = String(args.p_talent_name ?? '').trim()
+      if (!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(u) || u.includes('--') || !name) return 'invalid'
+      if (isReservedUsername(u)) return 'system'
+      if (state.tables.profiles.some(x => x.username === u)) return 'taken'
+      const rows = (state.tables.talent_reservations ??= [])
+      const row = { username: u, talent_name: name, email: args.p_email ?? null, note: args.p_note ?? null, created_at: new Date().toISOString() }
+      const i = rows.findIndex(r => r.username === u)
+      if (i >= 0) rows[i] = { ...rows[i], ...row }
+      else rows.unshift(row)
+      audit(state, 'talent_reserved', 'talent_reservations', u, {})
+      return 'saved'
+    }
+    case 'admin_delete_talent_reservation': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      state.tables.talent_reservations = (state.tables.talent_reservations ?? []).filter(r => r.username !== args.p_username)
+      return null
+    }
     case 'check_username': {
       const u = String(args.p_username ?? '')
       if (!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(u)) return 'invalid'
       if (isReservedUsername(u)) return 'reserved'
+      if ((state.tables.talent_reservations ?? []).some(r => r.username === u)) return 'reserved'
       return state.tables.profiles.some(x => x.username === u) ? 'taken' : 'available'
     }
     default: return null

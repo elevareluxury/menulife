@@ -8,7 +8,7 @@ import { Button, ImageField, PageHeader, SelectField, TextField } from '../compo
 import { EditTabs, ProfileSaveIndicator } from '../components/shared'
 import { useStudioT } from '@/i18n/app/studio'
 
-const PURPOSES = ['personal', 'professional', 'creator', 'business', 'event']
+const PURPOSES = ['personal', 'professional', 'creator', 'business', 'event', 'model', 'actor', 'influencer', 'musician', 'creative']
 
 type EnField = 'display_name' | 'descriptor' | 'bio' | 'primary_action_label'
 

@@ -118,7 +118,7 @@ const pt: AuthDict = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "Verificação em duas etapas",
-    intro: "Além da sua senha, pedimos um código de 6 números de um app autenticador (Google Authenticator, Microsoft Authenticator, 1Password…). Mesmo que alguém consiga sua senha, não consegue entrar.",
+    intro: "Além da sua senha, a Mycen pede a digital ou o rosto do seu celular ou computador (ou um código de um app). Mesmo que alguém consiga sua senha, não consegue entrar.",
     on: "Ativada",
     off: "Desativada",
     enable: "Ativar",
@@ -131,7 +131,7 @@ const pt: AuthDict = {
     wrong: "O código está errado ou expirou. Use o que o app mostra agora.",
     failed: "Não conseguimos concluir esta etapa. Tente de novo.",
     challengeTitle: "Seu código de verificação",
-    challengeIntro: "Abra seu app autenticador e digite o código de 6 números da Mycen.",
+    challengeIntro: "Confirme que é você com a digital ou o rosto (ou com o código do seu app).",
     signOut: "Sair",
     lost: "Perdeu o celular? Escreva para team@mycen.id do e-mail da sua conta.",
     adminTitle: "O painel da equipe exige verificação em duas etapas",
@@ -140,6 +140,13 @@ const pt: AuthDict = {
     disabledDone: "A verificação em duas etapas está desativada.",
     cancel: "Cancelar",
     needsRecent: "Para desativar, saia e entre de novo com seu código.",
+    passkeyEnable: "Usar digital ou rosto",
+    passkeyIntro: "Seu celular ou computador vai pedir sua digital, seu rosto ou o PIN do aparelho. Não precisa instalar nada.",
+    passkeyUse: "Entrar com digital ou rosto",
+    passkeyFailed: "Não foi possível usar a digital ou o rosto. Tente de novo ou use um app de códigos.",
+    useCodeApp: "Prefiro um app de códigos",
+    usePasskey: "Usar digital ou rosto",
+    waiting: "Esperando a digital ou o rosto…",
   },
 }
 

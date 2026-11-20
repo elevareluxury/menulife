@@ -21,6 +21,7 @@ import { PeopleTab }         from '@/modules/super-admin/pages/PeopleTab'
 import { ActivityTab }       from '@/modules/super-admin/pages/ActivityTab'
 import { EstadoTab }         from '@/modules/super-admin/pages/EstadoTab'
 import { CrecimientoTab }    from '@/modules/super-admin/pages/CrecimientoTab'
+import { ReservationsTab }   from '@/modules/super-admin/pages/ReservationsTab'
 import { ROUTES } from '@/lib/constants'
 import { AdminMfaGate } from '@/modules/auth/components/Mfa'
 
@@ -59,6 +60,7 @@ export function SuperAdminPage() {
         <Route path="solicitudes"       element={<AccessRequestsTab />} />
         <Route path="denuncias"         element={<ReportsTab />} />
         <Route path="verificaciones"    element={<VerificationsTab />} />
+        <Route path="reservas"          element={<ReservationsTab />} />
         <Route path="errores"           element={<ErrorsTab />} />
         <Route path="producto"          element={<ProductTab />} />
         <Route path="negocios"          element={<RestaurantsTab />} />

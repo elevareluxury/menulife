@@ -118,7 +118,7 @@ const en: AuthDict = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "Two-step verification",
-    intro: "Besides your password, we ask for a 6-digit code from an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password…). Even if someone gets your password, they can’t get in.",
+    intro: "Besides your password, Mycen asks for the fingerprint or face on your phone or computer (or a code from an app). Even if someone gets your password, they can’t get in.",
     on: "On",
     off: "Off",
     enable: "Turn on",
@@ -131,7 +131,7 @@ const en: AuthDict = {
     wrong: "The code is wrong or expired. Try the one your app shows now.",
     failed: "We couldn’t complete this step. Please try again.",
     challengeTitle: "Your verification code",
-    challengeIntro: "Open your authenticator app and enter Mycen’s 6-digit code.",
+    challengeIntro: "Confirm it’s you with your fingerprint or face (or your app’s code).",
     signOut: "Sign out",
     lost: "Lost your phone? Write to team@mycen.id from your account’s email.",
     adminTitle: "The team panel requires two-step verification",
@@ -140,6 +140,13 @@ const en: AuthDict = {
     disabledDone: "Two-step verification is off.",
     cancel: "Cancel",
     needsRecent: "To turn it off, sign out and sign back in with your code.",
+    passkeyEnable: "Use fingerprint or face",
+    passkeyIntro: "Your phone or computer will ask for your fingerprint, face or device PIN. Nothing to install.",
+    passkeyUse: "Sign in with fingerprint or face",
+    passkeyFailed: "Couldn’t use your fingerprint or face. Try again or use a code app.",
+    useCodeApp: "I prefer a code app",
+    usePasskey: "Use fingerprint or face",
+    waiting: "Waiting for your fingerprint or face…",
   },
 }
 

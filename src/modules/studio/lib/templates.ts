@@ -13,20 +13,24 @@ export const TEMPLATE_IDS = [
   'musician', 'creator', 'professional', 'business', 'personal',
   // Por rubro
   'restaurant', 'beauty', 'photographer', 'coach', 'store', 'podcaster', 'producer',
+  // Talentos (portfolio profesional)
+  'model', 'actor', 'influencer', 'singer', 'creative',
 ] as const
 export type TemplateId = typeof TEMPLATE_IDS[number]
 
 /** Propósito elegido en el onboarding (paso "¿Para qué es tu perfil?") */
-export type OnboardingPurpose = 'personal' | 'creator' | 'professional' | 'business'
+export type OnboardingPurpose = 'personal' | 'creator' | 'professional' | 'business' | 'model' | 'actor' | 'influencer' | 'musician' | 'creative'
 
 export interface IdentityTemplate {
   id: TemplateId
-  /** 'profile' = por tipo de perfil (las del onboarding), 'industry' = por rubro */
-  group: 'profile' | 'industry'
+  /** 'profile' = por tipo de perfil (las del onboarding), 'industry' = por rubro, 'talent' = portfolio de talentos */
+  group: 'profile' | 'industry' | 'talent'
   layout: ProfileLayout
   accent: MycenAccent
   /** Tipos de módulo, en el orden en que se agregan */
   modules: ModuleType[]
+  /** Contenido de partida por tipo (sólo formato, nunca texto de ejemplo: ej. la galería en book) */
+  presets?: Partial<Record<ModuleType, Record<string, unknown>>>
 }
 
 export const TEMPLATES: Record<TemplateId, IdentityTemplate> = {
@@ -78,6 +82,29 @@ export const TEMPLATES: Record<TemplateId, IdentityTemplate> = {
     id: 'producer', group: 'industry', layout: 'portada', accent: 'plasma',
     modules: ['events', 'video_gallery', 'gallery', 'social', 'subscribe', 'contact_form'],
   },
+  model: {
+    id: 'model', group: 'talent', layout: 'portada', accent: 'mono',
+    modules: ['gallery', 'measurements', 'representation', 'brands', 'press', 'social', 'contact_form'],
+    presets: { gallery: { layout: 'book' } },
+  },
+  actor: {
+    id: 'actor', group: 'talent', layout: 'editorial', accent: 'grafito',
+    modules: ['media', 'credits', 'gallery', 'measurements', 'representation', 'press', 'contact_form'],
+    presets: { gallery: { layout: 'book' } },
+  },
+  influencer: {
+    id: 'influencer', group: 'talent', layout: 'portada', accent: 'plasma',
+    modules: ['audience', 'brands', 'latest_video', 'social', 'collab', 'contact_form'],
+  },
+  singer: {
+    id: 'singer', group: 'talent', layout: 'portada', accent: 'nebulosa',
+    modules: ['listen_on', 'latest_video', 'events', 'press', 'credits', 'representation', 'subscribe'],
+  },
+  creative: {
+    id: 'creative', group: 'talent', layout: 'bento', accent: 'ion',
+    modules: ['portfolio', 'gallery', 'brands', 'credits', 'press', 'testimonials', 'contact_form'],
+    presets: { gallery: { layout: 'book' } },
+  },
 }
 
 export const TEMPLATE_LIST: IdentityTemplate[] = TEMPLATE_IDS.map(id => TEMPLATES[id])
@@ -85,12 +112,14 @@ export const TEMPLATE_LIST: IdentityTemplate[] = TEMPLATE_IDS.map(id => TEMPLATE
 /** Plantilla que aplica el onboarding según el propósito */
 export const PURPOSE_TEMPLATE: Record<OnboardingPurpose, TemplateId> = {
   personal: 'personal', creator: 'creator', professional: 'professional', business: 'business',
+  model: 'model', actor: 'actor', influencer: 'influencer', musician: 'singer', creative: 'creative',
 }
 
 /** Tipos que no tiene sentido repetir en un mismo Space: si ya hay uno, la plantilla no agrega otro */
 export const SINGLETON_TYPES: readonly ModuleType[] = [
   'contact_form', 'subscribe', 'collab', 'support', 'hours', 'location', 'contact', 'latest_video', 'portfolio',
   'testimonials', 'gallery', 'featured_action', 'contact_card', 'podcast',
+  'measurements', 'audience', 'brands', 'press', 'credits', 'representation',
 ]
 
 type ModuleLike = { type: ModuleType; config?: Record<string, unknown> | null; deleted_at?: string | null }
@@ -123,7 +152,7 @@ export function templateModuleRows(template: IdentityTemplate, types: ModuleType
   return types.map((type, i) => ({
     type,
     title: null,
-    content: {} as Record<string, unknown>,
+    content: { ...(template.presets?.[type] ?? {}) } as Record<string, unknown>,
     translations: {} as Record<string, unknown>,
     config: { template: template.id } as Record<string, unknown>,
     visibility: 'hidden' as const,

@@ -44,6 +44,14 @@ const BIO = [
   moduleRow({ id: 'm-form', type: 'contact_form', title: 'Formulario', position: 220, content: {} }),
   moduleRow({ id: 'm-collab', type: 'collab', title: 'Colaboraciones', position: 230, content: { intro: 'Hago reels para marcas de café.', rates: 'Tarifas desde USD 300' } }),
   moduleRow({ id: 'm-sub', type: 'subscribe', title: 'Novedades', position: 240, content: { ask_name: true } }),
+  // Portfolio profesional (textos largos a propósito)
+  moduleRow({ id: 'm-measures', type: 'measurements', title: 'Mis medidas', position: 250, content: { height: 178, waist: 61, hips: 89, shoe: '38', eyes: 'Marrones verdosos' } }),
+  moduleRow({ id: 'm-audience', type: 'audience', title: 'Mi audiencia', position: 260, content: { as_of: new Date().toISOString().slice(0, 10), items: [
+    { platform: 'instagram', handle: 'ana.perez.estudio.oficial', followers: 1250000, avg_views: 98000, engagement: 3.4 }] } }),
+  moduleRow({ id: 'm-brands', type: 'brands', title: 'Marcas', position: 270, content: { items: [{ name: 'Compañía Internacional de Cafés Especiales' }, { name: 'Uno' }] } }),
+  moduleRow({ id: 'm-press', type: 'press', title: 'Prensa', position: 280, content: { items: [{ quote: 'Una de las diseñadoras más interesantes de la nueva generación latinoamericana.', outlet: 'Revista de Diseño Contemporáneo', url: 'https://revista.example.com/nota', date: '2026-03-10' }] } }),
+  moduleRow({ id: 'm-credits', type: 'credits', title: 'Créditos', position: 290, content: { items: [{ title: 'Identidad visual para el festival internacional de cine independiente', role: 'Dirección de arte', company: 'Productora del Sur', year: '2025' }] } }),
+  moduleRow({ id: 'm-rep', type: 'representation', title: 'Representación', position: 300, content: { items: [{ role: 'mother_agency', name: 'Agencia Internacional de Talentos del Sur', city: 'Buenos Aires', email: 'booking@agenciasur.example.com', phone: '+54 11 5555-5555', url: 'https://agenciasur.example.com' }] } }),
 ]
 const ALL = [...MODULE_FIXTURES, ...API_MODULE_FIXTURES].map(f => ({ label: f.label, row: f.row })).concat(BIO.map(r => ({ label: r.title as string, row: r })))
 function identityState() {

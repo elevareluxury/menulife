@@ -402,6 +402,7 @@ export function GalleryModule({ module, lang }: ModuleProps) {
   const items = (Array.isArray(module.content.items) ? module.content.items : [])
     .filter((i): i is GalleryItem => !!i && typeof (i as GalleryItem).url === 'string' && !!safeHref((i as GalleryItem).url))
     .filter(i => !broken.has(i.url))
+  const book = module.content.layout === 'book'
 
   if (!items.length) return null
 
@@ -410,14 +411,15 @@ export function GalleryModule({ module, lang }: ModuleProps) {
       <h2 className="mp-card-title">{trLabel(module.title, lang) || t.gallery}</h2>
       {/* Estilo revista: la primera grande. Según cuántas fotos haya, la primera ocupa 2×2 o toda la fila (y con
           resto 2, la última va de a dos), así la grilla siempre cierra sin huecos */}
-      <div className={`mp-gallery${items.length >= 3 ? ` is-mag-${items.length % 3}` : ''}`}>
+      {/* Book (modelos, fotógrafos): cada foto entera, con su forma, en dos columnas; nada se recorta */}
+      <div className={`mp-gallery${book ? ' is-book' : items.length >= 3 ? ` is-mag-${items.length % 3}` : ''}`}>
         {items.map((item, i) => {
           const thumb = safeHref(item.thumbnail_url) ?? (isVideo(item) ? null : item.url)
           return (
             <button key={item.url + i} type="button" onClick={() => setOpen(i)}
               aria-label={str(item.alt) || item.caption || `${t.gallery} ${i + 1}`}>
               {thumb
-                ? <SafeImage sizing="third" src={thumb} alt="" loading="lazy" onFail={() => setBroken(b => new Set(b).add(item.url))} />
+                ? <SafeImage sizing={book ? 'column' : 'third'} src={thumb} alt="" loading="lazy" onFail={() => setBroken(b => new Set(b).add(item.url))} />
                 : <video src={item.url} muted playsInline preload="metadata" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
             </button>
           )

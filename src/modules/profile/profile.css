@@ -190,6 +190,11 @@
 /* Con 1 o 2 fotos no queda un tercio vacío */
 .mp-gallery:has(> :only-child) { grid-template-columns: 1fr; }
 .mp-gallery:has(> :nth-child(2):last-child) { grid-template-columns: repeat(2, 1fr); }
+/* Book: fotos enteras (sin recortar) en dos columnas, cada una con su forma */
+.mp-gallery.is-book { display: block; columns: 2; column-gap: 6px; }
+.mp-gallery.is-book:has(> :only-child) { columns: 1; }
+.mp-gallery.is-book > button { display: block; width: 100%; aspect-ratio: auto; margin: 0 0 6px; break-inside: avoid; }
+.mp-gallery.is-book img, .mp-gallery.is-book video { height: auto; object-fit: contain; }
 /* Títulos de colecciones sin tarjeta (Proyectos, Trabajos, Entradas): alineados con los de las tarjetas */
 .mp-section-title { padding-inline: 4px; }
 

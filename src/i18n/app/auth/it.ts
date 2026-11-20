@@ -118,7 +118,7 @@ const it: AuthDict = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "Verifica in due passaggi",
-    intro: "Oltre alla password, ti chiediamo un codice di 6 cifre da un’app di autenticazione (Google Authenticator, Microsoft Authenticator, 1Password…). Anche se qualcuno ottiene la tua password, non può entrare.",
+    intro: "Oltre alla password, Mycen chiede l’impronta o il volto del tuo telefono o computer (o un codice di un’app). Anche se qualcuno ottiene la tua password, non può entrare.",
     on: "Attiva",
     off: "Disattivata",
     enable: "Attiva",
@@ -131,7 +131,7 @@ const it: AuthDict = {
     wrong: "Il codice è sbagliato o scaduto. Prova con quello che mostra l’app adesso.",
     failed: "Non siamo riusciti a completare il passaggio. Riprova.",
     challengeTitle: "Il tuo codice di verifica",
-    challengeIntro: "Apri la tua app di autenticazione e scrivi il codice di 6 cifre di Mycen.",
+    challengeIntro: "Conferma che sei tu con l’impronta o il volto (o con il codice della tua app).",
     signOut: "Esci",
     lost: "Hai perso il telefono? Scrivi a team@mycen.id dall’email del tuo account.",
     adminTitle: "Il pannello del team richiede la verifica in due passaggi",
@@ -140,6 +140,13 @@ const it: AuthDict = {
     disabledDone: "La verifica in due passaggi è disattivata.",
     cancel: "Annulla",
     needsRecent: "Per disattivarla, esci e rientra con il tuo codice.",
+    passkeyEnable: "Usa impronta o volto",
+    passkeyIntro: "Il tuo telefono o computer ti chiederà l’impronta, il volto o il PIN del dispositivo. Non devi installare nulla.",
+    passkeyUse: "Entra con impronta o volto",
+    passkeyFailed: "Non è stato possibile usare l’impronta o il volto. Riprova o usa un’app di codici.",
+    useCodeApp: "Preferisco un’app di codici",
+    usePasskey: "Usa impronta o volto",
+    waiting: "In attesa dell’impronta o del volto…",
   },
 }
 

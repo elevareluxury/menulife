@@ -118,7 +118,7 @@ const ko: AuthDict = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "2단계 인증",
-    intro: "비밀번호와 함께 인증 앱(Google Authenticator, Microsoft Authenticator, 1Password 등)의 6자리 코드를 입력하도록 합니다. 누군가 비밀번호를 알아내더라도 로그인할 수 없습니다.",
+    intro: "비밀번호와 함께 Mycen은 휴대폰이나 컴퓨터의 지문 또는 얼굴(또는 앱의 코드)을 요청합니다. 누군가 비밀번호를 알아내더라도 로그인할 수 없습니다.",
     on: "켜짐",
     off: "꺼짐",
     enable: "켜기",
@@ -131,7 +131,7 @@ const ko: AuthDict = {
     wrong: "코드가 맞지 않거나 만료되었습니다. 지금 앱에 표시된 코드를 입력하세요.",
     failed: "이 단계를 완료하지 못했습니다. 다시 시도해 주세요.",
     challengeTitle: "인증 코드",
-    challengeIntro: "인증 앱을 열고 Mycen의 6자리 코드를 입력하세요.",
+    challengeIntro: "지문 또는 얼굴(또는 앱의 코드)로 본인임을 확인하세요.",
     signOut: "로그아웃",
     lost: "휴대폰을 잃어버렸나요? 계정 이메일로 team@mycen.id에 연락해 주세요.",
     adminTitle: "팀 패널에는 2단계 인증이 필요합니다",
@@ -140,6 +140,13 @@ const ko: AuthDict = {
     disabledDone: "2단계 인증이 꺼져 있습니다.",
     cancel: "취소",
     needsRecent: "끄려면 로그아웃한 뒤 코드로 다시 로그인하세요.",
+    passkeyEnable: "지문 또는 얼굴 사용",
+    passkeyIntro: "휴대폰이나 컴퓨터가 지문, 얼굴 또는 기기 PIN을 요청합니다. 설치할 것은 없습니다.",
+    passkeyUse: "지문 또는 얼굴로 로그인",
+    passkeyFailed: "지문이나 얼굴을 사용하지 못했습니다. 다시 시도하거나 코드 앱을 사용하세요.",
+    useCodeApp: "코드 앱을 쓰고 싶어요",
+    usePasskey: "지문 또는 얼굴 사용",
+    waiting: "지문 또는 얼굴을 기다리는 중…",
   },
 }
 

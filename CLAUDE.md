@@ -745,6 +745,26 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   no comercial) → `cron_flag_link` crea una denuncia `scam` (una vez por perfil y link, `mycen_link_flags`; nada se
   suspende solo). Reglas puras en `scripts/cron/rules.mjs`. Visitas (`profile_events`) 13 meses e índice parcial de
   vistas por fecha. Propuesta de portfolio (modelos, influencers, cantantes): `docs/identity/portfolio-propuesta.md`.
+- Nombres reservados y huella o cara (PR E, `20261126000001_talent_reservations.sql`, tests en
+  `talent_reservations.test.sql` y `emergency-mfa.spec.ts`): Super-admin → Nombres reservados (`ReservationsTab`,
+  `/super-admin/reservas`; de a uno o varios "usuario, nombre, email" por línea) → `talent_reservations` (nadie la lee;
+  `admin_list/save/delete_talent_reservation`, en la bitácora). `check_username` y `mycen_validate_username` dan
+  'reserved' salvo a quien tiene el email confirmado de la reserva (`mycen_talent_reserved_for_other`; la toma queda en
+  `claimed_by`/`claimed_at`); sin email, nadie la toma. Segundo paso: `PasskeyEnroll`/`PasskeyChallenge`
+  (`supabase.auth.mfa.webauthn._register/_authenticate`, experimental; hay que prender WebAuthn en Supabase → Auth →
+  MFA) primero y la app de códigos como alternativa (`EnrollChoice`/`ChallengeChoice` en `Mfa.tsx`); en la app nativa,
+  sólo códigos. Privacidad (12 idiomas).
+- Portfolio profesional (PR F, `FEATURES.portfolioModules`, `20261127000001_identity_portfolio_modules.sql`, tests en
+  `portfolio_modules.test.sql`, `portfolio.test.ts` y `portfolio.spec.ts`): 6 tipos de módulo — `measurements` (cm 20–260
+  y talles; la página suma pulgadas), `audience` (por red: seguidores/vistas/interacción, con `as_of`: > 90 días avisa,
+  > 1 año o sin fecha no se muestra; los carga la persona, Mycen no calcula nada), `brands`, `press`, `credits` y
+  `representation` (agencia, booking, management…: email/teléfono/web con `onAction` `email|phone|u:`). Reglas puras en
+  `profile/lib/portfolio.ts` (la página vuelve a validar), un solo chunk `PortfolioModules.tsx` + `portfolio.css` con
+  textos en `portfolioI18n.ts`; editores en `studio/components/portfolioEditors.tsx`. Galería "book"
+  (`content.layout = 'book'`: columnas, fotos enteras sin recortar). Ajustes → "Quién lo puede ver" (`profiles.visibility`:
+  público / sólo con el link = noindex y fuera del sitemap / privado; se aplica sin publicar). Plantillas de talento
+  (`group: 'talent'`: modelo, actor, influencer, cantante, creativo; `presets` = sólo formato, ej. galería en book) y 5
+  tipos de talento en el onboarding (`profiles.purpose`: model, actor, influencer, musician, creative). Privacidad (12 idiomas).
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,

@@ -118,7 +118,7 @@ const zh: AuthDict = {
   /** Verificación en dos pasos (TOTP): obligatoria para el panel del equipo, opcional para el resto */
   mfa: {
     title: "两步验证",
-    intro: "除了密码，我们还会要求输入身份验证器应用（Google Authenticator、Microsoft Authenticator、1Password…）中的 6 位数字验证码。即使有人拿到你的密码，也无法登录。",
+    intro: "除了密码，Mycen 还会要求验证你手机或电脑上的指纹或面容（或验证码应用中的代码）。即使有人拿到你的密码，也无法登录。",
     on: "已开启",
     off: "已关闭",
     enable: "开启",
@@ -131,7 +131,7 @@ const zh: AuthDict = {
     wrong: "验证码不正确或已过期。请输入应用当前显示的验证码。",
     failed: "无法完成这一步。请重试。",
     challengeTitle: "你的验证码",
-    challengeIntro: "打开身份验证器应用，输入 Mycen 的 6 位数字验证码。",
+    challengeIntro: "用指纹或面容（或你应用中的验证码）确认是你本人。",
     signOut: "退出",
     lost: "手机丢了？请用你账户的邮箱写信到 team@mycen.id。",
     adminTitle: "团队面板需要两步验证",
@@ -140,6 +140,13 @@ const zh: AuthDict = {
     disabledDone: "两步验证已关闭。",
     cancel: "取消",
     needsRecent: "要关闭它，请退出后用验证码重新登录。",
+    passkeyEnable: "使用指纹或面容",
+    passkeyIntro: "你的手机或电脑会要求验证指纹、面容或设备密码。无需安装任何东西。",
+    passkeyUse: "用指纹或面容登录",
+    passkeyFailed: "无法使用指纹或面容。请重试，或改用验证码应用。",
+    useCodeApp: "我更想用验证码应用",
+    usePasskey: "使用指纹或面容",
+    waiting: "正在等待指纹或面容…",
   },
 }
 
