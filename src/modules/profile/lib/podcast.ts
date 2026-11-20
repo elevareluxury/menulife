@@ -25,6 +25,9 @@ export interface PodcastResponse {
 
 export type FeedProblem = 'empty' | 'not_https' | 'too_long' | 'bad_host'
 
+/** Dominios que resuelven a la IP que se escriba en el nombre (127.0.0.1.nip.io…) o a la máquina local */
+const REBIND_HOSTS = /(^|\.)(nip\.io|sslip\.io|xip\.io|localtest\.me|lvh\.me|internal|localhost)$/
+
 /** Un link de feed aceptable: https, con dominio (no IP ni localhost) y sin usuario/clave */
 export function inspectFeedUrl(input: string | null | undefined): { url: string } | { error: FeedProblem } {
   const raw = (input ?? '').trim()
@@ -35,7 +38,7 @@ export function inspectFeedUrl(input: string | null | undefined): { url: string 
   if (u.protocol !== 'https:') return { error: 'not_https' }
   const host = u.hostname.toLowerCase()
   if (u.username || u.password || !host.includes('.') || host === 'localhost' || host.endsWith('.local')
-    || /^[\d.]+$/.test(host) || host.includes(':') || u.port) return { error: 'bad_host' }
+    || /^[\d.]+$/.test(host) || host.includes(':') || u.port || REBIND_HOSTS.test(host)) return { error: 'bad_host' }
   return { url: u.toString() }
 }
 

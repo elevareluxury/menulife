@@ -2,8 +2,8 @@ import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { describe, expect, it } from 'vitest'
 import {
-  BLOCKED_USERNAMES, BRAND_USERNAMES, RESERVED_USERNAMES, STAFF_USERNAMES, SYSTEM_USERNAMES, isReservedUsername,
-  isSystemUsername,
+  BLOCKED_USERNAMES, BRAND_USERNAMES, IMPERSONATION_FRAGMENTS, RESERVED_USERNAMES, STAFF_USERNAMES, SYSTEM_USERNAMES,
+  impersonatesBrand, isReservedUsername, isSystemUsername,
 } from '@/lib/reservedUsernames'
 
 // La lista de usernames reservados vive en 3 lugares (docs/identity/03, R11). Este test falla si se desincronizan.
@@ -59,6 +59,22 @@ describe('usernames reservados', () => {
     expect(isReservedUsername('ana-garcia')).toBe(false)
     expect(isSystemUsername('dashboard')).toBe(true)
     expect(isSystemUsername('apple')).toBe(false)
+  })
+
+  it('los fragmentos de marcas coinciden con mycen_username_impersonates de la base', () => {
+    const sql = readFileSync(join(root, 'supabase', 'migrations', '20261123000001_web_launch_hardening.sql'), 'utf8')
+    const block = /function public\.mycen_username_impersonates[\s\S]*?unnest\(array\[([\s\S]*?)\]\)/.exec(sql)?.[1] ?? ''
+    const fromSql = [...block.matchAll(/'([a-z0-9]+)'/g)].map(m => m[1]).sort()
+    expect(fromSql.length).toBeGreaterThan(20)
+    expect([...IMPERSONATION_FRAGMENTS].sort()).toEqual(fromSql)
+  })
+
+  it('frena usernames que suplantan marcas o bancos, con o sin guiones, y deja pasar nombres comunes', () => {
+    for (const u of ['santander-ayuda', 'pay-pal-soporte', 'Binance-Oficial', 'mi-banco', 'whatsapp-help']) {
+      expect(impersonatesBrand(u)).toBe(true)
+      expect(isReservedUsername(u)).toBe(true)
+    }
+    for (const u of ['ana-garcia', 'lucia', 'estudio-luna', 'cafe-del-centro']) expect(impersonatesBrand(u)).toBe(false)
   })
 
   it('cada ruta de primer nivel de la app está reservada (nadie puede tomarla como username)', () => {

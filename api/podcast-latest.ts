@@ -4,6 +4,7 @@
 // la CDN. Errores con códigos fijos (nunca se devuelve lo que llegó).
 
 import { EPISODES_MAX, inspectFeedUrl, parsePodcastFeed } from '../src/modules/profile/lib/podcast'
+import { fetchCheckedRedirects } from '../src/lib/checkedFetch'
 
 export const config = { runtime: 'edge' }
 
@@ -59,10 +60,12 @@ export default async function handler(req: Request): Promise<Response> {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
   try {
-    const res = await fetch(checked.url, { signal: ctrl.signal, redirect: 'follow', headers: { 'user-agent': UA, accept: 'application/rss+xml, application/xml, text/xml' } })
+    // Cada redirección se valida antes de seguirla: nada que no sea https o que apunte a una dirección interna
+    const res = await fetchCheckedRedirects(checked.url,
+      { signal: ctrl.signal, headers: { 'user-agent': UA, accept: 'application/rss+xml, application/xml, text/xml' } },
+      next => !('error' in inspectFeedUrl(next)))
     if (res.status === 404 || res.status === 410) return fail('not_found')
-    // Una redirección a algo que no es https o a una dirección interna no se sigue leyendo
-    if (!res.ok || (res.url && 'error' in inspectFeedUrl(res.url))) return fail('upstream')
+    if (!res.ok) return fail('upstream')
     const feed = parsePodcastFeed(await readText(res, FEED_MAX_BYTES))
     if (!feed) return fail('not_found')
     return json(feed, 200, 'public, max-age=300, s-maxage=1800, stale-while-revalidate=86400')

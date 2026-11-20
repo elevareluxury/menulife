@@ -89,7 +89,7 @@ export function TestimonialsTab() {
     setUploading(true)
     try {
       // Se achica a 640 px y pasa a WebP en el dispositivo; el tope de 2 MB cuenta después
-      const file = await optimizeImage(picked, { maxSide: 640 })
+      const file = await optimizeImage(picked, { maxSide: 640, strict: true })
       if (file.size > 2 * 1024 * 1024) { toast.error('Imagen demasiado grande (máx 2 MB)'); return }
       const ext = file.name.split('.').pop()
       const fileName = `testimonials/${Date.now()}.${ext}`

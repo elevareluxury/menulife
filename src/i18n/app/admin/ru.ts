@@ -200,6 +200,10 @@ const ru: AdminDict = {
     statusDraft: 'Черновик',
     statusUnpublished: 'Не опубликован',
     statusArchived: 'В архиве',
+    purgeFiles: 'Удалить фото и PDF',
+    purgeConfirm: 'Да, удалить все файлы (отменить нельзя)',
+    purgeHelp: 'Если контент незаконный, сначала сохраните доказательства (скриншот и ссылку). Файлы исчезнут из интернета.',
+    purgeDone: (n) => `Удалено файлов: ${n}`,
   },
   activity: {
     title: 'Действия команды',
@@ -209,6 +213,7 @@ const ru: AdminDict = {
     loadFailed: 'Не удалось загрузить действия.',
     space_suspended: 'Заблокировал Space',
     space_unsuspended: 'Снял блокировку',
+    media_purged: 'Удалил файлы аккаунта',
     verified: 'Подтвердил аккаунт',
     verification_removed: 'Снял подтверждение',
     report_actioned: 'Принял меры по жалобе',

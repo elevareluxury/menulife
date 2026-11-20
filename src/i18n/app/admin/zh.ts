@@ -192,6 +192,10 @@ const zh: AdminDict = {
     statusDraft: '草稿',
     statusUnpublished: '未发布',
     statusArchived: '已归档',
+    purgeFiles: '删除其照片和 PDF',
+    purgeConfirm: '是的，删除所有文件（无法撤销）',
+    purgeHelp: '如为违法内容，请先保存证据（截图和链接）。文件将从互联网上移除。',
+    purgeDone: (n) => `已删除 ${n} 个文件`,
   },
   activity: {
     title: '团队操作记录',
@@ -201,6 +205,7 @@ const zh: AdminDict = {
     loadFailed: '无法加载操作记录。',
     space_suspended: '停用了一个 Space',
     space_unsuspended: '解除了停用',
+    media_purged: '删除了一个账户的文件',
     verified: '认证了一个账户',
     verification_removed: '取消了一个认证',
     report_actioned: '处理了一条举报并采取措施',

@@ -195,6 +195,10 @@ const de: AdminDict = {
     statusDraft: 'Entwurf',
     statusUnpublished: 'Nicht veröffentlicht',
     statusArchived: 'Archiviert',
+    purgeFiles: 'Fotos und PDFs löschen',
+    purgeConfirm: 'Ja, alle Dateien löschen (nicht rückgängig zu machen)',
+    purgeHelp: 'Bei illegalen Inhalten zuerst Beweise sichern (Screenshot und Link). Die Dateien verschwinden aus dem Internet.',
+    purgeDone: (n) => `${n} Dateien gelöscht`,
   },
   activity: {
     title: 'Team-Aktivität',
@@ -204,6 +208,7 @@ const de: AdminDict = {
     loadFailed: 'Die Aktivität konnte nicht geladen werden.',
     space_suspended: 'Hat einen Space gesperrt',
     space_unsuspended: 'Hat eine Sperre aufgehoben',
+    media_purged: 'Hat die Dateien eines Kontos gelöscht',
     verified: 'Hat ein Konto verifiziert',
     verification_removed: 'Hat eine Verifizierung entfernt',
     report_actioned: 'Hat eine Meldung mit Maßnahme erledigt',

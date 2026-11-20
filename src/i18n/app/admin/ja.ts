@@ -192,6 +192,10 @@ const ja: AdminDict = {
     statusDraft: '下書き',
     statusUnpublished: '非公開',
     statusArchived: 'アーカイブ',
+    purgeFiles: '写真とPDFを削除',
+    purgeConfirm: 'はい、すべてのファイルを削除します（元に戻せません）',
+    purgeHelp: '違法なコンテンツの場合は、先に証拠（スクリーンショットとリンク）を保存してください。ファイルはインターネットから削除されます。',
+    purgeDone: (n) => `${n} 件のファイルを削除しました`,
   },
   activity: {
     title: 'チームの操作履歴',
@@ -201,6 +205,7 @@ const ja: AdminDict = {
     loadFailed: '操作履歴を読み込めませんでした。',
     space_suspended: 'Space を停止しました',
     space_unsuspended: '停止を解除しました',
+    media_purged: 'アカウントのファイルを削除しました',
     verified: 'アカウントを認証しました',
     verification_removed: '認証を外しました',
     report_actioned: '通報に対応しました',

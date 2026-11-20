@@ -1,4 +1,5 @@
-import { publicRpc } from '@/lib/publicRpc'
+import { hasDeviceSession, publicRpc } from '@/lib/publicRpc'
+import { apiUrl } from '@/lib/platform'
 import { takePrefetchedProfile } from './profilePrefetch'
 import type { ProfileEventType, ProfileLookup, PublicProfile } from './profileTypes'
 import type { ProjectLookup, PublicProject } from './projectTypes'
@@ -12,9 +13,26 @@ async function publicProfileData(handle: string): Promise<unknown> {
   if (early) {
     try { return await early } catch { /* se repite abajo con el pedido de siempre */ }
   }
+  // Sin sesión, la copia de la CDN (api/profile.ts): no llega a la base en cada visita. Con sesión (el dueño ve su
+  // borrador) o si la CDN no responde, la RPC directa.
+  if (!hasDeviceSession()) {
+    const cached = await cachedProfile(handle)
+    if (cached.ok) return cached.data
+  }
   const { data, error } = await rpc('get_public_profile', { p_username: handle })
   if (error) throw new Error(error.message)
   return data
+}
+
+/** El perfil desde la CDN; `ok: false` si no está disponible (desarrollo, sin red, error) para seguir con la RPC */
+export async function cachedProfile(handle: string): Promise<{ ok: true; data: unknown } | { ok: false }> {
+  try {
+    const res = await fetch(apiUrl(`/api/profile?h=${encodeURIComponent(handle)}`))
+    if (!res.ok || !(res.headers.get('content-type') ?? '').includes('application/json')) return { ok: false }
+    return { ok: true, data: await res.json() }
+  } catch {
+    return { ok: false }
+  }
 }
 
 /** `handle`: "ana" o "ana/estudio" (Space secundario, Fase 10) */

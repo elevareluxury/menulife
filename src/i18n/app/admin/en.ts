@@ -195,6 +195,10 @@ const en: AdminDict = {
     statusDraft: 'Draft',
     statusUnpublished: 'Unpublished',
     statusArchived: 'Archived',
+    purgeFiles: 'Delete their photos and PDFs',
+    purgeConfirm: 'Yes, delete all their files (can\'t be undone)',
+    purgeHelp: 'For illegal content, save the evidence first (screenshot and link). The files will be removed from the internet.',
+    purgeDone: (n) => `${n} files deleted`,
   },
   activity: {
     title: 'Team activity',
@@ -204,6 +208,7 @@ const en: AdminDict = {
     loadFailed: 'The activity could not be loaded.',
     space_suspended: 'Suspended a Space',
     space_unsuspended: 'Lifted a suspension',
+    media_purged: 'Deleted an account\'s files',
     verified: 'Verified an account',
     verification_removed: 'Removed a verification',
     report_actioned: 'Resolved a report with action',

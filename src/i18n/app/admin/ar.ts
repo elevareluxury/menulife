@@ -192,6 +192,10 @@ const ar: AdminDict = {
     statusDraft: 'مسودة',
     statusUnpublished: 'غير منشور',
     statusArchived: 'مؤرشف',
+    purgeFiles: 'حذف صورها وملفات PDF',
+    purgeConfirm: 'نعم، احذف كل الملفات (لا يمكن التراجع)',
+    purgeHelp: 'في حالة المحتوى غير القانوني، احفظ الدليل أولًا (لقطة شاشة ورابط). ستُزال الملفات من الإنترنت.',
+    purgeDone: (n) => `تم حذف ${n} ملفات`,
   },
   activity: {
     title: 'نشاط الفريق',
@@ -201,6 +205,7 @@ const ar: AdminDict = {
     loadFailed: 'تعذّر تحميل النشاط.',
     space_suspended: 'أوقف Space',
     space_unsuspended: 'رفع إيقافًا',
+    media_purged: 'حذف ملفات حساب',
     verified: 'وثّق حسابًا',
     verification_removed: 'أزال توثيقًا',
     report_actioned: 'عالج بلاغًا باتخاذ إجراء',

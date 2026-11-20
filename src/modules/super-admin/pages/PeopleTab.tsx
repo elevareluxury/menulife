@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useAdminT } from '@/i18n/app/admin'
 import { useAdminFormat } from '../lib/adminFormat'
 import { adminRpc, BTN, CARD, INPUT, MUTED, OK_COLOR, TEXT, WARN_COLOR } from '../lib/adminRpc'
+import { removeAccountFiles } from '@/lib/accountFiles'
 
 // Personas (auditoría del panel): buscar una cuenta por email, usuario o nombre y ver su ficha — Spaces, verificación,
 // suspensión, denuncias, mensajes, suscriptores y cuántas cosas tiene en Life OS (nunca su contenido). Desde la ficha
@@ -129,6 +130,20 @@ function AccountView({ userId, onBack }: { userId: string; onBack: () => void })
   const [reasons, setReasons] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [purgeStep, setPurgeStep] = useState<'idle' | 'confirm' | 'done'>('idle')
+  const [purged, setPurged] = useState(0)
+
+  // Contenido denunciado: suspender oculta la página, pero las fotos y los PDF siguen en sus links públicos
+  async function purgeFiles(target: string) {
+    setBusy(true); setError(null)
+    try {
+      const n = await removeAccountFiles(target)
+      await adminRpc('admin_log_media_purge', { p_user_id: target, p_files: n })
+      setPurged(n); setPurgeStep('done')
+    } catch {
+      setError(t.common.actionFailed)
+    } finally { setBusy(false) }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -216,6 +231,20 @@ function AccountView({ userId, onBack }: { userId: string; onBack: () => void })
                   )}
                 </section>
               ))}
+
+              {d.spaces.some(s => s.suspended_at) && (
+                <section style={CARD} aria-labelledby="acc-purge">
+                  <h2 id="acc-purge" style={{ margin: '0 0 4px', fontSize: 16, color: TEXT }}>{p.purgeFiles}</h2>
+                  <p style={{ margin: '0 0 12px', fontSize: 12.5, color: MUTED }}>{p.purgeHelp}</p>
+                  {purgeStep === 'done' ? <p role="status" style={{ margin: 0, color: OK_COLOR }}>{p.purgeDone(purged)}</p>
+                    : purgeStep === 'confirm' ? (
+                      <button type="button" style={{ ...BTN, borderColor: `${WARN_COLOR}66`, color: WARN_COLOR }} disabled={busy}
+                        onClick={() => { void purgeFiles(d.user_id) }}>{p.purgeConfirm}</button>
+                    ) : (
+                      <button type="button" style={BTN} disabled={busy} onClick={() => setPurgeStep('confirm')}>{p.purgeFiles}</button>
+                    )}
+                </section>
+              )}
 
               <section style={CARD} aria-labelledby="acc-life">
                 <h2 id="acc-life" style={{ margin: '0 0 4px', fontSize: 16, color: TEXT }}>{p.lifeTitle}</h2>

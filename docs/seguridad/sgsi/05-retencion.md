@@ -13,7 +13,10 @@ mismo: si se cambia un plazo, se cambian los dos en el mismo PR.
 | Personas afectadas por errores (`app_error_hits`) | **90 días** | `mycen_purge_expired()` y al reportar un error |
 | Errores (`app_errors`) | Mientras sirvan (uno resuelto queda por si vuelve) | A mano desde `/super-admin/errores` |
 | Bitácora del equipo (`admin_audit_log`) | **3 años** | `mycen_purge_expired()`; nadie la puede modificar ni borrar antes (trigger `admin_audit_log_guard`) |
-| Copias de seguridad | Ciclo del proveedor (Supabase Pro: 7 días) | Se sobrescriben solas |
+| Copias de seguridad de la base | Ciclo del proveedor (Supabase Pro con PITR) | Se sobrescriben solas |
+| Copia de fotos y PDF (Cloudflare R2) | Espejo diario; lo borrado o cambiado, **30 días** | `storage-backup.yml` borra `old/` de más de 30 días |
+| Contadores de pedidos por IP (`mycen_rate_hits`, hash de la IP) | **2 días** | pg_cron `mycen-rate-hits-purge` cada hora |
+| Archivos de una cuenta borrada | Se borran al borrar la cuenta (fotos y PDF) | `removeAccountFiles` antes de `delete_my_account`; el equipo puede borrarlos desde Personas |
 | Datos que la ley obligue a guardar (facturación) | El plazo de la ley | Fuera de la app |
 
 **Comprobar que corre:** `/super-admin/estado` muestra las tareas de pg_cron (`mycen-purge-expired`) con su última

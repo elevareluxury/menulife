@@ -95,9 +95,12 @@ export const PROFILE_PREFETCH_SCRIPT = `(function(){try{` +
     `var u=D.url,k=D.key;` +
     `if(localStorage.getItem('sb-'+new URL(u).hostname.split('.')[0]+'-auth-token'))return;` +
     `var h=sp?s+'/'+sp:s;` +
-    `var d=fetch(u+'/rest/v1/rpc/get_public_profile',{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'Content-Type':'application/json'},` +
-    `body:JSON.stringify({p_username:h})}).then(function(r){if(!r.ok)throw new Error(String(r.status));return r.text()})` +
-    `.then(function(t){return t?JSON.parse(t):null});` +
+    // Primero la copia de la CDN (api/profile.ts); si no está (desarrollo, error), la RPC directa
+    `var J=function(t){return t?JSON.parse(t):null};` +
+    `var rpc=function(){return fetch(u+'/rest/v1/rpc/get_public_profile',{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'Content-Type':'application/json'},` +
+    `body:JSON.stringify({p_username:h})}).then(function(r){if(!r.ok)throw new Error(String(r.status));return r.text()}).then(J)};` +
+    `var d=D.api?fetch(D.api+'?h='+encodeURIComponent(h)).then(function(r){if(!r.ok||(r.headers.get('content-type')||'').indexOf('application/json')<0)throw 0;` +
+    `return r.text()}).then(J).catch(rpc):rpc();` +
     // Con los datos: estructura, módulos con chunk propio e imágenes de la primera pantalla
     `d.then(function(p){if(!p||!p.modules)return;var t=p.theme||{},L=A.layouts[t.layout]||A.layouts.clasica,mods=p.modules,seen={};` +
     `(L||[]).forEach(add);mods.forEach(function(x){if(!seen[x.type]){seen[x.type]=1;(A.types[x.type]||[]).forEach(add)}});` +
@@ -112,7 +115,7 @@ export const PROFILE_PREFETCH_SCRIPT = `(function(){try{` +
 
 function data(url: string, key: string, assets: ProfileAssets): string {
   // "<" escapado: nada del bloque puede cerrar la etiqueta
-  return JSON.stringify({ url, key, reserved: [...SYSTEM_USERNAMES], assets }).replace(/</g, '\\u003c')
+  return JSON.stringify({ url, key, api: '/api/profile', reserved: [...SYSTEM_USERNAMES], assets }).replace(/</g, '\\u003c')
 }
 
 export function profilePrefetchPlugin(): Plugin {

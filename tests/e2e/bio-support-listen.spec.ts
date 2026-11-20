@@ -107,7 +107,7 @@ test('Studio: crear "Apoyame", publicarlo y usarlo en la página pública', asyn
   const mp = card.getByRole('link', { name: 'Mercado Pago' })
   await expect(mp).toHaveAttribute('href', 'https://link.mercadopago.com.ar/anaperez')
   await expect(mp).toHaveAttribute('target', '_blank')
-  await expect(mp).toHaveAttribute('rel', 'noopener noreferrer')
+  await expect(mp).toHaveAttribute('rel', 'noopener noreferrer nofollow ugc')
   await expect(card.getByText('Mycen no cobra ni procesa pagos.', { exact: false })).toBeVisible()
 
   await card.getByRole('button', { name: 'Copiar Alias, CVU o CBU' }).click()
@@ -165,7 +165,7 @@ test('Studio: crear "Escuchá en" con la plataforma detectada, publicarlo y ver 
   await expect(card.getByRole('link', { name: 'Escuchá en Spotify' })).toHaveAttribute('href', 'https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC')
   const ytm = card.getByRole('link', { name: 'Escuchá en YouTube Music' })
   await expect(ytm).toHaveAttribute('href', 'https://music.youtube.com/playlist?list=OLAK5uy_x')
-  await expect(ytm).toHaveAttribute('rel', 'noopener noreferrer')
+  await expect(ytm).toHaveAttribute('rel', 'noopener noreferrer nofollow ugc')
   await pub.waitForLoadState('networkidle')
   expect(hits).toEqual([])
   await axe(pub)

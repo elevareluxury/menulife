@@ -41,7 +41,7 @@ export interface ModuleProps {
 const str = (v: unknown): string => (typeof v === 'string' ? v : '')
 
 function linkProps(href: string) {
-  return isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+  return isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer nofollow ugc' } : {}
 }
 
 // ── Link ────────────────────────────────────────────────────────────────────
@@ -251,7 +251,7 @@ export function LocationModule({ module, lang, onAction }: ModuleProps) {
           <span className="mp-maps-label">{t.howToGet}</span>
           <span className="mp-maps-apps">
             {apps.map(a => (
-              <a key={a.key} className="mp-maps-app" href={a.href} target="_blank" rel="noopener noreferrer"
+              <a key={a.key} className="mp-maps-app" href={a.href} target="_blank" rel="noopener noreferrer nofollow ugc"
                 aria-label={`${t.howToGet}: ${a.label}`} onClick={() => onAction(module.id)}>{a.label}</a>
             ))}
           </span>
@@ -464,7 +464,7 @@ export function TestimonialsModule({ module, lang, onAction }: ModuleProps) {
           </div>
           {googleHref && (
             <a className="mp-btn-ghost mp-rating-link" href={googleHref}
-              target="_blank" rel="noopener noreferrer" onClick={() => onAction(module.id)}>
+              target="_blank" rel="noopener noreferrer nofollow ugc" onClick={() => onAction(module.id)}>
               {t.seeOnGoogle}
             </a>
           )}

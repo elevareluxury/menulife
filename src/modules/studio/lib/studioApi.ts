@@ -7,6 +7,7 @@ import type {
 import type { SpaceSummary } from './spaces'
 import { studioT } from '@/i18n/app/studio'
 import { optimizeImage } from '@/lib/imageOptimize'
+import { removeAccountFiles } from '@/lib/accountFiles'
 import type { SourceRow } from './trafficSources'
 import type { ClickStats, ClickStatRow } from './clickStats'
 
@@ -240,7 +241,9 @@ export async function saveOrder(modules: StudioModule[]): Promise<void> {
 export async function uploadMedia(userId: string, original: File, kind: 'avatar' | 'image' = 'image'): Promise<string> {
   if (!original.type.startsWith('image/')) throw new Error(studioT().errors.notImage)
   if (original.size > MAX_SOURCE_BYTES) throw new Error(studioT().errors.tooBig)
-  const file = await optimizeImage(original, { maxSide: kind === 'avatar' ? 640 : 1920 })
+  // strict: la foto se sube siempre vuelta a dibujar, sin la ubicación GPS ni otros datos del original
+  const file = await optimizeImage(original, { maxSide: kind === 'avatar' ? 640 : 1920, strict: true })
+    .catch(() => { throw new Error(studioT().errors.notImage) })
   // Una foto HEIC/HEIF que el navegador no pudo convertir no se vería en la mayoría de los navegadores: mejor pedir otra
   if (/^image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name)) throw new Error(studioT().errors.notImage)
   if (file.size > MAX_UPLOAD_BYTES) throw new Error(studioT().errors.tooBig)
@@ -339,10 +342,8 @@ export type DeleteResult = 'deleted' | 'has_business' | 'error'
 
 /** Borra las imágenes subidas y la cuenta (perfiles y datos de Life OS caen en cascada). */
 export async function deleteMyAccount(userId: string): Promise<DeleteResult> {
-  try {
-    const { data: files } = await db.storage.from(MEDIA_BUCKET).list(userId, { limit: 1000 })
-    if (files?.length) await db.storage.from(MEDIA_BUCKET).remove(files.map(f => `${userId}/${f.name}`))
-  } catch { /* si falla la limpieza de imágenes, se sigue con la cuenta */ }
+  // Primero los archivos (fotos y PDF): después de borrar la cuenta ya no hay sesión para hacerlo
+  try { await removeAccountFiles(userId) } catch { /* si falla la limpieza, se sigue con la cuenta */ }
   const { error } = await db.rpc('delete_my_account')
   if (!error) return 'deleted'
   return (error.message ?? '').includes('HAS_BUSINESS') ? 'has_business' : 'error'

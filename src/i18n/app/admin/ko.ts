@@ -192,6 +192,10 @@ const ko: AdminDict = {
     statusDraft: '초안',
     statusUnpublished: '게시 안 됨',
     statusArchived: '보관됨',
+    purgeFiles: '사진과 PDF 삭제',
+    purgeConfirm: '네, 모든 파일을 삭제할게요 (되돌릴 수 없어요)',
+    purgeHelp: '불법 콘텐츠라면 먼저 증거(스크린샷과 링크)를 저장하세요. 파일이 인터넷에서 사라져요.',
+    purgeDone: (n) => `파일 ${n}개를 삭제했어요`,
   },
   activity: {
     title: '팀 활동 기록',
@@ -201,6 +205,7 @@ const ko: AdminDict = {
     loadFailed: '활동 기록을 불러오지 못했어요.',
     space_suspended: 'Space를 정지했어요',
     space_unsuspended: '정지를 해제했어요',
+    media_purged: '계정의 파일을 삭제했어요',
     verified: '계정을 인증했어요',
     verification_removed: '인증을 해제했어요',
     report_actioned: '신고를 조치했어요',

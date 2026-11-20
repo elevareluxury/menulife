@@ -701,6 +701,25 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   espera el guardado en curso antes de publicar y Ajustes actualiza la revisión del autosave; quien dejó el onboarding
   a medias vuelve a Studio al entrar; la cola sin conexión reintenta al volver a la app y cada minuto; exportar pagina
   con orden fijo.
+- Salida web mundial (auditoría del 20/11/2026, `20261123000001_web_launch_hardening.sql`, tests en
+  `web_launch_hardening.test.sql`): Mycen Business **cerrado también en la base** (tablas de negocio sin acceso anónimo ni
+  políticas "para todos", funciones de Business sin EXECUTE para anónimos, carpetas de Business sin subidas salvo el
+  equipo; reabrirlo pide una migración nueva). Usernames con marcas o bancos reservados (`mycen_username_impersonates` =
+  `IMPERSONATION_FRAGMENTS` de `src/lib/reservedUsernames.ts`, un test compara). El tilde de verificado vuelve a revisión
+  si cambia el nombre o el username del principal, o si un Space se llama distinto (`mycen_verification_follows_name`).
+  Un perfil suspendido no se borra (salvo con la cuenta: su username queda reservado) y la cuenta no crea perfiles.
+  Tope diario por IP en las RPC públicas que escriben con el gancho previo de PostgREST (`mycen_pre_request`,
+  `mycen_rate_limit_for`, IP de `cf-connecting-ip` como hash en `mycen_rate_hits`, 2 días; responde 429; si algo falla
+  deja pasar). Sitemap sin Spaces de menos de 7 días. Perfil público desde la CDN: `api/profile.ts` (`?h=` y nada más,
+  `CDN-Cache-Control` 30 s + 10 min de copia, errores sin caché); `profileApi` y el pedido temprano de index.html la
+  usan sin sesión y vuelven a la RPC si falla (tests en `profileCache.test.ts`). Fotos siempre vueltas a dibujar
+  (`optimizeImage` con `strict`: sin EXIF/GPS; si no se puede leer, no se sube). Borrar la cuenta borra todas las fotos
+  y PDF (`removeAccountFiles`, `src/lib/accountFiles.ts`) y el equipo puede borrarlos de una cuenta suspendida desde
+  Personas (`admin_log_media_purge` queda en la actividad). Links de los perfiles con `rel="… nofollow ugc"`. Podcast y
+  portadas validan cada redirección antes de seguirla (`src/lib/checkedFetch.ts`). Copia diaria de fotos y PDF a
+  Cloudflare R2 (`.github/workflows/storage-backup.yml`, pasos en `docs/lanzamiento/copia-archivos.md`) y prueba de carga
+  con k6 (`scripts/load/profile-load.js`, `docs/lanzamiento/prueba-de-carga.md`). Android sin copia de seguridad
+  (`allowBackup="false"`).
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,

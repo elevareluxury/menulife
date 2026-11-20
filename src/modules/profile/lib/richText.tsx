@@ -19,7 +19,7 @@ function inline(text: string, key: string): ReactNode[] {
       const label = m[2] ?? m[4]
       const href = safeHref(m[3] ?? m[4])
       out.push(href
-        ? <a key={`${key}-${n++}`} href={href} {...(isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{label}</a>
+        ? <a key={`${key}-${n++}`} href={href} {...(isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer nofollow ugc' } : {})}>{label}</a>
         : m[0])
     }
     last = m.index! + m[0].length

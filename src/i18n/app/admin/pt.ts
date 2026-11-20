@@ -195,6 +195,10 @@ const pt: AdminDict = {
     statusDraft: 'Rascunho',
     statusUnpublished: 'Não publicado',
     statusArchived: 'Arquivado',
+    purgeFiles: 'Apagar fotos e PDFs',
+    purgeConfirm: 'Sim, apagar todos os arquivos (não dá para desfazer)',
+    purgeHelp: 'Para conteúdo ilegal, guarde antes a evidência (captura e link). Os arquivos deixam de estar na internet.',
+    purgeDone: (n) => `${n} arquivos apagados`,
   },
   activity: {
     title: 'Atividade da equipe',
@@ -204,6 +208,7 @@ const pt: AdminDict = {
     loadFailed: 'Não foi possível carregar a atividade.',
     space_suspended: 'Suspendeu um Space',
     space_unsuspended: 'Retirou uma suspensão',
+    media_purged: 'Apagou os arquivos de uma conta',
     verified: 'Verificou uma conta',
     verification_removed: 'Removeu uma verificação',
     report_actioned: 'Resolveu uma denúncia com uma medida',
