@@ -12,7 +12,7 @@ test('pedir la verificación desde Ajustes: valida el link y queda en revisión'
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/studio/settings')
 
-  const section = page.getByRole('region', { name: 'Verificación' })
+  const section = page.getByRole('region', { name: 'Verificación', exact: true })
   await expect(section).toBeVisible()
   const send = section.getByRole('button', { name: 'Pedir verificación' })
   await expect(send).toBeDisabled()
