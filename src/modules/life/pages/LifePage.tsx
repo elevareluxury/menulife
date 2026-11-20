@@ -146,7 +146,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
             type="button"
             onClick={() => navigate('/studio')}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              display: 'inline-flex', alignItems: 'center', gap: '5px', minHeight: '44px',
               padding: '8px 14px', borderRadius: radius.full,
               background: colors.accent.default, border: `1px solid ${colors.accent.default}`,
               color: colors.accent.on, fontFamily: font, fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
@@ -160,7 +160,7 @@ function HubSection({ hasRestaurant, restaurantSlug, avatarUrl, initials }: HubS
               type="button"
               onClick={() => navigate(`/${restaurantSlug}`)}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                display: 'inline-flex', alignItems: 'center', gap: '4px', minHeight: '44px',
                 padding: '8px 12px', borderRadius: radius.full,
                 background: colors.surface.base, border: `1px solid ${colors.border.subtle}`,
                 color: colors.text.tertiary, fontFamily: font, fontSize: '12px', fontWeight: 600, cursor: 'pointer',

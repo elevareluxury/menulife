@@ -336,6 +336,8 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         ] },
       ],
       prefill: x => { if (!x.layout) x.layout = 'grid' },
+      // Revista es lo de siempre: no se guarda (abrir y guardar una galería vieja no la cambia)
+      finalize: content => { if (content.layout !== 'book') delete content.layout },
       extra: extra<GalleryItem[]>({
         init: m => (Array.isArray(m?.content.items) ? m.content.items as GalleryItem[] : []),
         validate: items => (items.length ? null : e.galleryEmpty),
