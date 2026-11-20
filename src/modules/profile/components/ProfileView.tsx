@@ -209,7 +209,7 @@ export function ProfileView({ profile, lang, onLang, onToast, toast, preview = f
 
   const primaryNode = primary && primaryHref ? (
     <a className="mp-primary" href={primaryHref}
-      {...(isExternal(primaryHref) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      {...(isExternal(primaryHref) ? { target: '_blank', rel: 'noopener noreferrer nofollow ugc' } : {})}
       onClick={() => track(profile.id, 'primary_action_click')}>
       {primaryIcon(primary.kind, primaryHref)}
       {tr(null, profile.translations, 'primary_action_label', lang) || trLabel(primary.label, lang)}

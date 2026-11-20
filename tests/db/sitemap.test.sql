@@ -42,6 +42,9 @@ select set_config('mycen.moderating', 'on', true);
 update profiles set suspended_at = now() where username = 'caro';
 select set_config('mycen.moderating', '', true);
 
+-- Creados hace un mes: el sitemap no publica Spaces de menos de 7 días (20261123000001)
+update profiles set created_at = now() - interval '30 days';
+
 set local role anon;
 select set_config('request.jwt.claim.sub', '', true);
 do $$

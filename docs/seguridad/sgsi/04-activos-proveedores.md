@@ -33,6 +33,7 @@ tabla y a la política de privacidad (12 idiomas) **antes** de usarse.
 | Vercel | Web y funciones `api/` | Pedidos HTTP (sin guardar IP en Mycen) | SOC 2 Tipo II, ISO 27001 | Sí (vercel.com/legal/dpa) |
 | Resend | Mails de la cuenta | Email y contenido del mail | SOC 2 Tipo II | Sí |
 | Cloudflare (Turnstile) | Anti-bots en registro y acceso | Señales del navegador durante la verificación | SOC 2 Tipo II, ISO 27001 | Sí |
+| Cloudflare (R2) | Copia diaria de fotos y PDF de los perfiles | Los archivos públicos de `profile-media` y `profile-files` (lo borrado se guarda 30 días) | SOC 2 Tipo II, ISO 27001 | Sí |
 | Google (OAuth) / Apple (Sign in) | Iniciar sesión | Nombre, email, foto (sólo si la persona elige) | ISO 27001 | Términos del proveedor |
 | YouTube, Vimeo, Spotify, SoundCloud, TikTok | Reproductores | Sólo al tocar "Reproducir" (antes, nada) | Propias | Políticas propias (informado en privacidad) |
 | Hosting del podcast del dueño | Audio del podcast | Sólo al tocar "Escuchar" | — | Informado en privacidad |

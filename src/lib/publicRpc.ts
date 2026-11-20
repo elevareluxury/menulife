@@ -33,6 +33,11 @@ async function call(fn: string, args: Record<string, unknown>, token: string): P
   })
 }
 
+/** ¿Hay una sesión vigente guardada en este dispositivo? (sin sesión, el perfil puede venir de la caché de la CDN) */
+export function hasDeviceSession(): boolean {
+  return sessionToken() !== null
+}
+
 export async function publicRpc<T = unknown>(fn: string, args: Record<string, unknown> = {}): Promise<RpcResult<T>> {
   try {
     const token = sessionToken()

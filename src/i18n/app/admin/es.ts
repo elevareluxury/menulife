@@ -283,6 +283,10 @@ const es = {
     statusDraft: 'Borrador',
     statusUnpublished: 'Sin publicar',
     statusArchived: 'Archivado',
+    purgeFiles: 'Borrar sus fotos y PDF',
+    purgeConfirm: 'Sí, borrar todos sus archivos (no se puede deshacer)',
+    purgeHelp: 'Para contenido ilegal, guardá antes la evidencia (captura y link). Los archivos dejan de estar en internet.',
+    purgeDone: (n: number) => `Se borraron ${n} archivos`,
   },
   activity: {
     title: 'Actividad del equipo',
@@ -292,6 +296,7 @@ const es = {
     loadFailed: 'No se pudo cargar la actividad.',
     space_suspended: 'Suspendió un Space',
     space_unsuspended: 'Levantó una suspensión',
+    media_purged: 'Borró los archivos de una cuenta',
     verified: 'Verificó una cuenta',
     verification_removed: 'Quitó una verificación',
     report_actioned: 'Resolvió una denuncia con una medida',

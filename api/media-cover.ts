@@ -4,6 +4,7 @@
 // imágenes de cada proveedor y con tope de tamaño. Los errores son códigos fijos.
 
 import { COVER_MAX_BYTES, COVER_TYPES, coverRequestFor, isAllowedCoverUrl } from '../src/modules/profile/lib/mediaCover'
+import { fetchCheckedRedirects } from '../src/lib/checkedFetch'
 
 export const config = { runtime: 'edge' }
 
@@ -31,8 +32,18 @@ async function fetchWithTimeout(url: string, accept: string): Promise<Response> 
 /** Baja la imagen sólo si viene de un servidor permitido, es una imagen y no pasa el tope */
 async function image(url: string): Promise<{ body: Uint8Array; type: string } | null> {
   if (!isAllowedCoverUrl(url)) return null
-  const res = await fetchWithTimeout(url, 'image/*')
-  if (!res.ok || (res.url && !isAllowedCoverUrl(res.url))) return null
+  // Cada redirección tiene que seguir en un servidor de imágenes permitido (se valida antes de pedirla)
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetchCheckedRedirects(url, { signal: ctrl.signal, headers: { 'user-agent': UA, accept: 'image/*' } }, isAllowedCoverUrl)
+  } catch {
+    clearTimeout(timer)
+    return null
+  }
+  clearTimeout(timer)
+  if (!res.ok) return null
   const type = (res.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase()
   if (!(COVER_TYPES as readonly string[]).includes(type)) return null
   if (Number(res.headers.get('content-length') ?? 0) > COVER_MAX_BYTES || !res.body) return null

@@ -19,7 +19,7 @@ import './v2modules.css'
 // galería de videos y podcast. Nada de terceros antes de que el visitante toque algo.
 
 const str = (v: unknown): string => (typeof v === 'string' ? v : '')
-const linkProps = (href: string) => (isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})
+const linkProps = (href: string) => (isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer nofollow ugc' } : {})
 
 // ── Encuesta ────────────────────────────────────────────────────────────────
 

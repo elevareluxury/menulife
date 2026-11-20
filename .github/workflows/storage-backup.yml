@@ -1,0 +1,68 @@
+# Copia diaria de los archivos de Mycen (fotos y PDF de profile-media y profile-files) a Cloudflare R2.
+# Las copias de la base de Supabase (PITR) no incluyen el almacenamiento: esto cubre ese hueco.
+#
+# - Copia "espejo" en <bucket R2>/current/<carpeta>. Lo que se borró o cambió en Mycen pasa a old/<fecha>/ y se borra
+#   a los 30 días (así un archivo que alguien borró, o el de una cuenta borrada, no queda guardado para siempre).
+# - Si faltan los secretos, no falla: avisa y termina (para poder mergear antes de configurarlo).
+# Secretos (GitHub → Settings → Secrets and variables → Actions), pasos en docs/lanzamiento/copia-archivos.md:
+#   SUPABASE_S3_ENDPOINT, SUPABASE_S3_REGION, SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY,
+#   R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET
+name: Copia diaria de archivos
+
+on:
+  schedule:
+    - cron: '41 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: storage-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG_SUPA_TYPE: s3
+      RCLONE_CONFIG_SUPA_PROVIDER: Other
+      RCLONE_CONFIG_SUPA_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+      RCLONE_CONFIG_SUPA_REGION: ${{ secrets.SUPABASE_S3_REGION }}
+      RCLONE_CONFIG_SUPA_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_SUPA_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_SUPA_FORCE_PATH_STYLE: 'true'
+      RCLONE_CONFIG_R2_TYPE: s3
+      RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_R2_NO_CHECK_BUCKET: 'true'
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+    steps:
+      - name: ¿Está configurado?
+        id: check
+        run: |
+          if [ -z "$RCLONE_CONFIG_SUPA_ENDPOINT" ] || [ -z "$RCLONE_CONFIG_R2_ENDPOINT" ] || [ -z "$R2_BUCKET" ]; then
+            echo "::notice::Copia de archivos sin configurar: faltan los secretos (docs/lanzamiento/copia-archivos.md)"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Instalar rclone
+        if: steps.check.outputs.ready == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq rclone
+      - name: Copiar profile-media y profile-files
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          day=$(date -u +%F)
+          for b in profile-media profile-files; do
+            rclone sync "supa:$b" "r2:$R2_BUCKET/current/$b" \
+              --backup-dir "r2:$R2_BUCKET/old/$day/$b" \
+              --fast-list --transfers 16 --checkers 32 --stats-one-line --stats 60s
+          done
+      - name: Borrar lo viejo (más de 30 días)
+        if: steps.check.outputs.ready == 'true'
+        run: rclone delete "r2:$R2_BUCKET/old" --min-age 30d --rmdirs

@@ -45,7 +45,7 @@ export function ListenOnModule({ module, lang, onAction }: ModuleProps) {
           const name = LISTEN_PLATFORM_NAME[l.platform]
           return (
             <li key={l.platform}>
-              <a className="mp-listen-link" href={l.url} target="_blank" rel="noopener noreferrer"
+              <a className="mp-listen-link" href={l.url} target="_blank" rel="noopener noreferrer nofollow ugc"
                 aria-label={t.listenOn.replace('{platform}', name)} onClick={() => onAction(module.id, l.platform)}>
                 <Music2 size={18} aria-hidden="true" className="mp-listen-icon" />
                 <span className="mp-listen-name" translate="no">{name}</span>

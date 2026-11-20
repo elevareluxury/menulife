@@ -9,6 +9,8 @@ insert into auth.users (id, email, created_at) values
 insert into public.super_admins (user_id) values ('cccccccc-0000-0000-0000-000000000003');
 insert into public.profiles (id, user_id, username, display_name, status)
 values ('11111111-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000001', 'ana', 'Ana', 'draft');
+-- Creado hace un mes: el sitemap no publica Spaces de menos de 7 días (20261123000001)
+update public.profiles set created_at = now() - interval '30 days' where id = '11111111-0000-0000-0000-000000000001';
 insert into storage.buckets (id, name, public) values ('media', 'media', true) on conflict do nothing;
 insert into storage.objects (bucket_id, name, metadata) values
   ('media', 'a/1.webp', '{"size": 1000}'), ('media', 'a/2.webp', '{"size": 500}');

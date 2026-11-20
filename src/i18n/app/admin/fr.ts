@@ -195,6 +195,10 @@ const fr: AdminDict = {
     statusDraft: 'Brouillon',
     statusUnpublished: 'Non publié',
     statusArchived: 'Archivé',
+    purgeFiles: 'Supprimer ses photos et PDF',
+    purgeConfirm: 'Oui, supprimer tous ses fichiers (irréversible)',
+    purgeHelp: 'Pour un contenu illégal, conservez d\'abord la preuve (capture et lien). Les fichiers seront retirés d\'internet.',
+    purgeDone: (n) => `${n} fichiers supprimés`,
   },
   activity: {
     title: 'Activité de l\'équipe',
@@ -204,6 +208,7 @@ const fr: AdminDict = {
     loadFailed: 'Impossible de charger l’activité.',
     space_suspended: 'A suspendu un Space',
     space_unsuspended: 'A levé une suspension',
+    media_purged: 'A supprimé les fichiers d\'un compte',
     verified: 'A vérifié un compte',
     verification_removed: 'A retiré une vérification',
     report_actioned: 'A traité un signalement avec une mesure',

@@ -22,7 +22,7 @@ import './events.css'
 // del evento (portada, datos, descripción y "Comprar entradas" fijo abajo), que tiene su propio link (?evento=<id>)
 // para compartirla. Los eventos con fecha pasada se ocultan solos.
 
-const linkProps = (href: string) => (isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})
+const linkProps = (href: string) => (isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer nofollow ugc' } : {})
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 function dateParts(date: string | undefined, lang: ProfileLang) {

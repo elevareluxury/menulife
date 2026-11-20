@@ -88,7 +88,7 @@ export function SupportModule({ module, lang, onAction }: ModuleProps) {
           const href = supportHref(m.kind, m.value)
           if (!href) return null
           return (
-            <a key={i} className={`mp-support-link${i === firstLink ? ' is-primary' : ''}`} href={href} target="_blank" rel="noopener noreferrer"
+            <a key={i} className={`mp-support-link${i === firstLink ? ' is-primary' : ''}`} href={href} target="_blank" rel="noopener noreferrer nofollow ugc"
               onClick={() => onAction(module.id, supportKey(m))}>
               <span className="mp-support-icon" aria-hidden="true"><Icon size={18} /></span>
               <span className="mp-support-link-name">{name}</span>

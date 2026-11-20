@@ -100,9 +100,28 @@ export const RESERVED_USERNAMES: ReadonlySet<string> = new Set([
 
 const norm = (value: string) => value.trim().toLowerCase()
 
+/**
+ * Fragmentos que no puede contener un username (se comparan sin guiones): marcas y bancos muy usados para phishing,
+ * así nadie arma `santander-ayuda` o `pay-pal-soporte`. Igual a `mycen_username_impersonates` en
+ * supabase/migrations/20261123000001_web_launch_hardening.sql (el test de unidad compara las dos listas).
+ */
+export const IMPERSONATION_FRAGMENTS: readonly string[] = [
+  'mycen', 'paypal', 'mercadopago', 'mercadolibre', 'mercadolivre', 'santander', 'bbva', 'banco',
+  'hsbc', 'citibank', 'wellsfargo', 'bankofamerica', 'jpmorgan', 'chasebank', 'itau', 'bradesco', 'nubank',
+  'brubank', 'naranjax', 'binance', 'coinbase', 'metamask', 'trustwallet', 'westernunion', 'moneygram',
+  'icloud', 'appleid', 'applesupport', 'gmail', 'googlesupport', 'microsoft', 'office365', 'outlook',
+  'hotmail', 'whatsapp', 'instagram', 'facebook', 'tiktok', 'netflix', 'afip', 'anses',
+]
+
+/** ¿El username contiene una marca o un banco de la lista? */
+export function impersonatesBrand(value: string): boolean {
+  const v = norm(value).replace(/-/g, '')
+  return IMPERSONATION_FRAGMENTS.some(f => v.includes(f))
+}
+
 /** ¿Está prohibido elegirlo como username? (onboarding, Studio) */
 export function isReservedUsername(value: string): boolean {
-  return RESERVED_USERNAMES.has(norm(value))
+  return RESERVED_USERNAMES.has(norm(value)) || impersonatesBrand(value)
 }
 
 /** ¿`/{value}` es una ruta del sistema y no un perfil? (páginas públicas) */

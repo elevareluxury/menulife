@@ -192,6 +192,10 @@ const hi: AdminDict = {
     statusDraft: 'ड्राफ़्ट',
     statusUnpublished: 'अप्रकाशित',
     statusArchived: 'संग्रहित',
+    purgeFiles: 'इनकी फ़ोटो और PDF हटाएँ',
+    purgeConfirm: 'हाँ, सारी फ़ाइलें हटाएँ (वापस नहीं होगा)',
+    purgeHelp: 'अवैध सामग्री के लिए पहले सबूत (स्क्रीनशॉट और लिंक) सहेजें। फ़ाइलें इंटरनेट से हट जाएँगी।',
+    purgeDone: (n) => `${n} फ़ाइलें हटाई गईं`,
   },
   activity: {
     title: 'टीम की गतिविधि',
@@ -201,6 +205,7 @@ const hi: AdminDict = {
     loadFailed: 'गतिविधि लोड नहीं हो सकी।',
     space_suspended: 'एक Space निलंबित किया',
     space_unsuspended: 'निलंबन हटाया',
+    media_purged: 'एक खाते की फ़ाइलें हटाईं',
     verified: 'एक अकाउंट सत्यापित किया',
     verification_removed: 'एक सत्यापन हटाया',
     report_actioned: 'एक शिकायत पर कार्रवाई की',
