@@ -89,7 +89,7 @@ test('cada módulo muestra lo cargado, en cm y pulgadas, con la fecha de los nú
 })
 
 const withAsOf = (days: number) => PORTFOLIO().map(m => (m.type === 'audience'
-  ? { ...m, content: { ...m.content, as_of: new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10) } } : m))
+  ? { ...m, content: { ...(m.content as Record<string, unknown>), as_of: new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10) } } : m))
 
 test('audiencia: con más de 90 días avisa que puede estar desactualizada', async ({ page, context }) => {
   await installSupabaseMock(context, createState({ profiles: [profileRow({ theme: { layout: 'credencial' } })], profile_modules: withAsOf(200) }))
@@ -189,7 +189,7 @@ test('plantilla Modelo: agrega medidas, representación y la galería en book (v
   const detail = page.getByRole('dialog', { name: 'Modelo' })
   await detail.getByRole('button', { name: /^Agregar \d+ módulos$/ }).click()
   await expect(detail).toHaveCount(0)
-  const added = state.tables.profile_modules.filter(m => m.config?.template === 'model')
+  const added = state.tables.profile_modules.filter(m => (m.config as Record<string, unknown> | null)?.template === 'model')
   expect(added.map(m => m.type)).toEqual(['gallery', 'measurements', 'representation', 'brands', 'press', 'social', 'contact_form'])
   expect(added.every(m => m.visibility === 'hidden')).toBe(true)
   expect(added.find(m => m.type === 'gallery')!.content).toEqual({ layout: 'book' })
