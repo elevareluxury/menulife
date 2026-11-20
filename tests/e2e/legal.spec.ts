@@ -9,7 +9,7 @@ test('términos en español con índice, reglas y contacto', async ({ page, cont
   await page.goto('/terminos#reglas')
   await expect(page.getByRole('heading', { level: 1, name: 'Términos y condiciones' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Reglas de contenido' })).toBeInViewport()
-  await expect(page.getByRole('navigation', { name: 'Contenido' }).getByRole('link')).toHaveCount(12)
+  await expect(page.getByRole('navigation', { name: 'Contenido' }).getByRole('link')).toHaveCount(15)
   await expect(page.getByText('Mycen es un servicio operado por')).toContainText('Resilio')
   await expect(page.getByText('La versión en español es la de referencia')).toHaveCount(0)
   await expect(page).toHaveTitle('Términos y condiciones · Mycen')

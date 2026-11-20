@@ -46,3 +46,44 @@ describe('textos legales', () => {
     for (const p of ['Cloudflare R2', 'Firebase Cloud Messaging', 'Mozilla']) expect(providers).toContain(p)
   })
 })
+
+describe('revisión mundial (20/11/2026)', () => {
+  const terms = (id: string) => JSON.stringify(es.terms.find(s => s.id === id))
+  const privacy = (id: string) => JSON.stringify(es.privacy.find(s => s.id === id))
+
+  it('términos: uso correcto, lo que es de Mycen, condiciones de Apple, moderación y contranotificación', () => {
+    for (const id of ['uso', 'propiedad', 'apps']) expect(es.terms.map(s => s.id)).toContain(id)
+    // Las condiciones mínimas que pide Apple para un contrato propio (Apple no es parte, soporte, garantía, reclamos,
+    // embargos, tercero beneficiario)
+    const apps = es.terms.find(s => s.id === 'apps')!.body.find(b => typeof b !== 'string') as { list: string[] }
+    expect(apps.list).toHaveLength(6)
+    expect(terms('apps')).toContain('terceros beneficiarios')
+    expect(terms('reglas')).toContain('Cómo moderamos')
+    expect(terms('reglas')).toContain('resolución extrajudicial')
+    expect(terms('derechos-de-autor')).toContain('contranotificación')
+    expect(terms('derechos-de-autor')).toContain('pena de perjurio')
+    expect(terms('quien')).toContain('Servicios Digitales')
+    expect(terms('servicio')).toContain('US$ 100')
+  })
+
+  it('privacidad: bases legales, objeción, transferencias, brechas, cookies y derechos por región', () => {
+    expect(privacy('para-que')).toContain('podés oponerte')
+    expect(privacy('para-que')).toContain('decisiones automatizadas')
+    expect(privacy('transferencias')).toContain('cláusulas contractuales tipo')
+    expect(privacy('seguridad')).toContain('72 horas')
+    expect(privacy('dispositivo')).toContain('aviso de cookies')
+    expect(es.privacy.map(s => s.id)).toContain('segun-pais')
+    for (const k of ['LGPD', 'California', 'Global Privacy Control', 'Apelación', 'PIPC', 'DPDP']) expect(privacy('segun-pais')).toContain(k)
+    expect(privacy('plazos')).toContain('denuncias')
+    expect(privacy('menores')).toContain('menos de 18')
+  })
+
+  it.each(APP_LANGS.filter(l => l !== 'es'))('%s tiene la sección por región y las condiciones de Apple', async lang => {
+    const dict = (await import(`../../src/i18n/app/legal/${lang}.ts`)).default as typeof es
+    const region = JSON.stringify(dict.privacy.find(s => s.id === 'segun-pais'))
+    for (const k of ['LGPD', 'Global Privacy Control', 'PIPC', 'DPDP', 'team@mycen.id']) expect(region).toContain(k)
+    expect(JSON.stringify(dict.terms.find(s => s.id === 'apps'))).toContain('Apple')
+    expect(JSON.stringify(dict.privacy.find(s => s.id === 'seguridad'))).toContain('72')
+  })
+})
+

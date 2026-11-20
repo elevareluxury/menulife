@@ -231,7 +231,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Legales (L4): `/terminos` y `/privacidad` salen de `src/i18n/app/legal/<idioma>.ts` (secciones con id; el español es la
   versión de referencia y las traducciones tienen la misma estructura, lo verifica `tests/unit/legal.test.ts`). Responsable:
   Luca Cazzoli (monotributo, CUIT 20-42325961-3) con el nombre de fantasía Resilio (Argentina), contacto `team@mycen.id`. Si se suma un proveedor o un dato nuevo, actualizar privacidad en los 12.
-  Textos sin revisión de abogado: revisarlos antes de abrir al público.
+  Revisión mundial del 20/11/2026 (sin abogado; GDPR, DSA, LGPD, CCPA y estados de EE. UU., DMCA, condiciones de Apple,
+  edades por país y derechos por región en `privacy` → `segun-pais`): qué cubre y qué falta del dueño (representante UE/RU,
+  agente DMCA, consentimiento aparte para Corea y China, sociedad) en `docs/lanzamiento/legal-mundial.md`. Tests en `legal.test.ts`.
 - Preferencias de la cuenta en `user_settings` (idioma, moneda principal, monedas extra, zona horaria, inicio de semana):
   `src/lib/prefs.ts` (`usePrefs`, `savePrefs`), se cargan en `PrefsInit`. Ajustes en `/life/settings` y Studio → Ajustes.
 - Zona horaria de Life OS: "hoy", meses, horas (Mi día desde las 18 h, recordatorios), claves de fecha, bordes de
