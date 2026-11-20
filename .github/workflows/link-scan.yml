@@ -1,0 +1,33 @@
+# Links peligrosos: cada hora revisa con Google Web Risk los links de lo publicado y deja en Denuncias los que tienen
+# una amenaza (phishing, malware). Nada se suspende solo. Sin los secretos, avisa y no falla.
+# Pasos y secretos: docs/lanzamiento/alertas.md
+name: Revisión de links
+
+on:
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: link-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Revisar links publicados
+        run: node scripts/cron/link-scan.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          MYCEN_CRON_KEY: ${{ secrets.MYCEN_CRON_KEY }}
+          WEB_RISK_API_KEY: ${{ secrets.WEB_RISK_API_KEY }}

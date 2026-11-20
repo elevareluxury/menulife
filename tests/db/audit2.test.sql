@@ -229,7 +229,9 @@ do $$ declare r record; begin
                                    'submit_profile_message', 'submit_profile_collab', 'track_product_event',
                                    'subscribe_profile', 'life_calendar_feed', 'get_site_flags', 'get_poll_results', 'vote_profile_poll',
                                    -- gancho previo de PostgREST (límite por IP, 20261123000001): no devuelve datos
-                                   'mycen_pre_request') loop
+                                   'mycen_pre_request',
+                                   -- tareas programadas (20261125000001): sin la llave de mycen_cron_keys no devuelven nada
+                                   'cron_alert_digest', 'cron_recent_links', 'cron_flag_link') loop
     assert false, 'anon puede ejecutar: ' || r.proname;
   end loop;
 end $$;

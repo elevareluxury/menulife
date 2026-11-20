@@ -40,6 +40,8 @@ tabla y a la política de privacidad (12 idiomas) **antes** de usarse.
 | Anthropic | Importar menú desde PDF (Business) | El PDF que sube el negocio | SOC 2 Tipo II, ISO 27001 | Sí. **Se deja de usar al borrar `import-menu-pdf`** (actualizar privacidad entonces) |
 | Mercado Pago | Cobros de Business | Pago en Mercado Pago | PCI DSS | Términos del proveedor |
 | Apple App Store / Google Play | Distribución de las apps | Descarga e instalación | ISO 27001 | Términos del proveedor |
+| Google (Web Risk) | Revisar links públicos de lo publicado (estafas, virus) | Sólo el link público; nada de la persona ni del visitante | ISO 27001, SOC 2 | Términos de Google Cloud |
+| GitHub Actions | Tareas programadas (avisos al equipo, revisión de links, copia de archivos) | Llave propia de tareas (sin service role) y resúmenes sin datos personales | SOC 2 Tipo II | Sí |
 | Servicio de avisos del navegador (Google FCM, Microsoft, Apple, Mozilla) | Recordatorios de Life OS con la web cerrada | Dirección de envío; el aviso viaja cifrado (no lo pueden leer) | Propias | Políticas propias (informado en privacidad) |
 
 ## Registro de tratamientos (27701 7.2.8 · GDPR art. 30 · Ley 25.326)
@@ -52,7 +54,7 @@ tabla y a la política de privacidad (12 idiomas) **antes** de usarse.
 | Ánimo del día (posible dato de salud, GDPR art. 9) | Valor 1–5 y fecha | Usuarios | Mostrarle sus propios patrones | Consentimiento explícito (tocar la carita, con el aviso al lado; se retira tocándola de nuevo) | Hasta que lo borre | Supabase |
 | Avisos web (push) | Dirección de envío, claves, zona, navegador | Usuarios | Recordatorios con la web cerrada | Consentimiento (permiso del navegador) | Hasta desactivarlos o borrar la cuenta | Supabase, servicio de avisos del navegador |
 | Límite por IP | Hash con sal de la IP, contador por día | Visitantes | Frenar abusos en las RPC públicas | Interés legítimo | 2 días | Nadie (sólo la base) |
-| Estadísticas de visitas | Eventos seudonimizados (hash diario), sin IP | Visitantes | Mostrar visitas al dueño | Interés legítimo | Mientras exista el perfil | Dueño del perfil (agregado) |
+| Estadísticas de visitas | Eventos seudonimizados (hash diario), sin IP | Visitantes | Mostrar visitas al dueño | Interés legítimo | 13 meses (o hasta borrar el perfil) | Dueño del perfil (agregado) |
 | Mensajes y colaboraciones | Nombre, contacto, mensaje | Visitantes | Que el dueño reciba contactos | Consentimiento (envío) | Hasta que el dueño los borre | Dueño del perfil |
 | Suscriptores | Email, nombre opcional, consentimiento | Visitantes | Lista del dueño | Consentimiento | Hasta que el dueño o la persona lo pida | Dueño del perfil |
 | Encuestas | Opción + hash diario | Visitantes | Resultados de la encuesta | Interés legítimo | Mientras exista el módulo | Público (sólo cantidades) |

@@ -7,7 +7,8 @@ mismo: si se cambia un plazo, se cambian los dos en el mismo PR.
 |---|---|---|
 | Cuenta, perfil, Life OS, proyectos | Mientras exista la cuenta | La persona borra la cuenta (Studio / Life OS → Ajustes, o `/eliminar-cuenta`): cascada en la base |
 | Mensajes, colaboraciones, suscriptores | Hasta que el dueño los borra o borra su cuenta | Studio → Mensajes / Suscriptores; cascada al borrar el perfil |
-| Estadísticas de visitas (`profile_events`) | Mientras exista el perfil | Cascada al borrar el perfil |
+| Estadísticas de visitas (`profile_events`) | 13 meses (Studio muestra hasta 90 días) | `mycen_purge_expired()` diario (hasta 200.000 por día) y cascada al borrar el perfil |
+| Links marcados como peligrosos (`mycen_link_flags`) | 13 meses | `mycen_purge_expired()` diario; la denuncia queda en `profile_reports` |
 | Votos de encuestas (`profile_poll_votes`) | Mientras exista el módulo | Cascada al borrar el módulo |
 | Uso de la app (`product_events`, `user_activity_days`) | **25 meses** | `mycen_purge_expired()` diario (pg_cron 04:17 UTC). Al borrar la cuenta: actividad en cascada, eventos sin vínculo |
 | Personas afectadas por errores (`app_error_hits`) | **90 días** | `mycen_purge_expired()` y al reportar un error |

@@ -27,7 +27,7 @@ describe('textos legales', () => {
   it('nombra a todos los proveedores que usa Mycen', () => {
     const providers = JSON.stringify(es.privacy.find(s => s.id === 'proveedores'))
     for (const p of ['Supabase', 'Vercel', 'Resend', 'Anthropic', 'Mercado Pago', 'YouTube', 'Vimeo', 'TikTok', 'Spotify', 'SoundCloud',
-      'Cloudflare R2', 'Firebase Cloud Messaging']) expect(providers).toContain(p)
+      'Cloudflare R2', 'Firebase Cloud Messaging', 'Google Web Risk']) expect(providers).toContain(p)
   })
 
   it('cuenta lo que guarda la salida web: ánimo con consentimiento, avisos, encuestas, IP como hash y bitácora', () => {
