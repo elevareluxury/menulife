@@ -736,6 +736,15 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   denuncias y pone `mycen_legal_holds`; con retención nadie borra la cuenta ni sus fotos y PDF, política restrictiva en
   `storage.objects`), Personas muestra la retención y "Levantar la retención"; procedimiento en `docs/seguridad/csam.md`.
   Texto alternativo: galería (`items[].alt`, nombre del botón y del visor) y foto de un texto (`content.image_alt`).
+- Avisos al equipo, links peligrosos y escala (PR D, `20261125000001_alerts_links_events_scale.sql`, tests en
+  `alerts_links_scale.test.sql` y `cronRules.test.ts`; pasos en `docs/lanzamiento/alertas.md`): tareas de GitHub
+  Actions sin service role — entran con la anon key y `MYCEN_CRON_KEY` (`mycen_cron_keys` guarda el hash;
+  `select mycen_set_cron_key()` en el SQL Editor la crea). `team-alerts.yml` (15 min) → `cron_alert_digest` + `/api/health`
+  → un mail por Resend si hay errores nuevos, denuncias, pico de registros o links marcados. `link-scan.yml` (1 h) →
+  `cron_recent_links` (links de lo publicado, `mycen_snapshot_links`) → Google Web Risk (no Safe Browsing: es para uso
+  no comercial) → `cron_flag_link` crea una denuncia `scam` (una vez por perfil y link, `mycen_link_flags`; nada se
+  suspende solo). Reglas puras en `scripts/cron/rules.mjs`. Visitas (`profile_events`) 13 meses e índice parcial de
+  vistas por fecha. Propuesta de portfolio (modelos, influencers, cantantes): `docs/identity/portfolio-propuesta.md`.
 - Portada automática (Video y música, "Escuchá en"): al pegar un link de YouTube, Vimeo, Spotify, SoundCloud o TikTok sin
   portada, Studio (`studio/lib/autoCover.ts`, `useAutoCover`) pide `/api/media-cover?url=` (Edge: reglas puras en
   `profile/lib/mediaCover.ts` — YouTube por i.ytimg, el resto por oEmbed; sólo servidores de imágenes de cada proveedor,

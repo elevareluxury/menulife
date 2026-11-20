@@ -192,6 +192,7 @@ const en: LegalDict = {
         '**Resend:** sending your account emails.',
         '**Cloudflare (Turnstile):** the anti-bot check on sign-up, log-in and password recovery. When you open those screens, Cloudflare receives technical data from your browser (such as your IP address) only to check that you are not a bot.',
         '**Cloudflare R2:** keeps a daily backup of the photos and PDFs that profiles upload, so they can be recovered if something fails. What’s deleted in Mycen stays in that backup for 30 days and is then removed.',
+        '**Google Web Risk:** we check the public links of published profiles and projects with Google to find scams and viruses. Only the link is sent; nothing about you or your visitors. If a link is dangerous, the Mycen team reviews it.',
         '**YouTube, Vimeo, TikTok, Spotify and SoundCloud:** only if a profile embeds a video or a song and you tap "Play". Nothing connects to them before that; from then on, their own policies apply. If a profile shows its "Latest video", the Mycen server checks the public video list of the YouTube channel chosen by the owner, without sending any of your data. When a profile owner pastes one of those links in Studio, the Mycen server fetches the public cover of that video or song and stores it as another photo of their profile, so the page shows it without connecting you to the provider. If a profile shows a podcast, the Mycen server reads the public RSS feed chosen by its owner, without sending any of your data; when you tap "Listen", your browser connects to the service hosting that podcast and its policies apply. If a profile has several locations and you tap "Show the nearest", your browser asks for permission to use your location: it’s used only on your device to sort the list and is not sent to Mycen or anyone else.',
         '**Anthropic:** only if a business uses the menu import from a PDF; that file is processed.',
         '**Mercado Pago:** only if a business sets it up to get paid; the payment happens on Mercado Pago.',
@@ -210,7 +211,7 @@ const en: LegalDict = {
     { id: 'plazos', title: 'How long we keep it', body: [
       { list: [
         'Your account, profile and Life OS data, for as long as you have the account. If you delete it, we delete them, including your photos and PDFs; providers’ backups are overwritten in their usual cycles, and the daily backup of photos and PDFs keeps what was deleted for 30 days.',
-        'Visit statistics and poll votes are kept pseudonymized (with the identifier that changes every day) for as long as the profile exists; if it’s deleted, they’re deleted with it.',
+        'Visit statistics are kept pseudonymized (with the identifier that changes every day) for 13 months —Studio shows up to 90 days— and poll votes for as long as the profile exists. If the profile is deleted, they’re deleted with it.',
         'Contact form messages, until the profile owner deletes them or deletes their account.',
         'Subscription emails, until the profile owner deletes them, deletes their account or you ask us to delete them.',
         'Error records are kept for as long as they help us fix problems (a resolved one stays in case it happens again); the count of affected people, 90 days.',

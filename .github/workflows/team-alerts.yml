@@ -1,0 +1,34 @@
+# Avisos al equipo: cada 15 minutos mira /api/health y el resumen de la base (errores nuevos, denuncias, pico de
+# registros, links peligrosos) y manda un mail si hay algo. Sin los secretos, avisa y no falla.
+# Pasos y secretos: docs/lanzamiento/alertas.md
+name: Avisos al equipo
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: team-alerts
+  cancel-in-progress: false
+
+jobs:
+  alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Revisar y avisar
+        run: node scripts/cron/team-alerts.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          MYCEN_CRON_KEY: ${{ secrets.MYCEN_CRON_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
