@@ -366,7 +366,7 @@ const fr: LifeDict = {
   },
   mood: {
     question: 'Comment vous êtes-vous senti aujourd’hui ?',
-    hint: 'Une touche, si vous voulez. C’est juste pour vous.',
+    hint: 'Facultatif et rien que pour vous : si vous touchez un visage, nous l’enregistrons pour vous montrer vos propres tendances. Touchez-le à nouveau pour l’effacer.',
     levels: ['Très mal', 'Mal', 'Bof', 'Bien', 'Très bien'],
     habitsTitle: 'Vos habitudes et votre humeur',
     habitsText: (w, wo, days) => `Les jours où vous faites une habitude, votre humeur a tendance à être meilleure (${w} contre ${wo}, sur 5). Cela ressort de ${days} jours notés ; cela ne veut pas dire que l’un cause l’autre.`,

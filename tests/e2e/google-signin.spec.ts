@@ -15,7 +15,7 @@ test('el registro manda a Google con la vuelta a /auth/callback y anota idioma y
   await page.goto('/register?ref=ana&tipo=creador')
   // Sin aceptar los Términos y la Privacidad no se va a Google
   await page.getByRole('button', { name: 'Continuar con Google' }).click()
-  await expect(page.getByRole('alert')).toHaveText('Para crear tu cuenta, aceptá los Términos y la Política de privacidad.')
+  await expect(page.getByRole('alert')).toHaveText('Para crear tu cuenta, aceptá los Términos y la Política de privacidad y confirmá que tenés la edad mínima.')
   expect(authorize).toBeNull()
 
   await page.getByRole('checkbox').check()
@@ -81,7 +81,7 @@ test('una cuenta nueva con Google desde el login acepta los términos una sola v
   expect(axe.violations.map(v => v.id)).toEqual([])
 
   await page.getByRole('button', { name: 'Continuar', exact: true }).click()
-  await expect(page.getByRole('alert')).toHaveText('Para crear tu cuenta, aceptá los Términos y la Política de privacidad.')
+  await expect(page.getByRole('alert')).toHaveText('Para crear tu cuenta, aceptá los Términos y la Política de privacidad y confirmá que tenés la edad mínima.')
   await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Continuar', exact: true }).click()
   await expect(page).toHaveURL(/\/studio/)

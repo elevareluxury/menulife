@@ -131,7 +131,9 @@ export function CollabModule({ module, lang, onAction }: ModuleProps) {
         <button type="submit" className="mp-primary" disabled={status === 'sending' || !!ctx?.preview}>
           {status === 'sending' ? t.sending : button}
         </button>
-        <p className="mp-form-note">{ctx?.preview ? t.preview : t.private}</p>
+        <p className="mp-form-note">
+          {ctx?.preview ? t.preview : <>{t.private}{' '}<a className="mp-sub-privacy" href="/privacidad#datos" target="_blank" rel="noopener noreferrer">{t.privacy}</a></>}
+        </p>
       </form>
       )}
     </section>

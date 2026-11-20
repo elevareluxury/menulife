@@ -366,7 +366,7 @@ const en: LifeDict = {
   },
   mood: {
     question: 'How did you feel today?',
-    hint: 'One tap, if you like. It’s just for you.',
+    hint: 'Optional and just for you: if you tap a face, we save it to show you your own patterns. Tap it again to delete it.',
     levels: ['Very bad', 'Bad', 'So-so', 'Good', 'Very good'],
     habitsTitle: 'Your habits and your mood',
     habitsText: (w, wo, days) => `On days you do a habit, your mood tends to be higher (${w} vs ${wo}, out of 5). This shows up across ${days} days you logged; it doesn’t mean one causes the other.`,

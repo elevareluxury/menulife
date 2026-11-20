@@ -17,6 +17,8 @@ export interface ContactFormStrings {
   formLimit: string
   formPreview: string
   formPrivate: string
+  /** Link a la política de privacidad, debajo del aviso */
+  formPrivacy: string
 }
 
 const STRINGS: Record<ProfileLang, ContactFormStrings> = {
@@ -35,6 +37,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'Ya enviaste varios mensajes hoy. Probá de nuevo mañana.',
     formPreview: 'En la vista previa los mensajes no se envían.',
     formPrivate: 'Sólo lo ve la persona dueña de este perfil.',
+    formPrivacy: 'Cómo cuida Mycen tus datos',
   },
   en: {
     formTitle: 'Leave me a message',
@@ -51,6 +54,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'You\'ve sent several messages today. Try again tomorrow.',
     formPreview: 'Messages are not sent from the preview.',
     formPrivate: 'Only the owner of this profile sees it.',
+    formPrivacy: 'How Mycen protects your data',
   },
   pt: {
     formTitle: 'Deixe uma mensagem',
@@ -67,6 +71,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'Você já enviou várias mensagens hoje. Tente de novo amanhã.',
     formPreview: 'Na prévia as mensagens não são enviadas.',
     formPrivate: 'Só a pessoa dona deste perfil vê.',
+    formPrivacy: 'Como a Mycen cuida dos seus dados',
   },
   fr: {
     formTitle: 'Laissez-moi un message',
@@ -83,6 +88,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'Vous avez déjà envoyé plusieurs messages aujourd’hui. Réessayez demain.',
     formPreview: 'Les messages ne sont pas envoyés depuis l’aperçu.',
     formPrivate: 'Seule la personne propriétaire de ce profil le voit.',
+    formPrivacy: 'Comment Mycen protège vos données',
   },
   de: {
     formTitle: 'Hinterlass mir eine Nachricht',
@@ -99,6 +105,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'Du hast heute schon mehrere Nachrichten gesendet. Versuche es morgen wieder.',
     formPreview: 'In der Vorschau werden keine Nachrichten gesendet.',
     formPrivate: 'Nur die Person, der dieses Profil gehört, sieht sie.',
+    formPrivacy: 'Wie Mycen deine Daten schützt',
   },
   it: {
     formTitle: 'Lasciami un messaggio',
@@ -115,6 +122,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'Hai già inviato diversi messaggi oggi. Riprova domani.',
     formPreview: 'Nell’anteprima i messaggi non vengono inviati.',
     formPrivate: 'Lo vede solo la persona proprietaria di questo profilo.',
+    formPrivacy: 'Come Mycen protegge i tuoi dati',
   },
   zh: {
     formTitle: '给我留言',
@@ -131,6 +139,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: '你今天已经发送了多条留言，请明天再试。',
     formPreview: '预览中不会发送留言。',
     formPrivate: '只有这个主页的主人能看到。',
+    formPrivacy: 'Mycen 如何保护你的数据',
   },
   ja: {
     formTitle: 'メッセージを送る',
@@ -147,6 +156,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: '本日はすでに複数のメッセージを送信しています。明日もう一度お試しください。',
     formPreview: 'プレビューではメッセージは送信されません。',
     formPrivate: 'このプロフィールの持ち主だけが見られます。',
+    formPrivacy: 'Mycen のデータの取り扱い',
   },
   ko: {
     formTitle: '메시지 남기기',
@@ -163,6 +173,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: '오늘 이미 여러 메시지를 보냈습니다. 내일 다시 시도하세요.',
     formPreview: '미리보기에서는 메시지가 전송되지 않습니다.',
     formPrivate: '이 프로필 주인만 볼 수 있습니다.',
+    formPrivacy: 'Mycen의 개인정보 보호 방법',
   },
   hi: {
     formTitle: 'मुझे संदेश भेजें',
@@ -179,6 +190,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'आप आज कई संदेश भेज चुके हैं। कल फिर कोशिश करें।',
     formPreview: 'प्रीव्यू में संदेश नहीं भेजे जाते।',
     formPrivate: 'इसे सिर्फ़ इस प्रोफ़ाइल का मालिक देखता है।',
+    formPrivacy: 'Mycen आपके डेटा की सुरक्षा कैसे करता है',
   },
   ar: {
     formTitle: 'اترك لي رسالة',
@@ -195,6 +207,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'أرسلت عدة رسائل اليوم. حاول مرة أخرى غدًا.',
     formPreview: 'لا تُرسل الرسائل من المعاينة.',
     formPrivate: 'لا يراها إلا صاحب هذا الملف.',
+    formPrivacy: 'كيف تحمي Mycen بياناتك',
   },
   ru: {
     formTitle: 'Оставьте сообщение',
@@ -211,6 +224,7 @@ const STRINGS: Record<ProfileLang, ContactFormStrings> = {
     formLimit: 'Сегодня вы уже отправили несколько сообщений. Попробуйте завтра.',
     formPreview: 'В предпросмотре сообщения не отправляются.',
     formPrivate: 'Его видит только владелец этого профиля.',
+    formPrivacy: 'Как Mycen защищает ваши данные',
   },
 }
 

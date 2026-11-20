@@ -366,7 +366,7 @@ const pt: LifeDict = {
   },
   mood: {
     question: 'Como você se sentiu hoje?',
-    hint: 'Um toque, se quiser. É só para você.',
+    hint: 'Opcional e só para você: se tocar uma carinha, a guardamos para mostrar seus próprios padrões. Toque de novo para apagar.',
     levels: ['Muito mal', 'Mal', 'Mais ou menos', 'Bem', 'Muito bem'],
     habitsTitle: 'Seus hábitos e seu humor',
     habitsText: (w, wo, days) => `Nos dias em que você faz algum hábito, seu humor costuma ser mais alto (${w} contra ${wo}, de 5). Isso aparece em ${days} dias registrados; não quer dizer que uma coisa cause a outra.`,

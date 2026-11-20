@@ -6,7 +6,7 @@
 export type LegalBlock = string | { list: string[] }
 export interface LegalSection { id: string; title: string; body: LegalBlock[] }
 
-const UPDATED = '2026-10-31'
+const UPDATED = '2026-11-20'
 
 const es = {
   ui: {
@@ -73,9 +73,10 @@ const es = {
     ] },
     { id: 'que-queda', title: 'Qué puede quedar', body: [
       { list: [
-        'Las copias de seguridad de los proveedores, que se sobrescriben en sus ciclos habituales.',
+        'Las copias de seguridad de los proveedores, que se sobrescriben en sus ciclos habituales, y la copia diaria de fotos y PDF, que guarda lo borrado 30 días.',
         'Los registros de errores, que no están vinculados a tu cuenta.',
         'Lo que la ley obligue a conservar (por ejemplo, datos de facturación), por el plazo que fije.',
+        'Si tu cuenta tenía un perfil suspendido, su nombre de usuario queda reservado para que nadie lo vuelva a usar, y el registro de esa suspensión se guarda 3 años.',
         'Si tu cuenta tiene un negocio en Mycen Business, escribinos: lo damos de baja con vos para cuidar los datos de tus clientes y ventas.',
       ] },
     ] },
@@ -112,6 +113,7 @@ const es = {
         '**Links maliciosos:** virus, phishing o sitios que engañan.',
       ] },
       'Cualquier persona puede denunciar un perfil o un proyecto con el link "Denunciar" al pie de la página, sin cuenta y de forma anónima. Revisamos cada denuncia. Si un perfil no cumple las reglas, lo suspendemos: deja de verse (página, proyectos y tarjeta de contacto) y su dueño ve el motivo en Studio. Si creés que fue un error, escribinos desde la cuenta con la que lo creaste y lo revisamos de nuevo.',
+      'Mientras un perfil está suspendido, su cuenta no puede crear perfiles nuevos ni borrarlo para empezar de cero. Si se elimina la cuenta, ese nombre de usuario queda reservado y no se puede volver a usar.',
     ] },
     { id: 'derechos-de-autor', title: 'Derechos de autor y otros derechos', body: [
       'Si creés que algo publicado en Mycen infringe tus derechos de autor u otros derechos (por ejemplo, tu marca o tu imagen), podés pedirnos que lo bajemos. Escribinos a **team@mycen.id** con:',
@@ -126,6 +128,7 @@ const es = {
     ] },
     { id: 'usernames', title: 'Nombres de usuario', body: [
       'Algunos nombres están reservados. No se permite registrar nombres para hacerse pasar por otra persona o marca, ni para revenderlos; podemos recuperarlos en esos casos. Si cambiás tu username, la dirección anterior redirige a la nueva para que tus links y QR sigan funcionando.',
+      'No se pueden elegir nombres que imiten bancos, billeteras, servicios o marcas conocidas (por ejemplo, con la palabra “banco” o el nombre de una marca): Mycen los rechaza al elegirlos. Si tu cuenta está verificada y cambiás tu nombre o tu nombre de usuario, el tilde de verificada vuelve a revisión.',
     ] },
     { id: 'pagos', title: 'Planes pagos de Mycen Business', body: [
       'Tu identidad, Studio y Life OS son gratis. Los planes de Mycen Business tienen el precio que se muestra al contratarlos, en dólares estadounidenses (US$), más los impuestos que correspondan en tu país.',
@@ -156,24 +159,31 @@ const es = {
     { id: 'datos', title: 'Qué datos usamos', body: [
       { list: [
         '**Tu cuenta:** nombre, email, contraseña (guardada cifrada, nunca la vemos), idioma, moneda, zona horaria y la fecha en que aceptaste estas condiciones.',
-        '**Tu perfil público:** lo que cargás en Studio (nombre, foto, textos, links, proyectos, tarjeta de contacto). Sólo se publica lo que decidís mostrar.',
+        '**Tu perfil público:** lo que cargás en Studio (nombre, foto, textos, links, proyectos, tarjeta de contacto). Sólo se publica lo que decidís mostrar. Cada foto se vuelve a generar en tu dispositivo antes de subirla, así que se borran los datos ocultos que trae (como la ubicación GPS o el modelo de la cámara).',
         '**Life OS:** tus metas, hábitos, tareas, finanzas y notas, incluidos los nombres que escribas (por ejemplo, con quién compartiste un gasto). Son privados: sólo vos podés verlos. Tu diario también: el bloqueo con PIN, huella o cara funciona sólo en tu dispositivo (no viaja a Mycen) y las entradas no tienen cifrado de extremo a extremo.',
+        '**Cómo te sentiste:** si al cerrar el día tocás una de las caritas, guardamos ese dato (del 1 al 5) y la fecha. Puede decir algo de tu salud: por eso es opcional, sólo lo ves vos y lo usamos sólo para mostrarte tus propios patrones (por ejemplo, en Insights y en “Tu mes”). Tocar la carita es tu consentimiento, y lo retirás tocándola de nuevo (se borra) o borrando Life OS.',
         '**Mycen Business:** los datos de tu negocio y los que cargues sobre tus clientes y ventas.',
-        '**Estadísticas de visitas:** eventos anónimos (visitas y clicks en tu perfil) con un identificador que cambia todos los días. No guardamos direcciones IP ni datos del dispositivo, y no contamos robots. También guardamos de qué sitio o link llegó la visita (por ejemplo, Instagram o el QR).',
-        '**Denuncias:** el motivo y el detalle que escribe quien denuncia, con un identificador anónimo diario para evitar abusos. Si quien denuncia tiene la sesión iniciada, guardamos también su cuenta: la ve sólo el equipo de Mycen, nunca la persona denunciada.',
-        '**Mensajes del formulario de contacto:** el nombre, el contacto (email o WhatsApp) y el mensaje que deja un visitante. Si el perfil tiene el módulo Colaboraciones, una marca deja además su empresa y qué busca, y si quiere su sitio web, un presupuesto y una fecha límite. Los ve sólo la persona dueña del perfil, en Studio; no se publican ni se mandan por email. Para evitar abusos usamos un identificador anónimo que cambia todos los días, sin IP ni datos del dispositivo. Si la persona dueña reporta un mensaje, guardamos una copia para que la revise el equipo de Mycen y ese contacto queda bloqueado en su perfil.',
-        '**Suscripciones:** si te suscribís desde el módulo “Suscribirse” de un perfil, guardamos tu email (y tu nombre, si el perfil lo pide), la fecha en que diste tu consentimiento y tu idioma, y se los damos a la persona dueña de ese perfil, que los ve en Studio y los puede exportar. Mycen no le manda nada a esa lista: la persona dueña del perfil decide cómo usarla y es responsable de hacerlo bien. Para salir, pedíselo a esa persona o escribinos a team@mycen.id y lo borramos. Para evitar abusos usamos un identificador anónimo que cambia todos los días, sin IP ni datos del dispositivo.',
+        '**Estadísticas de visitas:** eventos seudonimizados (visitas y toques en tu perfil): en lugar de saber quién es cada visitante, usamos un identificador que cambia todos los días y no se puede revertir. No guardamos direcciones IP ni datos del dispositivo, y no contamos robots. También guardamos de qué sitio o link llegó la visita (por ejemplo, Instagram o el QR).',
+        '**Denuncias:** el motivo y el detalle que escribe quien denuncia, con un identificador seudonimizado que cambia todos los días, para evitar abusos. Si quien denuncia tiene la sesión iniciada, guardamos también su cuenta: la ve sólo el equipo de Mycen, nunca la persona denunciada.',
+        '**Mensajes del formulario de contacto:** el nombre, el contacto (email o WhatsApp) y el mensaje que deja un visitante. Si el perfil tiene el módulo Colaboraciones, una marca deja además su empresa y qué busca, y si quiere su sitio web, un presupuesto y una fecha límite. Los ve sólo la persona dueña del perfil, en Studio; no se publican ni se mandan por email. Para evitar abusos usamos un identificador seudonimizado que cambia todos los días, sin IP ni datos del dispositivo. Si la persona dueña reporta un mensaje, guardamos una copia para que la revise el equipo de Mycen. Si bloquea a un contacto (o lo reporta), guardamos ese email o teléfono en su perfil para descartar lo que vuelva a mandar.',
+        '**Suscripciones:** si te suscribís desde el módulo “Suscribirse” de un perfil, guardamos tu email (y tu nombre, si el perfil lo pide), la fecha en que diste tu consentimiento y tu idioma, y se los damos a la persona dueña de ese perfil, que los ve en Studio y los puede exportar. Mycen no le manda nada a esa lista: la persona dueña del perfil decide cómo usarla y es responsable de hacerlo bien. Para salir, pedíselo a esa persona o escribinos a team@mycen.id y lo borramos. Para evitar abusos usamos un identificador seudonimizado que cambia todos los días, sin IP ni datos del dispositivo.',
+        '**Encuestas:** si votás en la encuesta de un perfil, guardamos tu opción con un identificador seudonimizado que cambia todos los días (sin IP, sin cuenta y sin datos del dispositivo), para contar un voto por persona. La persona dueña ve sólo los totales. Tu navegador recuerda qué votaste, para mostrártelo.',
         '**Invitaciones:** si creás tu cuenta desde “Creá tu identidad” en el perfil de otra persona, guardamos qué perfil te trajo y su tipo, para saber cómo crece Mycen. Esa persona no ve tus datos.',
         '**Uso de la app:** para saber si Mycen funciona y cómo crece, guardamos eventos de uso (por ejemplo, que publicaste tu perfil, que abriste “Mi día” o que marcaste un hábito) con tu cuenta, la fecha y datos cortos como la estructura elegida o la cantidad de días. Además, una vez por día anotamos que usaste Mycen, desde qué tipo de dispositivo (navegador, app instalada, iPhone o Android), en qué idioma y la zona horaria del dispositivo (por ejemplo, “America/Argentina/Buenos_Aires”); nunca tu IP ni tu ubicación exacta. Nunca guardamos el contenido de tus tareas, hábitos, notas ni mensajes. No usamos servicios de analítica de terceros.',
         '**Verificación de cuenta:** si pedís el tilde de cuenta verificada, guardamos tu mensaje, el link que nos pases y la respuesta. Los ve sólo el equipo de Mycen para revisarlo; si se aprueba, tu perfil muestra el tilde.',
         '**Errores técnicos:** cuando algo falla, guardamos el mensaje de error, la pantalla, la versión de Mycen y el navegador (por ejemplo, "Chrome 128 · Android"), sin IP ni datos personales, para poder arreglarlo.',
+        '**Avisos con la app cerrada (web):** si permitís los avisos de Life OS en el navegador, guardamos la dirección de envío que crea tu navegador, sus claves de cifrado, la zona horaria y el nombre del navegador (por ejemplo, “Chrome · Android”), para mandarte tus recordatorios. Se borra cuando desactivás los avisos, cuando el navegador da de baja la suscripción o al eliminar tu cuenta.',
+        '**Protección contra abusos:** para frenar ataques, contamos cuántos pedidos llegan desde cada conexión a las funciones públicas (visitas, mensajes, votos, denuncias). No guardamos la dirección IP: la convertimos en un código que no se puede revertir (un hash con una clave secreta) y lo borramos a los 2 días.',
+        '**Lo que hace el equipo de Mycen:** cuando el equipo suspende un perfil, resuelve una denuncia, verifica una cuenta o borra archivos, queda anotado quién lo hizo, cuándo y sobre qué cuenta, para poder rendir cuentas. Ese registro no se puede modificar y se guarda 3 años.',
       ] },
     ] },
     { id: 'para-que', title: 'Para qué los usamos y con qué base', body: [
       { list: [
         '**Prestarte el servicio** que pediste al crear tu cuenta: guardar, mostrar y sincronizar tu información (ejecución del contrato).',
+        '**Guardar cómo te sentiste** (las caritas de Life OS), sólo si lo anotás: con tu consentimiento explícito, que retirás cuando quieras borrándolo.',
+        '**Mandarte avisos con la app cerrada**, sólo si los permitís en tu navegador o en tu teléfono (consentimiento; lo retirás desactivándolos).',
         '**Mantener Mycen seguro y funcionando:** prevenir abusos, revisar denuncias y arreglar errores (interés legítimo).',
-        '**Mostrarte estadísticas** de tu perfil, de forma anónima (interés legítimo).',
+        '**Mostrarte estadísticas** de tu perfil, con datos seudonimizados (interés legítimo).',
         '**Mandarte mails necesarios** sobre tu cuenta: confirmación, recuperación de contraseña y cambios importantes.',
         '**Cumplir la ley** cuando una autoridad competente lo exija.',
       ] },
@@ -189,12 +199,14 @@ const es = {
         '**Vercel:** alojamiento de la aplicación y entrega de las páginas.',
         '**Resend:** envío de los mails de tu cuenta.',
         '**Cloudflare (Turnstile):** la verificación anti-bots del registro, el inicio de sesión y la recuperación de contraseña. Al abrir esas pantallas, Cloudflare recibe datos técnicos de tu navegador (como la dirección IP) sólo para comprobar que no sos un bot.',
+        '**Cloudflare R2:** guarda una copia de seguridad diaria de las fotos y los PDF que suben los perfiles, para poder recuperarlos si algo falla. Lo que se borra en Mycen queda en esa copia 30 días y después se elimina.',
         '**YouTube, Vimeo, TikTok, Spotify y SoundCloud:** sólo si un perfil integra un video o una canción y tocás "Reproducir". Antes de eso no nos conectamos con ellos; desde ese momento se aplican sus propias políticas. Si un perfil muestra su "Último video", el servidor de Mycen consulta el listado público de videos del canal de YouTube que eligió su dueño, sin enviar ningún dato tuyo. Cuando el dueño de un perfil pega uno de esos links en Studio, el servidor de Mycen trae la portada pública de ese video o esa canción y la guarda como una foto más de su perfil: así la página la muestra sin conectarte con el proveedor. Si un perfil muestra un podcast, el servidor de Mycen lee el feed RSS público que eligió su dueño, sin enviar ningún dato tuyo; al tocar "Escuchar", tu navegador se conecta con el servicio que aloja ese podcast y se aplican sus políticas. Si un perfil tiene varias sucursales y tocás "Ver la más cerca", tu navegador te pide permiso para usar tu ubicación: se usa sólo en tu dispositivo para ordenar la lista y no se manda a Mycen ni a nadie.',
         '**Anthropic:** sólo si un negocio usa la importación de su menú desde un PDF; se procesa ese archivo.',
         '**Mercado Pago:** sólo si un negocio lo configura para cobrar; el pago se hace en Mercado Pago.',
         '**Google (inicio de sesión):** sólo si elegís "Continuar con Google". Google nos confirma tu nombre, tu email y tu foto; no recibimos tu contraseña de Google ni accedemos a nada más de tu cuenta.',
         '**Apple (inicio de sesión):** sólo si elegís "Continuar con Apple". Apple nos confirma tu nombre y tu email (o un email de reenvío que Apple genera si preferís ocultar el tuyo); no recibimos tu contraseña ni accedemos a nada más de tu cuenta.',
-        '**App de iOS y Android:** si la descargás, Apple (App Store) o Google (Google Play) registran la descarga según sus propias políticas. Los recordatorios de la app se programan en tu teléfono; Mycen no usa un servicio de notificaciones de terceros.',
+        '**App de iOS y Android:** si la descargás, Apple (App Store) o Google (Google Play) registran la descarga según sus propias políticas. En la app, los recordatorios se programan en tu teléfono, sin un servicio de notificaciones de terceros.',
+        '**Servicio de avisos de tu navegador:** sólo si permitís los avisos de Life OS en la web. El recordatorio (el nombre de la tarea o el hábito y su hora) viaja cifrado hasta tu dispositivo a través del servicio de avisos de tu navegador: Google (Firebase Cloud Messaging) en Chrome y Android, Microsoft en Edge, Apple en Safari y Mozilla en Firefox. Ese servicio ve la dirección de envío, pero no puede leer el contenido.',
         '**Google Calendar, Apple u otro calendario:** sólo si activás el link de calendario de Life OS; ese servicio descarga tus tareas pendientes con fecha (título, fecha, hora y aviso). Lo podés apagar o cambiar cuando quieras.',
         '**Reconocimiento de voz de tu navegador:** sólo si usás "Dictar" en Life OS. Tu navegador convierte la voz en texto (en Chrome lo hace el servicio de voz de Google; en Safari, Apple). Mycen recibe sólo el texto.',
       ] },
@@ -205,12 +217,13 @@ const es = {
     ] },
     { id: 'plazos', title: 'Cuánto tiempo los guardamos', body: [
       { list: [
-        'Los datos de tu cuenta, tu perfil y Life OS, mientras tengas la cuenta. Si la eliminás, los borramos; las copias de seguridad de los proveedores se sobrescriben en sus ciclos habituales.',
-        'Las estadísticas de visitas se guardan como eventos anónimos (con el identificador que cambia cada día) mientras exista el perfil; si se borra, se borran con él.',
+        'Los datos de tu cuenta, tu perfil y Life OS, mientras tengas la cuenta. Si la eliminás, los borramos, también tus fotos y PDF; las copias de seguridad de los proveedores se sobrescriben en sus ciclos habituales y la copia diaria de fotos y PDF guarda lo borrado 30 días.',
+        'Las estadísticas de visitas y los votos de las encuestas se guardan seudonimizados (con el identificador que cambia cada día) mientras exista el perfil; si se borra, se borran con él.',
         'Los mensajes del formulario de contacto, hasta que la persona dueña del perfil los borra o elimina su cuenta.',
         'Los emails de suscripción, hasta que la persona dueña del perfil los borra, elimina su cuenta o nos pedís que los borremos.',
         'Los registros de errores se guardan mientras sirvan para arreglarlos (uno resuelto queda guardado por si vuelve a pasar); el conteo de personas afectadas, 90 días.',
         'Los eventos de uso de la app y el registro de los días que usaste Mycen, 25 meses (después se borran solos); si antes eliminás tu cuenta, quedan sin ningún vínculo con vos.',
+        'Los avisos del navegador, hasta que los desactives o elimines tu cuenta; el código de conexión para frenar abusos, 2 días; los contactos bloqueados, hasta que la persona dueña los desbloquee o elimine su perfil; y el registro de lo que hace el equipo de Mycen, 3 años.',
         'Lo que la ley obligue a conservar (por ejemplo, datos de facturación), por el plazo que fije.',
       ] },
     ] },
