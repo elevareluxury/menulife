@@ -76,7 +76,7 @@ const en: LegalDict = {
   terms: [
     { id: "quien", title: "Who provides the service", body: [
       "Mycen is a service operated by **Luca Cazzoli** (Argentine tax ID CUIT 20-42325961-3), under the trade name **Resilio**, based in the Argentine Republic. You can write to us at **team@mycen.id**.",
-      "Mycen lets you create a public digital identity (Mycen Identity), manage it from Mycen Studio, organize your personal life in Life OS and, if you have a business, run it with Mycen Business.",
+      "Mycen lets you create a public digital identity (Mycen Identity), manage it from Mycen Studio and organize your personal life in Life OS. Mycen Business, for managing businesses, is not yet open to new businesses.",
       "**Point of contact:** for users and for authorities (including for the purposes of the European Union’s Digital Services Act), write to **team@mycen.id**, in Spanish or English.",
     ] },
     { id: "edad", title: "Who can use Mycen", body: [
@@ -140,9 +140,9 @@ const en: LegalDict = {
     { id: "propiedad", title: "What belongs to Mycen", body: [
       "The Mycen brand, the fingerprint mark, the design and the software of Mycen belong to their owners. These terms give you permission to use the service, not rights over those things. If you send us ideas or suggestions, we may use them freely to improve Mycen, with no obligation to you.",
     ] },
-    { id: "pagos", title: "Paid Mycen Business plans", body: [
-      "Your identity, Studio and Life OS are free. Mycen Business plans have the price shown when you subscribe, in US dollars (US$), plus any taxes that apply in your country.",
-      "There is no minimum term: you can cancel anytime and the plan stays active until the end of the paid period. If we change a price, we will tell you in advance and the change applies from the next period. If you are a consumer, you keep the rights your country’s law gives you, such as the right to withdraw from a distance purchase.",
+    { id: "pagos", title: "Price", body: [
+      "Today Mycen is **free**: your identity, Studio and Life OS cost nothing and we don’t ask you for any payment method.",
+      "If we add paid plans in the future (for example, when Mycen Business opens), we will tell you in advance, with their price in U.S. dollars (US$) plus your country’s taxes, and nothing you use for free today will start being charged without your agreement. There will be no minimum term, and if you are a consumer you keep the rights your country’s law gives you, such as withdrawing from a distance purchase.",
     ] },
     { id: "servicio", title: "The service", body: [
       "We work to keep Mycen running well at all times, but there may be interruptions, errors or changes. Features may change, improve or stop being available; if something important changes, we will tell you in advance whenever possible.",

@@ -76,7 +76,7 @@ const zh: LegalDict = {
   terms: [
     { id: "quien", title: "谁提供本服务", body: [
       "Mycen 由 **Luca Cazzoli**（阿根廷税号 CUIT 20-42325961-3）以商号 **Resilio** 运营，住所位于阿根廷共和国。你可以发邮件至 **team@mycen.id** 联系我们。",
-      "Mycen 让你创建公开的数字身份（Mycen Identity），在 Mycen Studio 中管理，在 Life OS 中规划个人生活；如果你有生意，还可以用 Mycen Business 来经营。",
+      "Mycen 让你创建公开的数字身份（Mycen Identity），在 Mycen Studio 中管理，并在 Life OS 中安排个人生活。用于管理商家的 Mycen Business 目前尚未向新商家开放。",
       "**联系点：**用户和主管机关（包括为欧盟《数字服务法》之目的）请发邮件至 **team@mycen.id**，可使用西班牙语或英语。",
     ] },
     { id: "edad", title: "谁可以使用 Mycen", body: [
@@ -140,9 +140,9 @@ const zh: LegalDict = {
     { id: "propiedad", title: "属于 Mycen 的内容", body: [
       "Mycen 品牌、指纹标志、设计和软件归其权利人所有。本条款允许你使用服务，但不授予你对这些内容的任何权利。如果你向我们提出想法或建议，我们可以自由用于改进 Mycen，而无需对你承担任何义务。",
     ] },
-    { id: "pagos", title: "Mycen Business 付费方案", body: [
-      "你的身份、Studio 和 Life OS 均免费。Mycen Business 方案的价格以订阅时显示的美元（US$）为准，另加你所在国家适用的税费。",
-      "没有最低期限：你可以随时取消，方案在已付费周期结束前继续有效。如果我们调整价格，会提前通知，并从下一个周期起生效。如果你是消费者，你仍享有所在国家法律赋予的权利，例如远程购买的撤销权。",
+    { id: "pagos", title: "价格", body: [
+      "目前 Mycen **免费**：你的身份、Studio 和 Life OS 都不收费，我们也不会要求你提供任何支付方式。",
+      "如果将来推出付费方案（例如 Mycen Business 开放时），我们会提前通知你，并以美元（US$）标明价格，另加你所在国家的税费；你现在免费使用的任何功能都不会在未经你同意的情况下开始收费。不会有最短使用期限；如果你是消费者，你仍享有所在国家法律赋予的权利，例如远程购买的撤销权。",
     ] },
     { id: "servicio", title: "关于服务", body: [
       "我们努力让 Mycen 始终稳定运行，但可能出现中断、错误或变更。功能可能会调整、改进或下线；如有重要变化，我们会尽可能提前通知你。",

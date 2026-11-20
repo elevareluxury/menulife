@@ -64,6 +64,9 @@ describe('revisión mundial (20/11/2026)', () => {
     expect(terms('derechos-de-autor')).toContain('pena de perjurio')
     expect(terms('quien')).toContain('Servicios Digitales')
     expect(terms('servicio')).toContain('US$ 100')
+    // Business sale después: hoy todo es gratis y no se promete ningún plan pago vigente
+    expect(terms('pagos')).toContain('**gratis**')
+    expect(terms('quien')).toContain('todavía no está abierto')
   })
 
   it('privacidad: bases legales, objeción, transferencias, brechas, cookies y derechos por región', () => {

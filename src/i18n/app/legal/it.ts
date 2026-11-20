@@ -76,7 +76,7 @@ const it: LegalDict = {
   terms: [
     { id: "quien", title: "Chi fornisce il servizio", body: [
       "Mycen è un servizio gestito da **Luca Cazzoli** (codice fiscale argentino CUIT 20-42325961-3), con il nome commerciale **Resilio**, residente nella Repubblica Argentina. Puoi scriverci a **team@mycen.id**.",
-      "Mycen ti permette di creare un’identità digitale pubblica (Mycen Identity), gestirla da Mycen Studio, organizzare la tua vita personale in Life OS e, se hai un’attività, gestirla con Mycen Business.",
+      "Mycen ti permette di creare un’identità digitale pubblica (Mycen Identity), gestirla da Mycen Studio e organizzare la tua vita personale in Life OS. Mycen Business, per gestire attività, non è ancora aperto a nuove attività.",
       "**Punto di contatto:** per gli utenti e per le autorità (anche ai fini del Regolamento europeo sui servizi digitali), scrivi a **team@mycen.id**, in spagnolo o in inglese.",
     ] },
     { id: "edad", title: "Chi può usare Mycen", body: [
@@ -140,9 +140,9 @@ const it: LegalDict = {
     { id: "propiedad", title: "Cosa appartiene a Mycen", body: [
       "Il marchio Mycen, l’impronta, il design e il software di Mycen appartengono ai rispettivi titolari. Queste condizioni ti danno il permesso di usare il servizio, non diritti su questi elementi. Se ci invii idee o suggerimenti, possiamo usarli liberamente per migliorare Mycen, senza alcun obbligo nei tuoi confronti.",
     ] },
-    { id: "pagos", title: "Piani a pagamento di Mycen Business", body: [
-      "La tua identità, Studio e Life OS sono gratuiti. I piani di Mycen Business hanno il prezzo mostrato al momento della sottoscrizione, in dollari statunitensi (US$), più le imposte applicabili nel tuo paese.",
-      "Non c’è un vincolo minimo: puoi disdire quando vuoi e il piano resta attivo fino alla fine del periodo pagato. Se cambiamo un prezzo, ti avvisiamo prima e il cambio vale dal periodo successivo. Se sei un consumatore, conservi i diritti che ti dà la legge del tuo paese, come il diritto di recesso per gli acquisti a distanza.",
+    { id: "pagos", title: "Prezzo", body: [
+      "Oggi Mycen è **gratuito**: la tua identità, Studio e Life OS non hanno costi e non ti chiediamo alcun metodo di pagamento.",
+      "Se in futuro aggiungeremo piani a pagamento (per esempio quando aprirà Mycen Business), ti avviseremo prima, con il prezzo in dollari statunitensi (US$) più le imposte del tuo paese, e nulla di ciò che oggi usi gratis diventerà a pagamento senza il tuo consenso. Non ci sarà una durata minima e, se sei un consumatore, conservi i diritti che ti dà la legge del tuo paese, come il recesso da un acquisto a distanza.",
     ] },
     { id: "servicio", title: "Il servizio", body: [
       "Lavoriamo perché Mycen funzioni sempre bene, ma possono esserci interruzioni, errori o cambiamenti. Le funzioni possono cambiare, migliorare o non essere più disponibili; se cambia qualcosa di importante, ti avvisiamo in anticipo quando possibile.",

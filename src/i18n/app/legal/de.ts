@@ -76,7 +76,7 @@ const de: LegalDict = {
   terms: [
     { id: "quien", title: "Wer den Dienst anbietet", body: [
       "Mycen ist ein Dienst von **Luca Cazzoli** (argentinische Steuernummer CUIT 20-42325961-3) unter dem Handelsnamen **Resilio**, mit Wohnsitz in der Argentinischen Republik. Du erreichst uns unter **team@mycen.id**.",
-      "Mit Mycen erstellst du eine öffentliche digitale Identität (Mycen Identity), verwaltest sie in Mycen Studio, organisierst dein Privatleben in Life OS und führst, wenn du ein Unternehmen hast, dieses mit Mycen Business.",
+      "Mit Mycen kannst du eine öffentliche digitale Identität erstellen (Mycen Identity), sie in Mycen Studio verwalten und dein Privatleben in Life OS organisieren. Mycen Business zur Verwaltung von Unternehmen ist für neue Unternehmen noch nicht geöffnet.",
       "**Kontaktstelle:** Für Nutzerinnen und Nutzer sowie für Behörden (auch im Sinne des Gesetzes über digitale Dienste der Europäischen Union) schreib an **team@mycen.id**, auf Spanisch oder Englisch.",
     ] },
     { id: "edad", title: "Wer Mycen nutzen darf", body: [
@@ -140,9 +140,9 @@ const de: LegalDict = {
     { id: "propiedad", title: "Was Mycen gehört", body: [
       "Die Marke Mycen, der Fingerabdruck, das Design und die Software von Mycen gehören ihren Inhabern. Diese Bedingungen erlauben dir, den Dienst zu nutzen, geben dir aber keine Rechte daran. Wenn du uns Ideen oder Vorschläge schickst, dürfen wir sie frei nutzen, um Mycen zu verbessern, ohne dir gegenüber verpflichtet zu sein.",
     ] },
-    { id: "pagos", title: "Kostenpflichtige Tarife von Mycen Business", body: [
-      "Deine Identität, Studio und Life OS sind kostenlos. Die Tarife von Mycen Business kosten den beim Abschluss angezeigten Preis in US-Dollar (US$) zuzüglich der in deinem Land geltenden Steuern.",
-      "Es gibt keine Mindestlaufzeit: Du kannst jederzeit kündigen, und der Tarif bleibt bis zum Ende des bezahlten Zeitraums aktiv. Ändern wir einen Preis, informieren wir dich vorher, und die Änderung gilt ab dem nächsten Zeitraum. Als Verbraucher behältst du die Rechte, die dir das Recht deines Landes gibt, etwa das Widerrufsrecht bei Fernabsatzverträgen.",
+    { id: "pagos", title: "Preis", body: [
+      "Mycen ist heute **kostenlos**: Deine Identität, Studio und Life OS kosten nichts, und wir fragen nach keinem Zahlungsmittel.",
+      "Wenn wir künftig kostenpflichtige Pläne einführen (zum Beispiel, wenn Mycen Business öffnet), sagen wir es dir vorher, mit dem Preis in US-Dollar (US$) zuzüglich der Steuern deines Landes, und nichts, was du heute kostenlos nutzt, wird ohne deine Zustimmung kostenpflichtig. Es wird keine Mindestlaufzeit geben, und als Verbraucher behältst du die Rechte, die dir das Recht deines Landes gibt, etwa das Widerrufsrecht bei Fernabsatzkäufen.",
     ] },
     { id: "servicio", title: "Der Dienst", body: [
       "Wir arbeiten daran, dass Mycen immer gut funktioniert, aber es kann Unterbrechungen, Fehler oder Änderungen geben. Funktionen können sich ändern, verbessern oder wegfallen; wenn sich etwas Wichtiges ändert, informieren wir dich nach Möglichkeit vorher.",

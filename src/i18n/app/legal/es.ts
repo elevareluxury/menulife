@@ -85,7 +85,7 @@ const es = {
   terms: [
     { id: "quien", title: "Quién presta el servicio", body: [
       "Mycen es un servicio operado por **Luca Cazzoli** (CUIT 20-42325961-3), bajo el nombre de fantasía **Resilio**, con domicilio en la República Argentina. Podés escribirnos a **team@mycen.id**.",
-      "Mycen te permite crear una identidad digital pública (Mycen Identity), administrarla desde Mycen Studio, organizar tu vida personal en Life OS y, si tenés un negocio, gestionarlo con Mycen Business.",
+      "Mycen te permite crear una identidad digital pública (Mycen Identity), administrarla desde Mycen Studio y organizar tu vida personal en Life OS. Mycen Business, para gestionar negocios, todavía no está abierto a nuevos negocios.",
       "**Punto de contacto:** para las personas usuarias y para las autoridades (también a efectos del Reglamento de Servicios Digitales de la Unión Europea), escribinos a **team@mycen.id**, en español o en inglés.",
     ] },
     { id: "edad", title: "Quién puede usar Mycen", body: [
@@ -149,9 +149,9 @@ const es = {
     { id: "propiedad", title: "Lo que es de Mycen", body: [
       "La marca Mycen, la huella, el diseño y el software de Mycen pertenecen a sus titulares. Estas condiciones te dan permiso para usar el servicio, no derechos sobre esas cosas. Si nos mandás ideas o sugerencias, las podemos usar libremente para mejorar Mycen, sin ninguna obligación hacia vos.",
     ] },
-    { id: "pagos", title: "Planes pagos de Mycen Business", body: [
-      "Tu identidad, Studio y Life OS son gratis. Los planes de Mycen Business tienen el precio que se muestra al contratarlos, en dólares estadounidenses (US$), más los impuestos que correspondan en tu país.",
-      "No hay permanencia mínima: podés cancelar cuando quieras y el plan sigue activo hasta el final del período pagado. Si cambiamos un precio, te avisamos antes y el cambio rige desde el período siguiente. Si sos consumidor, conservás los derechos que te da la ley de tu país, como el de arrepentirte de una compra a distancia.",
+    { id: "pagos", title: "Precio", body: [
+      "Hoy Mycen es **gratis**: tu identidad, Studio y Life OS no tienen costo y no te pedimos ningún medio de pago.",
+      "Si en el futuro sumamos planes pagos (por ejemplo, cuando abra Mycen Business), te vamos a avisar antes, con su precio en dólares estadounidenses (US$) más los impuestos de tu país, y nada de lo que hoy usás gratis va a pasar a cobrarse sin tu acuerdo. No va a haber permanencia mínima, y si sos consumidor conservás los derechos que te da la ley de tu país, como el de arrepentirte de una compra a distancia.",
     ] },
     { id: "servicio", title: "El servicio", body: [
       "Trabajamos para que Mycen funcione siempre y bien, pero puede haber interrupciones, errores o cambios. Las funciones pueden cambiar, mejorar o dejar de estar disponibles; si algo importante cambia, te avisamos con anticipación cuando sea posible.",
