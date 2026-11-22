@@ -99,7 +99,6 @@ export interface UiStrings {
   cards: string
   swipeHint: string
   /** Botón de una tarjeta de evento con link (diseño Flyers) */
-  tickets: string
   tags: string
   projects: string
   viewProject: string
@@ -143,7 +142,7 @@ const ES: UiStrings = {
     verified: 'Cuenta verificada', available: 'Disponible', moreAboutMe: 'Más sobre mí', createIdentity: 'Creá tu identidad', createFree: 'Creá tu Mycen gratis', call: 'Llamar', copyLink: 'Copiar link', qrCode: 'Código QR', moreOptions: 'Más opciones', backToTop: 'Volver arriba', votesCount: "{n} votos", oneVote: "1 voto", noVotes: "Todavía no hay votos: el tuyo es el primero", pollPaused: "Las votaciones están en pausa por un rato. Probá de nuevo más tarde.", yourVote: "Tu voto", download: "Descargar", copyCode: "Copiar código", codeCopied: "Código copiado", validUntil: "Válido hasta el {date}", useCoupon: "Usar el cupón", listen: "Escuchar", nearest: "Ver la más cerca", nearestBusy: "Buscando dónde estás…", nearestDone: "Ordenadas por cercanía", nearestFail: "No pudimos saber dónde estás. Revisá el permiso de ubicación.", nearestPrivate: "Tu ubicación no sale de tu celular.", pause: "Pausar", videos: "Videos", podcast: "Podcast", episodes: "Episodios", emailLabel: 'Email', playOn: 'Reproducir en {provider}',
     days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mié', thursday: 'Jue', friday: 'Vie', saturday: 'Sáb', sunday: 'Dom' },
     languageLabel: 'Idioma', socials: 'Redes sociales', close: 'Cerrar', prevPhoto: 'Foto anterior', nextPhoto: 'Foto siguiente', cards: 'Tarjetas',
-    swipeHint: 'deslizá para ver más', tickets: 'Entradas', tags: 'Categorías',
+    swipeHint: 'deslizá para ver más', tags: 'Categorías',
     projects: "Proyectos", viewProject: "Ver proyecto", credits: "Créditos", backToProfile: "Volver al perfil", projectNotFoundTitle: "Este proyecto no existe", projectNotFoundText: "Revisá el link o mirá el perfil completo.", projectUnavailableTitle: "Este proyecto no está disponible", projectUnavailableText: "Su dueño todavía no lo publicó o lo despublicó.", projectDraftBanner: "Vista previa: este proyecto todavía no es público.", video: "Video",
     links: 'Links',
     report: 'Denunciar', reportTitle: 'Denunciar este perfil', reportProjectTitle: 'Denunciar este proyecto', reportIntro: 'Contanos qué pasa. Lo revisa el equipo de Mycen; el dueño no sabe quién denunció.', reportReason: 'Motivo', reportDetails: 'Detalles (opcional)', reportSend: 'Enviar denuncia', reportSending: 'Enviando…', reportThanks: 'Gracias. Recibimos tu denuncia y la vamos a revisar.', reportDuplicate: 'Ya recibimos tu denuncia sobre este perfil. La estamos revisando.', reportLimit: 'Enviaste muchas denuncias hoy. Probá de nuevo mañana.', reportError: 'No pudimos enviar la denuncia. Revisá tu conexión e intentá de nuevo.', cancel: 'Cancelar', rules: 'Reglas de contenido',

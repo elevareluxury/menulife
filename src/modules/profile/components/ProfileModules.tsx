@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type SyntheticEvent } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { ArrowUpRight, ChevronDown, Clock, Mail, MapPin, MessageCircle, Navigation, Phone } from 'lucide-react'
 import type { ProfileLang, ProfileModule, WeekSchedule } from '../lib/profileTypes'
 import { tr, trLabel, ui } from '../lib/profileI18n'
@@ -14,7 +14,10 @@ const Lightbox = lazy(() => import('./Lightbox').then(m => ({ default: m.Lightbo
 import { richText } from '../lib/richText'
 import { cleanBranches, type Branch } from '../lib/branches'
 import { mapLinks } from '../lib/mapLinks'
+import { cardsToEvents } from '../lib/events'
 const Branches = lazy(() => import('./Branches').then(m => ({ default: m.Branches })))
+// Tarjetas con el diseño viejo "Flyers" (retirado): se muestran con el módulo Eventos hasta volver a publicar
+const EventsModule = lazy(() => import('./EventsModule').then(m => ({ default: m.EventsModule })))
 import { NETWORK_LABELS, networkFromUrl } from '../lib/networks'
 import { generateHuella, huellaToSvg } from '@/lib/huella'
 import { useProfileModule } from './profileModuleContext'
@@ -562,156 +565,11 @@ export interface CardItem {
   title?: string
   subtitle?: string
   date?: string
-  /** Hora del evento HH:MM (diseño Flyers) */
+  /** Hora HH:MM (sólo del diseño Flyers retirado: pasa a Eventos) */
   time?: string
   url?: string
   /** Traducciones por tarjeta: { en: { title, subtitle } } */
   en?: { title?: string; subtitle?: string }
-}
-
-const dateLocale = (lang: ProfileLang) => (lang === 'es' ? 'es-AR' : lang === 'en' ? 'en-US' : lang)
-
-/** Fecha del flyer en partes (VIE · 14 · NOV); null si no hay fecha o no es válida */
-function ticketDate(date: string | undefined, lang: ProfileLang) {
-  if (!date) return null
-  const d = new Date(`${date}T12:00:00`)
-  if (Number.isNaN(d.getTime())) return null
-  const part = (o: Intl.DateTimeFormatOptions) => d.toLocaleDateString(dateLocale(lang), o).replace('.', '')
-  return { weekday: part({ weekday: 'short' }), day: part({ day: 'numeric' }), month: part({ month: 'short' }) }
-}
-
-/**
- * Diseño Flyers (ticketera): entradas que se deslizan de a una, centradas. La tarjeta toma la forma exacta del flyer
- * (se mide al cargar: ni recorte ni bandas; un formato muy alto achica el ancho para que entre en la pantalla) con la
- * fecha encima; debajo día, hora, título y lugar, y un talón con código de barras decorativo y "Entradas" (si hay
- * link). Forma futurista: esquinas en chanfle, cortes en V en la línea de troquel y borde de luz del acento.
- * Puntos abajo para saber cuántas hay y saltar a una.
- */
-function TicketCards({ module, lang, onAction, items }: ModuleProps & { items: CardItem[] }) {
-  const heading = tr(module.title, module.translations, 'title', lang)
-  const t = ui(lang)
-  const track = useRef<HTMLDivElement>(null)
-  const [active, setActive] = useState(0)
-  // Proporción real de cada flyer (ancho / alto), medida al cargar; entre 9:16 y 1.91:1
-  const [ratios, setRatios] = useState<Record<number, number>>({})
-  const arOf = (first: number, last: number) => ({
-    '--tix-ar-first': safeHref(items[first]?.image_url) ? ratios[first] ?? 0.8 : 0.8,
-    '--tix-ar-last': safeHref(items[last]?.image_url) ? ratios[last] ?? 0.8 : 0.8,
-  }) as CSSProperties
-  const measure = (i: number) => (e: SyntheticEvent<HTMLImageElement>) => {
-    const { naturalWidth: w, naturalHeight: h } = e.currentTarget
-    if (!w || !h) return
-    const ar = Math.min(1.91, Math.max(0.5625, w / h))
-    setRatios(r => (r[i] === ar ? r : { ...r, [i]: ar }))
-  }
-
-  useEffect(() => {
-    const el = track.current
-    if (!el) return
-    let frame = 0
-    const onScroll = () => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        const cards = Array.from(el.children) as HTMLElement[]
-        const center = el.scrollLeft + el.clientWidth / 2
-        let best = 0
-        cards.forEach((c, i) => {
-          if (Math.abs(c.offsetLeft + c.offsetWidth / 2 - center) < Math.abs(cards[best].offsetLeft + cards[best].offsetWidth / 2 - center)) best = i
-        })
-        setActive(best)
-      })
-    }
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => { el.removeEventListener('scroll', onScroll); cancelAnimationFrame(frame) }
-  }, [])
-
-  const goTo = (i: number) => {
-    const el = track.current
-    const card = el?.children[i] as HTMLElement | undefined
-    if (!el || !card) return
-    el.scrollTo({ left: card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2, behavior: 'smooth' })
-  }
-
-  // Entrada: las tarjetas suben una tras otra cuando la sección aparece en pantalla
-  const section = useRef<HTMLElement>(null)
-  const [shown, setShown] = useState(false)
-  useEffect(() => {
-    const el = section.current
-    if (!el || typeof IntersectionObserver === 'undefined') { setShown(true); return }
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setShown(true); io.disconnect() } }, { threshold: 0.15 })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
-
-  return (
-    <section ref={section} className={`mp-tix${shown ? ' is-in' : ''}`} aria-label={heading || t.cards}>
-      <SectionTitle heading={heading} count={items.length} />
-      <div ref={track} className="mp-tix-track" tabIndex={0} style={arOf(0, items.length - 1)} role="region" aria-label={`${heading || t.cards} — ${t.swipeHint}`}>
-        {items.map((item, i) => {
-          const href = safeHref(item.url)
-          const img = safeHref(item.image_url)
-          const title = (lang === 'en' && item.en?.title) || item.title || ''
-          const subtitle = (lang === 'en' && item.en?.subtitle) || item.subtitle || ''
-          const when = ticketDate(item.date, lang)
-          const body = (
-            <>
-              <div className="mp-tix-top">
-                <div className="mp-tix-flyer">
-                  {img
-                    ? <>
-                        <SafeImage className="mp-tix-backdrop" sizing="column" src={img} alt="" aria-hidden="true" loading={i < 2 ? 'eager' : 'lazy'} />
-                        <SafeImage className="mp-tix-img" sizing="column" src={img} alt={title} loading={i < 2 ? 'eager' : 'lazy'} onLoad={measure(i)} />
-                      </>
-                    : <span className="mp-tix-blank" aria-hidden="true">{title}</span>}
-                  <span className="mp-tix-sheen" aria-hidden="true" />
-                  {when && (
-                    <span className="mp-tix-badge" aria-hidden="true">
-                      <span className="mp-tix-badge-day">{when.day}</span>
-                      <span className="mp-tix-badge-month">{when.month}</span>
-                    </span>
-                  )}
-                </div>
-                <div className="mp-tix-head">
-                  {(when || item.time) && (
-                    <span className="mp-tix-when">
-                      {[when && `${when.weekday} ${when.day} ${when.month}`, item.time].filter(Boolean).join(' · ')}
-                    </span>
-                  )}
-                  {title && <span className="mp-tix-title">{title}</span>}
-                  {subtitle && <span className="mp-tix-sub"><MapPin size={13} aria-hidden="true" />{subtitle}</span>}
-                </div>
-              </div>
-              {/* Talón: troquel con cortes en V, código de barras decorativo y el botón de entradas */}
-              {href && (
-                <div className="mp-tix-stub">
-                  <span className="mp-tix-code" aria-hidden="true">
-                    <span className="mp-tix-bars" />
-                    <span className="mp-tix-serial">{String(i + 1).padStart(3, '0')}</span>
-                  </span>
-                  <span className="mp-tix-cta">{t.tickets} <ArrowUpRight size={17} aria-hidden="true" /></span>
-                </div>
-              )}
-            </>
-          )
-          const pos = i === active ? ' is-active' : i < active ? ' is-before' : ' is-after'
-          const cls = `mp-tix-card${pos}${href ? ' has-stub' : ''}`
-          // --i: orden para la entrada escalonada; --tix-ar: proporción del flyer (4:5 hasta que se mide)
-          const style = { '--i': i, '--tix-ar': img ? ratios[i] ?? 0.8 : 0.8 } as CSSProperties
-          return href
-            ? <a key={i} className={cls} style={style} href={href} {...linkProps(href)} onClick={() => onAction(module.id, urlKey(item.url))}>{body}</a>
-            : <article key={i} className={cls} style={style}>{body}</article>
-        })}
-      </div>
-      {items.length > 1 && (
-        <div className="mp-tix-dots">
-          {items.map((item, i) => (
-            <button key={i} type="button" data-touch-exempt className={i === active ? 'is-active' : undefined} aria-current={i === active || undefined}
-              aria-label={`${i + 1} / ${items.length}${item.title ? ` · ${item.title}` : ''}`} onClick={() => goTo(i)} />
-          ))}
-        </div>
-      )}
-    </section>
-  )
 }
 
 function formatCardDate(date: string, lang: ProfileLang): string {
@@ -724,7 +582,9 @@ export function CardsModule({ module, lang, onAction }: ModuleProps) {
   const items = (Array.isArray(module.content.items) ? module.content.items : []) as CardItem[]
   const visible = items.filter(i => i && (i.title || i.image_url))
   if (!visible.length) return null
-  if (module.content.layout === 'tickets') return <TicketCards module={module} lang={lang} onAction={onAction} items={visible} />
+  if (module.content.layout === 'tickets') {
+    return <Suspense fallback={null}><EventsModule module={{ ...module, type: 'events', content: { items: cardsToEvents(visible) } }} lang={lang} onAction={onAction} /></Suspense>
+  }
   const layout = module.content.layout === 'stack' ? 'stack' : 'carousel'
   const heading = tr(module.title, module.translations, 'title', lang)
 

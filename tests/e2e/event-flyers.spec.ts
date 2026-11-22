@@ -1,10 +1,10 @@
 import { expect, test, type BrowserContext } from '@playwright/test'
 import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
 
-// Tarjetas · diseño Flyers: flyers en formato historia que se deslizan de a uno, con talón de entrada (fecha, hora,
-// lugar y botón "Entradas"). En Studio, cada subida de imagen dice el tamaño recomendado en px.
+// Tarjetas · diseño "Flyers" retirado: ahora es el módulo Eventos. Lo ya publicado con ese diseño se ve como Eventos
+// hasta volver a publicar (la migración 20261128000001 pasa lo guardado a `events`), y Studio ya no lo ofrece.
 
-// Un flyer de ejemplo; `h` = alto (1920 = formato historia; 1350 = 4:5, para ver que no se recorta)
+// Un flyer de ejemplo; `h` = alto (1920 = formato historia)
 const flyer = (from: string, to: string, text: string, h = 1920) => `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="${h}">
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient></defs>
   <rect width="1080" height="${h}" fill="url(#g)"/>
@@ -16,9 +16,9 @@ const FLYERS_MODULE = () => moduleRow({
   content: {
     layout: 'tickets',
     items: [
-      { image_url: 'https://cdn.example.com/flyer-1.svg', title: 'Noche Universo', subtitle: 'Niceto Club · Palermo', date: '2026-11-14', time: '23:30', url: 'https://tickets.example.com/universo' },
-      { image_url: 'https://cdn.example.com/flyer-2.svg', title: 'Sunset Sessions', subtitle: 'Terraza Mirador', date: '2026-11-22', time: '18:00', url: 'https://tickets.example.com/sunset' },
-      { title: 'Fiesta de fin de año', subtitle: 'Lugar a confirmar', date: '2026-12-31' },
+      { image_url: 'https://cdn.example.com/flyer-1.svg', title: 'Noche Universo', subtitle: 'Niceto Club · Palermo', date: '2099-11-14', time: '23:30', url: 'https://tickets.example.com/universo' },
+      { image_url: 'https://cdn.example.com/flyer-2.svg', title: 'Sunset Sessions', subtitle: 'Terraza Mirador', date: '2099-11-22', time: '18:00', url: 'https://tickets.example.com/sunset' },
+      { title: 'Fiesta de fin de año', subtitle: 'Lugar a confirmar', date: '2099-12-31' },
     ],
   },
 })
@@ -34,49 +34,33 @@ async function serveFlyers(context: BrowserContext) {
   })
 }
 
-test('perfil público: los flyers se deslizan como entradas, con fecha, hora y botón Entradas', async ({ page, context }) => {
+test('perfil público: las tarjetas con el diseño Flyers retirado se ven como Eventos', async ({ page, context }) => {
   await installSupabaseMock(context, createState({ profiles: [profileRow()], profile_modules: [FLYERS_MODULE()] }))
   await serveFlyers(context) // después del mock: si no, el mock responde sus propias imágenes de cdn.example.com
   await page.goto('/ana')
 
-  await expect(page.getByRole('region', { name: 'Próximas fechas', exact: true })).toBeVisible()
-  const cards = page.locator('.mp-tix-card')
-  await expect(cards).toHaveCount(3)
-  await expect(cards.first()).toHaveClass(/is-active/)
-  await expect(cards.first()).toContainText('23:30')
-  await expect(cards.first()).toContainText('Niceto Club')
-
-  const ticket = page.getByRole('link', { name: /Noche Universo/ })
-  await expect(ticket).toHaveAttribute('href', 'https://tickets.example.com/universo')
-  await expect(ticket).toContainText('Entradas')
-  // Sin link: tarjeta sin botón; sin imagen: el título sobre el color de acento
-  await expect(cards.nth(2)).not.toContainText('Entradas')
-  await expect(cards.nth(2).locator('.mp-tix-stub')).toHaveCount(0)
-  // La tarjeta toma la forma exacta de cada flyer: ni recorte ni bandas (9:16 y 4:5)
-  await expect(cards.nth(1).locator('img.mp-tix-img')).toHaveCSS('object-fit', 'contain')
-  for (const [n, ratio] of [[0, 1080 / 1920], [1, 1080 / 1350]] as const) {
-    await expect.poll(async () => {
-      const box = await cards.nth(n).locator('.mp-tix-flyer').boundingBox()
-      return box ? Math.abs(box.width / box.height - ratio) < 0.02 : false
-    }).toBe(true)
-  }
-  await expect(cards.nth(2).locator('.mp-tix-blank')).toHaveText('Fiesta de fin de año')
-
-  // Los puntos llevan a cada flyer
-  await page.getByRole('button', { name: /^2 \/ 3/ }).click()
-  await expect(cards.nth(1)).toHaveClass(/is-active/)
-  await expect(page.getByRole('button', { name: /^2 \/ 3/ })).toHaveAttribute('aria-current', 'true')
+  const section = page.getByRole('region', { name: 'Próximas fechas', exact: true })
+  await expect(section).toBeVisible()
+  await expect(page.locator('.mp-ev-card')).toHaveCount(3)
+  await expect(page.locator('.mp-tix-card')).toHaveCount(0)
+  const buy = section.getByRole('link', { name: /Entradas: Noche Universo/ })
+  await expect(buy).toHaveAttribute('href', 'https://tickets.example.com/universo')
+  // El subtítulo era el lugar: aparece en la ficha del evento
+  await section.getByRole('button', { name: /^Ver evento: Noche Universo/ }).click()
+  const detail = page.getByRole('dialog', { name: 'Noche Universo' })
+  await expect(detail).toContainText('Niceto Club · Palermo')
+  await expect(page).toHaveURL(/evento=flyer0$/)
 })
 
-test('Studio: el diseño Flyers pide el flyer en formato historia y muestra el tamaño recomendado', async ({ page, context }) => {
+test('Studio: Tarjetas ya no ofrece el diseño Flyers (lo que quedaba así se edita como carrusel)', async ({ page, context }) => {
   await serveFlyers(context)
   await installSupabaseMock(context, createState({ profiles: [profileRow()], profile_modules: [FLYERS_MODULE()] }), { signedIn: true })
   await page.goto('/studio/modules')
   await page.getByRole('button', { name: 'Editar Próximas fechas', exact: true }).click()
 
   const dialog = page.getByRole('dialog')
-  await expect(dialog.locator('select').first()).toHaveValue('tickets')
-  await expect(dialog.getByText('Recomendado: 1080 × 1920 px').first()).toBeVisible()
-  await expect(dialog.getByLabel('Hora (opcional)').first()).toHaveValue('23:30')
-  await expect(dialog.getByLabel('Link de entradas (opcional)').first()).toHaveValue('https://tickets.example.com/universo')
+  const layout = dialog.getByRole('combobox', { name: /Cómo se muestran/ })
+  await expect(layout).toHaveValue('carousel')
+  await expect(layout.locator('option[value="tickets"]')).toHaveCount(0)
+  await expect(dialog.getByLabel('Hora (opcional)')).toHaveCount(0)
 })
