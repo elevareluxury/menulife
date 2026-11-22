@@ -69,3 +69,18 @@ describe('ficha y portada', () => {
     expect(posterRatio(0, 0)).toBe(0.8)
   })
 })
+
+describe('tarjetas del diseño Flyers retirado → eventos', () => {
+  it('cada tarjeta es un evento con id corto, el subtítulo como lugar y sin las que no tienen ni título ni foto', async () => {
+    const { cardsToEvents } = await import('../../src/modules/profile/lib/events')
+    expect(cardsToEvents([
+      { image_url: 'https://cdn.example.com/f.webp', title: 'Noche', subtitle: 'Niceto', date: '2099-01-02', time: '23:30', url: 'https://t.example.com', en: { title: 'Night' } },
+      { subtitle: 'sólo texto' },
+      { title: 'Fiesta', date: 'mañana' },
+    ])).toEqual([
+      { id: 'flyer0', image_url: 'https://cdn.example.com/f.webp', title: 'Noche', date: '2099-01-02', time: '23:30', venue: 'Niceto', url: 'https://t.example.com', en: { title: 'Night' } },
+      { id: 'flyer2', title: 'Fiesta' },
+    ])
+    expect(cardsToEvents(null)).toEqual([])
+  })
+})

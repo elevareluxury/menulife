@@ -37,10 +37,10 @@ export function imageStressModules() {
       { title: 'Vertical', image_url: img(600, 1800) }, { title: 'Panorámica', image_url: img(2400, 400) },
       { title: 'Transparente', image_url: img(600, 600, true) }, { title: 'Rota', image_url: BROKEN_IMG },
     ] }),
-    row('m-cards-flyers', 'cards', 'Flyers', { layout: 'tickets', items: [
-      { title: 'Flyer horizontal (no es 9:16)', image_url: img(1920, 1080), date: '2026-12-31', subtitle: 'Club Central', url: 'https://entradas.example.com' },
-      { title: 'Flyer 9:16', image_url: img(1080, 1920), date: '2026-12-01' },
-      { title: 'Flyer roto', image_url: BROKEN_IMG },
+    row('m-events-flyers', 'events', 'Flyers', { items: [
+      { id: 'flyerh', title: 'Flyer horizontal (no es 9:16)', image_url: img(1920, 1080), date: '2099-12-31', venue: 'Club Central', url: 'https://entradas.example.com' },
+      { id: 'flyerv', title: 'Flyer 9:16', image_url: img(1080, 1920), date: '2099-12-01' },
+      { id: 'flyerx', title: 'Flyer roto', image_url: BROKEN_IMG },
     ] }),
     row('m-media-cover', 'media', 'Video con portada vertical', { url: 'https://youtu.be/dQw4w9WgXcQ', provider: 'youtube', kind: 'video', cover_url: img(900, 1600) }),
     row('m-media-cover-broken', 'media', 'Música con portada rota', { url: 'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC', provider: 'spotify', kind: 'audio', cover_url: BROKEN_IMG }),

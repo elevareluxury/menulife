@@ -93,3 +93,19 @@ export function eventHref(current: string, id: string | null): string {
   else u.searchParams.delete('evento')
   return u.pathname + u.search + u.hash
 }
+
+/**
+ * Tarjetas del diseño "Flyers" (retirado) → eventos. La migración 20261128000001 hace lo mismo con lo guardado; esto
+ * cubre lo ya publicado hasta que se vuelva a publicar. El subtítulo era el lugar.
+ */
+export function cardsToEvents(cards: unknown): EventItem[] {
+  const list = Array.isArray(cards) ? cards : []
+  return readEvents(list.map((c, i) => {
+    const card = (c && typeof c === 'object' ? c : {}) as Record<string, unknown>
+    const en = card.en && typeof card.en === 'object' ? card.en as Record<string, unknown> : null
+    return {
+      id: `flyer${i}`, image_url: card.image_url, title: card.title, date: card.date, time: card.time,
+      venue: card.subtitle, url: card.url, ...(en?.title ? { en: { title: en.title } } : {}),
+    }
+  }))
+}

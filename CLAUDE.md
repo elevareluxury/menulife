@@ -878,7 +878,9 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   link; tocar la portada abre la ficha (portal a pantalla completa con foco atrapado, Escape y botón atrás) con su link
   `?evento=<id>` (pushState; se puede compartir). Studio: `EventsEditor`, plantilla por rubro "Productora de eventos".
   Migración `20261122000001_identity_events_module.sql` (sólo el tipo), tests en `events_module.test.sql`,
-  `events.test.ts` y `events.spec.ts`. El diseño "Flyers" de Tarjetas sigue para quien ya lo usa.
+  `events.test.ts` y `events.spec.ts`. El diseño "Flyers" de Tarjetas se retiró (22/11/2026): Studio ya no lo ofrece,
+  `20261128000001_cards_flyers_to_events.sql` pasa lo guardado a `events` (`mycen_cards_flyers_to_events()`) y lo ya
+  publicado con `layout: 'tickets'` se dibuja con `EventsModule` (`cardsToEvents`) hasta volver a publicar.
 - Fase 1 de diseño (lenguaje único de módulos): títulos con la letra de la interfaz (también "Sobre mí"; la de marca
   queda para el nombre, nombres de proyectos/canciones y momentos grandes), colecciones sin tarjeta con
   `SectionTitle` (mismo estilo + cantidad), acción principal rellena (`mp-primary` en Producto y Cupón), producto sin

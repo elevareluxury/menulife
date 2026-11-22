@@ -353,10 +353,10 @@ export function buildCatalog(t: StudioDict): ModuleDef[] {
         { key: 'layout', label: f.layout, kind: 'select', required: true, options: [
           { value: 'carousel', label: c.layoutCarousel },
           { value: 'stack', label: c.layoutStack },
-          { value: 'tickets', label: c.layoutTickets },
         ] },
       ],
-      prefill: x => { if (!x.layout) x.layout = 'carousel' },
+      // "Flyers" (tickets) se retiró: lo que quede así se edita como carrusel (la migración lo pasa a Eventos)
+      prefill: x => { if (!x.layout || x.layout === 'tickets') x.layout = 'carousel' },
       extra: extra<CardItem[]>({
         init: m => (Array.isArray(m?.content.items) ? m.content.items as CardItem[] : [{}]),
         validate: items => {
