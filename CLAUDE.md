@@ -745,7 +745,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   → un mail por Resend si hay errores nuevos, denuncias, pico de registros o links marcados. `link-scan.yml` (1 h) →
   `cron_recent_links` (links de lo publicado, `mycen_snapshot_links`) → Google Web Risk (no Safe Browsing: es para uso
   no comercial) → `cron_flag_link` crea una denuncia `scam` (una vez por perfil y link, `mycen_link_flags`; nada se
-  suspende solo). Reglas puras en `scripts/cron/rules.mjs`. Visitas (`profile_events`) 13 meses e índice parcial de
+  suspende solo). Reglas puras en `scripts/cron/rules.mjs`. GitHub no corre las tareas a horario (pasan horas): cada
+  pasada mira desde la anterior exitosa (`sinceFor` + `previousRun.mjs`, con `actions: read`), no una ventana fija. Visitas (`profile_events`) 13 meses e índice parcial de
   vistas por fecha. Propuesta de portfolio (modelos, influencers, cantantes): `docs/identity/portfolio-propuesta.md`.
 - Nombres reservados y huella o cara (PR E, `20261126000001_talent_reservations.sql`, tests en
   `talent_reservations.test.sql` y `emergency-mfa.spec.ts`): Super-admin → Nombres reservados (`ReservationsTab`,

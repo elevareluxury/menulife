@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  actions: read   # para saber cuándo corrió la pasada anterior
 
 concurrency:
   group: team-alerts
@@ -27,6 +28,7 @@ jobs:
       - name: Revisar y avisar
         run: node scripts/cron/team-alerts.mjs
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           MYCEN_CRON_KEY: ${{ secrets.MYCEN_CRON_KEY }}
