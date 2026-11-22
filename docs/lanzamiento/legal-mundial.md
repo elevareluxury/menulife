@@ -29,9 +29,11 @@ de constituir una sociedad).
    Términos → quien (12 idiomas).
 2. **Agente DMCA** (EE. UU.): registrarlo en el U.S. Copyright Office (dmca.copyright.gov, US$ 6, se renueva cada 3
    años) para tener la protección de “safe harbor”. Después, sumar su contacto en Términos → derechos-de-autor.
-3. **Corea del Sur y China continental**: sus leyes piden un consentimiento **separado** para mandar datos fuera del país
-   (con destinatario, país, datos, finalidad y plazo) y, en China, también para datos sensibles. Hoy no hay esa casilla
-   aparte. Decidir: sumarla al registro para esos países (es código) o no ofrecer Mycen activamente allí.
+3. ~~**Corea del Sur y China continental**~~ — hecho (22/11/2026, opción A): casilla aparte en el registro (email y
+   Google) y en `/auth/terms` para cuentas que ya existían, con datos, proveedores, países, finalidad, plazo y
+   responsable (`src/lib/crossBorder.ts`, `CrossBorderField`); queda en la cuenta con fecha y versión del texto.
+   Privacidad → segun-pais lo explica en los 12 idiomas. Si cambian los proveedores o los países, subir
+   `XBORDER_VERSION` (se vuelve a pedir).
 4. **Sociedad**: hoy el responsable es Luca Cazzoli (monotributo) con el nombre de fantasía Resilio. Si se arma una
    sociedad, cambiar el responsable en los 12 idiomas (comentario `RESPONSABLE` en `legal/es.ts`).
 5. **Revisión de un abogado**: con lo anterior resuelto, que un abogado con experiencia en protección de datos lea la

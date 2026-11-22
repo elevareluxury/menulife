@@ -66,6 +66,15 @@ const zh: AuthDict = {
     submit: "继续",
     cancel: "取消并退出",
   },
+  xborder: {
+    kr: "韩国",
+    cn: "中国",
+    title: "您的数据将存储在{country}境外",
+    details: "Mycen 在{country}没有服务器。为提供服务，您的账户数据（姓名、邮箱和照片）、您发布的内容以及您在 Life OS 中记录的内容，将在美国和欧盟存储和处理，使用的服务器分别由 Supabase（数据库）、Vercel（网站）、Resend（邮件）、Cloudflare（安全与备份）和 Google（如果您使用 Google 登录）提供。每次使用 Mycen 时，数据都会通过互联网加密传输；在您保留账户期间存储，删除账户时一并删除。个人信息处理者：Luca Cazzoli（Resilio，阿根廷），team@mycen.id。",
+    accept: "我同意按上述说明在{country}境外存储和处理我的数据。",
+    need: "要创建账户，请同意将您的数据存储在{country}境外。如果您不同意，我们无法为您提供服务。",
+    gateIntro: "继续之前，我们需要您同意将数据存储在{country}境外。只需同意一次。",
+  },
   forgot: {
     title: "找回密码",
     intro: "输入你的邮箱，我们会发送一个设置新密码的链接。",

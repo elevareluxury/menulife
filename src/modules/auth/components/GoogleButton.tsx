@@ -6,6 +6,7 @@ import type { Referral } from '@/lib/referral'
 import type { Claim } from '@/lib/claim'
 import { oauthProviders, startOAuthSignIn } from '@/modules/auth/lib/googleSignIn'
 import { fetchAuthProviders } from '@/lib/authProviders'
+import { crossBorderRegion, deviceTimeZone, withCountry, type CrossBorderRegion } from '@/lib/crossBorder'
 
 // Logo de Google con sus colores oficiales (lo piden sus pautas de marca para el botón de acceso)
 function GoogleLogo() {
@@ -33,7 +34,10 @@ function AppleLogo() {
  * de los Términos y la Privacidad la pide Mycen. En el registro (`accepted` = la casilla del formulario) no se va a Google
  * sin tildarla. En el login no se pide: quien ya tiene cuenta entra directo y una cuenta nueva acepta en `/auth/terms`.
  */
-export function GoogleButton({ referral = null, claim = null, accepted }: { referral?: Referral | null; claim?: Claim | null; accepted?: boolean }) {
+/** `xborder` (sólo en el registro, Corea del Sur o China): la región si tildó el permiso aparte, `false` si falta. */
+export function GoogleButton({ referral = null, claim = null, accepted, xborder = null }: {
+  referral?: Referral | null; claim?: Claim | null; accepted?: boolean; xborder?: CrossBorderRegion | false | null
+}) {
   const t = useAuthT()
   const g = t.google
   const r = t.register
@@ -52,10 +56,14 @@ export function GoogleButton({ referral = null, claim = null, accepted }: { refe
   async function handleClick(provider: 'google' | 'apple') {
     setError('')
     if (signup && !accepted) { setError(r.needTerms); return }
+    if (xborder === false) {
+      const region = crossBorderRegion({ lang: useAppLang.getState().lang, timeZone: deviceTimeZone() })
+      if (region) { setError(withCountry(t.xborder.need, region, t.xborder)); return }
+    }
     setLoading(provider)
     try {
       // Si sale bien, el navegador se va a Google o Apple; no hace falta apagar "loading"
-      await startOAuthSignIn(provider, useAppLang.getState().lang, referral, signup, claim)
+      await startOAuthSignIn(provider, useAppLang.getState().lang, referral, signup, claim, xborder || null)
     } catch (err: unknown) {
       setError(authErrorMessage(err, t.errors, provider === 'apple' ? a.failed : g.failed))
       setLoading(null)

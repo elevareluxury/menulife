@@ -336,6 +336,13 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `lib/brainDump.ts` separa en cosas (línea, oración; comas sólo si son 3 o más) y cada una pasa por `parseVoice`; se
   revisa (tipo con un toque, monto, quitar) y "Guardar todo": tareas e ideas a Brain, gastos/ingresos a Dinero con
   `suggestCategory` u "Otros"; sin conexión, a `lib/outbox.ts`. Tests en `brainDump.test.ts` y `why-dump.spec.ts`.
+- Corea del Sur y China (PIPA art. 28-8, PIPL art. 39): permiso aparte para guardar los datos fuera del país.
+  `src/lib/crossBorder.ts` (`crossBorderRegion`: zona horaria del dispositivo y, si no, idioma ko/zh; Hong Kong, Macao
+  y Taiwán no) → `CrossBorderField` en el registro (también antes de ir a Google: `PendingSignup.xborder`) y en
+  `/auth/terms` (`needsTerms` = Términos de Google o `crossBorderMissing`; pide sólo lo que falta). Se guarda en la
+  cuenta: `xborder_consent_at`, `xborder_region`, `xborder_version` (= `XBORDER_VERSION`; subirla si cambian
+  proveedores o países vuelve a pedirlo). Textos en `auth.xborder` y Privacidad → segun-pais (12 idiomas). Tests en
+  `crossBorder.test.ts` y `cross-border.spec.ts`.
 - Entrar con Google (V1.1, `FEATURES.googleSignIn`, prendido): `GoogleButton` (`modules/auth/components/`) debajo del
   login y del registro. Google sólo da nombre, email y foto: la aceptación la pide Mycen, una sola vez. En el registro no
   va a Google sin la casilla del formulario; en el login no se pide y una cuenta nueva de Google sin `terms_accepted_at`

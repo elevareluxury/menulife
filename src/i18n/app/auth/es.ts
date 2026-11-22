@@ -68,6 +68,16 @@ const es = {
     submit: "Continuar",
     cancel: "Cancelar y salir",
   },
+  /** Corea del Sur y China: permiso aparte para guardar los datos fuera del país (`src/lib/crossBorder.ts`) */
+  xborder: {
+    kr: "Corea del Sur",
+    cn: "China",
+    title: "Tus datos fuera de {country}",
+    details: "Mycen no tiene servidores en {country}. Para darte el servicio, tus datos de cuenta (nombre, email y foto), lo que publicás y lo que cargás en Life OS se guardan y se procesan en Estados Unidos y en la Unión Europea, en los servidores de Supabase (base de datos), Vercel (web), Resend (mails), Cloudflare (seguridad y copias) y Google (si entrás con Google). Viajan cifrados por internet cada vez que usás Mycen y se guardan mientras tengas la cuenta (se borran al eliminarla). Responsable: Luca Cazzoli (Resilio, Argentina), team@mycen.id.",
+    accept: "Acepto que mis datos se guarden y procesen fuera de {country}, como se explica arriba.",
+    need: "Para crear tu cuenta, aceptá que tus datos se guarden fuera de {country}. Si no aceptás, no podemos darte el servicio.",
+    gateIntro: "Antes de seguir, necesitamos tu permiso para guardar tus datos fuera de {country}. Se pide una sola vez.",
+  },
   forgot: {
     title: 'Recuperar contraseña',
     intro: 'Escribí tu email y te mandamos un link para crear una contraseña nueva.',
