@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 // @ts-expect-error módulo .mjs sin tipos (lo usan las tareas programadas)
-import { alertLines, alertSubject, checkableUrl, threatOf, webRiskUrl } from '../../scripts/cron/rules.mjs'
+import { alertLines, alertSubject, checkableUrl, sinceFor, threatOf, webRiskUrl } from '../../scripts/cron/rules.mjs'
+// @ts-expect-error módulo .mjs sin tipos
+import { previousRunStart } from '../../scripts/cron/previousRun.mjs'
 
 // Tareas programadas (PR D): qué se avisa al equipo y qué links se mandan a revisar. Sin red.
 
@@ -51,5 +53,38 @@ describe('links', () => {
   it('lee la amenaza de la respuesta (vacía = limpio)', () => {
     expect(threatOf({})).toBeNull()
     expect(threatOf({ threat: { threatTypes: ['SOCIAL_ENGINEERING'] } })).toBe('SOCIAL_ENGINEERING')
+  })
+})
+
+describe('sinceFor (GitHub no corre las tareas a horario)', () => {
+  const now = Date.parse('2026-11-22T19:00:00Z')
+  it('sin pasada anterior, la ventana de siempre', () => {
+    expect(sinceFor(null, 16, now)).toBe('2026-11-22T18:44:00.000Z')
+    expect(sinceFor('no es fecha', 16, now)).toBe('2026-11-22T18:44:00.000Z')
+  })
+  it('si la anterior fue hace horas, mira desde ahí (con 2 minutos de margen)', () => {
+    expect(sinceFor('2026-11-22T12:00:00Z', 16, now)).toBe('2026-11-22T11:58:00.000Z')
+  })
+  it('nunca menos que la ventana, ni desde el futuro', () => {
+    expect(sinceFor('2026-11-22T18:58:00Z', 16, now)).toBe('2026-11-22T18:44:00.000Z')
+    expect(sinceFor('2026-11-22T20:00:00Z', 16, now)).toBe('2026-11-22T18:44:00.000Z')
+  })
+})
+
+describe('previousRunStart', () => {
+  afterEach(() => { vi.unstubAllGlobals() })
+  const env = { GITHUB_TOKEN: 't', GITHUB_REPOSITORY: 'o/r', GITHUB_RUN_ID: '9',
+    GITHUB_WORKFLOW_REF: 'o/r/.github/workflows/team-alerts.yml@refs/heads/main' }
+  it('toma la pasada exitosa anterior (no la que está corriendo)', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ workflow_runs: [
+      { id: 9, run_started_at: '2026-11-22T19:00:00Z' }, { id: 8, run_started_at: '2026-11-22T12:00:00Z' }] })))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await previousRunStart(env)).toBe('2026-11-22T12:00:00Z')
+    expect(String((fetchMock.mock.calls[0] as unknown[])[0])).toContain('/repos/o/r/actions/workflows/team-alerts.yml/runs?status=success')
+  })
+  it('sin token o si GitHub falla, null (ventana de siempre)', async () => {
+    expect(await previousRunStart({ ...env, GITHUB_TOKEN: '' })).toBeNull()
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('no', { status: 500 })))
+    expect(await previousRunStart(env)).toBeNull()
   })
 })

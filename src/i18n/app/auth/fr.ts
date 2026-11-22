@@ -66,6 +66,15 @@ const fr: AuthDict = {
     submit: "Continuer",
     cancel: "Annuler et se déconnecter",
   },
+  xborder: {
+    kr: "Corée du Sud",
+    cn: "Chine",
+    title: "Vos données hors de {country}",
+    details: "Mycen n’a pas de serveurs en {country}. Pour vous fournir le service, les données de votre compte (nom, e-mail et photo), ce que vous publiez et ce que vous ajoutez dans Life OS sont stockés et traités aux États-Unis et dans l’Union européenne, sur les serveurs de Supabase (base de données), Vercel (web), Resend (e-mails), Cloudflare (sécurité et sauvegardes) et Google (si vous vous connectez avec Google). Elles transitent chiffrées sur Internet à chaque utilisation de Mycen et sont conservées tant que vous avez le compte (supprimées quand vous le supprimez). Responsable : Luca Cazzoli (Resilio, Argentine), team@mycen.id.",
+    accept: "J’accepte que mes données soient stockées et traitées hors de {country}, comme expliqué ci-dessus.",
+    need: "Pour créer votre compte, acceptez que vos données soient stockées hors de {country}. Sans votre accord, nous ne pouvons pas fournir le service.",
+    gateIntro: "Avant de continuer, nous avons besoin de votre autorisation pour stocker vos données hors de {country}. Nous ne la demandons qu’une fois.",
+  },
   forgot: {
     title: "Réinitialiser le mot de passe",
     intro: "Saisissez votre e-mail et nous vous enverrons un lien pour créer un nouveau mot de passe.",

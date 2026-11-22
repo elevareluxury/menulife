@@ -20,6 +20,8 @@ import { CaptchaField } from '@/modules/auth/components/Captcha'
 import { useCaptcha } from '@/modules/auth/lib/useCaptcha'
 import { withCaptcha } from '@/lib/turnstile'
 import { signupsPausedNow, useSiteFlags } from '@/lib/siteFlags'
+import { crossBorderConsent, crossBorderRegion, deviceTimeZone, withCountry } from '@/lib/crossBorder'
+import { CrossBorderField } from '@/modules/auth/components/CrossBorderField'
 
 const CORAL = '#F4705A'
 
@@ -86,6 +88,10 @@ export function RegisterPage() {
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
   const [accepted, setAccepted] = useState(false)
+  // Corea del Sur y China: permiso aparte para guardar los datos fuera del país (por la zona horaria o el idioma)
+  const lang = useAppLang(s => s.lang)
+  const xRegion = crossBorderRegion({ lang, timeZone: deviceTimeZone() })
+  const [xAccepted, setXAccepted] = useState(false)
   const captcha = useCaptcha()
   // Interruptor de emergencia (Super-admin → Estado): con los registros en pausa no se intenta (la base igual lo frena)
   const { signups } = useSiteFlags()
@@ -100,6 +106,7 @@ export function RegisterPage() {
       return
     }
     if (!accepted) { setError(r.needTerms); return }
+    if (xRegion && !xAccepted) { setError(withCountry(t.xborder.need, xRegion, t.xborder)); return }
     if (!captcha.check()) return
 
     setLoading(true)
@@ -113,6 +120,7 @@ export function RegisterPage() {
             name: name.trim(), terms_accepted_at: new Date().toISOString(), locale: useAppLang.getState().lang,
             ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
             ...claimMetadata(claim),
+            ...(xRegion ? crossBorderConsent(xRegion) : {}),
           },
           emailRedirectTo: authCallbackUrl(),
         }, captcha.token),
@@ -255,6 +263,10 @@ export function RegisterPage() {
             </span>
           </label>
 
+          {xRegion && (
+            <CrossBorderField region={xRegion} t={t.xborder} checked={xAccepted} onChange={v => { setXAccepted(v); setError('') }} />
+          )}
+
           <CaptchaField captcha={captcha} t={t.captcha} />
 
           <button
@@ -277,7 +289,7 @@ export function RegisterPage() {
           </button>
         </form>
 
-        {featureOn('googleSignIn') && signups && <GoogleButton referral={referral} claim={claim} accepted={accepted} />}
+        {featureOn('googleSignIn') && signups && <GoogleButton referral={referral} claim={claim} accepted={accepted} xborder={xRegion ? (xAccepted ? xRegion : false) : null} />}
 
         <p style={{ marginTop: '24px', textAlign: 'center', fontFamily: 'var(--font-jakarta)', fontSize: '13px', color: 'rgba(255,255,255,0.65)' }}>
           {r.haveAccount}{' '}

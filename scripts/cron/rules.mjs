@@ -67,3 +67,19 @@ export function threatOf(body) {
   const types = body?.threat?.threatTypes
   return Array.isArray(types) && types.length ? String(types[0]).slice(0, 64) : null
 }
+
+/**
+ * Desde cuándo mirar en esta pasada. GitHub no corre las tareas programadas a horario (una "cada 15 minutos" llega a
+ * pasar cada varias horas), así que una ventana fija dejaba sin revisar casi todo lo que pasaba entre una y otra.
+ * Se mira desde que empezó la pasada anterior que terminó bien (con 2 minutos de margen), y nunca menos que la
+ * ventana de siempre. Sin dato de la anterior, la ventana de siempre. Los topes máximos los pone la base.
+ * @param {string | null | undefined} previousStart  run_started_at de la pasada anterior exitosa (ISO)
+ * @param {number} windowMin  ventana mínima en minutos
+ * @param {number} [now]
+ */
+export function sinceFor(previousStart, windowMin, now = Date.now()) {
+  const fallback = now - windowMin * 60_000
+  const prev = previousStart ? Date.parse(previousStart) : NaN
+  if (!Number.isFinite(prev) || prev > now) return new Date(fallback).toISOString()
+  return new Date(Math.min(fallback, prev - 2 * 60_000)).toISOString()
+}

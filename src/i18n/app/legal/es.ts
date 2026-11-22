@@ -8,7 +8,7 @@
 export type LegalBlock = string | { list: string[] }
 export interface LegalSection { id: string; title: string; body: LegalBlock[] }
 
-const UPDATED = "2026-11-20"
+const UPDATED = "2026-11-22"
 
 const es = {
   ui: {
@@ -287,6 +287,7 @@ const es = {
         "**Estados Unidos (California y los estados con leyes de privacidad, como Virginia, Colorado, Connecticut o Texas):** podés saber qué datos tenemos —identificadores como tu nombre y tu email, lo que publicás, datos de uso de la app y, sólo si lo anotás, cómo te sentiste, un dato sensible que usamos únicamente para mostrártelo—, pedir que los corrijamos o borremos y llevártelos. No vendemos ni compartimos tus datos para publicidad, así que no hace falta que te des de baja de nada; igual respetamos la señal Global Privacy Control. Podés actuar por medio de un representante autorizado y no te vamos a tratar distinto por ejercer tus derechos. Si rechazamos un pedido, podés apelar respondiendo con el asunto «Apelación» y, si seguís en desacuerdo, reclamar ante el fiscal general de tu estado.",
         "**Canadá, Australia, Japón y Corea del Sur:** podés acceder a tus datos, corregirlos y retirar tu consentimiento. Podés reclamar ante el Comisionado de Privacidad de Canadá, la OAIC de Australia, la PPC de Japón o la PIPC de Corea.",
         "**India (DPDP):** podés acceder a tus datos, corregirlos y borrarlos, y nombrar a alguien que ejerza tus derechos si no pudieras hacerlo. Las quejas se presentan primero ante nosotros (team@mycen.id) y después ante la Junta de Protección de Datos de la India.",
+        "**Corea del Sur y China continental:** como Mycen no tiene servidores ahí, al registrarte te pedimos un consentimiento aparte para guardar y procesar tus datos fuera del país, con el detalle de qué datos salen, a qué proveedores y países (los de «Datos fuera de tu país»), para qué y por cuánto tiempo. Podés retirarlo cuando quieras eliminando tu cuenta. En Corea podés reclamar ante la PIPC y en China, ante la Administración del Ciberespacio (CAC).",
         "**Otros países:** te damos los derechos que te reconozca la ley de tu país; escribinos y te ayudamos.",
       ] },
     ] },

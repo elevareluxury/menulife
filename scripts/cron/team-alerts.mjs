@@ -1,6 +1,7 @@
 // Avisos al equipo (cada 15 min, .github/workflows/team-alerts.yml): mira /api/health y el resumen de la base
 // (cron_alert_digest) y, si hay algo, manda UN mail por Resend. Pasos en docs/lanzamiento/alertas.md.
-import { alertLines, alertSubject } from './rules.mjs'
+import { alertLines, alertSubject, sinceFor } from './rules.mjs'
+import { previousRunStart } from './previousRun.mjs'
 
 const env = process.env
 const need = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'MYCEN_CRON_KEY', 'RESEND_API_KEY']
@@ -12,6 +13,8 @@ if (missing.length) {
 const SITE = env.SITE_URL || 'https://mycen.id'
 const TO = env.ALERT_EMAIL || 'team@mycen.id'
 const WINDOW_MIN = Number(env.WINDOW_MINUTES || 16)
+// Desde la pasada anterior: GitHub no respeta los 15 minutos (a veces pasan horas)
+const SINCE = sinceFor(await previousRunStart(), WINDOW_MIN)
 
 async function health() {
   try {
@@ -27,7 +30,7 @@ async function digest() {
     const res = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/cron_alert_digest`, {
       method: 'POST',
       headers: { apikey: env.SUPABASE_ANON_KEY, authorization: `Bearer ${env.SUPABASE_ANON_KEY}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ p_key: env.MYCEN_CRON_KEY, p_since: new Date(Date.now() - WINDOW_MIN * 60_000).toISOString() }),
+      body: JSON.stringify({ p_key: env.MYCEN_CRON_KEY, p_since: SINCE }),
       signal: AbortSignal.timeout(15_000),
     })
     return res.ok ? await res.json() : null

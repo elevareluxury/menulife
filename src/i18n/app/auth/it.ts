@@ -66,6 +66,15 @@ const it: AuthDict = {
     submit: "Continua",
     cancel: "Annulla ed esci",
   },
+  xborder: {
+    kr: "Corea del Sud",
+    cn: "Cina",
+    title: "I tuoi dati fuori da {country}",
+    details: "Mycen non ha server in {country}. Per fornirti il servizio, i dati del tuo account (nome, email e foto), ciò che pubblichi e ciò che inserisci in Life OS vengono conservati e trattati negli Stati Uniti e nell’Unione europea, sui server di Supabase (database), Vercel (web), Resend (email), Cloudflare (sicurezza e copie) e Google (se accedi con Google). Viaggiano cifrati su internet ogni volta che usi Mycen e vengono conservati finché hai l’account (cancellati quando lo elimini). Titolare: Luca Cazzoli (Resilio, Argentina), team@mycen.id.",
+    accept: "Accetto che i miei dati vengano conservati e trattati fuori da {country}, come spiegato sopra.",
+    need: "Per creare il tuo account, accetta che i tuoi dati vengano conservati fuori da {country}. Se non accetti, non possiamo fornirti il servizio.",
+    gateIntro: "Prima di continuare, ci serve il tuo permesso per conservare i tuoi dati fuori da {country}. Lo chiediamo una sola volta.",
+  },
   forgot: {
     title: "Recupera password",
     intro: "Scrivi la tua email e ti mandiamo un link per creare una nuova password.",

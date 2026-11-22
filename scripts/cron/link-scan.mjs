@@ -1,7 +1,8 @@
-// Links peligrosos (cada hora, .github/workflows/link-scan.yml): toma los links de lo publicado en la última hora
+// Links peligrosos (cada hora, .github/workflows/link-scan.yml): toma los links de lo publicado desde la pasada anterior
 // (cron_recent_links), los consulta en Google Web Risk y los que tienen amenaza quedan como denuncia para el equipo
 // (cron_flag_link). Nada se suspende solo. Pasos en docs/lanzamiento/alertas.md.
-import { checkableUrl, threatOf, webRiskUrl } from './rules.mjs'
+import { checkableUrl, sinceFor, threatOf, webRiskUrl } from './rules.mjs'
+import { previousRunStart } from './previousRun.mjs'
 
 const env = process.env
 const need = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'MYCEN_CRON_KEY', 'WEB_RISK_API_KEY']
@@ -20,7 +21,7 @@ const rpc = (fn, args) => fetch(`${env.SUPABASE_URL}/rest/v1/rpc/${fn}`, {
   signal: AbortSignal.timeout(20_000),
 })
 
-const res = await rpc('cron_recent_links', { p_since: new Date(Date.now() - WINDOW_MIN * 60_000).toISOString() })
+const res = await rpc('cron_recent_links', { p_since: sinceFor(await previousRunStart(), WINDOW_MIN) })
 if (!res.ok) {
   console.log(`::error::cron_recent_links respondió ${res.status}`)
   process.exit(1)

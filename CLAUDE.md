@@ -336,6 +336,13 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   `lib/brainDump.ts` separa en cosas (línea, oración; comas sólo si son 3 o más) y cada una pasa por `parseVoice`; se
   revisa (tipo con un toque, monto, quitar) y "Guardar todo": tareas e ideas a Brain, gastos/ingresos a Dinero con
   `suggestCategory` u "Otros"; sin conexión, a `lib/outbox.ts`. Tests en `brainDump.test.ts` y `why-dump.spec.ts`.
+- Corea del Sur y China (PIPA art. 28-8, PIPL art. 39): permiso aparte para guardar los datos fuera del país.
+  `src/lib/crossBorder.ts` (`crossBorderRegion`: zona horaria del dispositivo y, si no, idioma ko/zh; Hong Kong, Macao
+  y Taiwán no) → `CrossBorderField` en el registro (también antes de ir a Google: `PendingSignup.xborder`) y en
+  `/auth/terms` (`needsTerms` = Términos de Google o `crossBorderMissing`; pide sólo lo que falta). Se guarda en la
+  cuenta: `xborder_consent_at`, `xborder_region`, `xborder_version` (= `XBORDER_VERSION`; subirla si cambian
+  proveedores o países vuelve a pedirlo). Textos en `auth.xborder` y Privacidad → segun-pais (12 idiomas). Tests en
+  `crossBorder.test.ts` y `cross-border.spec.ts`.
 - Entrar con Google (V1.1, `FEATURES.googleSignIn`, prendido): `GoogleButton` (`modules/auth/components/`) debajo del
   login y del registro. Google sólo da nombre, email y foto: la aceptación la pide Mycen, una sola vez. En el registro no
   va a Google sin la casilla del formulario; en el login no se pide y una cuenta nueva de Google sin `terms_accepted_at`
@@ -745,7 +752,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   → un mail por Resend si hay errores nuevos, denuncias, pico de registros o links marcados. `link-scan.yml` (1 h) →
   `cron_recent_links` (links de lo publicado, `mycen_snapshot_links`) → Google Web Risk (no Safe Browsing: es para uso
   no comercial) → `cron_flag_link` crea una denuncia `scam` (una vez por perfil y link, `mycen_link_flags`; nada se
-  suspende solo). Reglas puras en `scripts/cron/rules.mjs`. Visitas (`profile_events`) 13 meses e índice parcial de
+  suspende solo). Reglas puras en `scripts/cron/rules.mjs`. GitHub no corre las tareas a horario (pasan horas): cada
+  pasada mira desde la anterior exitosa (`sinceFor` + `previousRun.mjs`, con `actions: read`), no una ventana fija. Visitas (`profile_events`) 13 meses e índice parcial de
   vistas por fecha. Propuesta de portfolio (modelos, influencers, cantantes): `docs/identity/portfolio-propuesta.md`.
 - Nombres reservados y huella o cara (PR E, `20261126000001_talent_reservations.sql`, tests en
   `talent_reservations.test.sql` y `emergency-mfa.spec.ts`): Super-admin → Nombres reservados (`ReservationsTab`,

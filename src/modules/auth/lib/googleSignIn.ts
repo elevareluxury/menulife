@@ -8,6 +8,7 @@ import { claimMetadata, type Claim } from '@/lib/claim'
 import { validUsername } from '@/lib/username'
 import { betaOn, featureOn } from '@/lib/features'
 import { cachedAuthProviders, type AuthProviders } from '@/lib/authProviders'
+import { crossBorderConsent, crossBorderMissing, type CrossBorderRegion } from '@/lib/crossBorder'
 
 /** Qué botones de acceso con otra cuenta se muestran.
  *  - Apple: con `appleSignIn` prendido, sólo si Supabase dice que Apple está configurado (`server`, por defecto lo
@@ -35,6 +36,8 @@ export interface PendingSignup {
   /** Nombre elegido en "Elegí tu nombre" (landing o perfil) y desde dónde */
   claimed_username?: string
   claim_from?: string
+  /** Corea del Sur o China: tildó en el registro el permiso aparte para guardar los datos fuera del país */
+  xborder?: CrossBorderRegion
 }
 
 export async function startGoogleSignIn(locale: string, referral: Referral | null, terms: boolean): Promise<void> {
@@ -44,9 +47,10 @@ export async function startGoogleSignIn(locale: string, referral: Referral | nul
 /** Google o Apple: mismo camino (se anota idioma, términos y referido; vuelve a /auth/callback) */
 export async function startOAuthSignIn(
   provider: 'google' | 'apple', locale: string, referral: Referral | null, terms: boolean, claim: Claim | null = null,
+  xborder: CrossBorderRegion | null = null,
 ): Promise<void> {
   const pending: PendingSignup = {
-    at: new Date().toISOString(), locale, terms,
+    at: new Date().toISOString(), locale, terms, ...(xborder ? { xborder } : {}),
     ...(referral ? { ref: referral.ref, ref_purpose: referral.purpose } : {}),
     ...claimMetadata(claim),
   }
@@ -77,6 +81,7 @@ export function pendingUpdates(
   const out: Record<string, unknown> = {}
   if (!m.terms_accepted_at && pending.terms === true) out.terms_accepted_at = pending.at
   if (!m.locale && typeof pending.locale === 'string') out.locale = pending.locale
+  if (!m.xborder_consent_at && (pending.xborder === 'kr' || pending.xborder === 'cn')) Object.assign(out, crossBorderConsent(pending.xborder, pending.at))
   if (!m.ref && typeof pending.ref === 'string') {
     out.ref = pending.ref
     if (typeof pending.ref_purpose === 'string') out.ref_purpose = pending.ref_purpose
@@ -105,10 +110,19 @@ export async function applyPendingSignup(): Promise<void> {
   } catch { /* se completa la próxima vez que haga falta; no frena el ingreso */ }
 }
 
-/** Cuenta creada con Google que todavía no aceptó Términos y Privacidad: `/auth/terms` lo pide antes de seguir. */
-export function needsTerms(user: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } | null): boolean {
+type GateUser = { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } | null
+
+/** Cuenta creada con Google que todavía no aceptó Términos y Privacidad. */
+export function needsTermsOnly(user: GateUser): boolean {
   if (!user) return false
   return user.app_metadata?.provider === 'google' && !user.user_metadata?.terms_accepted_at
+}
+
+/** Lo que `/auth/terms` pide antes de seguir: Términos (cuenta de Google nueva) y, en Corea del Sur o China, el
+ *  permiso aparte para guardar los datos fuera del país (cualquier cuenta que no lo dio). */
+export function needsTerms(user: GateUser, timeZone?: string | null): boolean {
+  if (!user) return false
+  return needsTermsOnly(user) || crossBorderMissing(user.user_metadata, timeZone) !== null
 }
 
 /** Pantallas que se pueden ver sin haber aceptado (para leer los textos o terminar el ingreso). */

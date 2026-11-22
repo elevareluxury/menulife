@@ -66,6 +66,15 @@ const ko: AuthDict = {
     submit: "계속",
     cancel: "취소하고 로그아웃",
   },
+  xborder: {
+    kr: "대한민국",
+    cn: "중국",
+    title: "{country} 외 지역에서의 데이터 보관",
+    details: "Mycen은 {country}에 서버가 없습니다. 서비스 제공을 위해 계정 정보(이름, 이메일, 사진), 게시한 내용, Life OS에 기록한 내용은 미국과 유럽연합에서 Supabase(데이터베이스), Vercel(웹), Resend(이메일), Cloudflare(보안 및 백업), Google(Google로 로그인하는 경우)의 서버에 보관·처리됩니다. Mycen을 이용할 때마다 인터넷을 통해 암호화되어 전송되며, 계정을 보유하는 동안 보관되고 계정을 삭제하면 함께 삭제됩니다. 개인정보처리자: Luca Cazzoli(Resilio, 아르헨티나), team@mycen.id.",
+    accept: "위 내용과 같이 내 데이터가 {country} 외 지역에서 보관·처리되는 것에 동의합니다.",
+    need: "계정을 만들려면 데이터를 {country} 외 지역에 보관하는 것에 동의해 주세요. 동의하지 않으면 서비스를 제공할 수 없습니다.",
+    gateIntro: "계속하기 전에 데이터를 {country} 외 지역에 보관하기 위한 동의가 필요합니다. 한 번만 요청합니다.",
+  },
   forgot: {
     title: "비밀번호 재설정",
     intro: "이메일을 입력하면 새 비밀번호를 만들 수 있는 링크를 보내드려요.",
