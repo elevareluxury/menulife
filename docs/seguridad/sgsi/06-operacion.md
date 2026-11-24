@@ -131,8 +131,14 @@ La evidencia de cada revisión se guarda como un issue de GitHub con su etiqueta
 
 ## Abuso sexual infantil (CSAM) e interruptores de emergencia
 - Procedimiento completo: [`../csam.md`](../csam.md) (bloquear con "Abuso sexual infantil" en Denuncias, denunciar a
-  NCMEC/UFECI el mismo día, retención legal de la evidencia en `mycen_legal_holds`, levantarla sólo con el OK de la
-  autoridad). Se revisa una vez por año.
+  NCMEC/UFECI el mismo día, retención legal de la evidencia en `mycen_legal_holds`, pasar los archivos al bucket
+  privado `mycen-evidence` con "Pasar archivos a evidencia privada", levantarla sólo con el OK de la autoridad).
+  Se revisa una vez por año.
+- Auditoría de seguridad del 24/11/2026 (arreglos 1–3, `20261129000001_security_audit_fixes_1.sql`): cuentas
+  suspendidas o retenidas no suben archivos; las funciones de retención que usan las políticas viven en el esquema
+  `mycen_private` (la API no lo expone: nadie pregunta si una cuenta está retenida); la verificación en dos pasos de
+  las cuentas la exige la base. La Edge Function `quarantine-held-files` se despliega con
+  `supabase functions deploy quarantine-held-files`.
 - Ante spam o un ataque: Super-admin → Estado → **Interruptores de emergencia** (registros, mensajes y colaboraciones,
   suscripciones, votaciones). La base los frena (503 `FEATURE_PAUSED` en el gancho previo; trigger en `auth.users`) y
   cada cambio queda en la actividad del equipo.

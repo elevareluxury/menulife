@@ -20,7 +20,7 @@ aplica (con motivo). La evidencia apunta a archivos del repo o a pantallas de lo
 | 5.10 Uso aceptable | ✅ | `/terminos#reglas` (12 idiomas) |
 | 5.12–5.13 Clasificación y etiquetado | ✅ | [04 · Clasificación](04-activos-proveedores.md#clasificación) |
 | 5.14 Transferencia de información | ✅ | Sólo HTTPS; exportes descargados por la propia persona |
-| 5.15–5.18 Control de accesos, identidad, autenticación, derechos | 🟡 | RLS + RPC; super-admins en tabla propia; [06 · Accesos](06-operacion.md#control-de-accesos). 2FA obligatoria en el panel con huella o cara (passkey, WebAuthn) o app de códigos (TOTP): la base exige aal2 en `mycen_is_admin()` (R-02); opcional para las cuentas (Ajustes) |
+| 5.15–5.18 Control de accesos, identidad, autenticación, derechos | 🟡 | RLS + RPC; super-admins en tabla propia; [06 · Accesos](06-operacion.md#control-de-accesos). 2FA obligatoria en el panel con huella o cara (passkey, WebAuthn) o app de códigos (TOTP): la base exige aal2 en `mycen_is_admin()` (R-02); opcional para las cuentas (Ajustes), pero quien lo activa queda protegido por la base: con un factor verificado y la sesión en aal1, `mycen_pre_request` sólo deja usar las RPC públicas y las políticas de Storage no dejan tocar archivos (`20261129000001`) |
 | 5.19–5.22 Proveedores | ✅ | [04 · Proveedores](04-activos-proveedores.md#proveedores-y-subencargados) con certificaciones y DPA |
 | 5.23 Servicios en la nube | ✅ | Supabase, Vercel, Resend: configuración en `docs/lanzamiento/salida-web.md` |
 | 5.24–5.28 Incidentes y evidencia | ✅ | [Plan ante incidentes](../../lanzamiento/incidentes.md) con registro y plazos de aviso |

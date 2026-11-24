@@ -745,6 +745,17 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   denuncias y pone `mycen_legal_holds`; con retención nadie borra la cuenta ni sus fotos y PDF, política restrictiva en
   `storage.objects`), Personas muestra la retención y "Levantar la retención"; procedimiento en `docs/seguridad/csam.md`.
   Texto alternativo: galería (`items[].alt`, nombre del botón y del visor) y foto de un texto (`content.image_alt`).
+- Auditoría de seguridad, arreglos 1–3 (`20261129000001_security_audit_fixes_1.sql`, tests en
+  `security_audit_fixes_1.test.sql` y `emergency-mfa.spec.ts`): las funciones que usan las políticas de Storage viven en
+  el esquema `mycen_private` (no expuesto por la API; `public.mycen_has_legal_hold`/`mycen_folder_on_hold` sin EXECUTE
+  para nadie de la app). Cuentas con un Space suspendido o con retención no suben ni cambian archivos (políticas
+  restrictivas `mycen_blocked_owner_*`). Con retención, Personas → "Pasar archivos a evidencia privada" llama a la Edge
+  Function `quarantine-held-files` (verifica con `admin_get_legal_hold` y la sesión del super-admin; copia a
+  `mycen-evidence/<bucket>/<ruta>` con service role y borra el original; de a 300, `more`; bitácora
+  `evidence_quarantined`). Dos pasos exigido por la base: con un factor verificado (`auth.mfa_factors`) y sesión aal1,
+  `mycen_pre_request` responde `MFA_REQUIRED` salvo en las RPC públicas (`mycen_mfa_pending_rpc_allowed`: una RPC
+  pública nueva se suma ahí) y las políticas `mycen_mfa_storage_*` frenan los archivos; `MfaGate` recarga al
+  verificar.
 - Avisos al equipo, links peligrosos y escala (PR D, `20261125000001_alerts_links_events_scale.sql`, tests en
   `alerts_links_scale.test.sql` y `cronRules.test.ts`; pasos en `docs/lanzamiento/alertas.md`): tareas de GitHub
   Actions sin service role — entran con la anon key y `MYCEN_CRON_KEY` (`mycen_cron_keys` guarda el hash;

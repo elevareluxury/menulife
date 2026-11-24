@@ -6,6 +6,10 @@ import { supabase } from '@/lib/supabase'
 type Rpc = { rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { message: string } | null }> }
 export const adminRpc = (fn: string, args?: Record<string, unknown>) => (supabase as unknown as Rpc).rpc(fn, args)
 
+/** Edge Function del panel con la sesión del super-admin (la función vuelve a chequear en la base) */
+export const adminFunction = <T,>(name: string, body: Record<string, unknown>) =>
+  supabase.functions.invoke<T>(name, { body })
+
 export const TEXT = '#F5F7FA'
 export const MUTED = '#98A2B3'
 export const OK_COLOR = '#22C55E'

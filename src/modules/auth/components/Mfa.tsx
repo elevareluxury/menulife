@@ -306,7 +306,9 @@ export function MfaGate() {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, overflow: 'auto' }}>
       <FullScreen title={t.challengeTitle} intro={t.challengeIntro}>
-        <ChallengeChoice onDone={() => setNeeds(false)} />
+        {/* La base frena una sesión aal1 con factor (20261129000001): lo que la pantalla pidió antes del código falló,
+            así que se vuelve a cargar ya con aal2 */}
+        <ChallengeChoice onDone={() => { setNeeds(false); window.location.reload() }} />
       </FullScreen>
     </div>
   )

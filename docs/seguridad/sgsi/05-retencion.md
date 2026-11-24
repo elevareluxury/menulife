@@ -21,7 +21,7 @@ mismo: si se cambia un plazo, se cambian los dos en el mismo PR.
 | Denuncias (`profile_reports`, `profile_message_reports`) | Mientras exista el perfil denunciado | Cascada al borrar el perfil |
 | Pedidos de verificación e invitaciones (`verification_requests`, `referrals`) | Mientras exista la cuenta | Cascada al borrar la cuenta |
 | Nombres reservados (`talent_reservations`) | Mientras dure la reserva | El equipo la borra en `/super-admin/reservas` |
-| Retención legal (`mycen_legal_holds`, abuso sexual infantil) | Lo que pida la autoridad | El equipo levanta la retención desde Personas; mientras tanto nadie borra la cuenta ni sus archivos |
+| Retención legal (`mycen_legal_holds`, abuso sexual infantil) | Lo que pida la autoridad | El equipo levanta la retención desde Personas; mientras tanto nadie borra la cuenta ni sus archivos. Los archivos pasan del link público al bucket privado `mycen-evidence` (sólo super-admins con aal2; se borra a mano al cerrar) |
 | Datos que la ley obligue a guardar (facturación) | El plazo de la ley | Fuera de la app |
 
 **Comprobar que corre:** `/super-admin/estado` muestra las tareas de pg_cron (`mycen-purge-expired`) con su última

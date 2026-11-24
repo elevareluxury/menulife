@@ -21,5 +21,6 @@ firma la dirección (columna "Decisión"). Se revisa cada trimestre y después d
 | R-13 | Una sola persona clave (conocimiento y accesos concentrados) | 3 | 2 | 6 | Documentación en el repo (`CLAUDE.md`, `docs/`); plan de incidentes; **pendiente:** cuenta de recuperación / segunda persona con acceso de emergencia guardado en un gestor de contraseñas | Medio | Plan: 30 días |
 | R-14 | Textos legales sin revisión de abogado | 2 | 2 | 4 | Revisión antes de campañas grandes | Medio | Plan: antes de campañas |
 | R-15 | Transferencia internacional de datos (Supabase/Vercel fuera de Argentina) | 2 | 1 | 2 | DPA con cláusulas contractuales tipo de cada proveedor; informado en privacidad | Bajo | Aceptado |
+| R-16 | Evidencia de abuso infantil en links públicos o sesión robada sin el segundo paso | 2 | 3 | 6 | Bucket privado `mycen-evidence` (Edge Function `quarantine-held-files`), subidas bloqueadas a cuentas suspendidas o retenidas, retención consultable sólo por el equipo (`mycen_private`), dos pasos exigido por la base (`20261129000001`) | Bajo | Hecho (auditoría 24/11/2026) |
 
 **Riesgos aceptados vigentes:** R-05, R-06, R-15. Firma de la dirección: ______________________ Fecha: ____ / ____ / ______
