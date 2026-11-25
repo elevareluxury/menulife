@@ -612,7 +612,7 @@ const en: StudioDict = {
     change: 'Change', confirmPauseTitle: 'Pause your profile?',
     confirmPauseText: 'Anyone who opens your link or scans your QR will see the profile is not available until you publish it again.',
     pauseShort: 'Pause', privacy: 'Privacy', download: 'Download my data', downloadHelp: 'Your profile, modules and Life OS data in a JSON file.',
-    downloadBtn: 'Download', downloadError: 'We could not prepare the download. Please try again.', deleteAccount: 'Delete my account',
+    downloadBtn: 'Download', downloadError: 'We could not prepare the download. Please try again.', downloadJournalSkipped: 'Your journal is locked on this device, so it wasn\'t included. Download it from Life OS → Settings → Your data (it asks for your PIN).', deleteAccount: 'Delete my account',
     deleteHelpBusiness: 'Since you have a business on Mycen Business, account deletion is handled by support.',
     deleteHelp: 'Your profile, modules, images and Life OS data are deleted. This cannot be undone.',
     deleteHasBusiness: 'Your account has a business on Mycen Business. To close it, contact support so we can protect your customers’ and sales data.',

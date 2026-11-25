@@ -300,6 +300,7 @@ const en: LifeDict = {
     deviceNotSaved: 'Could not use fingerprint or face; the PIN is set.',
     disable: 'Turn off the lock',
     disablePrompt: 'Enter your PIN to turn off the lock.',
+    exportPrompt: 'The copy includes your journal: enter your PIN to download it.',
     disabled: 'You turned off the journal lock.',
     noStorage: 'This browser does not allow saving the lock (it may be a private window).',
     deleteNote: 'Your journal is deleted too.',

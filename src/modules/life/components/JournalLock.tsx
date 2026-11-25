@@ -164,8 +164,9 @@ export function JournalLockScreen({ userId, lock, onUnlocked, onLockChange }: {
   // (contraseña o Google), que es lo que prueba que es la dueña.
   const resetBySignIn = async () => {
     setForgot(false)
-    writeLock(userId, null)
+    // Primero la sesión (se borra del dispositivo aunque no haya red) y recién después el bloqueo
     await signOut()
+    writeLock(userId, null)
     navigate('/login', { replace: true })
   }
 

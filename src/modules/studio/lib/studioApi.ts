@@ -290,7 +290,7 @@ const LIFE_TABLES = [
 ]
 
 /** Copia de los datos del usuario (lo que su sesión puede leer) en un JSON descargable. */
-export async function exportMyData(userId: string, email: string | undefined): Promise<Blob> {
+export async function exportMyData(userId: string, email: string | undefined, opts: { skipJournal?: boolean } = {}): Promise<Blob> {
   const { data: profiles } = await db.from('profiles').select('*').eq('user_id', userId)
   const profileIds = (profiles ?? []).map((p: { id: string }) => p.id)
   const { data: modules } = profileIds.length
@@ -298,6 +298,8 @@ export async function exportMyData(userId: string, email: string | undefined): P
     : { data: [] }
   const life: Record<string, unknown[]> = {}
   for (const table of LIFE_TABLES) {
+    // Diario con bloqueo en este dispositivo: no sale sin el PIN (se descarga desde Life OS → Ajustes, que lo pide)
+    if (opts.skipJournal && table === 'life_journal_entries') continue
     const { data, error } = await db.from(table).select('*').eq('user_id', userId)
     if (!error) life[table] = data ?? []
   }

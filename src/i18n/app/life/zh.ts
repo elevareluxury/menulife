@@ -300,6 +300,7 @@ const zh: LifeDict = {
     deviceNotSaved: '无法使用指纹或面容；已设置 PIN。',
     disable: '关闭锁定',
     disablePrompt: '输入 PIN 以关闭锁定。',
+    exportPrompt: '副本包含你的日记：输入 PIN 码后即可下载。',
     disabled: '你已关闭日记锁定。',
     noStorage: '此浏览器不允许保存锁定设置（可能是无痕窗口）。',
     deleteNote: '你的日记也会被删除。',

@@ -139,6 +139,10 @@ La evidencia de cada revisión se guarda como un issue de GitHub con su etiqueta
   `mycen_private` (la API no lo expone: nadie pregunta si una cuenta está retenida); la verificación en dos pasos de
   las cuentas la exige la base. La Edge Function `quarantine-held-files` se despliega con
   `supabase functions deploy quarantine-held-files`.
+- Hallazgos medios restantes (`20261130000001_security_audit_fixes_2.sql`): Business sin lectura cruzada entre cuentas
+  (negocios y productos) ni altas desde la app, tilde de verificado que sigue al nombre en todos los casos, tope de
+  versiones por Space y de tarjetas de proyectos en la página pública, cerrar sesión sin conexión que igual borra la
+  sesión del dispositivo y PIN del diario también al exportar.
 - Ante spam o un ataque: Super-admin → Estado → **Interruptores de emergencia** (registros, mensajes y colaboraciones,
   suscripciones, votaciones). La base los frena (503 `FEATURE_PAUSED` en el gancho previo; trigger en `auth.users`) y
   cada cambio queda en la actividad del equipo.

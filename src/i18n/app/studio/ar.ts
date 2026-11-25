@@ -612,7 +612,7 @@ const ar: StudioDict = {
     change: 'تغيير', confirmPauseTitle: 'إيقاف ملفك مؤقتًا؟',
     confirmPauseText: 'من يفتح رابطك أو يمسح رمز QR سيرى أن الملف غير متاح حتى تنشره مرة أخرى.',
     pauseShort: 'إيقاف مؤقت', privacy: 'الخصوصية', download: 'تنزيل بياناتي', downloadHelp: 'ملفك ووحداتك وبيانات Life OS في ملف JSON.',
-    downloadBtn: 'تنزيل', downloadError: 'تعذّر تجهيز التنزيل. حاول مرة أخرى.', deleteAccount: 'حذف حسابي',
+    downloadBtn: 'تنزيل', downloadError: 'تعذّر تجهيز التنزيل. حاول مرة أخرى.', downloadJournalSkipped: 'يومياتك مقفلة على هذا الجهاز، لذلك لم تُضمَّن في النسخة. نزّلها من Life OS ← الإعدادات ← بياناتك (سيُطلب رمز PIN).', deleteAccount: 'حذف حسابي',
     deleteHelpBusiness: 'لأن لديك نشاطًا تجاريًا على Mycen Business، يتم الحذف عبر الدعم.',
     deleteHelp: 'تُحذف ملفاتك ووحداتك وصورك وبيانات Life OS. لا يمكن التراجع.',
     deleteHasBusiness: 'لدى حسابك نشاط تجاري على Mycen Business. لإغلاقه تواصل مع الدعم، لنحافظ على بيانات عملائك ومبيعاتك.',

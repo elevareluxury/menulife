@@ -612,7 +612,7 @@ const de: StudioDict = {
     change: 'Ändern', confirmPauseTitle: 'Profil pausieren?',
     confirmPauseText: 'Wer deinen Link öffnet oder deinen QR scannt, sieht, dass das Profil nicht verfügbar ist, bis du es wieder veröffentlichst.',
     pauseShort: 'Pausieren', privacy: 'Datenschutz', download: 'Meine Daten herunterladen', downloadHelp: 'Dein Profil, deine Module und Life-OS-Daten als JSON-Datei.',
-    downloadBtn: 'Herunterladen', downloadError: 'Der Download konnte nicht vorbereitet werden. Bitte erneut versuchen.', deleteAccount: 'Mein Konto löschen',
+    downloadBtn: 'Herunterladen', downloadError: 'Der Download konnte nicht vorbereitet werden. Bitte erneut versuchen.', downloadJournalSkipped: 'Dein Tagebuch ist auf diesem Gerät gesperrt und wurde deshalb nicht aufgenommen. Lade es in Life OS → Einstellungen → Deine Daten herunter (dort wird die PIN abgefragt).', deleteAccount: 'Mein Konto löschen',
     deleteHelpBusiness: 'Da du ein Unternehmen bei Mycen Business hast, läuft die Löschung über den Support.',
     deleteHelp: 'Dein Profil, deine Module, Bilder und Life-OS-Daten werden gelöscht. Das kann nicht rückgängig gemacht werden.',
     deleteHasBusiness: 'Dein Konto hat ein Unternehmen bei Mycen Business. Wende dich zur Löschung an den Support, damit die Daten deiner Kundschaft und Verkäufe geschützt bleiben.',

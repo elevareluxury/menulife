@@ -300,6 +300,7 @@ const fr: LifeDict = {
     deviceNotSaved: 'Impossible d’utiliser l’empreinte ou le visage ; le code PIN est en place.',
     disable: 'Désactiver le verrouillage',
     disablePrompt: 'Saisissez votre code PIN pour désactiver le verrouillage.',
+    exportPrompt: 'La copie contient ton journal : saisis ton code PIN pour la télécharger.',
     disabled: 'Vous avez désactivé le verrouillage du journal.',
     noStorage: 'Ce navigateur ne permet pas d’enregistrer le verrouillage (fenêtre privée ?).',
     deleteNote: 'Votre journal est aussi supprimé.',

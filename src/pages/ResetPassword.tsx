@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { signOutDevice } from '@/lib/signOutDevice'
 import { Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthT } from '@/i18n/app/auth'
@@ -179,7 +180,7 @@ export function ResetPassword() {
       if (authError) throw authError
       toast.success(r.saved)
       // Sign out then redirect — avoids session-state race when landing on dashboard
-      await supabase.auth.signOut()
+      if (!(await signOutDevice(supabase))) { window.location.replace('/login?message=password_updated'); return }
       navigate('/login?message=password_updated', { replace: true })
     } catch (err: unknown) {
       setError(authErrorMessage(err, t.errors, r.failed))

@@ -300,6 +300,7 @@ const ar: LifeDict = {
     deviceNotSaved: 'تعذّر استخدام البصمة أو الوجه؛ تم ضبط رمز PIN.',
     disable: 'إلغاء القفل',
     disablePrompt: 'أدخل رمز PIN لإلغاء القفل.',
+    exportPrompt: 'تتضمن النسخة يومياتك: أدخل رمز PIN لتنزيلها.',
     disabled: 'ألغيت قفل المذكّرات.',
     noStorage: 'هذا المتصفح لا يسمح بحفظ القفل (ربما نافذة خاصة).',
     deleteNote: 'تُحذف مذكّراتك أيضًا.',

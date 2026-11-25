@@ -377,6 +377,7 @@ const es = {
     deviceNotSaved: 'No se pudo usar la huella o la cara; quedó el PIN.',
     disable: 'Desactivar el bloqueo',
     disablePrompt: 'Ingresá tu PIN para desactivar el bloqueo.',
+    exportPrompt: 'La copia incluye tu diario: ingresá tu PIN para descargarla.',
     disabled: 'Desactivaste el bloqueo del diario.',
     noStorage: 'Este navegador no deja guardar el bloqueo (puede ser una ventana privada).',
     deleteNote: 'También se borra tu diario.',

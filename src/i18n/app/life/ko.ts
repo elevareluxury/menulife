@@ -300,6 +300,7 @@ const ko: LifeDict = {
     deviceNotSaved: '지문이나 얼굴을 사용할 수 없어요. PIN은 설정됐어요.',
     disable: '잠금 끄기',
     disablePrompt: '잠금을 끄려면 PIN을 입력하세요.',
+    exportPrompt: '복사본에 일기가 포함돼요. 다운로드하려면 PIN을 입력하세요.',
     disabled: '일기 잠금을 껐어요.',
     noStorage: '이 브라우저에서는 잠금을 저장할 수 없어요(시크릿 창일 수 있어요).',
     deleteNote: '일기도 함께 삭제돼요.',

@@ -300,6 +300,7 @@ const it: LifeDict = {
     deviceNotSaved: 'Impossibile usare impronta o volto; resta il PIN.',
     disable: 'Disattiva il blocco',
     disablePrompt: 'Inserisci il PIN per disattivare il blocco.',
+    exportPrompt: 'La copia include il tuo diario: inserisci il PIN per scaricarla.',
     disabled: 'Hai disattivato il blocco del diario.',
     noStorage: 'Questo browser non permette di salvare il blocco (forse è una finestra privata).',
     deleteNote: 'Viene eliminato anche il tuo diario.',

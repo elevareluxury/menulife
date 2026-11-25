@@ -87,12 +87,14 @@ begin
 end $$;
 reset role;
 
--- ── Otra cuenta (visitante con sesión): el menú sigue andando ────────────────
+-- ── Otra cuenta (con sesión): con Business cerrado no ve negocios ajenos ──────
+-- Antes la veía entera, con email, notas y plan (auditoría de seguridad C4; 20261130000001 la deja sólo en la suya)
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'bbbbbbbb-0000-0000-0000-000000000002', true);
 do $$ begin
-  assert (select name from restaurants where slug = 'cafe-luna' and is_active) = 'Café Luna', 'una cuenta ve el menú';
-  assert (select count(*) from menu_items_demo) = 1, 'y sus productos';
+  assert (select count(*) from restaurants where slug = 'cafe-luna') = 0, 'otra cuenta no ve el negocio ajeno';
+  assert (select count(*) from restaurants where email like 'ana%') = 0, 'ni adivina sus columnas privadas';
+  assert (select count(*) from menu_items_demo) = 0, 'ni sus productos';
 end $$;
 reset role;
 
