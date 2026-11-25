@@ -1,7 +1,7 @@
 // Links peligrosos (cada hora, .github/workflows/link-scan.yml): toma los links de lo publicado desde la pasada anterior
 // (cron_recent_links), los consulta en Google Web Risk y los que tienen amenaza quedan como denuncia para el equipo
 // (cron_flag_link). Nada se suspende solo. Pasos en docs/lanzamiento/alertas.md.
-import { checkableUrl, sinceFor, threatOf, webRiskUrl } from './rules.mjs'
+import { checkableUrl, oneLine, sinceFor, threatOf, webLinkOf, webRiskUrl } from './rules.mjs'
 import { previousRunStart } from './previousRun.mjs'
 
 const env = process.env
@@ -27,11 +27,24 @@ if (!res.ok) {
   process.exit(1)
 }
 /** @type {{ profile_id: string, handle: string, url: string }[]} */
-const rows = (await res.json()).filter(r => checkableUrl(r.url))
-// Un mismo link en varios perfiles se consulta una vez
+const raw = await res.json()
+// Cada texto se lleva al link que arma la página ('"tienda.com"' → https://tienda.com) y un mismo link en varios
+// perfiles se consulta una vez. Lo que no es un link web se anota igual como revisado (no vuelve a aparecer).
 const byUrl = new Map()
-for (const r of rows) byUrl.set(r.url, [...(byUrl.get(r.url) ?? []), r])
-const urls = [...byUrl.keys()].slice(0, MAX)
+const notLinks = []
+for (const r of raw) {
+  const url = webLinkOf(r.url)
+  if (!url || !checkableUrl(url)) { notLinks.push(r.url); continue }
+  const entry = byUrl.get(url) ?? { rows: [], texts: new Set() }
+  entry.rows.push(r); entry.texts.add(r.url)
+  byUrl.set(url, entry)
+}
+const all = [...byUrl.keys()]
+const urls = all.slice(0, MAX)
+if (all.length > MAX) {
+  console.log(`::warning::Quedan ${all.length - MAX} links para la próxima pasada (tope ${MAX} por pasada)`)
+}
+const scannedTexts = [...notLinks]
 
 let flagged = 0
 let failed = 0
@@ -41,15 +54,20 @@ for (let i = 0; i < urls.length; i += 10) {
       const check = await fetch(webRiskUrl(url, env.WEB_RISK_API_KEY), { signal: AbortSignal.timeout(10_000) })
       if (!check.ok) { failed++; return }
       const threat = threatOf(await check.json())
+      scannedTexts.push(...byUrl.get(url).texts)
       if (!threat) return
-      for (const r of byUrl.get(url)) {
+      for (const r of byUrl.get(url).rows) {
         const f = await rpc('cron_flag_link', { p_profile_id: r.profile_id, p_url: url, p_threat: threat })
-        if (f.ok && (await f.json()) === 'flagged') { flagged++; console.log(`Marcado: ${r.handle} → ${url} (${threat})`) }
+        if (f.ok && (await f.json()) === 'flagged') { flagged++; console.log(`Marcado: ${oneLine(r.handle, 80)} → ${oneLine(url, 300)} (${oneLine(threat, 64)})`) }
       }
     } catch {
       failed++
     }
   }))
+}
+// Se anota lo revisado: la próxima pasada sigue con lo que falta (de a 5000 por pedido)
+for (let i = 0; i < scannedTexts.length; i += 5000) {
+  await rpc('cron_mark_links_scanned', { p_urls: scannedTexts.slice(i, i + 5000) }).catch(() => undefined)
 }
 console.log(`Links revisados: ${urls.length} · marcados: ${flagged} · sin respuesta: ${failed}`)
 if (urls.length && failed === urls.length) {

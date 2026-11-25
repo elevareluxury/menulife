@@ -10,12 +10,15 @@ export interface SubscriberCsvRow {
 }
 
 const BOM = String.fromCharCode(0xfeff)
-const FORMULA = /^[=+\-@\t\r]/
+// También después de ; o tabulación: una planilla configurada con otro separador (Excel en español usa ;) parte la
+// celda ahí, y el pedazo que empieza con = sería una fórmula (auditoría de seguridad)
+const FORMULA_AT_SEGMENT = /(^|[;\t])([=+\-@\r])/g
 
 export function csvCell(value: string | null | undefined): string {
   let v = value ?? ''
-  if (FORMULA.test(v)) v = `'${v}`
-  return /[",\n\r]/.test(v) || v !== v.trim() ? `"${v.replace(/"/g, '""')}"` : v
+  v = v.replace(FORMULA_AT_SEGMENT, "$1'$2")
+  if (/^[\t\r]/.test(v)) v = `'${v}`
+  return /[",;\t\n\r]/.test(v) || v !== v.trim() ? `"${v.replace(/"/g, '""')}"` : v
 }
 
 export function subscribersCsv(rows: SubscriberCsvRow[]): string {

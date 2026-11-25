@@ -15,7 +15,8 @@ describe('CSV de suscriptores', () => {
     expect(csvCell('+54 9 11')).toBe("'+54 9 11")
     expect(csvCell('-1')).toBe("'-1")
     expect(csvCell('@SUM(A1)')).toBe("'@SUM(A1)")
-    expect(csvCell('\tcmd')).toBe("'\tcmd")
+    // Con tabulación además va entre comillas (es otro separador posible)
+    expect(csvCell('\tcmd')).toBe("\"'\tcmd\"")
   })
 
   it('arma el archivo con encabezado, BOM y CRLF', () => {
@@ -26,3 +27,15 @@ describe('CSV de suscriptores', () => {
     expect(csv).toBe(String.fromCharCode(0xfeff) + 'email,name,date,locale\r\nana@mail.com,Ana,2026-10-15T12:00:00.000Z,es\r\nbo@mail.com,,2026-10-14T12:00:00.000Z,\r\n')
   })
 })
+
+describe('csvCell con otros separadores (auditoría)', () => {
+  it('ningún pedazo separado por ; o tabulación empieza con una fórmula', () => {
+    for (const raw of ['a;=HYPERLINK("http://x")', 'x\t=1+1', 'ok;+1;-2;@SUM(A1)', '\t=cmd', 'a;b']) {
+      const cell = csvCell(raw)
+      const inner = cell.startsWith('"') ? cell.slice(1, -1).replace(/""/g, '"') : cell
+      for (const seg of inner.split(/[;\t]/)) expect(seg).not.toMatch(/^[=+\-@]/)
+    }
+    expect(csvCell('a;b')).toBe('"a;b"')
+  })
+})
+

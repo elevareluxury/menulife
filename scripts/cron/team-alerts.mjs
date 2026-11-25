@@ -1,6 +1,6 @@
 // Avisos al equipo (cada 15 min, .github/workflows/team-alerts.yml): mira /api/health y el resumen de la base
 // (cron_alert_digest) y, si hay algo, manda UN mail por Resend. Pasos en docs/lanzamiento/alertas.md.
-import { alertLines, alertSubject, sinceFor } from './rules.mjs'
+import { alertLines, alertSubject, oneLine, sinceFor } from './rules.mjs'
 import { previousRunStart } from './previousRun.mjs'
 
 const env = process.env
@@ -50,8 +50,9 @@ const res = await fetch('https://api.resend.com/emails', {
   headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
   body: JSON.stringify({ from: env.ALERT_FROM || 'Mycen <alertas@mycen.id>', to: [TO], subject: alertSubject(lines), text }),
 })
-console.log(text)
+// En la salida de GitHub sólo cuántos avisos: el texto ya está saneado, pero no hace falta repetirlo ahí
+console.log(`Avisos enviados: ${lines.filter(l => !l.startsWith('   ')).length}`)
 if (!res.ok) {
-  console.log(`::error::Resend respondió ${res.status}: ${await res.text()}`)
+  console.log(`::error::Resend respondió ${res.status}: ${oneLine(await res.text())}`)
   process.exit(1)
 }

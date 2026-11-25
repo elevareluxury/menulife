@@ -143,6 +143,9 @@ La evidencia de cada revisión se guarda como un issue de GitHub con su etiqueta
   (negocios y productos) ni altas desde la app, tilde de verificado que sigue al nombre en todos los casos, tope de
   versiones por Space y de tarjetas de proyectos en la página pública, cerrar sesión sin conexión que igual borra la
   sesión del dispositivo y PIN del diario también al exportar.
+- Hallazgos bajos (`20261201000001_security_audit_fixes_3.sql`): usernames de perfiles suspendidos reservados con su
+  historial, "publicado" sólo con versión, `/auth/callback` sin entrar con tokens ajenos, avisos al equipo con el texto
+  saneado, revisión de links sin huecos (lo revisado se anota en `mycen_link_scans`) y CSV a prueba de `;`.
 - Ante spam o un ataque: Super-admin → Estado → **Interruptores de emergencia** (registros, mensajes y colaboraciones,
   suscripciones, votaciones). La base los frena (503 `FEATURE_PAUSED` en el gancho previo; trigger en `auth.users`) y
   cada cambio queda en la actividad del equipo.

@@ -48,3 +48,15 @@ export async function scheduleNativeReminders(kind: ReminderKind, items: NativeR
     })),
   })
 }
+
+/** Al cerrar sesión o borrar la cuenta: se borran los avisos programados de Life OS (si no, seguían llegando los de
+ *  la cuenta anterior en el mismo teléfono). No pide permiso; sin plugin o sin nada programado, no hace nada. */
+export async function cancelAllNativeReminders(): Promise<void> {
+  const { LocalNotifications } = await import('@capacitor/local-notifications')
+  const pending = await LocalNotifications.getPending()
+  const ours = pending.notifications.filter(n => {
+    const kind = (n.extra as { kind?: string } | undefined)?.kind
+    return kind === 'task' || kind === 'habit'
+  })
+  if (ours.length) await LocalNotifications.cancel({ notifications: ours.map(n => ({ id: n.id })) })
+}

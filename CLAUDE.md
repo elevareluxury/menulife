@@ -768,6 +768,16 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   sesión siempre olvida la sesión del dispositivo (`src/lib/signOutDevice.ts`: si el servidor no contesta, borra las
   claves y recarga; todo `signOut` pasa por ahí). Con el bloqueo del diario, "Descargar todo (JSON)" de Life OS pide
   el PIN y la descarga de Studio lo deja afuera y lo explica.
+- Auditoría de seguridad, hallazgos bajos (`20261201000001_security_audit_fixes_3.sql`, tests en
+  `security_audit_fixes_3.test.sql`, `cronRules.test.ts`, `subscribersCsv.test.ts` y `auth-callback.spec.ts`): un perfil
+  suspendido no cambia su dirección y al borrarse reserva también sus usernames anteriores; la app no deja un Space
+  "publicado" sin versión (`mycen_published_needs_version`; los viejos recibieron la versión 1). `/auth/callback` ya
+  no entra con tokens en el # y, con una sesión abierta, un `token_hash` ajeno no la reemplaza (salvo cambiar el email).
+  Avisos al equipo: el texto de afuera pasa por `oneLine` (sin saltos ni "::") y el mail no se repite en la salida de
+  GitHub. Revisión de links: `cron_recent_links` mira 8 días en orden y saca lo ya revisado (`mycen_link_scans`,
+  `cron_mark_links_scanned`), así lo que no entra en una pasada va en la siguiente; también entrega links sueltos
+  (`mycen_snapshot_link_candidates`) que `webLinkOf` (en `scripts/cron/rules.mjs`, misma regla que `safeHref`, un test
+  las compara) arma como la página. CSV: fórmulas neutralizadas también después de `;` o tabulación.
 - Avisos al equipo, links peligrosos y escala (PR D, `20261125000001_alerts_links_events_scale.sql`, tests en
   `alerts_links_scale.test.sql` y `cronRules.test.ts`; pasos en `docs/lanzamiento/alertas.md`): tareas de GitHub
   Actions sin service role — entran con la anon key y `MYCEN_CRON_KEY` (`mycen_cron_keys` guarda el hash;
