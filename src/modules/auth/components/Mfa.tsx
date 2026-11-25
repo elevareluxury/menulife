@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { signOutDevice } from '@/lib/signOutDevice'
 import { useAuthT } from '@/i18n/app/auth'
 import { useAuthStore } from '@/store/authStore'
 import { Field, PrimaryAction } from '@/design'
@@ -256,7 +257,7 @@ function FullScreen({ title, intro, children }: { title: string; intro: string; 
         <p style={{ margin: 0, color: 'var(--my-muted)' }}>{intro}</p>
         {children}
         <p style={{ margin: 0, fontSize: 13, color: 'var(--my-muted)' }}>{t.lost}</p>
-        <button type="button" onClick={() => { void supabase.auth.signOut().then(() => window.location.assign('/login')) }}
+        <button type="button" onClick={() => { void signOutDevice(supabase).then(() => window.location.assign('/login')) }}
           style={{ background: 'none', border: 0, color: 'inherit', textDecoration: 'underline', justifySelf: 'start', minHeight: 44, cursor: 'pointer' }}>
           {t.signOut}</button>
       </section>
@@ -306,7 +307,9 @@ export function MfaGate() {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, overflow: 'auto' }}>
       <FullScreen title={t.challengeTitle} intro={t.challengeIntro}>
-        <ChallengeChoice onDone={() => setNeeds(false)} />
+        {/* La base frena una sesión aal1 con factor (20261129000001): lo que la pantalla pidió antes del código falló,
+            así que se vuelve a cargar ya con aal2 */}
+        <ChallengeChoice onDone={() => { setNeeds(false); window.location.reload() }} />
       </FullScreen>
     </div>
   )

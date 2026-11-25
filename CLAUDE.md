@@ -62,6 +62,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   verifica). Las pantallas públicas (menú `/r/:slug`, reservas, catálogo, seguimiento, presupuesto, logins de mozo/delivery/
   cocina, landing de referidos) piden columnas, nunca `*`; email, teléfono, dirección, dueño, plan y notas no salen.
   Tests en `restaurants_public_columns.test.sql` y `business-public-menu.spec.ts` (el mock aplica la misma regla).
+  Con sesión (auditoría C4, `20261130000001`): cada cuenta ve sólo su negocio (política restrictiva
+  `mycen_restaurants_own_only`; el equipo con aal2, todos), nadie crea negocios desde la app (sin INSERT para
+  `authenticated`) y las tablas de Business no tienen lecturas "para cualquiera" (p. ej. `products` con `is_active`).
 - Migraciones en `supabase/migrations/`; se aplican pegándolas en Supabase → SQL Editor.
 
 ## Código
@@ -745,6 +748,26 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   denuncias y pone `mycen_legal_holds`; con retención nadie borra la cuenta ni sus fotos y PDF, política restrictiva en
   `storage.objects`), Personas muestra la retención y "Levantar la retención"; procedimiento en `docs/seguridad/csam.md`.
   Texto alternativo: galería (`items[].alt`, nombre del botón y del visor) y foto de un texto (`content.image_alt`).
+- Auditoría de seguridad, arreglos 1–3 (`20261129000001_security_audit_fixes_1.sql`, tests en
+  `security_audit_fixes_1.test.sql` y `emergency-mfa.spec.ts`): las funciones que usan las políticas de Storage viven en
+  el esquema `mycen_private` (no expuesto por la API; `public.mycen_has_legal_hold`/`mycen_folder_on_hold` sin EXECUTE
+  para nadie de la app). Cuentas con un Space suspendido o con retención no suben ni cambian archivos (políticas
+  restrictivas `mycen_blocked_owner_*`). Con retención, Personas → "Pasar archivos a evidencia privada" llama a la Edge
+  Function `quarantine-held-files` (verifica con `admin_get_legal_hold` y la sesión del super-admin; copia a
+  `mycen-evidence/<bucket>/<ruta>` con service role y borra el original; de a 300, `more`; bitácora
+  `evidence_quarantined`). Dos pasos exigido por la base: con un factor verificado (`auth.mfa_factors`) y sesión aal1,
+  `mycen_pre_request` responde `MFA_REQUIRED` salvo en las RPC públicas (`mycen_mfa_pending_rpc_allowed`: una RPC
+  pública nueva se suma ahí) y las políticas `mycen_mfa_storage_*` frenan los archivos; `MfaGate` recarga al
+  verificar.
+- Auditoría de seguridad, hallazgos medios restantes (`20261130000001_security_audit_fixes_2.sql`, tests en
+  `security_audit_fixes_2.test.sql`, `signOutDevice.test.ts` y `journal.spec.ts`): Business sin lectura cruzada (ver
+  `restaurants`); el tilde vuelve a revisión también al borrar o cambiar el principal o sumar un Space con dirección
+  propia (`mycen_verification_on_delete`); restaurar lo ya publicado no crea versión y cada Space guarda 50
+  (`mycen_prune_versions`); `get_public_profile` arma hasta 24 tarjetas por módulo de proyectos, sólo en los primeros 12 y
+  livianas (título y resumen); el tope de 100 módulos vale al recuperar uno (`mycen_limit_modules_update`). Cerrar
+  sesión siempre olvida la sesión del dispositivo (`src/lib/signOutDevice.ts`: si el servidor no contesta, borra las
+  claves y recarga; todo `signOut` pasa por ahí). Con el bloqueo del diario, "Descargar todo (JSON)" de Life OS pide
+  el PIN y la descarga de Studio lo deja afuera y lo explica.
 - Avisos al equipo, links peligrosos y escala (PR D, `20261125000001_alerts_links_events_scale.sql`, tests en
   `alerts_links_scale.test.sql` y `cronRules.test.ts`; pasos en `docs/lanzamiento/alertas.md`): tareas de GitHub
   Actions sin service role — entran con la anon key y `MYCEN_CRON_KEY` (`mycen_cron_keys` guarda el hash;

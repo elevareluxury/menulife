@@ -612,7 +612,7 @@ const zh: StudioDict = {
     change: '更改', confirmPauseTitle: '暂停你的主页？',
     confirmPauseText: '在你重新发布之前，打开链接或扫描二维码的人会看到主页不可用。',
     pauseShort: '暂停', privacy: '隐私', download: '下载我的数据', downloadHelp: '你的主页、模块和 Life OS 数据，打包为 JSON 文件。',
-    downloadBtn: '下载', downloadError: '无法准备下载，请重试。', deleteAccount: '删除我的账户',
+    downloadBtn: '下载', downloadError: '无法准备下载，请重试。', downloadJournalSkipped: '你的日记在此设备上已锁定，因此未包含在副本中。请在 Life OS → 设置 → 你的数据 中下载（需要输入 PIN 码）。', deleteAccount: '删除我的账户',
     deleteHelpBusiness: '由于你在 Mycen Business 有商家，注销需通过客服处理。',
     deleteHelp: '你的主页、模块、图片和 Life OS 数据都将被删除，且无法恢复。',
     deleteHasBusiness: '你的账户在 Mycen Business 有商家。如需注销请联系客服，以保护你的客户和销售数据。',

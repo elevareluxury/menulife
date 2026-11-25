@@ -300,6 +300,7 @@ const de: LifeDict = {
     deviceNotSaved: 'Fingerabdruck oder Gesicht konnte nicht verwendet werden; die PIN ist eingerichtet.',
     disable: 'Sperre ausschalten',
     disablePrompt: 'Gib deine PIN ein, um die Sperre auszuschalten.',
+    exportPrompt: 'Die Kopie enthält dein Tagebuch: Gib deine PIN ein, um sie herunterzuladen.',
     disabled: 'Du hast die Tagebuchsperre ausgeschaltet.',
     noStorage: 'Dieser Browser erlaubt nicht, die Sperre zu speichern (vielleicht ein privates Fenster).',
     deleteNote: 'Dein Tagebuch wird ebenfalls gelöscht.',

@@ -19,7 +19,12 @@ mensajes o links. Se revisa una vez por año junto con el SGSI (`sgsi/06-operaci
    - suspende el principal (deja de verse toda la identidad, sus Spaces, proyectos y vCard) y el Space denunciado;
    - cierra las denuncias abiertas de la cuenta;
    - pone la cuenta en **retención legal** (`mycen_legal_holds`): nadie puede borrar la cuenta ni sus fotos y PDF
-     (tampoco el equipo ni la persona), y queda en la bitácora (`csam_hold`).
+     (tampoco el equipo ni la persona), y queda en la bitácora (`csam_hold`). La cuenta tampoco puede subir ni cambiar
+     archivos (igual que cualquier cuenta suspendida).
+   - **El mismo día:** Personas → la cuenta → **"Pasar archivos a evidencia privada"**. Las fotos y los PDF salen de
+     sus links públicos y quedan en el bucket privado `mycen-evidence` (Edge Function `quarantine-held-files`; sólo
+     super-admins con verificación en dos pasos los ven; nadie los borra desde la app). Si dice "Seguir pasando
+     archivos", tocarlo hasta que desaparezca. Queda en la bitácora (`evidence_quarantined`).
 3. El motivo que ve la persona en Studio es genérico ("Incumplimiento grave de las reglas de contenido"). **No le
    avisamos** de la denuncia a la autoridad.
 4. Si el material está en un link externo (no en Mycen), igual se suspende el perfil y se informa el link en la denuncia.
@@ -40,6 +45,8 @@ mensajes o links. Se revisa una vez por año junto con el SGSI (`sgsi/06-operaci
 
 - La retención dura hasta que la autoridad diga que ya no hace falta (en EE. UU. se pide al menos 1 año).
 - Mientras dure no se usa "Borrar sus fotos y PDF" (el panel no lo muestra) y la cuenta no se puede eliminar.
+- La evidencia vive en `mycen-evidence/<bucket>/<id de la cuenta>/…`. Para entregarla a una autoridad: descargarla
+  desde Supabase → Storage con la cuenta del equipo, sólo lo que pide la orden, y anotarlo.
 - La copia diaria de archivos en Cloudflare R2 (`docs/lanzamiento/copia-archivos.md`) también guarda esos archivos:
   no tocarla.
 - Si una autoridad pide los datos: entregar sólo lo que pide la orden, por el canal que indique, y anotarlo.
@@ -47,7 +54,8 @@ mensajes o links. Se revisa una vez por año junto con el SGSI (`sgsi/06-operaci
 ## 4. Cerrar
 
 - Cuando la autoridad lo confirme: Personas → la cuenta → **"Levantar la retención"** (queda en la bitácora,
-  `legal_hold_released`). Recién ahí se pueden borrar los archivos y la cuenta.
+  `legal_hold_released`). Recién ahí se pueden borrar los archivos y la cuenta (la evidencia de `mycen-evidence` se
+  borra a mano desde Supabase → Storage, cuando la autoridad lo confirme, y se anota).
 - La cuenta queda suspendida: no se levanta la suspensión.
 
 ## 5. Cuidar al equipo

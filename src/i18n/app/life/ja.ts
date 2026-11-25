@@ -300,6 +300,7 @@ const ja: LifeDict = {
     deviceNotSaved: '指紋または顔を使えませんでした。PIN は設定済みです。',
     disable: 'ロックをオフにする',
     disablePrompt: 'ロックをオフにするには PIN を入力してください。',
+    exportPrompt: 'コピーには日記が含まれます。ダウンロードするには PIN を入力してください。',
     disabled: '日記のロックをオフにしました。',
     noStorage: 'このブラウザではロックを保存できません（プライベートウィンドウかもしれません）。',
     deleteNote: '日記も削除されます。',

@@ -113,6 +113,29 @@ test('Denuncias: "Abuso sexual infantil" suspende, retiene la evidencia y muestr
   expect(state.tables.profile_reports[0].status).toBe('actioned')
 })
 
+test('Personas: con retención, los archivos pasan a la evidencia privada (de a tandas) y queda la opción de levantarla', async ({ page }) => {
+  const state = createState({ profiles: [profileRow({})] })
+  state.tables.mycen_legal_holds = [{ user_id: OWNER_ID, reason: 'csam', report_id: null, created_at: new Date().toISOString() }]
+  await asAdmin(page, state)
+  const calls: unknown[] = []
+  await page.route('**/functions/v1/quarantine-held-files', async route => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' } })
+    calls.push(route.request().postDataJSON())
+    const body = calls.length === 1 ? { moved: 300, failed: 0, more: true } : { moved: 12, failed: 0, more: false }
+    return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(body) })
+  })
+  await page.goto(`/super-admin/personas?id=${OWNER_ID}`)
+  const hold = page.getByTestId('legal-hold')
+  await expect(hold).toContainText('siguen en sus links públicos')
+  await hold.getByRole('button', { name: 'Pasar archivos a evidencia privada' }).click()
+  await expect(hold.getByRole('status')).toHaveText('Se pasaron 300 archivos a la evidencia privada')
+  await hold.getByRole('button', { name: 'Seguir pasando archivos' }).click()
+  await expect(hold.getByRole('status')).toHaveText('Se pasaron 312 archivos a la evidencia privada')
+  await expect(hold.getByTestId('quarantine-files')).toHaveCount(0)
+  await expect(hold.getByRole('button', { name: 'Levantar la retención' })).toBeVisible()
+  expect(calls).toEqual([{ user_id: OWNER_ID }, { user_id: OWNER_ID }])
+})
+
 test('las fotos de la galería se nombran con su texto alternativo', async ({ page, context }) => {
   await installSupabaseMock(context, createState({
     profiles: [profileRow({ theme: { layout: 'credencial' } })],

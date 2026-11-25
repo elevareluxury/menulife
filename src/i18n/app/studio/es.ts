@@ -864,6 +864,7 @@ const es = {
     downloadHelp: 'Tu perfil, módulos y datos de Life OS en un archivo JSON.',
     downloadBtn: 'Descargar',
     downloadError: 'No pudimos preparar la descarga. Intentá de nuevo.',
+    downloadJournalSkipped: 'Tu diario está bloqueado en este dispositivo, así que no entró en la copia. Descargalo desde Life OS → Ajustes → Tus datos (te pide el PIN).',
     deleteAccount: 'Eliminar mi cuenta',
     deleteHelpBusiness: 'Como tenés un negocio en Mycen Business, la baja se gestiona con soporte.',
     deleteHelp: 'Se borran tu perfil, tus módulos, tus imágenes y tus datos de Life OS. No se puede deshacer.',

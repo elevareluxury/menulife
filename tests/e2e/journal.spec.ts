@@ -170,6 +170,45 @@ test('bloqueo con PIN: activar, bloquea al volver y al pasar a segundo plano, PI
   await page.getByRole('button', { name: 'Cancelar' }).click()
 })
 
+test('con el bloqueo, "Descargar todo (JSON)" pide el PIN antes de leer el diario; Studio lo deja afuera', async ({ page, context }) => {
+  const state = seed()
+  await installSupabaseMock(context, state, { signedIn: true })
+  const journalReads: string[] = []
+  page.on('request', r => { if (r.url().includes('/rest/v1/life_journal_entries') && r.method() === 'GET') journalReads.push(r.url()) })
+  await page.goto('/life/settings')
+  await page.getByRole('button', { name: 'Activar el bloqueo' }).click()
+  await page.getByLabel('PIN nuevo (4 a 8 números)').fill('123456')
+  await page.getByLabel('Repetí el PIN').fill('123456')
+  await page.getByRole('button', { name: 'Activar el bloqueo' }).click()
+  await expect(page.getByRole('button', { name: 'Desactivar el bloqueo' })).toBeVisible()
+  journalReads.length = 0
+
+  await page.getByRole('button', { name: 'Descargar todo (JSON)' }).first().click()
+  const pin = page.getByTestId('export-pin')
+  await expect(pin).toContainText('La copia incluye tu diario')
+  expect(journalReads).toEqual([])
+  // Cancelar no descarga nada
+  await pin.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(pin).toHaveCount(0)
+  expect(journalReads).toEqual([])
+
+  await page.getByRole('button', { name: 'Descargar todo (JSON)' }).first().click()
+  await page.getByTestId('export-pin').getByLabel('PIN', { exact: true }).fill('123456')
+  const download = page.waitForEvent('download')
+  await page.getByTestId('export-pin').getByRole('button', { name: 'Descargar todo (JSON)' }).click()
+  await download
+  expect(journalReads.length).toBeGreaterThan(0)
+
+  // Studio → Ajustes → Descargar: el diario bloqueado no entra y se explica
+  journalReads.length = 0
+  await page.goto('/studio/settings')
+  const studioDownload = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Descargar', exact: true }).click()
+  await studioDownload
+  await expect(page.getByText('Tu diario está bloqueado en este dispositivo')).toBeVisible()
+  expect(journalReads).toEqual([])
+})
+
 test('desactivar el bloqueo desde Ajustes pide el PIN', async ({ page, context }) => {
   const state = seed()
   await installSupabaseMock(context, state, { signedIn: true })

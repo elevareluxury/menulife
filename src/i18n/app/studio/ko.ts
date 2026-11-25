@@ -612,7 +612,7 @@ const ko: StudioDict = {
     change: '변경', confirmPauseTitle: '프로필을 일시중지할까요?',
     confirmPauseText: '다시 공개할 때까지 링크를 열거나 QR을 스캔한 사람은 프로필을 이용할 수 없다는 화면을 보게 됩니다.',
     pauseShort: '일시중지', privacy: '개인정보', download: '내 데이터 다운로드', downloadHelp: '프로필, 모듈, Life OS 데이터를 JSON 파일로 받습니다.',
-    downloadBtn: '다운로드', downloadError: '다운로드를 준비하지 못했습니다. 다시 시도해 주세요.', deleteAccount: '계정 삭제',
+    downloadBtn: '다운로드', downloadError: '다운로드를 준비하지 못했습니다. 다시 시도해 주세요.', downloadJournalSkipped: '이 기기에서 일기가 잠겨 있어 복사본에 포함하지 않았어요. Life OS → 설정 → 내 데이터에서 다운로드하세요(PIN을 물어봐요).', deleteAccount: '계정 삭제',
     deleteHelpBusiness: 'Mycen Business에 비즈니스가 있어 탈퇴는 고객지원을 통해 진행됩니다.',
     deleteHelp: '프로필, 모듈, 이미지, Life OS 데이터가 삭제되며 되돌릴 수 없습니다.',
     deleteHasBusiness: '계정에 Mycen Business 비즈니스가 있습니다. 고객과 매출 데이터를 보호하기 위해 탈퇴는 고객지원에 문의해 주세요.',

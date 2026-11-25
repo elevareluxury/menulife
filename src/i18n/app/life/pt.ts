@@ -300,6 +300,7 @@ const pt: LifeDict = {
     deviceNotSaved: 'Não foi possível usar a digital ou o rosto; ficou o PIN.',
     disable: 'Desativar o bloqueio',
     disablePrompt: 'Digite seu PIN para desativar o bloqueio.',
+    exportPrompt: 'A cópia inclui seu diário: digite seu PIN para baixá-la.',
     disabled: 'Você desativou o bloqueio do diário.',
     noStorage: 'Este navegador não permite salvar o bloqueio (pode ser uma janela anônima).',
     deleteNote: 'Seu diário também é apagado.',

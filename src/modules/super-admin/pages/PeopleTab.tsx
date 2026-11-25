@@ -2,7 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAdminT } from '@/i18n/app/admin'
 import { useAdminFormat } from '../lib/adminFormat'
-import { adminRpc, BTN, CARD, INPUT, MUTED, OK_COLOR, TEXT, WARN_COLOR } from '../lib/adminRpc'
+import { adminFunction, adminRpc, BTN, CARD, INPUT, MUTED, OK_COLOR, TEXT, WARN_COLOR } from '../lib/adminRpc'
 import { removeAccountFiles } from '@/lib/accountFiles'
 
 // Personas (auditoría del panel): buscar una cuenta por email, usuario o nombre y ver su ficha — Spaces, verificación,
@@ -132,6 +132,19 @@ function AccountView({ userId, onBack }: { userId: string; onBack: () => void })
   const [error, setError] = useState<string | null>(null)
   const [purgeStep, setPurgeStep] = useState<'idle' | 'confirm' | 'done'>('idle')
   const [purged, setPurged] = useState(0)
+  const [evidence, setEvidence] = useState<{ moved: number; failed: number; more: boolean } | null>(null)
+
+  // Retención: los archivos pasan del link público al bucket privado de evidencia (no se borran)
+  async function quarantineFiles(target: string) {
+    setBusy(true); setError(null)
+    try {
+      const { data, error: e } = await adminFunction<{ moved: number; failed: number; more: boolean }>('quarantine-held-files', { user_id: target })
+      if (e || !data) throw e ?? new Error('empty')
+      setEvidence(prev => ({ moved: (prev?.moved ?? 0) + data.moved, failed: data.failed, more: data.more }))
+    } catch {
+      setError(t.common.actionFailed)
+    } finally { setBusy(false) }
+  }
 
   // Contenido denunciado: suspender oculta la página, pero las fotos y los PDF siguen en sus links públicos
   async function purgeFiles(target: string) {
@@ -239,10 +252,24 @@ function AccountView({ userId, onBack }: { userId: string; onBack: () => void })
               {state.held ? (
                 <section style={{ ...CARD, borderColor: `${WARN_COLOR}66` }} aria-labelledby="acc-hold" data-testid="legal-hold">
                   <h2 id="acc-hold" style={{ margin: '0 0 10px', fontSize: 16, color: TEXT }}>{p.legalHold}</h2>
-                  <button type="button" style={BTN} disabled={busy}
-                    onClick={() => { if (window.confirm(p.releaseConfirm)) void act('admin_release_legal_hold', { p_user_id: d.user_id }) }}>
-                    {p.releaseHold}
-                  </button>
+                  <p style={{ margin: '0 0 12px', fontSize: 12.5, color: MUTED }}>{p.quarantineHelp}</p>
+                  {evidence && (
+                    <p role="status" style={{ margin: '0 0 12px', color: evidence.failed ? WARN_COLOR : OK_COLOR }}>
+                      {p.quarantineDone(evidence.moved)}{evidence.failed ? ` · ${p.quarantineFailed(evidence.failed)}` : ''}
+                    </p>
+                  )}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {(!evidence || evidence.more || evidence.failed > 0) && (
+                      <button type="button" style={{ ...BTN, borderColor: `${WARN_COLOR}66`, color: WARN_COLOR }} disabled={busy}
+                        data-testid="quarantine-files" onClick={() => { void quarantineFiles(d.user_id) }}>
+                        {evidence?.more ? p.quarantineMore : p.quarantine}
+                      </button>
+                    )}
+                    <button type="button" style={BTN} disabled={busy}
+                      onClick={() => { if (window.confirm(p.releaseConfirm)) void act('admin_release_legal_hold', { p_user_id: d.user_id }) }}>
+                      {p.releaseHold}
+                    </button>
+                  </div>
                 </section>
               ) : d.spaces.some(s => s.suspended_at) && (
                 <section style={CARD} aria-labelledby="acc-purge">

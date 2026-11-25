@@ -47,7 +47,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     // Antes de cerrar la sesión: este dispositivo deja de recibir los avisos de la cuenta (Web Push)
     await import('@/lib/webPush').then(m => m.dropPushSubscription()).catch(() => undefined)
-    await (await loadSupabase()).auth.signOut()
+    const { signOutDevice } = await import('@/lib/signOutDevice')
+    const clean = await signOutDevice(await loadSupabase())
     set({ user: null, role: null })
+    // Sin respuesta del servidor la sesión ya se borró del dispositivo: se recarga para soltar el cliente en memoria
+    if (!clean) window.location.replace('/login')
   },
 }))

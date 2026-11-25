@@ -612,7 +612,7 @@ const it: StudioDict = {
     change: 'Cambia', confirmPauseTitle: 'Mettere in pausa il profilo?',
     confirmPauseText: 'Chi apre il tuo link o scansiona il tuo QR vedrà che il profilo non è disponibile finché non lo ripubblichi.',
     pauseShort: 'Metti in pausa', privacy: 'Privacy', download: 'Scarica i miei dati', downloadHelp: 'Il tuo profilo, i moduli e i dati di Life OS in un file JSON.',
-    downloadBtn: 'Scarica', downloadError: 'Impossibile preparare il download. Riprova.', deleteAccount: 'Elimina il mio account',
+    downloadBtn: 'Scarica', downloadError: 'Impossibile preparare il download. Riprova.', downloadJournalSkipped: 'Il tuo diario è bloccato su questo dispositivo, quindi non è stato incluso. Scaricalo da Life OS → Impostazioni → I tuoi dati (chiede il PIN).', deleteAccount: 'Elimina il mio account',
     deleteHelpBusiness: 'Poiché hai un’attività su Mycen Business, la cancellazione passa dal supporto.',
     deleteHelp: 'Vengono eliminati profilo, moduli, immagini e dati di Life OS. Non si può annullare.',
     deleteHasBusiness: 'Il tuo account ha un’attività su Mycen Business. Per chiuderlo contatta il supporto, così proteggiamo i dati di clienti e vendite.',

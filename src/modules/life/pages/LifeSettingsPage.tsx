@@ -17,7 +17,8 @@ import { featureOn } from '@/lib/features'
 import { CalendarFeedCard } from '../components/CalendarFeedCard'
 import { CategoriesCard } from '../components/CategoriesCard'
 import { useHomePrefs } from '../lib/homePrefs'
-import { JournalLockCard } from '../components/JournalLock'
+import { JournalLockCard, PinUnlock } from '../components/JournalLock'
+import { readLock, writeLock, type JournalLock } from '../lib/journalLock'
 import { deviceTimeZone, lifeToday, sameTimeZone } from '../lib/zonedTime'
 
 function timezones(): string[] {
@@ -36,6 +37,7 @@ const help: React.CSSProperties = { fontFamily: font, fontSize: 12.5, color: col
 export function LifeSettingsPage() {
   const t = useLifeT()
   const [showCalendar] = useState(() => featureOn('calendarFeed'))
+  const [exportLock, setExportLock] = useState<JournalLock | null>(null)
   const navigate = useNavigate()
   const userId = useAuthStore(s => s.user?.id)
   const signOut = useAuthStore(s => s.signOut)
@@ -61,8 +63,14 @@ export function LifeSettingsPage() {
   // La cuenta usa otra zona que el celular (viaje, o se eligió a mano): se avisa con calma y se ofrece la del celular
   const device = deviceTimeZone()
   const otherZone = !!prefs.timezoneSaved && !sameTimeZone(prefs.timezoneSaved, device)
-  const download = async (kind: 'json' | 'csv') => {
+  const download = async (kind: 'json' | 'csv', unlockedNow = false) => {
     if (!userId || busy) return
+    // El JSON lleva el diario: con el bloqueo de este dispositivo, primero el PIN (o la huella)
+    if (kind === 'json' && !unlockedNow && featureOn('journal')) {
+      const lock = readLock(userId)
+      if (lock) { setExportLock(lock); return }
+    }
+    setExportLock(null)
     setBusy(kind)
     try {
       if (kind === 'json') downloadBlob(await exportLifeJson(userId), `mycen-life-os-${stamp()}.json`)
@@ -199,6 +207,16 @@ export function LifeSettingsPage() {
             <button type="button" style={dataBtn} disabled={!!busy} onClick={() => void download('json')}>
               <Download size={16} aria-hidden="true" /> {busy === 'json' ? t.data.preparing : t.data.exportJson}
             </button>
+            {exportLock && userId && (
+              <div data-testid="export-pin" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <PinUnlock userId={userId} lock={exportLock} prompt={t.journal.exportPrompt} submitLabel={t.data.exportJson}
+                  onUnlocked={l => { writeLock(userId, l); void download('json', true) }}
+                  onLockChange={setExportLock} />
+                <button type="button" style={{ ...dataBtn, background: 'transparent' }} onClick={() => setExportLock(null)}>
+                  {t.common.cancel}
+                </button>
+              </div>
+            )}
             <button type="button" style={dataBtn} disabled={!!busy} onClick={() => void download('csv')}>
               <FileSpreadsheet size={16} aria-hidden="true" /> {busy === 'csv' ? t.data.preparing : t.data.exportCsv}
             </button>

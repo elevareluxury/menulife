@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { signOutDevice } from '@/lib/signOutDevice'
 import { useAuthStore } from '@/store/authStore'
 import { useAuthT } from '@/i18n/app/auth'
 import { useAppLang } from '@/i18n/app/store'
@@ -56,7 +57,7 @@ export function AcceptTerms() {
   }
 
   async function handleCancel() {
-    await supabase.auth.signOut()
+    if (!(await signOutDevice(supabase))) { window.location.replace('/login'); return }
     navigate('/login', { replace: true })
   }
 

@@ -612,7 +612,7 @@ const ja: StudioDict = {
     change: '変更', confirmPauseTitle: 'プロフィールを一時停止しますか？',
     confirmPauseText: '再公開するまで、リンクを開いたり QR を読み取ったりした人には「利用できません」と表示されます。',
     pauseShort: '一時停止', privacy: 'プライバシー', download: 'データをダウンロード', downloadHelp: 'プロフィール、モジュール、Life OS のデータを JSON ファイルで。',
-    downloadBtn: 'ダウンロード', downloadError: 'ダウンロードを準備できませんでした。もう一度お試しください。', deleteAccount: 'アカウントを削除',
+    downloadBtn: 'ダウンロード', downloadError: 'ダウンロードを準備できませんでした。もう一度お試しください。', downloadJournalSkipped: 'この端末では日記がロックされているため、コピーに含めませんでした。Life OS → 設定 → あなたのデータ からダウンロードしてください（PIN が必要です）。', deleteAccount: 'アカウントを削除',
     deleteHelpBusiness: 'Mycen Business にビジネスがあるため、退会はサポートで対応します。',
     deleteHelp: 'プロフィール、モジュール、画像、Life OS のデータが削除されます。元に戻せません。',
     deleteHasBusiness: 'このアカウントには Mycen Business のビジネスがあります。お客さまや売上のデータを守るため、退会はサポートにご連絡ください。',

@@ -18,6 +18,7 @@ import { useAppLang } from '@/i18n/app/store'
 import { savePrefs, usePrefs } from '@/lib/prefs'
 import { useVerification } from '../lib/useVerification'
 import { useScrollLock } from '@/lib/scrollLock'
+import { readLock } from '@/modules/life/lib/journalLock'
 
 export function SettingsPage() {
   const { profile, patchProfile, userId, business, publish, publishing } = useStudio()
@@ -338,14 +339,17 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
   const [deleting, setDeleting] = useState(false)
   useScrollLock(open)
   const [message, setMessage] = useState<string | null>(null)
+  const [note, setNote] = useState<string | null>(null)
   const t = useStudioT()
   const st = t.settings
 
   async function download() {
     setExporting(true); setMessage(null)
     try {
-      const blob = await exportMyData(userId, user?.email)
+      const journalLocked = !!readLock(userId)
+      const blob = await exportMyData(userId, user?.email, { skipJournal: journalLocked })
       await saveFile(blob, `${st.fileName}-${new Date().toISOString().slice(0, 10)}.json`)
+      setNote(journalLocked ? st.downloadJournalSkipped : null)
     } catch {
       setMessage(st.downloadError)
     } finally { setExporting(false) }
@@ -386,6 +390,7 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
         <Button variant="danger" onClick={() => { setOpen(true); setWord('') }}><Trash2 size={15} aria-hidden="true" /> {t.common.delete}</Button>
       </div>
       {message && <p className="st-error" role="alert" style={{ margin: 0 }}>{message}</p>}
+      {note && <p className="st-help" role="status" style={{ margin: 0 }}>{note}</p>}
 
       {open && (
         <div className="st-dialog-wrap" onMouseDown={e => { if (e.target === e.currentTarget && !deleting) setOpen(false) }}>

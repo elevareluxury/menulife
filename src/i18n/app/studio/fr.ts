@@ -612,7 +612,7 @@ const fr: StudioDict = {
     change: 'Changer', confirmPauseTitle: 'Mettre votre profil en pause ?',
     confirmPauseText: 'Qui ouvrira votre lien ou scannera votre QR verra que le profil n’est pas disponible, jusqu’à ce que vous le republiiez.',
     pauseShort: 'Mettre en pause', privacy: 'Confidentialité', download: 'Télécharger mes données', downloadHelp: 'Votre profil, vos modules et vos données Life OS dans un fichier JSON.',
-    downloadBtn: 'Télécharger', downloadError: 'Impossible de préparer le téléchargement. Réessayez.', deleteAccount: 'Supprimer mon compte',
+    downloadBtn: 'Télécharger', downloadError: 'Impossible de préparer le téléchargement. Réessayez.', downloadJournalSkipped: 'Ton journal est verrouillé sur cet appareil, il n’a donc pas été inclus. Télécharge-le depuis Life OS → Réglages → Tes données (le PIN est demandé).', deleteAccount: 'Supprimer mon compte',
     deleteHelpBusiness: 'Comme vous avez une entreprise sur Mycen Business, la suppression passe par le support.',
     deleteHelp: 'Votre profil, vos modules, vos images et vos données Life OS sont supprimés. C’est irréversible.',
     deleteHasBusiness: 'Votre compte a une entreprise sur Mycen Business. Pour le clôturer, contactez le support afin de protéger les données de vos clients et ventes.',
