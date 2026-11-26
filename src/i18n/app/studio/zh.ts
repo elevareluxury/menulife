@@ -32,7 +32,7 @@ const zh: StudioDict = {
     usernameTaken: '该用户名已被使用。', usernameReserved: '该用户名为系统保留。',
     usernameInvalid: '请使用 3 到 30 个小写字母、数字或连字符。', moduleLimit: '已达到 100 个模块的上限。',
     tooLong: '有文字过长。', offline: '网络未连接。请检查网络后重试。',
-    generic: '保存失败，请重试。', notImage: '请选择图片（JPG、PNG 或 WebP）。', tooBig: '图片太大，请换一张小于 30 MB 的图片。',
+    generic: '保存失败，请重试。', notImage: '请选择图片（JPG、PNG 或 WebP）。', tooBig: '图片太大，请换一张小于 30 MB 的图片。', storageFull: '你的账户空间已满（1 GB 或 3000 个文件）。请删除不再使用的照片或 PDF 后重试。',
   },
   username: {
     idle: '3 到 30 个字符：小写字母、数字和连字符。', checking: '正在检查…', same: '这是你当前的用户名。',

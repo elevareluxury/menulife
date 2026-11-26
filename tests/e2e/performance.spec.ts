@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createState, installSupabaseMock, profileRow } from './support/mockSupabase'
 import { MODULE_FIXTURES } from './support/moduleFixtures'
+import { testPng } from './support/testImages'
 
 // Lanzamiento L1: la página pública carga sólo lo suyo, las imágenes se optimizan y se puede hacer zoom.
 
@@ -49,4 +50,20 @@ test('una foto grande se achica y se sube en WebP', async ({ page, context }) =>
   expect(req.url()).toMatch(/\.webp$/)
   const body = req.postDataBuffer()
   expect(body?.length ?? Infinity).toBeLessThan(png.length / 2)
+})
+
+test('con la cuenta llena (1 GB o 3000 archivos) la subida explica qué hacer', async ({ page, context }) => {
+  await installSupabaseMock(context, createState({ profiles: [profileRow()] }), { signedIn: true })
+  // La base frena la subida (política del tope) y mycen_storage_usage dice que la cuenta está llena
+  await context.route(/\/storage\/v1\/object\/profile-media\//, route => route.request().method() === 'POST'
+    ? route.fulfill({ status: 403, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ statusCode: '403', error: 'Unauthorized', message: 'new row violates row-level security policy' }) })
+    : route.fallback())
+  await context.route(/\/rest\/v1\/rpc\/mycen_storage_usage/, route => route.fulfill({
+    status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+    body: JSON.stringify({ bytes: 1073741824, files: 40, max_bytes: 1073741824, max_files: 3000, full: true }) }))
+  await page.goto('/studio/identity')
+  await expect(page.getByRole('textbox', { name: 'Nombre' })).toHaveValue('Ana Pérez')
+  await page.locator('input[type="file"]').first().setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: testPng(800, 800) })
+  await expect(page.getByText(/Llegaste al espacio máximo de tu cuenta/)).toBeVisible()
 })
