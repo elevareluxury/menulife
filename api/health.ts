@@ -38,6 +38,38 @@ async function probe(
 
 const isImage = (res: Response) => (res.headers.get('content-type') ?? '').startsWith('image/')
 
+/** Direcciones por parte del sitemap: igual a SITEMAP_CHUNK de api/sitemap.ts y mycen_sitemap_chunk() en la base */
+const SITEMAP_CHUNK = 5000
+
+/**
+ * Cuántas direcciones tiene el sitemap a partir de su índice (/sitemap.xml) sin bajar todas las partes: pide la parte
+ * fija y la última de Spaces y de proyectos; las anteriores tienen SITEMAP_CHUNK cada una. Un sitemap viejo (sin
+ * índice) se cuenta tal cual. null si alguna parte no responde.
+ */
+export async function countSitemapUrls(indexXml: string): Promise<number | null> {
+  const locs = [...indexXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1].replace(/&amp;/g, '&'))
+  if (!indexXml.includes('<sitemapindex')) return locs.length
+  const byKind = new Map<string, string[]>()
+  const fetchCount = async (u: string) => {
+    const r = await fetch(u, { redirect: 'manual', signal: AbortSignal.timeout(DEEP_TIMEOUT_MS) })
+    if (r.status !== 200) throw new Error(String(r.status))
+    return ((await r.text()).match(/<url>/g) ?? []).length
+  }
+  let fixed: string | null = null
+  for (const loc of locs) {
+    const kind = /\/sitemap-([pj])-[0-9a-f-]{36}\.xml$/.exec(loc)?.[1]
+    if (kind) byKind.set(kind, [...(byKind.get(kind) ?? []), loc])
+    else if (loc.endsWith('/sitemap-static.xml')) fixed = loc
+  }
+  try {
+    const parts = [...byKind.values()]
+    const counts = await Promise.all([fixed ? fetchCount(fixed) : 0, ...parts.map(list => fetchCount(list[list.length - 1]))])
+    return counts[0] + parts.reduce((sum, list, i) => sum + (list.length - 1) * SITEMAP_CHUNK + counts[i + 1], 0)
+  } catch {
+    return null
+  }
+}
+
 export async function deepChecks(origin: string, username: string | null): Promise<DeepCheck[]> {
   const jobs: Promise<DeepCheck>[] = []
   if (username) {
@@ -52,8 +84,8 @@ export async function deepChecks(origin: string, username: string | null): Promi
   }
   jobs.push(probe('sitemap', `${origin}/sitemap.xml`, {}, async res => {
     const xml = res.ok ? await res.text() : ''
-    const count = (xml.match(/<loc>/g) ?? []).length
-    return { ok: res.status === 200 && count > 0, count }
+    const count = res.status === 200 ? await countSitemapUrls(xml) : null
+    return { ok: count != null && count > 0, count: count ?? undefined }
   }))
   jobs.push(probe('youtube_latest', `${origin}/api/youtube-latest?channel=${PROBE_CHANNEL}`, {}, async res => {
     await res.body?.cancel()

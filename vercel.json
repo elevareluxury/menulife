@@ -68,6 +68,14 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/sitemap-static.xml",
+      "destination": "/api/sitemap?kind=static"
+    },
+    {
+      "source": "/sitemap-:kind(p|j)-:from([0-9a-f-]{36}).xml",
+      "destination": "/api/sitemap?kind=:kind&from=:from"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

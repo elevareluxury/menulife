@@ -173,8 +173,14 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - Zoom permitido en toda la app (sin `user-scalable=no`); los campos táctiles usan 16px para que iOS no haga zoom al tocarlos.
 
 ## Buscadores (Lanzamiento L2)
-- `/sitemap.xml` → `api/sitemap.ts` (regla en `vercel.json`) con la RPC `public_sitemap`: sólo Spaces publicados con
-  visibilidad "public" (sin suspensión propia ni del principal) y proyectos publicados y públicos. `public/robots.txt`:
+- `/sitemap.xml` → `api/sitemap.ts` (regla en `vercel.json`): sólo Spaces publicados con visibilidad "public" (sin
+  suspensión propia ni del principal) y proyectos publicados y públicos. En partes para millones de perfiles
+  (`20261206000001_sitemap_index.sql`, tests en `sitemap_index.test.sql` y `sitemap.test.ts`): `/sitemap.xml` es un
+  índice (`public_sitemap_index()`) que apunta a `/sitemap-static.xml` (landing en 12 idiomas y páginas fijas) y a partes
+  de 5000 en la raíz, `/sitemap-p-<id>.xml` (Spaces) y `/sitemap-j-<id>.xml` (proyectos), leídas desde ese id en orden de
+  clave (`public_sitemap_page(kind, from)`). Las dos devuelven un jsonb (no filas), así "Max rows" no las corta.
+  `mycen_sitemap_chunk()` = `SITEMAP_CHUNK` de `api/sitemap.ts` y de `api/health.ts` (`countSitemapUrls` cuenta sin bajar
+  todas las partes). `public_sitemap` queda para el panel. `public/robots.txt`:
   las rutas privadas terminan en `/` o `$` para no bloquear usernames que empiezan igual (lo verifica `tests/unit/sitemap.test.ts`).
 - El HTML para buscadores (`api/og.ts`) declara `<html lang>` con el `default_locale` del perfil.
 
