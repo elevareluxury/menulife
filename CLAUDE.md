@@ -808,6 +808,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   "Actualizar ahora" → `admin_refresh_snapshot`, `admin_snapshot_info`; 12 idiomas). El trabajo de fondo pasa
   `mycen_assert_admin()` sólo con `mycen.snapshot_job` y fuera de la API (`session_user`). Medición local:
   `scripts/load/admin-bench.sh` (nunca contra producción).
+  Personas busca con índices (`20261208000001_admin_search_index.sql`, tests en `admin_search_index.test.sql`): trigramas
+  (`pg_trgm`) en usuario, nombre y dirección de los Spaces, y la copia interna del email en minúsculas
+  (`mycen_private.account_emails`, trigger `mycen_sync_account_email` en `auth.users`, cascada al borrar la cuenta;
+  `auth.users` no admite índices propios); `admin_search_accounts` junta hasta 500 candidatos por fuente.
 - Auditoría de seguridad, hallazgos bajos (`20261201000001_security_audit_fixes_3.sql`, tests en
   `security_audit_fixes_3.test.sql`, `cronRules.test.ts`, `subscribersCsv.test.ts` y `auth-callback.spec.ts`): un perfil
   suspendido no cambia su dirección y al borrarse reserva también sus usernames anteriores; la app no deja un Space
