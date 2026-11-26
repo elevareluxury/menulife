@@ -8,6 +8,7 @@ import type { SpaceSummary } from './spaces'
 import { studioT } from '@/i18n/app/studio'
 import { optimizeImage } from '@/lib/imageOptimize'
 import { removeAccountFiles } from '@/lib/accountFiles'
+import { readAll } from '@/lib/readAll'
 import type { SourceRow } from './trafficSources'
 import type { ClickStats, ClickStatRow } from './clickStats'
 
@@ -304,49 +305,48 @@ const LIFE_TABLES = [
 
 /** Copia de los datos del usuario (lo que su sesión puede leer) en un JSON descargable. */
 export async function exportMyData(userId: string, email: string | undefined, opts: { skipJournal?: boolean } = {}): Promise<Blob> {
-  const { data: profiles } = await db.from('profiles').select('*').eq('user_id', userId)
-  const profileIds = (profiles ?? []).map((p: { id: string }) => p.id)
-  const { data: modules } = profileIds.length
-    ? await db.from('profile_modules').select('*').in('profile_id', profileIds).is('deleted_at', null)
-    : { data: [] }
+  // Cada tabla de a 1000 y con orden fijo (readAll): sin paginar, más de 1000 filas salían cortadas sin avisar
+  const all = (table: string, columns: string, filter: Parameters<typeof readAll>[3]) =>
+    readAll(db, table, columns, filter)
+  const profiles = await all('profiles', '*', q => q.eq('user_id', userId))
+  const profileIds = profiles.map(p => String(p.id))
+  const modules = profileIds.length
+    ? await all('profile_modules', '*', q => q.in('profile_id', profileIds).is('deleted_at', null))
+    : []
   const life: Record<string, unknown[]> = {}
   for (const table of LIFE_TABLES) {
     // Diario con bloqueo en este dispositivo: no sale sin el PIN (se descarga desde Life OS → Ajustes, que lo pide)
     if (opts.skipJournal && table === 'life_journal_entries') continue
-    const { data, error } = await db.from(table).select('*').eq('user_id', userId)
-    if (!error) life[table] = data ?? []
+    // Una tabla de Life OS que no se puede leer se omite (como antes); las demás siguen
+    try { life[table] = await all(table, '*', q => q.eq('user_id', userId)) } catch { /* se omite */ }
   }
   // Identity: raíz, versiones publicadas y contenido reutilizable
   const identity: Record<string, unknown[]> = {}
-  const { data: identities } = await db.from('identities').select('*').eq('user_id', userId)
-  identity.identities = identities ?? []
-  const identityIds = (identities ?? []).map((i: { id: string }) => i.id)
+  const identities = await all('identities', '*', q => q.eq('user_id', userId))
+  identity.identities = identities
+  const identityIds = identities.map(i => String(i.id))
   if (profileIds.length) {
-    const { data } = await db.from('profile_versions').select('*').in('profile_id', profileIds)
-    identity.profile_versions = data ?? []
+    identity.profile_versions = await all('profile_versions', '*', q => q.in('profile_id', profileIds))
     // Mensajes recibidos por el formulario de contacto (sin el hash anti-abuso, que no le sirve a nadie)
-    const { data: messages } = await db.from('profile_messages')
-      .select('profile_id, kind, name, contact, message, details, created_at, read_at').in('profile_id', profileIds)
-    identity.profile_messages = messages ?? []
+    identity.profile_messages = await all('profile_messages',
+      'id, profile_id, kind, name, contact, message, details, created_at, read_at', q => q.in('profile_id', profileIds))
     // Suscriptores del módulo "Suscribirse" (sin el hash anti-abuso)
-    const { data: subscribers } = await db.from('profile_subscribers')
-      .select('profile_id, email, name, consent_at, locale, created_at').in('profile_id', profileIds)
-    identity.profile_subscribers = subscribers ?? []
+    identity.profile_subscribers = await all('profile_subscribers',
+      'id, profile_id, email, name, consent_at, locale, created_at', q => q.in('profile_id', profileIds))
   }
   if (identityIds.length) {
-    const { data: objects } = await db.from('content_objects').select('*').in('identity_id', identityIds)
-    identity.content_objects = objects ?? []
-    const objectIds = (objects ?? []).map((o: { id: string }) => o.id)
+    const objects = await all('content_objects', '*', q => q.in('identity_id', identityIds))
+    identity.content_objects = objects
+    const objectIds = objects.map(o => String(o.id))
     if (objectIds.length) {
-      const { data } = await db.from('content_blocks').select('*').in('content_object_id', objectIds)
-      identity.content_blocks = data ?? []
+      identity.content_blocks = await all('content_blocks', '*', q => q.in('content_object_id', objectIds))
     }
   }
   const payload = {
     exported_at: new Date().toISOString(),
     account: { id: userId, email },
-    profiles: profiles ?? [],
-    profile_modules: modules ?? [],
+    profiles,
+    profile_modules: modules,
     identity,
     life_os: life,
   }

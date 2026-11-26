@@ -72,7 +72,7 @@ self.addEventListener('fetch', (event) => {
 
   // Funciones del servidor (/api, calendario, sitemap): siempre a la red. Guardarlas dejaba "Último video", el estado
   // del sistema y las portadas congelados en la primera respuesta.
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/cal/') || url.pathname === '/sitemap.xml') return
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/cal/') || /^\/sitemap[a-z0-9-]*\.xml$/.test(url.pathname)) return
 
   // Fuentes (servidas por Mycen) — Cache First
   if (request.destination === 'font') {

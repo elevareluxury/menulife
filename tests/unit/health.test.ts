@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import handler from '../../api/health'
+import handler, { countSitemapUrls } from '../../api/health'
 
 // /api/health: lo que mira el monitor externo para avisar si la web o la base se caen.
 beforeEach(() => {
@@ -82,5 +82,35 @@ describe('api/health?deep=1 (Estado del sistema)', () => {
     const body = await (await handler(req('?deep=1&u=../../etc', JWT))).json() as { checks: { id: string }[] }
     expect(body.checks.map(c => c.id)).not.toContain('og')
     expect(urls.some(u => u.includes('etc'))).toBe(false)
+  })
+})
+
+describe('countSitemapUrls (sitemap en partes)', () => {
+  const P = (n: number) => `https://mycen.id/sitemap-p-${String(n).padStart(8, '0')}-0000-4000-8000-000000000000.xml`
+  const J = 'https://mycen.id/sitemap-j-66666666-0000-4000-8000-000000000006.xml'
+  const index = `<sitemapindex><sitemap><loc>https://mycen.id/sitemap-static.xml</loc></sitemap>${
+    [P(1), P(2), P(3), J].map(l => `<sitemap><loc>${l}</loc></sitemap>`).join('')}</sitemapindex>`
+  const urls = (n: number) => `<urlset>${'<url><loc>x</loc></url>'.repeat(n)}</urlset>`
+
+  it('suma la parte fija, las completas sin bajarlas y la última de cada tipo', async () => {
+    const asked: string[] = []
+    vi.stubGlobal('fetch', vi.fn(async (u: string) => {
+      asked.push(String(u))
+      if (u.endsWith('sitemap-static.xml')) return new Response(urls(16), { status: 200 })
+      if (u === P(3)) return new Response(urls(7), { status: 200 })
+      if (u === J) return new Response(urls(2), { status: 200 })
+      return new Response('', { status: 500 })
+    }))
+    expect(await countSitemapUrls(index)).toBe(16 + 2 * 5000 + 7 + 2)
+    expect(asked).toHaveLength(3)
+  })
+
+  it('si una parte no responde, no inventa un número', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 503 })))
+    expect(await countSitemapUrls(index)).toBeNull()
+  })
+
+  it('un sitemap sin índice se cuenta tal cual', async () => {
+    expect(await countSitemapUrls('<urlset><url><loc>a</loc></url><url><loc>b</loc></url></urlset>')).toBe(2)
   })
 })
