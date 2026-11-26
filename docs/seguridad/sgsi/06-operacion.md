@@ -146,6 +146,10 @@ La evidencia de cada revisión se guarda como un issue de GitHub con su etiqueta
 - Hallazgos bajos (`20261201000001_security_audit_fixes_3.sql`): usernames de perfiles suspendidos reservados con su
   historial, "publicado" sólo con versión, `/auth/callback` sin entrar con tokens ajenos, avisos al equipo con el texto
   saneado, revisión de links sin huecos (lo revisado se anota en `mycen_link_scans`) y CSV a prueba de `;`.
+- Puntos "a validar" revisados con consultas de sólo lectura (26/11/2026): N2 y N4 confirmados y cerrados
+  (`20261202000001_security_audit_fixes_4.sql`); N6 sin archivos en subcarpetas (igual se arregló el borrado); N12 con
+  uso bajo (la cuenta más grande, 10 MB): el tope por cuenta queda para la etapa de escala; N8–N11 cerrados al borrar
+  las Edge Functions viejas. Quedan del dueño: "Max rows" de la API (N1) y salida de red de Vercel Edge (N5).
 - Ante spam o un ataque: Super-admin → Estado → **Interruptores de emergencia** (registros, mensajes y colaboraciones,
   suscripciones, votaciones). La base los frena (503 `FEATURE_PAUSED` en el gancho previo; trigger en `auth.users`) y
   cada cambio queda en la actividad del equipo.

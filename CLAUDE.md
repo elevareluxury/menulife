@@ -569,7 +569,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   "Editar identidad"; debajo siguen estado, link, Tu semana y pendientes.
 - Seguridad (auditoría V1, `docs/seguridad/auditoria-v1.md`): `super_admins` y `site_config` sólo para admins (sin
   escritura desde la app), fotos sin listado público (cada cuenta lista su carpeta), CSP mínima en `vercel.json`.
-  `access_requests`: el formulario público sólo crea solicitudes nuevas; leerlas y aprobarlas, sólo admins.
+  `access_requests`: el formulario se retiró (`/solicitar-acceso` → `/register`) y nadie inserta desde la app
+  (`20261202000001`); leer y resolver las que hay, sólo admins.
   Migraciones `20261023000001_security_hardening.sql` y `20261023000002_access_requests_admin.sql`, tests en
   `tests/db/security.test.sql`.
   Auditoría total (antes del freeze): metas sólo propias en Life OS (trigger `life_check_goal_owner`,
@@ -778,6 +779,9 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `cron_mark_links_scanned`), así lo que no entra en una pasada va en la siguiente; también entrega links sueltos
   (`mycen_snapshot_link_candidates`) que `webLinkOf` (en `scripts/cron/rules.mjs`, misma regla que `safeHref`, un test
   las compara) arma como la página. CSV: fórmulas neutralizadas también después de `;` o tabulación.
+  Puntos "a validar" confirmados con la base real (`20261202000001_security_audit_fixes_4.sql`, tests en
+  `security_audit_fixes_4.test.sql`): sin altas en `access_requests` y `restaurants.organization_id` no se cambia desde
+  la app (`mycen_restaurant_org_locked`; la política `organizations_owner_manage` depende de ese campo).
 - Avisos al equipo, links peligrosos y escala (PR D, `20261125000001_alerts_links_events_scale.sql`, tests en
   `alerts_links_scale.test.sql` y `cronRules.test.ts`; pasos en `docs/lanzamiento/alertas.md`): tareas de GitHub
   Actions sin service role — entran con la anon key y `MYCEN_CRON_KEY` (`mycen_cron_keys` guarda el hash;
