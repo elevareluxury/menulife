@@ -224,9 +224,27 @@
 @media (min-width: 560px) { .st-template-list { grid-template-columns: 1fr; } }
 .st-library .st-template-modules, .st-template-modules { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .st-template-modules .st-template-chip {
-  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--st-muted);
-  padding: 3px 9px; border-radius: 999px; background: var(--st-surface-2);
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--st-text);
+  padding: 3px 9px; border-radius: 999px; border: 1px solid var(--st-border);
+  background: color-mix(in srgb, var(--my-accent) 8%, var(--st-surface-2));
 }
+/* El ícono del chip lleva el acento (elemento gráfico: 3:1 en los dos temas); el texto, el color del texto */
+.st-template-chip svg { flex: none; color: var(--my-accent); }
+/* Grupos de plantillas: el título abre su grupo (más aire arriba que abajo) y se lee como encabezado de sección */
+.st-template-group + .st-template-group { margin-top: 32px; }
+.st-template-group-title {
+  display: flex; align-items: center; gap: 8px; margin: 0 0 12px;
+  font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--st-text);
+}
+.st-template-group-title::before {
+  content: ''; flex: none; width: 16px; height: 2px; border-radius: 999px; background: var(--my-accent);
+}
+/* Tarjeta: nombre en el color del texto, descripción secundaria y chips debajo */
+.st-template-list button > span { display: flex; flex-direction: column; min-width: 0; }
+.st-template-list strong { color: var(--st-text); font-size: 15px; font-weight: 650; line-height: var(--my-lh-title); margin-bottom: 3px; }
+.st-template-list strong + span { color: var(--st-muted); font-size: 13px; line-height: 1.45; }
+.st-template-list button { transition: border-color 0.15s, background 0.15s; }
+.st-template-list button:hover { border-color: color-mix(in srgb, var(--my-accent) 55%, var(--st-border-strong)); }
 .st-module.is-pending { opacity: 1; border-style: dashed; }
 .st-pending-note { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 .st-pending-note strong { font-size: 15px; }

@@ -61,8 +61,8 @@ export function TemplatePicker({ onClose, onAdded }: { onClose: () => void; onAd
       <Drawer title={x.title} onClose={onClose}>
         <p className="st-help" style={{ marginTop: 0 }}>{x.intro}</p>
         {(['profile', 'talent', 'industry'] as const).map(group => (
-          <section key={group} aria-label={x.groups[group]}>
-            <h3 className="st-card-title">{x.groups[group]}</h3>
+          <section key={group} className="st-template-group" aria-label={x.groups[group]}>
+            <h3 className="st-card-title st-template-group-title">{x.groups[group]}</h3>
             <div className="st-library st-template-list">
               {TEMPLATE_LIST.filter(tpl => tpl.group === group).map(tpl => (
                 <button key={tpl.id} type="button" onClick={() => { setChosen(tpl); setApplyLook(false) }}
