@@ -9,6 +9,16 @@ const ar: AdminDict = {
     flags: 'مفاتيح الميزات', landing: 'الصفحة الرئيسية', testimonials: 'آراء المستخدمين', tester: 'الاختبار', status: 'الحالة',
     growth: 'النمو',
   },
+  snapshot: {
+    justNow: 'حُسب الآن',
+    minutes: (m: number) => `حُدّث قبل ${m} دقيقة`,
+    hours: (h: number) => `حُدّث قبل ${h} ساعة`,
+    live: 'حُسب مباشرة (لا توجد لقطة كل ساعة بعد)',
+    refresh: 'حدّث الآن',
+    refreshing: 'جارٍ التحديث…',
+    refreshFailed: 'لم يكتمل في الوقت: ما زالت الأرقام السابقة معروضة. يُعاد الحساب تلقائيًا كل ساعة.',
+    lastError: 'فشل آخر حساب كل ساعة: تُعرض اللقطة السابقة.',
+  },
   common: { loading: 'جارٍ التحميل…', filter: 'تصفية', note: (note) => `ملاحظة: ${note}`, actionFailed: 'تعذّر إكمال الإجراء. حاول مرة أخرى.' },
   dashboard: {
     title: 'لوحة التحكم', subtitle: 'نظرة شاملة على Mycen',

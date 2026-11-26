@@ -9,6 +9,16 @@ const pt: AdminDict = {
     flags: 'Feature flags', landing: 'Landing', testimonials: 'Depoimentos', tester: 'Tester', status: 'Status',
     growth: 'Crescimento',
   },
+  snapshot: {
+    justNow: 'Calculado agora',
+    minutes: (m: number) => `Atualizado há ${m} min`,
+    hours: (h: number) => `Atualizado há ${h} h`,
+    live: 'Calculado ao vivo (ainda sem a foto de cada hora)',
+    refresh: 'Atualizar agora',
+    refreshing: 'Atualizando…',
+    refreshFailed: 'Não terminou a tempo: continua mostrando o anterior. Recalcula sozinho a cada hora.',
+    lastError: 'O último cálculo de cada hora falhou: mostrando a foto anterior.',
+  },
   common: {
     loading: 'Carregando…', filter: 'Filtro', note: (note) => `Nota: ${note}`,
     actionFailed: 'Não foi possível concluir a ação. Tente de novo.',

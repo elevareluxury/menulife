@@ -9,6 +9,16 @@ const ko: AdminDict = {
     flags: '기능 플래그', landing: '랜딩', testimonials: '사용 후기', tester: '테스터', status: '상태',
     growth: '성장',
   },
+  snapshot: {
+    justNow: '방금 계산됨',
+    minutes: (m: number) => `${m}분 전 업데이트`,
+    hours: (h: number) => `${h}시간 전 업데이트`,
+    live: '실시간 계산 (아직 매시간 스냅샷 없음)',
+    refresh: '지금 업데이트',
+    refreshing: '업데이트 중…',
+    refreshFailed: '제시간에 끝나지 않았어요. 이전 숫자를 계속 보여 줘요. 매시간 자동으로 다시 계산돼요.',
+    lastError: '지난 매시간 계산이 실패했어요. 이전 스냅샷을 보여 줘요.',
+  },
   common: { loading: '불러오는 중…', filter: '필터', note: (note) => `메모: ${note}`, actionFailed: '작업을 완료하지 못했어요. 다시 시도해 주세요.' },
   dashboard: {
     title: '제어판', subtitle: 'Mycen 전체 보기',

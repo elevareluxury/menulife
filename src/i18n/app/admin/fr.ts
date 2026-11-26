@@ -9,6 +9,16 @@ const fr: AdminDict = {
     flags: 'Feature flags', landing: 'Landing', testimonials: 'Témoignages', tester: 'Testeur', status: 'État',
     growth: 'Croissance',
   },
+  snapshot: {
+    justNow: 'Calculé à l’instant',
+    minutes: (m: number) => `Mis à jour il y a ${m} min`,
+    hours: (h: number) => `Mis à jour il y a ${h} h`,
+    live: 'Calculé en direct (pas encore de photo horaire)',
+    refresh: 'Actualiser',
+    refreshing: 'Actualisation…',
+    refreshFailed: 'Le calcul n’a pas fini à temps : les chiffres précédents restent affichés. Il se recalcule tout seul chaque heure.',
+    lastError: 'Le dernier calcul horaire a échoué : la photo précédente est affichée.',
+  },
   common: {
     loading: 'Chargement…', filter: 'Filtre', note: (note) => `Note : ${note}`,
     actionFailed: 'L’action n’a pas pu aboutir. Réessayez.',

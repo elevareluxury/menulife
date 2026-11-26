@@ -9,6 +9,16 @@ const zh: AdminDict = {
     flags: '功能开关', landing: '落地页', testimonials: '用户评价', tester: '测试', status: '状态',
     growth: '增长',
   },
+  snapshot: {
+    justNow: '刚刚计算',
+    minutes: (m: number) => `${m} 分钟前更新`,
+    hours: (h: number) => `${h} 小时前更新`,
+    live: '实时计算（尚无每小时快照）',
+    refresh: '立即更新',
+    refreshing: '正在更新…',
+    refreshFailed: '未能及时完成：仍显示之前的数据。系统每小时会自动重新计算。',
+    lastError: '上一次每小时计算失败：显示的是之前的快照。',
+  },
   common: { loading: '加载中…', filter: '筛选', note: (note) => `备注：${note}`, actionFailed: '操作未能完成，请重试。' },
   dashboard: {
     title: '控制面板', subtitle: 'Mycen 全局视图',
