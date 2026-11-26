@@ -78,7 +78,7 @@ const es = {
     offline: 'Sin conexión. Revisá internet e intentá de nuevo.',
     generic: 'No pudimos guardar. Intentá de nuevo.',
     notImage: 'Elegí una imagen (JPG, PNG o WebP).',
-    tooBig: 'La imagen es demasiado pesada. Probá con una de menos de 30 MB.', storageFull: 'Llegaste al espacio máximo de tu cuenta (1 GB o 3000 archivos). Borrá fotos o PDF que ya no uses y probá de nuevo.',
+    tooBig: 'La imagen es demasiado pesada. Probá con una de menos de 30 MB.', storageFull: 'Llegaste al espacio máximo de tu cuenta (1 GB o 3000 archivos). Borrá fotos o PDF que ya no uses y probá de nuevo.', rateLimited: 'Hiciste muchos cambios seguidos. Esperá unos minutos y probá de nuevo.',
   },
   username: {
     idle: 'Entre 3 y 30 caracteres: letras minúsculas, números y guiones.',

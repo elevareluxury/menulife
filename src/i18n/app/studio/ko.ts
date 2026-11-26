@@ -32,7 +32,7 @@ const ko: StudioDict = {
     usernameTaken: '이미 사용 중인 사용자 이름입니다.', usernameReserved: '예약된 사용자 이름입니다.',
     usernameInvalid: '소문자, 숫자, 하이픈을 사용해 3~30자로 입력하세요.', moduleLimit: '모듈 최대 개수(100개)에 도달했습니다.',
     tooLong: '너무 긴 텍스트가 있습니다.', offline: '오프라인 상태입니다. 인터넷 연결을 확인하고 다시 시도하세요.',
-    generic: '저장하지 못했습니다. 다시 시도해 주세요.', notImage: '이미지(JPG, PNG 또는 WebP)를 선택하세요.', tooBig: '이미지가 너무 큽니다. 30MB 미만의 이미지를 사용해 주세요.', storageFull: '계정 저장 공간이 가득 찼어요(1GB 또는 파일 3,000개). 쓰지 않는 사진이나 PDF를 삭제하고 다시 시도하세요.',
+    generic: '저장하지 못했습니다. 다시 시도해 주세요.', notImage: '이미지(JPG, PNG 또는 WebP)를 선택하세요.', tooBig: '이미지가 너무 큽니다. 30MB 미만의 이미지를 사용해 주세요.', storageFull: '계정 저장 공간이 가득 찼어요(1GB 또는 파일 3,000개). 쓰지 않는 사진이나 PDF를 삭제하고 다시 시도하세요.', rateLimited: '짧은 시간에 너무 많이 변경했어요. 몇 분 뒤에 다시 시도하세요.',
   },
   username: {
     idle: '3~30자: 소문자, 숫자, 하이픈.', checking: '확인 중…', same: '현재 사용자 이름입니다.',

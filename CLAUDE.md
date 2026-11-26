@@ -777,6 +777,12 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (`mycen_private.storage_quota()`; política restrictiva `mycen_storage_quota_insert` que cuenta lo que la carpeta ya
   tiene, así que pasa como mucho un archivo de más). `uploadMedia`/`uploadPdf` (`uploadFailure`) preguntan
   `mycen_storage_usage()` al fallar y muestran `errors.storageFull` (12 idiomas). Borrar libera lugar enseguida.
+- Topes por cuenta y por hora (escala, `20261205000001_account_rate_limits.sql`, tests en
+  `account_rate_limits.test.sql` y `rate-limits.spec.ts`): en `mycen_pre_request`, antes del tope por IP, toda escritura
+  con sesión (POST/PATCH/PUT/DELETE) suma en `acct:writes` (6000 por hora) y las acciones pesadas en su balde
+  (`mycen_account_rate_limit_for`: publish_space 60, restore_space_version 30, duplicate_space 20, publish_project 60,
+  record_referral 10). Misma tabla `mycen_rate_hits` (hash de la cuenta con sal, 2 días) y 429 `RATE_LIMITED`; si algo
+  falla adentro, deja pasar. Studio lo muestra con `errors.rateLimited` (12 idiomas). Una RPC pesada nueva se suma ahí.
 - Auditoría de seguridad, hallazgos bajos (`20261201000001_security_audit_fixes_3.sql`, tests en
   `security_audit_fixes_3.test.sql`, `cronRules.test.ts`, `subscribersCsv.test.ts` y `auth-callback.spec.ts`): un perfil
   suspendido no cambia su dirección y al borrarse reserva también sus usernames anteriores; la app no deja un Space

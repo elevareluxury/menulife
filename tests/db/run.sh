@@ -84,7 +84,8 @@ for m in \
   20261201000001_security_audit_fixes_3 \
   20261202000001_security_audit_fixes_4 \
   20261203000001_scale_reminders \
-  20261204000001_storage_quota; do
+  20261204000001_storage_quota \
+  20261205000001_account_rate_limits; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 
