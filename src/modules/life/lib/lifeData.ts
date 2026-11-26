@@ -1,6 +1,7 @@
 import { saveFile } from '@/lib/nativeFiles'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { readAll } from '@/lib/readAll'
 import { localDateOf } from './moneyFuture'
 
 // Las tablas de Life OS todavía no están en database.types.ts
@@ -14,30 +15,13 @@ const LIFE_TABLES = [
   'life_daily_reviews', 'life_weekly_reviews',
 ] as const
 
-const PAGE = 1000
-
-async function readAll(table: string, userId: string): Promise<Record<string, unknown>[]> {
-  const rows: Record<string, unknown>[] = []
-  // Con orden fijo (id): sin él, Postgres puede repetir o saltear filas entre páginas
-  let ordered = true
-  for (let from = 0; ; from += PAGE) {
-    const q = db.from(table).select('*').eq('user_id', userId)
-    const { data, error } = await (ordered ? q.order('id') : q).range(from, from + PAGE - 1)
-    if (error && ordered && error.code === '42703' && from === 0) { ordered = false; from -= PAGE; continue }
-    if (error) {
-      // Tablas legado que pueden no existir en todas las bases: se omiten
-      if (error.code === '42P01' || error.code === 'PGRST205') return rows
-      throw error
-    }
-    rows.push(...(data ?? []))
-    if (!data || data.length < PAGE) return rows
-  }
-}
+// De a 1000 y con orden fijo (src/lib/readAll.ts)
+const readLifeTable = (table: string, userId: string) => readAll(db, table, '*', q => q.eq('user_id', userId))
 
 /** Todos los datos de Life OS del usuario en un JSON. */
 export async function exportLifeJson(userId: string): Promise<Blob> {
   const tables: Record<string, unknown[]> = {}
-  for (const table of LIFE_TABLES) tables[table] = await readAll(table, userId)
+  for (const table of LIFE_TABLES) tables[table] = await readLifeTable(table, userId)
   return new Blob([JSON.stringify({ exported_at: new Date().toISOString(), life_os: tables }, null, 2)], { type: 'application/json' })
 }
 
@@ -68,9 +52,9 @@ export function moneyCsvLines(rows: Record<string, unknown>[], customNames: Read
 
 /** Movimientos de dinero en CSV (para abrir en una planilla). Cada fila con su moneda. */
 export async function exportMoneyCsv(userId: string): Promise<Blob> {
-  const rows = await readAll('life_transactions', userId)
+  const rows = await readLifeTable('life_transactions', userId)
   // Categorías propias ('c:<id>'): en la planilla va su nombre
-  const custom = new Map((await readAll('life_categories', userId)).map(c => [`c:${String(c.id)}`, String(c.name)]))
+  const custom = new Map((await readLifeTable('life_categories', userId)).map(c => [`c:${String(c.id)}`, String(c.name)]))
   const lines = moneyCsvLines(rows, custom)
   // BOM para que Excel lea bien los acentos
   return new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' })

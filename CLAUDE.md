@@ -121,6 +121,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   un mínimo de datos y si no alcanza no se muestra. El inicio destaca uno (no repite las vencidas).
   Insights y "Tu mes" (`/life/replay`) están prendidos desde antes del freeze (`FEATURES` en `src/lib/features.ts`);
   E2E en `insights-replay.spec.ts`. "Tu mes" no muestra un 0 de logros (sin culpa).
+- Exportar (Life OS y Studio → Ajustes): cada tabla con `readAll` (`src/lib/readAll.ts`: de a 1000, orden por id; sin
+  paginar, "Max rows" cortaba en 1000 filas sin avisar). Tests en `readAll.test.ts`; el mock de E2E pagina con `offset`.
 - Datos de Life OS (Ajustes → Tus datos, `lib/lifeData.ts`): exportar JSON completo y CSV de Dinero; borrar sólo Life OS
   (cuenta, perfil y ajustes quedan). La cuenta entera se exporta/borra desde Studio → Ajustes.
 - Sin conexión: el + guarda en una cola local (`lib/outbox.ts`, id generado en el cliente, upsert sin duplicar) y se sube

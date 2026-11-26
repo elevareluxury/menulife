@@ -269,8 +269,10 @@ function filterRows(rows: Row[], params: URLSearchParams): Row[] {
       return 0
     })
   }
+  // Paginado como PostgREST (range() de supabase-js manda offset y limit)
+  const offset = Number(params.get('offset') ?? 0) || 0
   const limit = params.get('limit')
-  return limit ? out.slice(0, Number(limit)) : out
+  return limit ? out.slice(offset, offset + Number(limit)) : out.slice(offset)
 }
 
 // ── RPC (misma lógica que la base) ───────────────────────────────────────────
