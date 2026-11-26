@@ -253,6 +253,8 @@ const UNIQUE: Record<string, string[]> = {
   life_brain_items: ['occurrence_of'],
 }
 
+/** "Max rows" de la API de Supabase (Settings → API) */
+const MAX_ROWS = 1000
 const NON_FILTERS = new Set(['select', 'order', 'limit', 'offset', 'on_conflict', 'columns', 'or'])
 const PUBLIC_COLUMNS = new Set<string>(PUBLIC_RESTAURANT_COLUMNS)
 
@@ -269,10 +271,11 @@ function filterRows(rows: Row[], params: URLSearchParams): Row[] {
       return 0
     })
   }
-  // Paginado como PostgREST (range() de supabase-js manda offset y limit)
+  // Paginado como PostgREST (range() de supabase-js manda offset y limit) y con el tope "Max rows" de Supabase (1000
+  // por defecto): una lectura sin paginar que pasa ese número sale cortada, como en producción
   const offset = Number(params.get('offset') ?? 0) || 0
-  const limit = params.get('limit')
-  return limit ? out.slice(offset, offset + Number(limit)) : out.slice(offset)
+  const limit = Math.min(Number(params.get('limit') ?? MAX_ROWS) || MAX_ROWS, MAX_ROWS)
+  return out.slice(offset, offset + limit)
 }
 
 // ── RPC (misma lógica que la base) ───────────────────────────────────────────

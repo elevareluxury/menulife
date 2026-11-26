@@ -1,3 +1,4 @@
+import { readAllResult } from '@/lib/readAll'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -68,10 +69,13 @@ async function generateReplay(userId: string, year: number, month: number, mainC
   const q = (table: string, cols: string) => db.from(table).select(cols).eq('user_id', userId)
   const [habitsRes, logsRes, stepsRes, goalsRes, txRes, brainRes, tasksRes, achRes, moodRes] = await Promise.all([
     q('life_habits', 'id,name,frequency,target_value,created_at').eq('is_active', true),
-    q('life_habit_logs', 'habit_id,completed_date,value').gte('completed_date', firstDay).lte('completed_date', lastDay),
+    // De a 1000 (readAll): un mes de registros o movimientos puede pasar las 1000 filas por pedido
+    readAllResult<{ habit_id: string; completed_date: string; value: number | null }>(db, 'life_habit_logs', 'habit_id,completed_date,value',
+      r => r.eq('user_id', userId).gte('completed_date', firstDay).lte('completed_date', lastDay)),
     q('life_goal_milestones', 'id').gte('completed_at', fromIso).lt('completed_at', toIso),
     q('life_goals', 'id').eq('status', 'in_progress'),
-    q('life_transactions', 'type,amount,currency,occurred_at').gte('occurred_at', fromIso).lt('occurred_at', toIso),
+    readAllResult<{ type: string; amount: string; currency: string | null; occurred_at: string }>(db, 'life_transactions', 'type,amount,currency,occurred_at',
+      r => r.eq('user_id', userId).gte('occurred_at', fromIso).lt('occurred_at', toIso)),
     q('life_brain_items', 'type').gte('created_at', fromIso).lt('created_at', toIso),
     q('life_brain_items', 'id').eq('type', 'task').gte('completed_at', fromIso).lt('completed_at', toIso),
     q('life_achievements', 'id').gte('achieved_at', fromIso).lt('achieved_at', toIso),

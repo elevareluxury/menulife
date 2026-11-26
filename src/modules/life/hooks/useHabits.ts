@@ -1,3 +1,4 @@
+import { readAllResult } from '@/lib/readAll'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -94,7 +95,8 @@ export function useHabits() {
     const since = shiftDate(today, -400)  // historial suficiente para rachas largas
     const [habitsRes, logsRes] = await Promise.all([
       db.from('life_habits').select('*').eq('user_id', user.id).order('sort_order'),
-      db.from('life_habit_logs').select('habit_id,completed_date,value').eq('user_id', user.id).gte('completed_date', since),
+      // De a 1000 (readAll): 400 días de varios hábitos pasan las 1000 filas que devuelve la API por pedido
+      readAllResult<{ habit_id: string; completed_date: string; value: number | null }>(db, 'life_habit_logs', 'habit_id,completed_date,value', q => q.eq('user_id', user.id).gte('completed_date', since)),
     ])
     if (habitsRes.error || logsRes.error) { setError(true); setLoading(false); return }
     setError(false)

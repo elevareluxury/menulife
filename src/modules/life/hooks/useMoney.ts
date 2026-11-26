@@ -1,3 +1,4 @@
+import { readAllResult } from '@/lib/readAll'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -116,12 +117,10 @@ export function useMoney(month: string = monthKeyOf(lifeNow())) {
     // Lo programado más allá de este mes (para poder avanzar hasta ahí con ‹ mes ›)
     const [nextStart] = monthRange(shiftMonth(monthKeyOf(lifeNow()), 1), tz)
     const [{ data, error }, { data: later }] = await Promise.all([
-      db.from('life_transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('occurred_at', from)
-        .lt('occurred_at', to)
-        .order('occurred_at', { ascending: false }),
+      // De a 1000 (readAll): un mes importado del banco puede pasar las 1000 filas que devuelve la API por pedido
+      readAllResult<Transaction>(db, 'life_transactions', '*',
+        q => q.eq('user_id', user.id).gte('occurred_at', from).lt('occurred_at', to),
+        { column: 'occurred_at', ascending: false }),
       db.from('life_transactions').select('occurred_at').eq('user_id', user.id)
         .gte('occurred_at', nextStart).order('occurred_at', { ascending: false }).limit(1),
     ])

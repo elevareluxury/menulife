@@ -1,3 +1,4 @@
+import { readAllResult } from '@/lib/readAll'
 import { useEffect, useState } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
@@ -34,8 +35,11 @@ export function useInsights() {
 
     void Promise.all([
       q('life_habits', 'id,name,frequency,target_value,created_at').eq('is_active', true),
-      q('life_habit_logs', 'habit_id,completed_date,value').gte('completed_date', shiftDate(today, -55)),
-      q('life_transactions', 'amount,currency,category,occurred_at').eq('type', 'expense').gte('occurred_at', prevMonthStart),
+      // De a 1000 (readAll): registros y gastos de casi dos meses pueden pasar las 1000 filas por pedido
+      readAllResult(db, 'life_habit_logs', 'habit_id,completed_date,value',
+        r => r.eq('user_id', user.id).gte('completed_date', shiftDate(today, -55))),
+      readAllResult(db, 'life_transactions', 'amount,currency,category,occurred_at',
+        r => r.eq('user_id', user.id).eq('type', 'expense').gte('occurred_at', prevMonthStart)),
       q('life_goals', 'id,name,created_at').eq('status', 'in_progress'),
       q('life_goal_milestones', 'goal_id,is_completed,completed_at'),
       q('life_brain_items', 'completed_at').eq('type', 'task').eq('is_completed', true).gte('completed_at', twoWeeksAgo),
