@@ -138,3 +138,20 @@ test('Analítica muestra de dónde vienen las visitas', async ({ page, context }
   await expect(sources.getByRole('listitem').nth(1)).toContainText('Instagram')
   await expect(sources.getByRole('listitem').nth(2)).toContainText('Directo')
 })
+
+test('Analítica con más de 1000 filas (90 días × muchos módulos) suma todas las visitas', async ({ page, context }) => {
+  const state = seed()
+  const day = (i: number) => new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10)
+  // 30 días × 40 módulos tocados = 1200 filas de toques, y después las visitas (2 por día): la API devuelve como mucho
+  // 1000 por pedido, así que sin paginar las visitas quedaban afuera
+  for (let i = 0; i < 30; i++) for (let m = 0; m < 40; m++) {
+    state.tables.profile_stats_daily.push({ profile_id: 'p-ana', day: day(i), event_type: 'module_click', module_id: `m${m}`, events: 1, visitors: 1 })
+  }
+  for (let i = 0; i < 30; i++) {
+    state.tables.profile_stats_daily.push({ profile_id: 'p-ana', day: day(i), event_type: 'view', module_id: null, events: 2, visitors: 2 })
+  }
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/studio/analytics')
+  await page.getByRole('button', { name: '90 días' }).click()
+  await expect(page.getByLabel('Gráfico de visitas de los últimos 90 días. Total: 60.')).toBeVisible()
+})

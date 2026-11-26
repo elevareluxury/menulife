@@ -24,16 +24,23 @@ export interface Query {
  * repetir o saltear filas entre páginas; sin paginar, una exportación con más de 1000 filas salía cortada sin avisar.
  * Si la tabla no tiene `id`, sigue sin orden. Una tabla legado que no existe en esta base devuelve [].
  */
+/** Orden de las páginas: una columna, o varias que juntas no se repiten (para vistas sin `id`, con `key: true`) */
+export type ReadOrder = { column: string; ascending?: boolean } | { key: true; columns: string[] }
+
 export async function readAll(
   db: SupabaseClient, table: string, columns: string, filter: (q: Query) => Query,
-  orderBy?: { column: string; ascending?: boolean },
+  orderBy?: ReadOrder,
 ): Promise<Row[]> {
   const rows: Row[] = []
-  let ordered = true
+  // Con una clave propia (varias columnas únicas juntas) no hace falta el id
+  const keyed = !!orderBy && 'key' in orderBy
+  let ordered = !keyed
   for (let page = 0, from = 0; page < MAX_PAGES; page++, from += PAGE_ROWS) {
     const base = filter(db.from(table).select(columns) as unknown as Query)
     // El orden pedido (si hay) y después el id, para que las páginas no se pisen
-    const sorted = orderBy ? base.order(orderBy.column, { ascending: orderBy.ascending ?? true }) : base
+    const sorted = !orderBy ? base
+      : 'key' in orderBy ? orderBy.columns.reduce((q, c) => q.order(c, { ascending: true }), base)
+      : base.order(orderBy.column, { ascending: orderBy.ascending ?? true })
     const { data, error } = await (ordered ? sorted.order('id') : sorted).range(from, from + PAGE_ROWS - 1)
     if (error && ordered && error.code === '42703' && from === 0) { ordered = false; from -= PAGE_ROWS; page--; continue }
     if (error) {
@@ -49,7 +56,7 @@ export async function readAll(
 /** readAll con la forma de una respuesta de supabase-js ({ data, error }), para usarla dentro de un Promise.all */
 export function readAllResult<T = Row>(
   db: SupabaseClient, table: string, columns: string, filter: (q: Query) => Query,
-  orderBy?: { column: string; ascending?: boolean },
+  orderBy?: ReadOrder,
 ): Promise<{ data: T[] | null; error: unknown }> {
   return readAll(db, table, columns, filter, orderBy).then(
     data => ({ data: data as T[], error: null }),

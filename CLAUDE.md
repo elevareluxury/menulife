@@ -125,8 +125,9 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
   paginar, "Max rows" cortaba en 1000 filas sin avisar). Tests en `readAll.test.ts`; el mock de E2E pagina con `offset`
   y corta en 1000 como la API (`MAX_ROWS`). También lo usan las lecturas que pueden pasar 1000 filas en el uso diario
   (`readAllResult`, forma `{ data, error }`): registros de 400 días en Hábitos, el mes de Dinero (un mes importado del
-  banco), Insights y "Tu mes". Una lista nueva que puede crecer: paginar o usar `readAll` (E2E: "más de 1000
-  movimientos" en `money-fixes.spec.ts`).
+  banco), Insights, "Tu mes" y Analítica de Studio (`loadStats`: la vista no tiene id, se pagina con su clave
+  `{ key: true, columns: [día, evento, módulo] }`). Una lista nueva que puede crecer: paginar o usar `readAll` (E2E:
+  "más de 1000 movimientos" en `money-fixes.spec.ts` y "más de 1000 filas" en `links-connect.spec.ts`).
 - Datos de Life OS (Ajustes → Tus datos, `lib/lifeData.ts`): exportar JSON completo y CSV de Dinero; borrar sólo Life OS
   (cuenta, perfil y ajustes quedan). La cuenta entera se exporta/borra desde Studio → Ajustes.
 - Sin conexión: el + guarda en una cola local (`lib/outbox.ts`, id generado en el cliente, upsert sin duplicar) y se sube
