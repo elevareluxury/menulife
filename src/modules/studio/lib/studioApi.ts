@@ -286,12 +286,11 @@ export async function uploadPdf(userId: string, file: File): Promise<{ url: stri
 
 export async function loadStats(profileId: string, days: number): Promise<DailyStat[]> {
   const since = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10)
-  const { data, error } = await db.from('profile_stats_daily')
-    .select('day, event_type, module_id, events, visitors')
-    .eq('profile_id', profileId)
-    .gte('day', since)
-  if (error) throw error
-  return ((data ?? []) as DailyStat[]).map(r => ({ ...r, events: Number(r.events), visitors: Number(r.visitors) }))
+  // De a 1000 (readAll): 90 días × tipo de evento × módulo pasan las 1000 filas que devuelve la API por pedido. La vista
+  // no tiene id: día, evento y módulo juntos no se repiten y dan el orden de las páginas
+  const data = await readAll(db, 'profile_stats_daily', 'day, event_type, module_id, events, visitors',
+    q => q.eq('profile_id', profileId).gte('day', since), { key: true, columns: ['day', 'event_type', 'module_id'] })
+  return (data as unknown as DailyStat[]).map(r => ({ ...r, events: Number(r.events), visitors: Number(r.visitors) }))
 }
 
 // ── Privacidad: exportar y eliminar ──────────────────────────────────────────

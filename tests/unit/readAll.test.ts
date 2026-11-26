@@ -64,3 +64,26 @@ describe('readAll', () => {
     expect(calls[0]).toMatchObject({ columns: 'id', filters: ['profile_id in', 'deleted_at is null'] })
   })
 })
+
+describe('readAll con clave propia (vistas sin id)', () => {
+  it('ordena por las columnas de la clave y no pide el id', async () => {
+    const orders: string[][] = []
+    const rows = Array.from({ length: 1500 }, (_, i) => ({ day: `2026-10-${String(1 + (i % 30)).padStart(2, '0')}`, module_id: `m${i}` }))
+    const db = {
+      from() {
+        const seen: string[] = []
+        orders.push(seen)
+        const q = {
+          select: () => q, eq: () => q, gte: () => q,
+          order(col: string) { seen.push(col); return q },
+          async range(from: number, to: number) { return { data: rows.slice(from, Math.min(to + 1, from + PAGE_ROWS)), error: null } },
+        }
+        return q
+      },
+    } as unknown as SupabaseClient
+    const got = await readAll(db, 'profile_stats_daily', '*', q => q.eq('profile_id', 'p').gte('day', '2026-10-01'),
+      { key: true, columns: ['day', 'event_type', 'module_id'] })
+    expect(got).toHaveLength(1500)
+    expect(orders).toEqual([['day', 'event_type', 'module_id'], ['day', 'event_type', 'module_id']])
+  })
+})

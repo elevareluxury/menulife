@@ -183,3 +183,15 @@ test('el + de Dinero sin conexión: queda en el dispositivo, se ve y se sube al 
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('mycen_life_outbox') ?? '[]').length)).toBe(0)
   await expect(page.getByText('Kiosco', { exact: true })).toBeVisible()
 })
+
+test('un mes con más de 1000 movimientos (importado del banco) suma todos: Dinero lee de a 1000', async ({ page, context }) => {
+  const state = seed()
+  // 1200 gastos de $1 en octubre: la API devuelve como mucho 1000 por pedido ("Max rows", el mock también)
+  for (let i = 0; i < 1200; i++) {
+    state.tables.life_transactions.push(tx({ amount: 1, category: 'Otros', description: `Compra ${i}`, occurred_at: noon(10, 1 + (i % 14)) }))
+  }
+  await page.clock.setFixedTime(NOW)
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/life/money')
+  await expect(page.locator('span').filter({ hasText: /^Gastos\s*\$\s?1\.200$/ })).toHaveCount(1)
+})
