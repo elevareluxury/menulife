@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { loadSupabase } from '@/lib/supabaseLazy'
+import { isNativeApp } from '@/lib/platform'
 import type { User } from '@supabase/supabase-js'
 import type { UserRole } from '@/types'
 
@@ -47,6 +48,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     // Antes de cerrar la sesión: este dispositivo deja de recibir los avisos de la cuenta (Web Push)
     await import('@/lib/webPush').then(m => m.dropPushSubscription()).catch(() => undefined)
+    // En la app: los recordatorios programados en el teléfono eran de esta cuenta (auditoría N7)
+    if (isNativeApp()) {
+      await import('@/modules/life/lib/nativeReminders').then(m => m.cancelAllNativeReminders()).catch(() => undefined)
+    }
     const { signOutDevice } = await import('@/lib/signOutDevice')
     const clean = await signOutDevice(await loadSupabase())
     set({ user: null, role: null })

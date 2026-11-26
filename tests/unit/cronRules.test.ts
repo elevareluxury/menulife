@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 // @ts-expect-error módulo .mjs sin tipos (lo usan las tareas programadas)
-import { alertLines, alertSubject, checkableUrl, sinceFor, threatOf, webRiskUrl } from '../../scripts/cron/rules.mjs'
+import { alertLines, alertSubject, checkableUrl, oneLine, sinceFor, threatOf, webLinkOf, webRiskUrl } from '../../scripts/cron/rules.mjs'
+import { safeHref } from '../../src/modules/profile/lib/safeUrl'
 // @ts-expect-error módulo .mjs sin tipos
 import { previousRunStart } from '../../scripts/cron/previousRun.mjs'
 
@@ -88,3 +89,37 @@ describe('previousRunStart', () => {
     expect(await previousRunStart(env)).toBeNull()
   })
 })
+
+describe('texto de afuera en los avisos (auditoría)', () => {
+  it('un mensaje de error con saltos y "::" queda en una sola entrada, sin comandos de GitHub', () => {
+    const digest = { new_errors: [{ area: 'app\n::warning::x', message: 'boom\r\n::error::falso\n🔴 La base cayó', count: 3 }] }
+    const lines = alertLines(digest, { ok: true, status: 200 })
+    expect(lines).toHaveLength(2)
+    for (const l of lines as string[]) {
+      expect(l).not.toMatch(/[\r\n]/)
+      expect(l).not.toContain('::')
+    }
+    expect(lines.join('\n').split('\n').some((l: string) => l.startsWith('::') || l.startsWith('🔴'))).toBe(false)
+  })
+  it('oneLine recorta y saca caracteres de control', () => {
+    expect(oneLine('a\u0000b\u2028c')).toBe('a b c')
+    expect(oneLine('x'.repeat(300)).length).toBe(200)
+  })
+})
+
+describe('webLinkOf = la regla de la página para links web (auditoría)', () => {
+  const samples = [
+    'https://evil.example/login', 'evil.example/login', '"evil.example"', '<https://evil.example>', 'https//evil.example',
+    'https:/evil.example/x', 'https://"evil.example"', 'www.tienda.com.ar?x=1', 'añá.com', 'evil.example.', 'tienda.com,',
+    'https://user@evil.example', 'https://ana .com', 'localhost', 'sin-punto', 'javascript:alert(1)', 'mailto:a@b.com',
+    'ana@mail.com', '/ruta', 'https://', 'xn--80ak6aa92e.com/a', 'evil.example:8080/x#y',
+  ]
+  it('da el mismo link web que safeHref', () => {
+    for (const s of samples) {
+      const page = safeHref(s)
+      const expected = page && /^https?:\/\//i.test(page) ? page : null
+      expect(webLinkOf(s), s).toBe(expected)
+    }
+  })
+})
+

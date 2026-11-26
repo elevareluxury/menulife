@@ -231,7 +231,9 @@ do $$ declare r record; begin
                                    -- gancho previo de PostgREST (límite por IP, 20261123000001): no devuelve datos
                                    'mycen_pre_request',
                                    -- tareas programadas (20261125000001): sin la llave de mycen_cron_keys no devuelven nada
-                                   'cron_alert_digest', 'cron_recent_links', 'cron_flag_link') loop
+                                   'cron_alert_digest', 'cron_recent_links', 'cron_flag_link',
+                                   -- revisión de links sin huecos (20261201000001): también pide la llave
+                                   'cron_mark_links_scanned') loop
     assert false, 'anon puede ejecutar: ' || r.proname;
   end loop;
 end $$;

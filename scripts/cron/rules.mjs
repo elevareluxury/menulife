@@ -2,6 +2,21 @@
 // tests/unit/cronRules.test.ts.
 
 /**
+ * Texto que viene de afuera (el mensaje de un error lo escribe cualquier visitante) en una sola línea segura: sin
+ * saltos ni caracteres de control (no inventa líneas en el mail) y sin "::" (GitHub Actions no lo toma como comando).
+ * @param {unknown} value
+ * @param {number} [max]
+ */
+export function oneLine(value, max = 200) {
+  const s = String(value ?? '')
+    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ')
+    .replace(/:{2,}/g, ':')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return s.length > max ? `${s.slice(0, max - 1)}…` : s
+}
+
+/**
  * Qué avisar al equipo a partir del resumen de la base (cron_alert_digest) y de /api/health.
  * Devuelve una línea por problema (vacío = no se manda nada).
  * @param {Record<string, any> | null} digest
@@ -17,7 +32,7 @@ export function alertLines(digest, health) {
   const errors = Array.isArray(digest.new_errors) ? digest.new_errors : []
   if (errors.length) {
     lines.push(`🟠 ${errors.length === 1 ? '1 error nuevo' : `${errors.length} errores nuevos`} en la app:`)
-    for (const e of errors.slice(0, 5)) lines.push(`   · [${e.area}] ${e.message} (${e.count})`)
+    for (const e of errors.slice(0, 5)) lines.push(`   · [${oneLine(e.area, 40)}] ${oneLine(e.message)} (${Number(e.count) || 0})`)
   }
   if (Number(digest.reopened_errors) > 0) lines.push(`🟠 ${digest.reopened_errors} error(es) viejos volvieron a pasar muchas veces.`)
   const hour = Number(digest.signups_hour) || 0
@@ -37,6 +52,45 @@ export function alertLines(digest, health) {
 export function alertSubject(lines) {
   const red = lines.some(l => l.startsWith('🔴'))
   return `${red ? '🔴' : '🟠'} Mycen: ${lines.filter(l => !l.startsWith('   ')).length} aviso(s)`
+}
+
+// ── Misma regla que la página pública (src/modules/profile/lib/safeUrl.ts: cleanLinkInput + safeHref para web) ──
+// El scanner es JavaScript puro y no puede importar el .ts; tests/unit/cronRules.test.ts compara las dos.
+const BARE_DOMAIN = /^(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?\.)+(?:\p{L}{2,}|xn--[a-z0-9-]+)(?::\d{1,5})?(?=[/?#]|$)/iu
+
+function cleanLink(raw) {
+  let v = raw.trim()
+  for (let prev = ''; prev !== v;) {
+    prev = v
+    v = v.replace(/^https?:\/\/(?=[<"'“”‘’«])/i, '')
+    v = v.replace(/^[<"'“”‘’«]+|[>"'“”‘’»]+$/g, '').replace(/[.,;]+$/, '').trim()
+  }
+  if (!/^https?:\/\/[^/]/i.test(v)) v = v.replace(/^(https?)(?::\/{0,3}|\/\/)(?=[^/])/i, '$1://')
+  return v
+}
+
+function validWeb(url) {
+  const authority = /^https?:\/\/([^/?#]*)/i.exec(url)?.[1] ?? ''
+  if (authority.includes('@') || /\s/.test(authority)) return false
+  let u
+  try { u = new URL(url) } catch { return false }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return false
+  const labels = u.hostname.replace(/\.$/, '').split('.')
+  return labels.length >= 2 && labels.every(Boolean) && /^([a-z]{2,}|xn--[a-z0-9-]+)$/i.test(labels[labels.length - 1])
+}
+
+/**
+ * El link web al que lleva un texto de un perfil, igual que lo arma la página ('"tienda.com/x"' → https://tienda.com/x),
+ * o null si la página no lo mostraría como link web.
+ * @param {unknown} raw
+ */
+export function webLinkOf(raw) {
+  if (typeof raw !== 'string') return null
+  const url = cleanLink(raw)
+  if (!url) return null
+  if (/^https?:\/\//i.test(url)) return validWeb(url) ? url : null
+  if (BARE_DOMAIN.test(url) && validWeb(`https://${url}`)) return `https://${url}`
+  return null
 }
 
 /** Link que vale la pena revisar: http(s), sin espacios, ≤ 2048 y que no sea de Mycen */

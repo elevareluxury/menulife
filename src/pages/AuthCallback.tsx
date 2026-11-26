@@ -59,6 +59,12 @@ export function AuthCallback() {
         if (tokenHash) {
           const otpType = (['email', 'signup', 'recovery', 'email_change', 'magiclink', 'invite'] as const)
             .find(t => t === type) ?? 'email'
+          // Con una sesión abierta, un link de otra cuenta no la reemplaza sin avisar (alguien podría mandarte el link
+          // de SU cuenta para que escribas tus cosas ahí). Sólo cambiar el email es de la cuenta abierta.
+          if (otpType !== 'email_change') {
+            const { data: current } = await supabase.auth.getSession()
+            if (current.session) { await redirectByRole(current.session.user.id); return }
+          }
           const { error: ex } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: otpType })
           if (ex) {
             const bad = /expired/i.test(ex.message) ? 'expired' : 'invalid'
@@ -70,13 +76,13 @@ export function AuthCallback() {
           return
         }
 
-        // CASE 1c: link viejo con los tokens en el # (mails enviados antes de pasar a PKCE)
-        if (accessToken && refreshToken) {
+        // CASE 1c: tokens en el # (mails viejos, antes de PKCE). Ya no se usan para entrar: cualquiera podía armar un
+        // link con los tokens de su cuenta y dejarte adentro de ella sin que lo notes. Se pide el link de nuevo.
+        if (accessToken || refreshToken) {
           if (window.location.hash) window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search)
-          const { error: ex } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
-          if (ex) { navigate(type === 'recovery' ? '/forgot-password?error=invalid' : '/login?error=invalid', { replace: true }); return }
-          if (type === 'recovery') { navigate('/reset-password', { replace: true }); return }
-          await redirectByRole()
+          const { data: current } = await supabase.auth.getSession()
+          if (current.session) { await redirectByRole(current.session.user.id); return }
+          navigate(type === 'recovery' ? '/forgot-password?error=expired' : '/login?error=expired', { replace: true })
           return
         }
 
