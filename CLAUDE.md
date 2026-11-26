@@ -772,6 +772,11 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   sesión siempre olvida la sesión del dispositivo (`src/lib/signOutDevice.ts`: si el servidor no contesta, borra las
   claves y recarga; todo `signOut` pasa por ahí). Con el bloqueo del diario, "Descargar todo (JSON)" de Life OS pide
   el PIN y la descarga de Studio lo deja afuera y lo explica.
+- Tope de espacio por cuenta (escala, auditoría N12, `20261204000001_storage_quota.sql`, tests en
+  `storage_quota.test.sql` y `performance.spec.ts`): hasta 1 GB y 3000 archivos entre `profile-media` y `profile-files`
+  (`mycen_private.storage_quota()`; política restrictiva `mycen_storage_quota_insert` que cuenta lo que la carpeta ya
+  tiene, así que pasa como mucho un archivo de más). `uploadMedia`/`uploadPdf` (`uploadFailure`) preguntan
+  `mycen_storage_usage()` al fallar y muestran `errors.storageFull` (12 idiomas). Borrar libera lugar enseguida.
 - Auditoría de seguridad, hallazgos bajos (`20261201000001_security_audit_fixes_3.sql`, tests en
   `security_audit_fixes_3.test.sql`, `cronRules.test.ts`, `subscribersCsv.test.ts` y `auth-callback.spec.ts`): un perfil
   suspendido no cambia su dirección y al borrarse reserva también sus usernames anteriores; la app no deja un Space

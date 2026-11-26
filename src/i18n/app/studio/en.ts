@@ -32,7 +32,7 @@ const en: StudioDict = {
     usernameTaken: 'That username is already taken.', usernameReserved: 'That username is reserved.',
     usernameInvalid: 'Use 3 to 30 lowercase letters, numbers or hyphens.', moduleLimit: 'You reached the limit of 100 modules.',
     tooLong: 'Some text is too long.', offline: 'You are offline. Check your internet and try again.',
-    generic: 'We could not save. Please try again.', notImage: 'Choose an image (JPG, PNG or WebP).', tooBig: 'The image is too large. Try one under 30 MB.',
+    generic: 'We could not save. Please try again.', notImage: 'Choose an image (JPG, PNG or WebP).', tooBig: 'The image is too large. Try one under 30 MB.', storageFull: 'Your account is out of space (1 GB or 3,000 files). Delete photos or PDFs you no longer use and try again.',
   },
   username: {
     idle: '3 to 30 characters: lowercase letters, numbers and hyphens.', checking: 'Checking…', same: 'This is your current username.',

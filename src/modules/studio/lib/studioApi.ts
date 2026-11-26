@@ -234,6 +234,18 @@ export async function saveOrder(modules: StudioModule[]): Promise<void> {
 }
 
 /**
+ * Una subida que falló: si la cuenta llegó a su espacio máximo (1 GB o 3000 archivos entre fotos y PDF, lo frena la
+ * base con `mycen_storage_usage`), lo explica; si no, devuelve el error tal cual.
+ */
+async function uploadFailure(error: unknown): Promise<Error> {
+  try {
+    const { data } = await db.rpc('mycen_storage_usage')
+    if ((data as { full?: boolean } | null)?.full) return new Error(studioT().errors.storageFull)
+  } catch { /* sin respuesta: el error original */ }
+  return error instanceof Error ? error : new Error(String((error as { message?: string })?.message ?? error))
+}
+
+/**
  * Sube una imagen a profile-media. Antes la achica y la pasa a WebP en el dispositivo (Lanzamiento L1): así una foto
  * grande del celular entra aunque pese más de 5 MB, y la página pública carga rápido.
  * `kind`: 'avatar' (foto de perfil, chica) o 'image' (portadas, galerías, bloques).
@@ -252,7 +264,7 @@ export async function uploadMedia(userId: string, original: File, kind: 'avatar'
   const { error } = await db.storage.from(MEDIA_BUCKET).upload(path, file, {
     cacheControl: '31536000', contentType: file.type, upsert: false,
   })
-  if (error) throw error
+  if (error) throw await uploadFailure(error)
   return db.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl
 }
 
@@ -266,7 +278,7 @@ export async function uploadPdf(userId: string, file: File): Promise<{ url: stri
   const { error } = await db.storage.from('profile-files').upload(path, file, {
     cacheControl: '31536000', contentType: 'application/pdf', upsert: false,
   })
-  if (error) throw error
+  if (error) throw await uploadFailure(error)
   return { url: db.storage.from('profile-files').getPublicUrl(path).data.publicUrl, size: file.size }
 }
 

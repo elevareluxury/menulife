@@ -151,7 +151,9 @@ La evidencia de cada revisión se guarda como un issue de GitHub con su etiqueta
   uso bajo (la cuenta más grande, 10 MB): el tope por cuenta queda para la etapa de escala; N8–N11 cerrados al borrar
   las Edge Functions viejas. N1 se cerró desde el código (`20261203000001_scale_reminders.sql`: tandas con tope por
   cuenta y por llamada, hasta 10 dispositivos por cuenta; `life-reminders` pagina y manda de a 50), sin depender de
-  "Max rows". Queda del dueño: salida de red de Vercel Edge (N5).
+  "Max rows". N12 cerrado (`20261204000001_storage_quota.sql`): hasta 1 GB y 3000 archivos por cuenta entre
+  `profile-media` y `profile-files` (política restrictiva al subir; Studio explica el error con `mycen_storage_usage`).
+  Queda del dueño: salida de red de Vercel Edge (N5).
 - Ante spam o un ataque: Super-admin → Estado → **Interruptores de emergencia** (registros, mensajes y colaboraciones,
   suscripciones, votaciones). La base los frena (503 `FEATURE_PAUSED` en el gancho previo; trigger en `auth.users`) y
   cada cambio queda en la actividad del equipo.
