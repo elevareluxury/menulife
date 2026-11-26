@@ -43,21 +43,55 @@ async function run(req: Request): Promise<Response> {
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
     auth: { persistSession: false },
   })
-  const { data: due, error } = await db.rpc('life_claim_due_reminders')
-  if (error) return json({ error: error.message }, 500)
-  const reminders = (due ?? []) as DueReminder[]
-  if (!reminders.length) return json({ sent: 0 })
+  // De a tandas (la base entrega hasta 300 tareas y 300 hábitos por llamada, 20 por cuenta): se piden hasta vaciar o
+  // hasta 40 s, para no pasar el "Max rows" de la API ni el tiempo de la función. Lo que quede sale en el minuto siguiente.
+  const started = Date.now()
+  const total = { reminders: 0, sent: 0, removed: 0, failed: 0, batches: 0 }
+  for (let batch = 0; batch < 10 && Date.now() - started < 40_000; batch++) {
+    const { data: due, error } = await db.rpc('life_claim_due_reminders')
+    if (error) return json({ error: error.message, ...total }, 500)
+    const reminders = (due ?? []) as DueReminder[]
+    if (!reminders.length) break
+    const r = await deliver(db, reminders)
+    if ('error' in r) return json({ error: r.error, ...total }, 500)
+    total.batches++
+    total.reminders += reminders.length
+    total.sent += r.sent; total.removed += r.removed; total.failed += r.failed
+  }
+  return json(total)
+}
 
+type Db = ReturnType<typeof createClient>
+type Sub = { id: string; user_id: string; endpoint: string; p256dh: string; auth: string }
+
+/** Los dispositivos de esas cuentas, de a 1000 (el "Max rows" de la API) */
+async function subscriptionsOf(db: Db, users: string[]): Promise<Sub[] | { error: string }> {
+  const out: Sub[] = []
+  for (let i = 0; i < users.length; i += 200) {
+    const chunk = users.slice(i, i + 200)
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await db.from('life_push_subscriptions')
+        .select('id, user_id, endpoint, p256dh, auth').in('user_id', chunk).order('id').range(from, from + 999)
+      if (error) return { error: error.message }
+      out.push(...((data ?? []) as Sub[]))
+      if (!data || data.length < 1000) break
+    }
+  }
+  return out
+}
+
+async function deliver(db: Db, reminders: DueReminder[]): Promise<{ sent: number; removed: number; failed: number } | { error: string }> {
   const users = [...new Set(reminders.map(r => r.user_id))]
-  const { data: subs, error: subsError } = await db.from('life_push_subscriptions')
-    .select('id, user_id, endpoint, p256dh, auth').in('user_id', users)
-  if (subsError) return json({ error: subsError.message }, 500)
-
+  const subsOrError = await subscriptionsOf(db, users)
+  if ('error' in subsOrError) return subsOrError
+  const subs = subsOrError
   let sent = 0
   const gone = new Set<string>()
   const failed = new Set<string>()
   const delivered = new Set<DueReminder>()
-  await Promise.all(reminders.flatMap(r => (subs ?? []).filter(s => s.user_id === r.user_id).map(async s => {
+  const byUser = new Map<string, Sub[]>()
+  for (const s of subs) byUser.set(s.user_id, [...(byUser.get(s.user_id) ?? []), s])
+  const jobs = reminders.flatMap(r => (byUser.get(r.user_id) ?? []).map(s => async () => {
     try {
       await webpush.sendNotification(
         { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
@@ -72,15 +106,21 @@ async function run(req: Request): Promise<Response> {
       if (status === 404 || status === 410) gone.add(s.id)
       else failed.add(s.id)
     }
-  })))
+  }))
+  // De a 50 envíos a la vez (miles juntos saturaban la función)
+  for (let i = 0; i < jobs.length; i += 50) await Promise.all(jobs.slice(i, i + 50).map(j => j()))
 
-  if (gone.size) await db.from('life_push_subscriptions').delete().in('id', [...gone])
-  const ok = (subs ?? []).filter(s => !gone.has(s.id) && !failed.has(s.id)).map(s => s.id)
-  if (ok.length) await db.from('life_push_subscriptions').update({ last_sent_at: new Date().toISOString(), failures: 0 }).in('id', ok)
+  // De a 200 ids por pedido (la dirección del pedido tiene un largo máximo)
+  const goneIds = [...gone]
+  for (let i = 0; i < goneIds.length; i += 200) await db.from('life_push_subscriptions').delete().in('id', goneIds.slice(i, i + 200))
+  const ok = subs.filter(s => !gone.has(s.id) && !failed.has(s.id)).map(s => s.id)
+  for (let i = 0; i < ok.length; i += 200) {
+    await db.from('life_push_subscriptions').update({ last_sent_at: new Date().toISOString(), failures: 0 }).in('id', ok.slice(i, i + 200))
+  }
   // Métricas (product_events): uno por recordatorio entregado, aunque llegue a varios dispositivos. Si falla, no importa.
   if (delivered.size) {
     const { error: evError } = await db.from('product_events').insert(shownEvents([...delivered]))
     if (evError) console.warn('[life-reminders] product_events', evError.message)
   }
-  return json({ reminders: reminders.length, sent, removed: gone.size, failed: failed.size })
+  return { sent, removed: gone.size, failed: failed.size }
 }

@@ -552,7 +552,10 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   `track_product_event`). Eventos: `goal_created`, `item_linked_to_goal {tipo}` (`trackGoalLink` en las hojas, sólo si la
   meta es nueva para el ítem), `capture_used {tipo: quick|voice|dump, dest, count?}` (`trackCapture` en `CaptureButton`),
   `weekly_review_done` (primera vez que se termina la semana), `reminder_shown`/`reminder_opened {kind, channel: app|push}`.
-  Sus props se validan con valores fijos (`mycen_valid_event_shape`). Los push mostrados los registra la Edge Function
+  Sus props se validan con valores fijos (`mycen_valid_event_shape`). Escala (`20261203000001_scale_reminders.sql`,
+  tests en `scale_reminders.test.sql`): `life_claim_due_reminders` entrega de a tandas (≤ 300 tareas y 300 hábitos por
+  llamada, ≤ 20 de cada uno por cuenta) y `life-reminders` pide tandas hasta vaciar (40 s), lee los dispositivos de a 1000
+  y manda de a 50; hasta 10 dispositivos por cuenta (`life_push_subscribe`). Los push mostrados los registra la Edge Function
   `life-reminders` (service role, uno por recordatorio entregado); al tocar un aviso la URL lleva `?aviso=<kind>.<channel>`
   y `useReminderOpened` (`lib/reminderOpen.ts`, en LifeShell) lo registra y lo saca. El panel suma integración con metas,
   captura por tipo y destino, revisiones, tasa de apertura por canal y mediana hasta el primer valor (del registro al
