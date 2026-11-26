@@ -37,6 +37,7 @@ export function friendlyError(err: unknown): string {
   if (msg.includes('content_objects_identity_id_type_slug_key')) return e.projectSlugTaken
   if (msg.includes('content_objects_slug_check')) return e.projectSlugInvalid
   if (msg.includes('profiles_text_lengths') || msg.includes('profile_modules_sizes')) return e.tooLong
+  if (msg.includes('RATE_LIMITED') || (err as { code?: string })?.code === 'PT429') return e.rateLimited
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) return e.offline
   return e.generic
 }

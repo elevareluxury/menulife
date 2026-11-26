@@ -32,7 +32,7 @@ const fr: StudioDict = {
     usernameTaken: 'Ce nom d’utilisateur est déjà pris.', usernameReserved: 'Ce nom d’utilisateur est réservé.',
     usernameInvalid: 'Utilisez de 3 à 30 lettres minuscules, chiffres ou tirets.', moduleLimit: 'Vous avez atteint la limite de 100 modules.',
     tooLong: 'Un texte est trop long.', offline: 'Pas de connexion. Vérifiez Internet et réessayez.',
-    generic: 'Enregistrement impossible. Réessayez.', notImage: 'Choisissez une image (JPG, PNG ou WebP).', tooBig: 'L’image est trop lourde. Essayez-en une de moins de 30 Mo.', storageFull: 'Votre compte n’a plus d’espace (1 Go ou 3 000 fichiers). Supprimez des photos ou des PDF inutilisés et réessayez.',
+    generic: 'Enregistrement impossible. Réessayez.', notImage: 'Choisissez une image (JPG, PNG ou WebP).', tooBig: 'L’image est trop lourde. Essayez-en une de moins de 30 Mo.', storageFull: 'Votre compte n’a plus d’espace (1 Go ou 3 000 fichiers). Supprimez des photos ou des PDF inutilisés et réessayez.', rateLimited: 'Vous avez fait beaucoup de modifications d’affilée. Patientez quelques minutes et réessayez.',
   },
   username: {
     idle: 'De 3 à 30 caractères : lettres minuscules, chiffres et tirets.', checking: 'Vérification…', same: 'C’est votre nom d’utilisateur actuel.',

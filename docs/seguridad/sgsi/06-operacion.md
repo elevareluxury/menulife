@@ -153,7 +153,9 @@ La evidencia de cada revisión se guarda como un issue de GitHub con su etiqueta
   cuenta y por llamada, hasta 10 dispositivos por cuenta; `life-reminders` pagina y manda de a 50), sin depender de
   "Max rows". N12 cerrado (`20261204000001_storage_quota.sql`): hasta 1 GB y 3000 archivos por cuenta entre
   `profile-media` y `profile-files` (política restrictiva al subir; Studio explica el error con `mycen_storage_usage`).
-  Queda del dueño: salida de red de Vercel Edge (N5).
+  Queda del dueño: salida de red de Vercel Edge (N5). Topes por cuenta y por hora
+  (`20261205000001_account_rate_limits.sql`): 6000 escrituras y, en acciones pesadas, publish_space 60,
+  restore_space_version 30, duplicate_space 20, publish_project 60 y record_referral 10; responde 429 `RATE_LIMITED`.
 - Ante spam o un ataque: Super-admin → Estado → **Interruptores de emergencia** (registros, mensajes y colaboraciones,
   suscripciones, votaciones). La base los frena (503 `FEATURE_PAUSED` en el gancho previo; trigger en `auth.users`) y
   cada cambio queda en la actividad del equipo.
