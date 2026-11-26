@@ -82,7 +82,8 @@ for m in \
   20261129000001_security_audit_fixes_1 \
   20261130000001_security_audit_fixes_2 \
   20261201000001_security_audit_fixes_3 \
-  20261202000001_security_audit_fixes_4; do
+  20261202000001_security_audit_fixes_4 \
+  20261203000001_scale_reminders; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 
