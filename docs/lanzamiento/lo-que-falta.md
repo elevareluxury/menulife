@@ -67,7 +67,7 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: Super-admin → **Estado** muestra las tareas programadas con su última corrida.
   - Detalle: [`panel-escala.md`](panel-escala.md) punto 4 · [`../seguridad/sgsi/05-retencion.md`](../seguridad/sgsi/05-retencion.md)
 
-- [ ] **Advisors de Supabase sin rojos**
+- [x] **Advisors de Supabase sin rojos** — revisado el 27/11/2026 (sólo avisos esperados)
   - Qué es: Supabase revisa solo la seguridad de la base y marca problemas.
   - Pasos: Supabase → **Advisors** → **Security** → correrlo y mirar lo que marque.
   - Cómo sé que anduvo: no quedan avisos en rojo (o Claude te explicó cada uno). Super-admin → Estado → autochequeo de
