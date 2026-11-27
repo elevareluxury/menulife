@@ -45,6 +45,23 @@
 .my-primary:active { transform: scale(0.98); }
 .my-primary:disabled, .my-primary[aria-disabled='true'] { opacity: 0.55; cursor: not-allowed; }
 
+/* ── Acciones secundarias (tamaño de su texto, no todo el ancho) ── */
+/* Secundaria: con borde y sin relleno de color, para la acción de una tarjeta de ajustes */
+.my-secondary, .my-quiet {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; justify-self: start;
+  min-height: 44px; max-width: 100%; padding: 6px 18px;
+  border-radius: var(--my-r-field);
+  font: 600 var(--my-fs-body) / 1.25 var(--my-font-ui); text-align: center;
+  text-decoration: none; cursor: pointer;
+}
+.my-secondary { border: 1px solid var(--my-track); background: var(--my-glass-strong); color: var(--my-text); box-shadow: var(--my-inset-top); }
+[data-mycen-lowfx] .my-secondary { background: var(--my-glass-strong-solid); }
+/* Silenciosa: sólo texto (sin borde ni relleno), para lo que se usa poco o deshace algo; el área táctil sigue en 44 px */
+.my-quiet { border: 0; background: none; color: var(--my-muted); padding-inline: 4px; text-decoration: underline; text-underline-offset: 3px; }
+.my-quiet--danger { color: var(--my-danger); }
+.my-secondary:disabled, .my-quiet:disabled { opacity: 0.55; cursor: not-allowed; }
+.my-secondary:focus-visible, .my-quiet:focus-visible { outline: 2px solid var(--my-accent); outline-offset: 2px; }
+
 /* ── Botón de ícono (44 × 44 mínimo) ── */
 .my-iconbtn {
   display: inline-flex; align-items: center; justify-content: center;

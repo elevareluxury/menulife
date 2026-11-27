@@ -358,9 +358,10 @@ export function MfaSettingsCard({ titleClassName, titleStyle }: { titleClassName
         <EnrollChoice onCancel={() => setEnrolling(false)}
           onDone={() => { setEnrolling(false); setMessage(t.enabledDone); void load() }} />
       ) : active ? (
-        <PrimaryAction onClick={() => void disable()} disabled={busy}>{t.disable}</PrimaryAction>
+        // Desactivar es lo que menos se quiere hacer: queda como texto (sin relleno ni todo el ancho)
+        <button type="button" className="my-quiet my-quiet--danger" onClick={() => void disable()} disabled={busy}>{t.disable}</button>
       ) : (
-        <PrimaryAction onClick={() => { setMessage(null); setEnrolling(true) }}>{t.enable}</PrimaryAction>
+        <button type="button" className="my-secondary" onClick={() => { setMessage(null); setEnrolling(true) }}>{t.enable}</button>
       )}
       <p role="status" style={{ margin: 0, fontSize: 13 }}>{message ?? ''}</p>
     </section>
