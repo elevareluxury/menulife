@@ -116,7 +116,7 @@ export function AnalyticsPage() {
 
           <ClickRanking profileId={profile.id} identityId={profile.identity_id} days={days} modules={modules} />
 
-          <p className="st-help">
+          <p className="st-help st-footnote">
             {an.howWeMeasure}
           </p>
         </>

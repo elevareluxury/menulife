@@ -110,7 +110,8 @@ export function SelectField({ label, value, onChange, options, required, error }
   return (
     <Field label={label} required={required} error={error} htmlFor={id}>
       <select id={id} className="st-select" value={value} onChange={e => onChange(e.target.value)}>
-        {!required && <option value="">—</option>}
+        {/* Sin elegir = "—", salvo que la lista ya tenga su propia opción vacía (p. ej. "Siempre abierto") */}
+        {!required && !options.some(o => o.value === '') && <option value="">—</option>}
         {required && !value && <option value="" disabled>{t.common.chooseOption}</option>}
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
