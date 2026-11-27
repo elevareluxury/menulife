@@ -528,6 +528,41 @@ const ko: AdminDict = {
     topTitle: '가장 많이 방문한 프로필',
     profile: '프로필',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: '푸시 알림 (앱을 닫았을 때의 Life OS)',
+    intro: '앱을 닫아도 리마인더가 도착하려면 무엇이 필요한지, 데이터베이스와 이 버전의 웹이 아는 범위에서 보여 줍니다.',
+    guide: '단계별 안내',
+    summary: { ok: '모두 연결됨', warn: '작동하지만 확인할 것이 있습니다', bad: '아직 설정할 것이 남았습니다', unknown: '아직 데이터가 없습니다' },
+    noMigration: '알림 상태를 읽을 수 없습니다. 마이그레이션 20261209000001_web_push_status.sql을 적용했나요?',
+    checks: {
+      buildKey: { title: '웹의 공개 키 (Vercel)', ok: '이 버전의 웹에 들어 있습니다', missing: 'Vercel에 VITE_VAPID_PUBLIC_KEY가 없습니다 (그다음 Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY가 VAPID 공개 키 형식이 아닙니다' },
+      function: { title: 'life-reminders 함수', ok: (min: string) => `${min}분 전에 응답했습니다`, never: '한 번도 응답하지 않았습니다: 게시하고 (GitHub → Actions → "Supabase 함수 게시") 1분마다 작업을 예약하세요', late: (min: string) => `마지막 응답은 ${min}분 전입니다`, error: (msg: string) => `마지막 실행에서 오류가 났습니다: ${msg}` },
+      keys: { title: 'Supabase의 키', ok: '설정되어 있고 웹과 같습니다', waiting: '함수가 응답하면 알 수 있습니다', missing: 'Supabase → Edge Functions → Secrets에 VAPID_PUBLIC_KEY와 VAPID_PRIVATE_KEY가 없습니다', invalid: 'Supabase 키를 잘못 붙여 넣었습니다 (공백이나 따옴표 없이)', mismatch: 'Supabase의 공개 키가 Vercel과 다릅니다: 같은 쌍의 두 키를 사용하세요' },
+      cron: { title: '1분마다 작업 (pg_cron)', ok: '예약됨', missing: '아직 예약되지 않았습니다 (안내의 SQL)', paused: '일시 중지됨', noCron: 'pg_cron을 읽을 수 없습니다 (켜져 있나요?)' },
+      secret: { title: 'cron 키', ok: '함수가 키를 받아들입니다', bad: (n: string) => `지난 1시간 동안 ${n}건의 호출이 거부되었습니다: SQL의 키가 REMINDERS_CRON_SECRET과 다릅니다`, unknown: '함수가 응답하면 알 수 있습니다' },
+      devices: { title: '구독된 기기', some: (n: string, people: string) => `${people}명의 기기 ${n}대`, none: '아직 아무도 알림을 허용하지 않았습니다 (Life OS → 할 일 → 알림 허용)', failing: (n: string) => `전송 오류가 있는 기기 ${n}대 (10번 연속이면 자동 삭제)` },
+      delivered: { title: '전달된 알림', some: (shown: string, opened: string) => `지난 24시간 ${shown}건 · ${opened}건 탭함`, none: '지난 24시간 동안 없음' },
+    },
+    generator: {
+      title: '키 만들기',
+      intro: '이 브라우저 안에서 만들어집니다. 어디로도 보내지거나 저장되지 않으며, 페이지를 닫거나 새로 고치면 사라집니다. 입력하기 직전에 한 번만 만드세요.',
+      generate: '키 만들기',
+      again: '다시 만들기',
+      unsupported: '이 브라우저는 키를 만들 수 없습니다. 최신 Chrome, Edge, Firefox 또는 Safari를 사용하세요.',
+      failed: '만들 수 없었습니다. 다시 시도하세요.',
+      publicLabel: '공개 키 (VAPID public key)',
+      publicHelp: 'Vercel(VITE_VAPID_PUBLIC_KEY)과 Supabase(VAPID_PUBLIC_KEY)에 넣습니다. 공개 정보라 누가 봐도 괜찮습니다.',
+      privateLabel: '비공개 키 (VAPID private key)',
+      privateHelp: '비밀. Supabase → Edge Functions → Secrets(VAPID_PRIVATE_KEY)에만 넣습니다. Vercel, 저장소, 채팅, 메일에는 절대 넣지 마세요.',
+      cronLabel: 'cron 키 (REMINDERS_CRON_SECRET)',
+      cronHelp: '비밀. Supabase → Edge Functions → Secrets와 1분마다 작업의 SQL(<REMINDERS_CRON_SECRET> 자리)에 넣습니다.',
+      copy: '복사',
+      copied: '복사됨',
+      copyFailed: '복사할 수 없습니다: 선택해서 직접 복사하세요',
+      rotate: '나중에 키를 바꾸면 새 키를 모든 곳에 동시에 넣으세요. 구독된 휴대폰은 Life OS를 열면 스스로 다시 구독합니다.',
+    },
+  },
 }
 
 export default ko

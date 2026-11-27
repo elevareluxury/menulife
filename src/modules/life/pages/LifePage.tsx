@@ -404,12 +404,12 @@ function MoneyCard() {
         <>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
             <span style={{ fontFamily: font, fontSize: '12px', color: colors.text.tertiary }}>{t.day.balance}</span>
-            <span style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color: monthBalance < 0 ? colors.semantic.error : colors.text.primary }}>
+            <span style={{ fontFamily: font, fontSize: '22px', fontWeight: 800, color: colors.money.expense }}>
               {fmtMoney(monthBalance, mainCurrency, locale)}
             </span>
           </div>
           <div style={{ display: 'flex', gap: 16, marginTop: 4, fontFamily: font, fontSize: '12.5px', color: colors.text.secondary, flexWrap: 'wrap' }}>
-            <span>{t.money.income} <strong style={{ color: colors.semantic.success }}>{fmtMoney(monthIncome, mainCurrency, locale)}</strong></span>
+            <span>{t.money.income} <strong style={{ color: colors.money.income }}>{fmtMoney(monthIncome, mainCurrency, locale)}</strong></span>
             <span>{t.money.expense} <strong style={{ color: colors.text.primary }}>{fmtMoney(monthExpense, mainCurrency, locale)}</strong></span>
           </div>
           {otherTotals.length > 0 && (
@@ -417,7 +417,7 @@ function MoneyCard() {
               {otherTotals.map(r => (
                 <li key={r.currency} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: font, fontSize: '12.5px', color: colors.text.secondary, padding: '2px 0' }}>
                   <span>{r.currency}</span>
-                  <span style={{ color: r.balance < 0 ? colors.semantic.error : colors.text.primary, fontWeight: 600 }}>{fmtMoney(r.balance, r.currency, locale)}</span>
+                  <span style={{ color: colors.money.expense, fontWeight: 600 }}>{fmtMoney(r.balance, r.currency, locale)}</span>
                 </li>
               ))}
             </ul>

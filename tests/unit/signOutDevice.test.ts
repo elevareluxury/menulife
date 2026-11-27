@@ -59,3 +59,46 @@ describe('signOutDevice', () => {
     expect(await forgetStoredSession(KEY)).toEqual([KEY, `${KEY}-code-verifier`, `${KEY}-user`])
   })
 })
+
+// Web Push: cualquier salida da de baja los avisos del dispositivo (antes sólo el botón "Cerrar sesión")
+describe('signOutDevice y los avisos push', () => {
+  function withSubscription() {
+    const order: string[] = []
+    const sub = { endpoint: 'https://push.example/abc', unsubscribe: vi.fn(async () => { order.push('unsubscribe'); return true }) }
+    vi.stubGlobal('navigator', { serviceWorker: { getRegistration: async () => ({ pushManager: { getSubscription: async () => sub } }) } })
+    return { order, sub }
+  }
+
+  it('borra la suscripción en la base y en el navegador antes de cerrar la sesión', async () => {
+    const { order, sub } = withSubscription()
+    const rpc = vi.fn(async (fn: string) => { order.push(fn); return { error: null } })
+    const signOut = vi.fn(async () => { order.push('signOut'); return { error: null } })
+    expect(await signOutDevice({ rpc, auth: { signOut } } as never)).toBe(true)
+    expect(rpc).toHaveBeenCalledWith('life_push_unsubscribe', { p_endpoint: sub.endpoint })
+    expect(order).toEqual(['life_push_unsubscribe', 'unsubscribe', 'signOut'])
+  })
+
+  it('sin respuesta del servidor igual se da de baja en el navegador y cierra la sesión', async () => {
+    vi.useFakeTimers()
+    try {
+      const { sub } = withSubscription()
+      const rpc = vi.fn(() => new Promise(() => { /* nunca contesta */ }))
+      const signOut = vi.fn(async () => ({ error: null }))
+      const done = signOutDevice({ rpc, auth: { signOut } } as never)
+      await vi.advanceTimersByTimeAsync(3100)
+      expect(await done).toBe(true)
+      expect(sub.unsubscribe).toHaveBeenCalled()
+      expect(signOut).toHaveBeenCalled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('sin push en el navegador no hace nada de más', async () => {
+    vi.stubGlobal('navigator', {})
+    const rpc = vi.fn()
+    const signOut = vi.fn(async () => ({ error: null }))
+    expect(await signOutDevice({ rpc, auth: { signOut } } as never)).toBe(true)
+    expect(rpc).not.toHaveBeenCalled()
+  })
+})

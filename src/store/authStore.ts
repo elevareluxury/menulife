@@ -46,8 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOut: async () => {
-    // Antes de cerrar la sesión: este dispositivo deja de recibir los avisos de la cuenta (Web Push)
-    await import('@/lib/webPush').then(m => m.dropPushSubscription()).catch(() => undefined)
+    // Los avisos push de este dispositivo se dan de baja en signOutDevice (vale para todas las salidas)
     // En la app: los recordatorios programados en el teléfono eran de esta cuenta (auditoría N7)
     if (isNativeApp()) {
       await import('@/modules/life/lib/nativeReminders').then(m => m.cancelAllNativeReminders()).catch(() => undefined)

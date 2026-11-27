@@ -92,7 +92,7 @@ export function ClickRanking({ profileId, identityId, days, modules }: {
         <h2 id="clicks-title" className="st-card-title">{an.clicksTitle}</h2>
         <p className="st-help" style={{ marginTop: 0 }}>{an.clicksHelp}</p>
         {ranked === null && <p className="st-help" role="status">{t.common.loading}</p>}
-        {ranked && ranked.items.length === 0 && <p className="st-help" style={{ margin: 0 }}>{an.noClicks}</p>}
+        {ranked && ranked.items.length === 0 && <p className="st-help" style={{ marginBottom: 0 }}>{an.noClicks}</p>}
         {ranked && ranked.items.length > 0 && list(items, 'clicks-title')}
         {ranked && ranked.items.length > VISIBLE && (
           <div style={{ marginTop: 12 }}>

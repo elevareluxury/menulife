@@ -528,6 +528,41 @@ const ar: AdminDict = {
     topTitle: 'الملفات الأكثر زيارة',
     profile: 'الملف',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'إشعارات الدفع (Life OS والتطبيق مغلق)',
+    intro: 'ما يلزم لتصل التذكيرات والتطبيق مغلق، وفق ما تعرفه قاعدة البيانات وهذه النسخة من الويب.',
+    guide: 'دليل خطوة بخطوة',
+    summary: { ok: 'كل شيء متصل', warn: 'يعمل، لكن هناك ما يستحق النظر', bad: 'ما زال هناك ما يجب إعداده', unknown: 'لا توجد بيانات بعد' },
+    noMigration: 'تعذّرت قراءة حالة الإشعارات. هل طبّقت الترحيل 20261209000001_web_push_status.sql؟',
+    checks: {
+      buildKey: { title: 'المفتاح العام في الويب (Vercel)', ok: 'موجود في هذه النسخة من الويب', missing: 'VITE_VAPID_PUBLIC_KEY غير موجود في Vercel (ثم Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY ليس بصيغة مفتاح VAPID عام' },
+      function: { title: 'دالة life-reminders', ok: (min: string) => `ردّت قبل ${min} دقيقة`, never: 'لم تردّ أبدًا: انشرها (GitHub → Actions → «نشر دوال Supabase») وجدول المهمة كل دقيقة', late: (min: string) => `آخر رد كان قبل ${min} دقيقة`, error: (msg: string) => `فشل آخر تشغيل: ${msg}` },
+      keys: { title: 'المفاتيح في Supabase', ok: 'مضبوطة ومطابقة لمفتاح الويب', waiting: 'سيُعرف عندما تردّ الدالة', missing: 'VAPID_PUBLIC_KEY وVAPID_PRIVATE_KEY غير موجودين في Supabase → Edge Functions → Secrets', invalid: 'لُصقت مفاتيح Supabase بشكل خاطئ (بلا مسافات ولا علامات اقتباس)', mismatch: 'المفتاح العام في Supabase ليس نفسه في Vercel: استخدم المفتاحين من الزوج نفسه' },
+      cron: { title: 'مهمة كل دقيقة (pg_cron)', ok: 'مجدولة', missing: 'لم تُجدول بعد (SQL الموجود في الدليل)', paused: 'متوقفة مؤقتًا', noCron: 'تعذّرت قراءة pg_cron (هل هو مفعّل؟)' },
+      secret: { title: 'مفتاح cron', ok: 'الدالة تقبل المفتاح', bad: (n: string) => `رُفض ${n} استدعاء في الساعة الأخيرة: المفتاح في SQL لا يطابق REMINDERS_CRON_SECRET`, unknown: 'سيُعرف عندما تردّ الدالة' },
+      devices: { title: 'الأجهزة المشتركة', some: (n: string, people: string) => `${n} جهاز لـ ${people} شخص`, none: 'لم يسمح أحد بالإشعارات بعد (Life OS → المهام → السماح بالإشعارات)', failing: (n: string) => `${n} بأخطاء في الإرسال (تُحذف تلقائيًا بعد 10 متتالية)` },
+      delivered: { title: 'الإشعارات المُسلَّمة', some: (shown: string, opened: string) => `${shown} في آخر 24 ساعة · ${opened} تم لمسها`, none: 'لا شيء في آخر 24 ساعة' },
+    },
+    generator: {
+      title: 'إنشاء المفاتيح',
+      intro: 'تُنشأ في هذا المتصفح. لا تُرسل إلى أي مكان ولا تُحفظ: تختفي عند إغلاق الصفحة أو إعادة تحميلها. أنشئها مرة واحدة، قبل إدخالها مباشرة.',
+      generate: 'إنشاء المفاتيح',
+      again: 'إنشاء غيرها',
+      unsupported: 'لا يستطيع هذا المتصفح إنشاء المفاتيح. جرّب Chrome أو Edge أو Firefox أو Safari بإصدار حديث.',
+      failed: 'تعذّر إنشاؤها. حاول مرة أخرى.',
+      publicLabel: 'المفتاح العام (VAPID public key)',
+      publicHelp: 'يوضع في Vercel ‏(VITE_VAPID_PUBLIC_KEY) وفي Supabase ‏(VAPID_PUBLIC_KEY). إنه عام: لا بأس إن رآه أحد.',
+      privateLabel: 'المفتاح الخاص (VAPID private key)',
+      privateHelp: 'سرّي. يوضع فقط في Supabase → Edge Functions → Secrets ‏(VAPID_PRIVATE_KEY). أبدًا ليس في Vercel أو المستودع أو الدردشة أو البريد.',
+      cronLabel: 'مفتاح cron ‏(REMINDERS_CRON_SECRET)',
+      cronHelp: 'سرّي. يوضع في Supabase → Edge Functions → Secrets وفي SQL مهمة كل دقيقة (مكان <REMINDERS_CRON_SECRET>).',
+      copy: 'نسخ',
+      copied: 'تم النسخ',
+      copyFailed: 'تعذّر النسخ: حدّده وانسخه يدويًا',
+      rotate: 'إذا غيّرت المفاتيح يومًا، أدخل الجديدة في كل الأماكن في وقت واحد. الهواتف المشتركة تعيد الاشتراك وحدها عند فتح Life OS.',
+    },
+  },
 }
 
 export default ar

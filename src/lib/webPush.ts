@@ -60,18 +60,4 @@ export async function syncPushSubscription(): Promise<boolean> {
   }
 }
 
-/** Al cerrar sesión: este dispositivo deja de recibir los avisos de la cuenta (en un celular compartido, de otra). */
-export async function dropPushSubscription(): Promise<void> {
-  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
-  try {
-    const reg = await navigator.serviceWorker.getRegistration()
-    const sub = await reg?.pushManager?.getSubscription()
-    if (!sub) return
-    // Con la sesión todavía abierta (la función borra sólo las de la cuenta); sin esperar de más si no hay red
-    await Promise.race([
-      db.rpc('life_push_unsubscribe', { p_endpoint: sub.endpoint }),
-      new Promise(resolve => setTimeout(resolve, 3000)),
-    ])
-    await sub.unsubscribe()
-  } catch { /* sin red o sin push: no hay nada que hacer */ }
-}
+// La baja al cerrar sesión está en webPushDrop.ts (la llama signOutDevice en todas las salidas)

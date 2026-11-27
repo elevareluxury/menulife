@@ -93,7 +93,7 @@ const ar: StudioDict = {
     emptyTitle: 'لا يحتوي ملفك على وحدات بعد', emptyText: 'أضف روابطك وشبكاتك الاجتماعية ووسائل التواصل ليجدك الآخرون.',
     addFirst: 'أضف الأولى', hidden: 'مخفية', editX: t => `تعديل ${t}`, upX: t => `نقل ${t} للأعلى`, downX: t => `نقل ${t} للأسفل`,
     hideX: t => `إخفاء ${t}`, showX: t => `إظهار ${t}`, deleteX: t => `حذف ${t}`, nowVisible: t => `${t} ظاهرة`, nowHidden: t => `${t} مخفية`,
-    moved: (t, p, n) => `نُقلت ${t} إلى الموضع ${p} من ${n}`, deleted: t => `حُذفت ${t}`, library: 'إضافة وحدة',
+    moved: (t, p, n) => `نُقلت ${t} إلى الموضع ${p} من ${n}`, deleted: t => `حُذفت ${t}`, library: 'إضافة وحدة', libraryGroups: { basics: 'الأساسيات', content: 'المحتوى', contact: 'التواصل', portfolio: 'معرض الأعمال', bio: 'النبذة' },
     deleteTitle: 'حذف هذه الوحدة؟', deleteText: t => `ستُزال "${t}" من ملفك. إذا كنت تريد فقط ألا تظهر لفترة، يمكنك إخفاؤها.`,
   },
   editor: {
@@ -260,7 +260,7 @@ const ar: StudioDict = {
     deleteText: 'ستُحذف نهائيًا.',
     deleted: 'تم حذف الرسالة',
     showMore: 'عرض الرسالة',
-    homeUnread: 'لديك {n} رسائل غير مقروءة',
+    homeUnread: (n: number) => n === 1 ? 'لديك رسالة واحدة غير مقروءة' : n === 2 ? 'لديك رسالتان غير مقروءتين' : n <= 10 ? `لديك ${n} رسائل غير مقروءة` : `لديك ${n} رسالة غير مقروءة`,
     homeNone: 'لا توجد رسائل غير مقروءة',
     moduleSummary: 'نموذج التواصل',
     intro: 'نص الدعوة (اختياري)',

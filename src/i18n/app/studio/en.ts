@@ -93,7 +93,7 @@ const en: StudioDict = {
     emptyTitle: 'Your profile has no modules yet', emptyText: 'Add your links, social networks and contact details so people can find you.',
     addFirst: 'Add the first one', hidden: 'Hidden', editX: t => `Edit ${t}`, upX: t => `Move ${t} up`, downX: t => `Move ${t} down`,
     hideX: t => `Hide ${t}`, showX: t => `Show ${t}`, deleteX: t => `Delete ${t}`, nowVisible: t => `${t} visible`, nowHidden: t => `${t} hidden`,
-    moved: (t, p, n) => `${t} moved to position ${p} of ${n}`, deleted: t => `${t} deleted`, library: 'Add a module',
+    moved: (t, p, n) => `${t} moved to position ${p} of ${n}`, deleted: t => `${t} deleted`, library: 'Add a module', libraryGroups: { basics: 'Basics', content: 'Content', contact: 'Contact', portfolio: 'Portfolio', bio: 'Bio' },
     deleteTitle: 'Delete this module?', deleteText: t => `"${t}" will be removed from your profile. If you just want to hide it for a while, you can hide it instead.`,
   },
   editor: {
@@ -260,7 +260,7 @@ const en: StudioDict = {
     deleteText: 'It will be deleted forever.',
     deleted: 'Message deleted',
     showMore: 'View message',
-    homeUnread: 'You have {n} unread messages',
+    homeUnread: (n: number) => n === 1 ? 'You have 1 unread message' : `You have ${n} unread messages`,
     homeNone: 'No unread messages',
     moduleSummary: 'Contact form',
     intro: 'Invitation text (optional)',

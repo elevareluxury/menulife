@@ -93,7 +93,7 @@ const it: StudioDict = {
     emptyTitle: 'Il tuo profilo non ha ancora moduli', emptyText: 'Aggiungi link, social e contatti perché ti trovino.',
     addFirst: 'Aggiungi il primo', hidden: 'Nascosto', editX: t => `Modifica ${t}`, upX: t => `Sposta su ${t}`, downX: t => `Sposta giù ${t}`,
     hideX: t => `Nascondi ${t}`, showX: t => `Mostra ${t}`, deleteX: t => `Elimina ${t}`, nowVisible: t => `${t} visibile`, nowHidden: t => `${t} nascosto`,
-    moved: (t, p, n) => `${t} spostato in posizione ${p} di ${n}`, deleted: t => `${t} eliminato`, library: 'Aggiungi un modulo',
+    moved: (t, p, n) => `${t} spostato in posizione ${p} di ${n}`, deleted: t => `${t} eliminato`, library: 'Aggiungi un modulo', libraryGroups: { basics: 'Di base', content: 'Contenuti', contact: 'Contatti', portfolio: 'Portfolio', bio: 'Bio' },
     deleteTitle: 'Eliminare questo modulo?', deleteText: t => `"${t}" verrà rimosso dal tuo profilo. Se vuoi solo nasconderlo per un po’, puoi nasconderlo.`,
   },
   editor: {
@@ -260,7 +260,7 @@ const it: StudioDict = {
     deleteText: 'Verrà eliminato per sempre.',
     deleted: 'Messaggio eliminato',
     showMore: 'Vedi messaggio',
-    homeUnread: 'Hai {n} messaggi da leggere',
+    homeUnread: (n: number) => n === 1 ? 'Hai 1 messaggio da leggere' : `Hai ${n} messaggi da leggere`,
     homeNone: 'Nessun messaggio da leggere',
     moduleSummary: 'Modulo di contatto',
     intro: 'Testo di invito (facoltativo)',

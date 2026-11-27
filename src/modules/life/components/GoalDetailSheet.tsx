@@ -338,7 +338,7 @@ function GoalLinks({ goal }: { goal: Goal }) {
           {money.map(m => (
             <div key={m.currency} style={{ ...row, flexWrap: 'wrap', fontFamily: font, fontSize: '13px', color: colors.text.secondary }}>
               <span style={{ fontWeight: 700, color: colors.text.primary, minWidth: 40 }}>{m.currency}</span>
-              {m.income > 0 && <span>{t.money.income} <strong style={{ color: colors.semantic.success }}>{formatMoney(m.income, m.currency, locale)}</strong></span>}
+              {m.income > 0 && <span>{t.money.income} <strong style={{ color: colors.money.income }}>{formatMoney(m.income, m.currency, locale)}</strong></span>}
               {m.expense > 0 && <span>{t.money.expense} <strong style={{ color: colors.text.primary }}>{formatMoney(m.expense, m.currency, locale)}</strong></span>}
               <span style={{ ...meta, marginInlineStart: 'auto' }}>{c.movements(m.count)}</span>
             </div>

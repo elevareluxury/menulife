@@ -129,6 +129,52 @@ test('en el celular está en la barra de abajo y pasa axe (celular y compu)', as
   }
 })
 
+test('avisos push: qué falta configurar y claves generadas en el navegador sin mandarlas a ningún lado', async ({ page, context }) => {
+  const state = adminState()
+  // La función corrió, pero sin las claves VAPID cargadas en Supabase
+  state.pushStatus = { run: { last_run_at: new Date().toISOString(), last_result: 'no_keys', last_ok_at: null, last_error: null, public_key: null, stats: null } }
+  await installSupabaseMock(context, state, { signedIn: true })
+  await mockHealth(context)
+  const bodies: string[] = []
+  page.on('request', r => { bodies.push(`${r.url()} ${r.postData() ?? ''}`) })
+  await page.goto('/super-admin/estado')
+  const card = page.getByTestId('push-card')
+  await expect(card).toHaveAttribute('data-level', 'bad')
+  // La web de prueba se arma sin VITE_VAPID_PUBLIC_KEY
+  await expect(page.getByTestId('push-check-buildKey')).toContainText('Falta VITE_VAPID_PUBLIC_KEY')
+  await expect(page.getByTestId('push-check-keys')).toContainText('Faltan VAPID_PUBLIC_KEY y VAPID_PRIVATE_KEY')
+  await expect(page.getByTestId('push-check-cron')).toHaveAttribute('data-level', 'ok')
+  await expect(page.getByTestId('push-check-devices')).toContainText('3 dispositivos de 2 personas')
+
+  await page.getByTestId('vapid-generate').click()
+  const pub = await page.getByTestId('vapid-public').inputValue()
+  const priv = await page.getByTestId('vapid-private').inputValue()
+  const cron = await page.getByTestId('cron-secret').inputValue()
+  expect(pub).toMatch(/^B[A-Za-z0-9_-]{86}$/)
+  expect(priv).toMatch(/^[A-Za-z0-9_-]{43}$/)
+  expect(cron).toMatch(/^[A-Za-z0-9]{40}$/)
+  await expect(card.getByText(/SECRETA\. Va sólo en Supabase/)).toBeVisible()
+  // Se revisa otra vez (sale un pedido nuevo) y ninguna clave viajó ni quedó guardada
+  await page.getByRole('button', { name: 'Revisar ahora' }).click()
+  await expect(page.getByRole('button', { name: 'Revisar ahora' })).toBeEnabled()
+  for (const secret of [priv, cron]) expect(bodies.some(b => b.includes(secret))).toBe(false)
+  const stored = await page.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }))
+  expect(stored.includes(priv) || stored.includes(cron)).toBe(false)
+  // Otra vez da otras
+  await page.getByRole('button', { name: 'Generar otras' }).click()
+  await expect(page.getByTestId('vapid-private')).not.toHaveValue(priv)
+})
+
+test('avisos push sin la migración: lo dice y el resto del estado sigue', async ({ page, context }) => {
+  const state = adminState()
+  state.pushStatus = null
+  await installSupabaseMock(context, state, { signedIn: true })
+  await mockHealth(context)
+  await page.goto('/super-admin/estado')
+  await expect(page.getByTestId('push-card')).toContainText('20261209000001_web_push_status.sql')
+  await expect(row(page, 'database')).toHaveAttribute('data-level', 'ok')
+})
+
 test('quien no es del equipo no entra', async ({ page, context }) => {
   await installSupabaseMock(context, createState({ profiles: [profileRow()] }), { signedIn: true })
   await page.goto('/super-admin/estado')

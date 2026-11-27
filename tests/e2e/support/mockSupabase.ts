@@ -28,6 +28,8 @@ export interface MockState {
   /** Estado del sistema: lo que cambia sobre la respuesta de admin_system_status y los hallazgos del autochequeo */
   systemStatus?: Row
   selfcheck?: { rule: string; level: 'red' | 'yellow' | 'info'; object: string }[]
+  /** Avisos push (admin_push_status): lo que cambia sobre una respuesta con todo andando; null = la RPC falla */
+  pushStatus?: Row | null
   /** Crecimiento: respuestas de admin_growth_* (si no, unas de ejemplo calculadas sobre el estado) */
   growth?: { overview?: Row; retention?: Row[]; funnel?: Row; adoption?: Row }
   /** Ajustes del Estado del sistema (admin_set_status_setting) */
@@ -1093,6 +1095,22 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
         push_shown_1h: 3,
         sitemap_paths: state.tables.profiles.filter(p => p.status === 'published').length,
         ...(state.systemStatus ?? {}),
+      }
+    }
+    case 'admin_push_status': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      // Como la base (20261209000001): la función corrió hace un minuto con la clave pública que firma
+      if (state.pushStatus === null) throw new Error('function admin_push_status() does not exist')
+      const now = Date.now()
+      return {
+        checked_at: new Date(now).toISOString(),
+        subscriptions: 3, people: 2, failing: 0, sent_7d: 2,
+        run: { last_run_at: new Date(now - 60_000).toISOString(), last_result: 'ok', last_ok_at: new Date(now - 60_000).toISOString(),
+          last_error: null, public_key: null, stats: { reminders: 1, sent: 2, removed: 0, failed: 0, batches: 1 } },
+        shown_24h: 5, opened_24h: 2,
+        cron: [{ name: 'life-reminders', schedule: '* * * * *', active: true }],
+        unauthorized_1h: 0,
+        ...(state.pushStatus ?? {}),
       }
     }
     case 'admin_security_selfcheck': {

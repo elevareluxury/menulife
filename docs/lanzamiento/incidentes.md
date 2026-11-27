@@ -47,10 +47,10 @@ cada paso con los clics exactos. Proyecto de Supabase: `fcuiolmzfnhxyukkyeht`. C
 1. **Panel de errores** — `/super-admin/errores` (y "Para revisar" en `/super-admin`). Mirar errores nuevos y cuántas
    personas afectan. Un error que vuelve después de resuelto se reabre solo. La semana del lanzamiento, revisarlo al
    menos 2 veces por día.
-2. **Monitor de caídas** — *a configurar antes del lanzamiento* (todavía no hay uno). Recomendado: UptimeRobot o Better
-   Stack, plan gratis, chequeo cada 5 min, alerta por mail a team@mycen.id y al celular del responsable técnico:
+2. **Monitor de caídas** — configurado (UptimeRobot, `https://mycen.id/api/health` con la palabra `"ok":true`). Se puede sumar
+   Better Stack u otro, chequeo cada 5 min, alerta por mail a team@mycen.id y al celular del responsable técnico:
    - `https://mycen.id/` (la landing).
-   - `https://mycen.id/sitemap.xml` (pasa por `api/sitemap.ts` y la RPC `public_sitemap`: si Supabase cae, falla).
+   - `https://mycen.id/sitemap.xml` (pasa por `api/sitemap.ts` y las RPC del sitemap: si Supabase cae, falla).
    - Un perfil público real, `https://mycen.id/<usuario>`, buscando una palabra del perfil en la respuesta.
 3. **Mails** — lo que llega a team@mycen.id (varias personas con lo mismo = incidente, ver `soporte.md`) y las alertas
    de Vercel, Supabase (uso, pagos, seguridad), Resend (rebotes, quejas), Cloudflare y GitHub (secret scanning).

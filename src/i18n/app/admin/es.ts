@@ -619,6 +619,41 @@ const es = {
     topTitle: 'Perfiles más visitados',
     profile: 'Perfil',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'Avisos push (Life OS con la app cerrada)',
+    intro: 'Lo que hace falta para que los recordatorios lleguen con la app cerrada, según lo que saben la base y esta versión de la web.',
+    guide: 'Guía paso a paso',
+    summary: { ok: 'Todo conectado', warn: 'Anda, pero hay algo para mirar', bad: 'Falta configurar algo', unknown: 'Todavía sin datos' },
+    noMigration: 'No se pudo leer el estado de los avisos. ¿Aplicaste la migración 20261209000001_web_push_status.sql?',
+    checks: {
+      buildKey: { title: 'Clave pública en la web (Vercel)', ok: 'Cargada en esta versión de la web', missing: 'Falta VITE_VAPID_PUBLIC_KEY en Vercel (después, Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY no tiene el formato de una clave pública VAPID' },
+      function: { title: 'Función life-reminders', ok: (min: string) => `Respondió hace ${min} min`, never: 'Nunca respondió: publicala (GitHub → Actions → "Publicar funciones de Supabase") y programá la tarea cada minuto', late: (min: string) => `La última respuesta fue hace ${min} min`, error: (msg: string) => `La última corrida dio error: ${msg}` },
+      keys: { title: 'Claves en Supabase', ok: 'Cargadas y son las mismas que en la web', waiting: 'Se sabe cuando la función responda', missing: 'Faltan VAPID_PUBLIC_KEY y VAPID_PRIVATE_KEY en Supabase → Edge Functions → Secrets', invalid: 'Las claves de Supabase están mal copiadas (sin espacios ni comillas)', mismatch: 'La clave pública de Supabase no es la misma que la de Vercel: cargá las dos del mismo par' },
+      cron: { title: 'Tarea cada minuto (pg_cron)', ok: 'Programada', missing: 'Falta programarla (el SQL de la guía)', paused: 'Está en pausa', noCron: 'No se pudo leer pg_cron (¿está prendido?)' },
+      secret: { title: 'Clave del cron', ok: 'La función acepta la clave', bad: (n: string) => `${n} llamadas rechazadas en la última hora: la clave del SQL no es igual a REMINDERS_CRON_SECRET`, unknown: 'Se sabe cuando la función responda' },
+      devices: { title: 'Dispositivos suscritos', some: (n: string, people: string) => `${n} dispositivos de ${people} personas`, none: 'Nadie permitió los avisos todavía (Life OS → Tareas → permitir avisos)', failing: (n: string) => `${n} con errores al enviar (se borran solos al 10.º seguido)` },
+      delivered: { title: 'Avisos entregados', some: (shown: string, opened: string) => `${shown} en las últimas 24 h · ${opened} tocados`, none: 'Ninguno en las últimas 24 h' },
+    },
+    generator: {
+      title: 'Generar las claves',
+      intro: 'Se crean en este navegador. No se mandan a ningún lado ni se guardan: al cerrar o recargar la página desaparecen. Generalas una sola vez, justo antes de cargarlas.',
+      generate: 'Generar claves',
+      again: 'Generar otras',
+      unsupported: 'Este navegador no puede generar claves. Probá con Chrome, Edge, Firefox o Safari actualizados.',
+      failed: 'No se pudieron generar. Probá de nuevo.',
+      publicLabel: 'Clave pública (VAPID public key)',
+      publicHelp: 'Va en Vercel (VITE_VAPID_PUBLIC_KEY) y en Supabase (VAPID_PUBLIC_KEY). Es pública: no pasa nada si alguien la ve.',
+      privateLabel: 'Clave privada (VAPID private key)',
+      privateHelp: 'SECRETA. Va sólo en Supabase → Edge Functions → Secrets (VAPID_PRIVATE_KEY). Nunca en Vercel, en el repo, por chat ni por mail.',
+      cronLabel: 'Clave del cron (REMINDERS_CRON_SECRET)',
+      cronHelp: 'SECRETA. Va en Supabase → Edge Functions → Secrets y en el SQL de la tarea cada minuto (en el lugar de <REMINDERS_CRON_SECRET>).',
+      copy: 'Copiar',
+      copied: 'Copiada',
+      copyFailed: 'No se pudo copiar: seleccionala y copiala a mano',
+      rotate: 'Si algún día cambiás las claves, cargá las nuevas en todos los lugares a la vez. Los celulares suscritos se vuelven a suscribir solos al abrir Life OS.',
+    },
+  },
 }
 
 export type AdminDict = typeof es

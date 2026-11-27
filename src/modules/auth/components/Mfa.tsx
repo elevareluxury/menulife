@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { signOutDevice } from '@/lib/signOutDevice'
@@ -316,7 +316,8 @@ export function MfaGate() {
 }
 
 /** Ajustes (Studio y Life OS): activar o desactivar la verificación en dos pasos */
-export function MfaSettingsCard() {
+/** Tarjeta de Ajustes (Studio y Life OS). El título toma el estilo de los demás títulos de esa pantalla. */
+export function MfaSettingsCard({ titleClassName, titleStyle }: { titleClassName?: string; titleStyle?: CSSProperties } = {}) {
   const t = useAuthT().mfa
   const [factors, setFactors] = useState<{ passkey: string | null; totp: string | null } | undefined>(undefined)
   const [enrolling, setEnrolling] = useState(false)
@@ -349,7 +350,7 @@ export function MfaSettingsCard() {
   if (factors === undefined) return null
   return (
     <section aria-labelledby="mfa-settings-title" data-testid="mfa-settings" style={{ display: 'grid', gap: 10 }}>
-      <h2 id="mfa-settings-title" style={{ margin: 0, fontSize: 16 }}>
+      <h2 id="mfa-settings-title" className={titleClassName} style={titleStyle ?? { margin: 0, fontSize: 16 }}>
         {t.title} · <span style={{ fontWeight: 600 }}>{active ? t.on : t.off}</span>
       </h2>
       <p style={{ margin: 0, fontSize: 14, color: 'var(--my-muted)' }}>{t.intro}</p>
@@ -357,9 +358,10 @@ export function MfaSettingsCard() {
         <EnrollChoice onCancel={() => setEnrolling(false)}
           onDone={() => { setEnrolling(false); setMessage(t.enabledDone); void load() }} />
       ) : active ? (
-        <PrimaryAction onClick={() => void disable()} disabled={busy}>{t.disable}</PrimaryAction>
+        // Desactivar es lo que menos se quiere hacer: queda como texto (sin relleno ni todo el ancho)
+        <button type="button" className="my-quiet my-quiet--danger" onClick={() => void disable()} disabled={busy}>{t.disable}</button>
       ) : (
-        <PrimaryAction onClick={() => { setMessage(null); setEnrolling(true) }}>{t.enable}</PrimaryAction>
+        <button type="button" className="my-secondary" onClick={() => { setMessage(null); setEnrolling(true) }}>{t.enable}</button>
       )}
       <p role="status" style={{ margin: 0, fontSize: 13 }}>{message ?? ''}</p>
     </section>

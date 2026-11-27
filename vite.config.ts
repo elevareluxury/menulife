@@ -9,8 +9,8 @@ import { profilePrefetchPlugin } from './scripts/profilePrefetch.ts'
 import { businessI18nPlugin } from './scripts/businessI18n.ts'
 import { readFileSync } from 'fs'
 
-// La CSP de producción (vercel.json) también en `vite preview`: el humo del build (npm run test:e2e:prod) corre con
-// ella y falla si algo la viola. scripts/check-csp.mjs verifica al compilar que cubre los scripts en línea del HTML.
+// Las cabeceras de producción de vercel.json (regla `/(.*)`: CSP, COOP, Permissions-Policy…) también en `vite preview`:
+// el humo del build (npm run test:e2e:prod) corre con ellas y falla si algo viola la CSP. scripts/check-csp.mjs verifica al compilar que cubre los scripts en línea del HTML.
 /** `inlineDynamicImports: true` (vite-plugin-pwa, también en su última versión) → `codeSplitting: false` */
 function swSingleFile(): Plugin {
   return {
@@ -27,8 +27,8 @@ function swSingleFile(): Plugin {
 }
 
 type VercelConfig = { headers?: { source: string; headers: { key: string; value: string }[] }[] }
-const vercelCsp = (JSON.parse(readFileSync(path.resolve(import.meta.dirname, 'vercel.json'), 'utf8')) as VercelConfig).headers
-  ?.find(r => r.source === '/(.*)')?.headers.find(h => h.key === 'Content-Security-Policy')?.value
+const vercelHeaders = Object.fromEntries((JSON.parse(readFileSync(path.resolve(import.meta.dirname, 'vercel.json'), 'utf8')) as VercelConfig)
+  .headers?.find(r => r.source === '/(.*)')?.headers.map(h => [h.key, h.value]) ?? [])
 
 export default defineConfig({
   plugins: [
@@ -101,7 +101,7 @@ export default defineConfig({
     },
   },
   preview: {
-    headers: vercelCsp ? { 'Content-Security-Policy': vercelCsp } : {},
+    headers: vercelHeaders,
   },
   build: {
     // manifest.json: lo usa scripts/check-bundle-budget.mjs para medir lo que descarga cada página

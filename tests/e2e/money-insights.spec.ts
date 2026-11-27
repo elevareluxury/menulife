@@ -113,3 +113,47 @@ test('un movimiento nuevo toma la categoría que ya usaste para algo parecido', 
   await sheet.getByRole('textbox', { name: 'Descripción (opcional)' }).fill('Uber trip 0100')
   await expect(sheet.getByRole('button', { name: 'Comida' })).toHaveAttribute('aria-pressed', 'true')
 })
+
+test('últimos meses: ingresos y gastos por mes (sin sumar monedas) y tocar un mes lo abre', async ({ page, context }) => {
+  const state = seed()
+  // Otra moneda en el mes anterior: no se suma, se avisa aparte
+  state.tables.life_transactions.push(row({ amount: 30, currency: 'USD', category: 'Ocio', description: 'En dólares', occurred_at: day(1, 15) }))
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/life/money')
+
+  const card = page.getByRole('region', { name: 'Últimos meses · ARS' })
+  const months = card.getByRole('list', { name: 'Ingresos y gastos por mes' }).getByRole('button')
+  await expect(months).toHaveCount(6)
+  // El mes que se mira está marcado; los demás no
+  await expect(months.last()).toHaveAttribute('aria-pressed', 'true')
+  await expect(months.last()).toHaveAccessibleName(/ingresos \$\s?5\.000, gastos \$\s?1\.000$/)
+  const prev = card.getByRole('button', { name: new RegExp(`^${monthName(1)}.*: ingresos \\$\\s?0, gastos \\$\\s?520$`, 'i') })
+  await expect(prev).toHaveAttribute('aria-pressed', 'false')
+  // Un mes sin movimientos queda vacío, sin un 0 que culpe
+  await expect(card.getByRole('button', { name: new RegExp(`^${monthName(2)}.*: sin movimientos$`, 'i') })).toBeVisible()
+  await expect(card.getByText('También hubo movimientos en USD: se ven en cada mes, sin sumarse.')).toBeVisible()
+
+  // Tocar un mes lleva ‹ mes › a ese mes
+  await prev.click()
+  await expect(page.getByRole('heading', { level: 2, name: new RegExp(monthName(1), 'i') })).toBeVisible()
+  await expect(page.getByText('Verdulería')).toBeVisible()
+  await expect(prev).toHaveAttribute('aria-pressed', 'true')
+  await expect(card).toContainText(/Gastos\s*\$\s?520/)
+
+  const axe = await (await settledAxe(page)).withTags(['wcag2a', 'wcag2aa']).analyze()
+  expect(axe.violations.map(v => `${v.id}: ${v.nodes.map(x => x.target.join(' ')).join(', ')}`)).toEqual([])
+})
+
+test('la curva del mes se recorre con el teclado y dice el día y el saldo', async ({ page, context }) => {
+  // El primer día del mes hay un solo punto: no hay curva
+  test.skip(thisDay < 2, 'el primer día del mes no hay curva')
+  await installSupabaseMock(context, seed(), { signedIn: true })
+  await page.goto('/life/money')
+  const curve = page.getByRole('slider', { name: 'Saldo del mes, día por día' })
+  await expect(curve).toHaveAttribute('aria-valuenow', String(thisDay))
+  await curve.focus()
+  await page.keyboard.press('Home')
+  await expect(curve).toHaveAttribute('aria-valuenow', '1')
+  // El día 1: sueldo 5000 menos el cine 400
+  await expect(curve).toHaveAttribute('aria-valuetext', /: \$\s?4\.600$/)
+})

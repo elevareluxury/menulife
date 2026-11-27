@@ -93,7 +93,7 @@ const de: StudioDict = {
     emptyTitle: 'Dein Profil hat noch keine Module', emptyText: 'Füge Links, Netzwerke und Kontaktdaten hinzu, damit man dich findet.',
     addFirst: 'Erstes Modul hinzufügen', hidden: 'Ausgeblendet', editX: t => `${t} bearbeiten`, upX: t => `${t} nach oben`, downX: t => `${t} nach unten`,
     hideX: t => `${t} ausblenden`, showX: t => `${t} anzeigen`, deleteX: t => `${t} löschen`, nowVisible: t => `${t} sichtbar`, nowHidden: t => `${t} ausgeblendet`,
-    moved: (t, p, n) => `${t} auf Position ${p} von ${n} verschoben`, deleted: t => `${t} gelöscht`, library: 'Modul hinzufügen',
+    moved: (t, p, n) => `${t} auf Position ${p} von ${n} verschoben`, deleted: t => `${t} gelöscht`, library: 'Modul hinzufügen', libraryGroups: { basics: 'Grundlagen', content: 'Inhalte', contact: 'Kontakt', portfolio: 'Portfolio', bio: 'Bio' },
     deleteTitle: 'Dieses Modul löschen?', deleteText: t => `„${t}“ wird aus deinem Profil entfernt. Wenn du es nur vorübergehend verbergen willst, kannst du es ausblenden.`,
   },
   editor: {
@@ -260,7 +260,7 @@ const de: StudioDict = {
     deleteText: 'Sie wird endgültig gelöscht.',
     deleted: 'Nachricht gelöscht',
     showMore: 'Nachricht ansehen',
-    homeUnread: 'Du hast {n} ungelesene Nachrichten',
+    homeUnread: (n: number) => n === 1 ? 'Du hast 1 ungelesene Nachricht' : `Du hast ${n} ungelesene Nachrichten`,
     homeNone: 'Keine ungelesenen Nachrichten',
     moduleSummary: 'Kontaktformular',
     intro: 'Einladungstext (optional)',

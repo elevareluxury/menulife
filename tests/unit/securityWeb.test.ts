@@ -121,6 +121,24 @@ describe('vercel.json: encabezados de seguridad', () => {
     expect(all['Cross-Origin-Opener-Policy']).toBe('same-origin-allow-popups')
     expect(all['X-Permitted-Cross-Domain-Policies']).toBe('none')
   })
+
+  // HSTS preload (hstspreload.org): la cabecera tiene que salir en TODA respuesta del dominio (páginas, /api, /cal,
+  // sitemap y cualquier redirección que arme vercel.json). Va en la regla que agarra todo, sin condiciones, ninguna otra
+  // regla la pisa con otro valor y no hay redirecciones ni `routes` propias que se salteen los encabezados.
+  it('HSTS en todas las respuestas, sin excepciones', () => {
+    const raw = JSON.parse(readFileSync(join(__dirname, '../../vercel.json'), 'utf8')) as Record<string, unknown> & {
+      headers: { source: string; has?: unknown; missing?: unknown; headers: { key: string; value: string }[] }[]
+    }
+    const catchAll = raw.headers.find(h => h.source === '/(.*)')!
+    expect(catchAll.has).toBeUndefined()
+    expect(catchAll.missing).toBeUndefined()
+    const hsts = raw.headers.flatMap(h => h.headers.filter(x => x.key.toLowerCase() === 'strict-transport-security').map(x => [h.source, x.value]))
+    expect(hsts).toEqual([['/(.*)', 'max-age=63072000; includeSubDomains; preload']])
+    // max-age de al menos un año (lo pide la lista de precarga)
+    expect(Number(/max-age=(\d+)/.exec(String(hsts[0][1]))![1])).toBeGreaterThanOrEqual(31_536_000)
+    expect(raw.routes).toBeUndefined()
+    expect((raw.redirects as unknown[] | undefined) ?? []).toEqual([])
+  })
 })
 
 describe('vercel.json: rutas', () => {

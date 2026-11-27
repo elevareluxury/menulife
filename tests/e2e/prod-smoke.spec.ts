@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { readFileSync } from 'fs'
 import { createState, installSupabaseMock, moduleRow, profileRow } from './support/mockSupabase'
 import { rich } from './support/richState'
 
@@ -28,6 +29,15 @@ test('vite preview manda la CSP de producción', async ({ request }) => {
   const csp = res.headers()['content-security-policy'] ?? ''
   expect(csp).toMatch(/script-src 'self' 'sha256-/)
   expect(csp).not.toContain("'unsafe-inline' 'sha256")
+})
+
+test('vite preview manda todas las cabeceras de producción (COOP, Permissions-Policy…)', async ({ request }) => {
+  const vercel = JSON.parse(readFileSync('vercel.json', 'utf8')) as { headers: { source: string; headers: { key: string; value: string }[] }[] }
+  const expected = vercel.headers.find(h => h.source === '/(.*)')!.headers
+  for (const path of ['/', '/ana', '/studio']) {
+    const got = (await request.get(path)).headers()
+    for (const { key, value } of expected) expect(got[key.toLowerCase()], `${path} ${key}`).toBe(value)
+  }
 })
 
 for (const [paths, signedIn] of [[PUBLIC, false], [SIGNED_IN, true]] as const) {

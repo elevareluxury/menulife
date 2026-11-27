@@ -89,7 +89,7 @@ export function ExchangePage() {
             {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />} {copied ? x.copied : x.copyLink}
           </Button>
           <Button size="sm" onClick={share}><Share2 size={15} aria-hidden="true" /> {x.share}</Button>
-          <a className="st-btn st-btn-ghost st-btn-sm" href={publicUrl} target="_blank" rel="noopener noreferrer">
+          <a className="st-btn st-btn-secondary st-btn-sm" href={publicUrl} target="_blank" rel="noopener noreferrer">
             <ExternalLink size={15} aria-hidden="true" /> {x.openProfile}
           </a>
         </div>

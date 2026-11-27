@@ -193,5 +193,8 @@ test('un mes con más de 1000 movimientos (importado del banco) suma todos: Dine
   await page.clock.setFixedTime(NOW)
   await installSupabaseMock(context, state, { signedIn: true })
   await page.goto('/life/money')
-  await expect(page.locator('span').filter({ hasText: /^Gastos\s*\$\s?1\.200$/ })).toHaveCount(1)
+  // 1200 filas en varias páginas (el mes, el anterior y "Últimos meses"): con otras pruebas en paralelo tarda más de 5 s
+  await expect(page.locator('span').filter({ hasText: /^Gastos\s*\$\s?1\.200$/ })).toHaveCount(1, { timeout: 20_000 })
+  // "Últimos meses" también lee de a 1000 (varios meses importados pasan el tope por pedido)
+  await expect(page.getByRole('region', { name: 'Últimos meses · ARS' }).getByRole('button', { name: /^octubre: ingresos \$\s?0, gastos \$\s?1\.200$/ })).toBeVisible({ timeout: 20_000 })
 })

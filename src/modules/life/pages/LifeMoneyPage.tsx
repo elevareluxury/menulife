@@ -31,6 +31,12 @@ import { BudgetsCard } from '../components/BudgetsCard'
 import { BudgetSheet, type BudgetDraft } from '../components/BudgetSheet'
 import { budgetStatuses, findBudget, type Budget } from '../lib/budgets'
 import { lifeNow } from '../lib/zonedTime'
+import { BalanceChart, MonthsHistoryCard } from '../components/MoneyCharts'
+import { useMonthHistory } from '../hooks/useMonthHistory'
+import { historyWindowEnd } from '../lib/moneyCharts'
+
+/** Meses de "Últimos meses" */
+const HISTORY_MONTHS = 6
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDateLabel(dateStr: string, t: LifeDict, locale: string): string {
@@ -156,7 +162,7 @@ function CategoryCard({ items, currency, locale, prevMonthName, active, onPick, 
                   <span dir="ltr" style={{ fontSize: 13, fontWeight: 700, color: colors.text.primary }}>{formatMoney(c.amount, currency, locale)}</span>
                   <span style={{ width: 40, textAlign: 'end', fontSize: 11, color: colors.text.tertiary }}>{pct} %</span>
                 </span>
-                <span aria-hidden="true" style={{ display: 'block', height: 6, borderRadius: radius.full, background: colors.surface.high, marginTop: 5, overflow: 'hidden' }}>
+                <span aria-hidden="true" style={{ display: 'block', height: 6, borderRadius: radius.full, background: colors.border.subtle, marginTop: 5, overflow: 'hidden' }}>
                   <span style={{ display: 'block', height: '100%', width: `${Math.max(2, pct)}%`, background: color, borderRadius: radius.full }} />
                 </span>
                 {c.change !== null && c.change !== 0 && (
@@ -217,37 +223,11 @@ function MoneySkeleton() {
   )
 }
 
-// ── Sparkline (se adapta al ancho disponible) ────────────────────────────────
-function Sparkline({ curve, color }: { curve: number[]; color: string }) {
-  const W = 240, H = 44
-  if (curve.length < 2) return null
-  const min = Math.min(...curve)
-  const max = Math.max(...curve)
-  const range = max - min || 1
-  const pts = curve.map((v, i) => ({
-    x: (i / (curve.length - 1)) * W,
-    y: H - ((v - min) / range) * (H - 8) - 4,
-  }))
-  const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
-  const area = `${d} L${W},${H} L0,${H} Z`
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true"
-      style={{ width: '100%', height: H, display: 'block', marginTop: 14, overflow: 'visible' }}>
-      <defs>
-        <linearGradient id="moneySparkGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#moneySparkGrad)" />
-      <path d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-    </svg>
-  )
-}
-
 // ── Transaction Row ───────────────────────────────────────────────────────────
-function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf, shared, inDays }: {
+function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf, shared, inDays, last }: {
   tx: Transaction
+  /** Última fila de la tarjeta: sin línea debajo */
+  last?: boolean
   /** Programado: días que faltan para su fecha (no cuenta en el balance hasta entonces) */
   inDays?: number
   /** Parte de una cuenta compartida */
@@ -262,21 +242,21 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, instal
   const t = useLifeT()
   const isIncome = tx.type === 'income'
   const scheduled = !!inDays && inDays > 0
-  // Lo programado va en tono neutro: todavía no pasó
-  const amountColor = scheduled ? colors.text.secondary : isIncome ? colors.semantic.success : colors.semantic.error
+  // Lo programado va en tono neutro: todavía no pasó. Sin rojo: un gasto va con el color del texto (el "-" ya lo dice)
+  const amountColor = scheduled ? colors.text.secondary : isIncome ? colors.money.income : colors.money.expense
   const { labelOf } = useCategoryLabels()
   const category = labelOf(tx.category)
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}` }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: last ? 'none' : `1px solid ${colors.border.subtle}` }}>
       <div style={{
         width: 34, height: 34, borderRadius: radius.sm, flexShrink: 0,
-        background: isIncome ? `${tint(colors.semantic.success, 8)}` : `${tint(colors.semantic.error, 8)}`,
+        background: isIncome ? tint(colors.money.income, 12) : tint(colors.money.expenseMark, 12),
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         {isIncome
-          ? <TrendingUp size={14} style={{ color: colors.semantic.success }} strokeWidth={2.5} aria-hidden="true" />
-          : <TrendingDown size={14} style={{ color: colors.semantic.error }} strokeWidth={2.5} aria-hidden="true" />}
+          ? <TrendingUp size={14} style={{ color: colors.money.income }} strokeWidth={2.5} aria-hidden="true" />
+          : <TrendingDown size={14} style={{ color: colors.money.expenseMark }} strokeWidth={2.5} aria-hidden="true" />}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -341,18 +321,18 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
         </h2>
         <p style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '0 0 6px' }}>{r.subtitle}</p>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {items.map(item => {
+          {items.map((item, i) => {
             const isIncome = item.type === 'income'
             const name = item.description || labelOf(item.category)
             return (
-              <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}`, opacity: item.active ? 1 : 0.6 }}>
+              <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i === items.length - 1 ? 'none' : `1px solid ${colors.border.subtle}`, opacity: item.active ? 1 : 0.6 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontFamily: font, fontSize: 13, fontWeight: 600, color: colors.text.primary, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</p>
                   <p style={{ fontFamily: font, fontSize: 11, color: colors.text.tertiary, margin: 0 }}>
                     {item.active ? `${r.schedule(item.day_of_month)} · ${r.next(dateLabel(nextDue(item)))}` : r.paused}
                   </p>
                 </div>
-                <span dir="ltr" style={{ fontFamily: font, fontSize: 14, fontWeight: 800, flexShrink: 0, color: isIncome ? colors.semantic.success : colors.semantic.error }}>
+                <span dir="ltr" style={{ fontFamily: font, fontSize: 14, fontWeight: 800, flexShrink: 0, color: isIncome ? colors.money.income : colors.money.expense }}>
                   {isIncome ? '+' : '-'}{formatMoney(item.amount, item.currency, locale)}
                 </span>
                 <ActionMenu label={`${r.options}: ${name}`} actions={[
@@ -414,10 +394,13 @@ export function LifeMoneyPage() {
     () => budgetStatuses(budgets.items, transactions, month, new Date(`${todayKey}T12:00:00`), mainCurrency),
     [budgets.items, transactions, month, mainCurrency, todayKey],
   )
+  // Últimos meses: termina en el mes actual (o en el que se mira, si es más viejo); se vuelve a leer cuando Dinero recarga
+  const history = useMonthHistory(historyWindowEnd(month, todayKey.slice(0, 7), HISTORY_MONTHS), HISTORY_MONTHS, mainCurrency, transactions)
 
   if (loading && !everHasData && !transactions.length) return <MoneySkeleton />
 
-  const balanceColor = monthBalance >= 0 ? colors.semantic.success : colors.semantic.error
+  // Sin rojo: a favor, el verde calmo; en contra, el color del texto (el signo "-" ya lo dice)
+  const balanceColor = monthBalance >= 0 ? colors.money.income : colors.money.expense
   const monthName = monthLabel(month, locale)
   const prevMonthName = monthLabel(shiftMonth(month, -1), locale)
   const changeMonth = (m: string) => { setMonth(m); setCat(null) }
@@ -552,16 +535,16 @@ export function LifeMoneyPage() {
             {formatMoney(monthBalance, mainCurrency, locale)}
           </motion.p>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: font, fontSize: '12px', fontWeight: 700, color: colors.semantic.success }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: font, fontSize: '12px', fontWeight: 700, color: colors.money.income }}>
               <TrendingUp size={12} strokeWidth={2.5} aria-hidden="true" />
               <span className="sr-only">{t.money.income}</span>{formatMoney(monthIncome, mainCurrency, locale)}
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: font, fontSize: '12px', fontWeight: 700, color: colors.semantic.error }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: font, fontSize: '12px', fontWeight: 700, color: colors.money.expense }}>
               <TrendingDown size={12} strokeWidth={2.5} aria-hidden="true" />
               <span className="sr-only">{t.money.expense}</span>{formatMoney(monthExpense, mainCurrency, locale)}
             </span>
           </div>
-          <Sparkline curve={monthCurve} color={balanceColor} />
+          <BalanceChart curve={monthCurve} month={month} currency={mainCurrency} locale={locale} />
         </LifeCard>
       )}
 
@@ -573,7 +556,7 @@ export function LifeMoneyPage() {
             {otherTotals.map(r => (
               <div key={r.currency} style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: font }}>
                 <strong style={{ width: 44, fontSize: 13, color: colors.text.secondary }}>{r.currency}</strong>
-                <span dir="ltr" style={{ flex: 1, fontSize: 15, fontWeight: 800, color: r.balance >= 0 ? colors.semantic.success : colors.semantic.error }}>
+                <span dir="ltr" style={{ flex: 1, fontSize: 15, fontWeight: 800, color: r.balance >= 0 ? colors.money.income : colors.money.expense }}>
                   {formatMoney(r.balance, r.currency, locale)}
                 </span>
                 <span dir="ltr" style={{ fontSize: 11, color: colors.text.tertiary }}>
@@ -583,6 +566,10 @@ export function LifeMoneyPage() {
             ))}
           </div>
         </LifeCard>
+      )}
+
+      {everHasData && !searchingAll && history && (history.max > 0 || history.others.length > 0) && (
+        <MonthsHistoryCard history={history} currency={mainCurrency} locale={locale} selected={month} onPick={changeMonth} />
       )}
 
       {upcomingTotals.length > 0 && !searchingAll && <UpcomingCard items={upcomingTotals} locale={locale} />}
@@ -677,8 +664,9 @@ export function LifeMoneyPage() {
                 <LifeCard>
                   <LifeSectionHeader title={formatDateLabel(group.date, t, locale)} />
                   <div>
-                    {group.items.map(tx => (
+                    {group.items.map((tx, i) => (
                       <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale} shared={splits.sharedTxIds.has(tx.id)}
+                        last={i === group.items.length - 1}
                         inDays={daysUntil(group.date, todayKey)}
                         onEdit={() => openEdit(tx)}
                         onDelete={() => remove(tx)}
@@ -687,7 +675,7 @@ export function LifeMoneyPage() {
                   </div>
                   {group.items.length > 1 && single && (
                     <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px' }}>
-                      <span dir="ltr" style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: dayTotal >= 0 ? colors.semantic.success : colors.semantic.error }}>
+                      <span dir="ltr" style={{ fontFamily: font, fontSize: '11px', fontWeight: 700, color: dayTotal >= 0 ? colors.money.income : colors.money.expense }}>
                         {dayTotal >= 0 ? '+' : ''}{formatMoney(dayTotal, single, locale)} {t.money.net}
                       </span>
                     </div>

@@ -93,7 +93,7 @@ const ja: StudioDict = {
     emptyTitle: 'プロフィールにまだモジュールがありません', emptyText: 'リンク、SNS、連絡先を追加して見つけてもらいましょう。',
     addFirst: '最初のモジュールを追加', hidden: '非表示', editX: t => `${t}を編集`, upX: t => `${t}を上へ`, downX: t => `${t}を下へ`,
     hideX: t => `${t}を非表示`, showX: t => `${t}を表示`, deleteX: t => `${t}を削除`, nowVisible: t => `${t}を表示しました`, nowHidden: t => `${t}を非表示にしました`,
-    moved: (t, p, n) => `${t}を ${n} 個中 ${p} 番目に移動しました`, deleted: t => `${t}を削除しました`, library: 'モジュールを追加',
+    moved: (t, p, n) => `${t}を ${n} 個中 ${p} 番目に移動しました`, deleted: t => `${t}を削除しました`, library: 'モジュールを追加', libraryGroups: { basics: '基本', content: 'コンテンツ', contact: '連絡先', portfolio: 'ポートフォリオ', bio: 'プロフィール' },
     deleteTitle: 'このモジュールを削除しますか？', deleteText: t => `「${t}」がプロフィールから削除されます。しばらく見せたくないだけなら、非表示にもできます。`,
   },
   editor: {
@@ -260,7 +260,7 @@ const ja: StudioDict = {
     deleteText: '完全に削除されます。',
     deleted: 'メッセージを削除しました',
     showMore: 'メッセージを見る',
-    homeUnread: '未読メッセージが {n} 件あります',
+    homeUnread: (n: number) => `未読メッセージが ${n} 件あります`,
     homeNone: '未読メッセージはありません',
     moduleSummary: 'お問い合わせフォーム',
     intro: '案内文（任意）',

@@ -62,7 +62,7 @@ dispositivos del equipo: bloqueo de pantalla, disco cifrado y sistema actualizad
 | 8.15 Registro (logs) | ✅ | `admin_audit_log` inalterable (`20261121000001`), `app_errors`, logs de Supabase/Vercel |
 | 8.16 Monitoreo | ✅ | `/super-admin/estado` cada minuto, `/api/health` + monitor externo, errores agrupados |
 | 8.17 Sincronización de relojes | ✅ | Relojes de los proveedores (NTP); la app usa la hora del servidor para todo lo que importa |
-| 8.20–8.22 Seguridad de redes y servicios web | ✅ | HTTPS + HSTS 2 años con preload; firewall de Vercel en `/api`; CORS sólo donde hace falta |
+| 8.20–8.22 Seguridad de redes y servicios web | ✅ | HTTPS + HSTS 2 años con `includeSubDomains; preload` en todas las respuestas (`vercel.json`, `securityWeb.test.ts`); alta de `mycen.id` en la lista de precarga de los navegadores decidida el 27/11/2026, la hace el dueño en hstspreload.org (pasos y subdominios revisados en `docs/lanzamiento/lo-que-falta.md`); firewall de Vercel en `/api`; CORS sólo donde hace falta |
 | 8.23 Filtrado web | ✅ | CSP sin `unsafe-inline` en scripts, orígenes cerrados; links del contenido por `safeUrl` |
 | 8.24 Criptografía | ✅ | TLS 1.2+; cifrado en reposo de los proveedores; PBKDF2 600.000 vueltas para el PIN del diario |
 | 8.25–8.29 Desarrollo seguro y pruebas | ✅ | [06 · Cambios](06-operacion.md#gestión-de-cambios-y-desarrollo-seguro); CI con E2E, axe, base de datos y humo del build con CSP |

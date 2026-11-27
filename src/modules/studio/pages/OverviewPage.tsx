@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Check, Circle, Copy, ExternalLink, Globe2, Inbox, PenLine } from 'lucide-react'
+import { Check, Circle, Copy, ExternalLink, Globe2, Inbox, PenLine, QrCode } from 'lucide-react'
 import { useStudio } from '../StudioContext'
 import { useUnreadMessages } from '../lib/useUnreadMessages'
 import { WeekCard } from '../components/WeekCard'
@@ -90,10 +90,8 @@ export function OverviewPage() {
             <ExternalLink size={15} aria-hidden="true" />
           </a>
         </div>
-        <div className="st-row" style={{ marginTop: 14 }}>
-          <Link to="/studio/exchange" className="st-btn st-btn-ghost st-btn-sm">{o.shareQr}</Link>
-        </div>
-        <div className="st-row" style={{ marginTop: 8 }}>
+        <div className="st-row" style={{ marginTop: 14, flexWrap: 'wrap' }}>
+          <Link to="/studio/exchange" className="st-btn st-btn-secondary st-btn-sm"><QrCode size={15} aria-hidden="true" /> {o.shareQr}</Link>
           <Link to="/studio/everywhere" className="st-btn st-btn-secondary st-btn-sm"><Globe2 size={15} aria-hidden="true" /> {everywhere.title}</Link>
         </div>
       </section>
@@ -102,7 +100,7 @@ export function OverviewPage() {
         <section className="st-card st-row" style={{ justifyContent: 'space-between' }} aria-label={t.messages.title}>
           <span className="st-row">
             <Inbox size={18} aria-hidden="true" />
-            {unread > 0 ? <strong>{t.messages.homeUnread.replace('{n}', String(unread))}</strong> : <span className="st-help">{t.messages.homeNone}</span>}
+            {unread > 0 ? <strong>{t.messages.homeUnread(unread)}</strong> : <span className="st-help">{t.messages.homeNone}</span>}
           </span>
           <Link to="/studio/messages" className="st-btn st-btn-secondary st-btn-sm">{t.messages.title}</Link>
         </section>

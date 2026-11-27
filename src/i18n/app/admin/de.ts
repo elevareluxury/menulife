@@ -531,6 +531,41 @@ const de: AdminDict = {
     topTitle: 'Meistbesuchte Profile',
     profile: 'Profil',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'Push-Benachrichtigungen (Life OS bei geschlossener App)',
+    intro: 'Was nötig ist, damit Erinnerungen bei geschlossener App ankommen – nach dem, was die Datenbank und diese Web-Version wissen.',
+    guide: 'Schritt-für-Schritt-Anleitung',
+    summary: { ok: 'Alles verbunden', warn: 'Läuft, aber etwas sollte geprüft werden', bad: 'Es fehlt noch eine Einstellung', unknown: 'Noch keine Daten' },
+    noMigration: 'Der Status der Benachrichtigungen konnte nicht gelesen werden. Hast du die Migration 20261209000001_web_push_status.sql angewendet?',
+    checks: {
+      buildKey: { title: 'Öffentlicher Schlüssel im Web (Vercel)', ok: 'In dieser Web-Version vorhanden', missing: 'VITE_VAPID_PUBLIC_KEY fehlt in Vercel (danach Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY hat nicht das Format eines öffentlichen VAPID-Schlüssels' },
+      function: { title: 'Funktion life-reminders', ok: (min: string) => `Hat vor ${min} Min. geantwortet`, never: 'Hat noch nie geantwortet: veröffentliche sie (GitHub → Actions → „Supabase-Funktionen veröffentlichen“) und plane den minütlichen Job', late: (min: string) => `Letzte Antwort vor ${min} Min.`, error: (msg: string) => `Der letzte Lauf ist fehlgeschlagen: ${msg}` },
+      keys: { title: 'Schlüssel in Supabase', ok: 'Gesetzt und identisch mit denen im Web', waiting: 'Bekannt, sobald die Funktion antwortet', missing: 'VAPID_PUBLIC_KEY und VAPID_PRIVATE_KEY fehlen in Supabase → Edge Functions → Secrets', invalid: 'Die Supabase-Schlüssel wurden falsch eingefügt (ohne Leerzeichen oder Anführungszeichen)', mismatch: 'Der öffentliche Schlüssel in Supabase ist nicht derselbe wie in Vercel: verwende beide aus demselben Paar' },
+      cron: { title: 'Minütlicher Job (pg_cron)', ok: 'Geplant', missing: 'Noch nicht geplant (das SQL aus der Anleitung)', paused: 'Pausiert', noCron: 'pg_cron konnte nicht gelesen werden (ist es aktiviert?)' },
+      secret: { title: 'Cron-Schlüssel', ok: 'Die Funktion akzeptiert den Schlüssel', bad: (n: string) => `${n} abgelehnte Aufrufe in der letzten Stunde: der Schlüssel im SQL ist nicht gleich REMINDERS_CRON_SECRET`, unknown: 'Bekannt, sobald die Funktion antwortet' },
+      devices: { title: 'Angemeldete Geräte', some: (n: string, people: string) => `${n} Geräte von ${people} Personen`, none: 'Noch niemand hat Benachrichtigungen erlaubt (Life OS → Aufgaben → Benachrichtigungen erlauben)', failing: (n: string) => `${n} mit Sendefehlern (werden nach 10 in Folge automatisch entfernt)` },
+      delivered: { title: 'Zugestellte Benachrichtigungen', some: (shown: string, opened: string) => `${shown} in den letzten 24 h · ${opened} angetippt`, none: 'Keine in den letzten 24 h' },
+    },
+    generator: {
+      title: 'Schlüssel erzeugen',
+      intro: 'Sie werden in diesem Browser erzeugt. Sie werden nirgendwohin gesendet und nicht gespeichert: Beim Schließen oder Neuladen der Seite verschwinden sie. Erzeuge sie nur einmal, direkt bevor du sie einträgst.',
+      generate: 'Schlüssel erzeugen',
+      again: 'Neue erzeugen',
+      unsupported: 'Dieser Browser kann keine Schlüssel erzeugen. Versuche ein aktuelles Chrome, Edge, Firefox oder Safari.',
+      failed: 'Konnten nicht erzeugt werden. Bitte erneut versuchen.',
+      publicLabel: 'Öffentlicher Schlüssel (VAPID public key)',
+      publicHelp: 'Kommt in Vercel (VITE_VAPID_PUBLIC_KEY) und in Supabase (VAPID_PUBLIC_KEY). Er ist öffentlich: Es macht nichts, wenn ihn jemand sieht.',
+      privateLabel: 'Privater Schlüssel (VAPID private key)',
+      privateHelp: 'GEHEIM. Kommt nur in Supabase → Edge Functions → Secrets (VAPID_PRIVATE_KEY). Nie in Vercel, ins Repo, in einen Chat oder eine E-Mail.',
+      cronLabel: 'Cron-Schlüssel (REMINDERS_CRON_SECRET)',
+      cronHelp: 'GEHEIM. Kommt in Supabase → Edge Functions → Secrets und in das SQL des minütlichen Jobs (anstelle von <REMINDERS_CRON_SECRET>).',
+      copy: 'Kopieren',
+      copied: 'Kopiert',
+      copyFailed: 'Kopieren nicht möglich: markiere ihn und kopiere ihn von Hand',
+      rotate: 'Wenn du die Schlüssel einmal änderst, trage die neuen überall gleichzeitig ein. Angemeldete Handys melden sich beim Öffnen von Life OS von selbst neu an.',
+    },
+  },
 }
 
 export default de

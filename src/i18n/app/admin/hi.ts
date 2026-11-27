@@ -528,6 +528,41 @@ const hi: AdminDict = {
     topTitle: 'सबसे ज़्यादा देखी गई प्रोफ़ाइल',
     profile: 'प्रोफ़ाइल',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'पुश सूचनाएँ (ऐप बंद होने पर Life OS)',
+    intro: 'ऐप बंद होने पर भी रिमाइंडर पहुँचें, इसके लिए क्या चाहिए — डेटाबेस और वेब के इस संस्करण को जितना पता है।',
+    guide: 'चरण-दर-चरण गाइड',
+    summary: { ok: 'सब जुड़ा हुआ है', warn: 'चल रहा है, पर कुछ देखना है', bad: 'अभी कुछ सेट करना बाकी है', unknown: 'अभी कोई डेटा नहीं' },
+    noMigration: 'सूचनाओं की स्थिति नहीं पढ़ी जा सकी। क्या आपने माइग्रेशन 20261209000001_web_push_status.sql लागू किया?',
+    checks: {
+      buildKey: { title: 'वेब में सार्वजनिक कुंजी (Vercel)', ok: 'वेब के इस संस्करण में मौजूद है', missing: 'Vercel में VITE_VAPID_PUBLIC_KEY नहीं है (फिर Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY सही VAPID सार्वजनिक कुंजी के रूप में नहीं है' },
+      function: { title: 'life-reminders फ़ंक्शन', ok: (min: string) => `${min} मिनट पहले जवाब दिया`, never: 'कभी जवाब नहीं दिया: इसे प्रकाशित करें (GitHub → Actions → "Supabase फ़ंक्शन प्रकाशित करें") और हर मिनट वाला काम तय करें', late: (min: string) => `आख़िरी जवाब ${min} मिनट पहले था`, error: (msg: string) => `आख़िरी बार चलाने में त्रुटि: ${msg}` },
+      keys: { title: 'Supabase में कुंजियाँ', ok: 'सेट हैं और वेब वाली जैसी ही हैं', waiting: 'फ़ंक्शन के जवाब देने पर पता चलेगा', missing: 'Supabase → Edge Functions → Secrets में VAPID_PUBLIC_KEY और VAPID_PRIVATE_KEY नहीं हैं', invalid: 'Supabase की कुंजियाँ ग़लत चिपकाई गई हैं (बिना स्पेस या उद्धरण चिह्न)', mismatch: 'Supabase की सार्वजनिक कुंजी Vercel वाली से अलग है: एक ही जोड़ी की दोनों कुंजियाँ लगाएँ' },
+      cron: { title: 'हर मिनट वाला काम (pg_cron)', ok: 'तय है', missing: 'अभी तय नहीं (गाइड का SQL)', paused: 'रुका हुआ है', noCron: 'pg_cron नहीं पढ़ा जा सका (क्या यह चालू है?)' },
+      secret: { title: 'cron कुंजी', ok: 'फ़ंक्शन कुंजी स्वीकार करता है', bad: (n: string) => `पिछले एक घंटे में ${n} कॉल अस्वीकार हुईं: SQL की कुंजी REMINDERS_CRON_SECRET जैसी नहीं है`, unknown: 'फ़ंक्शन के जवाब देने पर पता चलेगा' },
+      devices: { title: 'सदस्य डिवाइस', some: (n: string, people: string) => `${people} लोगों के ${n} डिवाइस`, none: 'अभी किसी ने सूचनाओं की अनुमति नहीं दी (Life OS → काम → सूचनाओं की अनुमति)', failing: (n: string) => `${n} में भेजने की त्रुटियाँ (लगातार 10 के बाद अपने-आप हटते हैं)` },
+      delivered: { title: 'पहुँची सूचनाएँ', some: (shown: string, opened: string) => `पिछले 24 घंटे में ${shown} · ${opened} टैप की गईं`, none: 'पिछले 24 घंटे में कोई नहीं' },
+    },
+    generator: {
+      title: 'कुंजियाँ बनाएँ',
+      intro: 'ये इसी ब्राउज़र में बनती हैं। कहीं भेजी या सहेजी नहीं जातीं: पेज बंद या रीलोड करने पर गायब हो जाती हैं। इन्हें केवल एक बार, डालने से ठीक पहले बनाएँ।',
+      generate: 'कुंजियाँ बनाएँ',
+      again: 'दूसरी बनाएँ',
+      unsupported: 'यह ब्राउज़र कुंजियाँ नहीं बना सकता। अपडेटेड Chrome, Edge, Firefox या Safari आज़माएँ।',
+      failed: 'नहीं बन सकीं। फिर से कोशिश करें।',
+      publicLabel: 'सार्वजनिक कुंजी (VAPID public key)',
+      publicHelp: 'Vercel (VITE_VAPID_PUBLIC_KEY) और Supabase (VAPID_PUBLIC_KEY) में जाती है। यह सार्वजनिक है: कोई देख ले तो कोई बात नहीं।',
+      privateLabel: 'निजी कुंजी (VAPID private key)',
+      privateHelp: 'गुप्त। केवल Supabase → Edge Functions → Secrets (VAPID_PRIVATE_KEY) में जाती है। Vercel, रिपॉज़िटरी, चैट या ईमेल में कभी नहीं।',
+      cronLabel: 'cron कुंजी (REMINDERS_CRON_SECRET)',
+      cronHelp: 'गुप्त। Supabase → Edge Functions → Secrets में और हर मिनट वाले काम के SQL में (<REMINDERS_CRON_SECRET> की जगह) जाती है।',
+      copy: 'कॉपी करें',
+      copied: 'कॉपी हुई',
+      copyFailed: 'कॉपी नहीं हो सकी: चुनकर हाथ से कॉपी करें',
+      rotate: 'अगर कभी कुंजियाँ बदलें, तो नई कुंजियाँ सभी जगह एक साथ डालें। सदस्य फ़ोन Life OS खोलने पर अपने-आप फिर से सदस्य बन जाते हैं।',
+    },
+  },
 }
 
 export default hi

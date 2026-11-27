@@ -1,5 +1,7 @@
 # Lanzamiento mundial — análisis y plan por fases
 
+> Lo que falta del dueño, en orden y paso a paso: [`lo-que-falta.md`](lo-que-falta.md).
+
 Fecha: 4/10/2026. Alcance: la parte **gratis** de Mycen (Identity + Studio, Life OS y la landing). Mycen Business y el
 Plan Pro quedan fuera. Cada fase termina como las de Identity: validación (`tsc`, tests, build, E2E), PR, CI en verde y,
 si toca la base, SQL para correr a mano con verificación y vuelta atrás. **No se empieza una fase sin aprobar la anterior.**

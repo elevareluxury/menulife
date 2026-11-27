@@ -93,7 +93,7 @@ const ko: StudioDict = {
     emptyTitle: '프로필에 아직 모듈이 없어요', emptyText: '링크, SNS, 연락처를 추가해 사람들이 찾을 수 있게 하세요.',
     addFirst: '첫 모듈 추가', hidden: '숨김', editX: t => `${t} 편집`, upX: t => `${t} 위로 이동`, downX: t => `${t} 아래로 이동`,
     hideX: t => `${t} 숨기기`, showX: t => `${t} 보이기`, deleteX: t => `${t} 삭제`, nowVisible: t => `${t} 표시됨`, nowHidden: t => `${t} 숨김`,
-    moved: (t, p, n) => `${t}을(를) ${n}개 중 ${p}번째로 이동했습니다`, deleted: t => `${t} 삭제됨`, library: '모듈 추가',
+    moved: (t, p, n) => `${t}을(를) ${n}개 중 ${p}번째로 이동했습니다`, deleted: t => `${t} 삭제됨`, library: '모듈 추가', libraryGroups: { basics: '기본', content: '콘텐츠', contact: '연락처', portfolio: '포트폴리오', bio: '바이오' },
     deleteTitle: '이 모듈을 삭제할까요?', deleteText: t => `"${t}"이(가) 프로필에서 삭제됩니다. 잠시 안 보이게만 하려면 숨길 수도 있어요.`,
   },
   editor: {
@@ -260,7 +260,7 @@ const ko: StudioDict = {
     deleteText: '영구적으로 삭제됩니다.',
     deleted: '메시지를 삭제했습니다',
     showMore: '메시지 보기',
-    homeUnread: '읽지 않은 메시지가 {n}개 있습니다',
+    homeUnread: (n: number) => `읽지 않은 메시지가 ${n}개 있습니다`,
     homeNone: '읽지 않은 메시지가 없습니다',
     moduleSummary: '문의 양식',
     intro: '안내 문구(선택)',

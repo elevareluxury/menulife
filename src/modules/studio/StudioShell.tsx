@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { haptic } from '@/lib/haptics'
 import { createPortal } from 'react-dom'
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -56,16 +56,18 @@ const NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean; deskto
   { to: '/studio/spaces',     label: 'spaces',     icon: Layers },
 ]
 
-// Barra de abajo del celular: se desliza de costado si no entra. Life OS va aparte, en la huella de arriba al medio
+// Barra de abajo del celular: 5 botones fijos (entran en 320 px con 44 px cada uno) y, en el medio, la huella de Life OS
+// (redonda, asoma un poco por arriba de la barra). Módulos, Apariencia, Proyectos, Mensajes, Suscriptores, Analítica,
+// Ajustes y la vista previa están en "Más".
 const MOBILE_NAV: { to: string; label: NavKey; icon: typeof Home; end?: boolean }[] = [
   { to: '/studio',            label: 'home',       icon: Home, end: true },
   { to: '/studio/identity',   label: 'edit',       icon: PenLine },
-  { to: '/studio/modules',    label: 'modules',    icon: LayoutGrid },
-  { to: '/studio/appearance', label: 'appearance', icon: Palette },
-  { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
   { to: '/studio/spaces',     label: 'spaces',     icon: Layers },
+  { to: '/studio/exchange',   label: 'exchange',   icon: Share2 },
   { to: '/studio/more',       label: 'more',       icon: MoreHorizontal },
 ]
+/** La huella de Life OS va entre Editar y Mis Spaces */
+const LIFE_SLOT = 2
 // Deslizar la página de costado pasa a la sección de al lado, en el orden de la barra (sin "Más")
 const SWIPE_ORDER = MOBILE_NAV.filter(item => item.label !== 'more').map(item => item.to)
 
@@ -214,32 +216,8 @@ function StudioReady({ userId, initial, switchSpace }: {
     if (swipeAt >= 0 && next) navigate(next)
   }
   const swipe = useSwipeNav(() => swipeTo(1), () => swipeTo(-1))
-  // El botón de la sección actual siempre a la vista en la barra que se desliza, y la cápsula de luz que lo marca
-  // viaja hasta él (posición en --st-ind-x / --st-ind-w; is-moving dispara el barrido de luz)
+  // La cápsula de luz que marca la sección actual viaja hasta su botón (posición en --st-ind-x / --st-ind-w; is-moving dispara el barrido de luz)
   const bottomNav = useRef<HTMLElement | null>(null)
-  // La huella de Life se achica mientras se baja (deja ver lo que pasa por debajo) y vuelve al subir o arriba de todo.
-  // Studio scrollea .st-root, no la página.
-  const scrollRoot = useRef<HTMLDivElement | null>(null)
-  const lifeFab = useRef<HTMLAnchorElement | null>(null)
-  useEffect(() => {
-    const root = scrollRoot.current
-    if (!root) return
-    let last = root.scrollTop
-    let frame = 0
-    const onScroll = () => {
-      if (frame) return
-      frame = requestAnimationFrame(() => {
-        frame = 0
-        const top = root.scrollTop
-        const delta = top - last
-        if (Math.abs(delta) < 4) return
-        lifeFab.current?.classList.toggle('is-compact', top > 60 && delta > 0)
-        last = top
-      })
-    }
-    root.addEventListener('scroll', onScroll, { passive: true })
-    return () => { root.removeEventListener('scroll', onScroll); cancelAnimationFrame(frame) }
-  }, [])
   const placeIndicator = useCallback((animate: boolean) => {
     const nav = bottomNav.current
     if (!nav) return
@@ -257,7 +235,6 @@ function StudioReady({ userId, initial, switchSpace }: {
   useLayoutEffect(() => {
     placeIndicator(!firstPlace.current)
     firstPlace.current = false
-    bottomNav.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
   }, [location.pathname, placeIndicator])
   useEffect(() => {
     const onResize = () => placeIndicator(false)
@@ -482,7 +459,7 @@ function StudioReady({ userId, initial, switchSpace }: {
 
   return (
     <StudioContext.Provider value={value}>
-      <div ref={scrollRoot} className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}>
+      <div className="st-root" data-mycen-theme={theme} data-scroll-root dir={dir}>
         <div className="st-layout">
           <nav className="st-sidebar" aria-label="Studio">
             <a className="st-logo" href="/studio">mycen.<small>Studio</small></a>
@@ -527,23 +504,29 @@ function StudioReady({ userId, initial, switchSpace }: {
 
         {/* En un portal a <body>: ningún contenedor puede alterar su position: fixed */}
         {createPortal(<>
-        {/* De la identidad a Life OS: la huella flotando arriba de la barra, al medio */}
-        <a ref={lifeFab} href="/life" className="st-life-fab" aria-label={t.nav.life} title={t.nav.life} data-mycen-theme={theme}>
-          <span className="st-life-fab-core">
-            <span className="st-life-fab-ring" aria-hidden="true" />
-            <HuellaMark id="studio-life" size={34} animated />
-          </span>
-        </a>
         <nav ref={bottomNav} className="st-bottom-nav" aria-label="Studio" data-mycen-theme={theme} dir={dir}>
           <span className="st-nav-indicator" aria-hidden="true" />
-          {MOBILE_NAV.map(item => (
-            <NavLink key={item.to} to={item.to} end={item.end} title={t.nav[item.label]}
-              aria-label={item.label === 'more' && unread ? `${t.nav.more}, ${t.messages.unread.replace('{n}', String(unread))}` : t.nav[item.label]}>
-              <item.icon size={21} aria-hidden="true" />
-              <span className="st-nav-label">{t.nav[item.label]}</span>
-              {/* En el celular, Mensajes está en "Más": el contador va ahí */}
-              {item.label === 'more' && <UnreadBadge count={unread} label={t.messages.unread} />}
-            </NavLink>
+          {MOBILE_NAV.map((item, i) => (
+            <Fragment key={item.to}>
+              {/* De la identidad a Life OS: la huella en el medio de la barra, asomando un poco por arriba */}
+              {i === LIFE_SLOT && (
+                <a href="/life" className="st-life-fab" aria-label={t.nav.life} title={t.nav.life}>
+                  <span className="st-life-fab-core">
+                    <span className="st-life-fab-ring" aria-hidden="true" />
+                    <HuellaMark id="studio-life" size={30} animated />
+                  </span>
+                </a>
+              )}
+              {/* Los de cada lado se reparten el mismo ancho: la huella queda en el centro de la barra */}
+              <NavLink to={item.to} end={item.end} title={t.nav[item.label]}
+                style={{ flexGrow: i < LIFE_SLOT ? MOBILE_NAV.length - LIFE_SLOT : LIFE_SLOT }}
+                aria-label={item.label === 'more' && unread ? `${t.nav.more}, ${t.messages.unread.replace('{n}', String(unread))}` : t.nav[item.label]}>
+                <item.icon size={21} aria-hidden="true" />
+                <span className="st-nav-label">{t.nav[item.label]}</span>
+                {/* En el celular, Mensajes está en "Más": el contador va ahí */}
+                {item.label === 'more' && <UnreadBadge count={unread} label={t.messages.unread} />}
+              </NavLink>
+            </Fragment>
           ))}
         </nav>
         </>, document.body)}

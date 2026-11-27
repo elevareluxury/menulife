@@ -27,7 +27,7 @@ with checks(migracion, aplicada) as (values
   ('20261021000001_v1_daily_review',                 to_regclass('public.life_daily_reviews') is not null),
   ('20261022000001_v1_product_events',               to_regclass('public.product_events') is not null),
   ('20261023000001_security_hardening',              exists (select 1 from pg_policies where policyname = 'super_admins_read')),
-  ('20261023000002_access_requests_admin',           exists (select 1 from pg_policies where policyname = 'access_requests_public_insert')),
+  ('20261023000002_access_requests_admin',           exists (select 1 from pg_policies where policyname = 'access_requests_admin_select')),
   ('20261024000001_v1_more_accents',                 exists (select 1 from pg_proc where proname = 'mycen_valid_profile_look' and prosrc like '%pizarra%')),
   ('20261025000001_v1_verification',                 to_regclass('public.verification_requests') is not null),
   ('20261026000001_life_goal_owner',                 exists (select 1 from pg_proc where proname = 'life_check_goal_owner')),
@@ -60,7 +60,28 @@ with checks(migracion, aplicada) as (values
   ('20261115000001_admin_system_status',             exists (select 1 from pg_proc where proname = 'admin_system_status')),
   ('20261116000001_admin_growth',                    to_regclass('public.user_activity_days') is not null),
   ('20261117000001_launch_hardening',                to_regclass('public.app_error_hits_hash_day_idx') is not null),
-  ('20261118000001_status_app_queries',              exists (select 1 from pg_proc where proname = 'admin_system_status' and prosrc like '%authenticator%'))
+  ('20261118000001_status_app_queries',              exists (select 1 from pg_proc where proname = 'admin_system_status' and prosrc like '%authenticator%')),
+  ('20261119000001_identity_modules_v2',              to_regclass('public.profile_poll_votes') is not null),
+  ('20261120000001_business_quotes_lockdown',         exists (select 1 from pg_proc where proname = 'get_public_quote')),
+  ('20261121000001_retention_hardening',              exists (select 1 from pg_proc where proname = 'mycen_purge_expired')),
+  ('20261122000001_identity_events_module',           exists (select 1 from pg_constraint where conname = 'profile_modules_type_check' and pg_get_constraintdef(oid) like '%events%')),
+  ('20261123000001_web_launch_hardening',             exists (select 1 from pg_proc where proname = 'mycen_username_impersonates')),
+  ('20261124000001_emergency_switches_mfa_csam',      exists (select 1 from pg_proc where proname = 'mycen_flag_on')),
+  ('20261125000001_alerts_links_events_scale',        to_regclass('public.mycen_cron_keys') is not null),
+  ('20261126000001_talent_reservations',              to_regclass('public.talent_reservations') is not null),
+  ('20261127000001_identity_portfolio_modules',       exists (select 1 from pg_constraint where conname = 'profile_modules_type_check' and pg_get_constraintdef(oid) like '%measurements%')),
+  ('20261128000001_cards_flyers_to_events',           exists (select 1 from pg_proc where proname = 'mycen_cards_flyers_to_events')),
+  ('20261129000001_security_audit_fixes_1',           exists (select 1 from pg_proc where proname = 'admin_log_evidence_quarantine')),
+  ('20261130000001_security_audit_fixes_2',           exists (select 1 from pg_proc where proname = 'mycen_prune_versions')),
+  ('20261201000001_security_audit_fixes_3',           to_regclass('public.mycen_link_scans') is not null),
+  ('20261202000001_security_audit_fixes_4',           exists (select 1 from pg_proc where proname = 'mycen_restaurant_org_locked')),
+  ('20261203000001_scale_reminders',                  exists (select 1 from pg_proc where proname = 'life_claim_due_reminders' and prosrc like '%limit 300%')),
+  ('20261204000001_storage_quota',                    exists (select 1 from pg_proc where proname = 'mycen_storage_usage')),
+  ('20261205000001_account_rate_limits',              exists (select 1 from pg_proc where proname = 'mycen_account_hit')),
+  ('20261206000001_sitemap_index',                    exists (select 1 from pg_proc where proname = 'public_sitemap_index')),
+  ('20261207000001_admin_snapshots',                  to_regclass('public.mycen_admin_snapshots') is not null),
+  ('20261208000001_admin_search_index',               to_regclass('mycen_private.account_emails') is not null),
+  ('20261209000001_web_push_status',                 to_regclass('public.life_push_runs') is not null)
 )
 select migracion, case when aplicada then 'OK' else 'FALTA' end as estado
 from checks

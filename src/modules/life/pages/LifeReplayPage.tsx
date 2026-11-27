@@ -359,7 +359,7 @@ export function LifeReplayPage() {
             <StoryCard
               gradient={balance >= 0
                 ? `linear-gradient(145deg, ${tint(colors.area.money, 26)} 0%, ${colors.surface.elevated} 100%)`
-                : `linear-gradient(145deg, ${tint(colors.semantic.error, 22)} 0%, ${colors.surface.elevated} 100%)`}
+                : `linear-gradient(145deg, ${tint(colors.money.expenseMark, 18)} 0%, ${colors.surface.elevated} 100%)`}
               index={3} total={TOTAL}>
               <CardHeader icon={Wallet} kicker={r.money} title={r.moneyTitle} />
               <div>

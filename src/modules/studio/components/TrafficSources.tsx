@@ -26,7 +26,7 @@ export function TrafficSources({ profileId, days }: { profileId: string; days: n
       <h2 id="sources-title" className="st-card-title">{an.sources}</h2>
       <p className="st-help" style={{ marginTop: 0 }}>{an.sourcesHelp}</p>
       {groups === null && <p className="st-help" role="status">…</p>}
-      {Array.isArray(groups) && groups.length === 0 && <p className="st-help" style={{ margin: 0 }}>{an.sourcesEmpty}</p>}
+      {Array.isArray(groups) && groups.length === 0 && <p className="st-help" style={{ marginBottom: 0 }}>{an.sourcesEmpty}</p>}
       {Array.isArray(groups) && groups.length > 0 && (
         <ul className="st-sources">
           {groups.map(g => {
