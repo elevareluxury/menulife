@@ -370,7 +370,7 @@ function PrivacySection({ userId, hasBusiness }: { userId: string; hasBusiness: 
   return (
     <>
     {/* Verificación en dos pasos (opcional; el panel del equipo la exige) */}
-    <section className="st-card"><MfaSettingsCard /></section>
+    <section className="st-card"><MfaSettingsCard titleClassName="st-card-title" titleStyle={{ margin: 0 }} /></section>
     <section className="st-card st-stack">
       <h2 className="st-card-title" style={{ margin: 0 }}>{st.privacy}</h2>
       <div className="st-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>

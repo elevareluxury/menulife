@@ -229,7 +229,7 @@ export function LifeSettingsPage() {
         </LifeCard>
 
         <LifeCard>
-          <MfaSettingsCard />
+          <MfaSettingsCard titleStyle={{ ...label, margin: 0 }} />
         </LifeCard>
 
         <LifeCard>
