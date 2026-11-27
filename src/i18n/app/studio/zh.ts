@@ -93,7 +93,7 @@ const zh: StudioDict = {
     emptyTitle: '你的主页还没有模块', emptyText: '添加链接、社交媒体和联系方式，让别人找到你。',
     addFirst: '添加第一个', hidden: '已隐藏', editX: t => `编辑 ${t}`, upX: t => `上移 ${t}`, downX: t => `下移 ${t}`,
     hideX: t => `隐藏 ${t}`, showX: t => `显示 ${t}`, deleteX: t => `删除 ${t}`, nowVisible: t => `${t} 已显示`, nowHidden: t => `${t} 已隐藏`,
-    moved: (t, p, n) => `${t} 已移到第 ${p} 位（共 ${n} 个）`, deleted: t => `${t} 已删除`, library: '添加模块',
+    moved: (t, p, n) => `${t} 已移到第 ${p} 位（共 ${n} 个）`, deleted: t => `${t} 已删除`, library: '添加模块', libraryGroups: { basics: '基础', content: '内容', contact: '联系', portfolio: '作品集', bio: '简介' },
     deleteTitle: '删除这个模块？', deleteText: t => `"${t}" 将从你的主页移除。如果只是暂时不想显示，可以把它隐藏。`,
   },
   editor: {

@@ -205,6 +205,7 @@ const es = {
     moved: (t: string, pos: number, total: number) => `${t} movido a la posición ${pos} de ${total}`,
     deleted: (t: string) => `${t} eliminado`,
     library: 'Agregar un módulo',
+    libraryGroups: { basics: 'Básicos', content: 'Contenido', contact: 'Contacto', portfolio: 'Portfolio', bio: 'Bio' },
     deleteTitle: '¿Eliminar este módulo?',
     deleteText: (t: string) => `"${t}" se va a quitar de tu perfil. Si solo querés que no se vea por un tiempo, podés ocultarlo.`,
   },

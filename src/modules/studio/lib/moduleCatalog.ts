@@ -153,6 +153,29 @@ export function socialUrl(network: string, handle: string): string | null {
 
 const urlOk = (v: string | undefined) => !v || !!safeHref(v)
 
+/** Grupos de la biblioteca "Agregar un módulo" (títulos en `modules.libraryGroups`) */
+export type ModuleGroup = 'basics' | 'content' | 'contact' | 'portfolio' | 'bio'
+
+/**
+ * En qué grupo de la biblioteca va cada tipo, en el orden en que se muestran. Todo tipo que se puede agregar está en
+ * un solo grupo (lo verifica tests/unit/moduleGroups.test.ts); contact_card no se agrega (se maneja desde Compartir).
+ */
+export const MODULE_GROUPS: readonly { id: ModuleGroup; types: readonly ModuleType[] }[] = [
+  { id: 'basics', types: ['link', 'link_group', 'social', 'featured_action', 'text', 'image', 'gallery'] },
+  { id: 'content', types: ['media', 'video_gallery', 'cards', 'project', 'portfolio', 'events', 'product', 'testimonials', 'poll', 'coupon', 'downloads', 'podcast'] },
+  { id: 'contact', types: ['contact', 'contact_form', 'location', 'hours'] },
+  { id: 'portfolio', types: ['measurements', 'audience', 'brands', 'press', 'credits', 'representation'] },
+  { id: 'bio', types: ['latest_video', 'listen_on', 'support', 'subscribe', 'collab'] },
+]
+
+/** La biblioteca por grupos: sólo lo que se puede agregar (respeta los interruptores de FEATURES); sin grupos vacíos */
+export function libraryGroups(catalog: readonly ModuleDef[]): { id: ModuleGroup; defs: ModuleDef[] }[] {
+  const byType = new Map(catalog.filter(d => d.addable).map(d => [d.type, d]))
+  return MODULE_GROUPS
+    .map(g => ({ id: g.id, defs: g.types.map(type => byType.get(type)).filter((d): d is ModuleDef => !!d) }))
+    .filter(g => g.defs.length > 0)
+}
+
 const catalogCache = new WeakMap<StudioDict, ModuleDef[]>()
 
 /** Catálogo de módulos con los textos en el idioma activo (en el orden de la biblioteca). */

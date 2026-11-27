@@ -93,7 +93,7 @@ const fr: StudioDict = {
     emptyTitle: 'Votre profil n’a pas encore de modules', emptyText: 'Ajoutez vos liens, réseaux et coordonnées pour qu’on vous trouve.',
     addFirst: 'Ajouter le premier', hidden: 'Masqué', editX: t => `Modifier ${t}`, upX: t => `Monter ${t}`, downX: t => `Descendre ${t}`,
     hideX: t => `Masquer ${t}`, showX: t => `Afficher ${t}`, deleteX: t => `Supprimer ${t}`, nowVisible: t => `${t} visible`, nowHidden: t => `${t} masqué`,
-    moved: (t, p, n) => `${t} déplacé en position ${p} sur ${n}`, deleted: t => `${t} supprimé`, library: 'Ajouter un module',
+    moved: (t, p, n) => `${t} déplacé en position ${p} sur ${n}`, deleted: t => `${t} supprimé`, library: 'Ajouter un module', libraryGroups: { basics: 'Essentiels', content: 'Contenu', contact: 'Contact', portfolio: 'Portfolio', bio: 'Bio' },
     deleteTitle: 'Supprimer ce module ?', deleteText: t => `« ${t} » sera retiré de votre profil. Si vous voulez seulement le cacher un temps, vous pouvez le masquer.`,
   },
   editor: {
