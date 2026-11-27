@@ -32,25 +32,23 @@ Palabras que aparecen mucho:
   - Pasos: Supabase → **SQL Editor** → pegá `docs/lanzamiento/sql/check_migraciones.sql` → **Run**.
     Si alguna dice `FALTA`, pegá ese archivo de `supabase/migrations/` (en orden de fecha) y volvé a correr el chequeo.
   - Cómo sé que anduvo: todas las filas dicen `OK`.
-  - ⚠️ A confirmar: ese chequeo llega hasta `20261118000001`; las migraciones posteriores (hasta `20261207000001`) no
-    están en la lista. Pedile a Claude que lo actualice antes de usarlo.
+  - El chequeo está al día hasta `20261208000001` (27/11/2026). Las de noviembre y diciembre ya las aplicaste una por
+    una; correrlo una vez confirma que no quedó ninguna vieja.
   - Detalle: [`sql/check_migraciones.sql`](sql/check_migraciones.sql)
 
-- [ ] **Plan Pro y copias diarias**
+- [x] **Plan Pro y copias diarias** — hecho (con límite de gasto)
   - Qué es: el plan gratis no tiene copias de seguridad diarias ni algunas protecciones; con gente real hace falta Pro.
   - Pasos: supabase.com → tu organización → **Billing** → **Upgrade to Pro**. Después Database → **Backups**.
     Opcional (pago aparte): **Point in Time Recovery** (volver a cualquier minuto de los últimos días).
   - Cómo sé que anduvo: Project Settings → General dice "Pro"; Backups dice "Daily backups" con la fecha de ayer.
   - Detalle: [`salida-web.md`](salida-web.md), bloque 1.1 y 1.2
 
-- [ ] **Reglas de contraseñas y "contraseñas filtradas"**
+- [x] **Reglas de contraseñas y "contraseñas filtradas"** — hecho
   - Qué es: que la base exija contraseñas decentes y rechace las que ya se filtraron en internet.
   - Pasos: Authentication → **Sign In / Providers** → **Email**: Confirm email, Secure email change y Secure password
     change prendidos; Minimum password length `8`; Password requirements "Letters and digits"; **Prevent use of leaked
     passwords** prendido → **Save**.
   - Cómo sé que anduvo: al registrarte con una contraseña tipo `password123`, la app dice que es débil.
-  - ⚠️ A confirmar: según el documento, la opción se llama "Prevent use of leaked passwords" o "Leaked password
-    protection", y puede estar en Email o en **Attack Protection**. Si no la ves, buscala en las dos.
   - Detalle: [`salida-web.md`](salida-web.md) bloque 1.3 · [`../seguridad/auditoria-lanzamiento.md`](../seguridad/auditoria-lanzamiento.md)
 
 - [ ] **Direcciones de la web y conexión segura**
@@ -61,7 +59,7 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: las dos direcciones aparecen en la lista y el interruptor de SSL queda prendido.
   - Detalle: [`salida-web.md`](salida-web.md) bloque 1.4 y 1.6
 
-- [ ] **pg_cron prendido (tareas automáticas de la base)**
+- [x] **pg_cron prendido (tareas automáticas de la base)** — hecho
   - Qué es: pg_cron corre cosas solas: borrar datos vencidos (`mycen-purge-expired`, todos los días), limpiar contadores
     (`mycen-rate-hits-purge`, cada hora) y calcular los números del panel (`mycen-admin-snapshots`, cada hora).
   - Pasos: Supabase → Database → **Extensions** → buscá `pg_cron` → prendelo. Si lo prendés recién ahora, pedile a
@@ -74,24 +72,25 @@ Palabras que aparecen mucho:
   - Pasos: Supabase → **Advisors** → **Security** → correrlo y mirar lo que marque.
   - Cómo sé que anduvo: no quedan avisos en rojo (o Claude te explicó cada uno). Super-admin → Estado → autochequeo de
     seguridad en verde.
-  - ⚠️ A confirmar: CLAUDE.md dice que queda "`pg_trgm` en public" para resolver en el panel, pero ningún documento da
-    los pasos. Preguntale a Claude antes de tocarlo.
+  - Si marca "Extension in public" por `pg_trgm` (la usa la búsqueda de Personas): SQL Editor →
+    `alter extension pg_trgm set schema extensions;` → Run. Es seguro: los índices siguen andando y las funciones de
+    Mycen ya buscan en `extensions`. Después volvé a correr Advisors.
   - Detalle: [`../seguridad/auditoria-lanzamiento.md`](../seguridad/auditoria-lanzamiento.md)
 
-- [ ] **¿Apagar `pg_graphql`?**
-  - ⚠️ A confirmar: ningún documento del repo pide apagar la extensión `pg_graphql` (una forma alternativa de leer la
-    base). No la toques sin preguntarle antes a Claude.
+- [ ] **Apagar `pg_graphql`**
+  - Qué es: otra puerta para leer la base (GraphQL). Mycen no la usa (todo va por la API REST con sus permisos), así
+    que apagarla achica lo que queda expuesto.
+  - Pasos: Supabase → Database → **Extensions** → buscá `pg_graphql` → apagala → confirmá.
+  - Cómo sé que anduvo: la extensión figura apagada y la app (perfil, Studio, Life OS) sigue andando igual.
 
-- [ ] **Borrar las funciones viejas de Business**
+- [x] **Borrar las funciones viejas de Business** — hecho (en Edge Functions quedan sólo `life-reminders` y `quarantine-held-files`)
   - Qué es: dos funciones viejas (`import-menu-pdf`, `send-reservation-email`) no controlan quién las llama.
   - Pasos: Supabase → **Edge Functions** → cada una → borrar. Si se borra `import-menu-pdf`, Anthropic deja de ser
     proveedor (pedile a Claude que actualice privacidad).
   - Cómo sé que anduvo: ya no aparecen en Edge Functions.
-  - ⚠️ A confirmar: `02-riesgos.md` (R-09) lo da como pendiente, pero `06-operacion.md` dice que N8–N11 "se cerraron al
-    borrar las Edge Functions viejas". Mirá si siguen en el panel.
   - Detalle: [`../seguridad/sgsi/02-riesgos.md`](../seguridad/sgsi/02-riesgos.md) R-09
 
-- [ ] **Publicar la función de evidencia privada**
+- [x] **Publicar la función de evidencia privada** — hecho
   - Qué es: la que saca de los links públicos las fotos de una cuenta denunciada por abuso infantil.
   - Pasos: en una terminal con el proyecto: `supabase functions deploy quarantine-held-files` (Claude te puede guiar).
   - Cómo sé que anduvo: Supabase → Edge Functions muestra `quarantine-held-files`.
@@ -113,7 +112,7 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: `mycen.id` con tilde verde ("Valid Configuration"); abrir `www.mycen.id` te lleva a `mycen.id`.
   - Detalle: [`salida-web.md`](salida-web.md) bloque 2
 
-- [ ] **Firewall de `/api` (en modo "sólo registrar")**
+- [x] **Firewall de `/api` (en modo "sólo registrar")** — hecho
   - Qué es: frena a quien pide miles de veces las funciones de Mycen (ahorra plata y evita caídas).
   - Pasos: proyecto → **Firewall** → **Configure** → **New Rule**, tres reglas por IP cada 60 s, al pasarse **Log**:
     `API portadas` (Target Path empieza con `/api/media-cover`, 30), `API vista previa` (`/api/og`, 600) y
@@ -238,14 +237,13 @@ Palabras que aparecen mucho:
     siguientes, las dos tareas aparecen en verde en Actions (pueden correr con horas de atraso: es normal en GitHub).
   - Detalle: [`alertas.md`](alertas.md)
 
-- [ ] **Monitor externo de caídas**
+- [x] **Monitor externo de caídas** — hecho
   - Qué es: te avisa al mail o al celular si la web o la base se caen, aunque nadie esté mirando.
   - Pasos: uptimerobot.com → **New monitor** → **Keyword monitoring** → URL `https://mycen.id/api/health` → Keyword
     `"ok":true` (con comillas) → **Start incident when keyword not exists** → avisos por mail (y Push) → **Create
     monitor**. Otro **HTTP(s)** a `https://mycen.id/` cada 5 minutos.
   - Cómo sé que anduvo: los dos monitores en verde ("Up").
-  - ⚠️ A confirmar: `incidentes.md` dice que "todavía no hay" monitor y sugiere vigilar también `/sitemap.xml` y un
-    perfil real; `salida-web.md` (más nuevo) usa `/api/health`. Con `/api/health` alcanza para abrir; los otros suman.
+  - Opcional: sumá uno a `/sitemap.xml` y otro a un perfil real (los sugiere `incidentes.md`).
   - Detalle: [`salida-web.md`](salida-web.md) bloque 7 · [`incidentes.md`](incidentes.md) "Cómo detectarlo"
 
 - [ ] **Copia diaria de fotos y PDF (Cloudflare R2)**
