@@ -100,3 +100,27 @@ test('quien no es del equipo no entra', async ({ page, context }) => {
   await page.goto('/super-admin/crecimiento')
   await expect(page).not.toHaveURL(/super-admin/)
 })
+
+test('las fotos de cada hora: se ve de cuándo son y se pueden recalcular', async ({ page, context }) => {
+  const state = adminState()
+  const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString()
+  state.snapshots = [
+    { name: 'growth_overview', days: 90, computed_at: ago(25), duration_ms: 900, error: null, error_at: null },
+    { name: 'growth_retention', days: 0, computed_at: ago(12), duration_ms: 300, error: null, error_at: null },
+    { name: 'growth_funnel', days: 90, computed_at: ago(12), duration_ms: 200, error: null, error_at: null },
+    { name: 'growth_adoption', days: 90, computed_at: ago(12), duration_ms: 200, error: null, error_at: null },
+  ]
+  await installSupabaseMock(context, state, { signedIn: true })
+  await page.goto('/super-admin/crecimiento')
+  // La más vieja de las cuatro que usa la pantalla
+  await expect(page.getByTestId('snapshot-freshness')).toHaveText('Actualizado hace 25 min')
+  await page.getByRole('button', { name: 'Actualizar ahora' }).click()
+  await expect(page.getByTestId('snapshot-freshness')).toHaveText('Calculado recién')
+  await expect(page.getByTestId('kpi-dau')).toContainText('12')
+
+  // Con millones, recalcular en vivo puede no llegar a tiempo: lo dice y deja lo anterior
+  state.snapshotRefreshFails = true
+  await page.getByRole('button', { name: 'Actualizar ahora' }).click()
+  await expect(page.getByRole('alert')).toContainText('No llegó a tiempo')
+  await expect(page.getByTestId('kpi-dau')).toContainText('12')
+})

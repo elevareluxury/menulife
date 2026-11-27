@@ -9,6 +9,16 @@ const ja: AdminDict = {
     flags: '機能フラグ', landing: 'ランディング', testimonials: '利用者の声', tester: 'テスター', status: 'ステータス',
     growth: 'グロース',
   },
+  snapshot: {
+    justNow: 'たった今計算',
+    minutes: (m: number) => `${m} 分前に更新`,
+    hours: (h: number) => `${h} 時間前に更新`,
+    live: 'リアルタイムで計算（毎時のスナップショットはまだありません）',
+    refresh: '今すぐ更新',
+    refreshing: '更新中…',
+    refreshFailed: '時間内に終わりませんでした。前の数値を表示しています。毎時自動で再計算されます。',
+    lastError: '直近の毎時計算に失敗しました。前のスナップショットを表示しています。',
+  },
   common: { loading: '読み込み中…', filter: '絞り込み', note: (note) => `メモ：${note}`, actionFailed: '操作を完了できませんでした。もう一度お試しください。' },
   dashboard: {
     title: 'コントロールパネル', subtitle: 'Mycen の全体ビュー',

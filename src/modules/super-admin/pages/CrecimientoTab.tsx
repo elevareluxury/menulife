@@ -4,6 +4,8 @@ import { useStudioT } from '@/i18n/app/studio'
 import { saveFile } from '@/lib/nativeFiles'
 import { useAdminFormat } from '../lib/adminFormat'
 import { adminRpc, BTN, CARD, MUTED, OK_COLOR, TEXT } from '../lib/adminRpc'
+import { SnapshotFreshness } from '../components/SnapshotFreshness'
+import { SNAPSHOTS } from '../lib/snapshots'
 import {
   change, cityOf, funnelRows, pct, REGIONS, toCsv,
   type Cohort, type GrowthAdoption, type GrowthFunnel, type GrowthOverview, type Keyed, type Region,
@@ -27,6 +29,7 @@ export function CrecimientoTab() {
   const { number, date, locale } = useAdminFormat()
   const [days, setDays] = useState<(typeof PERIODS)[number]>(90)
   const [state, setState] = useState<{ days: number; data: Data | null; failed: boolean } | null>(null)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -45,7 +48,7 @@ export function CrecimientoTab() {
       })
     })
     return () => { cancelled = true }
-  }, [days])
+  }, [days, attempt])
 
   const n = (v: number | null | undefined, digits = 0) => (v === null || v === undefined ? '—' : number(v, digits))
   const p = (v: number | null | undefined) => (v === null || v === undefined ? '—' : `${number(v, 1)} %`)
@@ -66,6 +69,7 @@ export function CrecimientoTab() {
           </button>
         ))}
       </div>
+      <SnapshotFreshness keys={SNAPSHOTS.growth(days)} onRefreshed={() => setAttempt(a => a + 1)} />
 
       {!current ? <p role="status" style={{ color: MUTED }}>{t.common.loading}</p>
         : !d ? <p role="alert" style={{ color: BAD }}>{g.loadFailed}</p>

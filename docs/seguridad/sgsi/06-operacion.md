@@ -156,6 +156,11 @@ La evidencia de cada revisión se guarda como un issue de GitHub con su etiqueta
   Queda del dueño: salida de red de Vercel Edge (N5). Topes por cuenta y por hora
   (`20261205000001_account_rate_limits.sql`): 6000 escrituras y, en acciones pesadas, publish_space 60,
   restore_space_version 30, duplicate_space 20, publish_project 60 y record_referral 10; responde 429 `RATE_LIMITED`.
+- Panel del equipo con millones de cuentas (`20261207000001_admin_snapshots.sql`, plan en
+  `docs/lanzamiento/panel-escala.md`): Resumen, Crecimiento, Producto y la parte pesada de Estado se calculan cada hora
+  con pg_cron (`mycen-admin-snapshots`, minuto 7) y la pantalla lee la foto. Si el trabajo falla, cada foto guarda su
+  error y el panel lo avisa ("El último cálculo de cada hora falló"); revisar Estado → tareas programadas. Control de
+  acceso: el trabajo de fondo pasa `mycen_assert_admin()` sólo con la marca `mycen.snapshot_job` y fuera de la API.
 - Ante spam o un ataque: Super-admin → Estado → **Interruptores de emergencia** (registros, mensajes y colaboraciones,
   suscripciones, votaciones). La base los frena (503 `FEATURE_PAUSED` en el gancho previo; trigger en `auth.users`) y
   cada cambio queda en la actividad del equipo.

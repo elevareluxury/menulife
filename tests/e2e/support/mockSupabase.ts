@@ -20,6 +20,9 @@ export interface MockState {
   rpcCalls: { fn: string; args: Row }[]
   /** Respuesta de profile_traffic_sources (Fase 7) */
   trafficSources?: { source: string | null; referrer_host: string | null; visits: number; visitors: number }[]
+  /** Fotos del panel (admin_snapshot_info) y si "Actualizar ahora" no llega a tiempo */
+  snapshots?: { name: string; days: number; computed_at: string | null; duration_ms: number | null; error: string | null; error_at: string | null }[]
+  snapshotRefreshFails?: boolean
   /** Interruptores del sitio (get_site_flags / admin_set_site_flag) */
   siteFlags?: { business: boolean; signups?: boolean; messages?: boolean; subscriptions?: boolean; polls?: boolean }
   /** Estado del sistema: lo que cambia sobre la respuesta de admin_system_status y los hallazgos del autochequeo */
@@ -939,6 +942,21 @@ function rpc(state: MockState, fn: string, args: Row, isOwner: boolean): unknown
         verifications: (state.tables.verification_requests ?? []).filter(r => r.status === 'pending').length,
         errors: (state.tables.app_errors ?? []).filter(e => e.status === 'open').length,
       }
+    }
+    // Fotos del panel (20261207000001): de cuándo es cada una y recalcular (en el mock, siempre recién)
+    case 'admin_snapshot_info': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      return (state.snapshots ?? []).map(x => ({ ...x }))
+    }
+    case 'admin_refresh_snapshot': {
+      if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')
+      if (state.snapshotRefreshFails) throw new Error('canceling statement due to statement timeout')
+      const at = new Date().toISOString()
+      const list = (state.snapshots ??= [])
+      const row = list.find(x => x.name === args.p_name && x.days === Number(args.p_days ?? 0))
+      if (row) { row.computed_at = at; row.error = null; row.error_at = null }
+      else list.push({ name: String(args.p_name), days: Number(args.p_days ?? 0), computed_at: at, duration_ms: 10, error: null, error_at: null })
+      return { computed_at: at, duration_ms: 10 }
     }
     case 'admin_overview': {
       if (!isOwner || !state.tables.super_admins.some(a => a.user_id === OWNER_ID)) throw new Error('NOT_ADMIN')

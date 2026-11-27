@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAdminT, type AdminDict } from '@/i18n/app/admin'
 import { useAdminFormat } from '../lib/adminFormat'
+import { SnapshotFreshness } from '../components/SnapshotFreshness'
+import { SNAPSHOTS } from '../lib/snapshots'
 
 // Métricas de producto propias (V1 · etapa 14): si la V1 cumple su propósito (ROADMAP, "Métricas de éxito").
 // Todo sale de product_events por la RPC admin_product_metrics (sólo super-admins). Sin terceros ni datos personales:
@@ -157,6 +159,7 @@ export function ProductTab() {
   const [result, setResult] = useState<{ days: number; data: ProductMetrics | null; failed: boolean } | null>(null)
   // "Elegí tu nombre" (migración 20261113000001_signup_sources): sin la migración no viene y la sección no se muestra
   const [sources, setSources] = useState<{ days: number; rows: SourceRow[] } | null>(null)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -167,7 +170,7 @@ export function ProductTab() {
       if (!cancelled) setSources({ days, rows: r.error || !Array.isArray(r.data) ? [] : r.data as SourceRow[] })
     })
     return () => { cancelled = true }
-  }, [days])
+  }, [days, attempt])
   const sourceRows = sources?.days === days ? sources.rows : []
 
   const loading = !result || result.days !== days
@@ -190,6 +193,7 @@ export function ProductTab() {
           </button>
         ))}
       </div>
+      <SnapshotFreshness keys={SNAPSHOTS.product(days)} onRefreshed={() => setAttempt(a => a + 1)} />
 
       {loading ? <p style={{ color: MUTED }} role="status">{t.common.loading}</p>
         : result?.failed || !m ? <p style={{ color: '#FCA5A5' }} role="alert">{tp.loadFailed}</p>

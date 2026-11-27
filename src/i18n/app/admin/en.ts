@@ -9,6 +9,16 @@ const en: AdminDict = {
     flags: 'Feature flags', landing: 'Landing', testimonials: 'Testimonials', tester: 'Tester', status: 'Status',
     growth: 'Growth',
   },
+  snapshot: {
+    justNow: 'Just calculated',
+    minutes: (m: number) => `Updated ${m} min ago`,
+    hours: (h: number) => `Updated ${h} h ago`,
+    live: 'Calculated live (no hourly snapshot yet)',
+    refresh: 'Refresh now',
+    refreshing: 'Refreshing…',
+    refreshFailed: 'It didn\'t finish in time: showing the previous numbers. It recalculates on its own every hour.',
+    lastError: 'The last hourly calculation failed: showing the previous snapshot.',
+  },
   common: {
     loading: 'Loading…', filter: 'Filter', note: (note) => `Note: ${note}`,
     actionFailed: 'The action could not be completed. Please try again.',

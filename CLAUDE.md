@@ -796,6 +796,18 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (`mycen_account_rate_limit_for`: publish_space 60, restore_space_version 30, duplicate_space 20, publish_project 60,
   record_referral 10). Misma tabla `mycen_rate_hits` (hash de la cuenta con sal, 2 días) y 429 `RATE_LIMITED`; si algo
   falla adentro, deja pasar. Studio lo muestra con `errors.rateLimited` (12 idiomas). Una RPC pesada nueva se suma ahí.
+- Panel del equipo con millones de cuentas (`20261207000001_admin_snapshots.sql`, plan y mediciones en
+  `docs/lanzamiento/panel-escala.md`, tests en `admin_snapshots.test.sql`, `snapshots.test.ts` y `admin-growth.spec.ts`):
+  Resumen, Crecimiento, Producto y lo pesado de Estado (archivos por bucket, direcciones del sitemap) se calculan cada
+  hora con pg_cron (`mycen_refresh_admin_snapshots`, minuto 7, sin el tope de 8 s) y se guardan en
+  `mycen_admin_snapshots`; las `admin_*` de siempre devuelven la foto con la misma forma (sin foto o con más de 2 h,
+  calculan en vivo; si eso falla, la anterior). El cálculo vive en `mycen_compute_*` (para cambiar un número, se cambia
+  esa función; el plan de fotos es `mycen_admin_snapshot_plan()` = `SNAPSHOTS` en `super-admin/lib/snapshots.ts`).
+  Crecimiento cuenta los activos de 7 y 30 días en una pasada (tramos por persona; mismos números, un test compara con
+  el conteo directo) y resume a cada persona de 30 días una vez. `SnapshotFreshness` ("Actualizado hace N min",
+  "Actualizar ahora" → `admin_refresh_snapshot`, `admin_snapshot_info`; 12 idiomas). El trabajo de fondo pasa
+  `mycen_assert_admin()` sólo con `mycen.snapshot_job` y fuera de la API (`session_user`). Medición local:
+  `scripts/load/admin-bench.sh` (nunca contra producción).
 - Auditoría de seguridad, hallazgos bajos (`20261201000001_security_audit_fixes_3.sql`, tests en
   `security_audit_fixes_3.test.sql`, `cronRules.test.ts`, `subscribersCsv.test.ts` y `auth-callback.spec.ts`): un perfil
   suspendido no cambia su dirección y al borrarse reserva también sus usernames anteriores; la app no deja un Space

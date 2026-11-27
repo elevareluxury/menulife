@@ -30,6 +30,16 @@ const es = {
     status: 'Estado',
     growth: 'Crecimiento',
   },
+  snapshot: {
+    justNow: 'Calculado recién',
+    minutes: (m: number) => `Actualizado hace ${m} min`,
+    hours: (h: number) => `Actualizado hace ${h} h`,
+    live: 'Calculado en vivo (todavía sin foto de cada hora)',
+    refresh: 'Actualizar ahora',
+    refreshing: 'Actualizando…',
+    refreshFailed: 'No llegó a tiempo: se sigue mostrando lo anterior. Se vuelve a calcular solo cada hora.',
+    lastError: 'El último cálculo de cada hora falló: se muestra la foto anterior.',
+  },
   common: {
     loading: 'Cargando…',
     filter: 'Filtro',

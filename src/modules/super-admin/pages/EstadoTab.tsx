@@ -10,6 +10,8 @@ import {
   evaluate, overall, selfcheckLevel,
   type Finding, type HealthResult, type Level, type ProfileProbe, type Row, type SystemStatus,
 } from '../lib/systemStatus'
+import { SnapshotFreshness } from '../components/SnapshotFreshness'
+import { SNAPSHOTS } from '../lib/snapshots'
 
 // "Estado del sistema" (auditoría del panel, PR 1): un semáforo general y una fila por chequeo. Lo de la base viene
 // de admin_system_status / admin_security_selfcheck; lo del navegador y del servidor, de /api/health (con ?deep=1 y
@@ -114,6 +116,8 @@ export function EstadoTab() {
     <div style={{ maxWidth: 1000 }}>
       <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 800, color: TEXT }}>{s.title}</h1>
       <p style={{ margin: '0 0 14px', fontSize: 13.5, color: MUTED }}>{s.intro}</p>
+      {/* El tamaño de cada bucket y las direcciones del sitemap se calculan cada hora (recorren todo) */}
+      <SnapshotFreshness keys={SNAPSHOTS.status} onRefreshed={() => { void run() }} />
 
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 14 }}>
         <button type="button" style={BTN} onClick={() => void run()} disabled={busy} aria-busy={busy}>

@@ -16,6 +16,7 @@ mismo: si se cambia un plazo, se cambian los dos en el mismo PR.
 | Bitácora del equipo (`admin_audit_log`) | **3 años** | `mycen_purge_expired()`; nadie la puede modificar ni borrar antes (trigger `admin_audit_log_guard`) |
 | Copias de seguridad de la base | Ciclo del proveedor (Supabase Pro con PITR) | Se sobrescriben solas |
 | Copia de fotos y PDF (Cloudflare R2) | Espejo diario; lo borrado o cambiado, **30 días** | `storage-backup.yml` borra `old/` de más de 30 días |
+| Fotos del panel del equipo (`mycen_admin_snapshots`: sólo totales y conteos, y los usernames públicos de "perfiles más visitados") | **Se reemplazan cada hora** (una fila por pantalla y período) | pg_cron `mycen-admin-snapshots` |
 | Contadores de pedidos por IP y por cuenta (`mycen_rate_hits`, hash de la IP o de la cuenta con sal) | **2 días** | pg_cron `mycen-rate-hits-purge` cada hora |
 | Archivos de una cuenta borrada | Se borran al borrar la cuenta (fotos y PDF) | `removeAccountFiles` antes de `delete_my_account`; el equipo puede borrarlos desde Personas |
 | Denuncias (`profile_reports`, `profile_message_reports`) | Mientras exista el perfil denunciado | Cascada al borrar el perfil |

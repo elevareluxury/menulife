@@ -5,6 +5,8 @@ import { useSiteFlags } from '@/lib/siteFlags'
 import { useAdminFormat } from '../lib/adminFormat'
 import { adminRpc, CARD, MUTED, OK_COLOR, TEXT } from '../lib/adminRpc'
 import { SuperDashboard } from './SuperDashboard'
+import { SnapshotFreshness } from '../components/SnapshotFreshness'
+import { SNAPSHOTS } from '../lib/snapshots'
 
 // Resumen de Mycen (auditoría del panel): cuentas, perfiles publicados, Life OS y lo que hay para revisar, con los
 // últimos 30 días por día. El resumen de Business (negocios, pedidos…) va debajo sólo si Business está prendido.
@@ -22,6 +24,7 @@ export function HomeTab() {
   const { number } = useAdminFormat()
   const { business } = useSiteFlags()
   const [state, setState] = useState<{ data: Overview | null; failed: boolean } | null>(null)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -29,7 +32,7 @@ export function HomeTab() {
       if (!cancelled) setState({ data: error ? null : data as Overview, failed: !!error })
     })
     return () => { cancelled = true }
-  }, [])
+  }, [attempt])
 
   const o = state?.data
   const pending = o ? [
@@ -42,6 +45,7 @@ export function HomeTab() {
     <div style={{ maxWidth: 1100 }}>
       <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 800, color: TEXT }}>{h.title}</h1>
       <p style={{ margin: '0 0 18px', fontSize: 13.5, color: MUTED }}>{h.subtitle}</p>
+      <SnapshotFreshness keys={SNAPSHOTS.home} onRefreshed={() => setAttempt(a => a + 1)} />
 
       {!state ? <p role="status" style={{ color: MUTED }}>{t.common.loading}</p>
         : !o ? <p role="alert" style={{ color: '#FCA5A5' }}>{h.loadFailed}</p>

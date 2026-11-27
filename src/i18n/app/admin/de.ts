@@ -9,6 +9,16 @@ const de: AdminDict = {
     flags: 'Feature-Flags', landing: 'Landing', testimonials: 'Erfahrungsberichte', tester: 'Tester', status: 'Status',
     growth: 'Wachstum',
   },
+  snapshot: {
+    justNow: 'Gerade berechnet',
+    minutes: (m: number) => `Vor ${m} Min. aktualisiert`,
+    hours: (h: number) => `Vor ${h} Std. aktualisiert`,
+    live: 'Live berechnet (noch kein stündlicher Stand)',
+    refresh: 'Jetzt aktualisieren',
+    refreshing: 'Wird aktualisiert…',
+    refreshFailed: 'Nicht rechtzeitig fertig: Die vorherigen Zahlen bleiben sichtbar. Wird jede Stunde automatisch neu berechnet.',
+    lastError: 'Die letzte stündliche Berechnung ist fehlgeschlagen: Der vorherige Stand wird angezeigt.',
+  },
   common: {
     loading: 'Wird geladen…', filter: 'Filter', note: (note) => `Notiz: ${note}`,
     actionFailed: 'Die Aktion konnte nicht ausgeführt werden. Bitte versuche es erneut.',

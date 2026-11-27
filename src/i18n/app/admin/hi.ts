@@ -9,6 +9,16 @@ const hi: AdminDict = {
     flags: 'फ़ीचर फ़्लैग', landing: 'लैंडिंग', testimonials: 'प्रशंसापत्र', tester: 'टेस्टर', status: 'स्थिति',
     growth: 'ग्रोथ',
   },
+  snapshot: {
+    justNow: 'अभी गणना हुई',
+    minutes: (m: number) => `${m} मिनट पहले अपडेट`,
+    hours: (h: number) => `${h} घंटे पहले अपडेट`,
+    live: 'लाइव गणना (अभी हर घंटे का स्नैपशॉट नहीं)',
+    refresh: 'अभी अपडेट करें',
+    refreshing: 'अपडेट हो रहा है…',
+    refreshFailed: 'समय पर पूरा नहीं हुआ: पिछले आँकड़े दिख रहे हैं। यह हर घंटे अपने आप दोबारा गणना करता है।',
+    lastError: 'पिछली प्रति घंटा गणना विफल रही: पिछला स्नैपशॉट दिख रहा है।',
+  },
   common: { loading: 'लोड हो रहा है…', filter: 'फ़िल्टर', note: (note) => `नोट: ${note}`, actionFailed: 'काम पूरा नहीं हो सका। फिर से कोशिश करें।' },
   dashboard: {
     title: 'कंट्रोल पैनल', subtitle: 'Mycen का पूरा दृश्य',
