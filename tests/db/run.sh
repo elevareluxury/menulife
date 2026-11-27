@@ -87,7 +87,8 @@ for m in \
   20261204000001_storage_quota \
   20261205000001_account_rate_limits \
   20261206000001_sitemap_index \
-  20261207000001_admin_snapshots; do
+  20261207000001_admin_snapshots \
+  20261208000001_admin_search_index; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 

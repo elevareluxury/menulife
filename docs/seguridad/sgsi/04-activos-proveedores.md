@@ -5,6 +5,7 @@
 | Activo | Dónde | Dueño | Clasificación |
 |---|---|---|---|
 | Base de datos de producción (cuentas, perfiles, Life OS, mensajes, suscriptores) | Supabase (proyecto `fcuiolmzfnhxyukkyeht`) | Responsable técnico | Confidencial / Personal |
+| Copia interna del email en minúsculas para buscar en el panel (`mycen_private.account_emails`, fuera de la API; trigger en `auth.users`) | Supabase (misma base) | Responsable técnico | Confidencial / Personal |
 | Archivos subidos (fotos de perfil, módulos, PDFs) | Supabase Storage (`profile-media`, `profile-files`, buckets de Business) | Responsable técnico | Público por link (sin listado) |
 | Código fuente, migraciones, CI | GitHub `elevareluxury/menulife` (privado) | Responsable técnico | Interno |
 | Aplicación web y funciones `api/` | Vercel (proyecto `menulife`) | Responsable técnico | Público |

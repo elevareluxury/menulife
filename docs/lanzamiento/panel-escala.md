@@ -1,6 +1,6 @@
 # Panel del equipo con millones de cuentas — plan
 
-Estado: PR 1 listo (26/11/2026); PR 2 (Personas) pendiente. Etapa 4 del plan de escala ("millones de usuarios").
+Estado: PR 1 y PR 2 listos (26/11/2026). Etapa 4 del plan de escala ("millones de usuarios").
 
 ## 1. Diagnóstico
 
@@ -83,3 +83,15 @@ días recortado del de 365. Verificado: el resultado completo es idéntico al de
 
 Proyección lineal del trabajo: ~8 min con 2 millones de cuentas, ~40 min con 10 millones (tope: 50 min). Si se
 acerca al tope, el siguiente paso es incremental sólo para Crecimiento de 365 días (el 50 % del tiempo).
+
+## 6. Mediciones (PR 2, Personas)
+
+Misma base de 200.000 cuentas. Antes, la búsqueda recorría todas las cuentas y sus Spaces; ahora junta candidatos de
+índices de trigramas (usuario, nombre, dirección de los Spaces y la copia interna del email).
+
+| Búsqueda | Antes | Después |
+| --- | ---: | ---: |
+| "bench1234" (usuario/email) | 1,3 s | 28 ms |
+| "persona 99" (nombre) | 2,1 s | 28 ms |
+| "example.com" (coincide con todas: tope de 500 candidatos por fuente) | — | 22 ms |
+| algo que no existe | — | 8 ms |
