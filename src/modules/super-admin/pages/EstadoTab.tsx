@@ -11,6 +11,8 @@ import {
   type Finding, type HealthResult, type Level, type ProfileProbe, type Row, type SystemStatus,
 } from '../lib/systemStatus'
 import { SnapshotFreshness } from '../components/SnapshotFreshness'
+import { PushSetupCard } from '../components/PushSetupCard'
+import type { PushStatus } from '../lib/pushStatus'
 import { SNAPSHOTS } from '../lib/snapshots'
 
 // "Estado del sistema" (auditoría del panel, PR 1): un semáforo general y una fila por chequeo. Lo de la base viene
@@ -35,6 +37,8 @@ interface Snapshot {
   findings: Finding[] | null
   health: HealthResult | null
   profile: ProfileProbe | null
+  /** Avisos push (admin_push_status); null = no se pudo leer (por ejemplo, falta la migración 20261209000001) */
+  push: PushStatus | null
   at: number
 }
 
@@ -65,10 +69,11 @@ async function probeProfile(username: string | null): Promise<ProfileProbe | nul
 }
 
 async function snapshot(): Promise<Snapshot> {
-  const [st, sc, plain] = await Promise.all([
+  const [st, sc, plain, ps] = await Promise.all([
     Promise.resolve(adminRpc('admin_system_status')),
     Promise.resolve(adminRpc('admin_security_selfcheck')),
     fetchHealth(null),
+    Promise.resolve(adminRpc('admin_push_status')),
   ])
   const status = st.error ? null : st.data as SystemStatus
   const probe = status?.probe_username ?? null
@@ -79,6 +84,7 @@ async function snapshot(): Promise<Snapshot> {
     findings: sc.error ? null : (sc.data as { findings: Finding[] }).findings,
     health,
     profile,
+    push: ps.error ? null : ps.data as PushStatus,
     at: Date.now(),
   }
 }
@@ -160,6 +166,8 @@ export function EstadoTab() {
           ))}
         </ul>
       )}
+
+      {snap && <PushSetupCard push={snap.push} now={snap.at} />}
 
       {snap?.status && <Details status={snap.status} s={s} n={n} dateTime={dateTime} />}
 

@@ -531,6 +531,41 @@ const fr: AdminDict = {
     topTitle: 'Profils les plus visités',
     profile: 'Profil',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'Notifications push (Life OS avec l’app fermée)',
+    intro: 'Ce qu’il faut pour que les rappels arrivent avec l’app fermée, d’après ce que savent la base et cette version du web.',
+    guide: 'Guide pas à pas',
+    summary: { ok: 'Tout est connecté', warn: 'Ça marche, mais il y a quelque chose à vérifier', bad: 'Il reste quelque chose à configurer', unknown: 'Pas encore de données' },
+    noMigration: 'Impossible de lire l’état des notifications. Avez-vous appliqué la migration 20261209000001_web_push_status.sql ?',
+    checks: {
+      buildKey: { title: 'Clé publique sur le web (Vercel)', ok: 'Présente dans cette version du web', missing: 'VITE_VAPID_PUBLIC_KEY manque dans Vercel (puis Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY n’a pas le format d’une clé publique VAPID' },
+      function: { title: 'Fonction life-reminders', ok: (min: string) => `A répondu il y a ${min} min`, never: 'Elle n’a jamais répondu : publiez-la (GitHub → Actions → « Publier les fonctions Supabase ») et planifiez la tâche chaque minute', late: (min: string) => `Dernière réponse il y a ${min} min`, error: (msg: string) => `La dernière exécution a échoué : ${msg}` },
+      keys: { title: 'Clés dans Supabase', ok: 'Enregistrées et identiques à celles du web', waiting: 'On le saura quand la fonction répondra', missing: 'VAPID_PUBLIC_KEY et VAPID_PRIVATE_KEY manquent dans Supabase → Edge Functions → Secrets', invalid: 'Les clés de Supabase sont mal copiées (sans espaces ni guillemets)', mismatch: 'La clé publique de Supabase n’est pas celle de Vercel : utilisez les deux clés de la même paire' },
+      cron: { title: 'Tâche chaque minute (pg_cron)', ok: 'Planifiée', missing: 'Pas encore planifiée (le SQL du guide)', paused: 'En pause', noCron: 'Impossible de lire pg_cron (est-il activé ?)' },
+      secret: { title: 'Clé du cron', ok: 'La fonction accepte la clé', bad: (n: string) => `${n} appels refusés dans la dernière heure : la clé du SQL n’est pas égale à REMINDERS_CRON_SECRET`, unknown: 'On le saura quand la fonction répondra' },
+      devices: { title: 'Appareils abonnés', some: (n: string, people: string) => `${n} appareils de ${people} personnes`, none: 'Personne n’a encore autorisé les notifications (Life OS → Tâches → autoriser les notifications)', failing: (n: string) => `${n} avec des erreurs d’envoi (supprimés automatiquement après 10 de suite)` },
+      delivered: { title: 'Notifications livrées', some: (shown: string, opened: string) => `${shown} ces dernières 24 h · ${opened} touchées`, none: 'Aucune ces dernières 24 h' },
+    },
+    generator: {
+      title: 'Générer les clés',
+      intro: 'Elles sont créées dans ce navigateur. Elles ne sont envoyées nulle part ni enregistrées : en fermant ou rechargeant la page, elles disparaissent. Générez-les une seule fois, juste avant de les saisir.',
+      generate: 'Générer les clés',
+      again: 'En générer d’autres',
+      unsupported: 'Ce navigateur ne peut pas générer de clés. Essayez Chrome, Edge, Firefox ou Safari à jour.',
+      failed: 'Impossible de les générer. Réessayez.',
+      publicLabel: 'Clé publique (VAPID public key)',
+      publicHelp: 'Va dans Vercel (VITE_VAPID_PUBLIC_KEY) et dans Supabase (VAPID_PUBLIC_KEY). Elle est publique : ce n’est pas grave si quelqu’un la voit.',
+      privateLabel: 'Clé privée (VAPID private key)',
+      privateHelp: 'SECRÈTE. Va uniquement dans Supabase → Edge Functions → Secrets (VAPID_PRIVATE_KEY). Jamais dans Vercel, le dépôt, un chat ou un e-mail.',
+      cronLabel: 'Clé du cron (REMINDERS_CRON_SECRET)',
+      cronHelp: 'SECRÈTE. Va dans Supabase → Edge Functions → Secrets et dans le SQL de la tâche chaque minute (à la place de <REMINDERS_CRON_SECRET>).',
+      copy: 'Copier',
+      copied: 'Copiée',
+      copyFailed: 'Impossible de copier : sélectionnez-la et copiez-la à la main',
+      rotate: 'Si un jour vous changez les clés, saisissez les nouvelles partout en même temps. Les téléphones abonnés se réabonnent seuls en ouvrant Life OS.',
+    },
+  },
 }
 
 export default fr

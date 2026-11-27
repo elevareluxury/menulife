@@ -531,6 +531,41 @@ const pt: AdminDict = {
     topTitle: 'Perfis mais visitados',
     profile: 'Perfil',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'Notificações push (Life OS com o app fechado)',
+    intro: 'O que falta para os lembretes chegarem com o app fechado, segundo o que a base e esta versão da web sabem.',
+    guide: 'Guia passo a passo',
+    summary: { ok: 'Tudo conectado', warn: 'Funciona, mas há algo para ver', bad: 'Falta configurar algo', unknown: 'Ainda sem dados' },
+    noMigration: 'Não foi possível ler o estado das notificações. Você aplicou a migração 20261209000001_web_push_status.sql?',
+    checks: {
+      buildKey: { title: 'Chave pública na web (Vercel)', ok: 'Presente nesta versão da web', missing: 'Falta VITE_VAPID_PUBLIC_KEY na Vercel (depois, Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY não tem o formato de uma chave pública VAPID' },
+      function: { title: 'Função life-reminders', ok: (min: string) => `Respondeu há ${min} min`, never: 'Nunca respondeu: publique-a (GitHub → Actions → "Publicar funções do Supabase") e agende a tarefa a cada minuto', late: (min: string) => `A última resposta foi há ${min} min`, error: (msg: string) => `A última execução deu erro: ${msg}` },
+      keys: { title: 'Chaves no Supabase', ok: 'Carregadas e iguais às da web', waiting: 'Saberemos quando a função responder', missing: 'Faltam VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY em Supabase → Edge Functions → Secrets', invalid: 'As chaves do Supabase foram coladas errado (sem espaços nem aspas)', mismatch: 'A chave pública do Supabase não é a mesma da Vercel: use as duas do mesmo par' },
+      cron: { title: 'Tarefa a cada minuto (pg_cron)', ok: 'Agendada', missing: 'Falta agendar (o SQL do guia)', paused: 'Está pausada', noCron: 'Não foi possível ler o pg_cron (está ativado?)' },
+      secret: { title: 'Chave do cron', ok: 'A função aceita a chave', bad: (n: string) => `${n} chamadas recusadas na última hora: a chave do SQL não é igual a REMINDERS_CRON_SECRET`, unknown: 'Saberemos quando a função responder' },
+      devices: { title: 'Dispositivos inscritos', some: (n: string, people: string) => `${n} dispositivos de ${people} pessoas`, none: 'Ninguém permitiu as notificações ainda (Life OS → Tarefas → permitir notificações)', failing: (n: string) => `${n} com erros no envio (são removidos sozinhos após 10 seguidos)` },
+      delivered: { title: 'Notificações entregues', some: (shown: string, opened: string) => `${shown} nas últimas 24 h · ${opened} tocadas`, none: 'Nenhuma nas últimas 24 h' },
+    },
+    generator: {
+      title: 'Gerar as chaves',
+      intro: 'São criadas neste navegador. Não são enviadas a lugar nenhum nem guardadas: ao fechar ou recarregar a página, desaparecem. Gere uma única vez, logo antes de carregá-las.',
+      generate: 'Gerar chaves',
+      again: 'Gerar outras',
+      unsupported: 'Este navegador não consegue gerar chaves. Use Chrome, Edge, Firefox ou Safari atualizados.',
+      failed: 'Não foi possível gerar. Tente de novo.',
+      publicLabel: 'Chave pública (VAPID public key)',
+      publicHelp: 'Vai na Vercel (VITE_VAPID_PUBLIC_KEY) e no Supabase (VAPID_PUBLIC_KEY). É pública: não tem problema se alguém vir.',
+      privateLabel: 'Chave privada (VAPID private key)',
+      privateHelp: 'SECRETA. Vai só em Supabase → Edge Functions → Secrets (VAPID_PRIVATE_KEY). Nunca na Vercel, no repositório, por chat nem por e-mail.',
+      cronLabel: 'Chave do cron (REMINDERS_CRON_SECRET)',
+      cronHelp: 'SECRETA. Vai em Supabase → Edge Functions → Secrets e no SQL da tarefa a cada minuto (no lugar de <REMINDERS_CRON_SECRET>).',
+      copy: 'Copiar',
+      copied: 'Copiada',
+      copyFailed: 'Não foi possível copiar: selecione e copie à mão',
+      rotate: 'Se um dia trocar as chaves, carregue as novas em todos os lugares ao mesmo tempo. Os celulares inscritos se inscrevem de novo sozinhos ao abrir o Life OS.',
+    },
+  },
 }
 
 export default pt

@@ -536,6 +536,41 @@ const ru: AdminDict = {
     topTitle: 'Самые посещаемые профили',
     profile: 'Профиль',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'Push-уведомления (Life OS при закрытом приложении)',
+    intro: 'Что нужно, чтобы напоминания приходили при закрытом приложении, — по тому, что знают база и эта версия сайта.',
+    guide: 'Пошаговая инструкция',
+    summary: { ok: 'Всё подключено', warn: 'Работает, но есть что проверить', bad: 'Ещё не всё настроено', unknown: 'Пока нет данных' },
+    noMigration: 'Не удалось прочитать состояние уведомлений. Вы применили миграцию 20261209000001_web_push_status.sql?',
+    checks: {
+      buildKey: { title: 'Открытый ключ на сайте (Vercel)', ok: 'Есть в этой версии сайта', missing: 'В Vercel нет VITE_VAPID_PUBLIC_KEY (затем Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY не похож на открытый ключ VAPID' },
+      function: { title: 'Функция life-reminders', ok: (min: string) => `Ответила ${min} мин назад`, never: 'Ни разу не ответила: опубликуйте её (GitHub → Actions → «Опубликовать функции Supabase») и запланируйте задачу на каждую минуту', late: (min: string) => `Последний ответ был ${min} мин назад`, error: (msg: string) => `Последний запуск завершился ошибкой: ${msg}` },
+      keys: { title: 'Ключи в Supabase', ok: 'Заданы и совпадают с ключом сайта', waiting: 'Станет известно, когда функция ответит', missing: 'В Supabase → Edge Functions → Secrets нет VAPID_PUBLIC_KEY и VAPID_PRIVATE_KEY', invalid: 'Ключи в Supabase вставлены неправильно (без пробелов и кавычек)', mismatch: 'Открытый ключ в Supabase не совпадает с ключом в Vercel: возьмите оба из одной пары' },
+      cron: { title: 'Задача каждую минуту (pg_cron)', ok: 'Запланирована', missing: 'Ещё не запланирована (SQL из инструкции)', paused: 'На паузе', noCron: 'Не удалось прочитать pg_cron (он включён?)' },
+      secret: { title: 'Ключ cron', ok: 'Функция принимает ключ', bad: (n: string) => `За последний час отклонено вызовов: ${n}. Ключ в SQL не совпадает с REMINDERS_CRON_SECRET`, unknown: 'Станет известно, когда функция ответит' },
+      devices: { title: 'Подписанные устройства', some: (n: string, people: string) => `Устройств: ${n}, людей: ${people}`, none: 'Пока никто не разрешил уведомления (Life OS → Задачи → разрешить уведомления)', failing: (n: string) => `С ошибками отправки: ${n} (удаляются сами после 10 подряд)` },
+      delivered: { title: 'Доставленные уведомления', some: (shown: string, opened: string) => `За 24 ч: ${shown} · открыто: ${opened}`, none: 'За последние 24 ч ни одного' },
+    },
+    generator: {
+      title: 'Создать ключи',
+      intro: 'Они создаются в этом браузере. Никуда не отправляются и не сохраняются: если закрыть или обновить страницу, они исчезнут. Создайте их один раз, прямо перед тем как вставлять.',
+      generate: 'Создать ключи',
+      again: 'Создать другие',
+      unsupported: 'Этот браузер не умеет создавать ключи. Попробуйте свежий Chrome, Edge, Firefox или Safari.',
+      failed: 'Не удалось создать. Попробуйте ещё раз.',
+      publicLabel: 'Открытый ключ (VAPID public key)',
+      publicHelp: 'Вставляется в Vercel (VITE_VAPID_PUBLIC_KEY) и в Supabase (VAPID_PUBLIC_KEY). Он открытый: ничего страшного, если его кто-то увидит.',
+      privateLabel: 'Закрытый ключ (VAPID private key)',
+      privateHelp: 'СЕКРЕТНЫЙ. Вставляется только в Supabase → Edge Functions → Secrets (VAPID_PRIVATE_KEY). Никогда в Vercel, репозиторий, чат или почту.',
+      cronLabel: 'Ключ cron (REMINDERS_CRON_SECRET)',
+      cronHelp: 'СЕКРЕТНЫЙ. Вставляется в Supabase → Edge Functions → Secrets и в SQL задачи на каждую минуту (вместо <REMINDERS_CRON_SECRET>).',
+      copy: 'Копировать',
+      copied: 'Скопировано',
+      copyFailed: 'Не удалось скопировать: выделите и скопируйте вручную',
+      rotate: 'Если когда-нибудь смените ключи, вставьте новые во все места одновременно. Подписанные телефоны переподпишутся сами, когда откроют Life OS.',
+    },
+  },
 }
 
 export default ru

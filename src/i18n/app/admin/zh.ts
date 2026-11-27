@@ -528,6 +528,41 @@ const zh: AdminDict = {
     topTitle: '访问最多的主页',
     profile: '主页',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: '推送通知（应用关闭时的 Life OS）',
+    intro: '根据数据库和当前网页版本所知，提醒在应用关闭时送达还需要什么。',
+    guide: '分步指南',
+    summary: { ok: '全部已连接', warn: '能用，但有需要查看的地方', bad: '还有设置未完成', unknown: '暂无数据' },
+    noMigration: '无法读取通知状态。你应用了迁移 20261209000001_web_push_status.sql 吗？',
+    checks: {
+      buildKey: { title: '网页中的公钥（Vercel）', ok: '已包含在此网页版本中', missing: 'Vercel 中缺少 VITE_VAPID_PUBLIC_KEY（之后点 Redeploy）', invalid: 'VITE_VAPID_PUBLIC_KEY 不是有效的 VAPID 公钥格式' },
+      function: { title: 'life-reminders 函数', ok: (min: string) => `${min} 分钟前有响应`, never: '从未响应：请发布它（GitHub → Actions →“发布 Supabase 函数”）并设置每分钟任务', late: (min: string) => `最后一次响应在 ${min} 分钟前`, error: (msg: string) => `最后一次运行出错：${msg}` },
+      keys: { title: 'Supabase 中的密钥', ok: '已设置，且与网页中的一致', waiting: '函数响应后即可知道', missing: 'Supabase → Edge Functions → Secrets 中缺少 VAPID_PUBLIC_KEY 和 VAPID_PRIVATE_KEY', invalid: 'Supabase 中的密钥粘贴有误（不要带空格或引号）', mismatch: 'Supabase 的公钥与 Vercel 的不同：请使用同一对中的两把密钥' },
+      cron: { title: '每分钟任务（pg_cron）', ok: '已安排', missing: '尚未安排（指南中的 SQL）', paused: '已暂停', noCron: '无法读取 pg_cron（是否已开启？）' },
+      secret: { title: 'cron 密钥', ok: '函数接受该密钥', bad: (n: string) => `过去一小时有 ${n} 次调用被拒绝：SQL 中的密钥与 REMINDERS_CRON_SECRET 不一致`, unknown: '函数响应后即可知道' },
+      devices: { title: '已订阅的设备', some: (n: string, people: string) => `${people} 人的 ${n} 台设备`, none: '还没有人允许通知（Life OS → 任务 → 允许通知）', failing: (n: string) => `${n} 台发送出错（连续 10 次后自动删除）` },
+      delivered: { title: '已送达的通知', some: (shown: string, opened: string) => `过去 24 小时 ${shown} 条 · ${opened} 条被点开`, none: '过去 24 小时没有' },
+    },
+    generator: {
+      title: '生成密钥',
+      intro: '密钥在此浏览器中生成，不会发送到任何地方，也不会保存：关闭或刷新页面后就会消失。请只生成一次，并在填写前立即生成。',
+      generate: '生成密钥',
+      again: '重新生成',
+      unsupported: '此浏览器无法生成密钥。请使用最新版 Chrome、Edge、Firefox 或 Safari。',
+      failed: '生成失败，请重试。',
+      publicLabel: '公钥（VAPID public key）',
+      publicHelp: '填到 Vercel（VITE_VAPID_PUBLIC_KEY）和 Supabase（VAPID_PUBLIC_KEY）。它是公开的：被别人看到也没关系。',
+      privateLabel: '私钥（VAPID private key）',
+      privateHelp: '机密。只填到 Supabase → Edge Functions → Secrets（VAPID_PRIVATE_KEY）。绝不要放进 Vercel、代码库、聊天或邮件。',
+      cronLabel: 'cron 密钥（REMINDERS_CRON_SECRET）',
+      cronHelp: '机密。填到 Supabase → Edge Functions → Secrets，以及每分钟任务的 SQL 中（替换 <REMINDERS_CRON_SECRET>）。',
+      copy: '复制',
+      copied: '已复制',
+      copyFailed: '无法复制：请选中后手动复制',
+      rotate: '如果以后更换密钥，请同时在所有地方填入新密钥。已订阅的手机打开 Life OS 时会自动重新订阅。',
+    },
+  },
 }
 
 export default zh

@@ -8,6 +8,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { nativeAuthStorage } from '@/lib/nativeAuthStorage'
 import { isNativeApp } from '@/lib/platform'
+import { dropPushSubscription } from '@/lib/webPushDrop'
 
 type AuthWithKey = { storageKey?: string; stopAutoRefresh?: () => Promise<void> | void }
 
@@ -31,6 +32,10 @@ export async function forgetStoredSession(storageKey: string): Promise<string[]>
  * sólo en el dispositivo: quien llama tiene que recargar (`window.location.replace`) para soltar el cliente en memoria.
  */
 export async function signOutDevice(client: SupabaseClient | { auth: SupabaseClient['auth'] }): Promise<boolean> {
+  // Antes de cerrar la sesión (la baja en la base la necesita): el dispositivo deja de recibir los avisos push. Antes
+  // lo hacía sólo el botón "Cerrar sesión"; "Salir" del segundo paso, aceptar términos y cambiar la contraseña dejaban
+  // el celular recibiendo los recordatorios de la cuenta anterior.
+  await dropPushSubscription(client)
   let failed: boolean
   try {
     const { error } = await client.auth.signOut()

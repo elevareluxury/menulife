@@ -531,6 +531,41 @@ const it: AdminDict = {
     topTitle: 'Profili più visitati',
     profile: 'Profilo',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'Notifiche push (Life OS con l’app chiusa)',
+    intro: 'Cosa serve perché i promemoria arrivino con l’app chiusa, secondo quello che sanno il database e questa versione del web.',
+    guide: 'Guida passo passo',
+    summary: { ok: 'Tutto collegato', warn: 'Funziona, ma c’è qualcosa da controllare', bad: 'Manca ancora qualcosa da configurare', unknown: 'Ancora nessun dato' },
+    noMigration: 'Impossibile leggere lo stato delle notifiche. Hai applicato la migrazione 20261209000001_web_push_status.sql?',
+    checks: {
+      buildKey: { title: 'Chiave pubblica sul web (Vercel)', ok: 'Presente in questa versione del web', missing: 'Manca VITE_VAPID_PUBLIC_KEY in Vercel (poi Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY non ha il formato di una chiave pubblica VAPID' },
+      function: { title: 'Funzione life-reminders', ok: (min: string) => `Ha risposto ${min} min fa`, never: 'Non ha mai risposto: pubblicala (GitHub → Actions → "Pubblica le funzioni di Supabase") e programma l’attività ogni minuto', late: (min: string) => `L’ultima risposta è stata ${min} min fa`, error: (msg: string) => `L’ultima esecuzione ha dato errore: ${msg}` },
+      keys: { title: 'Chiavi in Supabase', ok: 'Inserite e uguali a quelle del web', waiting: 'Si saprà quando la funzione risponde', missing: 'Mancano VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY in Supabase → Edge Functions → Secrets', invalid: 'Le chiavi di Supabase sono state incollate male (senza spazi né virgolette)', mismatch: 'La chiave pubblica di Supabase non è la stessa di Vercel: usa le due della stessa coppia' },
+      cron: { title: 'Attività ogni minuto (pg_cron)', ok: 'Programmata', missing: 'Non ancora programmata (lo SQL della guida)', paused: 'In pausa', noCron: 'Impossibile leggere pg_cron (è attivo?)' },
+      secret: { title: 'Chiave del cron', ok: 'La funzione accetta la chiave', bad: (n: string) => `${n} chiamate rifiutate nell’ultima ora: la chiave nello SQL non è uguale a REMINDERS_CRON_SECRET`, unknown: 'Si saprà quando la funzione risponde' },
+      devices: { title: 'Dispositivi iscritti', some: (n: string, people: string) => `${n} dispositivi di ${people} persone`, none: 'Nessuno ha ancora consentito le notifiche (Life OS → Attività → consenti notifiche)', failing: (n: string) => `${n} con errori di invio (rimossi da soli dopo 10 di fila)` },
+      delivered: { title: 'Notifiche consegnate', some: (shown: string, opened: string) => `${shown} nelle ultime 24 h · ${opened} toccate`, none: 'Nessuna nelle ultime 24 h' },
+    },
+    generator: {
+      title: 'Genera le chiavi',
+      intro: 'Vengono create in questo browser. Non vengono inviate da nessuna parte né salvate: chiudendo o ricaricando la pagina spariscono. Generale una sola volta, subito prima di inserirle.',
+      generate: 'Genera chiavi',
+      again: 'Generane altre',
+      unsupported: 'Questo browser non può generare chiavi. Prova con Chrome, Edge, Firefox o Safari aggiornati.',
+      failed: 'Impossibile generarle. Riprova.',
+      publicLabel: 'Chiave pubblica (VAPID public key)',
+      publicHelp: 'Va in Vercel (VITE_VAPID_PUBLIC_KEY) e in Supabase (VAPID_PUBLIC_KEY). È pubblica: non succede nulla se qualcuno la vede.',
+      privateLabel: 'Chiave privata (VAPID private key)',
+      privateHelp: 'SEGRETA. Va solo in Supabase → Edge Functions → Secrets (VAPID_PRIVATE_KEY). Mai in Vercel, nel repository, in chat o per e-mail.',
+      cronLabel: 'Chiave del cron (REMINDERS_CRON_SECRET)',
+      cronHelp: 'SEGRETA. Va in Supabase → Edge Functions → Secrets e nello SQL dell’attività ogni minuto (al posto di <REMINDERS_CRON_SECRET>).',
+      copy: 'Copia',
+      copied: 'Copiata',
+      copyFailed: 'Impossibile copiare: selezionala e copiala a mano',
+      rotate: 'Se un giorno cambi le chiavi, inserisci le nuove ovunque contemporaneamente. I telefoni iscritti si reiscrivono da soli aprendo Life OS.',
+    },
+  },
 }
 
 export default it

@@ -531,6 +531,41 @@ const en: AdminDict = {
     topTitle: 'Most visited profiles',
     profile: 'Profile',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'Push notifications (Life OS with the app closed)',
+    intro: 'What reminders need to arrive with the app closed, based on what the database and this version of the web know.',
+    guide: 'Step-by-step guide',
+    summary: { ok: 'All connected', warn: 'Working, but something needs a look', bad: 'Something still needs setting up', unknown: 'No data yet' },
+    noMigration: 'Could not read the notification status. Did you apply the migration 20261209000001_web_push_status.sql?',
+    checks: {
+      buildKey: { title: 'Public key on the web (Vercel)', ok: 'Present in this version of the web', missing: 'VITE_VAPID_PUBLIC_KEY is missing in Vercel (then Redeploy)', invalid: 'VITE_VAPID_PUBLIC_KEY is not a valid VAPID public key' },
+      function: { title: 'life-reminders function', ok: (min: string) => `Answered ${min} min ago`, never: 'It has never answered: deploy it (GitHub → Actions → "Deploy Supabase functions") and schedule the every-minute job', late: (min: string) => `Last answer was ${min} min ago`, error: (msg: string) => `The last run failed: ${msg}` },
+      keys: { title: 'Keys in Supabase', ok: 'Set and the same as on the web', waiting: 'Known once the function answers', missing: 'VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY are missing in Supabase → Edge Functions → Secrets', invalid: 'The Supabase keys were pasted wrong (no spaces or quotes)', mismatch: 'The Supabase public key is not the same as the Vercel one: use both keys from the same pair' },
+      cron: { title: 'Every-minute job (pg_cron)', ok: 'Scheduled', missing: 'Not scheduled yet (the SQL in the guide)', paused: 'Paused', noCron: 'Could not read pg_cron (is it enabled?)' },
+      secret: { title: 'Cron key', ok: 'The function accepts the key', bad: (n: string) => `${n} calls rejected in the last hour: the key in the SQL is not the same as REMINDERS_CRON_SECRET`, unknown: 'Known once the function answers' },
+      devices: { title: 'Subscribed devices', some: (n: string, people: string) => `${n} devices from ${people} people`, none: 'Nobody has allowed notifications yet (Life OS → Tasks → allow notifications)', failing: (n: string) => `${n} with sending errors (removed automatically after 10 in a row)` },
+      delivered: { title: 'Notifications delivered', some: (shown: string, opened: string) => `${shown} in the last 24 h · ${opened} tapped`, none: 'None in the last 24 h' },
+    },
+    generator: {
+      title: 'Generate the keys',
+      intro: 'They are created in this browser. They are not sent anywhere or stored: closing or reloading the page makes them disappear. Generate them once, right before entering them.',
+      generate: 'Generate keys',
+      again: 'Generate new ones',
+      unsupported: 'This browser cannot generate keys. Try an up-to-date Chrome, Edge, Firefox or Safari.',
+      failed: 'Could not generate them. Please try again.',
+      publicLabel: 'Public key (VAPID public key)',
+      publicHelp: 'Goes in Vercel (VITE_VAPID_PUBLIC_KEY) and in Supabase (VAPID_PUBLIC_KEY). It is public: it is fine if someone sees it.',
+      privateLabel: 'Private key (VAPID private key)',
+      privateHelp: 'SECRET. Goes only in Supabase → Edge Functions → Secrets (VAPID_PRIVATE_KEY). Never in Vercel, the repo, chat or email.',
+      cronLabel: 'Cron key (REMINDERS_CRON_SECRET)',
+      cronHelp: 'SECRET. Goes in Supabase → Edge Functions → Secrets and in the SQL of the every-minute job (in place of <REMINDERS_CRON_SECRET>).',
+      copy: 'Copy',
+      copied: 'Copied',
+      copyFailed: 'Could not copy: select it and copy it by hand',
+      rotate: 'If you ever change the keys, enter the new ones everywhere at once. Subscribed phones subscribe again by themselves when they open Life OS.',
+    },
+  },
 }
 
 export default en

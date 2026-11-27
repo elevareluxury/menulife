@@ -528,6 +528,41 @@ const ja: AdminDict = {
     topTitle: '訪問数の多いプロフィール',
     profile: 'プロフィール',
   },
+  /** Estado → "Avisos push": qué falta para los recordatorios con la app cerrada y el generador de claves */
+  push: {
+    title: 'プッシュ通知（アプリを閉じているときの Life OS）',
+    intro: 'アプリを閉じていてもリマインダーが届くために必要なこと（データベースとこのバージョンのウェブがわかる範囲で）。',
+    guide: '手順ガイド',
+    summary: { ok: 'すべて接続済み', warn: '動いていますが確認が必要です', bad: 'まだ設定が足りません', unknown: 'まだデータがありません' },
+    noMigration: '通知の状態を読み込めませんでした。マイグレーション 20261209000001_web_push_status.sql を適用しましたか？',
+    checks: {
+      buildKey: { title: 'ウェブの公開鍵（Vercel）', ok: 'このバージョンのウェブに含まれています', missing: 'Vercel に VITE_VAPID_PUBLIC_KEY がありません（その後 Redeploy）', invalid: 'VITE_VAPID_PUBLIC_KEY が VAPID 公開鍵の形式ではありません' },
+      function: { title: 'life-reminders 関数', ok: (min: string) => `${min} 分前に応答しました`, never: '一度も応答していません：公開して（GitHub → Actions →「Supabase の関数を公開」）、毎分のジョブを設定してください', late: (min: string) => `最後の応答は ${min} 分前です`, error: (msg: string) => `最後の実行でエラーが出ました：${msg}` },
+      keys: { title: 'Supabase の鍵', ok: '設定済みで、ウェブと同じです', waiting: '関数が応答するとわかります', missing: 'Supabase → Edge Functions → Secrets に VAPID_PUBLIC_KEY と VAPID_PRIVATE_KEY がありません', invalid: 'Supabase の鍵の貼り付けが間違っています（空白や引用符なし）', mismatch: 'Supabase の公開鍵が Vercel のものと違います：同じペアの 2 つを使ってください' },
+      cron: { title: '毎分のジョブ（pg_cron）', ok: '設定済み', missing: 'まだ設定されていません（ガイドの SQL）', paused: '一時停止中', noCron: 'pg_cron を読み込めませんでした（有効ですか？）' },
+      secret: { title: 'cron の鍵', ok: '関数が鍵を受け付けています', bad: (n: string) => `直近 1 時間で ${n} 件の呼び出しが拒否されました：SQL の鍵が REMINDERS_CRON_SECRET と一致しません`, unknown: '関数が応答するとわかります' },
+      devices: { title: '登録済みの端末', some: (n: string, people: string) => `${people} 人の ${n} 台`, none: 'まだ誰も通知を許可していません（Life OS → タスク → 通知を許可）', failing: (n: string) => `送信エラーのある端末 ${n} 台（10 回連続で自動削除）` },
+      delivered: { title: '届いた通知', some: (shown: string, opened: string) => `直近 24 時間で ${shown} 件 · ${opened} 件タップ`, none: '直近 24 時間はありません' },
+    },
+    generator: {
+      title: '鍵を生成',
+      intro: 'このブラウザの中で作られます。どこにも送信されず保存もされません：ページを閉じるか再読み込みすると消えます。入力する直前に一度だけ生成してください。',
+      generate: '鍵を生成',
+      again: '別の鍵を生成',
+      unsupported: 'このブラウザでは鍵を生成できません。最新の Chrome、Edge、Firefox、Safari をお使いください。',
+      failed: '生成できませんでした。もう一度お試しください。',
+      publicLabel: '公開鍵（VAPID public key）',
+      publicHelp: 'Vercel（VITE_VAPID_PUBLIC_KEY）と Supabase（VAPID_PUBLIC_KEY）に入れます。公開情報なので見られても問題ありません。',
+      privateLabel: '秘密鍵（VAPID private key）',
+      privateHelp: '秘密。Supabase → Edge Functions → Secrets（VAPID_PRIVATE_KEY）にだけ入れます。Vercel、リポジトリ、チャット、メールには絶対に入れないでください。',
+      cronLabel: 'cron の鍵（REMINDERS_CRON_SECRET）',
+      cronHelp: '秘密。Supabase → Edge Functions → Secrets と、毎分のジョブの SQL（<REMINDERS_CRON_SECRET> の部分）に入れます。',
+      copy: 'コピー',
+      copied: 'コピーしました',
+      copyFailed: 'コピーできませんでした：選択して手動でコピーしてください',
+      rotate: '鍵を変えるときは、新しい鍵をすべての場所に同時に入れてください。登録済みのスマホは Life OS を開くと自動で登録し直します。',
+    },
+  },
 }
 
 export default ja
