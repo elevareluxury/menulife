@@ -517,7 +517,9 @@ function StudioReady({ userId, initial, switchSpace }: {
                   </span>
                 </a>
               )}
+              {/* Los de cada lado se reparten el mismo ancho: la huella queda en el centro de la barra */}
               <NavLink to={item.to} end={item.end} title={t.nav[item.label]}
+                style={{ flexGrow: i < LIFE_SLOT ? MOBILE_NAV.length - LIFE_SLOT : LIFE_SLOT }}
                 aria-label={item.label === 'more' && unread ? `${t.nav.more}, ${t.messages.unread.replace('{n}', String(unread))}` : t.nav[item.label]}>
                 <item.icon size={21} aria-hidden="true" />
                 <span className="st-nav-label">{t.nav[item.label]}</span>

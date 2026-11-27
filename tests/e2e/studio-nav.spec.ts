@@ -44,6 +44,8 @@ test('la barra de abajo trae 5 botones que entran (también en 320 px), Life OS 
   expect(bar.y - fab.y).toBeLessThan(fab.height / 2)
   expect(fab.x).toBeGreaterThan(edit.x + edit.width - 1)
   expect(fab.x + fab.width).toBeLessThanOrEqual(target.x + 1)
+  // …y en el centro de la barra (los de cada lado se reparten el mismo ancho)
+  expect(Math.abs((fab.x + fab.width / 2) - (bar.x + bar.width / 2))).toBeLessThan(3)
 
   // Lo que salió de la barra sigue en "Más"
   await nav.getByRole('link', { name: 'Más', exact: true }).click()
