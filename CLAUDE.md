@@ -192,7 +192,8 @@ Rumbo de Identity: `docs/identity/` (auditoría Fase 0, 13 decisiones aprobadas 
 - El HTML para buscadores (`api/og.ts`) declara `<html lang>` con el `default_locale` del perfil.
 
 - Salida de la web: guía del dueño en `docs/lanzamiento/salida-web.md` (planes, Auth, Resend, Google, Turnstile, Search
-  Console, monitor, DNS, 2FA, prueba final). `/sitemap.xml` lista la landing en los 12 idiomas con `xhtml:link`
+  Console, monitor, DNS, 2FA, prueba final). Lo que falta del dueño, en orden: `docs/lanzamiento/lo-que-falta.md`.
+  `/sitemap.xml` lista la landing en los 12 idiomas con `xhtml:link`
   (hreflang) además de las páginas fijas y lo público; la landing agrega JSON-LD (`Organization` + `WebSite`) desde
   `useLandingLocale`. `/api/health` (Edge, sin caché): 200 si responde `get_site_flags`, 503 si no (lo mira el monitor
   externo; tests en `health.test.ts`). `public/.well-known/security.txt` (contacto de seguridad, vence cada año).
