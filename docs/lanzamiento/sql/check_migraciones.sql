@@ -62,7 +62,8 @@ with checks(migracion, aplicada) as (values
   ('20261117000001_launch_hardening',                to_regclass('public.app_error_hits_hash_day_idx') is not null),
   ('20261118000001_status_app_queries',              exists (select 1 from pg_proc where proname = 'admin_system_status' and prosrc like '%authenticator%')),
   ('20261119000001_identity_modules_v2',              to_regclass('public.profile_poll_votes') is not null),
-  ('20261120000001_business_quotes_lockdown',         exists (select 1 from pg_proc where proname = 'get_public_quote')),
+  -- Sin la tabla de presupuestos (Business no se usó en esta base) la migración no tiene nada que crear
+  ('20261120000001_business_quotes_lockdown',         to_regclass('public.service_quotes') is null or exists (select 1 from pg_proc where proname = 'get_public_quote')),
   ('20261121000001_retention_hardening',              exists (select 1 from pg_proc where proname = 'mycen_purge_expired')),
   ('20261122000001_identity_events_module',           exists (select 1 from pg_constraint where conname = 'profile_modules_type_check' and pg_get_constraintdef(oid) like '%events%')),
   ('20261123000001_web_launch_hardening',             exists (select 1 from pg_proc where proname = 'mycen_username_impersonates')),
@@ -81,7 +82,11 @@ with checks(migracion, aplicada) as (values
   ('20261206000001_sitemap_index',                    exists (select 1 from pg_proc where proname = 'public_sitemap_index')),
   ('20261207000001_admin_snapshots',                  to_regclass('public.mycen_admin_snapshots') is not null),
   ('20261208000001_admin_search_index',               to_regclass('mycen_private.account_emails') is not null),
-  ('20261209000001_web_push_status',                 to_regclass('public.life_push_runs') is not null)
+  ('20261209000001_web_push_status',                 to_regclass('public.life_push_runs') is not null),
+  ('20261210000001_reapply_account_limits',          exists (select 1 from pg_proc where proname = 'mycen_account_rate_limit_for' and prosrc like '%admin_refresh_snapshot%')
+                                                      and exists (select 1 from pg_proc where proname = 'mycen_account_hit')
+                                                      and not exists (select 1 from pg_proc p where p.proname = 'verify_staff_pin'
+                                                                      and has_function_privilege('authenticated', p.oid, 'execute')))
 )
 select migracion, case when aplicada then 'OK' else 'FALTA' end as estado
 from checks

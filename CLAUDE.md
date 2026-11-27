@@ -797,6 +797,8 @@ Documentos: `docs/design/DESIGN_SYSTEM.md` (sistema visual Universo / Amanecer y
   (`mycen_account_rate_limit_for`: publish_space 60, restore_space_version 30, duplicate_space 20, publish_project 60,
   record_referral 10). Misma tabla `mycen_rate_hits` (hash de la cuenta con sal, 2 días) y 429 `RATE_LIMITED`; si algo
   falla adentro, deja pasar. Studio lo muestra con `errors.rateLimited` (12 idiomas). Una RPC pesada nueva se suma ahí.
+  En producción faltaba `mycen_account_hit`: `20261210000001_reapply_account_limits.sql` la vuelve a aplicar con la lista
+  de 20261207 (`admin_refresh_snapshot`) y cierra `verify_staff_pin` también para `authenticated` (Business cerrado).
 - Panel del equipo con millones de cuentas (`20261207000001_admin_snapshots.sql`, plan y mediciones en
   `docs/lanzamiento/panel-escala.md`, tests en `admin_snapshots.test.sql`, `snapshots.test.ts` y `admin-growth.spec.ts`):
   Resumen, Crecimiento, Producto y lo pesado de Estado (archivos por bucket, direcciones del sitemap) se calculan cada

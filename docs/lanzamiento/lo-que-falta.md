@@ -32,7 +32,9 @@ Palabras que aparecen mucho:
   - Pasos: Supabase → **SQL Editor** → pegá `docs/lanzamiento/sql/check_migraciones.sql` → **Run**.
     Si alguna dice `FALTA`, pegá ese archivo de `supabase/migrations/` (en orden de fecha) y volvé a correr el chequeo.
   - Cómo sé que anduvo: todas las filas dicen `OK`.
-  - El chequeo está al día hasta `20261209000001` (27/11/2026; la última, de los avisos push, es nueva). Las anteriores de noviembre y diciembre ya las aplicaste una por
+  - 27/11/2026: el chequeo marcó `FALTA` en `20261205000001` (topes por cuenta) → se aplica `20261210000001`, que la
+    vuelve a poner con la lista al día; `20261120000001` era un falso aviso (sin tabla de presupuestos de Business).
+  - El chequeo está al día hasta `20261210000001` (27/11/2026; la última, de los avisos push, es nueva). Las anteriores de noviembre y diciembre ya las aplicaste una por
     una; correrlo una vez confirma que no quedó ninguna vieja.
   - Detalle: [`sql/check_migraciones.sql`](sql/check_migraciones.sql)
 
@@ -51,7 +53,7 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: al registrarte con una contraseña tipo `password123`, la app dice que es débil.
   - Detalle: [`salida-web.md`](salida-web.md) bloque 1.3 · [`../seguridad/auditoria-lanzamiento.md`](../seguridad/auditoria-lanzamiento.md)
 
-- [ ] **Direcciones de la web y conexión segura**
+- [x] **Direcciones de la web y conexión segura** — hecho (27/11/2026)
   - Qué es: Supabase arma los links de los mails con esto; si está mal, el botón del mail no abre Mycen.
   - Pasos: Authentication → **URL Configuration** → Site URL `https://mycen.id`; Redirect URLs con
     `https://mycen.id/auth/callback` y `https://mycen.id/**` → Save. Después Database → **Settings** →
@@ -67,17 +69,17 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: Super-admin → **Estado** muestra las tareas programadas con su última corrida.
   - Detalle: [`panel-escala.md`](panel-escala.md) punto 4 · [`../seguridad/sgsi/05-retencion.md`](../seguridad/sgsi/05-retencion.md)
 
-- [ ] **Advisors de Supabase sin rojos**
+- [x] **Advisors de Supabase sin rojos** — revisado el 27/11/2026 (sólo avisos esperados)
   - Qué es: Supabase revisa solo la seguridad de la base y marca problemas.
   - Pasos: Supabase → **Advisors** → **Security** → correrlo y mirar lo que marque.
   - Cómo sé que anduvo: no quedan avisos en rojo (o Claude te explicó cada uno). Super-admin → Estado → autochequeo de
     seguridad en verde.
   - Si marca "Extension in public" por `pg_trgm` (la usa la búsqueda de Personas): SQL Editor →
     `alter extension pg_trgm set schema extensions;` → Run. Es seguro: los índices siguen andando y las funciones de
-    Mycen ya buscan en `extensions`. Después volvé a correr Advisors.
+    Mycen ya buscan en `extensions`. Después volvé a correr Advisors. (`pg_trgm` movido el 27/11/2026.)
   - Detalle: [`../seguridad/auditoria-lanzamiento.md`](../seguridad/auditoria-lanzamiento.md)
 
-- [ ] **Apagar `pg_graphql`**
+- [x] **Apagar `pg_graphql`** — hecho (27/11/2026)
   - Qué es: otra puerta para leer la base (GraphQL). Mycen no la usa (todo va por la API REST con sus permisos), así
     que apagarla achica lo que queda expuesto.
   - Pasos: Supabase → Database → **Extensions** → buscá `pg_graphql` → apagala → confirmá.
@@ -155,14 +157,14 @@ Palabras que aparecen mucho:
 
 ### Mails
 
-- [ ] **Resend: dominio verificado**
+- [x] **Resend: dominio verificado** — hecho (confirmado el 27/11/2026)
   - Qué es: el servicio que manda los mails de confirmar cuenta y recuperar contraseña desde `team@mycen.id`.
   - Pasos: resend.com → **Domains** → **Add Domain** → `mycen.id` → cargá en el DNS los registros que muestra (MX y TXT
     en `send`, TXT `resend._domainkey`) tal cual → **Verify**.
   - Cómo sé que anduvo: el dominio dice **Verified**.
   - Detalle: [`../../supabase/templates/LEEME.md`](../../supabase/templates/LEEME.md) · [`salida-web.md`](salida-web.md) bloque 3.1 y 8
 
-- [ ] **SMTP propio en Supabase y límite de mails**
+- [x] **SMTP propio en Supabase y límite de mails** — hecho (confirmado el 27/11/2026)
   - Qué es: sin esto Supabase usa su correo de prueba, que deja de mandar con poco tráfico.
   - Pasos: Resend → **API Keys** → **Create API Key** (nombre `supabase`, **Sending access**, dominio `mycen.id`).
     Supabase → Authentication → **Emails** → **SMTP Settings** → **Enable Custom SMTP**: Sender `team@mycen.id`,
@@ -171,7 +173,7 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: la prueba de mails de más abajo llega desde `team@mycen.id`.
   - Detalle: [`salida-web.md`](salida-web.md) bloque 3.1 y 1.5
 
-- [ ] **Plantillas de los mails (12 idiomas)**
+- [x] **Plantillas de los mails (12 idiomas)** — hecho (confirmado el 27/11/2026)
   - Qué es: los mails con la marca de Mycen y en el idioma de cada persona.
   - Pasos: Authentication → **Emails** → **Templates**. En cada una, el **Subject** de `supabase/templates/asuntos.md`
     y el **Body** del archivo: Confirm signup = `confirmar_cuenta.html`, Reset Password = `recuperar_contrasena.html`,
@@ -180,7 +182,7 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: el mail de prueba llega con la huella y en el idioma elegido.
   - Detalle: [`../../supabase/templates/LEEME.md`](../../supabase/templates/LEEME.md) punto 3
 
-- [ ] **Recibir mails en `team@mycen.id` y anti-spam**
+- [x] **Recibir mails en `team@mycen.id` y anti-spam** — hecho (confirmado el 27/11/2026)
   - Qué es: es el contacto que piden las leyes y las tiendas; tiene que llegarte lo que te escriban.
   - Pasos: con el DNS en Cloudflare: tu dominio → **Email** → **Email Routing** → **Get started** → dirección `team` →
     tu Gmail. Si no: improvmx.com → alias `team` → tu Gmail. Después un TXT `_dmarc` con
@@ -188,7 +190,7 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: mandás un mail desde otra casilla a `team@mycen.id` y te llega.
   - Detalle: [`salida-web.md`](salida-web.md) bloque 3.2, 3.3 y 8
 
-- [ ] **Probar los mails de punta a punta**
+- [x] **Probar los mails de punta a punta** — hecho (confirmado el 27/11/2026)
   - Pasos: ventana privada → `https://mycen.id/register` → idioma **English** → cuenta con un Gmail tuyo. Después
     `https://mycen.id/forgot-password`. Repetí con iCloud u Outlook si podés.
   - Cómo sé que anduvo: llega en inglés, desde `team@mycen.id`, en la bandeja de entrada (no spam), con la huella, y el
@@ -197,7 +199,7 @@ Palabras que aparecen mucho:
 
 ### Acceso a la cuenta
 
-- [ ] **Entrar con Google en producción**
+- [x] **Entrar con Google en producción** — hecho (confirmado el 27/11/2026)
   - Qué es: que el botón "Continuar con Google" funcione para cualquiera, no sólo para cuentas de prueba.
   - Pasos: console.cloud.google.com → tu proyecto → **Google Auth Platform**. **Branding**: App name `Mycen`, logo
     `public/web-app-manifest-512x512.png`, home `https://mycen.id`, privacidad `https://mycen.id/privacidad`, términos
@@ -207,7 +209,7 @@ Palabras que aparecen mucho:
     pide "Un paso más" (aceptar términos) y entra.
   - Detalle: [`salida-web.md`](salida-web.md) bloque 4
 
-- [ ] **CAPTCHA contra cuentas falsas (Turnstile)** — en este orden, sin saltear
+- [x] **CAPTCHA contra cuentas falsas (Turnstile)** — hecho (confirmado el 27/11/2026) — en este orden, sin saltear
   - Qué es: un recuadro de Cloudflare que frena a los robots que crean cuentas en masa.
   - Pasos:
     1. dash.cloudflare.com → **Turnstile** → **Add widget**: nombre `Mycen`, dominios `mycen.id` y `www.mycen.id`, modo
@@ -245,7 +247,7 @@ Palabras que aparecen mucho:
 
 ### Avisos, monitoreo y copias
 
-- [ ] **Avisos al equipo y revisión de links (GitHub Actions)**
+- [x] **Avisos al equipo y revisión de links (GitHub Actions)** — hecho (confirmado el 27/11/2026)
   - Qué es: dos tareas que te mandan un mail si hay errores nuevos, denuncias, un pico de registros o links peligrosos
     en perfiles publicados.
   - Pasos:
@@ -321,7 +323,7 @@ Palabras que aparecen mucho:
 
 ### Buscadores y prueba final
 
-- [ ] **Google Search Console y Bing**
+- [x] **Google Search Console y Bing** — hecho (confirmado el 27/11/2026)
   - Qué es: avisarle a Google que existe Mycen y darle la lista de perfiles públicos (`/sitemap.xml`).
   - Pasos: search.google.com/search-console → **Agregar propiedad** → **Dominio** → `mycen.id` → cargá el TXT
     `google-site-verification=…` en el DNS → **Verificar**. **Sitemaps** → escribí la dirección **completa**

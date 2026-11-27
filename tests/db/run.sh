@@ -89,7 +89,8 @@ for m in \
   20261206000001_sitemap_index \
   20261207000001_admin_snapshots \
   20261208000001_admin_search_index \
-  20261209000001_web_push_status; do
+  20261209000001_web_push_status \
+  20261210000001_reapply_account_limits; do
   "${PSQL[@]}" -f "supabase/migrations/$m.sql" >/dev/null
 done
 
