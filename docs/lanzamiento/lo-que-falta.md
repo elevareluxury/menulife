@@ -51,7 +51,7 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: al registrarte con una contraseña tipo `password123`, la app dice que es débil.
   - Detalle: [`salida-web.md`](salida-web.md) bloque 1.3 · [`../seguridad/auditoria-lanzamiento.md`](../seguridad/auditoria-lanzamiento.md)
 
-- [ ] **Direcciones de la web y conexión segura**
+- [x] **Direcciones de la web y conexión segura** — hecho (27/11/2026)
   - Qué es: Supabase arma los links de los mails con esto; si está mal, el botón del mail no abre Mycen.
   - Pasos: Authentication → **URL Configuration** → Site URL `https://mycen.id`; Redirect URLs con
     `https://mycen.id/auth/callback` y `https://mycen.id/**` → Save. Después Database → **Settings** →
@@ -74,10 +74,10 @@ Palabras que aparecen mucho:
     seguridad en verde.
   - Si marca "Extension in public" por `pg_trgm` (la usa la búsqueda de Personas): SQL Editor →
     `alter extension pg_trgm set schema extensions;` → Run. Es seguro: los índices siguen andando y las funciones de
-    Mycen ya buscan en `extensions`. Después volvé a correr Advisors.
+    Mycen ya buscan en `extensions`. Después volvé a correr Advisors. (`pg_trgm` movido el 27/11/2026.)
   - Detalle: [`../seguridad/auditoria-lanzamiento.md`](../seguridad/auditoria-lanzamiento.md)
 
-- [ ] **Apagar `pg_graphql`**
+- [x] **Apagar `pg_graphql`** — hecho (27/11/2026)
   - Qué es: otra puerta para leer la base (GraphQL). Mycen no la usa (todo va por la API REST con sus permisos), así
     que apagarla achica lo que queda expuesto.
   - Pasos: Supabase → Database → **Extensions** → buscá `pg_graphql` → apagala → confirmá.
