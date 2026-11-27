@@ -35,11 +35,14 @@ export function AuthCallback() {
     async function redirectByRole(userId?: string) {
       // Volviendo de "Continuar con Google": idioma, términos y referido, como en el registro con email
       await applyPendingSignup()
-      const { data: { user } } = await supabase.auth.getUser()
+      // Si el servidor tarda o falla, la cuenta de la sesión recién guardada. Nunca seguir sin saber quién es: antes
+      // iba a /life sin revisar los términos ni el destino
+      const { data: { user: fresh } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+      const user = fresh ?? (await supabase.auth.getSession()).data.session?.user ?? null
+      if (!user && !userId) { navigate('/login', { replace: true }); return }
       // Cuenta nueva con Google desde el login: acepta Términos y Privacidad una vez antes de entrar
       if (needsTerms(user)) { navigate('/auth/terms', { replace: true }); return }
-      const id = userId ?? user?.id
-      if (!id) { navigate('/life', { replace: true }); return }
+      const id = userId ?? user!.id
       navigate(await postLoginRoute(id), { replace: true })
     }
 
