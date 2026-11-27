@@ -246,8 +246,10 @@ function Sparkline({ curve, color }: { curve: number[]; color: string }) {
 }
 
 // ── Transaction Row ───────────────────────────────────────────────────────────
-function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf, shared, inDays }: {
+function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, installmentsOf, shared, inDays, last }: {
   tx: Transaction
+  /** Última fila de la tarjeta: sin línea debajo */
+  last?: boolean
   /** Programado: días que faltan para su fecha (no cuenta en el balance hasta entonces) */
   inDays?: number
   /** Parte de una cuenta compartida */
@@ -268,7 +270,7 @@ function TransactionRow({ tx, fallbackCurrency, locale, onEdit, onDelete, instal
   const category = labelOf(tx.category)
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}` }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: last ? 'none' : `1px solid ${colors.border.subtle}` }}>
       <div style={{
         width: 34, height: 34, borderRadius: radius.sm, flexShrink: 0,
         background: isIncome ? `${tint(colors.semantic.success, 8)}` : `${tint(colors.semantic.error, 8)}`,
@@ -341,11 +343,11 @@ function FixedCard({ items, locale, onEdit, onToggle, onDelete }: {
         </h2>
         <p style={{ fontFamily: font, fontSize: 12, color: colors.text.tertiary, margin: '0 0 6px' }}>{r.subtitle}</p>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {items.map(item => {
+          {items.map((item, i) => {
             const isIncome = item.type === 'income'
             const name = item.description || labelOf(item.category)
             return (
-              <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${colors.border.subtle}`, opacity: item.active ? 1 : 0.6 }}>
+              <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i === items.length - 1 ? 'none' : `1px solid ${colors.border.subtle}`, opacity: item.active ? 1 : 0.6 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontFamily: font, fontSize: 13, fontWeight: 600, color: colors.text.primary, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</p>
                   <p style={{ fontFamily: font, fontSize: 11, color: colors.text.tertiary, margin: 0 }}>
@@ -677,8 +679,9 @@ export function LifeMoneyPage() {
                 <LifeCard>
                   <LifeSectionHeader title={formatDateLabel(group.date, t, locale)} />
                   <div>
-                    {group.items.map(tx => (
+                    {group.items.map((tx, i) => (
                       <TransactionRow key={tx.id} tx={tx} fallbackCurrency={mainCurrency} locale={locale} shared={splits.sharedTxIds.has(tx.id)}
+                        last={i === group.items.length - 1}
                         inDays={daysUntil(group.date, todayKey)}
                         onEdit={() => openEdit(tx)}
                         onDelete={() => remove(tx)}
