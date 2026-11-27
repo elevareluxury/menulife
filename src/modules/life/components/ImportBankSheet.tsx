@@ -210,11 +210,11 @@ export function ImportBankSheet({ open, onClose }: { open: boolean; onClose: () 
               {(split?.fresh ?? parsed.items).slice(0, 5).map((i, n) => (
                 <li key={n} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderTop: `1px solid ${colors.border.subtle}`, fontFamily: font, fontSize: 12 }}>
                   {i.type === 'income'
-                    ? <TrendingUp size={13} aria-hidden="true" style={{ color: colors.semantic.success, flexShrink: 0 }} />
-                    : <TrendingDown size={13} aria-hidden="true" style={{ color: colors.semantic.error, flexShrink: 0 }} />}
+                    ? <TrendingUp size={13} aria-hidden="true" style={{ color: colors.money.income, flexShrink: 0 }} />
+                    : <TrendingDown size={13} aria-hidden="true" style={{ color: colors.money.expenseMark, flexShrink: 0 }} />}
                   <span style={{ color: colors.text.tertiary, flexShrink: 0 }}>{new Date(`${i.date}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}</span>
                   <span style={{ flex: 1, minWidth: 0, color: colors.text.primary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.description || '—'}</span>
-                  <strong dir="ltr" style={{ color: i.type === 'income' ? colors.semantic.success : colors.semantic.error, flexShrink: 0 }}>
+                  <strong dir="ltr" style={{ color: i.type === 'income' ? colors.money.income : colors.money.expense, flexShrink: 0 }}>
                     {i.type === 'income' ? '+' : '-'}{formatMoney(i.amount, currency, locale)}
                   </strong>
                 </li>

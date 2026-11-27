@@ -27,7 +27,7 @@ function insightView(i: Insight, t: LifeDict, locale: string, labelOf: (category
       const fmt = (n: number) => formatMoney(n, i.currency, locale)
       const up = i.pct > 0
       const item = up ? it.spendUp : it.spendDown
-      return { title: item.title, text: item.text(Math.abs(i.pct), fmt(i.now), fmt(i.prev)), icon: up ? TrendingUp : TrendingDown, color: up ? colors.semantic.error : colors.semantic.success, route: '/life/money' }
+      return { title: item.title, text: item.text(Math.abs(i.pct), fmt(i.now), fmt(i.prev)), icon: up ? TrendingUp : TrendingDown, color: up ? colors.money.expenseMark : colors.money.income, route: '/life/money' }
     }
     case 'habitBestDay':
       return { ...it.habitBestDay, text: it.habitBestDay.text(weekdayName(i.best, locale), i.bestPct, weekdayName(i.worst, locale), i.worstPct), icon: CalendarDays, color: colors.area.habits, route: '/life/habits' }

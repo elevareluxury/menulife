@@ -169,6 +169,8 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
   }
 
   const isIncome = form.type === 'income'
+  /** Color del monto y de la categoría elegida: ingreso en verde calmo, gasto en el color del texto (nunca rojo) */
+  const tone = isIncome ? colors.money.income : colors.money.expense
   // Compartido no se combina con "Repetir todos los meses" ni con "En cuotas"
   const canShare = !!shareable && !template && !isIncome && !repeat && !split && !sharedLocked
   // Moneda principal + adicionales (+ la del movimiento si se edita uno en otra moneda)
@@ -185,8 +187,9 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
         background: colors.surface.high,
         borderRadius: radius.md,
       }}>
-        {([['income', t.tx.income, TrendingUp, colors.semantic.success],
-           ['expense', t.tx.expense, TrendingDown, colors.semantic.error]] as const).map(([type, label, Icon, clr]) => (
+        {/* Sin rojo para los gastos: el gasto va con el color del texto y el ingreso con el verde calmo de Dinero */}
+        {([['income', t.tx.income, TrendingUp, colors.money.income],
+           ['expense', t.tx.expense, TrendingDown, colors.money.expense]] as const).map(([type, label, Icon, clr]) => (
           <button
             key={type}
             type="button"
@@ -196,7 +199,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
             style={{
               padding: '11px 8px', borderRadius: radius.sm,
               background: form.type === type ? colors.surface.elevated : 'transparent',
-              border: `1.5px solid ${form.type === type ? clr + '50' : 'transparent'}`,
+              border: `1.5px solid ${form.type === type ? tint(clr, 31) : 'transparent'}`,
               color: form.type === type ? clr : colors.text.tertiary,
               fontFamily: font, fontSize: '14px', fontWeight: 700,
               cursor: sharedLocked ? 'default' : 'pointer', transition: 'all 0.18s',
@@ -218,7 +221,7 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
           <span style={{
             position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
             fontFamily: font, fontSize: '22px', fontWeight: 700,
-            color: isIncome ? colors.semantic.success : colors.semantic.error,
+            color: tone,
           }}>
             {currencySymbol(form.currency, locale)}
           </span>
@@ -241,8 +244,8 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
               padding: '12px 14px 12px 48px', width: '220px',
               borderRadius: radius.md,
               background: colors.surface.high,
-              border: `1.5px solid ${error && !amountStr ? colors.semantic.error : isIncome ? tint(ink(colors.semantic.success), 25) : tint(ink(colors.semantic.error), 25)}`,
-              color: isIncome ? colors.semantic.success : colors.semantic.error,
+              border: `1.5px solid ${error && !amountStr ? colors.semantic.error : tint(tone, 25)}`,
+              color: tone,
               fontFamily: font, fontSize: '28px', fontWeight: 800,
               textAlign: 'right', outline: 'none',
             }}
@@ -289,9 +292,9 @@ export function TransactionSheet({ open, onClose, onSave, initial, repeatable, t
               onClick={() => { setCatTouched(true); setForm(f => ({ ...f, category: cat })) }}
               style={{
                 padding: '6px 12px', borderRadius: radius.full,
-                background: form.category === cat ? (isIncome ? tint(ink(colors.semantic.success), 13) : tint(ink(colors.semantic.error), 13)) : colors.surface.high,
-                border: `1px solid ${form.category === cat ? (isIncome ? tint(ink(colors.semantic.success), 31) : tint(ink(colors.semantic.error), 31)) : colors.border.subtle}`,
-                color: form.category === cat ? (isIncome ? colors.semantic.success : colors.semantic.error) : colors.text.secondary,
+                background: form.category === cat ? tint(tone, 13) : colors.surface.high,
+                border: `1px solid ${form.category === cat ? tint(tone, 31) : colors.border.subtle}`,
+                color: form.category === cat ? tone : colors.text.secondary,
                 fontFamily: font, fontSize: '12px', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.15s',
                 display: 'inline-flex', alignItems: 'center', gap: 6,

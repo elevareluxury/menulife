@@ -6,6 +6,8 @@
   --life-goals:  #7DB8FF;
   --life-habits: #FBBF24;
   --life-brain:  #C4B5FD;
+  /* Ingresos en Dinero: verde calmo (no el --my-ok brillante); los gastos van con el color del texto */
+  --life-income: #A3DDB9;
   --life-ink: 85%;
 }
 [data-mycen-theme='amanecer'] {
@@ -13,7 +15,13 @@
   --life-goals:  #1D4ED8;
   --life-habits: #A15C07;
   --life-brain:  #6D28D9;
+  --life-income: #2D6A47;
   --life-ink: 55%;
+}
+
+/* Gráficos de Dinero (components/MoneyCharts.tsx): las barras crecen y el cursor se mueve sólo sin "reducir movimiento" */
+@media (prefers-reduced-motion: no-preference) {
+  .life-chart-bar { transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 }
 
 /* Celebración al completar: el tilde aparece con un rebote corto. Apagada con "reducir movimiento". */

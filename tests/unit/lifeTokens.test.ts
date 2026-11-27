@@ -50,6 +50,8 @@ function onAccent(theme: string): RGB {
 }
 
 const AREAS = ['--life-money', '--life-goals', '--life-habits', '--life-brain'] as const
+// Dinero: el verde calmo de los ingresos se usa como texto (montos) y como barra del gráfico
+const TEXT_ONLY = ['--life-income'] as const
 
 for (const theme of ['universo', 'amanecer'] as const) {
   const t = vars(tokens, theme)
@@ -86,6 +88,20 @@ for (const theme of ['universo', 'amanecer'] as const) {
         expect(contrast(onAccent(theme), hex(l[a]))).toBeGreaterThanOrEqual(4.5)
       })
     }
+
+    for (const a of TEXT_ONLY) {
+      it(`${a} se lee como texto (≥ 4.5:1) en todas las superficies`, () => {
+        expect(l[a], a).toMatch(/^#[0-9A-F]{6}$/i)
+        for (const [name, s] of surfaces) expect(contrast(hex(l[a]), s), `${a} sobre ${name}`).toBeGreaterThanOrEqual(4.5)
+      })
+    }
+
+    it('Dinero sin rojo: los gastos (texto y texto secundario) se leen y se distinguen del verde de ingresos como barra', () => {
+      for (const [name, s] of surfaces) {
+        expect(contrast(text, s), `texto sobre ${name}`).toBeGreaterThanOrEqual(4.5)
+        expect(contrast(hex(t['--my-muted']), s), `barra de gastos sobre ${name}`).toBeGreaterThanOrEqual(3)
+      }
+    })
 
     it('los colores que elige la persona, pasados por ink(), se leen sobre el fondo y el vidrio', () => {
       const all = [...new Set([...LIFE_COLORS, ...Object.values(CATEGORY_COLORS)])]

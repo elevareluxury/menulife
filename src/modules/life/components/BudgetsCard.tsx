@@ -75,8 +75,13 @@ export function BudgetsCard({ statuses, locale, monthName, onAdd, onEdit, onDele
                         {b.of(money(s.spent), money(s.budget.amount))}
                       </span>
                     </p>
-                    <span aria-hidden="true" style={{ display: 'block', height: 6, borderRadius: radius.full, background: colors.surface.high, marginTop: 6, overflow: 'hidden' }}>
+                    {/* Escala honesta: la barra es lo gastado; si se pasó, llena todo y una marca muestra dónde estaba lo
+                        previsto (sin rojo: el texto de abajo lo cuenta con tono amable) */}
+                    <span aria-hidden="true" style={{ position: 'relative', display: 'block', height: 6, borderRadius: radius.full, background: colors.border.subtle, marginTop: 6, overflow: 'hidden' }}>
                       <span style={{ display: 'block', height: '100%', width: `${Math.min(100, Math.max(2, pct))}%`, background: color, borderRadius: radius.full }} />
+                      {s.ratio > 1 && (
+                        <span style={{ position: 'absolute', top: 0, bottom: 0, insetInlineStart: `${Math.round(100 / s.ratio)}%`, width: 2, marginInlineStart: -1, background: colors.surface.elevated }} />
+                      )}
                     </span>
                     <p style={{ fontFamily: font, fontSize: 12, color: colors.text.secondary, margin: '5px 0 0', lineHeight: 1.4 }}>
                       {budgetMessage(s, label, t, locale, monthName)}

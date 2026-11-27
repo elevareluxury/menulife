@@ -43,6 +43,16 @@ export const colors = {
     error:   'var(--my-danger)',
     info:    'var(--life-goals)',
   },
+  /** Dinero sin culpa: nada de rojo para los gastos ni para un balance negativo (el signo "-" ya lo dice). El rojo
+   *  (semantic.error) queda sólo para errores de verdad. Ingresos con un verde calmo propio (--life-income, life.css). */
+  money: {
+    /** Monto o balance a favor: verde calmo, AA como texto en los dos temas */
+    income:      'var(--life-income)',
+    /** Monto de un gasto o balance negativo: el color del texto */
+    expense:     'var(--my-text)',
+    /** Íconos y barras de gastos (gráficos): el texto secundario del tema (≥ 3:1 como objeto gráfico) */
+    expenseMark: 'var(--my-muted)',
+  },
   text: {
     primary:    'var(--my-text)',
     secondary:  'var(--my-muted)',
