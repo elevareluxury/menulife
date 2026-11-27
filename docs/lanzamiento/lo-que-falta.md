@@ -32,7 +32,9 @@ Palabras que aparecen mucho:
   - Pasos: Supabase → **SQL Editor** → pegá `docs/lanzamiento/sql/check_migraciones.sql` → **Run**.
     Si alguna dice `FALTA`, pegá ese archivo de `supabase/migrations/` (en orden de fecha) y volvé a correr el chequeo.
   - Cómo sé que anduvo: todas las filas dicen `OK`.
-  - El chequeo está al día hasta `20261209000001` (27/11/2026; la última, de los avisos push, es nueva). Las anteriores de noviembre y diciembre ya las aplicaste una por
+  - 27/11/2026: el chequeo marcó `FALTA` en `20261205000001` (topes por cuenta) → se aplica `20261210000001`, que la
+    vuelve a poner con la lista al día; `20261120000001` era un falso aviso (sin tabla de presupuestos de Business).
+  - El chequeo está al día hasta `20261210000001` (27/11/2026; la última, de los avisos push, es nueva). Las anteriores de noviembre y diciembre ya las aplicaste una por
     una; correrlo una vez confirma que no quedó ninguna vieja.
   - Detalle: [`sql/check_migraciones.sql`](sql/check_migraciones.sql)
 
