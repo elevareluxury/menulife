@@ -260,7 +260,7 @@ const ja: StudioDict = {
     deleteText: '完全に削除されます。',
     deleted: 'メッセージを削除しました',
     showMore: 'メッセージを見る',
-    homeUnread: '未読メッセージが {n} 件あります',
+    homeUnread: (n: number) => `未読メッセージが ${n} 件あります`,
     homeNone: '未読メッセージはありません',
     moduleSummary: 'お問い合わせフォーム',
     intro: '案内文（任意）',

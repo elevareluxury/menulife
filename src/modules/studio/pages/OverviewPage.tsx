@@ -102,7 +102,7 @@ export function OverviewPage() {
         <section className="st-card st-row" style={{ justifyContent: 'space-between' }} aria-label={t.messages.title}>
           <span className="st-row">
             <Inbox size={18} aria-hidden="true" />
-            {unread > 0 ? <strong>{t.messages.homeUnread.replace('{n}', String(unread))}</strong> : <span className="st-help">{t.messages.homeNone}</span>}
+            {unread > 0 ? <strong>{t.messages.homeUnread(unread)}</strong> : <span className="st-help">{t.messages.homeNone}</span>}
           </span>
           <Link to="/studio/messages" className="st-btn st-btn-secondary st-btn-sm">{t.messages.title}</Link>
         </section>

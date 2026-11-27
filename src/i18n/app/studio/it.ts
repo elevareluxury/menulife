@@ -260,7 +260,7 @@ const it: StudioDict = {
     deleteText: 'Verrà eliminato per sempre.',
     deleted: 'Messaggio eliminato',
     showMore: 'Vedi messaggio',
-    homeUnread: 'Hai {n} messaggi da leggere',
+    homeUnread: (n: number) => n === 1 ? 'Hai 1 messaggio da leggere' : `Hai ${n} messaggi da leggere`,
     homeNone: 'Nessun messaggio da leggere',
     moduleSummary: 'Modulo di contatto',
     intro: 'Testo di invito (facoltativo)',

@@ -260,7 +260,7 @@ const pt: StudioDict = {
     deleteText: 'Ela será apagada para sempre.',
     deleted: 'Mensagem apagada',
     showMore: 'Ver mensagem',
-    homeUnread: 'Você tem {n} mensagens não lidas',
+    homeUnread: (n: number) => n === 1 ? 'Você tem 1 mensagem não lida' : `Você tem ${n} mensagens não lidas`,
     homeNone: 'Nenhuma mensagem não lida',
     moduleSummary: 'Formulário de contato',
     intro: 'Texto de convite (opcional)',

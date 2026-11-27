@@ -260,7 +260,7 @@ const ko: StudioDict = {
     deleteText: '영구적으로 삭제됩니다.',
     deleted: '메시지를 삭제했습니다',
     showMore: '메시지 보기',
-    homeUnread: '읽지 않은 메시지가 {n}개 있습니다',
+    homeUnread: (n: number) => `읽지 않은 메시지가 ${n}개 있습니다`,
     homeNone: '읽지 않은 메시지가 없습니다',
     moduleSummary: '문의 양식',
     intro: '안내 문구(선택)',

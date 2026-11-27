@@ -260,7 +260,7 @@ const en: StudioDict = {
     deleteText: 'It will be deleted forever.',
     deleted: 'Message deleted',
     showMore: 'View message',
-    homeUnread: 'You have {n} unread messages',
+    homeUnread: (n: number) => n === 1 ? 'You have 1 unread message' : `You have ${n} unread messages`,
     homeNone: 'No unread messages',
     moduleSummary: 'Contact form',
     intro: 'Invitation text (optional)',

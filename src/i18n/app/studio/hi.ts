@@ -260,7 +260,7 @@ const hi: StudioDict = {
     deleteText: 'यह हमेशा के लिए हट जाएगा।',
     deleted: 'संदेश हटा दिया गया',
     showMore: 'संदेश देखें',
-    homeUnread: 'आपके {n} अपठित संदेश हैं',
+    homeUnread: (n: number) => n === 1 ? 'आपका 1 अपठित संदेश है' : `आपके ${n} अपठित संदेश हैं`,
     homeNone: 'कोई अपठित संदेश नहीं',
     moduleSummary: 'संपर्क फ़ॉर्म',
     intro: 'निमंत्रण टेक्स्ट (वैकल्पिक)',

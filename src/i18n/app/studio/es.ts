@@ -413,7 +413,7 @@ const es = {
     deleteText: 'Se borra para siempre.',
     deleted: 'Mensaje borrado',
     showMore: 'Ver mensaje',
-    homeUnread: 'Tenés {n} mensajes sin leer',
+    homeUnread: (n: number) => n === 1 ? 'Tenés 1 mensaje sin leer' : `Tenés ${n} mensajes sin leer`,
     homeNone: 'No tenés mensajes sin leer',
     moduleSummary: 'Formulario de contacto',
     intro: 'Texto de invitación (opcional)',

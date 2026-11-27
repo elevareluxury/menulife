@@ -260,7 +260,7 @@ const zh: StudioDict = {
     deleteText: '删除后无法恢复。',
     deleted: '留言已删除',
     showMore: '查看留言',
-    homeUnread: '你有 {n} 条未读留言',
+    homeUnread: (n: number) => `你有 ${n} 条未读留言`,
     homeNone: '没有未读留言',
     moduleSummary: '联系表单',
     intro: '邀请语（可选）',

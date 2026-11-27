@@ -34,7 +34,7 @@ test('un visitante sin cuenta envía un mensaje y la dueña lo ve en Studio con 
   await installSupabaseMock(owner, state, { signedIn: true })
   const studio = await owner.newPage()
   await studio.goto('/studio')
-  await expect(studio.getByText('Tenés 1 mensajes sin leer')).toBeVisible()
+  await expect(studio.getByText('Tenés 1 mensaje sin leer')).toBeVisible()
   await studio.getByRole('link', { name: 'Mensajes' }).first().click()
   await expect(studio).toHaveURL(/\/studio\/messages$/)
 

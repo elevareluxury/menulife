@@ -260,7 +260,7 @@ const de: StudioDict = {
     deleteText: 'Sie wird endgültig gelöscht.',
     deleted: 'Nachricht gelöscht',
     showMore: 'Nachricht ansehen',
-    homeUnread: 'Du hast {n} ungelesene Nachrichten',
+    homeUnread: (n: number) => n === 1 ? 'Du hast 1 ungelesene Nachricht' : `Du hast ${n} ungelesene Nachrichten`,
     homeNone: 'Keine ungelesenen Nachrichten',
     moduleSummary: 'Kontaktformular',
     intro: 'Einladungstext (optional)',
