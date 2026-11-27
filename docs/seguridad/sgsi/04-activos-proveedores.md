@@ -12,6 +12,7 @@
 | Dominio y DNS `mycen.id` (+ `menulife.digital` redirigido) | Registrador / Vercel | Dirección | Crítico |
 | Envío de mails (`team@mycen.id`, mails de la cuenta) | Resend + casilla de correo | Responsable técnico | Interno |
 | Claves y secretos (service role, Resend, Turnstile, Google, Apple, push) | Paneles de cada proveedor | Responsable técnico | Secreto |
+| Token de Supabase para publicar funciones (`SUPABASE_ACCESS_TOKEN`) | GitHub → Secrets (sólo lo usa `deploy-functions.yml`, con `contents: read`) | Responsable técnico | Secreto |
 | Apps de iOS y Android | App Store Connect / Google Play Console | Dirección | Público |
 | Cuentas de administración de todo lo anterior | Cada proveedor, con 2FA | Dirección | Secreto |
 
@@ -56,7 +57,7 @@ tabla y a la política de privacidad (12 idiomas) **antes** de usarse.
 | Ánimo del día (posible dato de salud, GDPR art. 9) | Valor 1–5 y fecha | Usuarios | Mostrarle sus propios patrones | Consentimiento explícito (tocar la carita, con el aviso al lado; se retira tocándola de nuevo) | Hasta que lo borre | Supabase |
 | Portfolio profesional (medidas, audiencia, marcas, prensa, créditos, representación) | Lo que la persona carga: medidas y talles, números de audiencia con su fecha, contactos de su agencia | Usuarios (y sus representantes, por pedido del usuario) | Mostrar su portfolio en su perfil público | Contrato (lo publica la persona; opcional) | Hasta que lo borre; la audiencia deja de mostrarse al año | Público |
 | Nombres reservados para talentos | Username, nombre, email (opcional) y nota | Talentos (todavía sin cuenta) | Que nadie se quede con el nombre de un talento | Interés legítimo (a pedido del talento o su agencia) | Mientras dure la reserva (el equipo la quita) | Equipo |
-| Avisos web (push) | Dirección de envío, claves, zona, navegador | Usuarios | Recordatorios con la web cerrada | Consentimiento (permiso del navegador) | Hasta desactivarlos o borrar la cuenta | Supabase, servicio de avisos del navegador |
+| Avisos web (push) | Dirección de envío, claves, zona, navegador | Usuarios | Recordatorios con la web cerrada | Consentimiento (permiso del navegador) | Hasta desactivarlos, cerrar sesión en ese dispositivo, 10 envíos fallidos seguidos o borrar la cuenta | Supabase, servicio de avisos del navegador |
 | Límite por IP | Hash con sal de la IP, contador por día | Visitantes | Frenar abusos en las RPC públicas | Interés legítimo | 2 días | Nadie (sólo la base) |
 | Estadísticas de visitas | Eventos seudonimizados (hash diario), sin IP | Visitantes | Mostrar visitas al dueño | Interés legítimo | 13 meses (o hasta borrar el perfil) | Dueño del perfil (agregado) |
 | Mensajes y colaboraciones | Nombre, contacto, mensaje | Visitantes | Que el dueño reciba contactos | Consentimiento (envío) | Hasta que el dueño los borre | Dueño del perfil |

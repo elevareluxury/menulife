@@ -80,7 +80,8 @@ with checks(migracion, aplicada) as (values
   ('20261205000001_account_rate_limits',              exists (select 1 from pg_proc where proname = 'mycen_account_hit')),
   ('20261206000001_sitemap_index',                    exists (select 1 from pg_proc where proname = 'public_sitemap_index')),
   ('20261207000001_admin_snapshots',                  to_regclass('public.mycen_admin_snapshots') is not null),
-  ('20261208000001_admin_search_index',               to_regclass('mycen_private.account_emails') is not null)
+  ('20261208000001_admin_search_index',               to_regclass('mycen_private.account_emails') is not null),
+  ('20261209000001_web_push_status',                 to_regclass('public.life_push_runs') is not null)
 )
 select migracion, case when aplicada then 'OK' else 'FALTA' end as estado
 from checks

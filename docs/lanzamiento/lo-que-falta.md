@@ -32,7 +32,7 @@ Palabras que aparecen mucho:
   - Pasos: Supabase → **SQL Editor** → pegá `docs/lanzamiento/sql/check_migraciones.sql` → **Run**.
     Si alguna dice `FALTA`, pegá ese archivo de `supabase/migrations/` (en orden de fecha) y volvé a correr el chequeo.
   - Cómo sé que anduvo: todas las filas dicen `OK`.
-  - El chequeo está al día hasta `20261208000001` (27/11/2026). Las de noviembre y diciembre ya las aplicaste una por
+  - El chequeo está al día hasta `20261209000001` (27/11/2026; la última, de los avisos push, es nueva). Las anteriores de noviembre y diciembre ya las aplicaste una por
     una; correrlo una vez confirma que no quedó ninguna vieja.
   - Detalle: [`sql/check_migraciones.sql`](sql/check_migraciones.sql)
 
@@ -120,11 +120,38 @@ Palabras que aparecen mucho:
   - Cómo sé que anduvo: las tres reglas aparecen activas; en Firewall → **Traffic** se ven pedidos contados.
   - Detalle: [`firewall-api.md`](firewall-api.md) (pasos en el panel y por línea de comandos)
 
-- [ ] **HSTS preload (opcional)**
-  - Qué es: le pide a los navegadores que abran mycen.id siempre con candado. La web ya manda la cabecera con `preload`
-    (`vercel.json`).
-  - ⚠️ A confirmar: ningún documento pide anotar el dominio en hstspreload.org. Es difícil de deshacer (todos los
-    subdominios quedan obligados a HTTPS por años). Decidilo con Claude; no es necesario para abrir.
+- [ ] **HSTS preload** — decidido: se hace (27/11/2026)
+  - Qué es: anotar `mycen.id` en la lista que traen adentro Chrome, Firefox, Safari y Edge, para que **nunca** lo abran
+    sin candado, ni siquiera la primera vez. La web ya manda la cabecera que pide la lista en todas las respuestas
+    (páginas, `/api`, calendario y sitemap): `max-age=63072000; includeSubDomains; preload` (`vercel.json`, lo verifica
+    `tests/unit/securityWeb.test.ts`).
+  - Qué queda obligado: `mycen.id` y **todos** sus subdominios, sólo con HTTPS. Revisado en el repo y los documentos:
+    - `www.mycen.id` (Vercel): anda con HTTPS y redirige a `mycen.id`. ✔
+    - `send.mycen.id`, `resend._domainkey`, `_dmarc`, los MX de recibir mails y el TXT de Google: son sólo registros
+      de DNS para mails y verificación, no se abren en un navegador. No les pasa nada. ✔
+    - Copias en Cloudflare R2 y Supabase: usan dominios de ellos (`cloudflarestorage.com`, `supabase.co`). No les pasa
+      nada. ✔
+    - Ojo a futuro: una página de estado en `estado.mycen.id` (UptimeRobot) u otro subdominio nuevo **tiene que andar con
+      HTTPS** (con candado) desde el primer día, o no va a abrir. Lo mismo si prendés el "seguimiento de clicks" de
+      Resend con un subdominio propio: sólo con HTTPS. Si dudás, preguntale a Claude antes de crear el subdominio.
+  - Pasos (en este orden):
+    1. Hacé antes el paso **Plan Pro y dominio** de arriba: en Vercel → proyecto **menulife** → Settings → **Domains**,
+       `mycen.id` y `www.mycen.id` con tilde verde ("Valid Configuration") y `www.mycen.id` en "Redirect to mycen.id".
+    2. Probá en el navegador: `http://mycen.id` (sin la s) tiene que cambiar solo a `https://mycen.id`, y
+       `http://www.mycen.id` tiene que terminar en `https://mycen.id` con candado.
+    3. Entrá a **hstspreload.org**, escribí `mycen.id` en el recuadro y tocá **Check HSTS preload status and
+       eligibility**.
+    4. Leé el resultado: tiene que decir que el dominio es elegible (todo en verde). Si muestra un error o una
+       advertencia, no sigas: copiá el texto tal cual y pasáselo a Claude.
+    5. Si está todo bien, aparece el formulario: tildá las dos casillas (que sos el dueño y que entendés que todos los
+       subdominios quedan sólo con HTTPS) y tocá **Submit**.
+    6. Volvé a hstspreload.org en unos días y chequeá `mycen.id`: va a decir "pending" y después "preloaded".
+  - Cuánto tarda: llegar a los navegadores lleva **semanas o meses** (sale con las versiones nuevas de cada uno). Mientras
+    tanto todo sigue andando igual: la cabecera ya protege a quien entró una vez.
+  - Si algún día hay que sacarlo: en hstspreload.org está **Removal** (hstspreload.org/removal), pero antes hay que sacar
+    `preload` de la cabecera en `vercel.json` (pedíselo a Claude) y salir de la lista también tarda semanas o meses, y
+    los navegadores viejos lo siguen recordando. Por eso: nunca crear un subdominio sin HTTPS.
+  - Cómo sé que anduvo: hstspreload.org muestra `mycen.id` como "preloaded" (o "pending" mientras tanto).
 
 ### Mails
 
@@ -267,11 +294,19 @@ Palabras que aparecen mucho:
 
 - [ ] **Avisos de Life OS con la app cerrada (Web Push)**
   - Qué es: que los recordatorios de tareas y hábitos lleguen con la web instalada cerrada.
-  - Pasos: `npx web-push generate-vapid-keys` → Vercel `VITE_VAPID_PUBLIC_KEY` (y redeploy) → Supabase → Edge Functions
-    → Secrets: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `REMINDERS_CRON_SECRET` → publicar `life-reminders` → prender
-    **pg_cron** y **pg_net** → agendar el cron (SQL en el documento).
-  - Cómo sé que anduvo: una tarea con aviso en 2 minutos te llega con la app cerrada.
-  - ⚠️ A confirmar: ningún documento dice si esto ya se hizo. Mirá Super-admin → Estado (recordatorios push) antes.
+  - Sin terminal. Pasos (detalle click por click en el documento):
+    1. SQL Editor → pegá `supabase/migrations/20261209000001_web_push_status.sql` → Run. Database → Extensions:
+       **pg_cron** y **pg_net** prendidas.
+    2. Super-admin → **Estado** → tarjeta **Avisos push** → **Generar claves** (se crean en tu navegador; no se mandan
+       ni se guardan). Dejá la pestaña abierta hasta el paso 5.
+    3. Vercel → Environment Variables → `VITE_VAPID_PUBLIC_KEY` = la clave pública → **Redeploy**.
+    4. Supabase → Edge Functions → **Secrets**: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `REMINDERS_CRON_SECRET`.
+    5. SQL Editor → el SQL de la tarea cada minuto del documento, con la clave del cron entre las comillas → Run (sin
+       guardar la consulta).
+    6. Supabase → Account → **Access Tokens** → nuevo token → GitHub → Settings → Secrets → Actions →
+       `SUPABASE_ACCESS_TOKEN`. Después GitHub → **Actions** → **Publicar funciones de Supabase** → **Run workflow**.
+  - Cómo sé que anduvo: la tarjeta **Avisos push** dice **Todo conectado** (si no, dice qué falta) y una tarea con aviso
+    en 2 minutos te llega con la app cerrada (en iPhone, abriendo Mycen desde el ícono del inicio).
   - Detalle: [`web-push.md`](web-push.md)
 
 - [ ] **Prueba de carga** (contra un proyecto de prueba, nunca contra producción con gente)
